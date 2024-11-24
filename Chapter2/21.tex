@@ -246,7 +246,7 @@ class ClassName {
 \end{figure}
 
 如图\ref{fig:A111}所示，派生类从基类中继承了数据成员和成员函数，并可以添加新的成员。
-派生类可以重写基类中的成员函数，从而实现新的功能。
+派生类可以重写基类中的成员虚函数，从而实现新的功能。
 派生类可以重载基类中的运算符，从而实现新的运算。
 
 \begin{center}
@@ -267,12 +267,12 @@ class ClassName {
 继承可以用下面的写法实现：
 
 \begin{tcode}
-class Shape {//这个基类只含有虚函数，又叫做抽象类
+class Shape {//这个基类只含有纯虚函数，又叫做抽象类
 public:
     Shape() = delete;
     Shape(double A):Area(A)
     {std::cout << "基类的构造函数已经被调用" << std::endl;}
-    virtual double calArea() = 0; //这里是虚函数，也可以使用普通函数
+    virtual double calArea() = 0; //这里是纯虚函数，也可以使用普通函数
     double Area;
 };
 
@@ -311,4 +311,88 @@ int main(int argc, char *argv[]) {
 \end{tcode}
 
 
- 
+ \subsubsection{模版}
+在开发过程中，我们可能会遇到这样的场景，我们有一个函数或者类，但是它只适用于特定的数据类型，
+比如$int$或者$double$。为了实现对这两种类型都可以调用函数，
+就会遇到需要复制一遍代码，但是这样做就造成了代码冗余，不利于维护。这时候就需要用到模版($template$)。
+
+模版是C++中一个重要的特性，它允许我们定义一个类或函数，使其可以接受不同的数据类型或者不同的参数。
+模版的定义和使用都比较复杂，这里只介绍最基本的用法。
+使用$class$关键字声明类型，使用具体的类型声明参数
+\textbf{函数模版}的语法如下：
+\begin{tcode}
+template<class T>
+T function(T a){
+    return a;
+}
+
+auto funcPtr = function<int>;
+template<int A>
+int function(){
+ return A;
+}
+
+auto funcPtr = function<2>;
+template<class T,T A>
+T function(){
+ return A;
+}
+auto funcPtr = function<int,2>;
+\end{tcode}
+
+ 这里的$class \quad T$表示一种数据类型，可以是任意类型。
+ 在函数的定义中，$T$可以作为函数的参数，也可以作为函数的局部变量。在使用函数模板时，需要首先进行函数的实例化。
+
+\begin{tcode}
+//调用的时候实际上分为两步，实例化和调用
+function<int>(10);
+function<double>(20.0);
+//在编译器可以推导出类型的时候可以不加<>
+auto a = function(1.0);
+//在无法推导的时候，要先进行实例化
+std::function<int(int)> ptr = function<int>;
+\end{tcode}
+
+模版的优点：
+\begin{enumerate}
+    \item 代码重用性高：可以定义一个通用的函数，然后根据需要实例化不同的类型，实现代码的重用。
+    \item 类型安全：模版可以保证类型安全，避免类型错误。
+    \item 效率高：模版可以提高效率，因为编译器可以对代码进行优化。
+\end{enumerate}
+
+\textbf{类模版}：
+类模板的语法和函数模板类似，只不过在类名而不是函数名前面加上关键字$template$。
+在普通类中也可以添加成员函数模版，只需要在函数名前面加上关键字$template$即可。
+
+\begin{tcode}
+template<class T1,class T2>
+class A{
+    A() = default;
+    ~A() =default;
+    T1 val;
+    T2 id;
+    T1 function(T1* a, T2& b){
+        return *a+b++;
+    }
+};
+\end{tcode}
+
+在$template$后面，可以定义多个类型参数，用逗号分隔。需要注意的是，在类中的函数模版需要再头文件中实现，
+也就是说，模版的声明和实现不可以分离，否则会出现很多问题。
+对于类模板也可以实现继承和多态，与普通类相同，这里不在展开，感兴趣的同学可以自行探索。
+
+\textbf{模板的实例化}：
+模板的实例化指的是将模板定义和具体的类型绑定在一起，生成一个具体的类或函数。
+在类的实例化时，$<>$的内部需要填写一个可以推导出的数据类型，编译器会根据类型推导出模板的具体类型。
+一般来说，实例化有以下几种方式：
+
+\begin{enumerate}
+    \item 具体类型：如$int$，$double$等基本类型，$struct$，$class$，$union$等复合数据类型，$int*$，$double\&$等指针和引用类型
+    \item 编译期可以确定的常数：字面常量，宏，$constexpr$
+    \item 显示实例化：在编译时，通过命令行指定具体的类型
+\end{enumerate}
+
+除此之外，还有一种变参模版，它可以接受任意数量的类型参数，但是在实例化时，必须指定具体的类型。
+这种情况比较复杂，这里不在展开。感兴趣的同学自行探讨：
+
+\url{https://blog.csdn.net/fl2011sx/article/details/128077440}
