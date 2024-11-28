@@ -798,6 +798,56 @@ auto newVec = std::remove_if(vec2.begin(),vec2.end(),[](int& a){
 
 \url{https://zh.cppreference.com/w/cpp/iterator}
 
+\textbf{迭代器失效}：迭代器失效指的是迭代器因为某些操作而不再指向原来的元素，
+或者不再保持有效的状态，这样的迭代器如果继续使用，可能会导致未定义行为，包括程序崩溃。
+通俗的理解就是，当你对容器进行了操作时，更改了容器的大小，但是迭代器仍然指向原来的位置，
+这样就会导致读取错误的内存，这就是迭代器失效。
+
+\begin{tcode}
+std::vector<int> vec={1,2,3,4,5,6,7,8,9,10};
+for(auto it = vec.begin(); it!= vec.end(); ++it){
+    if(*it%2==0){
+        vec.erase(it);
+    }
+}
+\end{tcode}
+
+看上面的代码，当执行到vec.erase(it)时，it已经失效，因为执行了erase之后，
+vec的大小发生了变化，这导致了迭代器失效。
+
+在实践过程中， 在下面的几种情况下，迭代器会失效，需要\textbf{避免}出现：
+\begin{enumerate}
+    \item 当执行erase方法时，指向删除节点的迭代器全部失效，指向删除节点之后的全部迭代器也失效
+    \item 当进行push\_back\(\)方法时，end操作返回的迭代器肯定失效。
+    \item 当插入\(push_back\)一个元素后，capacity返回值与没有插入元素之前相比有改变，
+    则需要重新加载整个容器，此时first和end操作返回的迭代器都会失效。
+    \item 当插入\(push_back\)一个元素后，如果空间未重新分配，指向插入位置之前的元素的迭代器仍然有效，但指向插入位置之后元素的迭代器全部失效。
+\end{enumerate}
+
+对于关联容器，使用迭代器时，删除一个键值对知识当前这个迭代器失效，别的迭代器不会受到影响，
+这可能是由于底层使用红黑树实现的原因，但是实际应用中，仍然不应该冒这个风险，因此，
+必须\textbf{坚决避免迭代器失效问题的发生}。
+
+在具体的应用中，我们在使用迭代器遍历时，应该注意不要对容器进行增删操作，更不应该改变容器的大小。
+可以将不需要的元素放在\textbf{容器的末尾}或者\textbf{记录下需要删除的迭代器}，然后适时删除。例如：
+
+\begin{tcode}
+for(auto it = vec.begin(); it!= vec.end(); ++it){
+    if((*it)%2==0){
+        its.push_back(it-vec.begin());
+    }
+}
+
+int i=0;
+for(auto it : its){
+    vec.erase(vec.begin()+it-i);
+    i++;
+}
+}
+\end{tcode}
+
+这种方法，非常\textbf{不优雅}，因此，\textbf{不要使用}。
+
 \textbf{更多的用法等待着同学们自己去探索！}
 
 \subsubsection{系统级内存运行逻辑}
