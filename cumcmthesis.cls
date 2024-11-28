@@ -275,6 +275,22 @@ Just choose `xelatex', no `pdflatex' or `latex' and so on.}
     }
   }
   {}
+
+  \lstnewenvironment{tbash}
+  {
+    \lstset{basicstyle = \ttfamily,
+        language=bash,
+        tabsize = 4,
+        frame = single,
+        escapechar = `,
+        breaklines = true,
+        breakatwhitespace = true,
+        frameround = tttt,
+        numbers = left,
+        numberstyle=\color{gray},
+    }
+  }
+  {}
 %%% crefformat settings
 \crefformat{figure}{#2图~#1#3}
 \crefrangeformat{figure}{图~(#3#1#4)\;\~{}\;(#5#2#6)}
