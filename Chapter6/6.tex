@@ -45,57 +45,57 @@
 Anaconda官方下载地址:\url{https://www.anaconda.com/download/}
 
 按照官方流程安装好Anaconda后，在Windows的Anaconda Prompt（ubuntu的终端）输入
-\begin{verbatim}
+\begin{tbash}
     conda --version
-\end{verbatim}
+\end{tbash}
 如果显示版本号，说明安装成功。
 
 \textbf{创建虚拟环境}
 
 在Anaconda Prompt输入
-\begin{verbatim}
+\begin{tbash}
     conda create -n pytorch python=3.7
-\end{verbatim}
+\end{tbash}
 这样我们就创建了一个名为pytorch的虚拟环境，同时指定了python的版本为3.7，这样我们就可以在这个环境下安装pytorch了。
 
 \textbf{激活虚拟环境}
 
 在Anaconda Prompt输入
-\begin{verbatim}
+\begin{tbash}
     conda activate pytorch
-\end{verbatim}
+\end{tbash}
 我们会发现命令行前面多了(pytorch)字样，这就说明我们已经成功激活了pytorch环境。
 这时输入
-\begin{verbatim}
+\begin{tbash}
     pip list
-\end{verbatim}
+\end{tbash}
 就可以看到当前环境下已经安装的包。
 类似的
-\begin{verbatim}
+\begin{tbash}
     conda deactivate
-\end{verbatim}
+\end{tbash}
 就退出了当前环境。
 
 \subsubsection{安装Pytorch}
 在激活了pytorch环境后，我们就可以安装pytorch了。
 在命令行输入
-\begin{verbatim}
+\begin{tbash}
     pip install pytorch torchvision
-\end{verbatim}
+\end{tbash}
 这样我们就安装好了pytorch，同时还安装了torchvision这个包是pytorch的辅助包，用于处理图像。
 \textit{如果你出现了诸如网络问题导致无法安装，请改变虚拟环境的源为国内源，具体操作请自行搜索}
 
 这样我们就安装好了pytorch-CPU,如果你有NVIDIA的显卡，可以考虑安装pytorch-GPU，网络的训练速度和推理速度会更快。
 可以在命令行输入
-\begin{verbatim}
+\begin{tbash}
     nvidia-smi
-\end{verbatim}
+\end{tbash}
 查看自己的显卡型号，然后在官网上查看对应的CUDA版本，再安装对应的pytorch-GPU版本。
 这里给上CUDA的官网下载地址:\url{https://developer.nvidia.com/cuda-toolkit-archive}
 刚刚的pip install命令可以改为
-\begin{verbatim}
+\begin{tbash}
     pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu{你的CUDA版本}
-\end{verbatim}
+\end{tbash}
 
 \subsubsection{搭建神经网络}
 接下来用pytorch搭建一个简单的LeNet网络，识别MNIST数据集中的手写数字
@@ -125,10 +125,10 @@ Anaconda官方下载地址:\url{https://www.anaconda.com/download/}
 
 MINST数据集是一个包含了6万张训练图片和1万张测试图片的数据集，每张图片都是各式各样的手写的数组，每张图片上都有一个0-9的数字标签。
 我们可以通过torchvision包中的datasets来下载这个数据集。
-\begin{tcode}
+\begin{tpython}
     train_dataset = torchvision.datasets.MNIST(root='./data', train=True, transform=transforms.ToTensor(), download=True)
     test_dataset = torchvision.datasets.MNIST(root='./data', train=False, transform=transforms.ToTensor(), download=True)
-\end{tcode}
+\end{tpython}
 这里的参数含义分别是：
 \begin{enumerate}
     \item root: 数据集的存放路径
@@ -138,7 +138,7 @@ MINST数据集是一个包含了6万张训练图片和1万张测试图片的数�
 \end{enumerate}
 
 但这里我们需要对数据集进行更多的转变操作，利用Compose将多个变换组合在一起，比如ToTensor()转化成Tensor和Normalize归一化
-\begin{tcode}
+\begin{tpython}
     compose=torchvision.transforms.Compose([
         torchvision.transforms.ToTensor(),
         torchvision.transforms.Normalize((0.1307,), (0.3081,))
@@ -146,13 +146,13 @@ MINST数据集是一个包含了6万张训练图片和1万张测试图片的数�
 
     train_dataset = torchvision.datasets.MNIST(root='./data', train=True, transform=compose, download=True)
     test_dataset = torchvision.datasets.MNIST(root='./data', train=False, transform=compose, download=True)
-\end{tcode}
+\end{tpython}
 
 然后通过DataLoader加载数据集，使我们可以迭代访问数据集
-\begin{tcode}
+\begin{tpython}
     train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=64, shuffle=True)
     test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=64, shuffle=False)
-\end{tcode}
+\end{tpython}
 这里的参数含义分别是：
 \begin{enumerate}
     \item dataset: 加载的数据集
@@ -242,7 +242,7 @@ MINST数据集是一个包含了6万张训练图片和1万张测试图片的数�
 \textbf{搭建网络}:
 
 首先写一个LeNet类，继承nn.Module
-\begin{tcode}
+\begin{tpython}
     class LeNet(nn.Module):
         def __init__(self):
             super(LeNet, self).__init__()
@@ -253,34 +253,34 @@ MINST数据集是一个包含了6万张训练图片和1万张测试图片的数�
             self.fc1=nn.Linear(16*5*5,120)
             self.fc2=nn.Linear(120,84)
             self.fc3=nn.Linear(84,10)
-\end{tcode}
+\end{tpython}
 
 我们这里定义了LeNet类，并且在初始化函数中定义了一些层
 显而易见
 \textbf{卷积层}:
-\begin{tcode}
+\begin{tpython}
     self.conv1=nn.Conv2d(3,16,5)
-\end{tcode}
+\end{tpython}
 参数分别是\textbf{输入通道数，输出通道数，卷积核大小}。
 我们知道图片是由RGB三个通道组成，因此这里输入通道数为3，按照LeNet的结构，让输出通道数为16，这是第一个卷积层。第二个卷积层同理，输入通道数为16，输出通道数为32。
 
 \textbf{池化层}:
-\begin{tcode}
+\begin{tpython}
     self.pool1=nn.MaxPool2d(2,2)
-\end{tcode}
+\end{tpython}
 参数分别是\textbf{池化核大小，步幅}。
 这里的池化核大小是2，步幅也是2，这是第一个池化层。第二个池化层同理。
 
 \textbf{全连接层}:
-\begin{tcode}
+\begin{tpython}
     self.fc1=nn.Linear(16*5*5,120)
-\end{tcode}
+\end{tpython}
 参数分别是\textbf{输入特征数，输出特征数}。
 输入特征数数根据上一层也就是池化层的输出决定。后面两个全连接层同理。
 在最后一个全连接层我们输出10个特征，因为MNIST数据集中有10个类别（0 ~ 9）。
 
 接下来我们定义前向传播函数，也就是网络的计算过程，处理输入数据，输出预测结果。
-\begin{tcode}
+\begin{tpython}
     def forward(self, x):
         x=nn.relu(self.conv1(x))
         x=self.pool1(x)
@@ -291,7 +291,7 @@ MINST数据集是一个包含了6万张训练图片和1万张测试图片的数�
         x=nn.relu(self.fc2(x))
         x=self.fc3(x)
         return x
-\end{tcode}
+\end{tpython}
 和上面的架构一样，只是在每次卷积操作后进行了激活操作，以及全连接层后进行了激活操作。
 \textbf{x.view}:
 这个函数是将一个多维的tensor转换为一维的tensor，参数-1表示自动计算，这里是将16*5*5的tensor转换为一维的tensor。
@@ -299,19 +299,19 @@ MINST数据集是一个包含了6万张训练图片和1万张测试图片的数�
 
 如果想让网络每个处理更加简洁，可以使用\text{Sequential容器}，将网络的层组合在一起。
 比如我们可以将一次卷积，激活，池化操作组合在一起
-\begin{tcode}
+\begin{tpython}
     self.conv1=nn.Sequential(
         nn.Conv2d(3,16,5),
         nn.ReLU(),
         nn.MaxPool2d(2,2)
     )
-\end{tcode}
+\end{tpython}
 这样在forward函数中就可以直接调用这个容器，更加简洁。
 
 这样我们就搭建好了一个简单的LeNet网络
-\begin{tcode}
+\begin{tpython}
     Net=LeNet() 
-\end{tcode}
+\end{tpython}
 实例化我们的网络
 
 \textbf{定义损失函数:}
@@ -334,9 +334,9 @@ $\hat{y}$表示预测值，$y$表示实际值，公式代表在$w$权重，$b$�
 其中y是实际值，$\hat{y}$是预测值，交叉熵损失函数是一个非负函数，当预测值和实际值相等时，交叉熵为0，否则交叉熵越大，预测值和实际值差距越大。
 
 代码中我们定义损失函数:
-\begin{tcode}
+\begin{tpython}
     criterion=nn.CrossEntropyLoss()
-\end{tcode}
+\end{tpython}
 
 \textbf{定义优化器:}
 
@@ -345,9 +345,9 @@ Adam优化器是一种自适应学习率的优化器，它可以根据梯度的�
 所谓\textbf{学习率}，就是每次更新参数的步长，学习率越大，参数更新的幅度越大，学习率越小，参数更新的幅度越小。
 因此动态调整学习率有一定的重要性，降低梯度爆炸和梯度消失的风险。
 
-\begin{tcode}
+\begin{tpython}
     optimizer=optim.Adam(Net.parameters(),lr=0.001)
-\end{tcode}
+\end{tpython}
 这里的参数含义分别是\textbf{网络的参数，学习率}。Net.parameters()自带的函数，可以返回网络中所有的参数。
 
 我们已经定义好了网络，损失函数，优化器，接下来我们就可以开始训练网络了。
@@ -384,7 +384,7 @@ Adam优化器是一种自适应学习率的优化器，它可以根据梯度的�
 \textit{算法只能使损失向最小值缓慢\textbf{收敛}，无法在有限步数下准确求出最小值}
 
 接下来我们定义train函数，用于训练网络
-\begin{tcode}
+\begin{tpython}
     def train(epoch) # 传入当前的轮次
         running_loss=0.0 # 累加损失
         running_total=0 # 累加样本总数
@@ -410,7 +410,7 @@ Adam优化器是一种自适应学习率的优化器，它可以根据梯度的�
                 running_loss = 0.0
                 running_total = 0
                 running_correct = 0
-\end{tcode}
+\end{tpython}
 
 其中累加损失，累加样本总数，累加正确样本数是为了计算平均损失和准确率，这样我们可以更直观的看到网络的训练情况。
 利用\textbf{enumerate}函数将train\_loader转换为一个迭代器，每次迭代返回一个batch的数据，同时返回一个索引，这样我们就可以知道当前是第几个batch。
@@ -419,15 +419,15 @@ Adam优化器是一种自适应学习率的优化器，它可以根据梯度的�
 通过得到的损失，进行反向传播，更新网络中的参数，用优化器优化网络。
 
 这样就完整的定义了一个训练函数，你也可以通过：
-\begin{tcode}
+\begin{tpython}
     torch.save(model, f"../save/model_{epoch+1}.pth")
-\end{tcode}
+\end{tpython}
 在指定路径下保存模型，以便后续使用。
 
 \textbf{测试函数}:
 
 训练完网络后，我们需要测试网络的性能，测试函数和训练函数类似，只是不需要反向传播和更新参数。
-\begin{tcode}
+\begin{tpython}
     def test(epoch):
         correct=0 # 正确样本数
         total=0 # 总样本数
@@ -440,17 +440,17 @@ Adam优化器是一种自适应学习率的优化器，它可以根据梯度的�
                 correct+=(predicted==labels).sum().item()
         acc=correct/total
         print('[%d / %d]: Accuracy on test set: %.1f %% ' % (epoch + 1, EPOCH, 100 * acc))  # 求测试的准确率，正确数/总数
-\end{tcode}
+\end{tpython}
 测试函数和训练函数类似，只是获取在不需要梯度的情况下进行的。
 correct和total是用来计算正确率的，方便我们看到网络的性能。
 
 这样就定义了一个测试函数，接下来只需要在主函数中调用这两个函数，就可以训练和测试网络了。
-\begin{tcode}
+\begin{tpython}
     if __name__ == '__main__':
         for epoch in range(50):
             train(epoch)
             test(epoch)
-\end{tcode}
+\end{tpython}
 
 到此，成功完成了LeNet网络的训练和测试。这并不是一个很复杂的网络，但是确实包含了当今主流网络的主要操作。
 当今网络的发展已经非常成熟，有很多优秀的网络结构，比如VGG，ResNet，DenseNet等，这些网络结构都有自己的特点。
@@ -461,13 +461,13 @@ correct和total是用来计算正确率的，方便我们看到网络的性能�
 我们利用torch.save()函数将模型保存下来后，可以在其他地方加载模型，继续训练或者是直接使用。
 
 \textbf{模型的使用:}
-\begin{tcode}
+\begin{tpython}
     model=torch.load('model.pth')
     model.eval() # 将模型设置为评估模式
     with torch.no_grad():
         output=model(input) # 得到输出
         print(output)
-\end{tcode}
+\end{tpython}
 
 \textbf{\textit{*利用GPU加速训练:}}
 
@@ -476,7 +476,7 @@ GPU上训练我们的模型。GPU相比于CPU牺牲了大部分在CPU上属于�
 CPU更适合并行运算，运算速度更快，更适合网络模型训练，去处理大量的数据。
 
 比如在代码中，我们加上
-\begin{tcode}
+\begin{tpython}
     # model声明后
     model.cuda()
     ....
@@ -494,7 +494,7 @@ CPU更适合并行运算，运算速度更快，更适合网络模型训练，�
     
     # 在损失函数下也可以加上
     loss_function = loss_function.cuda()
-\end{tcode}
+\end{tpython}
 再次训练，你会发现训练速度大大提升，从loss的输出就可以看出。
 
 \textbf{\textit{*关于YOLO等框架:}}
