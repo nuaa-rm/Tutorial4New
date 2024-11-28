@@ -320,7 +320,7 @@ MINST数据集是一个包含了6万张训练图片和1万张测试图片的数�
 \begin{equation}
     l^{(i)}(\textbf{w},b)=\frac{1}{2}(\hat{y}^{(i)}-y^{(i)})^{2}
 \end{equation}
-$y^$表示预测值，$y$表示实际值，公式代表在$w$权重，$b$偏置下预测值和实际值的误差
+$\hat{y}$表示预测值，$y$表示实际值，公式代表在$w$权重，$b$偏置下预测值和实际值的误差
 一般情况下，我们要计算训练集上n个样本的平均损失L
 \begin{equation}
     L(\textbf{w},b)=\frac{1}{n}\sum_{i=1}^{n}l^{(i)}(\textbf{w},b)
@@ -375,8 +375,8 @@ Adam优化器是一种自适应学习率的优化器，它可以根据梯度的�
 \end{equation}
 \begin{enumerate}
     \item $\eta$: 学习率，控制参数更新的步长
-    \item $\mathcal{B}$ : 批量大小，每次更新参数的样本数(batch_size)
-    \item $\partial$ : 偏导数，迭代的是$w$就对$w$求偏导，迭代的是$b$就对$b$求偏导
+    \item $\mathcal{B}$ : 批量大小，每次更新参数的样本数
+    \item $\partial$ : 偏导数，迭代的是哪个参数就对哪个参数求偏导
     \item $l^{(i)}$ : 损失函数求得的损失
 \end{enumerate}
 这其中\textbf{学习率和批量}是手动设置的，是超参数。需要不断调整来达到最优效果。
