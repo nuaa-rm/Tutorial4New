@@ -507,7 +507,17 @@ CPU更适合并行运算，运算速度更快，更适合网络模型训练，�
 YOLO是一个非常优秀的目标检测框架，它的全称是You Only Look Once，它的特点是速度快，准确率高，适合实时目标检测。
 YOLO如今仍然在不断迭代更新，如今已有诸如YOLO-v5,YOLO-v8,YOLO-v10等一系列的版本。
 其支持不同功能模型的训练，比如detect（检测），classify（分类），pose（姿态估计）等。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/YOLOv5.jpeg}
+    \caption{YOLOv5网络架构}
+    \label{fig:YOLOv5}
+\end{figure}
+
 可以通过这里了解：\url{https://github.com/THU-MIG/yolov10}
+
+\url{https://blog.csdn.net/WZZ18191171661/article/details/113789486}
 
 \subsection{简单了解模型部署}
 如果我们已经拥有了一个训练好的模型，但是事实上这并不能草草的生搬硬套在我们实际的项目中。
@@ -525,7 +535,7 @@ YOLO如今仍然在不断迭代更新，如今已有诸如YOLO-v5,YOLO-v8,YOLO-v
 模型文件的类型并不是单一的，不同的框架支持的是不同的文件类型。
 譬如pytorch导出的模型为.pth文件，YOLO框架导出的是.pt文件。
 而在openvino部署模型的时候，又需要把模型转换没xml和bin文件。
-tensorrt所需的又是.trt文件。
+tensorrt所需的又是.engine文件。
 
 模型文件类型的不同确实是一件麻烦的事情，因此领域内出现了一种.onnx文件，它使得不同的深度学习框架之间可以互操作。
 openvino和tensorrt都支持对onnx文件的转换。有相应的API可以将onnx文件转换为自身所需要的文件类型。YOLO官方也给出了
