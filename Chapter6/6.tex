@@ -34,7 +34,7 @@
 简单调整一下框架的参数，就可以训练出一个高性能的网络。
 
 我们将从安装开始，一步步利用pytorch搭建出一个简单的识别图像中数字的网络。
-\subsubsection{虚拟环境——anaconda}
+\subsubsection{虚拟环境——Anaconda}
 在安装Pytorch之前，我们要先安装Anaconda。
 
 什么是Anaconda？一般来说在电脑上已经安装好了一个python环境，但是对于不同的项目需要不同的python环境
@@ -51,6 +51,7 @@ Anaconda官方下载地址:\url{https://www.anaconda.com/download/}
 如果显示版本号，说明安装成功。
 
 \textbf{创建虚拟环境}
+
 在Anaconda Prompt输入
 \begin{verbatim}
     conda create -n pytorch python=3.7
@@ -58,6 +59,7 @@ Anaconda官方下载地址:\url{https://www.anaconda.com/download/}
 这样我们就创建了一个名为pytorch的虚拟环境，同时指定了python的版本为3.7，这样我们就可以在这个环境下安装pytorch了。
 
 \textbf{激活虚拟环境}
+
 在Anaconda Prompt输入
 \begin{verbatim}
     conda activate pytorch
@@ -410,6 +412,12 @@ Adam优化器是一种自适应学习率的优化器，它可以根据梯度的�
                 running_correct = 0
 \end{tcode}
 
+其中累加损失，累加样本总数，累加正确样本数是为了计算平均损失和准确率，这样我们可以更直观的看到网络的训练情况。
+利用\textbf{enumerate}函数将train\_loader转换为一个迭代器，每次迭代返回一个batch的数据，同时返回一个索引，这样我们就可以知道当前是第几个batch。
+\textbf{optimizer.zero\_grad()}是将梯度清零，因为pytorch默认会将梯度累加，所以每次迭代前都要清零。
+然后经过前向传播获取到输出，将输出和标签传入损失函数，计算输出和标签之间的差距，也就是损失。
+通过得到的损失，进行反向传播，更新网络中的参数，用优化器优化网络。
+
 这样就完整的定义了一个训练函数，你也可以通过：
 \begin{tcode}
     torch.save(model, f"../save/model_{epoch+1}.pth")
@@ -433,8 +441,10 @@ Adam优化器是一种自适应学习率的优化器，它可以根据梯度的�
         acc=correct/total
         print('[%d / %d]: Accuracy on test set: %.1f %% ' % (epoch + 1, EPOCH, 100 * acc))  # 求测试的准确率，正确数/总数
 \end{tcode}
+测试函数和训练函数类似，只是获取在不需要梯度的情况下进行的。
+correct和total是用来计算正确率的，方便我们看到网络的性能。
 
-这样就定义了一个训练函数，接下来只需要在主函数中调用这两个函数，就可以训练和测试网络了。
+这样就定义了一个测试函数，接下来只需要在主函数中调用这两个函数，就可以训练和测试网络了。
 \begin{tcode}
     if __name__ == '__main__':
         for epoch in range(50):
