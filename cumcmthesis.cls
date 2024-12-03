@@ -230,12 +230,12 @@ Just choose `xelatex', no `pdflatex' or `latex' and so on.}
 	 \hypersetup{%
 %         xetex,
 		% unicode=false, % hyperref 和 xetex 同时使用时不能开启 Unicode 选项.
-    pdfstartview=FitH,
-    CJKbookmarks=true,
-    bookmarksnumbered=true,
-    bookmarksopen=true,
-    colorlinks, %注释掉此项则交叉引用为彩色边框(将colorlinks和pdfborder同时注释掉)
-    pdfborder=001,   %注释掉此项则交叉引用为彩色边框
+         pdfstartview=FitH,
+         CJKbookmarks=true,
+         bookmarksnumbered=true,
+         bookmarksopen=true,
+         colorlinks, %注释掉此项则交叉引用为彩色边框(将colorlinks和pdfborder同时注释掉)
+         pdfborder=001,   %注释掉此项则交叉引用为彩色边框
 		 allcolors=black,
 		 breaklinks=true}%
 % \if@mcm@bwprint
@@ -244,14 +244,26 @@ Just choose `xelatex', no `pdflatex' or `latex' and so on.}
 \pdfstringdefDisableCommands{%
 	\def\cftdotfill{ }%
 }
-
-
-
-
 \lstnewenvironment{tcode}
   {
     \lstset{basicstyle = \ttfamily,
         language=c++,
+        tabsize = 4,
+        frame = single,
+        escapechar = `,
+        breaklines = true,
+        breakatwhitespace = true,
+        frameround = tttt,
+        numbers = left,
+        numberstyle=\color{gray},
+    }
+  }
+  {}
+
+  \lstnewenvironment{tpython}
+  {
+    \lstset{basicstyle = \ttfamily,
+        language=python,
         tabsize = 4,
         frame = single,
         escapechar = `,
@@ -279,25 +291,6 @@ Just choose `xelatex', no `pdflatex' or `latex' and so on.}
     }
   }
   {}
-
-  \lstnewenvironment{tpython}
-  {
-    \lstset{basicstyle = \ttfamily,
-        language=tpython,
-        tabsize = 4,
-        frame = single,
-        escapechar = `,
-        breaklines = true,
-        breakatwhitespace = true,
-        frameround = tttt,
-        numbers = left,
-        numberstyle=\color{gray},
-    }
-  }
-  {}
-
-
-
 %%% crefformat settings
 \crefformat{figure}{#2图~#1#3}
 \crefrangeformat{figure}{图~(#3#1#4)\;\~{}\;(#5#2#6)}
