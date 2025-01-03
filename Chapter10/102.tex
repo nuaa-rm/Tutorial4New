@@ -1,6 +1,6 @@
 导航最重要的技术就是
 \textbf{SLAM（simultaneous localization and mapping,实时定位和建图技术）}简称SM(不是)。
-先通过一个视频直观了解一下https://www.bilibili.com/video/BV1tS4y1S7qE
+先通过一个视频直观了解一下\url{https://www.bilibili.com/video/BV1tS4y1S7qE}
 视频中随着机器人的移动，机器人的传感器获取到了环境信息，然后完成对博物馆地图的构建。
 有小伙伴可能会问，只看到建图没看到定位呀。细心观察可以发现建图的过程中，其实一直都在计算机器人的位置。
 
@@ -25,11 +25,11 @@ tf的主要信息包含父子节点（即两个坐标系，注意有父子关系
 \begin{figure}[H]
         \centering
         \includegraphics[width=0.8\textwidth]{./images/tf树.png}
-        \caption{map到livox到livox_192_168_1_104的tf树}
+        \caption{map到livox到livox\_192\_168\_1\_104的tf树}
 \end{figure}
 \begin{figure}[H]
         \centering
-        \includegraphics[width=0.8\textwidth]{./images/REP-105标准.png}
+        \includegraphics[width=1.0\textwidth]{./images/REP-105标准.png}
         \caption{REP-105标准}
 \end{figure}
 但是可怜的小哨兵并没有GPS直接定位。
@@ -87,7 +87,7 @@ IMU，即惯性测量单元，可以测量各方向的角速度和线加速度�
 
 最常见的融合方法（也是我们现在使用的方法）是激光雷达和里程计的融合。
 我们新建一个节点odom，他作为map的子节点，作为base\_link的父节点。
-里程计提供 odom -> base_link 的tf。
+里程计提供 odom -> base\_link 的tf。
 里程计可以来自许多数据源，包括激光雷达、车轮编码器、VIO和IMU。
 里程计的目标是提供基于机器人运动的平滑和连续的局部坐标系。
 这样平滑输出就可用于精确运动的航行位置推算和在全局位置更新之间准确地更新机器人的位置。
@@ -105,10 +105,10 @@ IMU，即惯性测量单元，可以测量各方向的角速度和线加速度�
 \end{figure}
 
 从算法的对数据的处理方式上看，目前常用的SLAM开源算法可以分为两类
-1.基于滤波
 
+1.基于滤波:
 比如扩展卡尔曼滤波（EKF: Extended Kalman Filter）、粒子滤波(PF: Particle Filter)等。
-ROS中的gmapping、hector_slam算法都是基于滤波实现的。
+ROS中的gmapping、hector\_slam算法都是基于滤波实现的。
 我们使用的point-lio也使用了流形扩展卡尔曼滤波。
 
 2.基于图优化，先通过传感器进行构图，然后对图进行优化。
