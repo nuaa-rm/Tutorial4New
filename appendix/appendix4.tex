@@ -1,0 +1,294 @@
+
+\subsection{my\_node's cmake}
+
+\begin{lstlisting}[language=cmake,label=lst:ament_cmake_auto_config,caption=my\_node's cmake]
+    cmake_minimum_required(VERSION 3.8)
+    project(my_package)
+    
+    if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        add_compile_options(-Wall -Wextra -Wpedantic)
+    endif ()
+    
+    # find dependencies
+    find_package(ament_cmake_auto REQUIRED)
+    # uncomment the following section in order to fill in
+    # further dependencies manually.
+    # find_package(<dependency> REQUIRED)
+    ament_auto_find_build_dependencies ()
+    
+    ament_auto_add_executable(my_package
+            src/my_node.cpp
+            src/node_run.cpp)
+    
+    if (BUILD_TESTING)
+        find_package(ament_lint_auto REQUIRED)
+        # the following line skips the linter which checks for copyrights
+        # comment the line when a copyright and license is added to all source files
+        set(ament_cmake_copyright_FOUND TRUE)
+        # the following line skips cpplint (only works in a git repo)
+        # comment the line when this package is in a git repo and when
+        # a copyright and license is added to all source files
+        set(ament_cmake_cpplint_FOUND TRUE)
+        ament_lint_auto_find_test_dependencies()
+    endif ()
+    
+    ament_auto_package ()
+    
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=XML,label=lst:xml_1,caption=my\_node's xml]
+    <?xml version="1.0"?>
+    <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+    <package format="3">
+      <name>my_package</name>
+      <version>0.0.0</version>
+      <description>TODO: Package description</description>
+      <maintainer email="052310228@nuaa.edu.cn">dcy</maintainer>
+      <license>TODO: License declaration</license>
+    
+      <buildtool_depend>ament_cmake</buildtool_depend>
+    
+      <depend>rclcpp</depend>
+      <depend>rclcpp_components</depend>
+      <depend>std_msgs</depend>
+    
+    
+    
+      <buildtool_depend>rosidl_default_generators</buildtool_depend>
+      <exec_depend>rosidl_default_runtime</exec_depend>
+      <member_of_group>rosidl_interface_packages</member_of_group>
+    
+    
+      <test_depend>ament_lint_auto</test_depend>
+      <test_depend>ament_lint_common</test_depend>
+    
+      <export>
+        <build_type>ament_cmake</build_type>
+      </export>
+    </package>
+    
+\end{lstlisting}
+
+\begin{lstlisting}[language=c++,label=lst:my_node_cpp,caption=my\_node.cpp,numbers=left]
+    //
+    // Created by dcy on 25-1-21.
+    //
+    
+    #include "my_package/my_node.h"
+    
+    #include <chrono>
+    #include <memory>
+    #include <string>
+    
+    my_node::my_node() : my_node(rclcpp::NodeOptions())
+    {
+    }
+    
+    
+    my_node::my_node(const rclcpp::NodeOptions& options): Node("my_node", options)
+    {
+        RCLCPP_INFO(get_logger(), "init");
+        string_subscription_ = create_subscription<std_msgs::msg::String>(
+            "receive",
+            10,
+            std::bind(&my_node::subscription_callback, this, std::placeholders::_1)
+        );
+        string_publisher_ = create_publisher<std_msgs::msg::String>(
+            "send",
+            10
+        );
+        timer_publisher_ = create_publisher<std_msgs::msg::String>(
+            "timer_",
+            10
+        );
+        timer_ = create_wall_timer(
+            std::chrono::milliseconds(1000), // 定时器间隔
+            std::bind(&my_node::timer_callback, this)); // 回调函数
+    
+        my_message_publisher_ = create_publisher<my_msgs::msg::My>(
+            "my_msg",
+            10
+        );
+    
+        my_message_subscription_ = create_subscription<my_msgs::msg::My>(
+            "my_msg",
+            10,
+            std::bind(&my_node::my_message_callback,this,std::placeholders::_1)
+        );
+    
+    }
+    
+    void my_node::subscription_callback(const std_msgs::msg::String::SharedPtr msg)
+    {
+        auto message = std_msgs::msg::String();
+        message.data = "I can hear:" + msg->data;
+        RCLCPP_INFO(get_logger(), "I hear %s", msg->data.c_str());
+        string_publisher_->publish(message);
+    
+    }
+    
+    void my_node::timer_callback()
+    {
+        RCLCPP_INFO(get_logger(), "%d s", ++cnt_);
+        auto time_msg = std_msgs::msg::String();
+        time_msg.data = "Now is " + std::to_string(cnt_);
+        timer_publisher_->publish(time_msg);
+        auto self_msg = my_msgs::msg::My();
+        self_msg.header = std_msgs::msg::Header();
+        self_msg.id = 1;
+        self_msg.yaw = 123.45;
+        self_msg.detect_success = true;
+        my_message_publisher_->publish(self_msg);
+    
+    }
+    void my_node::my_message_callback(const my_msgs::msg::My::SharedPtr msg)
+    {
+        RCLCPP_INFO(get_logger(),"id %d , yaw %f , detect_success %d ",msg->id,msg->yaw,msg->detect_success);
+    }
+    
+    
+\end{lstlisting}
+
+\begin{lstlisting}[language=c++,label=lst:my_node_h,caption=my\_node.h,numbers=left]
+    //
+    // Created by dcy on 25-1-21.
+    //
+    
+    #ifndef MY_NODE_H
+    #define MY_NODE_H
+    
+    #include "rclcpp/rclcpp.hpp"
+    #include "std_msgs/msg/string.hpp"
+    
+    #include "my_msgs/msg/my.hpp"
+    
+    class my_node: public rclcpp::Node {
+        rclcpp::Publisher<std_msgs::msg::String>::SharedPtr string_publisher_;
+        rclcpp::Publisher<std_msgs::msg::String>::SharedPtr timer_publisher_;
+        rclcpp::Subscription<std_msgs::msg::String>::SharedPtr string_subscription_;
+        rclcpp::TimerBase::SharedPtr timer_;
+        rclcpp::Publisher<my_msgs::msg::My>::SharedPtr  my_message_publisher_;
+        rclcpp::Subscription<my_msgs::msg::My>::SharedPtr my_message_subscription_;
+        int cnt_ = 0;
+    public:
+        my_node() ;
+        my_node(const rclcpp::NodeOptions &options);
+        void subscription_callback(std_msgs::msg::String::SharedPtr msg);
+        void timer_callback();
+        void my_message_callback(my_msgs::msg::My::SharedPtr msg);
+    };
+    
+    
+    
+    #endif //MY_NODE_H
+    
+\end{lstlisting}
+
+\begin{lstlisting}[language=c++,label=lst:node_run_cpp,caption=node\_run.cpp,numbers=left]
+
+    //
+    // Created by dcy on 25-1-21.
+    //
+
+    #include <rclcpp/rclcpp.hpp>
+    #include <my_package/my_node.h>
+
+    int main(int argc, char **argv)
+    {
+        rclcpp::init(argc,argv);
+        rclcpp::spin(std::make_shared<my_node>());
+        rclcpp::shutdown();
+    }
+
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=cmake,label=lst:cmake_2,caption=my\_msgs.cpp,numbers=left]
+    cmake_minimum_required(VERSION 3.8)
+project(my_msgs)
+
+if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)cmake_minimum_required(VERSION 3.8)
+  project(my_msgs)
+  
+  if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    add_compile_options(-Wall -Wextra -Wpedantic)
+  endif ()
+  
+  find_package(ament_cmake_auto REQUIRED)
+  ament_auto_find_build_dependencies()
+  
+  file(
+          GLOB ${PROJECT_NAME}_msg_files
+          RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} msg/*
+  )
+  
+  rosidl_generate_interfaces(
+          ${PROJECT_NAME}
+          "msg/My.msg"
+          DEPENDENCIES std_msgs
+  )
+  
+  if (BUILD_TESTING)
+    find_package(ament_lint_auto REQUIRED)
+    set(ament_cmake_copyright_FOUND TRUE)
+    set(ament_cmake_cpplint_FOUND TRUE)
+    ament_lint_auto_find_test_dependencies()
+  endif ()
+  
+  ament_auto_package()
+  
+  
+ament_auto_find_build_dependencies()
+
+file(
+        GLOB ${PROJECT_NAME}_msg_files
+        RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} msg/*
+)
+
+rosidl_generate_interfaces(
+        ${PROJECT_NAME}
+        "msg/My.msg"
+        DEPENDENCIES std_msgs
+)
+
+if (BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  set(ament_cmake_copyright_FOUND TRUE)
+  set(ament_cmake_cpplint_FOUND TRUE)
+  ament_lint_auto_find_test_dependencies()
+endif ()
+
+ament_auto_package()
+
+
+\end{lstlisting}
+
+\begin{lstlisting}[language=XML,label=lst:xml_2,caption=my\_msgs.xml]
+    <?xml version="1.0"?>
+    <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+    <package format="3">
+      <name>my_msgs</name>
+      <version>0.0.0</version>
+      <description>TODO: Package description</description>
+      <maintainer email="1012866210@qq.com">mijiao</maintainer>
+      <license>Apache-2.0</license>
+    
+      <buildtool_depend>ament_cmake</buildtool_depend>
+    
+      <test_depend>ament_lint_auto</test_depend>
+      <test_depend>ament_lint_common</test_depend>
+    
+      <depend>geometry_msgs</depend>
+    
+      <buildtool_depend>rosidl_default_generators</buildtool_depend>
+      <exec_depend>rosidl_default_runtime</exec_depend>
+      <member_of_group>rosidl_interface_packages</member_of_group>
+    
+      <export>
+        <build_type>ament_cmake</build_type>
+      </export>
+    </package>
+    
+\end{lstlisting}

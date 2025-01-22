@@ -244,6 +244,46 @@ Just choose `xelatex', no `pdflatex' or `latex' and so on.}
 \pdfstringdefDisableCommands{%
 	\def\cftdotfill{ }%
 }
+
+\lstdefinelanguage{CMake}{
+  basicstyle=\ttfamily\small,
+  numberstyle=\tiny\color{gray},
+    morekeywords={
+        cmake_minimum_required, project, if, endif, find_package,
+        add_compile_options, ament_auto_find_build_dependencies,
+        ament_auto_add_executable, BUILD_TESTING, set, ament_lint_auto_find_test_dependencies,
+        ament_auto_package
+    },
+    sensitive=false,
+    morecomment=[l][\color{gray}]{\#},
+    morestring=[b]",
+    breaklines=true,
+    numbers = left,
+    frame=single,
+    backgroundcolor=\color{white},
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{gray}\itshape,
+    stringstyle=\color{red}
+}
+
+\lstdefinelanguage{XML}{
+    basicstyle=\ttfamily\small,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    frame=single,
+    backgroundcolor=\color{white},
+    breaklines=true,
+    morestring=[b]",
+    morecomment=[s]{<!--}{-->},
+    morekeywords={%
+        package, name, version, description, maintainer, license,
+        buildtool_depend, depend, exec_depend, test_depend, export,
+        build_type, member_of_group
+    },
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{gray}\itshape,
+    stringstyle=\color{red}
+}
 \lstnewenvironment{tcode}
   {
     \lstset{basicstyle = \ttfamily,
@@ -291,6 +331,27 @@ Just choose `xelatex', no `pdflatex' or `latex' and so on.}
     }
   }
   {}
+  \lstnewenvironment{tcpp}
+  {
+    \lstset{basicstyle = \ttfamily,
+        language=c++,
+        tabsize = 4,
+        frame = single,
+        escapechar = `,  % 用于在代码中插入 LaTeX 命令
+        breaklines = true,  % 自动换行
+        breakatwhitespace = true,  % 只在空格处换行
+        frameround = tttt,  % 圆角边框
+        numbers = left,  % 行号在左侧显示
+        numberstyle=\color{gray},  % 行号颜色为灰色
+        keywordstyle=\color{blue},  % 关键字颜色为蓝色
+        commentstyle=\color{green},  % 注释颜色为绿色
+        stringstyle=\color{red}  % 字符串颜色为红色
+    }
+  }
+  {}
+
+  
+
 %%% crefformat settings
 \crefformat{figure}{#2图~#1#3}
 \crefrangeformat{figure}{图~(#3#1#4)\;\~{}\;(#5#2#6)}
