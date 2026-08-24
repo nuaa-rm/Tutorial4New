@@ -1,0 +1,110 @@
+
+在完成了对目标状态的估计（Kalman 滤波）和空间位置的精确解算（BA）之后，自瞄系统的最后一步，是将“期望的射击角度”转化为云台的实际运动。云台是一个存在惯性、延迟和饱和的非理想执行器，如何规划其运动轨迹以最大化命中率，就是本章要讨论的模型预测控制（MPC）及相关信号与系统知识。
+
+\section{信号与系统——指令是如何变成云台运动的}
+\subsection{为什么视觉要学习一些控制理论}
+自瞄不仅仅是“看到目标——>开火”。相机检测到装甲板，计算出云台需要偏转的角度，这个角度作为指令发送给云台电机。然而，真实云台并不会瞬间到达指令位置，它的运动是一个动态过程：加速、超调、震荡、滞后。若不了解这个过程，仅仅依靠“看到目标就拉过去”的简单逻辑，在面对高速旋转的“小陀螺”目标时，命中率会急剧下降。
+学习控制理论，本质上是理解\emph{指令信号是如何被系统“扭曲”的}。只有理解了扭曲的规律，我们才能设计出前瞻性的规划器，提前补偿这种扭曲，使云台的实际指向尽可能贴合弹道所需的理想指向。这正是信号与系统视角的用武之地。
+
+\subsection{傅里叶变换和频域分析}
+任何连续变化的信号，例如目标运动导致的期望云台角度 $r(t)$，都可以通过傅里叶变换分解为不同频率的正弦波叠加。频域分析的核心思想是：我们不直接观察系统对复杂信号的响应，而是考察系统对每个单一频率正弦信号的响应，然后综合起来。
+对于一个线性时不变系统，输入为 $\sin(\omega t)$，稳态输出必然是 $A(\omega)\sin(\omega t + \phi(\omega))$。其中 $A(\omega)$ 称为幅频特性，$\phi(\omega)$ 称为相频特性。它们构成了系统的频率响应，完整描述了系统对任意信号的“处理方式”。
+
+\subsection{系统传递函数}
+云台的单轴动力学可以简化为一个带有惯量和阻尼的二阶系统，微分方程为：
+\begin{equation}
+    J\ddot{\theta}(t) + B\dot{\theta}(t) = \tau(t)
+\end{equation}
+其中 $J$ 为转动惯量，$B$ 为阻尼系数，$\tau$ 为电机力矩。
+由于我们通常以期望角速度或角度作为控制指令，实际的云台电机驱动器内部往往已包含电流环和速度环，因此从指令 $u$（如设定角速度）到实际角度 $\theta$ 的传递函数可近似为：
+\begin{equation}
+    G(s) = \frac{\Theta(s)}{U(s)} = \frac{K}{s(T s + 1)} \quad \text{或更精确的二阶形式。}
+\end{equation}
+通过拉普拉斯变换，微分方程变成了代数方程，使我们能方便地分析系统的极点、带宽和稳定性。在数字控制中，我们还要进行离散化，得到脉冲传递函数 $G(z)$，这是 MPC 预测模型的基础。
+
+\section{幅频失真和相频失真}
+\subsection{静态响应特性和动态响应特性}
+系统的响应可以分为两个阶段：动态过程（过渡过程）和静态（稳态）过程。我们通常用阶跃响应来刻画：
+\begin{itemize}
+    \item 动态特性指标：上升时间 $t_r$、峰值时间 $t_p$、超调量 $\sigma\%$、调节时间 $t_s$。
+    \item 静态特性指标：稳态误差 $e_{ss}$。
+\end{itemize}
+一个理想的云台要求动态响应快、无超调、稳态误差小。但由于物理限制，这些指标往往相互矛盾。
+
+\subsection{失真}
+当输入信号含有多个频率分量时，如果系统在各个频率上的 $A(\omega)$ 不是常数，或者 $\phi(\omega)$ 与 $\omega$ 不成正比，输出波形就会与输入形状不同，这就是失真。
+\begin{itemize}
+    \item 幅频失真：不同频率分量被放大了不同的倍数，改变了信号的能量分布。在自瞄中，表现为云台对快速摆动幅度跟不上，但慢速摆动正常。
+    \item 相频失真：不同频率分量产生不同的时间延迟，导致各分量“错位”叠加，波形发生严重畸变。即便幅频特性平坦，相位滞后也会使云台总是慢一拍。
+\end{itemize}
+
+\subsection{产生失真的原因}
+失真的根本原因在于系统的惯性。从传递函数上看，就是极点不为零且时间常数不可忽略。此外，机械间隙、摩擦、传感器采样延迟和通讯延迟都会加剧相位滞后。在控制层面，过高的增益可能激发结构谐振，导致高频抖振，这也是一种非线性失真。
+
+\section{可响应信号与误差容限}
+\subsection{命中条件}
+弹丸从枪口射出到命中装甲板需要飞行时间。在这段时间内，目标可能发生位移。由于弹丸有一定直径，且装甲板有尺寸，允许云台指向存在一个角度偏差 $\epsilon$。简单估计，在距离 $d$ 处，可命中区域对应的角度容限约为：
+\begin{equation}
+    \epsilon \approx \arctan\left(\frac{L}{2d}\right) \approx \frac{L}{2d}
+\end{equation}
+其中 $L$ 为装甲板宽度加上弹丸直径的有效区域。这就是云台跟踪的最大允许误差。
+
+\subsection{云台响应误差容限}
+我们要求云台的实际指向 $\theta_{real}$ 与解算出的理想射击角度 $\theta_{des}$ 之间的偏差 $e(t) = \theta_{des}(t) - \theta_{real}(t)$ 在弹丸飞行期间满足 $|e(t)| \leq \epsilon$。但考虑到系统存在动态滞后，$e(t)$ 不会恒为零，必须分析在最坏目标运动下，系统的误差能否被限制在 $\epsilon$ 以内。
+
+\subsection{可响应信号的定义}
+受限于电机最大力矩（加速度）和最大转速，云台能够跟踪的信号在频率和幅度上是有范围的。定义输入信号为正弦摆动 $r(t) = A \sin(\omega t)$，若要求跟踪误差小于 $\epsilon$，则系统必须在误差容限内响应。通过频域分析，可绘制出系统对于不同 $\omega$ 所能跟踪的最大幅度 $A_{\max}$，这称为\emph{可响应信号包络}。超出此包络的信号，无论如何设计控制器，云台都无法物理跟随。MPC 中的约束（最大速度、最大加速度）正是对这个包络的显式描述。
+
+\section{控制器设计——规划问题建立}
+\subsection{最大化命中率}
+命中率的最大化，可以转化为一个优化问题：在云台物理能力的严格约束下，使跟踪误差的某种范数最小。这就是典型的最小二乘思想：
+\begin{center}
+    \textbf{找一个控制指令序列，让未来一段时间内的预测输出与期望轨迹之间的差距最小，同时输入能量不能太大。}
+\end{center}
+形式上与 Kalman 滤波（最小化估计误差方差）和 BA（最小化重投影误差平方和）完全一致，只是这里的优化变量是控制量。
+
+\subsection{基于云台模型的规划器设计}
+我们采用线性离散状态空间模型描述云台的动态。设状态 $\mathbf{x} = [\theta, \dot{\theta}]^T$，控制输入 $u$（例如加速度或速度指令），离散化后得到：
+\begin{equation}
+    \mathbf{x}_{k+1} = \mathbf{A} \mathbf{x}_k + \mathbf{B} u_k,\qquad y_k = \mathbf{C} \mathbf{x}_k
+\end{equation}
+其中 $\mathbf{C} = [1, 0]$。
+
+在时刻 $k$，已知当前状态 $\mathbf{x}_k$，我们需要规划未来 $N$ 个周期的控制序列 $\mathbf{U} = [u_k, u_{k+1}, \dots, u_{k+N-1}]^T$，使输出 $y_{k+i}$ 跟踪由目标预测与弹道解算给出的参考角度 $r_{k+i}$。
+
+定义代价函数：
+\begin{equation}
+    F(\mathbf{U}) = \sum_{i=1}^{N} \| r_{k+i} - y_{k+i}\|_{\mathbf{Q}}^2 + \sum_{i=0}^{N-1} \| u_{k+i}\|_{\mathbf{R}}^2
+\end{equation}
+第一项惩罚跟踪误差，第二项抑制过大的控制量，避免震荡。同时，必须满足物理约束：
+\begin{align}
+    |u_{k+i}| &\leq u_{\max} \quad (\text{加速度/力矩限制}) \\
+    |\dot{\theta}_{k+i}| &\leq \dot{\theta}_{\max} \quad (\text{速度限制})
+\end{align}
+由此，云台控制问题被建立为一个带约束的二次优化问题。这种在模型预测框架下直接考虑约束的方法，正是 MPC 区别于 PID 的核心优势。
+
+\section{最优控制轨迹求解}
+为求解，需要将上述优化问题化为标准二次规划（QP）形式。首先，利用状态方程递推，将预测的输出序列表示为当前状态 $\mathbf{x}_k$ 与控制序列 $\mathbf{U}$ 的线性组合：
+\begin{equation}
+    \mathbf{Y} = \begin{bmatrix} y_{k+1} \\ y_{k+2} \\ \vdots \\ y_{k+N} \end{bmatrix} = \Phi \mathbf{x}_k + \Theta \mathbf{U}
+\end{equation}
+其中 $\Phi$ 和 $\Theta$ 由 $\mathbf{A}, \mathbf{B}, \mathbf{C}$ 构成。然后，将代价函数改写为：
+\begin{align}
+    F(\mathbf{U}) &= (\mathbf{R} - \mathbf{Y})^T \bar{\mathbf{Q}} (\mathbf{R} - \mathbf{Y}) + \mathbf{U}^T \bar{\mathbf{R}} \mathbf{U} \\
+    &= \frac{1}{2} \mathbf{U}^T \mathbf{H} \mathbf{U} + \mathbf{g}^T \mathbf{U} + \text{常数}
+\end{align}
+其中 $\mathbf{H} = 2(\Theta^T \bar{\mathbf{Q}} \Theta + \bar{\mathbf{R}})$，$\mathbf{g} = -2\Theta^T \bar{\mathbf{Q}} (\mathbf{R} - \Phi \mathbf{x}_k)$。约束同样整理为 $\mathbf{A}_{ineq} \mathbf{U} \leq \mathbf{b}_{ineq}$ 的形式。
+最终，每个控制周期求解：
+\begin{equation}
+    \mathbf{U}^* = \arg\min_{\mathbf{U}} \frac{1}{2}\mathbf{U}^T \mathbf{H} \mathbf{U} + \mathbf{g}^T \mathbf{U} \quad \text{s.t.} \quad \mathbf{A}_{ineq} \mathbf{U} \leq \mathbf{b}_{ineq}
+\end{equation}
+此 QP 问题可使用高效求解器（如 qpOASES、OSQP）在线求解。$MPC$ 的“滚动时域”思想在于：只执行 $\mathbf{U}^*$ 的第一个元素 $u_k^*$，下一周期根据新的状态重新规划。这赋予系统对模型误差和外部扰动的反馈能力。
+
+\section{关于云台控制信号的一些细节}
+\begin{itemize}
+    \item \textbf{前馈与反馈结合}：MPC 给出的控制量是规划好的最优轨迹，但实际模型存在误差。通常将 MPC 的输出作为前馈力矩，再叠加一个轻度的 PID 或 PD 进行误差补偿，可以进一步提升鲁棒性。
+    \item \textbf{预测时域}：时域 $N$ 的选择是权衡。过短则缺乏前瞻，过长则计算量大且模型不准。对于自瞄，通常取 $N=10\sim20$ 个控制周期，对应 $0.1\sim0.2$ 秒的未来。
+    \item \textbf{与 Kalman 的衔接}：MPC 的参考轨迹 $r_{k+i}$ 来自 Kalman 滤波器的多步预测和弹道补偿。Kalman 输出的预测协方差也可以用来动态调整 MPC 的权重 $\mathbf{Q}$，在预测不确定性高时降低跟踪精度要求，避免激烈抖动。
+    \item \textbf{低通滤波}：指令 $u_k$ 在发送给电机前，通常经过一个截止频率略高于系统带宽的低通滤波器，以滤除规划器输出的高频毛刺，防止激发机械共振。
+\end{itemize}
+整个 MPC 控制框图可以理解为：视觉前馈的参考轨迹 $\rightarrow$ 基于模型的优化规划器 $\rightarrow$ 补偿与滤波 $\rightarrow$ 物理云台。它与前两章讲述的 Kalman 滤波和 BA 一道，构成了从“看见”到“击中”的完整自瞄计算链条。

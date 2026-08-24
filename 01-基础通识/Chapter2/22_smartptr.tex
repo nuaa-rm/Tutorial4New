@@ -1,0 +1,130 @@
+动态内存若使用 $new$/$delete$ 手动管理，易因遗漏释放导致内存泄漏；在对象生命周期复杂、函数嵌套较深时尤甚。C++11 引入智能指针，在对象析构时自动释放所管理的堆内存。常用类型包括 $unique\_ptr$、$shared\_ptr$ 与 $weak\_ptr$。
+
+下文示例中的类型 $A$、$B$ 定义如下。
+
+\begin{tcode}
+class A;
+class B;
+class A{
+public:
+    A(){std::cout << "你调用了A的默认构造函数" << std::endl;}
+    ~A(){std::cout << "A对象已被析构，val值为：" << val << std::endl;}
+    int getVal(){return val;};
+    void setVal(int val){this->val = val;}
+    std::shared_ptr<B> B_ptr;
+private:
+    int val;
+};
+
+class B{
+public:
+    B(){std::cout << "你调用了B的默认构造函数" << std::endl;}
+    ~B(){std::cout << "B对象已被析构，val值为：" << val << std::endl;}
+    int getVal(){return val;};
+    void setVal(int val){this->val = val;}
+    std::shared_ptr<A> A_ptr;
+private:
+    int val;    
+};
+\end{tcode}
+
+\subsubsection{unique\_ptr}
+$unique\_ptr$ 为独占式智能指针：同一时刻仅允许一个指针拥有资源。离开作用域时自动释放资源。拷贝构造与拷贝赋值被禁用，所有权只能通过移动转移。
+
+\begin{tcode}
+{
+    std::unique_ptr<A> ptr1 = std::make_unique<A>();
+    ptr1->setVal(1);
+    //std::unique_ptr<A> ptr2 = ptr;会报错
+    std::unique_ptr<A> ptr2 = std::move(ptr1);
+    if(ptr1 == nullptr){
+        std::cout << "ptr1是一个空指针" << std::endl;
+    }
+    std::cout << "ptr2的val值为：" << ptr2->getVal() << std::endl;
+    ptr1 = std::make_unique<A>();
+    ptr1->setVal(2);
+}
+\end{tcode}
+
+\subsubsection{shared\_ptr}
+当需要多个指针共同管理同一资源时，应使用 $shared\_ptr$。其内部维护引用计数：拷贝使计数加一，析构使计数减一；计数归零时释放资源。移动操作转移所有权，不增加引用计数。
+
+\begin{tcode}
+{
+{
+    std::shared_ptr<A> ptr1 = nullptr;
+    {
+        auto ptr2 = std::make_shared<A>();
+        ptr2->setVal(1);
+        ptr1 = ptr2;
+        //ptr1 = std::move(ptr2);//看一下这两种有什么区别？
+        std::cout << "ptr1对象的引用次数为：" << ptr1.use_count() << std::endl;
+        std::cout << "ptr2对象的引用次数为：" << ptr2.use_count() << std::endl;
+    }
+    std::cout << "ptr2已经被析构了" << std::endl;
+}
+}
+\end{tcode}
+
+\subsubsection{循环引用与 weak\_ptr}
+若两个 $shared\_ptr$ 互相持有对方，将形成循环引用，引用计数无法归零，对象无法析构，从而造成泄漏。
+
+\begin{tcode}
+int main(int argc, char *argv[]) {
+{
+    std::shared_ptr<A> pA(new A);
+    std::shared_ptr<B> pB(new B);
+
+    std::cout << pA.use_count() << std::endl;
+    std::cout << pB.use_count() << std::endl;
+}
+std::cout << "上面是符合我们预期的" << std::endl << std::endl;
+{
+    std::shared_ptr<A> pA(new A);
+    std::shared_ptr<B> pB(new B);
+
+    pA->B_ptr = pB;
+    pB->A_ptr = pA;
+
+    std::cout << pA.use_count() << std::endl;
+    std::cout << pB.use_count() << std::endl;
+}
+std::cout << "咦？这是什么情况呢？为什么没有被析构呢？" << std::endl;
+return 0;
+}
+\end{tcode}
+
+此时应将一侧改为 $weak\_ptr$。$weak\_ptr$ 不增加引用计数，也不直接解引用资源；需要访问时通过 $lock()$ 升级为 $shared\_ptr$，并检查返回值是否为空。
+
+\begin{tcode}
+{
+    std::shared_ptr<A> pA(new A);
+    std::shared_ptr<B> pB(new B);
+
+    pA->B_ptr = pB;
+    pB->A_ptr = pA;
+
+    std::cout << pA.use_count() << std::endl;
+    std::cout << pB.use_count() << std::endl;
+
+    std::shared_ptr<A> PtrA = pB->A_ptr.lock();
+    if(PtrA!= nullptr)
+        PtrA->setVal(1234);
+    PtrA.reset();
+}
+\end{tcode}
+
+在多线程环境下，$lock()$ 可用于在访问前确认共享对象仍存活。相关同步问题见多线程章节。
+
+\subsubsection{三种智能指针对照}
+\begin{center}
+    \begin{tabular}{cccc}
+        \hline
+        智能指针 & 指向数量 & 析构条件 & 是否可操作资源\\
+        \hline
+        unique\_ptr & 只能一个 & 离开作用域 & 是\\
+        shared\_ptr & 可多个指向同一对象 & 引用计数为 0 & 是\\
+        weak\_ptr & 可观察 shared\_ptr 管理的对象 & 不单独决定析构 & 否，需 lock 升级\\
+        \hline
+    \end{tabular}
+\end{center}

@@ -1,0 +1,150 @@
+% 卷三 · RM 比赛中视觉技术概述
+% 编译：xelatex main.tex（建议两次）
+\documentclass[
+  lang=cn,
+  scheme=chinese,
+  chinesefont=ctexfont,
+  11pt,
+  oneside,
+  device=normal,
+  color=cyan,
+  mode=fancy
+]{elegantbook}
+
+\input{../templates/preamble.tex}
+
+\title{长空御风视觉组培训教材}
+\subtitle{卷三 · RM 比赛中视觉技术概述}
+\author{长空御风视觉组}
+\institute{视觉组培训}
+\date{\today}
+\version{2026.08}
+\extrainfo{少公式、重链路与工程准则；细节回卷二。三方向：自瞄 / 雷达 / 导航。}
+
+\begin{document}
+
+\maketitle
+
+\frontmatter
+
+\chapter*{编者说明}
+本卷把通识与专项\textbf{串成比赛故事}：读完应能画清视觉数据流、指认接口边界、复述工程红线。
+\textbf{不替代}卷二公式与实现细节。
+
+\noindent 建议学时：开营 $0.5$--$1$ 天精讲第 1、2、5 章；全文通读约 $1$--$2$ 周。
+考核重心：画链路、指接口、说红线——不考手推 BA/MPC。
+
+\tableofcontents
+
+\mainmatter
+
+% ============================================================
+\chapter{视觉组在 RM 中的职责与技术全景}
+
+\begin{introduction}
+  \item 学习目标：区分自瞄 / 雷达 / 导航；理解图像处理与深度学习如何结合；能画视觉数据流并说明与机械、电控的边界。
+  \item 建议学时：开营半天内讲完。
+  \item 产出：一张「相机 $\rightarrow$ 识别 $\rightarrow$ 估计 $\rightarrow$ 控制 / 导航 / 广播」示意图。
+\end{introduction}
+
+\input{chapters/01_overview.tex}
+
+\section{本章验收}
+\begin{enumerate}
+    \item 说出三个方向各自一句话职责，并指出一个「不是方向名」的常见误称。
+    \item 在纸上画出总数据流，并标出自瞄、雷达、导航各走到哪一条出口。
+\end{enumerate}
+
+% ============================================================
+\chapter{自瞄系统概述}
+
+\begin{introduction}
+  \item 学习目标：掌握检测 $\rightarrow$ 跟踪预测 $\rightarrow$ 云台控制三段；知道 PnP、Kalman、MPC 各处在哪一环；能标出主要噪声来源。
+  \item 细节回卷二：B/C（检测）、G（PnP/BA）、F（滤波）、H（MPC）。
+\end{introduction}
+
+\input{chapters/02_aim.tex}
+
+\section{本章验收}
+\begin{enumerate}
+    \item 口述或一页纸画出自瞄三段链路。
+    \item 在每一段标注至少一种噪声或故障表现。
+\end{enumerate}
+
+% ============================================================
+\chapter{导航在 RM 中的应用}
+
+\begin{introduction}
+  \item 学习目标：用比赛语言理解地图、定位、规划、控制与恢复；能把常见故障归到模块；区分 LiDAR 与雷达站方向。
+  \item 细节回卷二导航章。
+\end{introduction}
+
+\input{chapters/03_sentry.tex}
+
+\section{本章验收}
+\begin{enumerate}
+    \item 对照 Nav2 示意，说明全局规划与局部控制在比赛中的分工。
+    \item 给出两种「车卡住」时优先检查的模块。
+\end{enumerate}
+
+% ============================================================
+\chapter{雷达站与全场感知概述}
+
+\begin{introduction}
+  \item 学习目标：理解雷达站广播职责与多进程数据流；区分俯视定位与车载 PnP；知道通信 / SDR 能力在卷二的位置。
+  \item 细节回卷二：多机通信、SDR、OpenCV、深度学习。
+\end{introduction}
+
+\input{chapters/03b_radar.tex}
+
+\section{本章验收}
+\begin{enumerate}
+    \item 说明雷达与自瞄在「闭环对象」上的区别。
+    \item 解释「无线电新鲜优先、过期回退视觉」在说什么。
+\end{enumerate}
+
+% ============================================================
+\chapter{相机与前端的赛场实践要点}
+
+\begin{introduction}
+  \item 学习目标：掌握卷帘/全局与帧率陷阱；能按 checklist 检查曝光与触发；原理回卷二相机章。
+\end{introduction}
+
+\input{chapters/04_camera_field.tex}
+
+\section{本章验收}
+\begin{enumerate}
+    \item 说明为何「高帧率标称」仍可能不够用。
+    \item 现场演练：按 checklist 检查一项曝光或触发设置。
+\end{enumerate}
+
+% ============================================================
+\chapter{工程准则与调车文化}
+
+\begin{introduction}
+  \item 学习目标：熟记五条工程准则；能区分学习时间与工程时间；开营与结营各复习一次。
+\end{introduction}
+
+\input{chapters/05_engineering.tex}
+
+\section{本章验收}
+\begin{enumerate}
+    \item 不看讲义背出五条准则的标题。
+    \item 举一例说明「只看最终命中率」为什么不够。
+\end{enumerate}
+
+% ============================================================
+\chapter{进阶地图与资料索引}
+
+\begin{introduction}
+  \item 学习目标：按方向得到推荐阅读顺序；知道资料入口与版本责任字段。
+\end{introduction}
+
+\input{chapters/06_index.tex}
+
+\chapter*{卷三小结}
+\addcontentsline{toc}{chapter}{卷三小结}
+本卷给出比赛视角的链路与规矩。下一步：按方向深入卷二专项，并在实车仓库中用五条准则约束开发过程。
+通识未过关者，应回到\textbf{卷一}补齐底座。
+
+\end{document}

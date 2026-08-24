@@ -560,9 +560,9 @@ Just choose `xelatex', no `pdflatex' or `latex' and so on.}
 % 中文标题格式设置
 % 目录深度
 \setcounter{secnumdepth}{3}
-% 节标题格式, 居中, 使用\chinese命令修改计数器
+% 节标题格式, 居中；一级标题为「第×章」
 \def\@seccntformat#1{\csname the#1\endcsname\ }
-\renewcommand\thesection{\chinese{section}、}
+\renewcommand\thesection{第\chinese{section}章}
 \renewcommand\thesubsection{\arabic{section}\thinspace.\thinspace\arabic{subsection}}
 \renewcommand\thesubsubsection{\thesubsection\thinspace.\thinspace\arabic{subsubsection}}
 \renewcommand\section{\@startsection{section}{1}{\z@}%

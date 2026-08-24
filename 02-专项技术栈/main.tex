@@ -1,0 +1,253 @@
+% 卷二 · 专项技术栈
+% 编译：xelatex main.tex（建议编译两次）
+\documentclass[
+  lang=cn,
+  scheme=chinese,
+  chinesefont=ctexfont,
+  11pt,
+  oneside,
+  device=normal,
+  color=cyan,
+  mode=fancy
+]{elegantbook}
+
+\input{../templates/preamble.tex}
+
+\title{长空御风视觉组培训教材}
+\subtitle{卷二 · 专项技术栈}
+\author{长空御风视觉组}
+\institute{视觉组培训}
+\date{\today}
+\version{2026.08}
+\extrainfo{三方向：自瞄 / 雷达 / 导航。OpenCV、深度学习等为共用技能，按方向组合选修。}
+
+\begin{document}
+
+\maketitle
+
+\frontmatter
+
+\chapter*{编者说明}
+本卷是视觉组主技能书。组内三个方向为\textbf{自瞄}、\textbf{雷达}、\textbf{导航}；
+OpenCV、深度学习、CUDA 等为共用技能，按方向组合选修，不要求一次学完。
+\textbf{前置条件}：通过卷一通识考核，具备 Linux、现代 C++ 与 CMake 基础。
+标 $*$ 的小节为选修。
+
+\noindent\textbf{推荐选课（示意）：}
+\begin{itemize}
+    \item \textbf{自瞄}：ROS2 + OpenCV + 深度学习 + 相机 + 滤波 + BA + MPC（CUDA 建议）
+    \item \textbf{雷达}：ROS2 + 多机通信 + SDR/电磁波解析 + OpenCV + 深度学习 + 相机（CUDA / 滤波建议）
+    \item \textbf{导航}：ROS2 + 导航章（相机 / 滤波 / 多机通信建议）；赛场建图见卷三
+\end{itemize}
+
+\tableofcontents
+
+\mainmatter
+
+% ============================================================
+\chapter{ROS2 基础}
+
+\begin{introduction}
+  \item 学习目标：理解 ROS2 节点与话题模型；创建 ament 工作空间与功能包；实现发布/订阅、定时器与自定义消息。
+  \item 建议学时：约 1 周。
+  \item 前置依赖：卷一 Linux、C++ 多线程与 CMake；OpenCV 图像在节点中的传递见本章末与 OpenCV 章。
+\end{introduction}
+
+\input{chapters/A_ros2.tex}
+\input{chapters/appendix_ros2.tex}
+
+\section{本章验收}
+\begin{enumerate}
+    \item 创建独立工作空间与功能包，实现字符串话题的发布与订阅。
+    \item 定义并编译自定义消息类型，在节点中发布与接收。
+    \item 使用 rqt 或 Foxglove 观察话题数据流。
+\end{enumerate}
+
+% ============================================================
+\chapter{多机通信方法}
+
+\begin{introduction}
+  \item 学习目标：在 ROS2 之外掌握本机 TCP 与串口帧通信；理解粘包拆包、CRC 重同步、latest-value 与连接代次；能设计简单的故障隔离。
+  \item 建议学时：约 2--3 天。
+  \item 适用方向：雷达站多进程、反制双机、与裁判/电控串口对接；自瞄/导航中的跨板通信亦可参考。
+\end{introduction}
+
+\input{chapters/J_comm.tex}
+
+\section{本章验收}
+\begin{enumerate}
+    \item 说明 TCP 字节流为何必须自行组帧，并举粘包与半包各一例。
+    \item 对比无限 FIFO 与 latest-value 队列，说明雷达坐标类数据更适合哪一种。
+    \item 设计「裁判串口与云台串口分离」的理由（一句话即可）。
+\end{enumerate}
+
+% ============================================================
+\chapter{SDR 与电磁波解析}
+
+\begin{introduction}
+  \item 学习目标：理解 SDR / IQ 基本概念；说明分阶段射频状态机；能陈述从 IQ 到 CRC 有效帧的解析步骤；知晓射频合规边界。
+  \item 建议学时：约 3--5 天。
+  \item 本卷边界：不要求实现完整赛场解调器；具体频点、波形与帧定义以规则及队内仓库为准。与导航章「激光雷达」无关。
+\end{introduction}
+
+\input{chapters/K_sdr.tex}
+
+\section{本章验收}
+\begin{enumerate}
+    \item 解释 I、Q 两路样本的含义，以及采样率与可观察带宽的关系（定性即可）。
+    \item 画出「一级干扰 $\rightarrow$ 二级干扰 $\rightarrow$ 信息波」单通道切换的状态顺序，并说明为何不同时解两路。
+    \item 列举解析流水线中同步、解调、CRC 三步各自的作用。
+\end{enumerate}
+
+% ============================================================
+\chapter{OpenCV 与图像处理基础}
+
+\begin{introduction}
+  \item 学习目标：掌握 \texttt{cv::Mat} 与读写；完成 HSV 分割、阈值、滤波、形态学与轮廓筛选；能用摄像头取流，并用 \texttt{cv\_bridge} 接入 ROS2。
+  \item 建议学时：约 1--1.5 周。
+  \item 本卷边界：装甲板识别案例与赛场调参见卷三；本卷聚焦 OpenCV 库能力与 C++ 接口。
+\end{introduction}
+
+\input{chapters/B_opencv.tex}
+
+\section{本章验收}
+\begin{enumerate}
+    \item 用 CMake 链接 OpenCV，读取本地图像或摄像头并显示。
+    \item 在 HSV 空间完成颜色分割（若为红色，正确处理色环两端），再配合形态学去噪。
+    \item 对二值图或 Canny 结果做轮廓提取，用面积（及可选长宽比）筛选后绘制 \texttt{minAreaRect}。
+    \item 说明 BGR 与 HSV 的差异，以及浅拷贝与 \texttt{clone} 的区别。
+\end{enumerate}
+
+% ============================================================
+\chapter{神经网络与深度学习}
+
+\begin{introduction}
+  \item 学习目标：理解拟合与过拟合；使用 PyTorch 搭建 LeNet 并完成 MNIST 训练；了解 YOLO 等检测框架与模型部署入口。
+  \item 建议学时：约 1.5--2 周。
+  \item 前置依赖：卷一 Conda 环境管理；GPU 与 CUDA 安装见本卷「CUDA 与 GPU 加速」章。
+\end{introduction}
+
+\input{chapters/C_dl.tex}
+
+\section{本章验收}
+\begin{enumerate}
+    \item 在 conda 虚拟环境中跑通 LeNet 训练，记录测试集准确率。
+    \item 简述卷积、池化与全连接层各自的作用。
+    \item 选做：用现成 YOLO 权重对单张赛场图片做推理。
+\end{enumerate}
+
+% ============================================================
+\chapter{CUDA 与 GPU 加速}
+
+\begin{introduction}
+  \item 学习目标：正确安装 CUDA Toolkit（不误装驱动）；理解 Host/Device 与内存拷贝；会写并运行简单 kernel；了解 shared memory 与推理部署入口。
+  \item 建议学时：约 3--5 天。
+  \item 前置依赖：卷一 C++/CMake；与深度学习章的 GPU 训练、TensorRT 部署衔接。
+\end{introduction}
+
+\input{chapters/D_cuda.tex}
+
+\section{本章验收}
+\begin{enumerate}
+    \item 说明为何已有驱动时安装 Toolkit 应取消勾选 Driver。
+    \item 实现并运行向量加法（或同类）CUDA 程序，用 \texttt{nvcc} 或 CMake 编译。
+    \item 解释 Thread / Block / Grid，以及 \texttt{cudaMemcpy} 的典型方向。
+    \item 选做：用 shared memory 改写一个简单滑窗或归约示例。
+\end{enumerate}
+
+% ============================================================
+\chapter{相机与成像原理}
+
+\begin{introduction}
+  \item 学习目标：理解 CCD/CMOS、曝光三角、噪声与 Bayer/Gamma；掌握畸变与标定入口；了解 HDR 与多相机同步。
+  \item 建议学时：约 3--5 天。
+  \item 本卷边界：赛场选型与曝光 checklist 见卷三；投影与 PnP 细节见几何视觉章。
+\end{introduction}
+
+\input{chapters/E_camera.tex}
+
+\section{本章验收}
+\begin{enumerate}
+    \item 说明光圈、快门、ISO 如何共同影响曝光与运动模糊。
+    \item 列举至少两种图像噪声来源，并说明卷帘快门的主要问题。
+    \item 使用 ROS2 或 OpenCV 完成一次棋盘格单目标定，得到内参与畸变系数。
+\end{enumerate}
+
+% ============================================================
+\chapter{信号处理与滤波}
+
+\begin{introduction}
+  \item 学习目标：区分系统噪声与观测噪声；掌握低通等基本滤波；理解 Kalman 预测—更新与增益；了解 EKF/UKF 入口。
+  \item 建议学时：约 1 周。
+  \item 材料来源：原讲义第九章与《自瞄核心算法》Kalman 章。
+\end{introduction}
+
+\input{chapters/F_filter.tex}
+
+\section{本章验收}
+\begin{enumerate}
+    \item 实现一阶低通或滑动平均，并观察不同系数对延迟与平滑的影响。
+    \item 写出一维常速度模型下 Kalman 的预测与更新公式，并说明 $Q$、$R$ 的含义。
+    \item 选做：对一组含噪位置序列做 Kalman 滤波，对比滤波前后方差。
+\end{enumerate}
+
+% ============================================================
+\chapter{几何视觉与 Bundle Adjustment}
+
+\begin{introduction}
+  \item 学习目标：掌握针孔投影与内参/外参；会陈述 PnP 问题并了解 P3P 等解法；理解 BA 作为最小化重投影误差的最小二乘问题。
+  \item 建议学时：约 1--1.5 周。
+  \item 材料来源：《自瞄核心算法》BA 章及附录。
+\end{introduction}
+
+\input{chapters/G_ba.tex}
+
+\section{本章验收}
+\begin{enumerate}
+    \item 写出针孔模型从相机坐标到像素坐标的公式，并解释 $f_x,f_y,c_x,c_y$。
+    \item 说明 PnP 的输入输出，以及为何需要至少三个（通常更多）点。
+    \item 用一句话概括 BA 优化的目标函数（重投影误差）。
+\end{enumerate}
+
+% ============================================================
+\chapter{模型预测控制}
+
+\begin{introduction}
+  \item 学习目标：从信号与系统角度理解云台动态；建立带约束的跟踪优化问题；理解 MPC 滚动时域与和 Kalman/弹道的衔接。
+  \item 建议学时：约 3--5 天。
+  \item 材料来源：《自瞄核心算法》MPC 章。
+\end{introduction}
+
+\input{chapters/H_mpc.tex}
+
+\section{本章验收}
+\begin{enumerate}
+    \item 说明幅频失真与相频失真对云台跟踪的影响。
+    \item 写出 MPC 代价函数中跟踪项与控制能量项的作用。
+    \item 解释「只执行控制序列第一个量、下一周期重规划」的含义。
+\end{enumerate}
+
+% ============================================================
+\chapter{导航与 SLAM 初步}
+
+\begin{introduction}
+  \item 学习目标：理解 Nav2 中地图、定位、规划、控制与恢复的职责划分；掌握 TF 与代价地图概念；了解 Dijkstra/A* 与局部规划器角色。
+  \item 建议学时：约 1 周。
+  \item 本卷边界：赛场建图流程与任务叙事见卷三。
+\end{introduction}
+
+\input{chapters/I_nav.tex}
+
+\section{本章验收}
+\begin{enumerate}
+    \item 对照 Nav2 框图，说明全局规划器、控制器与代价地图各自输入输出。
+    \item 解释 TF 树中 \texttt{map}、\texttt{odom}、\texttt{base\_link} 的典型关系。
+    \item 列举至少两种恢复行为，并说明行为树 Fallback 的用途。
+\end{enumerate}
+
+\chapter*{卷二小结}
+\addcontentsline{toc}{chapter}{卷二小结}
+本卷覆盖自瞄、雷达、导航三个方向所需的主要专项技能（含共用的图像、学习与 CUDA）。
+赛场链路、工程准则与任务级案例见 \textbf{卷三 · RM 视觉概述}。
+
+\end{document}

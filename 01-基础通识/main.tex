@@ -1,0 +1,142 @@
+% 卷一 · 基础通识
+% 模板：ElegantBook（教材书籍模板，见 templates/elegantbook.cls）
+% 编译：xelatex main.tex（建议编译两次以生成目录）
+\documentclass[
+  lang=cn,
+  scheme=chinese,
+  chinesefont=ctexfont,
+  11pt,
+  oneside,
+  device=normal,
+  color=cyan,
+  mode=fancy
+]{elegantbook}
+
+\input{../templates/preamble.tex}
+
+\title{长空御风视觉组培训教材}
+\subtitle{卷一 · 基础通识}
+\author{长空御风视觉组}
+\institute{视觉组培训}
+\date{\today}
+\version{2026.08}
+\extrainfo{标 $*$ 的小节为选修，不计入通识考核。}
+
+\begin{document}
+
+\maketitle
+
+\frontmatter
+
+\chapter*{认识技术组与视觉组}
+\addcontentsline{toc}{chapter}{认识技术组与视觉组}
+\input{preface/promo_body.tex}
+
+\chapter*{编者说明}
+\addcontentsline{toc}{chapter}{编者说明}
+\input{preface/0.tex}
+
+\tableofcontents
+
+\mainmatter
+
+% ============================================================
+\chapter{Linux 工作环境}
+
+\begin{introduction}
+  \item 学习目标：安装并维护 Ubuntu 开发环境；熟练使用命令行、shell 与 git；掌握 conda 基本用法。
+  \item 建议学时：约 1 周，含安装与练习。
+  \item 本卷边界：不涉及 ROS2 工作空间细节，相关内容见卷二。
+\end{introduction}
+
+\section{安装 Ubuntu 22.04 双系统}
+\input{Chapter1/11.tex}
+
+\section{系统数据备份}
+配置环境前须完成本节。系统异常时，快照恢复通常优于重装。
+\input{Chapter1/12.tex}
+
+\section{卸载重装 Ubuntu 系统*}
+\input{Chapter1/13.tex}
+
+\section{文件系统与常用命令}
+\input{Chapter1/14_fs.tex}
+
+\section{Shell 脚本与环境变量}
+\input{Chapter1/14_shell.tex}
+
+\section{Git 工具的使用}
+\input{Chapter1/15.tex}
+
+\section{Conda 的简单使用*}
+\input{Chapter1/16.tex}
+
+\section{本章验收}
+\begin{enumerate}
+    \item 配置 SSH，克隆私有仓库，并完成一次修改、暂存、提交与推送。
+    \item 编写 shell 脚本：创建目录、调用编译器或可执行文件并运行。
+    \item 使用 timeshift 或等价工具制作快照，并说明图形界面不可用时的恢复步骤。
+\end{enumerate}
+
+% ============================================================
+\chapter{现代 C++ 基础}
+
+\begin{introduction}
+  \item 学习目标：掌握类、继承与模板；编写 lambda；理解引用与移动；使用智能指针与常用 STL；掌握多线程同步与常见模型，并理解进程内存分区与堆栈差异。
+  \item 建议学时：约 1.5--2 周。
+  \item 本卷边界：ROS2 执行器与节点生命周期中的多线程用法见卷二。四阶段并发综合作业见 \texttt{参考文献/multithread.pdf}。
+\end{introduction}
+
+\section{面向对象编程：类}
+\input{Chapter2/21.tex}
+
+\section{Lambda 表达式、引用与移动}
+\input{Chapter2/22_core.tex}
+
+\section{智能指针}
+\input{Chapter2/22_smartptr.tex}
+
+\section{标准模版库（STL）}
+本节介绍常用数据结构对应的 STL 容器，以及迭代器的基本用法与失效问题。
+\input{Chapter2/22_stl.tex}
+
+\section{C++ 多线程}
+本节展开多线程同步与常见模型，并将系统内存布局作为相关基础一并说明。
+\input{Chapter2/22_thread.tex}
+
+\section{本章验收}
+\begin{enumerate}
+    \item 定义表示平面点的结构体或类，重载输出运算符，打印若干角点坐标。
+    \item 使用 lambda 作为比较器，对自定义结构体数组排序。
+    \item 说明拷贝构造函数参数必须为引用的原因，以及按值传递将导致的问题。
+    \item 使用 \texttt{std::vector} 等容器管理一组对象，并说明优先使用智能指针管理堆内存的原因。
+    \item 实现线程安全队列，或完成 \texttt{参考文献/multithread.pdf} 中 Phase~1，并用测试验证。
+\end{enumerate}
+
+% ============================================================
+\chapter{编译过程与 CMake 基础}
+
+\begin{introduction}
+  \item 学习目标：说明预处理、编译、汇编与链接；编写基本 \texttt{CMakeLists.txt}，完成可执行文件生成、依赖查找与链接。
+  \item 建议学时：约 3--5 天。
+  \item 本卷边界：CUDA 与 ament 等构建细节见卷二。本卷实例中出现的相关语句仅作认知，不纳入考核。
+\end{introduction}
+
+% Chapter3 原文使用 \subsection 作为章内一级，临时提升为 \section
+\let\subsection\section
+\input{Chapter3/3.tex}
+\let\subsection\textbook@subsection
+
+\section{本章验收}
+\begin{enumerate}
+    \item 建立至少包含两个 \texttt{.cpp} 源文件的工程，使用 \texttt{add\_executable} 与 \texttt{target\_link\_libraries} 完成编译与运行。
+    \item 使用 \texttt{find\_package(OpenCV REQUIRED)} 编译读取并显示图像的示例程序。算法细节见卷二 OpenCV 章。
+\end{enumerate}
+
+\chapter*{卷一小结}
+\addcontentsline{toc}{chapter}{卷一小结}
+完成本卷验收后，应具备进入专项学习的基础能力。
+下一步学习 \textbf{卷二 · 专项技术栈}，按\textbf{自瞄 / 雷达 / 导航}方向选修对应章节；
+赛场链路与工程准则见 \textbf{卷三 · RM 视觉概述}。
+
+\end{document}

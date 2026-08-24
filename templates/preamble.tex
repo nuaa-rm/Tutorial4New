@@ -1,0 +1,104 @@
+% 共用导言：教材模板 + 原讲义代码环境
+% 在各卷 main.tex 中：\input{../templates/preamble.tex}
+\makeatletter
+% 保存原始层级，并将正文中的 \subsubsection 映射为书籍的 \subsection
+\let\textbook@subsection\subsection
+\let\textbook@subsubsection\subsubsection
+\let\subsubsection\subsection
+\makeatother
+
+\usepackage{bm}
+\usepackage{amsmath,amssymb}
+\usepackage{url}
+\usepackage{subcaption}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage[framemethod=TikZ]{mdframed}
+
+\graphicspath{{images/}{figures/}}
+
+% 封面（ElegantBook \cover 为全宽顶图；三卷共用）
+\cover{cover.png}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red},
+  breaklines=true,
+  columns=flexible,
+  keepspaces=true,
+}
+
+\lstnewenvironment{tcode}
+  {\lstset{
+      language=C++,
+      tabsize=4,
+      frame=single,
+      escapechar=`,
+      breaklines=true,
+      breakatwhitespace=true,
+      numbers=left,
+      numberstyle=\color{gray}\tiny,
+  }}
+  {}
+
+\lstnewenvironment{tpython}
+  {\lstset{
+      language=Python,
+      tabsize=4,
+      frame=single,
+      escapechar=`,
+      breaklines=true,
+      breakatwhitespace=true,
+      numbers=left,
+      numberstyle=\color{gray}\tiny,
+  }}
+  {}
+
+\lstnewenvironment{tbash}
+  {\lstset{
+      language=bash,
+      tabsize=4,
+      frame=single,
+      escapechar=`,
+      breaklines=true,
+      breakatwhitespace=true,
+      numbers=left,
+      numberstyle=\color{gray}\tiny,
+  }}
+  {}
+
+\lstnewenvironment{tcpp}
+  {\lstset{
+      language=C++,
+      tabsize=4,
+      frame=single,
+      escapechar=`,
+      breaklines=true,
+      breakatwhitespace=true,
+      numbers=left,
+      numberstyle=\color{gray}\tiny,
+  }}
+  {}
+
+% listings 附录：CMake / XML
+\lstdefinelanguage{cmake}{
+  keywords={cmake_minimum_required,project,find_package,add_executable,add_compile_options,
+    target_include_directories,target_link_libraries,ament_auto_find_build_dependencies,
+    ament_auto_add_executable,ament_auto_package,ament_package,rosidl_generate_interfaces,
+    if,endif,set,file,GLOB,RELATIVE,REQUIRED},
+  sensitive=true,
+  morecomment=[l]{\#},
+}
+\lstdefinelanguage{XML}{
+  morekeywords={xml,version,package,name,depend,buildtool_depend,exec_depend,export,build_type},
+  sensitive=false,
+}

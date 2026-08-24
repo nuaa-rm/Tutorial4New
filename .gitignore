@@ -1,11 +1,57 @@
-*.gz
-*.toc
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor / IDE
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.code-workspace
+
+# LaTeX build intermediates
 *.aux
+*.toc
 *.out
 *.log
 *.nav
 *.snm
 *.vrb
+*.bbl
+*.blg
+*.lof
+*.lot
 *.fdb_latexmk
 *.fls
 *.synctex.gz
+*.synctex(busy)
+*.bcf
+*.run.xml
+*.xdv
+*.dvi
+
+# Generated PDFs from each volume (compile locally with xelatex)
+main.pdf
+01-基础通识/main.pdf
+02-专项技术栈/main.pdf
+03-RM视觉概述/main.pdf
+
+# Local scratch / clones
+_refs/
+
+# 不上传：旧合订本归档、参考文献大附件
+_legacy/
+参考文献/
+
+# Obsolete per-volume copies of old contest class (keep root cumcmthesis.cls only)
+01-基础通识/cumcmthesis.cls
+02-专项技术栈/cumcmthesis.cls
+03-RM视觉概述/cumcmthesis.cls
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/

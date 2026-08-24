@@ -1,0 +1,346 @@
+随着时代的发展和项目变得越来越复杂，人们创造了一系列新的代码特性，其中一些特性在C++11和C++17中被引入，
+在不熟悉这些特性的人看来，这些代码看上去显得十分无厘头，甚至有些难以理解。本章将介绍C++11和C++17中引入的一些新的代码特性，
+并通过实例来说明它们的用法。
+\subsubsection{lambda表达式}
+
+\textbf{指名初始化(Designated Initializers)}是一种初始化聚合类型（Aggregate Types）成员的方式，
+这种方式允许你指定每个成员的初始化值，而不必按照成员在聚合类型中的声明顺序进行初始化。
+这种方式在C++11标准中被引入。他的语法很简单:
+
+\begin{tcode}
+//类型名 对象名{成员名1 = 初始值1, 成员名2 = 初始值2,...};
+struct Foo {int a, b};
+Foo foo = {.b = 3, .a = 1};
+\end{tcode}
+
+\textbf{匿名函数（anonymous function）}是一种在程序中定义的函数，它没有名字，只能在运行时创建。C++11引入了lambda表达式，
+它是一种更简洁的语法，可以用来创建匿名函数。lambda表达式的语法如下：
+
+\begin{tcode}
+完成版：[捕获列表](参数列表) mutable throw(异常列表) -> 返回值 {函数体}
+简化版：[捕获列表](参数列表) {函数体}
+\end{tcode}    
+
+\begin{enumerate}
+    \item 捕获列表：捕获列表可以用来捕获外部作用域中的变量，使得lambda表达式可以访问这些变量。捕获列表的语法如下：
+    \item 参数列表：参数列表定义了lambda表达式的参数，可以有0到多个参数。
+    \item mutable[可选]：mutable关键字用来声明lambda表达式的捕获列表中的变量是可修改的。
+    \item throw(异常列表)[可选]：throw关键字用来指定lambda表达式可能抛出的异常。
+    \item 返回值：返回值定义了lambda表达式的返回类型。
+    \item 函数体：函数体定义了lambda表达式的主体，可以是一条表达式或多条语句。
+\end{enumerate}
+
+\begin{tcode}
+#include<iostream>
+#include<functional>
+
+template<class T>
+void sort(T* array,int n,std::function<bool(T&,T&)> compare){
+    for(int i=0;i<n;i++){
+        for(int j=i;j<n;j++){
+            if(!compare(array[i],array[j])){    //为false时，交换（按照指标降序）
+                std::swap(array[i],array[j]);
+            }
+        }
+    }
+}
+
+typedef struct Block{
+    char ch;
+    int id;
+}Block;
+
+int main(int argc, char *argv[]) {
+    auto sum = [](int a,int b){
+        return a+b;
+    };
+
+    std::cout << sum(1,2) << std::endl;
+
+    Block blocks[5]={{'a',2},{'d',4},{'q',1},{'t',7},{'s',-1}};
+    sort<Block>(blocks,5,[](Block& a1,Block a2){//lambda表达式作为参数传递
+        return a1.id > a2.id;
+    });
+    for(int i=0;i<5;i++){
+        std::cout << "ch:" << blocks[i].ch << "  id:" << blocks[i].id << std::endl;
+    }
+    return 0;
+}
+\end{tcode}    
+
+\textbf{捕获列表：}可以捕获外部作用域中的变量，包括this指针。捕获的方式包括两种，即值捕获和引用捕获。
+
+
+\begin{center}
+
+    \begin{tabular}{ccccc}
+        \hline
+        捕获方式 & 拷贝方式 & 是否可以修改值 & 语法 & 全捕获\\
+        \hline
+        值捕获 & 通常深拷贝  & 否 & [a,b] & [=]\\
+        引用捕获 & 浅拷贝 & 是 & [\&a,\&b] & [\&]\\
+        \hline
+        
+    \end{tabular}
+\end{center}
+
+如果使用值捕获，这里是否是深拷贝取决于拷贝构造函数，如果拷贝构造函数中是移动或者引用语义，
+那么遵从拷贝构造的语义。
+但是这个值会被设置成不可操作的状态，他的值被视为常量，不能被修改。
+这时，可以使用mutable关键字来声明这个值是\textbf{可修改}的。
+
+\begin{tcode}
+int a = 0;
+auto f = [a]() mutable {
+    return ++a;//如果不写mutable，编译器会报错
+};
+\end{tcode}
+
+使用lambda表达式可以简化代码，提高可读性。由于捕获列表的存在，使得lambda表达式可以访问外部作用域的变量，
+相比于普通函数，lambda表达式更加灵活。
+lambda表达式的返回值是一个函数指针，可以作为函数参数进行传递。也可以使用function承接返回值。
+\begin{tcode}
+//使用function承接返回值
+std::function<int(int,int)> add = [](int a,int b){return a+b;};
+int result = add(1,2);//调用lambda表达式
+//也可以使用auto关键字自动推导返回类型
+auto sub = [](int a,int b){return a-b;};
+\end{tcode}
+
+在C++14和C++17中，lambda表达式增加了一些新的用法，使用这些新的特性可以简化代码，更加灵活地解决实际问题。
+
+\textbf{泛型Lambda表达式:} 
+可以使用auto关键指定形参的类型，从而快速地实现函数\textbf{泛用}。这也是\textbf{泛化编程}的一种方式，感兴趣的同学可以自行了解。
+\begin{tcode}
+auto f=[](auto a,auto b){return a+b;};
+std::cout << f(1,2) << " " << f('a',2.0) << std::endl;
+\end{tcode}
+
+\textbf{this指针捕获:} 
+可以使用[this]的方式捕获类中的$this$指针，$this$和$*this$都可以。
+给一个简单的例子，可以自己理解：
+\begin{tcode}
+class A{
+private:
+    int a;
+public:
+    A(){
+        auto function = [this](){//[]中使用*this作用相同
+            return a+1;
+        };
+    }
+};
+\end{tcode}
+
+\textbf{初始化捕获：}在C++17中，可以使用初始化捕获来简化代码。
+可以初始化一个变量，并将其绑定到lambda表达式中，这样就不需要再使用声明这个变量了。
+
+\begin{tcode}
+auto f = [a=1]() mutable {
+    return a;
+};
+\end{tcode}
+
+\subsubsection{引用和移动}
+\textbf{左值与右值：}
+左值一般为我们自己定义的变量，在定义时开辟了内存，我们可以对这块内存赋值，修改内存中的值，如果有const也仅从语法层面上不允许修改，这块内存在其生命周期结束的时候销毁。
+
+右值一般为临时变量，是程序运行时产生的中间产物，他不是我们用户自己定义开辟空间的，是由编译器帮我们开辟空间，并且在用完就立即销毁。右值的生命周期一般只在当前语句，当我们要对右值进行赋值时，他已经释放空间了，此时我们再进行访问就是野访问，（与野指针一样造成内存问题），所以我们不能对右值进行修改，编译器强制语法检查，遇到修改操作就报错。
+
+右值中特殊的就是字面常量，他们存储在内存的常量区，内存为只读属性，不可以修改，不可以取地址，他们的生命周期与程序的生命周期一样，当我们使用字面常量时，编译器帮我们开辟空间，并用字面常量初始化，这块临时空间用完即销。
+\textbf{分辨左右值最常用方法就是判断他是否可以取地址。如果不可以就为右值。}
+\begin{tcode}
+int a;
+a = 10;//这个赋值过程中，a是左值，b是右值（字面常量）
+int b;
+b = a;//这个赋值过程中，a是右值，b是左值
+//10 = a;//这样的语句显然是错误的，即右值不能被修改
+\end{tcode}
+显而易见的是，左值可以被隐式地转换为右值，而右值不可以被转换为左值（从这一点上看，右值类似于常量）。
+
+\textbf{引用：}
+C++的引用是一种别名，用于引用已存在的变量。引用一旦初始化，就不能再引用其他变量。在创建引用时，编译器不会重新开辟内存，而是直接引用已存在的内存（这一点引用类似于指针）。
+引用的主要用途包括函数参数传递和返回值优化。使用引用可以避免复制，提高效率，特别是在处理大型对象时。
+引用通过 \& 符号来声明。例如:
+\begin{tcode}
+int& ref = var;
+\end{tcode}
+这段代码创建了一个名为 $ref$ 的引用，它引用了变量 $var$。引用分为两种，左值引用（\&）和右值引用（\&\&）。
+顾名思义，左值引用只能绑定一个左值，而右值引用只能绑定一个右值。
+
+首先说左值引用，这个十分简单，可以认为是去别名，操作左引用就相当于操作被绑定的那个左值本身，这一点就算在函数传参过程中也是如此。
+\begin{tcode}
+void func(int& A){//可以试一下把引用去掉
+    A *= 2;
+}
+
+int main(int argc, char *argv[]) {
+    int a = 10;
+    func(a);
+    return 0;
+}
+\end{tcode}
+在这里a的值被修改为20，因为传入$func()$的a是引用，所以操作的是a本身，而不是a的拷贝。
+这就是引用在传参和提高函数效率上的用处。
+
+再说右值引用，这个就有点复杂了，右值引用是为了解决左值引用不能绑定右值的限制。
+\begin{tcode}
+void func(int&& a){
+    std::cout << "a的地址：" << &a << std::endl;
+    a *= 2;
+}
+
+int main(int argc, char *argv[]) {
+    int&& c = 10;
+    std::cout << "c的值为：" << c << std::endl;
+    func(c);
+    std::cout << "经过函数之后，c的值为：" << c << std::endl;
+    std::cout << "c的地址为" << &c << std::endl;
+    return 0;
+}
+\end{tcode}
+
+哎？这就很奇怪，为什么c的值被修改了？为什么c的地址可以取到？为什么作为右值的c的值被修改了？这说明右值引用绝对不是简单的取别名，他的作用更加复杂。
+
+根据我们上面的解释，编译器在执行完第6行的代码之后，自动帮我们析构了10这个右值。
+但是实际情况是，由于我们使用了右值引用，\textbf{对内存空间的操控权转交给了我们，没有进行自动析构}。
+
+话又说回来，为什么a的地址和c是相同，这完全就是左值引用的用法啊？是的，在C++中，\textbf{右值引用会被自动地当做为左值来使用}。
+而在函数传参时，两种引用就没有什么分别了。
+
+看到这里，我们不禁想要问这样的一个问题了，既然右值引用可以被自动转换为左值来使用，为什么还要使用右值引用呢？
+C++的设计师是闲的吗，每天整这么多概念来为难我们？当然不是！还记得我们刚才说的，左值引用是不能绑定右值的，
+那如果我们想要使用右值，那岂不是每次都要拷贝一份了吗？这显然是不合理的。设想一下，如果有一个超级大的对象，我们每次都只能拷贝一份，那效率岂不是太低了？
+所以，C++的设计者们想到了一个折中的办法，既能避免拷贝，又能保证效率，就是使用右值引用。
+\begin{tcode}
+#include <iostream>
+class A {
+public:
+    A() : val("a0") { std::cout << "你调用了默认构造" << std::endl; }
+
+    A(std::string a) : val(a) { std::cout << "你调用了含参构造" << std::endl; }
+
+    A(A &obj) {
+        std::cout << "你调用了拷贝构造" << std::endl;
+        this->val = obj.val;
+    }
+
+    A(A &&obj) noexcept {
+        std::cout << "你调用了移动构造" << std::endl;
+        this->val = std::move(obj.val);
+    }
+
+    A &operator=(A &obj) {
+        if (this == &obj)
+            return *this;
+        std::cout << "你调用了等号赋值" << std::endl;
+        this->val = obj.val;
+
+        return *this;
+    }
+
+    ~A() { std::cout << "对象被析构，val为：" << val << std::endl; }
+
+    std::string val;
+};
+
+int main(int argc, char *argv[]) {
+    std::cout << "a1,";
+    A a1("a1");
+    std::cout << std::endl;
+
+    std::cout << "a2,";
+    A a2 = a1;
+    std::cout << "val值为：" << a2.val << std::endl;
+    std::cout << std::endl;
+
+    a2 = a1;//区别上面的
+    std::cout << std::endl;
+
+    std::cout << "a3,";
+    A a3(a2);
+    std::cout << "val值为：" << a3.val << std::endl;
+    std::cout << std::endl;
+
+    std::cout << "a4,";
+    A &a4 = a1;
+    std::cout << "val值为：" << a4.val << std::endl;
+    std::cout << std::endl;
+
+    std::cout << "a5,";
+    A &&a5 = std::move(a1);
+    std::cout << "val值为：" << a5.val << std::endl;
+    std::cout << std::endl;
+
+    a2.val = "new a2";
+    std::cout << "a1的val值为：" << a1.val << std::endl;
+    a4.val = "new a4";
+    std::cout << "a1的val值为：" << a1.val << std::endl;
+    std::cout << "a5的val值为：" << a5.val << std::endl;
+    std::cout << std::endl;
+
+    std::cout << "a6,";
+    A a6(std::move(a1));
+    std::cout << "val值为：" << a6.val << std::endl;
+    std::cout << "a1被传入移动构造后,";
+    std::cout << "val值为：" << a1.val << std::endl;
+    std::cout << std::endl;
+
+
+    return 0;
+}
+\end{tcode}
+请读者，仔细体会一下这段代码的输出。
+
+\textbf{移动语义：}
+首先了解一个std中函数move，他的作用是将参数类型强制转换为右值，不管参数是左值还是右值。
+\begin{tcode}
+using namespace std;
+void Fun(int& x) { cout << "左值引用" << endl; }
+void Fun(const int& x) { cout << "const 左值引用" << endl; }
+void Fun(int&& x) { cout << "右值引用" << endl; }
+void Fun(const int&& x) { cout << "const 右值引用" << endl; }
+
+int main() {
+    PerfectForward(10);           // 右值
+    int a = 1;
+    Fun(a);            // 左值
+    Fun(std::move(a)); // 右值
+    const int b = 8;
+    Fun(b);      // const 左值
+    Fun(std::move(b)); // const 右值
+    return 0;
+}
+\end{tcode}
+如代码所见，当我们使用std::move()时，编译器将左值引用转换为右值引用。
+
+再介绍一种利用模版实现完美转发的方式。在模板中，T\&\&可以接收左值和右值，要利用到forward<>()函数，他会保留引用的类型，并将其转发给另一个函数，
+否则，传参的引用都会被转换为左值引用。
+
+\begin{tcode}
+using namespace std;
+void Fun(int& x) { cout << "左值引用" << endl; }
+void Fun(const int& x) { cout << "const 左值引用" << endl; }
+void Fun(int&& x) { cout << "右值引用" << endl; }
+void Fun(const int&& x) { cout << "const 右值引用" << endl; }
+
+template<typename T>
+void PerfectForward(T&& t)
+{
+    Fun(t);
+    //Fun(std::forward<T>(t));//使用完美转发
+}
+
+int main() {
+    PerfectForward(10);           // 右值
+    int a = 1;
+    Fun(a);            // 左值
+    Fun(std::move(a)); // 右值
+    const int b = 8;
+    Fun(b);      // const 左值
+    Fun(std::move(b)); // const 右值
+    return 0;
+}
+\end{tcode}
+左引用和右引用的概念比较容易混淆，要在实践中不断运用，才能熟练掌握。
+

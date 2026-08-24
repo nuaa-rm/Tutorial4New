@@ -1,0 +1,97 @@
+\section{为何需要「多机通信」}
+
+ROS2 话题适合同一机器人内多个节点协作。雷达站、反制机、电控裁判链路等场景里，进程往往分布在\textbf{不同机器或不同进程模型}上：
+有的用 Python 独立进程，有的只提供 TCP/串口，并不暴露完整 ROS 图。
+此时需要在话题之外掌握更底层的进程间 / 机间通信约定。
+
+本章讨论三类常见手段：\textbf{本机 TCP}、\textbf{串口帧协议}、\textbf{可靠投递与故障隔离}。
+赛场完整帧定义以当年裁判系统协议与队内仓库为准；此处讲模式与工程要点。
+
+\section{通信拓扑与角色}
+
+先分清谁听、谁连、谁拥有资源：
+
+\begin{itemize}
+    \item \textbf{Server / Client}：一方监听端口，另一方主动连接。雷达无线电侧常做 TCP Server，地面视觉做 Client 并自动重连。
+    \item \textbf{唯一所有者}：同一物理设备（串口、SDR）同一时刻只应被一个进程打开；多进程抢占会导致错帧或设备占用失败。
+    \item \textbf{单向与双向}：坐标/密钥可单向推送；控制指令（阵营、干扰等级）需反向通道。
+\end{itemize}
+
+示意：
+\begin{tbash}
+[无线电进程] --TCP 127.0.0.1:port--> [地面视觉进程] --串口--> [裁判系统]
+[地面视觉] --另一串口--> [反制机进程]
+\end{tbash}
+本机环回地址避免把比赛数据接口裸露到局域网；跨机部署须另行考虑鉴权与防火墙。
+
+\section{本机 TCP：粘包、拆包与最新值优先}
+
+TCP 是字节流，没有「一帧消息」边界。接收端必须自行组帧：缓存字节，按协议切出完整帧，处理粘包（多帧连在一起）与拆包（一帧分多次到达）。
+
+对雷达类高频状态，队列策略比「无限 FIFO」更重要：
+\begin{itemize}
+    \item \textbf{Latest-value}：同类命令只保留最新一条（如最新坐标、最新密钥），避免旧数据积压导致越发越旧。
+    \item \textbf{优先级}：密钥、坐标通常高于次要状态信息。
+    \item \textbf{连接代次（generation）}：每次新连接递增代数；旧连接线程禁止关闭或污染新 socket，防止重连竞态。
+\end{itemize}
+
+示意性伪代码：
+\begin{tcode}
+// 按 cmd_id 覆盖写槽位，而不是 push 到无界队列
+void enqueue(uint16_t cmd, bytes payload) {
+    slots[cmd] = payload; // 覆盖
+}
+bytes take_highest_priority() {
+    for (cmd : priority_order)
+        if (slots[cmd]) return pop(slots[cmd]);
+    return {};
+}
+\end{tcode}
+
+发送与接收均应校验连接代次；断开时清空待发槽与缓存，避免把上局数据发给新客户端。
+
+\section{串口帧：定界、CRC 与重同步}
+
+裁判系统、云台板、反制计数链路多用串口。典型二进制帧结构（示意，字段以官方协议为准）：
+\begin{center}
+\texttt{SOF | length | seq | CRC8 | cmd\_id | payload | CRC16}
+\end{center}
+
+工程要点：
+\begin{itemize}
+    \item 用 \texttt{/dev/serial/by-id/...} 固定设备路径，避免插拔后 \texttt{ttyUSB} 编号漂移；
+    \item 波特率、校验位与对端严格一致；
+    \item 坏 CRC 时丢弃并在字节流中重新搜索 SOF，实现\textbf{重同步}；
+    \item 不同业务使用\textbf{独立物理串口}（裁判 / 云台 / 计数），避免一根线故障拖垮全站。
+\end{itemize}
+
+短控制包亦可更简，例如双字节定界 + 单字节命令（阵营、等级），同样需要粘包处理与非法字节跳过。
+
+\section{与 ROS2 的关系}
+
+\begin{itemize}
+    \item 机内模块多、已有生态：优先 ROS2 话题 / 服务 / Action，配合 \texttt{qos}。
+    \item 对接非 ROS 进程或嵌入式板：TCP/串口桥（Bridge）把外部帧转为内部消息，或反之。
+    \item 调试：先单进程回环（模拟器发固定帧），再上实机；用 Wireshark / 串口抓包核对时序。
+\end{itemize}
+
+ROS2 的 DDS 发现与跨机组网是另一套问题（域名、防火墙、\texttt{ROS\_DOMAIN\_ID}）；雷达站常见部署是「同机多进程 + 串口出站」，与全场 ROS 多机发现不同。
+
+\section{故障隔离清单}
+
+| 故障 | 期望行为 |
+|------|----------|
+| 对端未启动 | 本端继续采集/解码；发送侧只保留最新槽 |
+| TCP 断开 | 清空旧代次；Client 指数退避重连 |
+| 串口拔出 | 打开失败可重试；其它链路不阻塞 |
+| 数据过期 | 融合层丢弃陈旧源，回退次优源（见雷达融合） |
+
+\section{练习建议}
+
+\begin{enumerate}
+    \item 实现一个本机 TCP echo：Client 重连后 Server 不混用旧连接。
+    \item 解析带 SOF + 长度 + CRC 的字节流（可用假数据），覆盖粘包与半包。
+    \item 为两类消息实现 latest-value 发送槽，并验证积压时始终发出最新坐标。
+\end{enumerate}
+
+延伸阅读：队内雷达开源架构说明（TCP / 裁判帧 / 多串口隔离），以及当年 RoboMaster 裁判系统通信协议文档。

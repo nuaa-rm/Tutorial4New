@@ -1,0 +1,169 @@
+\subsubsection{shell简介}
+
+在windows系统中，我们使用电脑主要是通过图形化界面点击某个图标来启动某个程序；在linux系统中我们更频繁的使用终端和命令行。然而这些都只是我们控制计算机的表象，真正能够控制计算机硬件（CPU、内存、显示器等）的只有操作系统内核（Kernel），图形界面和命令行只是架设在用户和内核之间的一座桥梁。
+
+考虑到安全等原因，用户不能直接接触内核，因此需要另外再开发一个程序，让用户通过使用这个程序来间接地与内核进行交互。该程序的作用就是接收用户的操作（点击图标、输入命令），并进行简单的处理，然后再传递给内核。用户界面和命令行就是这个另外开发的程序，在 Linux下，这个命令行程序叫做 shell 。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{shell.png}
+    \caption{shell工作流程示意图} % 图片标题
+    \label{fig:shell} % 图片标签，用于引用
+\end{figure}
+
+shell的一大特性就是它是一个应用程序，它连接了用户和 Linux 内核，让用户能够更加高效、安全、低成本地使用 Linux 内核。另一大特性是它是一个命令语言解释器，shell把我们在计算机上的操作或我们的命令，翻译为计算机可识别的二进制命令，传递给内核，以便调用计算机硬件执行相关的操作；计算机执行完命令后，再通过Shell翻译成自然语言，呈现在我们面前。同时，Shell 程序设计语言支持在高级语言里所能见到的绝大多数程序控制结构，比如循环，函数，变量和数组等等。
+
+常见的shell有Bourne shell (sh), C shell (csh), Korn shell (ksh), Bourne Again shell(bash, sh 的扩展)，zsh等等。
+
+启动shell的方法有两种，一是进入linux控制台，二是使用终端（快捷键为ctrl+alt+t）
+
+\subsubsection{简单的shell脚本}
+
+shell
+
+\textbf{新建一个shell脚本}
+
+打开文本编辑器，新建一个文件 test.sh
+
+\begin{tcode}
+	vim test.sh
+\end{tcode}
+
+然后在shell脚本的第一行输入
+
+\begin{tcode}
+	#!/bin/bash
+\end{tcode}
+
+\#! 是一个约定的标记，它告诉系统这个脚本需要什么解释器来执行，即使用哪一种 shell。在第一行下面就可以用shell编程语言输入脚本内容了，以下是一个简单的例子：
+
+\begin{tcode}
+	#!/bin/bash
+	echo "Hello World !"
+\end{tcode}
+
+shell脚本可用于ROS程序自启，即编写一系列命令行操作，启动程序时无需打开终端敲命令行，只需启动一个shell脚本即可。
+
+\textbf{运行shell脚本}
+
+运行shell脚本也有两种方式：
+
+\begin{enumerate}
+\item 作为可执行程序
+
+先使脚本具有执行权限
+
+\begin{tcode}
+	chmod +x ./test.sh
+\end{tcode}
+
+再执行脚本
+
+\begin{tcode}
+	./test.sh
+\end{tcode}
+
+\item 作为解释器参数
+
+直接运行解释器，其参数就是 shell 脚本的文件名。eg:
+
+\begin{tcode}
+	/bin/sh test.sh
+	/bin/php test.php
+\end{tcode}
+
+这种方式运行的脚本，不需要在第一行指定解释器信息，写了也没用
+\end{enumerate}
+
+\subsubsection{linux中的bash}
+
+根据刚刚对shell的介绍可以知道bash也是一种shell，事实上在大多数的linux系统中，bash是默认的缺省shell。当然如果你不想用bash也可以换成其他的shell（比如zsh也很好用）。
+
+bash和shell一样有许多强大的功能，经常用到的有命令补全，通配符，命令历史记录，重定向，管道等等。bash的配置文件分为全局配置文件和个人配置文件：
+
+\begin{center}
+\textbf{bash主要文件}
+	\begin{tabular}{cc}
+		\toprule[1.5pt]
+		文件 & 作用\\
+		\midrule[1pt]
+		$  /etc/profile    $		&系统的主配置文件，用于设置系统范围内的环境变量和其他系统的设置\\
+		$  \texttildelow /.bashrc    $		&用于定义用户的命令别名和本地变量\\
+		$  \texttildelow /.bash\_profile   $		&用于定义用户的环境变量，运行命令或脚本\\
+		\bottomrule[1.5pt]
+	\end{tabular}
+\end{center}
+
+其中我们会经常对.bashrc文件进行操作。
+
+.bashrc是终端里面指令运行的配置脚本，是系统的隐藏文件，存放在\texttildelow 目录下。.bashrc的功能主要有两个：
+
+\begin{enumerate}
+\item 个性化指令alias：alias [指令别名]='原指令'
+
+注意alias和=之间不能有空格
+
+\item 设定环境路径：export PATH=\$PATH:路径
+\end{enumerate}
+
+对.bashrc中的内容进行修改后，在下一次打开新终端时修改内容才会生效，或执行source \texttildelow /.bashrc立刻生效。
+
+\subsubsection{linux系统环境变量简介}
+
+linux系统中有非常多的环境变量在控制系统的运行，常用的有：
+
+\begin{enumerate}
+\item PATH：决定了shell将到哪些目录中寻找命令或程序
+
+\item HOME：当前用户主目录
+
+\item SHELL：当前用户Shell类型
+\end{enumerate}
+
+这里我们主要介绍PATH环境变量
+
+PATH说简单点就是一个字符串变量，当输入命令的时候linux会去查找PATH里面记录的路径，path 配置的路径下的文件可以在任何位置执行，并且可以通过which 可执行文件命令来找到该文件的位置。注意PATH是大写，linux中区分大小写。
+
+我们先来查看一下PATH：
+
+\begin{tcode}
+	echo $PATH
+\end{tcode}
+
+终端中会输出
+
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:
+
+/usr/local/games:/usr/lib/wsl/lib:/snap/bin
+
+
+每个路径中间用:隔开，输入命令时系统根据这些路径来寻找对应的可执行文件，先找到谁就用谁
+
+设置环境变量的方法有两种：
+
+\begin{enumerate}
+\item export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+
+\item PATH="/bin:/sbin:/usr/bin:/usr/sbin"
+\end{enumerate}
+
+这两种方法都是将PATH环境变量设置为包含了/bin、/sbin、/usr/bin、/usr/sbin这四个目录，但不同在于第一个命令是将PATH变量设置为一个新的字符串，第二个命令则是将PATH变量设置为一个已经存在的字符串，会覆盖之前的设置。并且不用export设置的环境变量仅对当前shell起作用，不会传导到子进程，export设置的环境变量在子进程也有效，因此我们常用export命令来设置PATH环境变量。
+
+修改环境变量的方法有三种：
+
+\begin{enumerate}
+\item 直接在终端输入
+
+\begin{tcode}
+	export PATH=/usr/local/mongodb/bin:$PATH
+\end{tcode}
+
+\$PATH表示在原有PATH的基础上继续在前面或后面添加相应路径，这样可以避免修改原有路径。由于是在终端中输入命令，因此这种修改方式仅对当前用户当前终端有效。
+
+\item 修改.bashrc文件：在.bashrc文件中添加export PATH=/usr/local/mongodb/bin:\$PATH一行，保存退出后source或打开新终端即可生效。该方法对当前用户永久有效。
+
+\item 修改/etc/profile文件：找到设置PATH的行，添加export PATH=/usr/local/mongodb/bin:\$PATH，系统重启或运行source /etc/profile后生效。由于是修改了整个系统的配置文件，因此该方法对所有用户永久有效。
+\end{enumerate}
+
+环境变量这里介绍的很浅，主要目的是让读者先对环境变量这个概念有所了解，在后续自己配环境的过程中逐步加深对环境变量的理解，避免对系统环境变量的误操作。
+
