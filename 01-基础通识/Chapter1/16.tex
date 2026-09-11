@@ -1,10 +1,10 @@
-\subsubsection{conda简介*}
+\subsubsection{conda简介}
 
 \begin{note}
 如果你接触的py项目不多，你也可以跳过conda，用python自带的venv管理环境，更轻量化。
 \end{note}
 
-conda是一个包，依赖和环境管理工具，可以用于在同一个机器上安装不同Python版本的软件包及其依赖，并能够在不同的Python环境之间切换。一个conda环境就是一个目录包含所有的安装包和依赖，不同环境之间独立且不相互影响，跟python的虚拟环境virtualenv一样。通过conda的创建的虚拟环境，我们可以管理不同的python版本及其安装包而无需担心因不同版本导致的冲突；同时，在配置一个新环境时我们还可以利用虚拟环境来试错而不用担心对电脑原生环境造成无法挽回的伤害。
+conda是一个包，依赖和环境管理工具，可以用于在同一个机器上安装不同Python版本的软件包及其依赖，并能够在不同的Python环境之间切换。一个conda环境就是一个目录包含所有的安装包和依赖，不同环境之间独立且不相互影响，跟python的虚拟环境virtualenv一样。通过conda的创建的虚拟环境，我们可以管理不同的python版本及其安装包而无需担心因不同版本导致的冲突；同时，在配置一个新环境时我们还可以利用虚拟环境来试错而不用担心对电脑原生环境造成无法挽回的伤害。想给每个项目都配一套独立环境？和conda签订契约，成为虚拟环境管理大师吧。
 
 conda适用于多种语言，如: Python,R,Scala, Java,Javascript, C/ C++, FORTRAN等。conda默认随miniconda或anaconda发行。
 
@@ -12,7 +12,7 @@ conda适用于多种语言，如: Python,R,Scala, Java,Javascript, C/ C++, FORTR
 
 \subsubsection{conda配置}
 
-conda默认的配置文件为\texttildelow /.condarc，通过修改配置文件我们可以配置如下内容：
+conda默认的配置文件为\textasciitilde/.condarc，通过修改配置文件我们可以配置如下内容：
 
 \begin{enumerate}
 \item conda从哪里获取安装包
@@ -26,29 +26,32 @@ conda默认的配置文件为\texttildelow /.condarc，通过修改配置文件�
 
 \textbf{查看所有配置信息}
 
-\begin{tcode}
-	conda config --show --json
-\end{tcode}
+\begin{tbash}
+conda config --show --json
+\end{tbash}
 
 \textbf{配置使用清华的源}
 
-\begin{tcode}
-	conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free
-	conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main
-	conda config --set show_channel_urls yes
-\end{tcode}
+\begin{example}
+将 conda 的软件源切换为清华镜像，并显示下载渠道：
+\begin{tbash}
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main
+conda config --set show_channel_urls yes
+\end{tbash}
+\end{example}
 
 \textbf{配置安装软件时不要提示输入yes}
 
-\begin{tcode}
-	conda config --set always_yes true
-\end{tcode}
+\begin{tbash}
+conda config --set always_yes true
+\end{tbash}
 
 \textbf{取消每次启动自动激活conda的基础环境}
 
-\begin{tcode}
-	conda config --set auto_activate_base false
-\end{tcode}
+\begin{tbash}
+conda config --set auto_activate_base false
+\end{tbash}
 
 建议安装后关闭自动激活。后续学习 ROS2 时，conda 基环境自动激活易与 ROS2 工作空间冲突，导致功能包无法正常编译。通识阶段应养成按需激活环境的习惯，细则见卷二 ROS2 章。
 
@@ -75,5 +78,17 @@ conda默认的配置文件为\texttildelow /.condarc，通过修改配置文件�
 	\end{tabular}
 \end{center}
 
-以上是 Linux 通识的主要内容。熟练度靠日常使用积累；配环境前请先做好备份。完成本章验收后，即可进入第 2 章学习现代 C++。
+\begin{example}
+创建一个名为 \texttt{py39} 的 Python 3.9 环境，激活后查看其中已安装的包，最后退出环境：
+\begin{tbash}
+conda create --name py39 python=3.9
+conda activate py39
+conda list
+conda deactivate
+\end{tbash}
+\end{example}
+
+\begin{exercise}
+创建一个 Python 3.10 的环境并激活，在其中安装 \texttt{numpy}，用 \texttt{conda list} 确认安装成功后退出环境，并删除该环境（提示：\texttt{conda remove --name 环境名 --all}）。
+\end{exercise}
 

@@ -7,6 +7,9 @@
 \let\subsubsection\subsection
 \makeatother
 
+% example 环境显示名改为"示例"：本书的 example 均为可运行的操作演示，而非数学题式的"例题"
+\renewcommand{\examplename}{示例}
+
 \usepackage{bm}
 \usepackage{amsmath,amssymb}
 \usepackage{url}
@@ -86,7 +89,7 @@
       breakatwhitespace=true,
       numbers=left,
       numberstyle=\color{gray}\tiny,
-  }}
+  }}   
   {}
 
 % listings 附录：CMake / XML

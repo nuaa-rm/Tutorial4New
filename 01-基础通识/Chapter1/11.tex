@@ -13,6 +13,10 @@
 你也可以换用一些比较高级的分区工具，例如DiskGenius来完成这一步。
 \end{note}
 
+\begin{note}
+分区操作直接作用于磁盘，动手前请确认重要文件已有备份。"压缩卷"只是划出一块空闲区域，不会删除数据，但后续安装环节的格式化操作会。
+\end{note}
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{linux1.png}
@@ -30,6 +34,10 @@
 \end{figure}
 
 输入好后点击"压缩"，压缩完成后出现一个"未分配"的区域则说明分区完成。
+
+\begin{exercise}
+打开 Windows 的磁盘管理，记录你电脑各分区的容量与剩余空间，规划留给 Ubuntu 的空间大小，并写出你打算采用的分区方案（各挂载点及容量）。
+\end{exercise}
 
 \subsubsection{制作启动盘}
 首先需要一个内存大于16GB的U盘，请先对其中的文件进行备份，后续操作需要格式化这个U盘。
@@ -66,6 +74,10 @@ U盘被制作成启动盘后仍可以存放其它的文件，插到windows中会
 \end{figure}
 
 进入启动选项界面后通过上下键选择Linpus lite选项，回车，进入系统安装程序，选择Try or Install Ubuntu，再回车，现在你离成功安装ubuntu双系统只有一步之遥啦。
+
+\begin{note}
+"Linpus lite"只是启动盘在某些主板上的显示名称，不同机器上可能显示为 U 盘的品牌名（如 Kingston、SanDisk）或其他字样。认准你的 U 盘对应的那个选项即可，不必纠结名字是否一致。
+\end{note}
 
 \begin{figure}[H]
     \centering
@@ -129,6 +141,23 @@ U盘被制作成启动盘后仍可以存放其它的文件，插到windows中会
 \end{figure}
 
 \end{enumerate}
+
+\begin{conclusion}
+两种分区方案对比：
+
+\begin{center}
+\begin{tabular}{ccc}
+\toprule[1.5pt]
+方案 & 优点 & 缺点\\
+\midrule[1pt]
+全部挂载到 / & 操作简单，不易出错 & 重装系统会清空所有数据\\
+/boot、/swap、/、/home 分开 & 重装时可保留 /home 中的数据 & 步骤较多，需提前规划容量\\
+\bottomrule[1.5pt]
+\end{tabular}
+\end{center}
+
+建议按第二种方案分区：日后重装系统时能保留 /home 下的工作数据——不然就只能抱着移动硬盘含泪抢救数据了。
+\end{conclusion}
 分区完成后点击"现在安装"，选择时区"Asia/Shanghai"就行了。然后填写用户名和计算机密码，如果在上一步中填过了就不需要再填了。
 
 点击"继续"，系统就会对ubuntu系统开始安装了，出现安装完成的提示后点击现在重启"，等待一会，出现提示"Please remove the installation medium,then press ENTER"后拔掉启动盘并按下ENTER键，进入ubuntu系统的启动引导。在启动页面选择Ubuntu，电脑正常启动后就会进入Ubuntu系统，至此安装就全部完成啦。
@@ -146,7 +175,7 @@ ubuntu系统安装完成后你的默认启动系统会变成ubuntu，而有的�
 如果你觉得每次都需要手动调整这些比较繁琐，我们也有稍微复杂一些的方法。但是配置完毕后可以轻松切换系统，而且再也不会有丑丑的黑框框，详见下面的grub美化章节。
 \end{note}
 
-首先重启电脑，重启时快速重复按下启动选项快捷键，进入启动引导，在这里选择windows系统即可启动windows。如果常用的系统还是windows，想优先启动windows系统，可以进入BOIS修改启动顺序。进入BIOS依然需要重启电脑，重启时快速重复按下进入BIOS的快捷键，各个主板的快捷键有所不同，可以参考下表进行操作。
+首先重启电脑，重启时快速重复按下启动选项快捷键，进入启动引导，在这里选择windows系统即可启动windows。如果常用的系统还是windows，想优先启动windows系统，可以进入BIOS修改启动顺序。进入BIOS依然需要重启电脑，重启时快速重复按下进入BIOS的快捷键，各个主板的快捷键有所不同，可以参考下表进行操作。
 
 \begin{figure}[H]
     \centering
@@ -157,21 +186,21 @@ ubuntu系统安装完成后你的默认启动系统会变成ubuntu，而有的�
 
 进入BIOS后找到Boot相关设置，根据电脑提示将Windows Boot Manager移到ubuntu的启动引导上方，保存退出即可。
 
+\begin{exercise}
+重启电脑进入 BIOS，找到 Boot 启动顺序设置并记录当前的启动顺序（不需要修改），确认自己知道如何将 Windows Boot Manager 调整到首位。
+\end{exercise}
+
 \subsubsection{系统扩容*}
 
 如果系统中的文件已经多到空间不足了，那么此时我们就需要给ubuntu系统进行扩容。
 
-扩容可以使用ubuntu自带的gparted分区管理工具，也可以类似第一步中使用Windows下的分区工具进行。不过上面既然介绍过了Windows下的工具，这里我们就换换口味，使用ubuntu下的gparted分区管理工具吧。打开终端，输入
+扩容可以使用ubuntu自带的gparted分区管理工具，也可以类似第一步中使用Windows下的分区工具进行。不过上面既然介绍过了Windows下的工具，这里我们就换换口味，使用ubuntu下的gparted分区管理工具吧。
 
-\begin{tcode}
-	sudo apt-get install gparted
-\end{tcode}
-
-安装完成后输入
-
-\begin{tcode}
-	sudo gparted
-\end{tcode}
+安装并启动 gparted 分区工具：
+\begin{tbash}
+sudo apt-get install gparted
+sudo gparted
+\end{tbash}
 
 进入gparted图形化界面，可以看到这里显示了电脑中的ubuntu和windows的所有分区，选中你要扩容的ubuntu分区，可以看到上方有一个箭头形状的图标亮起
 
@@ -205,10 +234,10 @@ ubuntu系统安装完成后你的默认启动系统会变成ubuntu，而有的�
 
 选择试用后我们会进入到ubuntu的主页面，打开终端，再次打开gparted
 
-\begin{tcode}
-    sudo apt-get install gparted
-	sudo gparted
-\end{tcode}
+\begin{tbash}
+sudo apt-get install gparted
+sudo gparted
+\end{tbash}
 
 此时就可以对原来ubuntu系统的分区进行修改了，修改完点击确认等待扩容操作完成即可。
 
@@ -232,9 +261,9 @@ ubuntu系统安装完成后你的默认启动系统会变成ubuntu，而有的�
 
 你可以下载这个仓库到你的ubuntu系统中（github的很多功能都和git有关，但是在介绍git之前，你可以通过点击网页中的code按钮点击download zip下载）。然后按照这个主题中的README.md文件的教程安装。
 
-\begin{tcode}
+\begin{tbash}
 sudo ./install.sh -t tela -s 2k
-\end{tcode}
+\end{tbash}
 
 完成了这一步后，如果你用的是笔者的这个主题，启动时就可以看到这样的界面了。而且10s没有操作可以自动进入ubuntu系统。
 
@@ -245,3 +274,99 @@ sudo ./install.sh -t tela -s 2k
 \end{figure}
 
 不过也许你还需要在没有操作的情况下进入Windows。那么我们需要小小的配置一下grub的配置文件。我们需要修改 \verb|/etc/default/grub| 这个文件，找到\verb|GRUB_DEFAULT=0|这一行，看一下你的windows系统在启动时在哪一行（一般是第3行），我们将这个0修改为行数减一（一般是2）即可。
+
+\subsubsection{桌面美化*}
+
+grub 好看了，桌面也不能输。Ubuntu 22.04 默认的 GNOME 桌面虽然朴素，但换个主题、装几个插件之后，颜值完全可以反超 Windows。本节为选修内容。
+
+\textbf{主题与图标}
+
+GNOME 的主题和图标可以在 \url{https://www.gnome-look.org/} 上挑选：左侧分类里 GTK3/GTK4 Themes 是窗口主题，Full Icon Themes 是图标包。下载得到的一般是压缩包，解压到对应目录即可被系统识别：
+
+\begin{example}
+把下载好的主题和图标解压到用户主题目录（目录不存在就先创建）：
+\begin{tbash}
+mkdir -p ~/.themes ~/.icons
+tar -xf 主题包.tar.gz -C ~/.themes
+tar -xf 图标包.tar.gz -C ~/.icons
+\end{tbash}
+\end{example}
+
+装好后需要 GNOME Tweaks（GNOME 优化）来切换主题和图标，顺便装上后面要用的插件管理器：
+
+\begin{example}
+安装 GNOME Tweaks 与 Extension Manager（插件管理器）：
+\begin{tbash}
+sudo apt install gnome-tweaks gnome-shell-extension-manager
+\end{tbash}
+\end{example}
+
+打开 Tweaks，在"外观"一栏即可选择刚装好的主题和图标。Extension Manager 则是本节的主角：它能直接在桌面上浏览、安装、开关各种 GNOME 插件，不用再去网页上折腾。
+
+% TODO(占位图)：Extension Manager 浏览/管理插件的界面截图，保存为 images/gnome_extension_manager.png
+\begin{figure}[H]
+    \centering
+    \IfFileExists{images/gnome_extension_manager.png}{%
+        \includegraphics[width=0.8\textwidth]{gnome_extension_manager.png}}{%
+        \fbox{\parbox[c][6em][c]{0.8\textwidth}{\centering 占位图：Extension Manager 插件管理界面（待补充截图）}}}
+    \caption{Extension Manager 插件管理界面}
+    \label{fig:extension_manager}
+\end{figure}
+
+\textbf{常用插件}
+
+打开 Extension Manager，在"浏览"页搜索插件名，点安装即可。以下是视觉组往届同学常用的几款：
+
+\begin{center}
+\begin{tabular}{cc}
+\toprule[1.5pt]
+插件名 & 作用\\
+\midrule[1pt]
+Caffeine & 保持屏幕常亮，编译、跑数据集时防止自动锁屏\\
+TopHat / Vitals & 在顶栏实时显示 CPU、内存、温度等信息\\
+Dark Mode Toggle / Night Theme Switcher & 一键或按计划自动切换深色/浅色模式\\
+Dash to Dock & 把左侧 Dock 栏变成可自定义的程序坞\\
+Dash to Panel + ArcMenu & 合成类似 Windows 的底部任务栏与"开始菜单"\\
+Rounded Window Corners Reborn & 给窗口加上圆角\\
+Blur my Shell & 给顶栏、Dock 等加上毛玻璃半透明效果\\
+Sound Input \& Output Device Chooser & 在右上角菜单直接切换声音输出/输入设备\\
+Clipboard Indicator & 剪贴板历史记录，复制过的内容随时找回来\\
+\bottomrule[1.5pt]
+\end{tabular}
+\end{center}
+
+建议先挑两三个顺手的装上，别一次全装——插件之间偶尔互相打架，装多了排查起来很痛苦。
+
+\begin{note}
+所有插件的官方来源是 GNOME 扩展商店 \url{https://extensions.gnome.org/}，Extension Manager 的"浏览"页就是它的目录。上表插件的主页链接：
+
+\begin{itemize}
+\item Caffeine：\url{https://extensions.gnome.org/extension/517/caffeine/}
+\item TopHat：\url{https://extensions.gnome.org/extension/5219/tophat/}；Vitals：\url{https://extensions.gnome.org/extension/1460/vitals/}
+\item Night Theme Switcher：\url{https://extensions.gnome.org/extension/2236/night-theme-switcher/}
+\item Dash to Dock：\url{https://extensions.gnome.org/extension/307/dash-to-dock/}
+\item Dash to Panel：\url{https://extensions.gnome.org/extension/1160/dash-to-panel/}；ArcMenu：\url{https://extensions.gnome.org/extension/3628/arcmenu/}
+\item Rounded Window Corners Reborn：\url{https://extensions.gnome.org/extension/7048/rounded-window-corners-reborn/}
+\item Blur my Shell：\url{https://extensions.gnome.org/extension/3193/blur-my-shell/}
+\item Sound Input \& Output Device Chooser：\url{https://extensions.gnome.org/extension/906/sound-output-device-chooser/}
+\item Clipboard Indicator：\url{https://extensions.gnome.org/extension/779/clipboard-indicator/}
+\end{itemize}
+\end{note}
+
+\begin{note}
+插件由社区维护，系统大版本升级（尤其是 GNOME 版本升级）后部分插件可能失效，届时在 Extension Manager 中更新或暂时禁用即可。Blur my Shell 这类特效插件会占用一定的显卡资源，笔记本续航会略有下降。
+\end{note}
+
+% TODO(占位图)：美化完成后的桌面整体效果截图，保存为 images/gnome_desktop_after.png
+\begin{figure}[H]
+    \centering
+    \IfFileExists{images/gnome_desktop_after.png}{%
+        \includegraphics[width=0.8\textwidth]{gnome_desktop_after.png}}{%
+        \fbox{\parbox[c][6em][c]{0.8\textwidth}{\centering 占位图：美化后的桌面整体效果（待补充截图）}}}
+    \caption{美化后的桌面效果}
+    \label{fig:desktop_after}
+\end{figure}
+
+\begin{exercise}
+安装 Extension Manager，启用 Caffeine 和 Clipboard Indicator 两个插件，并验证：点亮 Caffeine 后屏幕不再自动熄灭；复制几段文字后能从剪贴板历史中找回。
+\end{exercise}

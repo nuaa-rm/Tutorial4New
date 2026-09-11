@@ -71,6 +71,32 @@
 \section{Conda 的简单使用*}
 \input{Chapter1/16.tex}
 
+\section{本章小结}
+本章围绕"装好系统 → 用好系统 → 护好系统"这条主线展开：
+
+\begin{itemize}
+\item \textbf{安装与维护}：双系统安装的四个流程（分区、制作启动盘、安装、设置）需要亲手走一遍；timeshift 快照相当于配环境前的存档位，每次大改环境前都应先存档，环境炸了随时回档。系统扩容、grub 美化、卸载重装属于选修内容，用到时再回来查即可。
+\item \textbf{命令行基础}：目录结构、"一切皆文件"与挂载是必须理解的概念；文件管理（ls/cp/mv/rm）、查找（find/grep）、重定向与管道、vim 基本操作是每天都要用的基本功，要求熟练；各命令的参数不必死记，会用参数表和 man 手册查即可。
+\item \textbf{shell 与环境变量}：会编写并运行简单的 shell 脚本；理解 PATH 的作用，掌握修改环境变量的三种方式及其生效范围，日常配置优先写入 \textasciitilde/.bashrc。
+\item \textbf{git}：理解工作区、暂存区、本地版本库、远程仓库四个区域的流转关系，熟练掌握 add/commit/push/pull 的日常闭环，会写基本的 .gitignore。
+\item \textbf{conda}（选修）：会创建、激活、退出和删除虚拟环境，配环境时先在虚拟环境中试错。
+\end{itemize}
+
+完成本章验收后，就可以揣着新装好的系统进入第 2 章了。配置环境的道路还会不断延伸——不要停下来啊，第 2 章现代 C++ 见。
+
+\begin{problemset}
+\item 说出双系统安装的四个主要流程，并解释安装类型为什么必须选择"其它选项"。
+\item 解释"挂载"的含义，并说明 U 盘插入 Ubuntu 后一般被自动挂载到哪个目录下。
+\item 写出命令：以易读单位统计当前目录下各子目录的磁盘占用（只统计一层）。
+\item 解释 \texttt{chmod 755 run.sh} 中三个数字各自的含义，并写出与之等价的符号写法。
+\item 写出命令：在 \texttt{/etc} 目录下查找所有以 \texttt{.conf} 结尾的文件，并把结果保存到家目录下的 \texttt{conf\_list.txt} 中。
+\item 说明 \texttt{./test.sh} 与 \texttt{bash test.sh} 两种脚本运行方式的区别，以及前者为什么需要先执行 \texttt{chmod +x}。
+\item 说明 git 中工作区、暂存区、本地版本库三者的区别，以及 \texttt{git add} 与 \texttt{git commit} 各自的作用。
+\item （提高）比较 timeshift 快照与 tar 系统镜像两种备份方式，说明各自适用的场景。
+\item （提高）若把 PATH 误写为 \texttt{export PATH=/opt/app/bin}（未包含原来的 \texttt{\$PATH}），会出现什么现象？分别就"终端内直接修改"和"写入 .bashrc"两种情况说明恢复方法。
+\item （实践）编写脚本 \texttt{backup.sh}：将家目录下指定的某个目录打包为以当天日期命名的 \texttt{tar.gz} 文件，保存到 \texttt{\textasciitilde/backups} 目录中，并解压验证内容完整。
+\end{problemset}
+
 \section{本章验收}
 \begin{enumerate}
     \item 配置 SSH，克隆私有仓库，并完成一次修改、暂存、提交与推送。

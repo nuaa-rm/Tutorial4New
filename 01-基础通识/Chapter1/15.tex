@@ -2,15 +2,17 @@
 
 git 是一个开源的分布式版本控制系统，用于敏捷高效地处理任何或小或大的项目，它可以在任何时间点，将文档的状态作为更新记录保存起来，也可以在任何时间点，将更新记录恢复回来。Git可以帮我们做到很多事情，比如代码的版本控制，分支管理，也提供了便于多人合作的平台。
 
-在linux上安装git
-
-\begin{tcode}
-	sudo apt install git
-\end{tcode}
+\begin{example}
+在 Ubuntu 上安装 git 并验证安装成功：
+\begin{tbash}
+sudo apt install git
+git --version
+\end{tbash}
+\end{example}
 
 \subsubsection{git基本概念}
 
-在git中有一些比较重要的基本概念：
+git的基本概念比较多，这一屏密度有点高，先混个脸熟就行——不用背，后面的工作流程里会全部用到：
 
 \textbf{本地仓库}：对本地代码进行管理的仓库，会包含代码的所有历史版本。
 
@@ -34,7 +36,7 @@ git 是一个开源的分布式版本控制系统，用于敏捷高效地处理�
 
 \textbf{克隆}：从远程仓库下载代码到本地的过程。
 
-\textbf{合并}：假设分支A和分支B是从节点P分叉出来的，合并之后分支A和分支B会在一个新的节点后会和。
+\textbf{合并}：假设分支A和分支B是从节点P分叉出来的，合并之后分支A和分支B会在一个新的节点后汇合。分支 A 和分支 B 表示：我们联合！
 
 \textbf{变基}：从节点P开始，把分支A中各个节点按提交的顺序加在分支B的上面，因为一个节点对应一次内容改变，所以分支A中不想要的改变可以在变基的过程中跳过相应的节点。变基其实也可以理解成是另一种合并，只不过他的合并会让提交历史更为干净清晰。
 
@@ -47,14 +49,23 @@ git 提供了一个叫做 git config 的命令，用来配置或读取相应的�
 \begin{enumerate}
 \item /etc/gitconfig 文件：系统中对所有用户都普遍适用的配置。若使用 git config 时用 --system 选项，读写的就是这个文件。
 
-\item \texttildelow /.gitconfig 文件：用户目录下的配置文件只适用于该用户。若使用 git config 时用 --global 选项，读写的就是这个文件。
+\item \textasciitilde/.gitconfig 文件：用户目录下的配置文件只适用于该用户。若使用 git config 时用 --global 选项，读写的就是这个文件。
 
 \item 当前项目的 Git 目录中的配置文件（也就是工作目录中的 .git/config 文件）：这里的配置仅仅针对当前项目有效。每一个级别的配置都会覆盖上层的相同配置，所以 .git/config 里的配置会覆盖 /etc/gitconfig 中的同名变量。
 \end{enumerate}
 
-\textbf{配置用户信息（个人访问令牌）}
+\textbf{配置提交者信息}
 
-github已经弃用了原先用个人用户名称和电子邮件地址来在每次提交代码时记录提交者的信息的方案，改用个人访问令牌。配置个人访问令牌的方法如下：
+每次提交时 git 都会记录提交者的名字和邮箱，首次使用前先配置好（只需配置一次）：
+
+\begin{tbash}
+git config --global user.name "你的名字"
+git config --global user.email "你的邮箱"
+\end{tbash}
+
+\textbf{配置个人访问令牌（https 方式）}
+
+github已经弃用了原先直接用账号密码验证身份的方案，改用个人访问令牌。配置个人访问令牌的方法如下：
 
 \begin{enumerate}
 \item 在github设置界面点击进入“Developer settings”，访问 Personal Access Tokens中的Tokens(classic)页面
@@ -65,16 +76,16 @@ github已经弃用了原先用个人用户名称和电子邮件地址来在每�
 
 \textbf{配置ssh密钥}
 
-克隆github上的私人仓库不能使用https协议，只能使用SSH协议进行克隆，因此想要正常使用github还需要配置SSH密钥，具体方法如下：
+克隆github上的私人仓库时，https 和 SSH 两种协议都可以：https 方式需要把个人访问令牌当作密码使用，而 SSH 配好密钥后就再也不用输令牌，一劳永逸，因此组内推荐配置 SSH 密钥，具体方法如下：
 
 \begin{enumerate}
 \item 生成SSH密钥
 
-\begin{tcode}
-	ssh-keygen
-\end{tcode}
+\begin{tbash}
+ssh-keygen
+\end{tbash}
 
-生成后可在\texttildelow 目录下找到.ssh文件夹
+生成后可在\textasciitilde{} 目录下找到.ssh文件夹
 \item 进入.ssh文件夹，复制其中id\_rsa.pub文件中的内容
 \item 在github中进入个人设置界面，选择“SSH and GPG keys”，点击“New SSH key”
 \item 给新的SSH起个标题，并将刚刚复制的内容粘贴到下方的文本框中，点击“Add SSH key”
@@ -108,11 +119,11 @@ git的学问很多，各种操作也是五花八门，这里只列举出git工�
 		$  git\enspace diff\enspace --cached   $		&查看暂存区和最后一次提交的差异\\
 		$  git\enspace remote   $		&列出当前仓库中已配置的远程仓库\\
 		$  git\enspace remote\enspace rename\enspace \textless old\textgreater\enspace \textless new\textgreater   $		&将已配置的远程仓库重命名\\
-		$  git\enspace remote\enspace show\enspace <remote\textgreater   $		&显示指定远程仓库的详细信息\\
+		$  git\enspace remote\enspace show\enspace \textless remote\textgreater   $		&显示指定远程仓库的详细信息\\
 		$  git\enspace fetch\enspace [remote]   $		&提取远程仓库中更新的数据\\
 		$  git\enspace merge\enspace [remote]/[branch]  $		&将远程仓库的更新合并到当前分支\\
 		$  git\enspace pull\enspace [remote]\enspace [branch]   $		&从远程获取代码并合并本地的版本\\
-		$  git\enspace push\enspace \textless remote\textgreater\enspace <branch\textgreater :<remote\textgreater   $		&将本地版本上传到远程并合并\\
+		$  git\enspace push\enspace [remote]\enspace [branch]   $		&将本地版本上传到远程并合并\\
 		$  git\enspace submodule\enspace init   $		&初始化子模块\\
 		$  git\enspace submodule\enspace update   $		&更新子模块\\
 		$  git\enspace submodule\enspace update\enspace --recursive\enspace --remote   $		&递归更新子模块并拉取最新更改\\
@@ -128,20 +139,24 @@ git的学问很多，各种操作也是五花八门，这里只列举出git工�
 			内容 & 作用\\
 			\midrule[1pt]
 			$  git\enspace submodule\enspace deinit\enspace [<path>]   $		&.git/config中移除子模块并删除文件\\
-			$  git\enspace rm\enspace [<path>]   $		&子模块引用从仓库中删除并提交更改\\
+			$  git\enspace rm\enspace [<path>]   $		&从仓库中删除子模块引用（需再 commit 生效）\\
 			$  git\enspace submodule   $		&列出当前仓库中的所有子模块\\
 			$  git\enspace branch   $		&查看所有分支\\
 			$  git\enspace branch\enspace -r   $		&查看远程分支\\
 			$  git\enspace branch\enspace -a   $		&查看所有本地和远程分支\\
 			$  git\enspace merge\enspace \textless branch\textgreater   $		&将其他分支合并到当前分支\\
 			$  git\enspace add\enspace \textless conflict-file\textgreater   $		&标记合并冲突解决完成\\
-			$  git\enspace branch\enspace -b\enspace \textless branch\textgreater   $		&创建分支并更换到该分支\\
+			$  git\enspace checkout\enspace -b\enspace \textless branch\textgreater   $		&创建分支并切换到该分支\\
 			$  git\enspace branch\enspace -d\enspace \textless branch\textgreater   $		&删除本地分支\\
-			$  git\enspace branch\enspace -D\enspace <branch>$  		&强制删除未合并的分支\\
+			$  git\enspace branch\enspace -D\enspace \textless branch\textgreater $  		&强制删除未合并的分支\\
 			$  git\enspace push\enspace origin\enspace --delete\enspace \textless branch\textgreater   $		&删除远程分支\\
 			\bottomrule[1.5pt]
 		\end{tabular}
 	\end{center}
+
+\begin{note}
+\texttt{git reset --hard} 会把工作区和暂存区强制回退到指定提交，未提交的修改全部丢失且无法恢复——git 不拦你，但时间也不倒流。执行前请确认这些修改真的不要了。
+\end{note}
 
 除了这些命令操作外，git中还有一个非常重要的工具\enspace——\enspace .gitignore忽略文件。尽管远程仓库在云端服务器上不会受到内存的限制，但是如果随便将大文件上传到远程仓库的话在下拉代码的时候会耗时非常久甚至拉代码失败。因此，上传至远程仓库中的内容一定是最核心的部分。
 
@@ -149,9 +164,9 @@ git的学问很多，各种操作也是五花八门，这里只列举出git工�
 
 需要注意的是，.gitignore只能忽略尚未提交到仓库的未被追踪的文件。如果一个文件已经被提交过了，此时再在.gitignore文件中添加忽略此文件时会发现这个文件依旧存在于版本库中。要想清除这个文件首先要将其从索引中删除：
 
-\begin{tcode}
-	git rm --cached .env
-\end{tcode}
+\begin{tbash}
+git rm --cached .env
+\end{tbash}
 
 这条命令会从版本库中删除文件，但不删除实际的文件。这意味着该文件仍然在你的本地系统和工作目录中作为一个被忽略的文件存在。此时可以重新提交修改过的.gitignore文件来使新的忽略生效。
 
@@ -189,6 +204,37 @@ git的基本工作流程就是从创建新仓库（或克隆别人的仓库）�
     \label{fig:git} % 图片标签，用于引用
 \end{figure}
 
+\begin{conclusion}
+git 的四个工作区域与流转命令：
+
+\begin{itemize}
+\item 工作区：你实际编辑文件的目录；
+\item 暂存区：\texttt{git add} 后，变更先进入这里等待提交；
+\item 本地版本库：\texttt{git commit} 把暂存区固化为一次版本记录；
+\item 远程仓库：\texttt{git push} 把本地版本推送上去，\texttt{git pull} / \texttt{git fetch} 把远程更新取回来。
+\end{itemize}
+
+这套流程一开始总要忘两步，很正常。忘了文件进行到哪个阶段了，就 \texttt{git status} 看一眼——它相当于游戏里的任务日志，随时告诉你现在该干嘛。
+\end{conclusion}
+
+\begin{example}
+一次完整的日常提交流程（以克隆好的仓库为例）——add、commit、push 这套连招以后每天要搓十几遍，出招表如下，建议早日练成肌肉记忆：
+\begin{tbash}
+git status
+git add main.cpp
+git commit -m "fix armor detection offset"
+git push origin main
+\end{tbash}
+\end{example}
+
+\begin{exercise}
+在任意 git 仓库中连续做两次提交，用 \texttt{git log} 查看提交历史；再修改一个文件，用 \texttt{git diff} 查看工作区与暂存区的差异。
+\end{exercise}
+
+\begin{exercise}
+在仓库中新建 \texttt{.gitignore}，实现：忽略所有 \texttt{.log} 文件；忽略 \texttt{build/} 目录下的所有内容，但保留其中的 \texttt{keep.txt}（提示：先写 \texttt{build/*}，再用 \texttt{!} 取消对单个文件的忽略）。
+\end{exercise}
+
 对自己的仓库进行版本管理主要用到以下这些命令：
 
 \begin{center}
@@ -198,12 +244,12 @@ git的基本工作流程就是从创建新仓库（或克隆别人的仓库）�
 		\toprule[1.5pt]
 		  git\enspace init       \\
 		  git\enspace clone\enspace [url]    \\
-		  git\enspace branch\enspace -b\enspace <branch>       \\
+		  git\enspace checkout\enspace -b\enspace \textless branch\textgreater       \\
 		  git\enspace remote\enspace add\enspace origin\enspace [url]       \\
 		  git\enspace add       \\
 		  git\enspace status       \\
 		  git\enspace commit\enspace -m\enspace "description"       \\
-		  git\enspace push\enspace <remote>\enspace <branch>:<remote>       \\
+		  git\enspace push\enspace [remote]\enspace [branch]       \\
 		  git\enspace pull\enspace [remote]\enspace [branch]       \\
 		\bottomrule[1.5pt]
 	\end{tabular}

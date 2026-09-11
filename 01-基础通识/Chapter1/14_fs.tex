@@ -1,4 +1,4 @@
-ubuntu系统为我们提供了完整的图形化界面，大部分操作已经可以通过图形化界面来完成，但如何通过命令行来和linux系统进行交互仍是基本功，下面我们就来简单介绍一下linux系统的基本操作。
+ubuntu系统提供了完整的图形化界面，日常操作点点鼠标都能完成。但命令行才是真正的基本功：装环境、连开发板、远程调试，样样绕不开它。下面我们就把最常用的操作过一遍。
 \subsubsection{linux文件系统基本概念}
 \textbf{linux目录结构}
 
@@ -15,7 +15,7 @@ ubuntu系统为我们提供了完整的图形化界面，大部分操作已经�
 
 \textbf{“一切皆文件”}
 
-在linux系统中有一个非常重要的、区别于windows系统的概念是“一切皆文件”，也就是把一切资源都看作是文件，包括硬件设备（通常称为设备文件），这样好处是用户可以用读写文件的方式实现对硬件的访问。举个简单的例子：在linux中则可以在/dev目录下找到新出现的文件，注意这里的文件表示的是U盘这个对象，你可以像操纵文件一样操纵这个对象，选择把他挂载到一个特定目录，然后读取其中的文件。
+在linux系统中有一个非常重要的、区别于windows系统的概念是“一切皆文件”，也就是把一切资源都看作是文件，包括硬件设备（通常称为设备文件），这样好处是用户可以用读写文件的方式实现对硬件的访问。举个简单的例子：在linux中则可以在/dev目录下找到新出现的文件，注意这里的文件表示的是U盘这个对象，你可以像操纵文件一样操纵这个对象，选择把他挂载到一个特定目录，然后读取其中的文件。简单来说：你以为是 U 盘设备？其实是我文件哒！
 
 \begin{note}
 如果你非要较真的话，网卡相关的部分并没有文件，不过这里不是重点，详情大家可以自己研究。
@@ -58,6 +58,10 @@ Windows的文件系统挂载使用其内部机制完成，用户基本无法探�
 
 在这些文件夹中，绝大多数目录都包含重要的系统文件，如果随意删除可能会导致系统出错，因此在平时操作时要多加注意。
 
+\begin{exercise}
+在终端执行 \texttt{ls /} 查看根目录下的文件夹，对照本节内容说出 \texttt{/etc}、\texttt{/home}、\texttt{/dev} 各自的作用；再执行 \texttt{ls /dev}，找出其中的设备文件。
+\end{exercise}
+
 \subsubsection{linux系统基本操作}
 由于篇幅有限，本部分仅能列出平时操作中最常用的部分，其它内容如需用到请读者自行查阅资料。
 
@@ -85,6 +89,14 @@ Windows的文件系统挂载使用其内部机制完成，用户基本无法探�
 	\item 命令前加sudo：以超级用户权限运行命令
 \end{enumerate}
 
+\begin{example}
+查看当前登录用户的账户名与 UID/GID 信息：
+\begin{tbash}
+whoami
+id
+\end{tbash}
+\end{example}
+
 \textbf{02系统信息}
 
 \begin{table}[!htbp]
@@ -93,14 +105,33 @@ Windows的文件系统挂载使用其内部机制完成，用户基本无法探�
 		\toprule[1.5pt]
 		语法 & 作用\\
 		\midrule[1pt]
-		$free\enspace -m$			&以MB为单位显示系统内存使用情况\\
-		$uname \enspace -amnrsv \enspace --help \enspace --version$			&显示电脑以及操作系统的相关信息\\
+		$free\enspace [options]$			&显示系统内存使用情况\\
+		$uname\enspace [options]$			&显示电脑以及操作系统的相关信息\\
+		$df\enspace [options]\enspace [file]$			&显示文件系统的磁盘空间使用情况\\
+		$du\enspace [options]\enspace [directory]$			&显示目录或文件的磁盘占用量\\
+		$top$			&动态显示系统中运行的进程及资源占用情况\\
+		$hostname$			&查看当前主机名\\
 		\bottomrule[1.5pt]
 	\end{tabular}
 \end{table}
 
 \begin{center}
-\textbf{uname参数说明}
+\textbf{free\enspace 选项和参数}
+
+	\begin{tabular}{cc}
+		\toprule[1.5pt]
+		参数 & 作用\\
+		\midrule[1pt]
+		$-h $		&以易读的单位（GB、MB等）显示\\
+		$-m $		&以MB为单位显示\\
+		$-g $		&以GB为单位显示\\
+		$-s$\enspace [秒数] 		&每隔指定秒数持续刷新显示\\
+		\bottomrule[1.5pt]
+	\end{tabular}
+\end{center}
+
+\begin{center}
+\textbf{uname\enspace 选项和参数}
 
 	\begin{tabular}{cc}
 		\toprule[1.5pt]
@@ -118,6 +149,46 @@ Windows的文件系统挂载使用其内部机制完成，用户基本无法探�
 		\bottomrule[1.5pt]
 	\end{tabular}
 \end{center}
+
+\begin{center}
+\textbf{df\enspace 选项和参数}
+
+	\begin{tabular}{cc}
+		\toprule[1.5pt]
+		参数 & 作用\\
+		\midrule[1pt]
+		$-h $		&以易读的单位（GB、MB等）显示\\
+		$-T $		&同时显示文件系统类型\\
+		\bottomrule[1.5pt]
+	\end{tabular}
+\end{center}
+
+\begin{center}
+\textbf{du\enspace 选项和参数}
+
+	\begin{tabular}{cc}
+		\toprule[1.5pt]
+		参数 & 作用\\
+		\midrule[1pt]
+		$-h $		&以易读的单位（GB、MB等）显示\\
+		$-s $		&只显示总计，不列出每个子目录\\
+		$--max-depth=1 $		&只统计指定层级的子目录\\
+		\bottomrule[1.5pt]
+	\end{tabular}
+\end{center}
+
+其余参数请查阅 man 手册（\texttt{man du}）。
+
+\begin{example}
+统计当前目录下各子目录的磁盘占用，并按易读单位显示：
+\begin{tbash}
+du -h --max-depth=1 .
+\end{tbash}
+\end{example}
+
+\begin{exercise}
+执行 \texttt{df -hT} 查看各文件系统的磁盘使用情况，找到你的根分区（挂载点为 \texttt{/} 的一行），记录其文件系统类型、容量与已用空间。
+\end{exercise}
 
 \textbf{03软件安装}
 
@@ -152,7 +223,7 @@ Windows的文件系统挂载使用其内部机制完成，用户基本无法探�
 		$  apt\enspace list \enspace --upgradable$		&列出可更新的软件包及版本信息\\
 		$  apt\enspace full-upgrade$	&升级软件包前先删除需要更新软件包\\
 		$  apt\enspace install \enspace \textless package1\textgreater \enspace \textless package2\textgreater $	&安装指定的软件\\
-		$  apt\enspace update \enspace \textless package\textgreater $		&更新指定的软件\\
+		$  apt\enspace install \enspace --only-upgrade\enspace \textless package\textgreater $		&更新指定的软件\\
 		$  apt\enspace show \enspace \textless package\textgreater $	&显示软件包具体信息\\
 		$  apt\enspace remove \enspace \textless package\textgreater $		&删除软件包\\
 		$  apt\enspace autoremove$		&清理不再使用的依赖和库文件\\
@@ -164,9 +235,23 @@ Windows的文件系统挂载使用其内部机制完成，用户基本无法探�
 	\end{tabular}
 \end{center}
 
+其余命令与参数请查阅 man 手册（\texttt{man apt}）。
+
+\begin{example}
+更新软件清单后安装 \texttt{tree}（一个以树状图显示目录结构的小工具）：
+\begin{tbash}
+sudo apt update
+sudo apt install tree
+\end{tbash}
+\end{example}
+
+\begin{exercise}
+使用 \texttt{apt search} 搜索并安装一个你感兴趣的小软件（如 \texttt{cowsay}），运行验证后用 \texttt{sudo apt remove} 将其卸载。
+\end{exercise}
+
 \textbf{04文件与目录管理}
 
-首先先介绍一些常用概念
+先认识几个常用概念，后面的命令都要用到它们：
 
 \begin{enumerate}
 \item 绝对路径：路径的写法，由根目录\enspace /\enspace 写起，例如：/usr/share/doc 这个目录。
@@ -197,6 +282,7 @@ Windows的文件系统挂载使用其内部机制完成，用户基本无法探�
 		$  cp\enspace [source]\enspace [destination]$		&复制文件或目录\\
 		$  rm\enspace [file name]$		&删除文件或目录\\
 		$  mv\enspace [old]\enspace [new]$		&移动或重命名文件或目录\\
+		$  ln\enspace [options]\enspace [source]\enspace [link name]$		&创建链接文件\\
 		$  chmod\enspace [permissions]\enspace [file name]$		&修改文件或目录的权限\\
 		$  tar\enspace [options]\enspace -f\enspace archive.tar\enspace [files...]$	&解压或压缩文件或目录\\
 		$  zip\enspace [options]\enspace output.zip\enspace [files...]$		&压缩文件或目录\\
@@ -259,12 +345,16 @@ Windows的文件系统挂载使用其内部机制完成，用户基本无法探�
 		\toprule[1.5pt]
 		参数 & 作用\\
 		\midrule[1pt]
-		$  -f $		&强制的意思，如果目标文件已经存在，不会询问而直接覆盖\\
+		$  -f $		&强制的意思，删除时不询问且忽略不存在的文件\\
 		$  -i $		&互动模式，在删除前会询问使用者是否动作\\
 		$  -r $		&递归删除,常用在目录的删除\\
 		\bottomrule[1.5pt]
 	\end{tabular}
 \end{center}
+
+\begin{note}
+\texttt{rm -rf} 会不做任何确认地递归删除目标及其全部内容，且命令行下的删除不进回收站，无法恢复。这条命令删库跑路一气呵成，使用前请三思——你的存档没有读档功能。脚本中使用 \texttt{rm -rf \$dir/} 这类写法时，务必先检查变量非空：变量一旦为空，路径可能直接变成根目录。
+\end{note}
 
 \begin{center}
 \textbf{mv\enspace 选项和参数}
@@ -279,6 +369,29 @@ Windows的文件系统挂载使用其内部机制完成，用户基本无法探�
 		\bottomrule[1.5pt]
 	\end{tabular}
 \end{center}
+
+\begin{center}
+\textbf{ln\enspace 选项和参数}
+
+	\begin{tabular}{cc}
+		\toprule[1.5pt]
+		参数 & 作用\\
+		\midrule[1pt]
+		$  -s $		&创建符号链接（软链接），不加该选项时默认创建硬链接\\
+		$  -f $		&强制创建，若链接文件已存在则直接覆盖\\
+		\bottomrule[1.5pt]
+	\end{tabular}
+\end{center}
+
+\begin{conclusion}
+硬链接、软链接与复制的区别：
+
+\begin{itemize}
+\item 硬链接：与源文件指向同一份数据，删除源文件不影响链接；但不能跨文件系统，也不能给目录创建；
+\item 软链接（符号链接）：类似 Windows 的快捷方式，只记录源文件的路径；源文件被删除后链接失效，但可以跨文件系统、可以链接目录；
+\item 复制（cp）：得到一份完全独立的新文件，与源文件互不影响。
+\end{itemize}
+\end{conclusion}
 
 \begin{center}
 \textbf{chmod\enspace 选项和参数}
@@ -297,21 +410,29 @@ Windows的文件系统挂载使用其内部机制完成，用户基本无法探�
 	\end{tabular}
 \end{center}
 
-使用chmod命令修改文件或目录权限有两种方式，一是用权限数字更改，方法为：
+使用chmod命令修改文件或目录权限有两种方式。一是用数字类型的权限属性更改，通用形式为：
 
-chmod [-R] xyz 文件或[递归修改]目录
+chmod\enspace [-R]\enspace xyz\enspace 文件或目录
 
-其中xyz就是刚刚提到的数字类型的权限属性，为 rwx 属性数值的相加。
+其中 xyz 是三位数字，分别对应所有者、用户组、其他用户的权限，每位数字为该身份 rwx 属性数值（r:4，w:2，x:1）的和。二是用符号类型改变文件权限，通用形式为：
 
-第二种是用符号类型改变文件权限，方法为：
+chmod\enspace [身份]\enspace +/-/=\enspace [permissions]\enspace [file name]
 
-chmod\enspace （[身份]）\enspace +/-/=\enspace [permissions]\enspace [file name]
+\begin{example}
+为 \texttt{ex1.py} 的文件拥有者增加可执行权限；再将 \texttt{run.sh} 递归地改为所有人可读可写可执行：
+\begin{tbash}
+chmod u+x ex1.py
+chmod -R 777 run.sh
+\end{tbash}
+\end{example}
 
-举例：
+\begin{note}
+不要图省事对所有文件都 \texttt{chmod 777}——这相当于把家门钥匙挂在门外，谁路过都能进来逛一圈。权限放得越宽，误操作和恶意篡改的风险越大；脚本只需要给所有者加上执行权限（\texttt{chmod u+x}）就够了。
+\end{note}
 
-chmod [-R] 777 filename    修改文件/[递归修改]目录权限为所有人可读可写可执行
-
-chmod u+x ex1.py        为 ex1.py 文件拥有者增加可执行权限
+\begin{exercise}
+在家目录下创建 \texttt{practice} 目录，在其中新建文件 \texttt{hello.txt}，将它复制为 \texttt{hello\_bak.txt}，再把原文件移动到 \texttt{practice/sub} 目录（该目录需用 \texttt{mkdir} 一并创建），最后删除整个 \texttt{practice} 目录。
+\end{exercise}
 
 \begin{center}
 \textbf{tar\enspace 选项和参数}
@@ -320,10 +441,9 @@ chmod u+x ex1.py        为 ex1.py 文件拥有者增加可执行权限
 		\toprule[1.5pt]
 		参数 & 作用\\
 		\midrule[1pt]
-		$  -f\enspace archive.tar $		&指定归档文件的名称\\
 		$  -c $		&创建新的归档文件\\
+		$  -f $		&指定归档文件的名称\\
 		$  -v $		&显示详细输出，列出被添加/解压到归档中的文件 \\
-		$  -f $		&指定归档文件的名称 \\
 		$  -x $		&解压归档文件 \\
 		$  -z $		&使用 gzip 压缩归档文件 \\
 		$  -r $		&向已存在的归档中追加文件 \\
@@ -346,12 +466,54 @@ tar命令的参数繁多，此处只列举了以上最最常见的参数。
 		$  -v $		&显示详细的压缩过程 \\
 		$  -x $		&排除某些文件或目录，不进行压缩 \\
 		$  -m $		&压缩后删除原始文件 \\
-		$  -0\enspace \texttildelow \enspace -9 $		&指定压缩级别，-0 表示存储不压缩，-9 表示最高压缩率，默认是 -6 \\
+		$-0$\enspace \textasciitilde\enspace $-9$		&指定压缩级别，-0 表示存储不压缩，-9 表示最高压缩率，默认是 -6 \\
 		\bottomrule[1.5pt]
 	\end{tabular}
 \end{center}
 
 \textbf{05查找、管道与重定向}
+
+\begin{center}
+\textbf{find\enspace 的语法}
+
+	\begin{tabular}{cc}
+		\toprule[1.5pt]
+		语法 & 作用\\
+		\midrule[1pt]
+		$  find\enspace [path]\enspace [option]\enspace [expression]$		&在指定目录下查找符合条件的文件或目录\\
+		\bottomrule[1.5pt]
+	\end{tabular}
+\end{center}
+
+\textbf{path}：要查找的起始目录，省略时默认从当前目录开始查找
+
+\textbf{expression}：查找条件，例如文件名、文件类型等\\
+
+\begin{center}
+\textbf{find\enspace 的参数}
+
+	\begin{tabular}{cc}
+		\toprule[1.5pt]
+		参数 & 作用\\
+		\midrule[1pt]
+		$  -name\enspace pattern$		&按文件名查找，支持通配符\\
+		$  -iname\enspace pattern$		&按文件名查找，忽略大小写\\
+		$  -type\enspace f/d/l$		&按类型查找，f 为普通文件，d 为目录，l 为链接文件\\
+		$  -size\enspace [+/-]n$		&按文件大小查找，+ 表示大于，- 表示小于\\
+		$  -mtime\enspace [+/-]n$		&按修改时间查找，n 表示 n 天前\\
+		\bottomrule[1.5pt]
+	\end{tabular}
+\end{center}
+
+其余参数请查阅 man 手册（\texttt{man find}）。
+
+\begin{example}
+在 \texttt{/home} 目录下查找所有以 \texttt{.txt} 结尾的文件，再在当前目录下查找名为 \texttt{test} 的目录：
+\begin{tbash}
+find /home -name "*.txt"
+find . -type d -name "test"
+\end{tbash}
+\end{example}
 
 \begin{center}
 \textbf{grep\enspace 的语法}
@@ -378,7 +540,7 @@ tar命令的参数繁多，此处只列举了以上最最常见的参数。
 		\toprule[1.5pt]
 		输入输出 & 重定向 & 意义\\
 		\midrule[1pt]
-		$  stdin$		& <\enspace /\enspace <<		& <重定向到文件中去读取，<<表示结束输入的字符\\
+		$  stdin$		& <\enspace /\enspace <<		& <从文件读取内容作为命令的输入，<<以指定字符串作为输入的结束标志\\
 		$  stdout$		& >\enspace /\enspace >>		& >会覆盖文件原有内容，>>则会在文件末尾追加内容\\
 		$  stderr$		& 2>\enspace /\enspace 2>>		&作用与标准输出重定向类似，但专门用于处理错误信息\\
 		\bottomrule[1.5pt]
@@ -406,6 +568,23 @@ tar命令的参数繁多，此处只列举了以上最最常见的参数。
 	\end{tabular}
 \end{center}
 
+其余参数请查阅 man 手册（\texttt{man grep}）。
+
+\begin{example}
+在 \texttt{dmesg}（内核日志）的输出中筛选包含 \texttt{error} 的行并显示行号：
+\begin{tbash}
+dmesg | grep -n error
+\end{tbash}
+\end{example}
+
+\begin{exercise}
+使用 find 在你的家目录下查找所有 7 天内修改过的 \texttt{.py} 文件。
+\end{exercise}
+
+\begin{exercise}
+使用管道和 grep，从 \texttt{apt list --installed} 的输出中筛选出名字包含 \texttt{python} 的软件包；再结合 \texttt{wc -l} 统计数量。
+\end{exercise}
+
 \textbf{06文件内容}
 
 \begin{center}
@@ -416,9 +595,25 @@ tar命令的参数繁多，此处只列举了以上最最常见的参数。
 		语法 & 作用\\
 		\midrule[1pt]
 		$  cat [file name]    $		&由第一行开始显示文件内容（只读）\\
+		$  head [file name]    $		&显示文件开头的内容（默认前10行）\\
+		$  tail [file name]    $		&显示文件末尾的内容（默认后10行）\\
+		$  less [file name]    $		&分页查看文件内容，可上下翻页，按 q 退出\\
 		$  touch [file name]    $		&创建空文件或更新文件的时间戳\\
 		$  gedit [file name]    $		&创建空文件或更改文件内容\\
 		$  vim/vi [file name]    $		&创建空文件或编辑文件内容\\
+		\bottomrule[1.5pt]
+	\end{tabular}
+\end{center}
+
+\begin{center}
+\textbf{head/tail\enspace 选项和参数}
+
+	\begin{tabular}{cc}
+		\toprule[1.5pt]
+		参数 & 作用\\
+		\midrule[1pt]
+		$  -n$\enspace [行数] 		&指定显示的行数（head 与 tail 均适用）\\
+		$  -f $		&（仅 tail）持续跟踪文件末尾的新增内容，常用于查看日志\\
 		\bottomrule[1.5pt]
 	\end{tabular}
 \end{center}
@@ -487,16 +682,91 @@ vi/vim 共分为三种模式，命令模式、输入模式和命令行模式
 		$  :q    $		&退出vim编辑器\\
 		$  :wq    $		&保存文件并退出vim编辑器\\
 		$  :q!    $		&强制退出vim编辑器，并不保存修改\\
-		$  :qa!    $		&强制退出vim编辑器，并不保存修改\\
+		$  :qa!    $		&不保存修改，强制退出所有打开的文件\\
 		\bottomrule[1.5pt]
 	\end{tabular}
 \end{center}
 
+\begin{conclusion}
+vim 三种模式的切换关系：启动后默认处于命令模式；按 \texttt{i} 等键进入输入模式，按 \texttt{ESC} 返回命令模式；命令模式下按 \texttt{:} 进入底线命令模式，执行完命令（如 \texttt{:wq}）后自动回到命令模式。江湖传言，"让新手自己尝试退出 vim"是一种可靠的随机字符串生成方式——卡在任何地方不知所措时，连按 \texttt{ESC} 再输入 \texttt{:q!} 即可强制退出。
+\end{conclusion}
+
+\begin{exercise}
+使用 vim 创建文件 \texttt{note.txt}，输入三行任意内容，保存退出后用 \texttt{cat} 验证内容；再次用 vim 打开并删除第二行，这次不保存直接强制退出，用 \texttt{cat} 确认文件没有变化。
+\end{exercise}
+
 \begin{note}
 vim是一个完全可以在终端中运行的文本编辑器，功能强大，如果是远程控制等情况没有图形化界面，vim的优点就会比较突出，但是新手可能难以适应。
 如果你对vim感到无从下手，可以试试更简单的终端文本编辑器nano，这个操作比较符合直觉。或者是使用在vim基础上发展的nvim，而且加入一些美化，比如AstroNvim
-\url{https://astronvim.com/}。如果你想进行vim的命令学习，推荐vim-adventure\url{https://vim-adventures.com/}，这是一个图形化的使用vim命令的小游戏，可以轻松入门vim内容，但是完整版需要付费，大家自行寻找学习版。
+\url{https://astronvim.com/}（开箱即用的 Neovim 配置，安装方法见本节末尾的"AstroNvim"小节）。如果你想进行vim的命令学习，推荐vim-adventure\url{https://vim-adventures.com/}，这是一个图形化的使用vim命令的小游戏，可以轻松入门vim内容，但是完整版需要付费，大家自行寻找学习版。
 \end{note}
 
 以上就是linux系统中关于文件和目录的基本操作，俗话说熟能生巧，请读者利用空余时间多加练习，尽快适应linux系统的命令行操作。
+
+\subsubsection{终端里的 IDE：AstroNvim*}
+
+裸装的 vim 对新手不太友好：没有文件树、没有补全、没有语法高亮，突出一个毛坯房，新手进去三秒就想退房。Neovim（nvim）是 vim 的现代化分支，而 AstroNvim 是一套开箱即用的 Neovim 配置——装完就有文件树、模糊搜索、代码补全和漂亮的界面，毛坯房直接变精装，终端里也能有接近 IDE 的体验。
+
+\textbf{安装新版 Neovim}
+
+AstroNvim 需要较新版本的 Neovim（0.10 及以上），而 Ubuntu 22.04 仓库自带的版本太老，因此从官网下载预编译包安装：
+
+\begin{example}
+下载并解压 Neovim 到 \texttt{/opt}，顺手装上两个依赖（ripgrep 用于全局搜索，gcc 用于编译语法高亮组件）：
+\begin{tbash}
+curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
+sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
+sudo apt install ripgrep gcc
+\end{tbash}
+然后把 \texttt{/opt/nvim-linux-x86\_64/bin} 追加到 PATH（写入 \textasciitilde/.bashrc 或 \textasciitilde/.zshrc，方法见 1.5 节）：
+\begin{tbash}
+export PATH=$PATH:/opt/nvim-linux-x86_64/bin
+\end{tbash}
+生效后执行 \texttt{nvim --version} 能看到版本号即安装成功。
+\end{example}
+
+\textbf{安装 AstroNvim}
+
+\begin{example}
+备份可能存在的旧配置，然后克隆 AstroNvim 模板并启动：
+\begin{tbash}
+mv ~/.config/nvim ~/.config/nvim.bak
+mv ~/.local/share/nvim ~/.local/share/nvim.bak
+git clone --depth 1 https://github.com/AstroNvim/template ~/.config/nvim
+rm -rf ~/.config/nvim/.git
+nvim
+\end{tbash}
+\end{example}
+
+首次启动会自动下载安装全部插件，泡杯茶等它跑完，看到欢迎界面就大功告成了。如果之前没有安装过 nvim，前两行备份命令报"文件不存在"属正常现象，忽略即可。
+
+\begin{note}
+第四步的 \texttt{rm -rf} 是为了去掉模板自带的 git 仓库信息，让这个配置目录变成你自己的仓库（方便日后提交和同步个人配置）。路径请照抄，不要自行发挥。
+\end{note}
+
+% TODO(占位图)：AstroNvim 欢迎界面/主界面截图，保存为 images/astronvim_welcome.png
+\begin{figure}[H]
+    \centering
+    \IfFileExists{images/astronvim_welcome.png}{%
+        \includegraphics[width=0.8\textwidth]{astronvim_welcome.png}}{%
+        \fbox{\parbox[c][6em][c]{0.8\textwidth}{\centering 占位图：AstroNvim 启动后的欢迎界面（待补充截图）}}}
+    \caption{AstroNvim 界面}
+    \label{fig:astronvim}
+\end{figure}
+
+\textbf{上手要点}
+
+\begin{itemize}
+\item Leader 键是空格：按下 \texttt{<Space>} 稍等片刻会弹出快捷键菜单，忘了按键组合也不用背，跟着菜单按就行；
+\item \texttt{<Space>ff} 模糊搜索并打开文件，\texttt{<Space>fw} 在整个项目中搜索文字（依赖 ripgrep）；
+\item 使用 \texttt{:LspInstall clangd} 安装 C++ 的语言服务器后，即可获得代码补全和跳转。
+\end{itemize}
+
+\begin{note}
+界面中的图标和 zsh 的 p10k 主题一样依赖 Nerd Font，装过 MesloLGS NF 的话直接通用（见 1.5 节）。更多用法见官方文档：\url{https://docs.astronvim.com/}
+\end{note}
+
+\begin{exercise}
+完成 AstroNvim 的安装，用 \texttt{<Space>ff} 打开任意一个文本文件，再用 \texttt{<Space>fw} 在某个项目目录中搜索一个关键词，体验模糊搜索。
+\end{exercise}
 
