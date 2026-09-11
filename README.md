@@ -4,7 +4,7 @@
 
 | 项目 | 说明 |
 |------|------|
-| 版本 | 2026.08 |
+| 版本 | 2026.09 |
 | 排版 | [ElegantBook](https://github.com/ElegantLaTeX/ElegantBook) + XeLaTeX |
 | 组内方向 | **自瞄** · **雷达** · **导航** |
 | 远程 | `https://github.com/nuaa-rm/Tutorial4New.git` |
@@ -59,7 +59,7 @@
 
 入口：[`01-基础通识/main.tex`](01-基础通识/main.tex)
 
-1. Linux 工作环境（安装、备份、文件系统、Shell、Git、Conda*）
+1. Linux 工作环境（安装、备份*、文件系统、Shell、Git、Conda*；选修小节含 zsh 美化*、AstroNvim*、桌面美化*）
 2. 现代 C++（类、lambda / 引用与移动、智能指针、STL、多线程）
 3. 编译过程与 CMake
 
@@ -113,7 +113,10 @@ Tutorial4New/
 ├── 03-RM视觉概述/             # 卷三
 ├── templates/
 │   ├── elegantbook.cls       # ElegantBook 类文件
-│   └── preamble.tex          # 共用导言、代码环境、封面图
+│   ├── preamble.tex          # 共用导言、代码环境、封面图
+│   └── chapter-guide.md      # 章节编写与改造规范（完整版）
+├── .claude/skills/
+│   └── textbook-chapter/     # 章节编写规范（AI 摘要版，与 chapter-guide.md 同步维护）
 ├── cumcmthesis.cls           # 旧数模模板（已弃用，仅本地对照）
 └── 长空御风.png              # 素材；各卷封面为本卷 images/cover.png
 ```
@@ -164,10 +167,10 @@ xelatex -interaction=nonstopmode main.tex
 
 - **当前**：ElegantBook（`lang=cn`，`scheme=chinese` → 「第一章 …」），主题色 cyan，`mode=fancy`
 - **已弃用**：`cumcmthesis.cls`（数模竞赛模板，不适合教材）
-- **共用**：[`templates/preamble.tex`](templates/preamble.tex) 提供 `tcode` / `tpython` / `tbash`、listings 对 CMake/XML 的支持、标题层级映射等
+- **共用**：[`templates/preamble.tex`](templates/preamble.tex) 提供 `tcode` / `tpython` / `tbash`、listings 对 CMake/XML 的支持、标题层级映射、`example` 环境中文名（显示为「示例」）等
 - **备选**：若 ElegantBook 过重，可改为 `ctexbook`，导言仍可复用
 
-章首「学习目标 / 学时 / 边界」使用 ElegantBook 的 `introduction`（内容提要）环境。
+章首「学习目标 / 学时 / 边界」使用 ElegantBook 的 `introduction`（内容提要）环境；章节结构（示例 / 随堂练习 / 难点小结 / 章末习题与验收）与语言口吻规范见 [`templates/chapter-guide.md`](templates/chapter-guide.md)，撰写或改造章节前请先阅读。
 
 ---
 
@@ -186,10 +189,11 @@ xelatex -interaction=nonstopmode main.tex
 ## 贡献与维护
 
 1. **改正文**：只改对应卷下的 `.tex`，不要改 `_legacy/`（除非刻意归档）。
-2. **改模板**：优先改 `templates/preamble.tex`；类文件升级时同步 `templates/elegantbook.cls`。
-3. **加图**：放入对应卷的 `images/`，正文用相对文件名即可（`\graphicspath` 含 `images/`）。
-4. **勿提交**：各卷 `main.pdf`、LaTeX 中间文件、`.DS_Store`、`_legacy/`、`参考文献/`（见 [`.gitignore`](.gitignore)）。
-5. **接口变更**：消息字段、坐标系、串口协议变更须同步文档与卷三索引活页中的责任人字段。
+2. **写章节**：遵循 [`templates/chapter-guide.md`](templates/chapter-guide.md) 的章节规范（章首提要、示例 / 练习 / 小结、章末习题与验收、语言口吻）。
+3. **改模板**：优先改 `templates/preamble.tex`；类文件升级时同步 `templates/elegantbook.cls`。
+4. **加图**：放入对应卷的 `images/`，正文用相对文件名即可（`\graphicspath` 含 `images/`）；插图缺失时可用 `\IfFileExists` 占位框过渡，不影响编译。
+5. **勿提交**：各卷 `main.pdf`、LaTeX 中间文件、`.DS_Store`、`_legacy/`、`参考文献/`（见 [`.gitignore`](.gitignore)）。
+6. **接口变更**：消息字段、坐标系、串口协议变更须同步文档与卷三索引活页中的责任人字段。
 
 Issue / PR 请说明改动卷册与是否影响编译。
 
@@ -207,6 +211,11 @@ Issue / PR 请说明改动卷册与是否影响编译。
 
 ## 更新日志
 
+- **2026-09-11**
+  - 卷一第 1 章按章节编写规范改造：补齐示例、随堂练习、难点小结、易错警示，章末新增本章小结与 10 道习题
+  - 新增选修小节：zsh 与终端美化*、AstroNvim*、桌面美化*（配图暂为占位框，待补截图）
+  - 修正知识点错误（git 分支创建命令、apt 更新单个软件、HTTPS 克隆私有仓库、重定向与 vim 命令描述等）；修复 `\texttildelow` 字体缺字；`example` 环境显示名改为「示例」
+  - 新增章节编写规范：`templates/chapter-guide.md`（完整版）与 `.claude/skills/textbook-chapter/`（AI 摘要版）
 - **2026-08-24**
   - 合订本拆为三卷独立工程；改用 ElegantBook；封面接入队徽图
   - 完成卷一正文；卷二 ROS2 / 通信 / SDR / OpenCV / 深度学习 / CUDA / 相机 / 滤波 / BA / MPC / 导航
