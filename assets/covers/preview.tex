@@ -1,0 +1,23 @@
+% 在本目录编译：xelatex -jobname=volume-01 "\def\CoverVolume{1}\input{preview.tex}"
+\documentclass[lang=cn,scheme=chinese,chinesefont=ctexfont,11pt,oneside,device=normal,color=cyan,mode=fancy]{../../templates/elegantbook}
+\input{../../templates/cover.tex}
+\renewcommand{\TextbookCoverArt}{vision-optics.png}
+\renewcommand{\TextbookTeamEmblem}{team-emblem-cyan.pdf}
+\providecommand{\CoverVolume}{1}
+\TextbookVolume{\CoverVolume}
+\title{长空御风视觉组培训教材}
+\author{长空御风视觉组}
+\ifnum\CoverVolume=1
+  \version{2026.09}
+  \extrainfo{标 $*$ 的小节为选修，不计入通识考核。}
+\else
+  \version{2026.08}
+  \ifnum\CoverVolume=2
+    \extrainfo{三方向：自瞄 / 雷达 / 导航。OpenCV、深度学习等为共用技能，按方向组合选修。}
+  \else
+    \extrainfo{少公式、重链路与工程准则；细节回卷二。三方向：自瞄 / 雷达 / 导航。}
+  \fi
+\fi
+\begin{document}
+\maketitle
+\end{document}

@@ -1,0 +1,1451 @@
+% 卷一三章题解；由 main.tex 在全文末尾载入。
+\begingroup
+\setlength{\emergencystretch}{3em}
+
+先自己试一遍，再来核对。答案写法不止一种：能解释思路、跑出正确结果、处理题目里的边界情况，就算做到了。
+下面按原题号整理；“随堂练习 1.1”和“第一章章末第 1 题”是两套编号，别串台。
+操作题以你的实际记录为准，不用把参考容量、用户名或设备名照抄到自己电脑上。
+
+\section*{第一章：Linux 工作环境}
+\phantomsection
+\addcontentsline{toc}{section}{第一章题解：Linux 工作环境}
+\subsubsection*{随堂练习}
+
+\paragraph*{随堂练习 1.1：规划分区}
+\begin{solution}
+先记录磁盘编号、各分区容量、剩余空间和准备压缩出的空间。
+例如，已有 Windows 的 UEFI/GPT 电脑，可以预留约 200 GiB：给 \texttt{/} 分配约 80 GiB，其余给 \texttt{/home}。这只是便于讨论的方案，容量要按你的磁盘和项目需求调整。
+交换空间可以使用交换文件；若单独建交换分区，应选择“交换空间”，它没有 \texttt{/swap} 这个挂载点。
+UEFI 安装还要确认 EFI 系统分区（ESP），通常复用已有分区并挂载到 \texttt{/boot/efi}，保留其中的 Windows 引导文件。
+\begin{note}
+这道题只要求记录和规划，不需要真的格式化。\texttt{/boot} 和 EFI 系统分区不是同一个概念；GPT 也不按旧式 MBR 的主分区、逻辑分区规则来划分。
+动手安装前，先备份文件，再核对磁盘、分区和格式化勾选项。分区表不是试错用的草稿纸。
+\end{note}
+\end{solution}
+
+\paragraph*{随堂练习 1.2：记录启动顺序}
+\begin{solution}
+进入 BIOS/UEFI 设置，找到 Boot 页面，记录 \texttt{Windows Boot Manager}、\texttt{ubuntu}、USB 启动项等的先后顺序。
+再记录调整顺序的按键或菜单位置，最后选择不保存退出。
+不同机器菜单不同，检查标准是：你能找到启动项，能指出如何把 Windows 的启动项放到首位，并且这次没有误改设置。
+\end{solution}
+
+\paragraph*{随堂练习 1.3：桌面插件（选修）}
+\begin{solution}
+按正文步骤安装 Extension Manager，在其中查找并启用与当前 GNOME 版本兼容的 Caffeine 和 Clipboard Indicator。
+验证时分两步：先记下自动熄屏时间，启用 Caffeine，等待超过该时间；再复制三段普通文字，从剪贴板历史中重新选择第一段并粘贴。
+分别记录插件状态和验证结果。没有兼容版本时，记录版本及提示，不把“能搜到插件”当作“已经启用”。剪贴板测试用普通文字就好，不要用密码。
+\end{solution}
+
+\paragraph*{随堂练习 1.4：创建快照（选修）}
+\begin{solution}
+先在 Timeshift 中选好快照类型和保存位置，再创建快照；也可在完成初始配置后执行：
+\begin{tbash}
+sudo timeshift --create --comments "before-training" --tags O
+sudo timeshift --list
+\end{tbash}
+列表中应出现这次快照的时间、名称及注释。记录保存位置，并确认创建过程没有报错。
+这道题不要求执行恢复；系统快照也不能代替个人文件备份。
+\end{solution}
+
+\paragraph*{随堂练习 1.5：tar 参数（选修）}
+\begin{solution}
+\texttt{-c} 创建归档；\texttt{-v} 显示处理的文件；\texttt{-p} 在解包时尽量恢复记录的权限；\texttt{-z} 使用 gzip 压缩或解压；\texttt{-f} 指定归档文件。
+注意，\texttt{-p} 不是“压缩得更完整”：归档本身会记录常规权限信息，能否完整恢复还受当前用户权限和文件系统限制。
+\texttt{-f} 后面要跟归档文件名，别把要备份的目录误放在这个位置。
+\end{solution}
+
+\paragraph*{随堂练习 1.6：根目录和设备文件}
+\begin{solution}
+\begin{tbash}
+ls /
+ls /dev
+ls -l /dev/null /dev/zero
+\end{tbash}
+\texttt{/etc} 保存许多系统级配置；\texttt{/home} 通常保存普通用户的家目录；\texttt{/dev} 提供设备文件。
+上面两项是字符设备，权限字符串的第一位为 \texttt{c}；磁盘等块设备通常以 \texttt{b} 开头。
+设备名要看本机输出，不是每台电脑都有 \texttt{/dev/sda}。
+\end{solution}
+
+\paragraph*{随堂练习 1.7：查看根分区}
+\begin{solution}
+\begin{tbash}
+df -hT
+df -hT /
+\end{tbash}
+第二条直接查看根目录所在的文件系统。按列记录文件系统、类型、总容量、已用空间、可用空间和挂载点。
+例如类型可能是 \texttt{ext4}，挂载点为 \texttt{/}；具体数值以你的输出为准。\texttt{tmpfs}、其他分区的容量不要抄进根分区这一行。
+\end{solution}
+
+\paragraph*{随堂练习 1.8：安装和卸载软件}
+\begin{solution}
+以 \texttt{cowsay} 为例：
+\begin{tbash}
+apt search cowsay
+sudo apt install cowsay
+/usr/games/cowsay "Hello, RoboMaster!"
+sudo apt remove cowsay
+\end{tbash}
+应先看到字符画输出，再看到卸载成功的提示。使用完整路径可以避开 \texttt{/usr/games} 未加入 PATH 的情况。
+\texttt{remove} 一般保留配置文件，本题不要求进一步清理所有依赖或配置。
+\end{solution}
+
+\paragraph*{随堂练习 1.9：文件操作}
+\begin{solution}
+确认家目录里没有需要保留的同名 \texttt{practice} 目录，再执行：
+\begin{tbash}
+mkdir -p "$HOME/practice/sub"
+touch "$HOME/practice/hello.txt"
+cp "$HOME/practice/hello.txt" "$HOME/practice/hello_bak.txt"
+mv "$HOME/practice/hello.txt" "$HOME/practice/sub/"
+ls -R "$HOME/practice"
+rm -ri -- "$HOME/practice"
+\end{tbash}
+删除前应看到根目录里的备份文件，以及 \texttt{sub} 中的原文件。删除后用 \texttt{test ! -e "\$HOME/practice"} 检查，退出码应为 \texttt{0}。
+\begin{note}
+最后一条会递归删除练习目录，\texttt{-i} 会逐项确认。先核对路径和内容，再回答确认提示。若同名目录原来就有资料，请换一个练习目录名。
+\end{note}
+\end{solution}
+
+\paragraph*{随堂练习 1.10：查找最近修改的 Python 文件}
+\begin{solution}
+\begin{tbash}
+find "$HOME" -type f -name '*.py' -mtime -7
+\end{tbash}
+\texttt{-type f} 限定普通文件，单引号让 \texttt{*.py} 交给 find 匹配，\texttt{-mtime -7} 选择修改时间距今不足七个 24 小时的文件。
+没有输出也可能是没有匹配项。可以先在练习目录里建一个 \texttt{check.py}，再运行命令验证。
+\end{solution}
+
+\paragraph*{随堂练习 1.11：管道筛选和计数}
+\begin{solution}
+\begin{tbash}
+apt list --installed | grep '^[^/]*python[^/]*/'
+apt list --installed | grep '^[^/]*python[^/]*/' | wc -l
+\end{tbash}
+软件包名在第一个斜杠前，这个匹配方式只检查包名是否含有 \texttt{python}。
+第一条列结果，第二条统计结果行数。apt 可能在标准错误输出提示命令行接口并不稳定；这条提示不会作为软件包行传给管道。脚本中做严格包查询时，可改用 \texttt{dpkg-query}。
+\end{solution}
+
+\paragraph*{随堂练习 1.12：Vim 保存与放弃修改}
+\begin{solution}
+运行 \texttt{vim note.txt}，按 \texttt{i} 进入插入模式，输入三行内容。按 Esc，输入 \texttt{:wq} 并回车，再用 \texttt{cat note.txt} 检查。
+第二次打开后，在普通模式输入 \texttt{2Gdd} 删除第二行，再输入 \texttt{:q!} 放弃修改并退出。
+再次用 cat 查看，文件仍应有原来的三行。\texttt{:q!} 放弃的是本次未保存的编辑，不会撤销上次已经保存的内容。
+\end{solution}
+
+\paragraph*{随堂练习 1.13：AstroNvim 搜索（选修）}
+\begin{solution}
+按正文步骤安装，在项目根目录启动 \texttt{nvim}，等待插件初始化完成。
+先按空格、\texttt{f}、\texttt{f}，输入文件名的一部分，选中文件并打开；再按空格、\texttt{f}、\texttt{w}，搜索文件中确实存在的一段文字，并跳到结果行。
+记录打开的文件名、搜索词和跳转行。若快捷键随版本变化，按空格查看当前菜单；文字搜索失败时先检查项目目录和 \texttt{rg} 是否可用。
+外观不是检查重点，能找到文件、找到内容才算跑通。
+\end{solution}
+
+\paragraph*{随堂练习 1.14：运行脚本}
+\begin{solution}
+在独立练习目录保存下面的 \texttt{prepare.sh}：
+% answer-code: prepare.sh
+\begin{tbash}
+#!/usr/bin/env bash
+set -e
+mkdir -p mydir
+touch mydir/a.txt
+ls mydir
+\end{tbash}
+在同一目录分别运行：
+\begin{tbash}
+chmod +x prepare.sh
+./prepare.sh
+bash prepare.sh
+\end{tbash}
+两次都应列出 \texttt{a.txt}。第一种需要执行权限，由首行指定解释器；第二种由你显式调用 Bash，脚本需要可读，但不要求执行权限。
+脚本中的相对路径以运行时的工作目录为准。
+\end{solution}
+
+\paragraph*{随堂练习 1.15：别名的生效和清理}
+\begin{solution}
+在 \texttt{\textasciitilde/.bashrc} 加入 \texttt{alias cls='clear'}，然后运行：
+\begin{tbash}
+source ~/.bashrc
+type cls
+cls
+\end{tbash}
+\texttt{type cls} 应显示该别名。练完删掉配置文件里新增的行，再在当前终端执行 \texttt{unalias cls}。
+仅删除文件中的那一行再 source，并不会自动删除当前 Shell 已有的别名。新开一个正常读取该配置的终端，确认它也不再定义 \texttt{cls}。
+\end{solution}
+
+\paragraph*{随堂练习 1.16：PATH 的作用范围}
+\begin{solution}
+在 Bash 中记录旧值，再追加目录：
+\begin{tbash}
+old_path=$PATH
+mkdir -p "$HOME/mybin"
+export PATH="$PATH:$HOME/mybin"
+printf '%s\n' "$PATH"
+\end{tbash}
+从桌面终端启动器新开一个独立终端，通常不会有这次追加的目录，因为原终端的修改没有写入启动配置。
+但如果你从已修改的终端启动子 Shell，例如直接运行 \texttt{bash}，子进程会继承 PATH，修改仍然可见。
+所以“新开终端一定失效”要看它由谁启动。最后在原终端执行 \texttt{export PATH="\$old\_path"} 恢复旧值。
+\end{solution}
+
+\paragraph*{随堂练习 1.17：迁移 zsh 配置（选修）}
+\begin{solution}
+按正文完成安装，确认 \texttt{\textasciitilde/.zshrc} 中的主题是 p10k，插件列表包含 \texttt{zsh-autosuggestions}。
+只迁移自己添加的、兼容 zsh 的配置，例如 \texttt{alias cls='clear'}，不要整份复制 \texttt{.bashrc}。
+新开 zsh 后，用 \texttt{type cls} 检查别名；执行一次普通命令，再输入相同前缀，应该出现历史建议，按右方向键可接受。
+提示符图标应能正常显示。若仍是方框，检查终端字体；不要为了一个图标把整个 Shell 重装一遍。
+\end{solution}
+
+\paragraph*{随堂练习 1.18：提交和比较差异}
+\begin{solution}
+为了不打扰真实项目，建一个独立仓库：
+\begin{tbash}
+mkdir git-answer-lab
+cd git-answer-lab
+git init
+git config user.name "Training Student"
+git config user.email "student@example.invalid"
+printf 'first\n' > note.txt
+git add note.txt
+git commit -m "Add first line"
+printf 'second\n' >> note.txt
+git add note.txt
+git commit -m "Add second line"
+git log --oneline -2
+printf 'third\n' >> note.txt
+git diff
+\end{tbash}
+日志应有两次提交，差异中应出现新增的 \texttt{third}。
+仓库配置只用于这个练习目录。\texttt{git diff} 默认比较工作区与暂存区；若再次 add，这部分差异会转到 \texttt{git diff --cached} 中。
+\end{solution}
+
+\paragraph*{随堂练习 1.19：忽略规则与例外}
+\begin{solution}
+\texttt{.gitignore} 写为：
+\begin{lstlisting}[language={},frame=single]
+*.log
+/build/*
+!/build/keep.txt
+\end{lstlisting}
+\texttt{/build/*} 忽略根目录 build 内的内容，随后取消对 keep.txt 的忽略。
+不要先写 \texttt{/build/} 把整个父目录排除，否则 Git 不会继续遍历它来找这个例外。
+在练习仓库验证：
+\begin{tbash}
+mkdir -p build
+touch run.log build/cache.tmp build/keep.txt
+git status --short --untracked-files=all
+git check-ignore -v run.log build/cache.tmp
+git check-ignore -v --no-index build/keep.txt
+\end{tbash}
+status 应显示 \texttt{build/keep.txt}，不显示另外两项。最后一条可能打印以 \texttt{!} 开头的例外规则，这表示取消忽略；不要只凭“有输出”就判断被忽略。
+已经被 Git 跟踪的文件，不会因为新增规则自动停止跟踪。
+\end{solution}
+
+\paragraph*{随堂练习 1.20：Conda 环境（选修）}
+\begin{solution}
+确认没有需要保留的同名环境，再执行：
+\begin{tbash}
+conda create --name rm-answer-py310 python=3.10
+conda activate rm-answer-py310
+conda install numpy
+python --version
+conda list numpy
+python -c "import numpy; print(numpy.__version__)"
+conda deactivate
+conda remove --name rm-answer-py310 --all
+conda env list
+\end{tbash}
+应看到 Python 3.10、numpy 的版本信息；删除完成后，环境列表中不再有该环境。
+\begin{note}
+\texttt{--all} 会删除指定环境的全部包，确认环境名无误再执行，不要把平时用的环境拿来交作业。
+\end{note}
+\end{solution}
+
+\subsubsection*{章末习题}
+
+\paragraph*{章末第 1 题：双系统安装流程}
+\begin{solution}
+四步是：准备空闲分区、制作启动盘、从 U 盘安装、完成系统设置。
+正文采用“其它选项”手动核对分区和挂载点，这样才能清楚指定 Ubuntu 装在哪里，并保留 Windows 的分区。
+题目中的“必须”针对本书这套手动流程；其他受支持的安装流程也可能使用“与 Windows 共存”等选项。
+无论走哪条流程，都要核对安装目标，不能误选“清除整个磁盘”。分区细节见随堂练习 1.1 的说明。
+\end{solution}
+
+\paragraph*{章末第 2 题：挂载}
+\begin{solution}
+挂载就是把一个文件系统接到现有目录树的某个目录上。之后访问这个目录，就能访问该文件系统的内容。
+Ubuntu 桌面自动挂载 U 盘时，常见路径是 \texttt{/media/用户名/卷标}；没有卷标时，最后一段可能是其他标识。
+实际位置可用 \texttt{lsblk -f} 或 \texttt{findmnt} 查看。
+\end{solution}
+
+\paragraph*{章末第 3 题：统计一层磁盘占用}
+\begin{solution}
+\begin{tbash}
+du -h --max-depth=1 .
+\end{tbash}
+\texttt{-h} 使用易读单位，\texttt{--max-depth=1} 限制显示层级。输出通常包含各子目录和当前目录总计；统计时仍会递归计算子目录里的内容。
+\end{solution}
+
+\paragraph*{章末第 4 题：权限 755}
+\begin{solution}
+三位依次对应所有者、所属组、其他用户。\texttt{7=4+2+1} 表示读写执行，\texttt{5=4+1} 表示读和执行。
+普通脚本可写成：
+\begin{tbash}
+chmod u=rwx,go=rx run.sh
+\end{tbash}
+这里用 \texttt{=} 明确设置权限，比在未知原权限上用 \texttt{+} 更准确。若文件原先带有特殊权限位，要精确清除它们可再执行 \texttt{chmod u-s,g-s,o-t run.sh}。
+\end{solution}
+
+\paragraph*{章末第 5 题：查找配置文件并保存}
+\begin{solution}
+\begin{tbash}
+find /etc -type f -name '*.conf' > "$HOME/conf_list.txt"
+\end{tbash}
+\texttt{>} 保存标准输出，权限不足等错误仍显示在终端。若确实需要读取受限目录，可在确认权限范围后给 find 加 sudo。
+本写法查找普通文件；若题意也包括同名符号链接，可去掉 \texttt{-type f}。
+\end{solution}
+
+\paragraph*{章末第 6 题：两种脚本运行方式}
+\begin{solution}
+\texttt{./test.sh} 请求系统执行这个文件，需要执行权限；对带有有效首行解释器声明的脚本，系统按该声明启动解释器。
+\texttt{bash test.sh} 是先执行 Bash，再让它读取脚本，因此脚本需要可读，不必有执行权限；此时由 Bash 执行，首行写的其他解释器不会替代它。
+\texttt{chmod +x} 的作用就是补上执行权限。
+\end{solution}
+
+\paragraph*{章末第 7 题：Git 三个区域}
+\begin{solution}
+工作区是你正在编辑的文件；暂存区记录准备放进下一次提交的内容；本地版本库保存已经提交的历史。
+\texttt{git add} 把当时的文件内容放进暂存区；之后继续编辑，不会自动更新暂存区。
+\texttt{git commit} 把暂存区里的内容保存为一次本地提交，并不会自动推送到远程。
+\end{solution}
+
+\paragraph*{章末第 8 题：Timeshift 与 tar 备份}
+\begin{solution}
+Timeshift 适合在升级或改配置前保存系统状态，出问题时回退。它通常侧重系统文件，用户数据是否包含取决于配置，不能默认家目录也已经备份。
+tar 把选定目录归档，便于把文件备份搬到其他存储介质；覆盖范围、排除目录、权限以及恢复步骤都需要自己安排。
+\begin{note}
+正文所说的“tar 系统镜像”实际是文件级归档，不是逐扇区磁盘镜像。分区表和引导信息不会因为打包根目录就自动完整保存；恢复整个系统时还要处理这些部分。
+备份是否可靠，要看能否恢复，不是看压缩包够不够大。
+\end{note}
+\end{solution}
+
+\paragraph*{章末第 9 题：修复 PATH}
+\begin{solution}
+PATH 被覆盖后，Shell 找不到原搜索目录中的外部命令，常见现象是 \texttt{ls} 等报“找不到命令”。Shell 内建命令和使用完整路径调用的程序仍可用。
+如果只是当前终端改错，优先恢复事先保存的值。没保存时，可以先临时恢复一组常见系统路径：
+\begin{tbash}
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+\end{tbash}
+这不是你的原始 PATH 全量备份，Conda、用户工具等路径可能仍需补回。
+如果错误写进了 \texttt{\textasciitilde/.bashrc}，用完整路径打开编辑器，例如 \texttt{/usr/bin/nano ~/.bashrc}，删掉错误行或改为：
+\begin{tbash}
+export PATH="$PATH:/opt/app/bin"
+\end{tbash}
+修正文件后，先恢复当前终端的 PATH，再 source，或者从未受影响的桌面会话打开新终端。反复 source 一份仍有错误的配置，只会把错误再执行一遍。
+\end{solution}
+
+\paragraph*{章末第 10 题：备份脚本与解压验证}
+\begin{solution}
+下面把要备份的目录作为参数。只接受家目录内的子目录，并拒绝把备份输出目录一起打包，避免归档不断包含自身。
+保存为 \texttt{backup.sh}：
+% answer-code: backup.sh
+\begin{tbash}
+#!/usr/bin/env bash
+set -euo pipefail
+if [[ $# -ne 1 ]]; then
+    printf 'Usage: %s <directory-under-home>\n' "$0" >&2
+    exit 1
+fi
+home_root=$(realpath -e -- "$HOME")
+src=$(realpath -e -- "$1")
+[[ -d "$src" ]] || { printf 'Not a directory\n' >&2; exit 1; }
+case "$src" in
+    "$home_root"/*) ;;
+    *) printf 'Choose a subdirectory under HOME\n' >&2; exit 1 ;;
+esac
+mkdir -p "$HOME/backups"
+dest=$(realpath -e -- "$HOME/backups")
+case "$dest/" in
+    "$src/"*) printf 'Backup output is inside source\n' >&2; exit 1 ;;
+esac
+archive=$(mktemp "$dest/$(date +%F)-XXXXXX.tar.gz")
+parent=$(dirname -- "$src")
+base=$(basename -- "$src")
+tar -czf "$archive" -C "$parent" -- "$base"
+verify=$(mktemp -d "$dest/verify.XXXXXX")
+tar -xzf "$archive" -C "$verify"
+diff -r -- "$src" "$verify/$base"
+printf 'Verified archive: %s\nExtracted copy: %s\n' "$archive" "$verify"
+\end{tbash}
+验证方法：
+\begin{tbash}
+mkdir -p "$HOME/backup-answer-source"
+printf 'armor=3\n' > "$HOME/backup-answer-source/config.txt"
+bash backup.sh "$HOME/backup-answer-source"
+\end{tbash}
+成功时会打印备份路径和解压目录，文件名包含当天日期，同一天重复运行也不会覆盖上次归档。
+\texttt{diff -r} 无输出且退出码为 0，表示本例的目录内容一致；它不验证所有扩展属性和权限。备份期间不要修改源目录，需要一致的在线系统备份时应采用适合的快照方案。
+验证目录保留下来供你查看，确认无误后再自行清理。
+\end{solution}
+
+\clearpage
+\section*{第二章：现代 C++ 基础}
+\phantomsection
+\addcontentsline{toc}{section}{第二章题解：现代 C++ 基础}
+下面给出的完整 C++ 程序各自保存为一个文件，不要把多个 \texttt{main} 拼到一起。
+统一用下面的方式编译；把 \texttt{answer.cpp} 换成实际文件名即可：
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread answer.cpp -o answer
+./answer
+\end{tbash}
+\texttt{-pthread} 用于多线程程序，放在本节统一命令里也方便复制。以下程序按 C++17 编写。
+
+\subsubsection*{随堂练习}
+
+\paragraph*{随堂练习 2.1：Point 类}
+\begin{solution}
+把坐标放进私有成员，构造时初始化，通过成员函数打印。
+% answer-code: point.cpp
+\begin{tcpp}
+#include <iostream>
+class Point {
+    double x_, y_;
+public:
+    Point(double x, double y) : x_(x), y_(y) {}
+    void print() const {
+        std::cout << '(' << x_ << ", " << y_ << ")\n";
+    }
+};
+int main() {
+    Point a(1, 2), b(3.5, 4.5);
+    a.print();
+    b.print();
+}
+\end{tcpp}
+应输出 \texttt{(1, 2)} 和 \texttt{(3.5, 4.5)}。打印不修改对象，所以成员函数标为 \texttt{const}。
+\end{solution}
+
+\paragraph*{随堂练习 2.2：统计存活对象}
+\begin{solution}
+这里统计的是“当前还活着多少个对象”，不是累计创建过多少个。普通构造和拷贝构造都要计数，析构时减回去。
+% answer-code: point_count.cpp
+\begin{tcpp}
+#include <iostream>
+class Point {
+    double x_, y_;
+public:
+    inline static int count = 0;
+    Point(double x, double y) : x_(x), y_(y) { ++count; }
+    Point(const Point& other) : Point(other.x_, other.y_) {}
+    ~Point() { --count; }
+};
+int main() {
+    std::cout << Point::count << '\n';
+    {
+        Point a(1, 2);
+        std::cout << Point::count << '\n';
+        {
+            Point b(3, 4), c = a;
+            std::cout << Point::count << '\n';
+        }
+        std::cout << Point::count << '\n';
+    }
+    std::cout << Point::count << '\n';
+}
+\end{tcpp}
+输出依次为 \texttt{0、1、3、1、0}。\texttt{inline static} 从 C++17 起允许在类内定义这个静态成员。
+本题只在单线程里计数；多线程同时创建对象时，还需要同步。
+\end{solution}
+
+\paragraph*{随堂练习 2.3：运算符重载}
+\begin{solution}
+\texttt{+} 返回新点，\texttt{<<} 返回流的引用，方便继续输出。
+% answer-code: point_operators.cpp
+\begin{tcpp}
+#include <iostream>
+class Point {
+    double x_, y_;
+public:
+    Point(double x, double y) : x_(x), y_(y) {}
+    Point operator+(const Point& other) const {
+        return Point(x_ + other.x_, y_ + other.y_);
+    }
+    friend std::ostream& operator<<(std::ostream& out, const Point& p) {
+        return out << '(' << p.x_ << ", " << p.y_ << ')';
+    }
+};
+int main() {
+    std::cout << Point(1, 2) + Point(3, 4) << '\n';
+}
+\end{tcpp}
+应输出 \texttt{(4, 6)}。友元输出函数可以读取私有坐标，但不会因此成为类的成员函数。
+\end{solution}
+
+\paragraph*{随堂练习 2.4：用基类指针调用派生类}
+\begin{solution}
+数组存放基类指针，调用虚函数时仍会选择实际对象的实现。
+% answer-code: shapes.cpp
+\begin{tcpp}
+#include <iostream>
+class Shape {
+public:
+    virtual ~Shape() = default;
+    virtual double calArea() const = 0;
+};
+class Circle : public Shape {
+    double r_;
+public:
+    explicit Circle(double r) : r_(r) {}
+    double calArea() const override { return 3.14 * r_ * r_; }
+};
+class Rectangle : public Shape {
+    double a_, b_;
+public:
+    Rectangle(double a, double b) : a_(a), b_(b) {}
+    double calArea() const override { return a_ * b_; }
+};
+int main() {
+    Circle circle(1);
+    Rectangle rectangle(1, 2);
+    Shape* shapes[] = {&circle, &rectangle};
+    for (const Shape* shape : shapes) {
+        std::cout << shape->calArea() << '\n';
+    }
+}
+\end{tcpp}
+输出为 \texttt{3.14} 和 \texttt{2}。对象都在栈上，数组只借用地址，不负责释放。
+基类提供虚析构函数，也为以后通过基类指针管理对象留好接口。
+\end{solution}
+
+\paragraph*{随堂练习 2.5：函数模板推导}
+\begin{solution}
+% answer-code: mymax.cpp
+\begin{tcpp}
+#include <iostream>
+template<class T>
+T myMax(T a, T b) {
+    return a < b ? b : a;
+}
+int main() {
+    std::cout << myMax(2, 5) << '\n';
+    std::cout << myMax(1.5, 2.5) << '\n';
+    std::cout << myMax<double>(1, 2.5) << '\n';
+}
+\end{tcpp}
+输出为 \texttt{5、2.5、2.5}。把最后一行改成 \texttt{myMax(1, 2.5)} 会推导失败：同一个 \texttt{T} 不能同时推成 \texttt{int} 和 \texttt{double}。
+显式写 \texttt{myMax<double>} 后，两个参数都按 double 处理。
+\end{solution}
+
+\paragraph*{随堂练习 2.6：lambda 排序}
+\begin{solution}
+% answer-code: lambda_sort.cpp
+\begin{tcpp}
+#include <algorithm>
+#include <iostream>
+#include <vector>
+int main() {
+    std::vector<int> values{3, 1, 4, 2};
+    auto print = [&values] {
+        for (int x : values) std::cout << x << ' ';
+        std::cout << '\n';
+    };
+    std::sort(values.begin(), values.end(),
+              [](int a, int b) { return a < b; });
+    print();
+    std::sort(values.begin(), values.end(),
+              [](int a, int b) { return a > b; });
+    print();
+}
+\end{tcpp}
+先输出 \texttt{1 2 3 4}，再输出 \texttt{4 3 2 1}。比较器用严格比较，不要把 \texttt{<} 随手改成 \texttt{<=}，否则不满足排序要求。
+\end{solution}
+
+\paragraph*{随堂练习 2.7：引用交换与副本交换}
+\begin{solution}
+为了在同一程序中对照，按值版本换一个名字，避免同名重载带来歧义。
+% answer-code: swap.cpp
+\begin{tcpp}
+#include <iostream>
+void swapVal(int& a, int& b) {
+    int temp = a; a = b; b = temp;
+}
+void swapCopy(int a, int b) {
+    int temp = a; a = b; b = temp;
+}
+int main() {
+    int x = 1, y = 2;
+    swapCopy(x, y);
+    std::cout << x << ' ' << y << '\n';
+    swapVal(x, y);
+    std::cout << x << ' ' << y << '\n';
+}
+\end{tcpp}
+两行分别是 \texttt{1 2}、\texttt{2 1}。按值版本只交换函数里的副本；引用版本操作的就是 main 中的两个整数。
+\end{solution}
+
+\paragraph*{随堂练习 2.8：返回独占指针}
+\begin{solution}
+% answer-code: unique_factory.cpp
+\begin{tcpp}
+#include <iostream>
+#include <memory>
+struct A {
+    int val;
+    explicit A(int v) : val(v) {}
+};
+std::unique_ptr<A> create(int v) {
+    return std::make_unique<A>(v);
+}
+int main() {
+    auto ptr = create(42);
+    std::cout << ptr->val << '\n';
+}
+\end{tcpp}
+输出 \texttt{42}。这里直接返回临时结果，在 C++17 下不需要复制它。
+如果先创建局部 \texttt{unique\_ptr} 再返回该局部变量，也可以利用返回值优化，或在适用规则下移动所有权；不需要启用拷贝。
+\end{solution}
+
+\paragraph*{随堂练习 2.9：打破循环引用}
+\begin{solution}
+两个对象没有互相持有时，离开作用域后计数归零，都会析构。
+两侧都用 \texttt{shared\_ptr} 并互相赋值后，作用域内两个计数都为 2；外部指针销毁后，内部仍互相持有，计数各剩 1，所以没有析构输出。
+修复版可单独验证：
+% answer-code: weak_cycle.cpp
+\begin{tcpp}
+#include <iostream>
+#include <memory>
+struct B;
+struct A {
+    std::shared_ptr<B> peer;
+    ~A() { std::cout << "destroy A\n"; }
+};
+struct B {
+    std::weak_ptr<A> peer;
+    ~B() { std::cout << "destroy B\n"; }
+};
+int main() {
+    auto a = std::make_shared<A>();
+    auto b = std::make_shared<B>();
+    a->peer = b;
+    b->peer = a;
+    std::cout << a.use_count() << ' ' << b.use_count() << '\n';
+    if (auto owner = b->peer.lock()) {
+        std::cout << "A is alive\n";
+    }
+}
+\end{tcpp}
+先输出 \texttt{1 2}，离开 main 时两个析构函数都会执行。weak 指针不增加强引用计数，观察时用 \texttt{lock()} 临时取得所有权，并检查结果。
+\end{solution}
+
+\paragraph*{随堂练习 2.10：观察 vector 容量}
+\begin{solution}
+% answer-code: vector_capacity.cpp
+\begin{tcpp}
+#include <iostream>
+#include <vector>
+int main() {
+    std::vector<int> values;
+    for (int i = 1; i <= 10; ++i) {
+        values.push_back(i);
+        std::cout << values.size() << ' ' << values.capacity() << '\n';
+    }
+}
+\end{tcpp}
+size 应依次为 1 到 10，capacity 始终不小于 size，且不会每次都增加。
+\begin{note}
+题目中的“扩容为 2 倍”是常见实现的现象，\textbf{不是 C++ 标准保证}。应记录你使用的标准库实际输出，不要求每个人的容量序列一样。
+这道题要验证的是扩容发生的时机，不能用一次实验替所有标准库宣布规则。
+\end{note}
+\end{solution}
+
+\paragraph*{随堂练习 2.11：括号匹配}
+\begin{solution}
+右括号出现时，先检查有没有可匹配的左括号；处理完后栈必须为空。
+% answer-code: parentheses.cpp
+\begin{tcpp}
+#include <iostream>
+#include <stack>
+#include <string>
+bool matched(const std::string& text) {
+    std::stack<char> pending;
+    for (char c : text) {
+        if (c == '(') {
+            pending.push(c);
+        } else if (c == ')') {
+            if (pending.empty()) return false;
+            pending.pop();
+        } else {
+            return false;
+        }
+    }
+    return pending.empty();
+}
+int main() {
+    std::string text;
+    std::getline(std::cin, text);
+    std::cout << (matched(text) ? "matched" : "not matched") << '\n';
+}
+\end{tcpp}
+\texttt{(())()} 和空串应匹配；\texttt{)(}、\texttt{(()} 应不匹配。不要对空栈调用 \texttt{pop()}。
+\end{solution}
+
+\paragraph*{随堂练习 2.12：单词计数}
+\begin{solution}
+先约定：这里按空白分词，区分大小写，不自动去掉标点。这样输入和预期结果都明确。
+% answer-code: word_count.cpp
+\begin{tcpp}
+#include <iostream>
+#include <map>
+#include <sstream>
+#include <string>
+int main() {
+    std::string line;
+    std::getline(std::cin, line);
+    std::istringstream input(line);
+    std::map<std::string, int> counts;
+    std::string word;
+    while (input >> word) ++counts[word];
+    for (const auto& [key, count] : counts) {
+        std::cout << key << ' ' << count << '\n';
+    }
+}
+\end{tcpp}
+输入 \texttt{armor camera armor}，依次输出 \texttt{armor 2}、\texttt{camera 1}。
+默认比较器按字符串字典序排列键，不按出现先后顺序排列。
+\end{solution}
+
+\paragraph*{随堂练习 2.13：安全删除偶数}
+\begin{solution}
+错误版本使用了失效迭代器，属于未定义行为（Undefined Behavior）。它可能崩溃，也可能看起来“没事”，不能规定某个错误输出。
+修复时接住 \texttt{erase} 返回的下一个有效迭代器：
+% answer-code: erase_even.cpp
+\begin{tcpp}
+#include <iostream>
+#include <vector>
+int main() {
+    std::vector<int> values{1, 2, 3, 4, 5, 6};
+    for (auto it = values.begin(); it != values.end(); ) {
+        if (*it % 2 == 0) it = values.erase(it);
+        else ++it;
+    }
+    for (int x : values) std::cout << x << ' ';
+    std::cout << '\n';
+}
+\end{tcpp}
+应输出 \texttt{1 3 5}。删除分支里不再额外自增，否则可能跳过元素。
+\end{solution}
+
+\paragraph*{随堂练习 2.14：两个线程的输出}
+\begin{solution}
+用锁保证每次输出完整的一项，延时放在锁外，让另一个线程有机会运行。
+% answer-code: thread_print.cpp
+\begin{tcpp}
+#include <chrono>
+#include <iostream>
+#include <mutex>
+#include <thread>
+std::mutex output_mutex;
+void print_range(int first, int last) {
+    for (int i = first; i <= last; ++i) {
+        {
+            std::lock_guard<std::mutex> lock(output_mutex);
+            std::cout << i << '\n';
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+}
+int main() {
+    std::thread a(print_range, 1, 5), b(print_range, 6, 10);
+    a.join();
+    b.join();
+}
+\end{tcpp}
+1 到 10 应各出现一次。同一个线程内仍按自己的顺序输出，但两组之间的交错由调度决定，sleep 不能保证严格轮流执行。
+\end{solution}
+
+\paragraph*{随堂练习 2.15：四线程计数}
+\begin{solution}
+正确目标值为 \texttt{4×50000=200000}。锁版本把整个自增放进临界区；原子版本用一次原子读改写。
+% answer-code: counters.cpp
+\begin{tcpp}
+#include <atomic>
+#include <iostream>
+#include <mutex>
+#include <thread>
+#include <vector>
+template<class F>
+void run_four(F work) {
+    std::vector<std::thread> threads;
+    for (int i = 0; i < 4; ++i) threads.emplace_back(work);
+    for (auto& t : threads) t.join();
+}
+int main() {
+    int locked = 0;
+    std::mutex mutex;
+    run_four([&] {
+        for (int i = 0; i < 50000; ++i) {
+            std::lock_guard<std::mutex> lock(mutex);
+            ++locked;
+        }
+    });
+    std::atomic<int> atomic_count{0};
+    run_four([&] {
+        for (int i = 0; i < 50000; ++i) ++atomic_count;
+    });
+    std::cout << locked << ' ' << atomic_count.load() << '\n';
+#ifdef DEMO_DATA_RACE
+    // 故意保留数据竞争，仅用于讨论错误写法。
+    int plain = 0;
+    run_four([&] {
+        for (int i = 0; i < 50000; ++i) ++plain;
+    });
+    std::cout << plain << '\n';
+#endif
+}
+\end{tcpp}
+默认只运行正确版本，应输出 \texttt{200000 200000}。普通 int 的错误分支需额外加 \texttt{-DDEMO\_DATA\_RACE} 才会编译进程序。
+它有数据竞争，属于未定义行为，结果没有保证；即使碰巧得到 200000，也不能证明正确。\texttt{volatile} 同样不能修复这个问题。
+\end{solution}
+
+\paragraph*{随堂练习 2.16：三个读者、两个写者}
+\begin{solution}
+延时要放在持锁期间，才能观察到锁被占用时的等待。实际项目应尽量缩短持锁时间。
+% answer-code: shared_config.cpp
+\begin{tcpp}
+#include <chrono>
+#include <iostream>
+#include <mutex>
+#include <shared_mutex>
+#include <thread>
+#include <unordered_map>
+#include <string>
+std::unordered_map<std::string, int> config{{"exposure", 10}};
+std::shared_mutex mutex;
+void read_config(int& result) {
+    std::shared_lock<std::shared_mutex> lock(mutex);
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    result = config.at("exposure");
+}
+void write_config(int value) {
+    std::unique_lock<std::shared_mutex> lock(mutex);
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    config["exposure"] = value;
+}
+int main() {
+    int a = 0, b = 0, c = 0;
+    std::thread r1([&] { read_config(a); });
+    std::thread r2([&] { read_config(b); });
+    std::thread r3([&] { read_config(c); });
+    std::thread w1(write_config, 12), w2(write_config, 14);
+    r1.join(); r2.join(); r3.join(); w1.join(); w2.join();
+    std::cout << a << ' ' << b << ' ' << c << '\n';
+    std::cout << "final=" << config.at("exposure") << '\n';
+}
+\end{tcpp}
+读者之间可以同时持锁，写者与读者、其他写者都互斥。读到的值可能是 10、12 或 14，最终值是最后完成写入的那个值。
+这里把结果存进各自变量，在线程全部结束后统一打印，避免输出本身影响观察。
+\end{solution}
+
+\paragraph*{随堂练习 2.17：原子编号分配器}
+\begin{solution}
+\texttt{fetch\_add(1)} 返回加一之前的值，每次原子操作取得不同的编号。各线程使用自己的结果容器，编号原子化并不会顺便让共享 vector 也变安全。
+% answer-code: task_ids.cpp
+\begin{tcpp}
+#include <algorithm>
+#include <array>
+#include <atomic>
+#include <iostream>
+#include <thread>
+#include <vector>
+int main() {
+    std::atomic<int> next{0};
+    std::array<std::vector<int>, 4> local;
+    std::vector<std::thread> workers;
+    for (int i = 0; i < 4; ++i) {
+        workers.emplace_back([&, i] {
+            for (int j = 0; j < 100; ++j) {
+                local[i].push_back(next.fetch_add(1));
+            }
+        });
+    }
+    for (auto& worker : workers) worker.join();
+    std::vector<int> all;
+    for (const auto& ids : local) all.insert(all.end(), ids.begin(), ids.end());
+    std::sort(all.begin(), all.end());
+    bool valid = all.size() == 400;
+    for (std::size_t i = 0; i < all.size(); ++i) valid &= all[i] == int(i);
+    std::cout << all.size() << ' ' << next.load() << ' ' << valid << '\n';
+}
+\end{tcpp}
+应输出 \texttt{400 400 1}。验证排序后恰好是 0 到 399，同时检查了数量、范围和不重复。
+\end{solution}
+
+\paragraph*{随堂练习 2.18：带超时的等待}
+\begin{solution}
+带谓词的 \texttt{wait\_for} 返回 false，表示超时检查时条件仍未满足。
+下面让消费者最多等待一秒；超时后通知生产者取消等待，并回收两个线程，避免主线程又在 join 上一直等下去。
+% answer-code: wait_timeout.cpp
+\begin{tcpp}
+#include <chrono>
+#include <condition_variable>
+#include <iostream>
+#include <mutex>
+#include <string>
+#include <thread>
+int main(int argc, char** argv) {
+    const int delay_ms = argc > 1 ? std::stoi(argv[1]) : 2000;
+    std::mutex mutex;
+    std::condition_variable cv;
+    bool ready = false, cancelled = false;
+    int result = 0;
+    std::thread producer([&] {
+        std::unique_lock<std::mutex> lock(mutex);
+        if (cv.wait_for(lock, std::chrono::milliseconds(delay_ms),
+                        [&] { return cancelled; })) return;
+        ready = true;
+        lock.unlock();
+        cv.notify_all();
+    });
+    std::thread consumer([&] {
+        std::unique_lock<std::mutex> lock(mutex);
+        if (!cv.wait_for(lock, std::chrono::seconds(1), [&] { return ready; })) {
+            cancelled = true;
+            result = 2;
+            lock.unlock();
+            cv.notify_all();
+            std::cout << "timeout\n";
+            return;
+        }
+        std::cout << "ready\n";
+    });
+    consumer.join();
+    producer.join();
+    return result;
+}
+\end{tcpp}
+传参数 \texttt{100} 时，正常调度下应输出 ready；传 \texttt{2000} 时，应输出 timeout，返回 2。
+调度和重新加锁可能让实际返回稍晚于一秒，这不是实时系统的硬截止时间。超时也不会自动强杀后台线程；本例用共享状态主动取消生产者的等待。
+\end{solution}
+
+\paragraph*{随堂练习 2.19：异步检查装甲板}
+\begin{solution}
+题目没有规定阈值和判定规则，这里约定：整组数据非空，且每个置信度都大于等于 0.5，才算有效。
+% answer-code: async_armor.cpp
+\begin{tcpp}
+#include <algorithm>
+#include <future>
+#include <iostream>
+#include <vector>
+bool is_armor_valid(const std::vector<double>& scores, double threshold) {
+    return !scores.empty() &&
+           std::all_of(scores.begin(), scores.end(),
+                       [threshold](double score) { return score >= threshold; });
+}
+int main() {
+    auto good = std::async(std::launch::async, is_armor_valid,
+                           std::vector<double>{0.8, 0.6}, 0.5);
+    auto bad = std::async(std::launch::async, is_armor_valid,
+                          std::vector<double>{0.8, 0.3}, 0.5);
+    std::cout << good.get() << ' ' << bad.get() << '\n';
+}
+\end{tcpp}
+应输出 \texttt{1 0}。显式使用 \texttt{std::launch::async}，要求异步执行；输入按值传给任务，不引用已经销毁的局部变量。每个 future 只调用一次 get。
+\end{solution}
+
+\paragraph*{随堂练习 2.20：线程池返回 future}
+\begin{solution}
+只改返回类型不能构成重载。这里保留原来的单参数任务接口，再增加“计算函数加一个整数参数”的双参数重载。
+\texttt{packaged\_task} 本身不能复制，用 shared 指针包住它后，就能放进原来的 \texttt{std::function<void()>} 队列。
+% answer-code: pool_future.cpp
+\begin{tcpp}
+#include <condition_variable>
+#include <functional>
+#include <future>
+#include <iostream>
+#include <memory>
+#include <mutex>
+#include <queue>
+#include <stdexcept>
+#include <thread>
+#include <utility>
+#include <vector>
+class ThreadPool {
+    std::vector<std::thread> workers_;
+    std::queue<std::function<void()>> tasks_;
+    std::mutex mutex_;
+    std::condition_variable cv_;
+    bool stopping_ = false;
+public:
+    explicit ThreadPool(std::size_t count) {
+        if (count == 0) throw std::invalid_argument("empty pool");
+        for (std::size_t i = 0; i < count; ++i) {
+            workers_.emplace_back([this] {
+                while (true) {
+                    std::function<void()> task;
+                    {
+                        std::unique_lock<std::mutex> lock(mutex_);
+                        cv_.wait(lock, [this] { return stopping_ || !tasks_.empty(); });
+                        if (stopping_ && tasks_.empty()) return;
+                        task = std::move(tasks_.front());
+                        tasks_.pop();
+                    }
+                    task();
+                }
+            });
+        }
+    }
+    ~ThreadPool() {
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            stopping_ = true;
+        }
+        cv_.notify_all();
+        for (auto& worker : workers_) worker.join();
+    }
+    void enqueue(std::function<void()> task) {
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            if (stopping_) throw std::runtime_error("pool stopped");
+            tasks_.push(std::move(task));
+        }
+        cv_.notify_one();
+    }
+    std::future<int> enqueue(std::function<int(int)> function, int value) {
+        auto task = std::make_shared<std::packaged_task<int()>>(
+            [function = std::move(function), value] { return function(value); });
+        auto future = task->get_future();
+        enqueue([task] { (*task)(); });
+        return future;
+    }
+};
+int main() {
+    ThreadPool pool(2);
+    auto a = pool.enqueue([](int x) { return x * x; }, 6);
+    auto b = pool.enqueue([](int x) { return x * x; }, 7);
+    std::cout << a.get() << ' ' << b.get() << '\n';
+}
+\end{tcpp}
+应输出 \texttt{36 49}。任务在队列锁外执行；析构时处理完已有任务，再退出线程。
+计算任务抛出的异常会由 packaged task 存进共享状态，在 get 时重新抛出。原来的 void 接口仍要求任务自行处理异常，不能把教学用线程池直接当成完整生产实现。
+\end{solution}
+
+\paragraph*{随堂练习 2.21：队列、死锁与写者等待}
+\begin{solution}
+\textbf{第一问：多个消费者。} 这里采用一个生产者、三个消费者。取队首和弹出必须在同一把锁内完成；生产结束后也要让消费者把剩余数据取完。
+% answer-code: multi_consumer.cpp
+\begin{tcpp}
+#include <algorithm>
+#include <array>
+#include <condition_variable>
+#include <iostream>
+#include <mutex>
+#include <queue>
+#include <thread>
+#include <vector>
+class Queue {
+    std::queue<int> data_;
+    std::mutex mutex_;
+    std::condition_variable cv_;
+    bool closed_ = false;
+public:
+    void push(int value) {
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            data_.push(value);
+        }
+        cv_.notify_one();
+    }
+    bool pop(int& value) {
+        std::unique_lock<std::mutex> lock(mutex_);
+        cv_.wait(lock, [this] { return closed_ || !data_.empty(); });
+        if (data_.empty()) return false;
+        value = data_.front();
+        data_.pop();
+        return true;
+    }
+    void close() {
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            closed_ = true;
+        }
+        cv_.notify_all();
+    }
+};
+int main() {
+    Queue queue;
+    std::array<std::vector<int>, 3> received;
+    std::vector<std::thread> consumers;
+    for (int i = 0; i < 3; ++i) {
+        consumers.emplace_back([&, i] {
+            int value;
+            while (queue.pop(value)) received[i].push_back(value);
+        });
+    }
+    for (int i = 0; i < 100; ++i) queue.push(i);
+    queue.close();
+    for (auto& consumer : consumers) consumer.join();
+    std::vector<int> all;
+    for (const auto& part : received) all.insert(all.end(), part.begin(), part.end());
+    std::sort(all.begin(), all.end());
+    bool valid = all.size() == 100;
+    for (std::size_t i = 0; i < all.size(); ++i) valid &= all[i] == int(i);
+    std::cout << all.size() << ' ' << valid << '\n';
+}
+\end{tcpp}
+应输出 \texttt{100 1}，说明没有丢失或重复消费。每个消费者分到多少个由调度决定，甚至可能有一个没取到数据；正确性不要求平均分工。本例约定生产者 close 后不再 push。
+
+\textbf{第二问：四个死锁条件。} 筷子互斥使用；拿着一根再等另一根是持有并等待；不能强行抢走别人持有的筷子是不可抢占；每个人等下一人的筷子形成循环等待。
+对同一组互斥锁使用 \texttt{std::scoped\_lock}，会采用避免死锁的多锁获取算法，避免各线程永久持有部分锁并互相等待。
+它不承诺一次硬件原子操作拿齐锁，也不自动解决程序中所有其他锁和资源形成的死锁。
+
+\textbf{第三问：读者占用导致写者等待。} 先用一个可控实验，确保写者等到读锁释放：
+% answer-code: writer_wait.cpp
+\begin{tcpp}
+#include <atomic>
+#include <chrono>
+#include <future>
+#include <iostream>
+#include <mutex>
+#include <shared_mutex>
+#include <thread>
+int main() {
+    std::shared_mutex mutex;
+    std::shared_lock<std::shared_mutex> reader(mutex);
+    std::atomic<bool> entered{false};
+    std::promise<void> attempting;
+    auto signal = attempting.get_future();
+    std::thread writer([&] {
+        attempting.set_value();
+        std::unique_lock<std::shared_mutex> lock(mutex);
+        entered = true;
+    });
+    signal.get();
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    std::cout << "before=" << entered.load() << '\n';
+    reader.unlock();
+    writer.join();
+    std::cout << "after=" << entered.load() << '\n';
+}
+\end{tcpp}
+应输出 \texttt{before=0}、\texttt{after=1}。把这个思路扩展为多个读者反复持锁，就可以观察写者在持续读负载下的等待时间。
+\texttt{shared\_mutex} 不保证公平性，但某些实现会优先照顾写者，因此不能要求每台机器都稳定复现无限饥饿。
+改进思路是缩短读锁时间、复制快照后在锁外处理，或使用明确提供公平策略的读写锁。设计写者优先策略时，可在有写者排队后暂停接纳新读者，也要考虑反过来饿住读者的问题。
+\end{solution}
+
+\subsubsection*{章末习题}
+
+\paragraph*{章末第 1 题：访问权限}
+\begin{solution}
+\texttt{public} 允许类外代码访问；\texttt{private} 只允许该类的成员和友元访问；\texttt{protected} 还允许派生类在相应访问规则下使用。
+派生类不能直接访问基类的 private 成员，但可以调用基类提供的 public 或 protected 接口间接使用它们。
+“不能直接访问”不等于“派生类对象里不存在这部分数据”。
+\end{solution}
+
+\paragraph*{章末第 2 题：返回类型与重载}
+\begin{solution}
+不能。\texttt{int f(int)} 和 \texttt{double f(int)} 参数列表相同，不能仅靠返回类型区分重载。
+对这样的两个声明，编译器应报冲突。可以改变参数类型或参数个数来设计重载。
+\end{solution}
+
+\paragraph*{章末第 3 题：lambda 捕获}
+\begin{solution}
+简化形式为 \texttt{[捕获列表](参数列表) -> 返回类型 \{函数体\}}，能推导时可以省略返回类型。
+对普通整数 a，\texttt{[a]} 保存副本，默认不能修改这个副本；加 mutable 后可以改副本，但原整数不变。
+\texttt{[\&a]} 引用原变量，若 a 本身可修改，就能改变原整数。验证如下：
+% answer-code: lambda_capture.cpp
+\begin{tcpp}
+#include <iostream>
+int main() {
+    int a = 1;
+    auto by_value = [a]() mutable { return ++a; };
+    std::cout << by_value() << ' ' << a << '\n';
+    auto by_reference = [&a] { ++a; };
+    by_reference();
+    std::cout << a << '\n';
+}
+\end{tcpp}
+输出为 \texttt{2 1}，再输出 \texttt{2}。引用捕获还要求被引用对象在调用 lambda 时仍然活着。
+\end{solution}
+
+\paragraph*{章末第 4 题：左值与右值}
+\begin{solution}
+值类别描述的是\textbf{表达式}。普通变量名表达式（如 x）是左值；字面量和许多计算结果是纯右值；\texttt{std::move(x)} 是将亡值。
+纯右值和将亡值统称右值。先根据表达式的形式、运算符规则和函数返回类型判断，比只背“放在等号哪一边”准确。
+正文的“能否取地址”可以辅助判断普通表达式，但不是通用定义：位域是左值却不能取地址，自定义取地址运算符也会干扰这个方法。
+对本题这些普通表达式，可以用额外括号中的 decltype 核对：
+% answer-code: value_categories.cpp
+\begin{tcpp}
+#include <type_traits>
+#include <utility>
+int main() {
+    int x = 1;
+    int&& ref = 2;
+    static_assert(std::is_lvalue_reference_v<decltype((x))>);
+    static_assert(std::is_lvalue_reference_v<decltype((ref))>);
+    static_assert(std::is_rvalue_reference_v<decltype((std::move(x)))>);
+    static_assert(!std::is_reference_v<decltype((x + 1))>);
+}
+\end{tcpp}
+编译通过即可。注意有名字的右值引用 ref，在普通使用它的表达式中仍是左值。
+\end{solution}
+
+\paragraph*{章末第 5 题：std::move 做了什么}
+\begin{solution}
+\texttt{std::move} 本身是类型转换，使表达式能够参与移动相关的重载选择，不会直接搬走资源。
+真正的移动发生在之后被调用的移动构造、移动赋值等操作中；有些类型或 const 对象还可能最终走拷贝。
+例如，对一个字符串仅执行 \texttt{(void)std::move(s);}，字符串内容不会因此改变。
+执行 \texttt{std::string target = std::move(s);} 后才可能转移资源。此后的 s 仍可析构、可重新赋值，但不要把“它一定为空”当作通用规则。
+\end{solution}
+
+\paragraph*{章末第 6 题：独占与共享所有权}
+\begin{solution}
+\texttt{unique\_ptr} 表示独占所有权，允许移动转交，不允许复制出第二个同样拥有资源的指针。
+\texttt{shared\_ptr} 通过控制块记录共享所有权，复制会增加强引用计数，最后一个强引用释放时销毁对象。
+禁用 unique 指针的拷贝，是为了保持“只有一个所有者”的约束。shared 指针的计数管理也不代表所指向对象的读写天然线程安全。
+\end{solution}
+
+\paragraph*{章末第 7 题：循环引用}
+\begin{solution}
+两个对象各用 shared 指针持有对方，外部所有者退出后，内部引用仍让两边计数无法归零。
+把其中一条不应拥有资源的反向关系改成 weak 指针，就不会增加强引用计数；访问前用 lock 获取临时所有权。
+完整实现与计数变化见本题解的随堂练习 2.9。选择哪一侧改成 weak，要根据对象之间实际的所有权关系决定。
+\end{solution}
+
+\paragraph*{章末第 8 题：两种安全删除写法}
+\begin{solution}
+第一种边遍历边 erase，并更新迭代器；第二种先 remove\_if 整理保留元素，再 erase 删除尾部。
+% answer-code: erase_methods.cpp
+\begin{tcpp}
+#include <algorithm>
+#include <iostream>
+#include <vector>
+int main() {
+    std::vector<int> first{1, 2, 3, 4, 5, 6};
+    auto second = first;
+    auto is_even = [](int x) { return x % 2 == 0; };
+    for (auto it = first.begin(); it != first.end(); ) {
+        if (is_even(*it)) it = first.erase(it);
+        else ++it;
+    }
+    second.erase(std::remove_if(second.begin(), second.end(), is_even),
+                 second.end());
+    for (int x : first) std::cout << x << ' ';
+    std::cout << '\n';
+    for (int x : second) std::cout << x << ' ';
+    std::cout << '\n';
+}
+\end{tcpp}
+两行都应为 \texttt{1 3 5}。\texttt{remove\_if} 自己不会改变 vector 的 size，最后的 erase 才真正缩小容器。
+\end{solution}
+
+\paragraph*{章末第 9 题：死锁条件与统一顺序}
+\begin{solution}
+四个必要条件是互斥、持有并等待、不可抢占、循环等待。
+例如线程 A 先拿锁 1，再等锁 2；线程 B 先拿锁 2，再等锁 1，就可能形成环。
+让所有相关线程统一按锁 1、锁 2 的顺序获取，可以破坏循环等待。也可用 \texttt{std::scoped\_lock} 一起管理两把锁，采用避免死锁的算法。
+不要把 sleep 当成修复方案：它可能改变复现概率，却没有消除死锁条件。
+\end{solution}
+
+\paragraph*{章末第 10 题：装甲板排序与并行计数}
+\begin{solution}
+先排序，再启动两个只读线程。两个线程分别写自己的计数，主线程在 join 后读取结果。
+题目要求“高于”和“低于”，所以恰好等于 0.5 的对象两边都不计入。
+% answer-code: armor_summary.cpp
+\begin{tcpp}
+#include <algorithm>
+#include <iostream>
+#include <thread>
+#include <vector>
+class Armor {
+    int id_;
+    double confidence_;
+public:
+    Armor(int id, double confidence) : id_(id), confidence_(confidence) {}
+    int id() const { return id_; }
+    double confidence() const { return confidence_; }
+};
+int main() {
+    std::vector<Armor> armors{{1, 0.3}, {2, 0.9}, {3, 0.5}, {4, 0.7}};
+    std::sort(armors.begin(), armors.end(), [](const Armor& a, const Armor& b) {
+        return a.confidence() > b.confidence();
+    });
+    for (const auto& armor : armors) {
+        std::cout << armor.id() << ':' << armor.confidence() << '\n';
+    }
+    int high = 0, low = 0;
+    std::thread above([&] {
+        for (const auto& armor : armors) {
+            if (armor.confidence() > 0.5) ++high;
+        }
+    });
+    std::thread below([&] {
+        for (const auto& armor : armors) {
+            if (armor.confidence() < 0.5) ++low;
+        }
+    });
+    above.join();
+    below.join();
+    std::cout << "high=" << high << " low=" << low << '\n';
+}
+\end{tcpp}
+排序后的编号为 \texttt{2、4、3、1}，最后输出 \texttt{high=2 low=1}。
+工作期间不能再让其他线程修改容器或对象。这里没有并发写同一个计数，所以不需要给这两个计数额外加锁。
+\end{solution}
+
+\clearpage
+\section*{第三章：编译过程与 CMake 基础}
+\phantomsection
+\addcontentsline{toc}{section}{第三章题解：编译过程与 CMake 基础}
+\subsubsection*{随堂练习}
+第三章的操作题沿用正文里的目录和源文件。下面只列出要改的配置、要执行的命令和结果，完整工程见对应示例。
+
+\paragraph*{随堂练习 3.1：改源文件与改程序}
+\begin{solution}
+只把源文件中的编号改为 7，直接运行旧程序时仍输出 \texttt{armor=3}。
+重新执行四步构建，或执行正文的一步构建命令后，才会输出 \texttt{armor=7}。第二行始终为 \texttt{function=main}。
+少写普通语句末尾的分号时，预处理通常仍能完成，翻译成汇编的编译阶段会首先报错。修复后要重新构建，不要把上次残留的可执行文件当成这次成功的证据。
+\end{solution}
+
+\paragraph*{随堂练习 3.2：修改目标名}
+\begin{solution}
+把原配置中创建和设置 hello 目标的两行同步改成：
+\begin{lstlisting}[language=cmake,frame=single,numbers=left]
+add_executable(armor_hello hello.cpp)
+target_compile_features(armor_hello PRIVATE cxx_std_17)
+\end{lstlisting}
+保留其他项目配置，在 \texttt{hello-cmake} 根目录运行：
+\begin{tbash}
+cmake -S . -B build-rename -DCMAKE_BUILD_TYPE=Debug
+cmake --build build-rename --parallel 2
+./build-rename/armor_hello
+\end{tbash}
+程序输出与改名前相同。项目名标识整个项目，目标名标识产物，二者可以不同，所以不用改 project。
+\end{solution}
+
+\paragraph*{随堂练习 3.3：缺路径与缺实现}
+\begin{solution}
+去掉 \texttt{-I include} 后，编译器找不到 \texttt{armor.hpp}，通常在预处理头文件时报告缺失。
+保留包含路径但去掉 \texttt{src/armor.cpp} 后，声明仍可见，源文件可以编译，但链接器找不到 \texttt{armor\_score(int)} 的定义，会报告未定义引用。
+恢复原来的完整命令后，应重新得到 \texttt{score=30}。
+\end{solution}
+
+\paragraph*{随堂练习 3.4：修改源码和配置开关}
+\begin{solution}
+在多文件版本的 \texttt{armor-demo} 中把乘数改为 20，然后执行：
+\begin{tbash}
+cmake --build build --parallel 2
+./build/armor_demo
+cmake -S . -B build -DSAVE_OUTPUT=OFF
+cmake --build build --parallel 2
+./build/armor_demo
+\end{tbash}
+分数应为 60；关闭开关并重新构建后，不再输出 \texttt{save output enabled}。
+普通源文件修改只需重新构建；配置开关通过重新配置写入构建要求后，也需要构建。
+最后把乘数改回 10，再构建一次，确认恢复为 \texttt{score=30}。
+\end{solution}
+
+\paragraph*{随堂练习 3.5：共享库版本}
+\begin{solution}
+把库目标改为 \texttt{add\_library(armor SHARED src/armor.cpp)}，然后在 Ubuntu 中运行：
+\begin{tbash}
+cmake -S . -B build-shared -DCMAKE_BUILD_TYPE=Debug
+cmake --build build-shared --parallel 2
+ls build-shared/libarmor.so
+./build-shared/armor_demo
+\end{tbash}
+应出现共享库文件，程序仍输出 30 分。此时是在构建目录里运行，CMake 通常会安排构建目录的运行时库搜索路径；不能由此推出复制到任意电脑也能运行。
+最后改回 STATIC，回到正文的静态库版本继续安装练习。
+\end{solution}
+
+\paragraph*{随堂练习 3.6：更换安装前缀}
+\begin{solution}
+在静态库版本已配置、已构建的前提下，运行：
+\begin{tbash}
+cmake --install build-lib --prefix "$PWD/stage-check"
+./stage-check/bin/armor_demo
+\end{tbash}
+前缀是 \texttt{\$PWD/stage-check}，安装规则中的相对目录是 \texttt{bin}，二者组合成最终安装位置。
+程序应输出 \texttt{score=30}。若你上一步还没恢复静态库版本，先恢复并重新配置、构建。
+\end{solution}
+
+\paragraph*{随堂练习 3.7：PUBLIC 改成 PRIVATE}
+\begin{solution}
+armor 库自己仍能使用 include 目录，所以其源码能编译。
+但这个目录不再作为使用要求传给链接它的 \texttt{armor\_demo}，后者在编译 \texttt{src/main.cpp} 时找不到 \texttt{armor.hpp}。
+恢复 PUBLIC 后重新配置并构建，应该通过。要是只改了文件却看到旧程序还能运行，先确认你检查的是本次构建结果。
+\end{solution}
+
+\paragraph*{随堂练习 3.8：检查退出码}
+\begin{solution}
+在 \texttt{opencv-demo} 目录执行：
+\begin{tbash}
+./build/image_viewer
+echo $?
+./build/image_viewer missing.png
+echo $?
+\end{tbash}
+两次退出码分别为 1、2。前者参数数量不对，后者读图失败；两种情况下都已成功启动程序，因此不应靠改链接配置解决。
+\texttt{echo \$?} 必须紧跟待检查的命令，其他命令会覆盖这个状态值。
+\end{solution}
+
+\subsubsection*{章末习题}
+\paragraph*{章末第 1 题：编译阶段}
+\begin{solution}
+预处理得到 \texttt{.ii}，编译得到 \texttt{.s}，汇编得到 \texttt{.o}，链接得到可执行文件。\texttt{-c} 在生成目标文件后停止，不执行链接。
+\end{solution}
+
+\paragraph*{章末第 2 题：项目名与目标名}
+\begin{solution}
+项目名是整个项目的名字，目标名是要构建的产物的名字。此时只准备好了构建文件，还要执行 \texttt{cmake --build 构建目录}。
+\end{solution}
+
+\paragraph*{章末第 3 题：头文件路径与源文件}
+\begin{solution}
+需要。头文件搜索路径只帮助编译器找到声明。\texttt{score.cpp} 里的实现仍要参与编译，也可以先做成库，再链接给程序。
+\end{solution}
+
+\paragraph*{章末第 4 题：库类型}
+\begin{solution}
+\texttt{STATIC} 创建静态库，\texttt{SHARED} 创建共享库。省略类型时取决于 \texttt{BUILD\_SHARED\_LIBS}；该变量未设置或为假时默认静态库。
+\end{solution}
+
+\paragraph*{章末第 5 题：目标名与变量}
+\begin{solution}
+不一样。\texttt{score} 指向已创建的库目标；\texttt{\$\{score\}} 读取同名变量。题目中没设置这个变量，展开后是空的，程序就没有通过这项配置链接该库。
+\end{solution}
+
+\paragraph*{章末第 6 题：安装位置}
+\begin{solution}
+可执行文件路径为 \texttt{/home/student/demo-stage/bin/viewer}。安装不会自动构建，应先配置、构建，再安装。
+\end{solution}
+
+\paragraph*{章末第 7 题：配置作用域}
+\begin{solution}
+第一个设为 \texttt{PUBLIC}，库自己和下游都能用；第二个设为 \texttt{PRIVATE}，只给库自己用。\texttt{INTERFACE} 只把要求传给下游，常用于只提供头文件的接口库。
+\end{solution}
+
+\paragraph*{章末第 8 题：OpenCV 查找}
+\begin{solution}
+不会自动安装。先检查 C++ 开发包是否安装。找到包配置文件 \texttt{OpenCVConfig.cmake} 后，把它所在的目录赋给 \texttt{OpenCV\_DIR}，不能随意指定一个头文件目录。
+\end{solution}
+
+\paragraph*{章末第 9 题：配置开关与重新构建}
+\begin{solution}
+漏了重新构建。开关决定是否调用 \texttt{target\_compile\_definitions}，这条命令会把宏加入目标的编译要求。重新构建后，条件编译的结果才会出现在新程序里；原程序不会自动变化。
+\end{solution}
+
+\paragraph*{章末第 10 题：增量构建}
+\begin{solution}
+按本章的构建规则，文件没变时，不需要重新编译或链接。改了 \texttt{armor.cpp} 后，要重新编译它、更新静态库，再重新链接程序。\texttt{main.cpp} 和它的依赖都没变，所以不用重新编译。不同生成器的日志长得不一样，看实际执行了哪些命令就好。
+\end{solution}
+
+\begin{note}
+几处易混淆规则可查阅原始文档：
+\begin{itemize}
+    \item C++ 表达式值类别：\url{https://eel.is/c++draft/basic.lval}
+    \item vector 容量要求：\url{https://eel.is/c++draft/vector.capacity}
+    \item 条件变量等待：\url{https://eel.is/c++draft/thread.condition.condvar}
+\end{itemize}
+理解当前题目需要的部分就够了，文档可以慢慢查。
+\end{note}
+\endgroup

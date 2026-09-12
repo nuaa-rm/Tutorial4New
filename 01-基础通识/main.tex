@@ -20,6 +20,7 @@
 \institute{视觉组培训}
 \date{\today}
 \version{2026.09}
+\TextbookVolume{1}
 \extrainfo{标 $*$ 的小节为选修，不计入通识考核。}
 
 \begin{document}
@@ -28,13 +29,13 @@
 
 \frontmatter
 
-\chapter*{认识技术组与视觉组}
-\addcontentsline{toc}{chapter}{认识技术组与视觉组}
-\input{preface/promo_body.tex}
-
 \chapter*{编者说明}
 \addcontentsline{toc}{chapter}{编者说明}
 \input{preface/editors_note.tex}
+
+\chapter*{认识技术组与视觉组}
+\addcontentsline{toc}{chapter}{认识技术组与视觉组}
+\input{preface/promo_body.tex}
 
 \tableofcontents
 
@@ -103,7 +104,7 @@
 \begin{introduction}
   \item 学习目标：掌握类、继承与模板；编写 lambda；理解引用与移动；使用智能指针与常用 STL；掌握多线程同步与常见模型，并理解进程内存分区与堆栈差异。
   \item 建议学时：约 1.5--2 周。
-  \item 本卷边界：ROS2 执行器与节点生命周期中的多线程用法见卷二。四阶段并发综合作业见 \texttt{参考文献/multithread.pdf}。
+  \item 本卷边界：ROS2 执行器与节点生命周期中的多线程用法见卷二；本节只讲标准 C++ 并发工具、经典问题与基础线程池。
 \end{introduction}
 
 \section{面向对象编程：类}
@@ -123,39 +124,87 @@
 本节展开多线程同步与常见模型，并将系统内存布局作为相关基础一并说明。
 \input{Chapter2/22_thread.tex}
 
-\section{本章验收}
-\begin{enumerate}
-    \item 定义表示平面点的结构体或类，重载输出运算符，打印若干角点坐标。
-    \item 使用 lambda 作为比较器，对自定义结构体数组排序。
-    \item 说明拷贝构造函数参数必须为引用的原因，以及按值传递将导致的问题。
-    \item 使用 \texttt{std::vector} 等容器管理一组对象，并说明优先使用智能指针管理堆内存的原因。
-    \item 实现线程安全队列，或完成 \texttt{参考文献/multithread.pdf} 中 Phase~1，并用测试验证。
-\end{enumerate}
+\section{本章小结}
+本章围绕"组织数据 → 组织函数 → 组织内存 → 组织计算"这条主线展开：
+
+\begin{itemize}
+\item \textbf{类与面向对象}：类的三大成员（数据成员、成员函数、构造/析构函数）和三种访问限定符是天天要用的基本功，要求熟练；函数重载、运算符重载、继承与多态是阅读和编写类代码的必备能力；模板只需掌握最基本的函数模板和类模板写法，遇到变参模板等进阶内容会查文档即可。
+\item \textbf{lambda、引用与移动}：lambda 的捕获列表（值捕获 vs 引用捕获）和 \texttt{std::function} 承接要熟练使用，回调和排序比较器里到处都是它；左值/右值、两种引用与 \texttt{std::move}/\texttt{std::forward} 是本章最容易混淆的部分，记住"能取地址的是左值、有名字的右值引用是左值"这两句就够应付日常，其余在实践中慢慢消化。
+\item \textbf{智能指针}：掌握 \texttt{unique\_ptr}（独占）、\texttt{shared\_ptr}（计数共享）、\texttt{weak\_ptr}（观察不占有）的分工，默认优先 \texttt{make\_unique}/\texttt{make\_shared}；循环引用的成因和用 \texttt{weak\_ptr} 破解的方法必须理解。
+\item \textbf{STL}：\texttt{vector} 的常用成员函数和扩容机制要熟练；队列、堆栈、映射等容器知道各自解决什么问题、会去 cppreference 查用法即可；迭代器失效是新手重灾区，删除元素时牢记用 \texttt{erase} 的返回值更新迭代器。
+\item \textbf{多线程与内存}：会创建线程，使用 \texttt{mutex}/\texttt{lock\_guard}、共享锁、原子变量和条件变量；能用 \texttt{future}/\texttt{promise}/\texttt{async} 传递异步结果；理解生产者—消费者、读者—写者、哲学家进餐和死锁；进程内存分区（代码/常量/静态/堆/栈）和栈帧机制是理解悬垂指针、栈溢出等经典 bug 的地基，务必建立图景。
+\end{itemize}
+
+本章验收通过后，恭喜你已经掌握了阅读现代 C++ 工程代码的主要语法设施。下一章我们来看看这些代码是如何被编译器组装成可执行文件的——CMake 见。
+
+\begin{problemset}
+\item 说出 \texttt{public}、\texttt{private}、\texttt{protected} 三种访问限定符的区别，并说明基类的 \texttt{private} 成员能否被派生类直接访问。
+\item 判断并说明理由：\texttt{int f(int)} 与 \texttt{double f(int)} 能否构成函数重载？
+\item 写出 lambda 表达式的简化语法形式，并说明值捕获 \texttt{[a]} 与引用捕获 \texttt{[\&a]} 在"修改原变量"这一点上的区别。
+\item 解释左值与右值的区别，写出判断一个表达式是左值还是右值的最常用方法。
+\item 说明 \texttt{std::move} 的作用，并回答：对一个对象执行 \texttt{std::move} 之后，该对象本身的数据被搬走了吗？
+\item 比较 \texttt{unique\_ptr} 与 \texttt{shared\_ptr} 的所有权语义，并说明为什么前者的拷贝构造被禁用。
+\item 解释 \texttt{shared\_ptr} 循环引用的成因，以及如何用 \texttt{weak\_ptr} 解决。
+\item （提高）写出遍历 \texttt{std::vector} 时安全删除满足某条件元素的两种写法（提示：一种利用 \texttt{erase} 的返回值，一种是 erase-remove 惯用法）。
+\item （提高）解释死锁产生的四个必要条件，并结合"两把锁以相反顺序获取"的例子说明破坏哪一个条件可以修复它。
+\item （实践）综合本章内容实现一个小程序：定义 \texttt{Armor} 类（含编号、置信度数据成员），用 \texttt{std::vector} 管理若干对象，使用 lambda 作为比较器按置信度降序排序，最后以多线程方式（两个线程）分别统计其中置信度高于/低于 0.5 的数量并打印，注意线程安全。
+\end{problemset}
 
 % ============================================================
 \chapter{编译过程与 CMake 基础}
 
 \begin{introduction}
-  \item 学习目标：说明预处理、编译、汇编与链接；编写基本 \texttt{CMakeLists.txt}，完成可执行文件生成、依赖查找与链接。
-  \item 建议学时：约 3--5 天。
-  \item 本卷边界：CUDA 与 ament 等构建细节见卷二。本卷实例中出现的相关语句仅作认知，不纳入考核。
+  \item 学习目标：分步生成编译产物；用 CMake 构建、链接并安装多文件工程；查找 OpenCV 依赖并定位常见构建错误。
+  \item 建议学时：约 3--5 天（含练习）。
+  \item 本卷边界：只考核标准 C++ 工程与 OpenCV 的基础构建；CUDA、ament 构建细节及图像算法见卷二，章末 ROS2 工程片段为选读。
 \end{introduction}
 
+% 仅在本章为较长的命令名留出换行余量。
+\begingroup
+\setlength{\emergencystretch}{3em}
 % Chapter3 原文使用 \subsection 作为章内一级，临时提升为 \section
 \let\subsection\section
 \input{Chapter3/3.tex}
+\makeatletter
 \let\subsection\textbook@subsection
+\makeatother
 
-\section{本章验收}
-\begin{enumerate}
-    \item 建立至少包含两个 \texttt{.cpp} 源文件的工程，使用 \texttt{add\_executable} 与 \texttt{target\_link\_libraries} 完成编译与运行。
-    \item 使用 \texttt{find\_package(OpenCV REQUIRED)} 编译读取并显示图像的示例程序。算法细节见卷二 OpenCV 章。
-\end{enumerate}
+\clearpage
+\section{本章小结}
+这一章，我们把代码一步步变成了能运行的程序。回头看，最常用的是这几件事：
+\begin{itemize}
+    \item \textbf{看懂编译过程}：说清预处理、编译、汇编和链接各做什么，能区分声明与定义、头文件与目标文件、静态库与动态库。四步命令亲手跑过即可，日常交给构建工具。
+    \item \textbf{跑通 CMake 工作流}：用 \texttt{cmake -S/-B} 配置，用 \texttt{cmake --build} 构建，再用 \texttt{cmake --install} 安装。这几条要练熟，源码目录和构建目录也要分开。
+    \item \textbf{写清目标与依赖}：先用 \texttt{add\_executable} 或 \texttt{add\_library} 创建目标，再给它设置头文件路径和链接依赖。这部分要会写，也要能说出哪些配置只给自己用，哪些会传给下游。
+    \item \textbf{按阶段排错}：先判断卡在配置、编译、链接还是运行，再查相应的路径、实现或依赖。参数细节、自定义模块和 ROS2 的构建约定，用到时会查就行。
+\end{itemize}
+现在拿一份构建文件，试着说出它要生成什么、依赖什么、怎样运行验证。能说清，也能亲手跑通，就可以带着这些基本功去卷二了。
+以后再遇到满屏报错，至少知道从哪里查起——这已经比对着终端许愿靠谱多了。
+
+\begin{problemset}
+\item （基础）写出从 \texttt{demo.cpp} 到可执行文件的四个阶段及其中间文件扩展名，并说明 \texttt{g++ -c demo.cpp} 停在哪一步。
+\item （基础）你把项目命名为 \texttt{training}，把可执行目标命名为 \texttt{viewer}。这两个名字分别管什么？终端出现 \texttt{Generating done} 时，程序已经编译好了吗？
+\item （基础）程序需要 \texttt{main.cpp} 和 \texttt{score.cpp}，头文件放在 \texttt{include} 目录。你已经设置了头文件搜索路径，还需要把 \texttt{score.cpp} 加进目标吗？说说理由。
+\item （基础）比较 \texttt{add\_library(score STATIC score.cpp)}、显式写 \texttt{SHARED} 和省略类型三种写法的含义。
+\item （基础）你用 \texttt{add\_library(score STATIC score.cpp)} 创建了库，但没定义名为 \texttt{score} 的变量。链接时写 \texttt{score} 和 \texttt{\$\{score\}}，结果一样吗？
+\item （基础）安装规则的目标目录为 \texttt{bin}，安装前缀为 \texttt{/home/student/demo-stage}。目标 \texttt{viewer} 会安装到哪里？只运行安装命令能否替代构建？
+\item （基础）库需要两个头文件目录：一个是库自己和使用这个库的程序都要用的，另一个只供库内部使用。它们分别该设成什么作用域？\texttt{INTERFACE} 又适合什么情况？
+\item （基础）\texttt{find\_package(OpenCV REQUIRED)} 在配置阶段失败。它会自动安装 OpenCV 吗？自行安装 OpenCV 后，\texttt{OpenCV\_DIR} 应指向哪类目录？
+\item （提高）你把 \texttt{SAVE\_OUTPUT} 从 \texttt{OFF} 改成 \texttt{ON}，配置完成后就运行了原程序，却没看到新提示。请按 CMake 变量、编译宏、可执行文件的顺序，解释中间漏了哪一步。
+\item （实践）观察一次“哪些文件需要重新编译”。在静态库工程中，先不改任何文件，连续构建两次；然后只改 \texttt{src/armor.cpp} 中的乘数，再构建一次。用 \texttt{--verbose} 保存后两次构建的输出，看看各自做了哪些工作。最后把乘数改回来。
+\end{problemset}
+
+\endgroup
 
 \chapter*{卷一小结}
 \addcontentsline{toc}{chapter}{卷一小结}
-完成本卷验收后，应具备进入专项学习的基础能力。
-下一步学习 \textbf{卷二 · 专项技术栈}，按\textbf{自瞄 / 雷达 / 导航}方向选修对应章节；
-赛场链路与工程准则见 \textbf{卷三 · RM 视觉概述}。
+\markboth{卷一小结}{卷一小结}
+\input{summary.tex}
+
+% 统一题解放在卷一全文末尾，题目仍保留在原章。
+\chapter*{参考题解}
+\addcontentsline{toc}{chapter}{参考题解}
+\markboth{参考题解}{参考题解}
+\input{answers.tex}
 
 \end{document}

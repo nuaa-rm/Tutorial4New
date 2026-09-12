@@ -1,0 +1,4 @@
+# Keep PDF byte offsets intact; never normalize line endings in binary assets.
+*.pdf binary
+*.png binary
+*.ttf binary

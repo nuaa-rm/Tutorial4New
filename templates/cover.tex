@@ -1,0 +1,249 @@
+% 三卷共用的封面与内标题页。由 preamble.tex 载入。
+% 封面文字为矢量文字；共用插画保存在 assets/covers/vision-optics.png。
+\definecolor{coverink}{HTML}{16343E}
+\definecolor{covermuted}{HTML}{536E76}
+\definecolor{coveraqua}{HTML}{1FBABE}
+\definecolor{coverpale}{HTML}{E8F7F7}
+\definecolor{coveraccent}{HTML}{E97953}
+\newcommand{\TextbookVolume}[1]{\def\TextbookVolumeNumber{#1}}
+\TextbookVolume{1}
+\newcommand{\TextbookCoverArt}{../assets/covers/vision-optics.png}
+\newcommand{\TextbookTeamEmblem}{../assets/covers/team-emblem-cyan.pdf}
+% 从项目加载字体，无须在系统安装；只作用于封面展示文字。
+\IfFileExists{../fonts/站酷高端黑.ttf}{\def\textbookFontPath{../fonts/}}
+  {\def\textbookFontPath{../../fonts/}}
+\newfontfamily\textbookDisplayLatin[Path=\textbookFontPath,BoldFont=站酷高端黑.ttf]{站酷高端黑.ttf}
+\newCJKfontfamily\textbookDisplayChinese[Path=\textbookFontPath,BoldFont=站酷高端黑.ttf]{站酷高端黑.ttf}
+\newcommand{\textbookDisplayFont}{\textbookDisplayLatin\textbookDisplayChinese}
+
+\makeatletter
+\newcommand{\textbook@coverdata}{%
+  \ifcase\TextbookVolumeNumber\relax
+  \or
+    \def\textbook@vol{卷一}\def\textbook@num{01}%
+    \def\textbook@topic{基础通识}%
+    \def\textbook@english{FOUNDATIONS}%
+    \def\textbook@keywords{Linux\quad /\quad 现代 C++\quad /\quad CMake\quad /\quad Git}%
+    \def\textbook@intro{从开发环境到第一个可以复现的工程。\\为视觉组专项学习建立工具、语言与协作基础。}%
+    \def\textbook@one{建立工作环境}\def\textbook@onedesc{安装与维护 Linux，掌握命令行、Shell 和 Git，\\让每次修改都有记录，让开发过程可以重复。}%
+    \def\textbook@two{用 C++ 组织程序}\def\textbook@twodesc{从类与对象到容器、资源管理和并发，\\写清数据怎样流动、对象由谁持有。}%
+    \def\textbook@three{构建并验证工程}\def\textbook@threedesc{理解编译与链接，用 CMake 管理多文件工程，\\按阶段定位错误，交付能够运行的结果。}%
+  \or
+    \def\textbook@vol{卷二}\def\textbook@num{02}%
+    \def\textbook@topic{专项技术栈}%
+    \def\textbook@english{TOOLS \& METHODS}%
+    \def\textbook@keywords{ROS2\quad /\quad OpenCV\quad /\quad 深度学习\quad /\quad 估计与控制}%
+    \def\textbook@intro{把通识基础转化为可以使用的技术模块。\\沿自瞄、雷达与导航方向，组合自己的学习路径。}%
+    \def\textbook@one{连接数据与模块}\def\textbook@onedesc{从 ROS2 到通信、相机与图像处理，\\搭建感知系统的数据入口和模块接口。}%
+    \def\textbook@two{实现算法与计算}\def\textbook@twodesc{学习深度学习、GPU 加速、滤波与几何视觉，\\把输入数据变成可用于决策的估计结果。}%
+    \def\textbook@three{按方向组合技能}\def\textbook@threedesc{结合控制、导航与相关专项，\\围绕具体任务选择方法并完成工程验证。}%
+  \or
+    \def\textbook@vol{卷三}\def\textbook@num{03}%
+    \def\textbook@topic{RM 视觉概述}%
+    \def\textbook@english{SYSTEMS IN COMPETITION}%
+    \def\textbook@keywords{自瞄\quad /\quad 雷达\quad /\quad 导航\quad /\quad 工程准则}%
+    \def\textbook@intro{把技术模块放回 RoboMaster 比赛场景。\\读懂系统链路、接口边界与实车调试的工程要求。}%
+    \def\textbook@one{看清赛场任务}\def\textbook@onedesc{认识视觉组的职责与协作关系，\\建立自瞄、雷达、导航三个方向的全景。}%
+    \def\textbook@two{串起感知与行动}\def\textbook@twodesc{沿相机、识别、估计与控制梳理数据流，\\说明各模块的输入、输出和接口责任。}%
+    \def\textbook@three{形成工程判断}\def\textbook@threedesc{结合前端调试、工程准则与进阶地图，\\让系统设计与赛场验证形成完整的工作流程。}%
+  \else
+    \PackageError{cover}{Unsupported volume number}{Use 1, 2 or 3.}%
+  \fi
+}
+
+% 使用整页坐标，内容不会因图片尺寸或正文页边距而挤到下一页。
+\newcommand{\textbook@coverpage}{%
+  \thispagestyle{empty}\null
+  \begin{tikzpicture}[remember picture,overlay,x=\paperwidth,y=\paperheight]
+    \begin{scope}[shift={(current page.south west)}]
+      \fill[white] (0,0) rectangle (1,1);
+      % 与学习导览呼应的轻量制图装饰，保持主标题和插画留白。
+      \fill[coveraqua] (0,0.885) rectangle (0.014,0.974);
+      \foreach \y in {0.64,0.665,...,0.84} {
+        \draw[coveraqua!35,line width=0.35pt] (0.039,\y) -- (0.046,\y);
+      }
+      % 新版队徽使用同源矢量 PDF，SVG 母版位于 assets/covers。
+      \node[anchor=west,inner sep=0pt] at (0.09,0.928)
+        {\includegraphics[width=0.102\paperwidth]{\TextbookTeamEmblem}};
+      \node[anchor=west,inner sep=0pt,text=coverink,
+        font=\textbookDisplayFont\fontsize{25}{30}\selectfont]
+        at (0.22,0.942) {NUAA};
+      \draw[coveraqua!65,line width=0.6pt] (0.403,0.925) -- (0.403,0.957);
+      \node[anchor=west,inner sep=0pt,text=coverink,
+        font=\textbookDisplayFont\fontsize{23}{29}\selectfont]
+        at (0.427,0.942) {长空御风};
+      \node[anchor=west,inner sep=0pt,text=covermuted,font=\sffamily\fontsize{8.5}{12}\selectfont]
+        at (0.22,0.905) {南京航空航天大学\quad /\quad 长空御风战队};
+      \node[anchor=east,inner sep=0pt,text=covermuted,font=\sffamily\fontsize{9}{12}\selectfont]
+        at (0.91,0.942) {ROBOMASTER};
+      \node[anchor=east,inner sep=0pt,text=covermuted,font=\sffamily\fontsize{8}{11}\selectfont]
+        at (0.91,0.919) {VISION TEAM};
+      \draw[coveraqua!28,line width=0.5pt] (0.09,0.877) -- (0.91,0.877);
+      \draw[coveraccent,line width=1.2pt] (0.09,0.877) -- (0.145,0.877);
+
+      \node[anchor=north west,inner sep=0pt,align=left,text=coverink,
+        font=\textbookDisplayFont\fontsize{54}{64}\selectfont]
+        at (0.09,0.84) {视觉组\\培训教材};
+      \fill[coverpale!40] (0.66,0.742) rectangle (0.932,0.85);
+      \foreach \x in {0.66,0.687,...,0.931} {
+        \draw[coveraqua!18,line width=0.3pt] (\x,0.742) -- (\x,0.85);
+      }
+      \foreach \y in {0.742,0.760,...,0.85} {
+        \draw[coveraqua!18,line width=0.3pt] (0.66,\y) -- (0.932,\y);
+      }
+      \draw[coveraqua!40,line width=0.45pt] (0.796,0.796) ellipse [x radius=0.12,y radius=0.074];
+      \draw[covermuted!65,line width=0.65pt] (0.653,0.824) -- (0.653,0.855) -- (0.69,0.855);
+      \draw[covermuted!65,line width=0.65pt] (0.896,0.736) -- (0.939,0.736) -- (0.939,0.762);
+      \fill[coveraccent] (0.664,0.736) rectangle (0.674,0.743);
+      \node[anchor=center,inner sep=0pt,text=coveraqua!33!white,
+        font=\textbookDisplayFont\fontsize{106}{106}\selectfont]
+        at (0.796,0.796) {\textbook@num};
+      \node[anchor=north east,inner sep=0pt,text=covermuted,
+        font=\sffamily\fontsize{7}{10}\selectfont]
+        at (0.932,0.718) {VOLUME\quad /\quad \textbook@num};
+      \node[anchor=west,inner sep=0pt,text=coverink,
+        font=\textbookDisplayFont\fontsize{27}{34}\selectfont]
+        at (0.09,0.68) {\textbook@vol\quad /\quad \textbook@topic};
+      \node[anchor=west,inner sep=0pt,text=covermuted,
+        font=\sffamily\fontsize{9}{12}\selectfont]
+        at (0.09,0.641) {\textbook@english};
+
+      \node[anchor=center,inner sep=0pt] at (0.51,0.385)
+        {\includegraphics[width=0.97\paperwidth]{\TextbookCoverArt}};
+      % 插画周边仅保留两组定位角，不用整框压住镜头与光线。
+      \draw[coveraqua!55,line width=0.6pt] (0.075,0.561) -- (0.075,0.592) -- (0.12,0.592);
+      \draw[coveraqua!55,line width=0.6pt] (0.881,0.183) -- (0.925,0.183) -- (0.925,0.214);
+      \fill[coveraccent] (0.914,0.177) rectangle (0.925,0.185);
+
+      \path[fill=coverpale!52,draw=coveraqua!20,line width=0.4pt]
+        (0.075,0.14) -- (0.912,0.14) -- (0.93,0.127)
+        -- (0.93,0.102) -- (0.075,0.102) -- cycle;
+      \node[anchor=west,inner sep=0pt,text=covermuted,
+        font=\sffamily\fontsize{10}{14}\selectfont]
+        at (0.09,0.118) {\textbook@keywords};
+      \draw[coveraqua,line width=0.7pt] (0.09,0.089) -- (0.91,0.089);
+      \draw[coveraccent,line width=1.2pt] (0.09,0.089) -- (0.145,0.089);
+      \node[anchor=west,inner sep=0pt,text=coverink,
+        font=\sffamily\fontsize{9}{12}\selectfont]
+        at (0.09,0.058) {南京航空航天大学\quad 长空御风战队};
+      \node[anchor=east,inner sep=0pt,text=covermuted,
+        font=\sffamily\fontsize{9}{12}\selectfont]
+        at (0.91,0.058) {\@version\quad /\quad VOL.\ \textbook@num};
+    \end{scope}
+  \end{tikzpicture}\clearpage
+}
+
+\newcommand{\textbook@learningrow}[4]{%
+  % 切角信息面板与编号节点；连线统一在面板之前绘制。
+  \path[fill=coverpale!38,draw=coveraqua!23,line width=0.5pt]
+    (0.18,#1+0.047) -- (0.888,#1+0.047) -- (0.91,#1+0.031)
+    -- (0.91,#1-0.074) -- (0.202,#1-0.074) -- (0.18,#1-0.058) -- cycle;
+  \draw[coveraqua!65,line width=0.7pt] (0.146,#1+0.019) -- (0.18,#1+0.019);
+  \path[fill=coverink] (0.086,#1+0.045) -- (0.137,#1+0.045)
+    -- (0.154,#1+0.032) -- (0.154,#1-0.009) -- (0.103,#1-0.009)
+    -- (0.086,#1+0.004) -- cycle;
+  \node[anchor=center,inner sep=0pt,text=white,
+    font=\textbookDisplayFont\fontsize{17}{20}\selectfont] at (0.120,#1+0.018) {#2};
+  \node[anchor=north west,inner sep=0pt,text=coverink,
+    font=\textbookDisplayFont\fontsize{17}{22}\selectfont] at (0.215,#1+0.027) {#3};
+  \node[anchor=north west,inner sep=0pt,text=covermuted,align=left,
+    font=\sffamily\fontsize{10.5}{17}\selectfont] at (0.215,#1-0.017) {#4};
+  \node[anchor=north east,inner sep=0pt,text=covermuted,
+    font=\sffamily\fontsize{6.5}{9}\selectfont] at (0.877,#1+0.027) {#2\ /\ 03};
+  \draw[coveraqua,line width=1pt] (0.887,#1-0.060) -- (0.902,#1-0.060);
+}
+
+\newcommand{\textbook@titlepage}{%
+  \thispagestyle{empty}\null
+  \begin{tikzpicture}[remember picture,overlay,x=\paperwidth,y=\paperheight]
+    \begin{scope}[shift={(current page.south west)}]
+      \fill[white] (0,0) rectangle (1,1);
+      % 留白中的工程制图语言：页边刻度、局部网格、切角与路径节点。
+      \fill[coveraqua] (0,0.875) rectangle (0.014,0.972);
+      \fill[coverink] (0,0.473) rectangle (0.008,0.603);
+      \foreach \y in {0.22,0.24,...,0.84} {
+        \draw[coveraqua!35,line width=0.35pt] (0.039,\y) -- (0.046,\y);
+      }
+      \node[anchor=west,inner sep=0pt,text=covermuted,
+        font=\sffamily\fontsize{8}{11}\selectfont]
+        at (0.10,0.943) {NUAA\quad /\quad 长空御风视觉组};
+      \node[anchor=east,inner sep=0pt,text=covermuted,
+        font=\sffamily\fontsize{8}{11}\selectfont]
+        at (0.91,0.943) {LEARNING MAP\quad /\quad VOL.\ \textbook@num};
+      \draw[coveraqua!45,line width=0.45pt] (0.10,0.922) -- (0.91,0.922);
+
+      \fill[coverink] (0.10,0.870) -- (0.204,0.870) -- (0.217,0.883)
+        -- (0.217,0.903) -- (0.10,0.903) -- cycle;
+      \node[anchor=center,inner sep=0pt,text=white,
+        font=\textbookDisplayFont\fontsize{11}{14}\selectfont]
+        at (0.156,0.887) {\textbook@vol};
+      \node[anchor=west,inner sep=0pt,text=covermuted,
+        font=\sffamily\fontsize{8}{11}\selectfont]
+        at (0.24,0.886) {\textbook@english};
+      \node[anchor=north west,inner sep=0pt,text=coveraqua,
+        font=\textbookDisplayFont\fontsize{35}{43}\selectfont]
+        at (0.10,0.843) {学习导览};
+      \node[anchor=north west,inner sep=0pt,text=coverink,
+        font=\textbookDisplayFont\fontsize{26}{34}\selectfont]
+        at (0.10,0.782) {\textbook@topic};
+      \draw[coveraccent,line width=2.2pt] (0.10,0.731) -- (0.158,0.731);
+
+      % 卷号嵌入坐标网格，图形限定在右侧，不穿过阅读文字。
+      \fill[coverpale!45] (0.66,0.755) rectangle (0.92,0.868);
+      \foreach \x in {0.66,0.686,...,0.92} {
+        \draw[coveraqua!20,line width=0.3pt] (\x,0.755) -- (\x,0.868);
+      }
+      \foreach \y in {0.755,0.773,...,0.864} {
+        \draw[coveraqua!20,line width=0.3pt] (0.66,\y) -- (0.92,\y);
+      }
+      \draw[coveraqua!45,line width=0.5pt] (0.792,0.810) ellipse [x radius=0.109,y radius=0.073];
+      \draw[coverink,line width=0.8pt] (0.655,0.846) -- (0.655,0.872) -- (0.691,0.872);
+      \draw[coverink,line width=0.8pt] (0.886,0.751) -- (0.925,0.751) -- (0.925,0.777);
+      \node[anchor=center,inner sep=0pt,text=coverink,
+        font=\textbookDisplayFont\fontsize{78}{85}\selectfont]
+        at (0.792,0.811) {\textbook@num};
+      \fill[coveraccent] (0.665,0.750) rectangle (0.676,0.758);
+      \node[anchor=north east,inner sep=0pt,text=covermuted,
+        font=\sffamily\fontsize{7}{10}\selectfont]
+        at (0.918,0.732) {VOLUME\quad /\quad \textbook@num};
+      \node[anchor=north west,inner sep=0pt,text=covermuted,align=left,
+        font=\sffamily\fontsize{11}{19}\selectfont]
+        at (0.10,0.701) {\textbook@intro};
+
+      \node[anchor=west,inner sep=0pt,text=covermuted,
+        font=\sffamily\fontsize{8}{11}\selectfont]
+        at (0.10,0.626) {学习路径\quad /\quad 3 个阶段};
+      \draw[coveraqua!65,line width=1pt] (0.120,0.580) -- (0.120,0.298);
+      \foreach \y in {0.485,0.345} {
+        \draw[coveraqua,line width=0.8pt] (0.115,\y+0.006) -- (0.120,\y) -- (0.125,\y+0.006);
+      }
+      \textbook@learningrow{0.558}{01}{\textbook@one}{\textbook@onedesc}
+      \textbook@learningrow{0.418}{02}{\textbook@two}{\textbook@twodesc}
+      \textbook@learningrow{0.278}{03}{\textbook@three}{\textbook@threedesc}
+
+      \draw[coveraqua!55,line width=0.5pt] (0.10,0.173) -- (0.90,0.173);
+      \draw[coveraccent,line width=1.2pt] (0.10,0.173) -- (0.16,0.173);
+      \node[anchor=north west,inner sep=0pt,text=covermuted,align=left,
+        font=\sffamily\fontsize{9}{16}\selectfont]
+        at (0.10,0.149) {编写\quad \@author\\版本\quad \@version};
+      \node[anchor=north east,inner sep=0pt,text=covermuted,align=right,
+        font=\sffamily\fontsize{9}{16}\selectfont]
+        at (0.90,0.149) {视觉组新人培训系列\\南京航空航天大学 · 长空御风战队};
+      \node[anchor=north west,inner sep=0pt,text=covermuted,align=left,
+        text width=0.8\paperwidth,font=\sffamily\fontsize{8.5}{13}\selectfont]
+        at (0.10,0.081) {\@extrainfo};
+    \end{scope}
+  \end{tikzpicture}\clearpage
+}
+
+\renewcommand{\maketitle}{%
+  \clearpage
+  \hypersetup{pageanchor=false}%
+  \begingroup
+    \setstretch{1}\textbook@coverdata
+    \textbook@coverpage
+    \textbook@titlepage
+  \endgroup
+  \hypersetup{pageanchor=true}%
+}
+\makeatother

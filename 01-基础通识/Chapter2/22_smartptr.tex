@@ -22,109 +22,172 @@ public:
     ~B(){std::cout << "B对象已被析构，val值为：" << val << std::endl;}
     int getVal(){return val;};
     void setVal(int val){this->val = val;}
-    std::shared_ptr<A> A_ptr;
+    std::weak_ptr<A> A_ptr; //注意：这里是weak_ptr，不是shared_ptr
 private:
-    int val;    
+    int val;
 };
 \end{tcode}
 
 \subsubsection{unique\_ptr}
 $unique\_ptr$ 为独占式智能指针：同一时刻仅允许一个指针拥有资源。离开作用域时自动释放资源。拷贝构造与拷贝赋值被禁用，所有权只能通过移动转移。
 
+\begin{example}
+\texttt{unique\_ptr} 的所有权转移：
 \begin{tcode}
-{
-    std::unique_ptr<A> ptr1 = std::make_unique<A>();
-    ptr1->setVal(1);
-    //std::unique_ptr<A> ptr2 = ptr;会报错
-    std::unique_ptr<A> ptr2 = std::move(ptr1);
-    if(ptr1 == nullptr){
-        std::cout << "ptr1是一个空指针" << std::endl;
-    }
-    std::cout << "ptr2的val值为：" << ptr2->getVal() << std::endl;
-    ptr1 = std::make_unique<A>();
-    ptr1->setVal(2);
+#include <iostream>
+#include <memory>
+
+int main() {
+    {
+        std::unique_ptr<A> ptr1 = std::make_unique<A>();
+        ptr1->setVal(1);
+        //std::unique_ptr<A> ptr2 = ptr1;会报错，独占指针不允许拷贝
+        std::unique_ptr<A> ptr2 = std::move(ptr1);
+        if(ptr1 == nullptr){
+            std::cout << "ptr1是一个空指针" << std::endl;
+        }
+        std::cout << "ptr2的val值为：" << ptr2->getVal() << std::endl;
+        ptr1 = std::make_unique<A>();
+        ptr1->setVal(2);
+    }//离开作用域，ptr1和ptr2管理的对象被自动析构
+    return 0;
 }
 \end{tcode}
+\end{example}
+
+\begin{note}
+创建智能指针优先使用 \texttt{std::make\_unique} / \texttt{std::make\_shared}，而不是先 \texttt{new} 再交给智能指针接管。
+前者一步完成，更安全也更高效；手动 \texttt{new} 出来的原始指针一旦被两个智能指针同时接管，会被析构两次，直接崩溃。
+\end{note}
+
+\begin{exercise}
+编写函数 \texttt{std::unique\_ptr<A> create(int v)}，在堆上创建一个 \texttt{A} 对象、设置 \texttt{val} 为 \texttt{v} 并返回；
+在 \texttt{main} 中接收返回值并打印 \texttt{val}。思考：为什么这里返回 \texttt{unique\_ptr} 不需要担心拷贝被禁用？
+\end{exercise}
 
 \subsubsection{shared\_ptr}
 当需要多个指针共同管理同一资源时，应使用 $shared\_ptr$。其内部维护引用计数：拷贝使计数加一，析构使计数减一；计数归零时释放资源。移动操作转移所有权，不增加引用计数。
 
+\begin{example}
+观察引用计数的变化：
 \begin{tcode}
-{
-{
-    std::shared_ptr<A> ptr1 = nullptr;
+#include <iostream>
+#include <memory>
+
+int main() {
     {
-        auto ptr2 = std::make_shared<A>();
-        ptr2->setVal(1);
-        ptr1 = ptr2;
-        //ptr1 = std::move(ptr2);//看一下这两种有什么区别？
-        std::cout << "ptr1对象的引用次数为：" << ptr1.use_count() << std::endl;
-        std::cout << "ptr2对象的引用次数为：" << ptr2.use_count() << std::endl;
-    }
-    std::cout << "ptr2已经被析构了" << std::endl;
-}
+        std::shared_ptr<A> ptr1 = nullptr;
+        {
+            auto ptr2 = std::make_shared<A>();
+            ptr2->setVal(1);
+            ptr1 = ptr2;
+            //ptr1 = std::move(ptr2);//看一下这两种写法有什么区别？
+            std::cout << "ptr1对象的引用次数为：" << ptr1.use_count() << std::endl;
+            std::cout << "ptr2对象的引用次数为：" << ptr2.use_count() << std::endl;
+        }
+        std::cout << "ptr2已经被析构了" << std::endl;
+        std::cout << "但A对象还活着，引用次数为：" << ptr1.use_count() << std::endl;
+    }//到这里A对象才被析构
+    return 0;
 }
 \end{tcode}
+\end{example}
 
 \subsubsection{循环引用与 weak\_ptr}
 若两个 $shared\_ptr$ 互相持有对方，将形成循环引用，引用计数无法归零，对象无法析构，从而造成泄漏。
 
+\begin{example}
+循环引用演示（先把 B 类中的 \texttt{A\_ptr} 临时改回 \texttt{shared\_ptr<A>} 再运行）：
 \begin{tcode}
 int main(int argc, char *argv[]) {
-{
-    std::shared_ptr<A> pA(new A);
-    std::shared_ptr<B> pB(new B);
+    {
+        std::shared_ptr<A> pA(new A);
+        std::shared_ptr<B> pB(new B);
 
-    std::cout << pA.use_count() << std::endl;
-    std::cout << pB.use_count() << std::endl;
-}
-std::cout << "上面是符合我们预期的" << std::endl << std::endl;
-{
-    std::shared_ptr<A> pA(new A);
-    std::shared_ptr<B> pB(new B);
+        std::cout << pA.use_count() << std::endl;
+        std::cout << pB.use_count() << std::endl;
+    }
+    std::cout << "上面是符合我们预期的" << std::endl << std::endl;
+    {
+        std::shared_ptr<A> pA(new A);
+        std::shared_ptr<B> pB(new B);
 
-    pA->B_ptr = pB;
-    pB->A_ptr = pA;
+        pA->B_ptr = pB;
+        pB->A_ptr = pA;
 
-    std::cout << pA.use_count() << std::endl;
-    std::cout << pB.use_count() << std::endl;
-}
-std::cout << "咦？这是什么情况呢？为什么没有被析构呢？" << std::endl;
-return 0;
+        std::cout << pA.use_count() << std::endl;
+        std::cout << pB.use_count() << std::endl;
+    }
+    std::cout << "咦？这是什么情况呢？为什么没有被析构呢？" << std::endl;
+    return 0;
 }
 \end{tcode}
+\end{example}
 
-此时应将一侧改为 $weak\_ptr$。$weak\_ptr$ 不增加引用计数，也不直接解引用资源；需要访问时通过 $lock()$ 升级为 $shared\_ptr$，并检查返回值是否为空。
+此时应将一侧改为 $weak\_ptr$（正如本节开头 B 类中的写法）。$weak\_ptr$ 不增加引用计数，也不直接解引用资源；需要访问时通过 $lock()$ 升级为 $shared\_ptr$，并检查返回值是否为空。
 
+\begin{example}
+用 \texttt{weak\_ptr} 打破循环引用：
 \begin{tcode}
-{
-    std::shared_ptr<A> pA(new A);
-    std::shared_ptr<B> pB(new B);
+int main() {
+    {
+        std::shared_ptr<A> pA(new A);
+        std::shared_ptr<B> pB(new B);
 
-    pA->B_ptr = pB;
-    pB->A_ptr = pA;
+        pA->B_ptr = pB;
+        pB->A_ptr = pA; //weak_ptr不增加引用计数
 
-    std::cout << pA.use_count() << std::endl;
-    std::cout << pB.use_count() << std::endl;
+        std::cout << pA.use_count() << std::endl;
+        std::cout << pB.use_count() << std::endl;
 
-    std::shared_ptr<A> PtrA = pB->A_ptr.lock();
-    if(PtrA!= nullptr)
-        PtrA->setVal(1234);
-    PtrA.reset();
+        std::shared_ptr<A> PtrA = pB->A_ptr.lock(); //升级为shared_ptr再使用
+        if(PtrA != nullptr)
+            PtrA->setVal(1234);
+        PtrA.reset();
+    }//这次两个对象都能正常析构了
+    return 0;
 }
 \end{tcode}
+\end{example}
 
 在多线程环境下，$lock()$ 可用于在访问前确认共享对象仍存活。相关同步问题见多线程章节。
 
+\begin{exercise}
+运行"循环引用演示"示例，观察两段的析构输出差异；然后保持 \texttt{weak\_ptr} 写法再运行一遍，
+确认两个对象都能正常析构，并用自己的话解释原因。
+\end{exercise}
+
 \subsubsection{三种智能指针对照}
+\begin{conclusion}
 \begin{center}
     \begin{tabular}{cccc}
-        \hline
+        \toprule[1.5pt]
         智能指针 & 指向数量 & 析构条件 & 是否可操作资源\\
-        \hline
+        \midrule[1pt]
         unique\_ptr & 只能一个 & 离开作用域 & 是\\
         shared\_ptr & 可多个指向同一对象 & 引用计数为 0 & 是\\
         weak\_ptr & 可观察 shared\_ptr 管理的对象 & 不单独决定析构 & 否，需 lock 升级\\
-        \hline
+        \bottomrule[1.5pt]
     \end{tabular}
 \end{center}
+
+选择原则：默认用 \texttt{unique\_ptr}；确实需要共享所有权时才用 \texttt{shared\_ptr}；
+只想"看一眼"而不想延长对象寿命时用 \texttt{weak\_ptr}。这就好比宿舍钥匙：独居一把钥匙（unique），
+合租人手一把、最后走的人锁门（shared），访客只登记不配钥匙（weak）。
+\end{conclusion}
+
+最后补充说明循环引用的两种形态，它们的处理难度完全不同：
+
+\begin{itemize}
+\item \textbf{静态环}：像本节 A、B 两个类这样，互相持有的关系在代码里写得明明白白。
+这种环一眼就能看出来，设计时把一侧改成 \texttt{weak\_ptr} 即可解决；
+\item \textbf{动态环}：环是在运行过程中"长"出来的——比如用 \texttt{shared\_ptr} 组织的链表、图结构，
+随着数据不断增加，节点之间可能意外连成一个环。这种环在代码里看不到，等到内存泄漏时往往已经很难排查。
+\end{itemize}
+
+\begin{note}
+对于动态环，标准库\textbf{没有}通用的解决方案：\texttt{weak\_ptr} 只能破解你预先知道存在的那条边，
+而运行时才形成的环你根本不知道该在哪一侧用 \texttt{weak\_ptr}。
+工程上的应对办法是在设计阶段就规定好所有权方向（比如父子结构中父持有子、子用 \texttt{weak\_ptr} 回指父），
+并通过代码评审和内存检测工具（如 AddressSanitizer 的泄漏检查）来兜底。
+\end{note}

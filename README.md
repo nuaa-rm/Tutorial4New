@@ -113,13 +113,17 @@ Tutorial4New/
 ├── 03-RM视觉概述/             # 卷三
 ├── templates/
 │   ├── elegantbook.cls       # ElegantBook 类文件
-│   ├── preamble.tex          # 共用导言、代码环境、封面图
+│   ├── preamble.tex          # 共用导言、代码环境、封面入口
+│   ├── cover.tex             # 三卷共用封面与内标题页
 │   └── chapter-guide.md      # 章节编写与改造规范（完整版）
 ├── .claude/skills/
 │   └── textbook-chapter/     # 章节编写规范（AI 摘要版，与 chapter-guide.md 同步维护）
 ├── cumcmthesis.cls           # 旧数模模板（已弃用，仅本地对照）
-└── 长空御风.png              # 素材；各卷封面为本卷 images/cover.png
+├── assets/covers/            # 共用插画、三卷封面 PDF、预览与复用说明
+└── 长空御风.png              # 原始队徽素材
 ```
+
+封面使用与正文一致的青色主题，三卷通过 `\TextbookVolume{1/2/3}` 切换卷号和导览内容。单独的封面 PDF 与重建方式见 [封面素材说明](assets/covers/README.md)。
 
 本地可有但不纳入 git（见 `.gitignore`）：
 
