@@ -491,83 +491,109 @@ io 保留生成 input.png，把 imread 路径改成不存在的文件，在 empt
 \end{solution}
 
 \section*{第五章：神经网络与深度学习}
-\phantomsection
 \addcontentsline{toc}{section}{第五章题解：神经网络与深度学习}
-\subsubsection*{随堂练习}
+\subsection*{随堂练习}
 
-\paragraph*{随堂练习 5.1}
+\paragraph*{随堂练习 \ref{ex:v2-dl-fit}}
 \begin{solution}
-令训练和验证的目标均为 [1,2,3]，两组预测均为 [2,3,4]，两组均方误差都是 1。训练误差只说明模型在见过的数据上的拟合，无法单独反映新样本表现；还需独立验证数据，并检查分布与划分是否合理。
+去掉扰动后，二阶与四阶都能拟合真正的二次规律，训练与验证误差接近浮点零；一阶仍有误差。模型容量较大不等于必然过拟合，仍须查看独立数据、划分与误差。四阶在原带扰动数据上插值了噪声，因此验证表现较差。
 \end{solution}
 
-\paragraph*{随堂练习 5.2}
+\paragraph*{随堂练习 \ref{ex:v2-dl-env}}
 \begin{solution}
-在所用环境执行：
-\begin{tbash}
-python -c "import sys, torch; print(sys.executable); print(torch.__version__); print(torch.ones(2,3).shape)"
-\end{tbash}
-记录实际解释器路径、版本和 \texttt{torch.Size([2, 3])}。\texttt{python -m pip} 明确使用该解释器的 pip，避免系统中另一个 pip 可执行文件把包安装到其它环境。
+激活后 sys.executable 应指向项目虚拟环境，版本组合为所装构建；未激活时可能导入失败，也可能找到另一套包，要记录实际结果。编辑器须选择该环境的解释器，不能因为终端已激活就假定 GUI 也自动使用它。使用 python -m pip 可将安装指向当前解释器。
 \end{solution}
 
-\paragraph*{随堂练习 5.3}
+\paragraph*{随堂练习 \ref{ex:v2-dl-data}}
 \begin{solution}
-空间尺寸依次为 $32\to28\to14\to10\to5$。最后为 16×5×5，每样本展平维度为 400；批量 2 时输出形状为 [2,400]。若接入完整 LeNet，第一层全连接的输入维度也必须由 256 改为 400，不能只改输入图片尺寸。
+批量为 50、50、28，训练样本共 128，首批形状为 (50,1,28,28)/(50,)/(50,10)，验证与测试仍为 5000/10000。最后一批 \texttt{loss.item()} 是 28 个样本的均值，应乘 28 累加后除总样本；把三个批均值直接平均会提高小批量权重。
 \end{solution}
 
-\paragraph*{随堂练习 5.4}
+\paragraph*{随堂练习 \ref{ex:v2-dl-ops}}
 \begin{solution}
-在 random\_split 得到训练子集之后、创建 DataLoader 之前，对训练子集再取前 128 项：
-\begin{tpython}
-train_set = torch.utils.data.Subset(train_set, range(128))
-\end{tpython}
-训练循环改为一轮，batch\_size 保持 64，因此有两个训练批次。输入形状应为 [64,1,28,28]，输出为 [64,10]，标签为 [64]；损失应有限，反向传播和参数保存不报错。此步骤只验证流程，不用 128 个样本的准确率评价模型能力，确认后恢复完整训练集。
+3 输入、2 窗口、步幅 2、无填充的空间尺寸为 1×1，最大值为 4、平均为 2。全 1 的互相关核、步幅 1 输出为 8/12/20/24。修改核改变加权和，修改池化步幅改变窗口位置与数量，二者不能混为一谈。
 \end{solution}
 
-\paragraph*{随堂练习 5.5}
+\paragraph*{随堂练习 \ref{ex:v2-dl-shape}}
 \begin{solution}
-原线性层权重形状为 [1,2]，新建 \texttt{nn.Linear(3,1)} 需要 [1,3]，load\_state\_dict 会报告 weight 尺寸不匹配。参数文件不能完整替代模型结构与预处理说明；应该恢复相同结构，再加载参数。单纯关闭严格键检查也不能让尺寸不同的权重变得兼容。
+32→28→14→10→5，特征 (2,16,5,5)、展平 (2,400)，原 Linear256 无法接收。将其改为 Linear400 后分数为 (2,10)；两套结构的权重形状不同，不应用 28 输入的参数强行加载。
 \end{solution}
 
-\paragraph*{随堂练习 5.6}
+\paragraph*{随堂练习 \ref{ex:v2-dl-grad}}
 \begin{solution}
-把 x 改为 \texttt{torch.ones(32,4)}，保持计时方式、线程设置和设备不变。分别记录中位每批用时 $T_1,T_{32}$；每样本平均计算开销为 $T_1$ 和 $T_{32}/32$，吞吐率为 $1/T_1$ 和 $32/T_{32}$。这不等于单张图片实际响应延迟，因为批处理还可能等待凑满输入；不应预先假定具体加速倍数。
+清零后梯度仍为 -16，学习率 0.05 更新为 w=0.8，损失 (1.6-4)²=5.76。若使用累加的 -32，则一步变为 1.6，损失约 0.64，这是改变了更新量，不证明不清零更好。backward 求梯度，step 才改参数。
 \end{solution}
 
-\subsubsection*{章末习题}
-
-\paragraph*{第五章章末第 1 题}
+\paragraph*{随堂练习 \ref{ex:v2-dl-mode}}
 \begin{solution}
-优先怀疑过拟合；减少样本不是通用修复，可检查数据划分、增强、正则化与早停。
+p=0 时三种前向数值都为全 1，但训练+\texttt{no\_grad} 与 eval+\texttt{no\_grad} 不记录梯度，单独 eval 仍保留输入的梯度关系。engine 的 net.train(training) 控制层模式，\texttt{torch.set\_grad\_enabled}(training) 控制图记录；没有随机层时数值相同也不能合并这两个功能。
 \end{solution}
 
-\paragraph*{第五章章末第 2 题}
+\paragraph*{随堂练习 \ref{ex:v2-dl-train}}
 \begin{solution}
-24×24、12×12、8×8、4×4；16 个输出通道对应 256 个展平特征。
+小规模仅训练 128，完整训练55000，验证5000、测试10000。查看每轮 valid.loss 的最小值及保存条件，而非只看最后的 train.loss。本次固定CPU三轮验证损失约0.09170/0.07315/0.06032，选第三轮，最终测试准确率0.9853；这是实测示例，不是读者必须复现的分数。
 \end{solution}
 
-\paragraph*{第五章章末第 3 题}
+\paragraph*{随堂练习 \ref{ex:v2-dl-load}}
 \begin{solution}
-接收 logits；PyTorch 默认累积梯度，常规逐批更新需要先清零。
+分类器第一层权重从120×256变成120×400，\texttt{load\_state\_dict} 会报告尺寸不匹配；恢复原结构才能正确加载。相同结构、参数、预处理与样本，推理应在数值容差内一致；归一化改变输入数值但不改变形状，可能不报错却改变分数或类别。
 \end{solution}
 
-\paragraph*{第五章章末第 4 题}
+\paragraph*{随堂练习 \ref{ex:v2-dl-device}}
 \begin{solution}
-不能。eval 改变 Dropout、BatchNorm 等模块行为；no\_grad 关闭梯度记录，二者作用不同。
+CPU构建应记录版本中的+cpu和不可用CUDA；GPU还需记录驱动、CUDA构建、\texttt{is\_available}与设备名。train 先 LeNet().to(device) 再建优化器，engine 将x/y都移到device。可用设备需跑真实训练、保存、加载和同参数比较，误差满足相对1e-4/绝对1e-5；本次RTX3070Ti已验证，无设备的同学不能把静态检查当GPU运行。
 \end{solution}
 
-\paragraph*{第五章章末第 5 题}
+\paragraph*{随堂练习 \ref{ex:v2-dl-nms}}
 \begin{solution}
-需要网络定义、类别顺序、输入形状、归一化和其它预处理约定；设备映射也需匹配。
+0.681低于0.8，保留0/1/2；网络框和分数没有改变，只改变去重条件。不同类别应按类别分组或使用对应类别感知NMS；本例的单类nms会错误抑制高重叠但不同类的框。
 \end{solution}
 
-\paragraph*{第五章章末第 6 题}
+\paragraph*{随堂练习 \ref{ex:v2-dl-deploy}}
 \begin{solution}
-吞吐率分别为 250 与约 667 样本/s；批量 8 吞吐更高，但每批等待和执行使单样本延迟不能直接这样比较。
+分别用 --index 1/2 与独立 --output 路径，记录完整分数误差、(1,10)与类别，而非只比较最大索引。更改benchmark批量为8，报告每批T、每样本T/8、吞吐8/T及线程1。该计时不包含采集、预处理、队列、设备传输、后处理和显示，不能称为相机单帧延迟。
 \end{solution}
 
-\paragraph*{第五章章末第 7 题}
+\subsection*{章末习题}
+\paragraph*{第五章章末习题 \ref{prob:v2-dl-1}}
 \begin{solution}
-批量 2 时输出为 2×400，因为最后特征为 16×5×5。
+优先怀疑过拟合，也检查划分与分布、训练状态和评价代码。相邻帧跨集合造成强相关/信息泄漏，验证可能偏高；按采集序列/场景划分并保留独立测试更能反映新场景。减少样本不是通用修复。
+\end{solution}
+\paragraph*{第五章章末习题 \ref{prob:v2-dl-2}}
+\begin{solution}
+每边floor((10+2-3)/2)+1=5，输出8×5×5（批量另保留）。参数8×3×3×3+8=224，空间大小不乘进参数数目，因为同一核在不同位置复用。
+\end{solution}
+\paragraph*{第五章章末习题 \ref{prob:v2-dl-3}}
+\begin{solution}
+空间28→24→12→8→4，通道16，单样本256。批量8时展平为8×256，Linear对各样本用同一组权重，不将输入特征数乘8。
+\end{solution}
+\paragraph*{第五章章末习题 \ref{prob:v2-dl-4}}
+\begin{solution}
+softmax把logits转为和为1的类别概率，正确类负对数给本例交叉熵；CrossEntropyLoss内部处理原分数。backward只求/累加梯度，不自动更新或清零；step更新，\texttt{zero\_grad}清零。
+\end{solution}
+\paragraph*{第五章章末习题 \ref{prob:v2-dl-5}}
+\begin{solution}
+eval改变Dropout/BatchNorm等行为，\texttt{no\_grad}关闭图记录。本章数值可能看不出eval差异，但独立推理应明确使用；后续换结构时不能继承错误训练状态。两者不能互替。
+\end{solution}
+\paragraph*{第五章章末习题 \ref{prob:v2-dl-6}}
+\begin{solution}
+结构/版本、输入形状与类型、颜色/归一化/resize、类别表、输出含义、训练配置及选择依据。形状相同可能颜色反了或均值不同，要对同一输入核对处理后的张量及完整分数。
+\end{solution}
+\paragraph*{第五章章末习题 \ref{prob:v2-dl-7}}
+\begin{solution}
+检查实际解释器、torch构建及\texttt{torch.version.cuda}、容器GPU可见性和驱动兼容性，不盲目装另一套工具链。CUDA异步提交返回时工作可能没完成，计时应预热并同步或用事件，说明是否包含传输。
+\end{solution}
+\paragraph*{第五章章末习题 \ref{prob:v2-dl-8}}
+\begin{solution}
+3个anchor×(4框量+1目标存在分数+80类)=255；同一历史输出设计改为3类时为3×(5+3)=24。该公式不代表所有新版YOLO。不同类应分组去重，不将所有框直接当同一类。
+\end{solution}
+\paragraph*{第五章章末习题 \ref{prob:v2-dl-9}}
+\begin{solution}
+本章导出固定batch1，批量8会形状不符；需要明确动态维或重新导出并验证。结构合法和单张类别相同都不足，还要比较完整数值、多种代表输入、预处理/后处理及目标设备运行。改变精度或算子路径后重新核对。
+\end{solution}
+\paragraph*{第五章章末习题 \ref{prob:v2-dl-10}}
+\begin{solution}
+提交三个索引、标签/十类分数/预测，权重与结构版本、mean/std/类别表；同一真实张量跨运行时比较最大误差和容差。报告CPU前向中位数、线程、批量/吞吐，不用它冒充采集到结果的时延。检查者可更换索引，须独立加载而非偷偷重训；实机还缺相机采集、预处理、传输、排队和后处理测量。
 \end{solution}
 
 \section*{第六章：CUDA 与 GPU 加速}

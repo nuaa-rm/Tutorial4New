@@ -1,661 +1,287 @@
-\subsubsection{了解神经网络}
-如今神经网络在各个领域都有涉及, 在计算机视觉领域更是有极大的优越性。从机器学习再到深度学习,几乎已经形成一个完整的
-技术体系并且仍然在高速发展。
-通常来说，神经网络一般有以下三个作用：
-\begin{enumerate}
-    \item \textbf{预测}: 这通常是一维层面的，通过给予计算机一定量已有的数据（通常是多组自变量和因变量）拟合出一个合适的曲线（函数），当有新的自变量传入的时候，通过该曲线给出预测的结果
-    \item \textbf{识别}: 这通常是二维层面的，同样是给予计算机一定量的二维图像，同时告诉计算机我们想要识别的图像主体，给予其标注，通过大量数据的学习让计算机能够准确识别任意图像中符合要求的部分
-    \item \textbf{自然语言}: 通过给予海量的文本数据，使计算机能够理解、解释和生成自然语言，进行情感分析和语言推断。
-\end{enumerate}
-这些只是对作用的简单解释，具体过程要比这复杂的多。
+\newenvironment{dlblock}{\par\medskip\noindent\begin{minipage}{\linewidth}}{\end{minipage}\par\smallskip}
+\subsubsection{从调阈值到让模型学习}
+前一章我们自己规定了“什么算红色”“多大的轮廓留下来”。不过，数字写得歪一点、光照换一下，规则就不那么好写了。这时候可以换一种办法：给程序看一些图片，同时告诉它正确答案，让它调整内部参数，学出从图片到答案的映射。这就是本章要动手做的监督学习（supervised learning）。我们先识别手写数字，把训练、保存、重新使用走完，再去碰赛场数据；否则环境和数据一齐出问题，你很难知道该先修谁。
 
-无论是一维的预测还是二维的识别，从本质上来说，所谓\textbf{学习}，就是不断调整神经网络内部参数使参数达到一种足够泛化也足够准确的大小，能够保证传入
-的数据在经过这群参数组成的\textbf{“函数"}映射后，得到一个可信度高的答案。
-那么在拟合这群参数后，如果没有处理好，会出现\textbf{欠拟合}和\textbf{过拟合}的问题
+神经网络（neural network）可以用于回归预测、图像分类、目标检测和语言等任务，不能按“一维预测、二维识别”划分用途。这里识别的是整张小图属于哪个数字，叫分类（classification）；找出大图里物体的位置还要输出框，叫检测（detection）。模型本质上仍是一个带参数的函数，训练让它在数据上表现更好，并不自动保证新图片也能识别好。
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{拟合.png}
-    \caption{欠拟合与过拟合}
-    \label{fig:拟合}
-\end{figure}
-
-欠拟合表现为训练集和验证集误差都较大，可检查模型容量、输入特征与训练是否充分。
-过拟合表现为训练误差继续下降而验证误差上升。可尝试增加有代表性的训练数据、数据增强、正则化或早停；不要把减少训练数据当作通用解法。
-验证集用于选模型和调参，测试集留作最终评价，不能反复用测试成绩决定训练轮数。
-
-通过简单的了解，我们知道神经网络的作用以及神经网络是如何训练出来的，现在我们将通过自己动手搭建一个神经网络，在学习搭建的过程中对
-更深入的内容进行讲述。
-
-\begin{example}
-用均方误差区分训练表现与泛化表现。模型把训练样本记住，但验证误差为 1。
-\begin{tpython}
-def mse(pred, target):
-    return sum((a-b)**2 for a,b in zip(pred,target))/len(target)
-train_error = mse([1,2,3],[1,2,3])
-valid_error = mse([2,3,4],[1,2,3])
-assert (train_error,valid_error) == (0,1)
-print(train_error,valid_error)
-\end{tpython}
+先用一个不用神经网络的小实验看这件事。本卷 \path{examples/dl/lenet-training-demo} 是完整工程，下面全部源码都在相应位置展示，README 给出最短命令。先看 \texttt{fit\_demo}：五个训练点带小扰动，四个独立验证点来自 $y=x^2$，分别拟合一、二、四阶多项式。均方误差（mean squared error，MSE）为 $\frac1n\sum_i(\hat y_i-y_i)^2$。
+\begin{example}[训练点记住了，下一张呢]
+在项目目录运行 \texttt{python fit\_demo.py}，比较两列误差。四阶能穿过全部训练点，但本例验证误差比二阶大；只盯着训练成绩就会选错。程序里的点是教学数据，图不是神经网络的训练曲线。
 \end{example}
-
-\begin{exercise}
-另构造训练与验证误差都为 1 的情况，说明仅凭训练误差为何不能判断泛化。
-\end{exercise}
-
-\subsubsection{动手搭建神经网络}
-如果我们的网络只有简单的功能需求，那么用当今主流的pytorch就可以快速构建起一个神经网络，pytorch中封装好了很多搭建网络所需要的功能
-我们只需要简单理解就能够直接调用使用。如果我们对准确性，效率等有更高的要求，可以使用已有的框架比如yolo，只需要准备好数据集和标注，按照需求
-简单调整一下框架的参数，就可以训练出一个高性能的网络。
-
-我们将从安装开始，一步步利用\textbf{pytorch}搭建出一个简单的识别图像中数字的网络。
-\paragraph*{Python 环境与 PyTorch 安装}
-
-Conda 虚拟环境的创建与切换已在卷一介绍。本节在已激活的 conda 环境中安装 PyTorch。
-卷一未选修 Conda 的同学，请先完成 \texttt{01-基础通识} 中 Conda 小节，或自行安装 Miniconda。
-在激活了pytorch环境后，我们就可以安装pytorch了。
-安装命令的通用形式为：
-\[
-python\enspace {-}m\enspace pip\enspace install\enspace [OPTIONS]\enspace PACKAGE
-\]
-\begin{center}
-\begin{tabular}{lp{0.58\textwidth}}
-\toprule[1.5pt]
-参数 & 作用 \\
-\midrule[1pt]
-\texttt{-m pip} & 使用当前 Python 解释器对应的包管理器 \\
-\texttt{--index-url URL} & 指定软件包索引 \\
-\texttt{PACKAGE==VERSION} & 固定包版本，便于复现 \\
-\bottomrule[1.5pt]
-\end{tabular}
-\end{center}
-其余选项见 $python\enspace {-}m\enspace pip\enspace install\enspace {-}{-}help$。
-\begin{example}
-先用 CPU 版本完成本章，环境已激活后执行：
-\begin{tbash}
-python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-python -c "import torch; print(torch.__version__); print(torch.ones(2, 3).shape)"
-\end{tbash}
-最后一行应包含 torch.Size([2, 3])。包名是 torch。
-\end{example}
-\begin{note}
-GPU 安装组合应从官方选择器取得：\url{https://pytorch.org/get-started/locally/}。
-不要自行拼接 CUDA 下载索引；先记录驱动版本，再选择兼容的 PyTorch 软件包。
-\end{note}
-\begin{exercise}
-记录当前 Python 路径、torch 版本和张量形状。说明为何激活环境后仍建议使用 python -m pip。
-\end{exercise}
-
-\paragraph*{搭建神经网络}
-接下来用pytorch搭建一个简单的LeNet网络，识别MNIST数据集中的手写数字
-
-选择一个你喜欢的IDE，比如VSCode, Pycharm, Clion等，创建一个python文件，选择解释器为刚刚创建的虚拟环境。
-如果你感觉IDE的配置比较麻烦，也可以试试jupyter notebook，它是一个交互式的笔记本，可以直接在浏览器上运行代码，适合学习使用。
-
-准备好后，首先导入需要的包
-\begin{tpython}
-    import torch
-    import torch.nn as nn
-    import torch.optim as optim
-    import torchvision
-    import torchvision.transforms as transforms
-\end{tpython}
-\begin{enumerate}
-    \item torch: pytorch的核心包，包含pytorch的核心数据结构，以及所有的操作
-    \item torch.nn: pytorch的神经网络包，包含所需的神经网络模块。
-    \item torch.optim: pytorch的优化器包，包含了所有的优化器。
-    \item torchvision: pytorch的图像处理包，包含了图像处理的所有操作。
-    \item torchvision.transforms: pytorch的图像变换包，包含了所有的图像变换操作。
-\end{enumerate}
-
-接下来准备MNIST数据集
-
-MNIST数据集是一个包含了6万张训练图片和1万张测试图片的数据集，每张图片都是各式各样的手写的数字，每张图片上都有一个0-9的数字标签。
-我们可以通过torchvision包中的datasets来下载这个数据集。
-\begin{tpython}
-    train_dataset = torchvision.datasets.MNIST(root='./data', train=True, transform=transforms.ToTensor(), download=True)
-    test_dataset = torchvision.datasets.MNIST(root='./data', train=False, transform=transforms.ToTensor(), download=True)
-\end{tpython}
-这里的参数含义分别是：
-\begin{enumerate}
-    \item root: 数据集的存放路径
-    \item train: 是否是训练集,True表示训练集，False表示测试集
-    \item transform: 数据集的变换方式，这里是ToTensor()，将图片转换为tensor张量
-    \item download: 是否下载数据集，如果已经下载过了，可以设为False
-\end{enumerate}
-
-但这里我们需要对数据集进行更多的转变操作，利用Compose将多个变换组合在一起，比如ToTensor()转化成Tensor和Normalize归一化
-\begin{tpython}
-    compose=torchvision.transforms.Compose([
-        torchvision.transforms.ToTensor(),
-        torchvision.transforms.Normalize((0.1307,), (0.3081,))
-    ])
-
-    train_dataset = torchvision.datasets.MNIST(root='./data', train=True, transform=compose, download=True)
-    test_dataset = torchvision.datasets.MNIST(root='./data', train=False, transform=compose, download=True)
-\end{tpython}
-
-然后通过DataLoader加载数据集，使我们可以迭代访问数据集
-\begin{tpython}
-    train_part, valid_part = torch.utils.data.random_split(train_dataset, [55000, 5000])
-    train_loader = torch.utils.data.DataLoader(dataset=train_part, batch_size=64, shuffle=True)
-    valid_loader = torch.utils.data.DataLoader(dataset=valid_part, batch_size=64, shuffle=False)
-    test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=64, shuffle=False)
-\end{tpython}
-这里的参数含义分别是：
-\begin{enumerate}
-    \item dataset: 加载的数据集
-    \item batch\_size: 一次加载的数据量, 这里是$64$
-    \item shuffle: 是否打乱数据集
-\end{enumerate}
-
-我们完成了对数据集的准备，接下来搭建最基础最经典的LeNet网络结构:
+\begin{dlblock}
+\lstinputlisting[numbers=left,language=Python,caption={fit\_demo.py}]{examples/dl/lenet-training-demo/fit_demo.py}
+\end{dlblock}
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{LeNet.png}
-    \caption{LeNet网络结构}
-    \label{fig:LeNet}
+\centering
+\includegraphics[width=0.98\textwidth]{images/dl_fit_revised.pdf}
+\caption{同一组训练点和独立验证点的多项式实验，标出实际 MSE}
+\label{fig:v2-dl-fit}
 \end{figure}
-
-可以看到，除去输入层，LeNet一共有7层，按顺序进行卷积，池化，卷积，池化，全连接，全连接，全连接操作。
-
-我们先对卷积，池化操作进行解释。
-
-\textbf{卷积操作}:
-
-卷积操作是神经网络中基本也是重要的操作之一，目的是提取图像的特征，通过一个n*n的卷积核在图像上滑动，将卷积核中心的像素大小替换为该卷积核上所有像素大小的加权和
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{卷积.png}
-    \caption{卷积操作}
-    \label{fig:卷积}
-\end{figure}
-用公式表示为：
-\begin{equation}
-    [H]_{i,j}=\sum_{a=-\Delta }^{\Delta}\sum_{b=-\Delta}^{\Delta}[V]_{a,b}[X]{i+a,j+b}   
-\end{equation}
-其中$[H]$是卷积后的图像，$[V]$是卷积核，$[X]$是原图像，$\Delta$是卷积核的大小。
-这就是一次卷积层的操作。
-
-我们要根据需要调整卷积核的大小，填充，步幅等参数。
-\begin{enumerate}
-    \item 卷积核大小: 通常是一个奇数，比如$3\times3$,$5\times5$,$7\times7$等
-    \item 填充: 由于卷积核不是$1\times1$，所以边缘像素无法进行卷积，在多次卷积后，图像像素显著减少会失去许多信息，这就需要填充对图像进行扩充。
-    \item 步幅: 卷积核每次滑动的步长，步长越大，卷积出的图像尺寸越小
-\end{enumerate}
-一般输出图像的形状为
-\begin{equation}
-    \left\lfloor\frac{n_h+2p_h-k_h}{s_h}+1\right\rfloor\times\left\lfloor\frac{n_w+2p_w-k_w}{s_w}+1\right\rfloor
-\end{equation}
-其中$n_{h},n_{w}$是输入图像的高和宽，$k_{h},k_{w}$是卷积核的高和宽，$p_{h},p_{w}$是每侧填充量，$s_h,s_w$ 是步幅；此式假定膨胀率为 1。
-
-\textbf{池化操作}:
-
-池化操作是为了减少数据量，减少计算量，同时保留图像的主要特征,目的是减低卷积层对位置的敏感性。
-
-汇聚层和卷积层相似，由一个池化核（池化窗口）在输入的信息上移动，同
-样具有填充和步幅两个参数。汇聚操作计算的是窗口
-中数据的最大值或者是平均值，这些操作分别称为\textbf{最大汇聚层}和\textbf{平均汇聚层}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{池化.png}
-    \caption{池化操作}
-    \label{fig:池化}
-\end{figure}
-
-\textbf{全连接层}:
-
-全连接层可作为输出层，将高层特征映射为类别分数（logits）；分数经 softmax 才成为概率。
-通常是为了整合特征，减少特征的维度，得到最终的输出类别。
-
-\textbf{激活函数}:
-
-这里我们涉及一下激活函数。
-激活函数是神经网络中非常重要的一部分，它的作用是引入非线性因素，使网络能够表达非线性关系。
-通过加权和以及偏置计算神经元的输入，将输入信号转换为输出的
-可微运算。大多数激活函数都是非线性的。
-我们将主要用到ReLU激活函数，这是一个非常纯粹的函数:
-\begin{equation}
-    ReLU(x)=max(0,x)
-\end{equation}
-负输入对应输出为零，正输入保持原值；这不等于把网络参数删除。
-
-除此之外，还有sigmoid函数:
-\begin{equation}
-    sigmoid(x)=\frac{1}{1+\exp{-x}} 
-\end{equation}
-又称挤压函数，将($-\infty$,$\infty$)的任意数压缩到( $0$ , $1$ )
-
-如此我们了解了神经网络的一些基本操作。
-
-\textbf{搭建网络}:
-
-首先写一个LeNet类，继承nn.Module
-\begin{tpython}
-    class LeNet(nn.Module):
-        def __init__(self):
-            super(LeNet, self).__init__()
-            self.conv1=nn.Conv2d(1,6,5)
-            self.pool1=nn.MaxPool2d(2,2)
-            self.conv2=nn.Conv2d(6,16,5)
-            self.pool2=nn.MaxPool2d(2,2)
-            self.fc1=nn.Linear(16*4*4,120)
-            self.fc2=nn.Linear(120,84)
-            self.fc3=nn.Linear(84,10)
-\end{tpython}
-
-我们这里定义了LeNet类，并且在初始化函数中定义了一些层
-显而易见
-\textbf{卷积层}:
-\begin{tpython}
-    self.conv1=nn.Conv2d(1,6,5)
-\end{tpython}
-参数分别是\textbf{输入通道数，输出通道数，卷积核大小}。
-MNIST 是单通道灰度图，因此第一层输入通道为 1、输出为 6；第二层输入为 6、输出为 16。28×28 输入经过两次无填充的 5×5 卷积和 2×2 池化后，得到 16×4×4 特征。
-
-\textbf{池化层}:
-\begin{tpython}
-    self.pool1=nn.MaxPool2d(2,2)
-\end{tpython}
-参数分别是\textbf{池化核大小，步幅}。
-这里的池化核大小是2，步幅也是2，这是第一个池化层。第二个池化层同理。
-
-\textbf{全连接层}:
-\begin{tpython}
-    self.fc1=nn.Linear(16*4*4,120)
-\end{tpython}
-参数分别是\textbf{输入特征数，输出特征数}。
-输入特征数数根据上一层也就是池化层的输出决定。后面两个全连接层同理。
-在最后一个全连接层我们输出10个特征，因为MNIST数据集中有10个类别（0 ~ 9）。
-
-接下来我们定义前向传播函数，也就是网络的计算过程，处理输入数据，输出预测结果。
-\begin{tpython}
-    def forward(self, x):
-        x=torch.relu(self.conv1(x))
-        x=self.pool1(x)
-        x=torch.relu(self.conv2(x))
-        x=self.pool2(x)
-        x=x.view(-1,16*4*4)
-        x=torch.relu(self.fc1(x))
-        x=torch.relu(self.fc2(x))
-        x=self.fc3(x)
-        return x
-\end{tpython}
-和上面的架构一样，只是在每次卷积操作后进行了激活操作，以及全连接层后进行了激活操作。
-\textbf{x.view}:
-这个函数是重排张量形状，参数-1表示自动计算，这里保留批量维，将每个样本展平为 256 个特征。
-符合后面的全连接层输入。
-
-如果想让网络每个处理更加简洁，可以使用\text{Sequential容器}，将网络的层组合在一起。
-比如我们可以将一次卷积，激活，池化操作组合在一起
-\begin{tpython}
-    self.conv1=nn.Sequential(
-        nn.Conv2d(1,6,5),
-        nn.ReLU(),
-        nn.MaxPool2d(2,2)
-    )
-\end{tpython}
-这样在forward函数中就可以直接调用这个容器，更加简洁。
-
-这样我们就搭建好了一个简单的LeNet网络
-\begin{tpython}
-    Net=LeNet() 
-\end{tpython}
-实例化我们的网络
-
-\textbf{定义损失函数:}
-
-损失函数负责责量化实际值和预测值之间的差距，数值越小损失越小，因此我们通常要追求更小的损失。比如，平方误差函数
-\begin{equation}
-    l^{(i)}(\textbf{w},b)=\frac{1}{2}(\hat{y}^{(i)}-y^{(i)})^{2}
-\end{equation}
-$\hat{y}$表示预测值，$y$表示实际值，公式代表在$w$权重，$b$偏置下预测值和实际值的误差
-一般情况下，我们要计算训练集上n个样本的平均损失L
-\begin{equation}
-    L(\textbf{w},b)=\frac{1}{n}\sum_{i=1}^{n}l^{(i)}(\textbf{w},b)
-\end{equation}
-
-在LeNet中我们使用\textbf{交叉熵损失函数}:
-交叉熵公式:
-\begin{equation}
-    H(y,\hat{y})=-\sum_{i}y_{i}\log{\hat{y}_{i}}
-\end{equation}
-其中y是实际值，$\hat{y}$是预测值，交叉熵损失函数是一个非负函数，对单一正确类别，预测给该类别的概率越接近 1，损失越接近 0。PyTorch 的 CrossEntropyLoss 接收未经过 softmax 的 logits 与整数类别标签。
-
-代码中我们定义损失函数:
-\begin{tpython}
-    criterion=nn.CrossEntropyLoss()
-\end{tpython}
-
-\textbf{定义优化器:}
-
-优化器负责更新网络的参数，使得损失函数最小化，这里我们使用\textbf{Adam优化器}:
-Adam优化器是一种自适应学习率的优化器，它可以根据梯度的大小自动调整学习率，使得训练更加稳定。
-所谓\textbf{学习率}，就是每次更新参数的步长，学习率越大，参数更新的幅度越大，学习率越小，参数更新的幅度越小。
-因此动态调整学习率有一定的重要性，降低梯度爆炸和梯度消失的风险。
-
-\begin{tpython}
-    optimizer=optim.Adam(Net.parameters(),lr=0.001)
-\end{tpython}
-这里的参数含义分别是\textbf{网络的参数，学习率}。Net.parameters()自带的函数，可以返回网络中所有的参数。
-
-我们已经定义好了网络，损失函数，优化器，接下来我们就可以开始训练网络了。
-
-
-\begin{example}
-以下最小程序验证 28×28 输入的卷积、池化尺寸；应输出 [2,16,4,4] 与 [2,256]。
-\begin{tpython}
-import torch
-from torch import nn
-features=nn.Sequential(nn.Conv2d(1,6,5),nn.ReLU(),nn.MaxPool2d(2),
-                       nn.Conv2d(6,16,5),nn.ReLU(),nn.MaxPool2d(2))
-y=features(torch.zeros(2,1,28,28))
-assert tuple(y.shape)==(2,16,4,4)
-print(y.shape,y.flatten(1).shape)
-\end{tpython}
-\end{example}
-
-\begin{exercise}
-将输入改为 32×32，手算展平维度，再用程序验证。
+欠拟合（underfitting）意味着模型连训练数据的规律都没有学好；过拟合（overfitting）则是训练表现很好，新的数据表现却差。图 \ref{fig:v2-dl-fit} 中先看训练点，再看灰色验证点。遇到后者，我们可以检查数据是否有代表性，尝试增强、正则化或早停；“把训练图片删少一些”不是通用解法。
+\begin{exercise}\label{ex:v2-dl-fit}
+将训练点扰动全部改成零，重新比较三个阶数的训练和验证 MSE。说明四阶模型是否一定过拟合，以及为何不能只凭模型复杂就下结论。
 \end{exercise}
-\paragraph*{训练与测试网络}
-在定义训练函数之前，我们需要了解一下网络训练过程中调整参数的主要方式——\textbf{反向传播}:
-
-首先是\textbf{前向传播}，前向传播是指从输入层到输出层的计算过程，通过输入数据，经过一系列的计算，得到输出结果。
-这期间会储存一些中间变量，以便后续的反向传播。
-
-反向传播是计算神经网络参数梯度的方法，该方法根据微积分中的\textbf{链式规则}，按相反的
-顺序从输出层到输入层遍历网络。该算法存储了计算某些参数梯度时所需的任何中间变量（偏导数）
-
-在训练神经网络时，在初始化模型参数后，我们交替使用前向传播和反向传播，利用反向传播给出的梯度来更新模型参数。
-
-\textit{反向传播需要利用前向传播中储存的中间值，因此我们一般需要保存这些中间值，这就导致需要更大的显存。
-这些中间值的大小与网络层的数量和批量的大小大致成正比。
-因此，使用更大的批量来训练更深层次的网络更容易导致\textbf{显存}不足（out of memory）错误}
-
-就像前面所说的，神经网络训练本质上是调整参数，参数好坏的标准就是损失函数，我们要让损失函数尽可能的小，这其中用到了一个非常重要的算法——\textbf{梯度下降}：
-梯度下降是一种优化算法，通过不断的往损失函数减小的方向上来更新参数以此降低误差，来达到优化模型的目的。
-更新过程:
-\begin{equation}
-    (\textbf{w},b) \longleftarrow (\textbf{w},b) - \frac{\eta}{\left\lvert\mathcal{B}\right\rvert}\sum_{i\in\mathcal{B}}\nabla_{(\textbf{w},b)}l^{(i)}(\textbf{w},b)
-\end{equation}
-\begin{enumerate}
-    \item $\eta$: 学习率，控制参数更新的步长
-    \item $\mathcal{B}$：本次抽取的样本集合，$|\mathcal{B}|$ 是批量大小
-    \item $\nabla$：对参数计算的梯度
-    \item $l^{(i)}$ : 损失函数求得的损失
-\end{enumerate}
-这其中\textbf{学习率和批量}是手动设置的，是\textbf{超参数}。需要不断调整来达到最优效果。
-在实际过程中，超参数的设置是十分关键的，这需要常年累月的调参经验。
-
-\textit{算法只能使损失向最小值缓慢\textbf{收敛}，无法在有限步数下准确求出最小值}
-
-接下来我们定义train函数，用于训练网络
-\begin{tpython}
-    def train(epoch): # 传入当前的轮次
-        Net.train()
-        running_loss=0.0 # 累加损失
-        running_total=0 # 累加样本总数
-        running_correct=0 # 累加正确样本数
-        for batch_idx, data in enumerate(train_loader,0): # 遍历训练集
-            inputs, labels=data # 获取输入和标签
-            optimizer.zero_grad() # 梯度清零
-
-            # 前向传播、反向传播、更新参数
-            outputs=Net(inputs) # 前向传播
-            loss=criterion(outputs,labels) # 计算损失
-            loss.backward() # 反向传播
-            optimizer.step() # 更新参数,优化
-
-            running_loss+=loss.item() # 累加损失
-            _, predicted=torch.max(outputs,dim=1) # 获取预测值
-            running_total+=inputs.shape[0] # 累加样本总数
-            running_correct+=(predicted==labels).sum().item() # 累加正确样本数
-
-            if batch_idx % 300 == 299: # 不想要每一次都出loss, 选择每300次出一个平均损失, 和准确率
-                print('[%d, %5d]: loss: %.3f , acc: %.2f %%'
-                % (epoch + 1, batch_idx + 1, running_loss / 300, 100 * running_correct / running_total))
-                running_loss = 0.0
-                running_total = 0
-                running_correct = 0
-\end{tpython}
-
-其中累加损失，累加样本总数，累加正确样本数是为了计算平均损失和准确率，这样我们可以更直观的看到网络的训练情况。
-利用\textbf{enumerate}函数将train\_loader转换为一个迭代器，每次迭代返回一个batch的数据，同时返回一个索引，这样我们就可以知道当前是第几个batch。
-\textbf{optimizer.zero\_grad()}是将梯度清零，因为pytorch默认会将梯度累加，所以每次迭代前都要清零。
-然后经过前向传播获取到输出，将输出和标签传入损失函数，计算输出和标签之间的差距，也就是损失。
-通过得到的损失，进行反向传播，更新网络中的参数，用优化器优化网络。
-
-这样就完整的定义了一个训练函数，你也可以通过：
-\begin{tpython}
-    torch.save(Net.state_dict(), "lenet.pth")
-\end{tpython}
-在指定路径下保存模型，以便后续使用。
-
-\textbf{测试函数}:
-
-训练完网络后，我们需要测试网络的性能，评价函数和训练函数类似，只是不需要反向传播和更新参数。
-\begin{tpython}
-    def evaluate(loader):
-        Net.eval()
-        correct=0 # 正确样本数
-        total=0 # 总样本数
-        with torch.no_grad(): # 测试集不需要算梯度
-            for data in loader:
-                images, labels=data # 获取输入和标签
-                outputs=Net(images)
-                _, predicted=torch.max(outputs,dim=1)
-                total+=labels.size(0)
-                correct+=(predicted==labels).sum().item()
-        acc=correct/total
-        print("Accuracy: %.1f %%" % (100 * acc))  # 求测试的准确率，正确数/总数
-\end{tpython}
-评价函数和训练函数类似，只是获取在不需要梯度的情况下进行的。
-correct和total是用来计算正确率的，方便我们看到网络的性能。
-
-这样就定义了一个测试函数，接下来只需要在主函数中调用训练与评价函数，就可以训练和测试网络了。
-\begin{tpython}
-    if __name__ == '__main__':
-        for epoch in range(50):
-            train(epoch)
-            evaluate(valid_loader)
-        evaluate(test_loader)
-\end{tpython}
-
-到此，成功完成了LeNet网络的训练和测试。这并不是一个很复杂的网络，但是确实包含了当今主流网络的主要操作。
-当今网络的发展已经非常成熟，有很多优秀的网络结构，比如VGG，ResNet，DenseNet等，这些网络结构都有自己的特点。
-它们都是基于LeNet的基础上不断发展而来，通过不断的尝试和改进，才有了现在的网络结构。
-如果你掌握了LeNet的基本操作，那么学习其他网络结构就会变得更加容易。
-
-
-\begin{example}
-完整参考实现：保存为 lenet\_complete.py，运行 python lenet\_complete.py。首次运行会下载 MNIST；应逐轮输出 0 到 1 之间的验证准确率，最后输出测试准确率并保存参数。具体成绩与设备、版本有关。
-\begin{tpython}
-import torch
-from torch import nn
-from torchvision import datasets, transforms
-from torch.utils.data import DataLoader, random_split
-
-torch.manual_seed(42)
-class LeNet(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.layers = nn.Sequential(
-            nn.Conv2d(1,6,5), nn.ReLU(), nn.MaxPool2d(2),
-            nn.Conv2d(6,16,5), nn.ReLU(), nn.MaxPool2d(2),
-            nn.Flatten(), nn.Linear(256,120), nn.ReLU(),
-            nn.Linear(120,84), nn.ReLU(), nn.Linear(84,10))
-    def forward(self,x): return self.layers(x)
-
-if __name__ == "__main__":
-    transform = transforms.Compose([transforms.ToTensor(),
-        transforms.Normalize((0.1307,), (0.3081,))])
-    dataset = datasets.MNIST("data",train=True,download=True,transform=transform)
-    train_set, valid_set = random_split(dataset,[55000,5000])
-    train_loader = DataLoader(train_set,batch_size=64,shuffle=True,num_workers=0)
-    valid_loader = DataLoader(valid_set,batch_size=256,num_workers=0)
-    test_set = datasets.MNIST("data",train=False,download=True,transform=transform)
-    test_loader = DataLoader(test_set,batch_size=256,num_workers=0)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    net = LeNet().to(device)
-    criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(net.parameters(),lr=0.001)
-    def accuracy(loader):
-        net.eval()
-        correct = total = 0
-        with torch.no_grad():
-            for x,y in loader:
-                x,y=x.to(device),y.to(device)
-                correct += (net(x).argmax(1)==y).sum().item()
-                total += len(y)
-        return correct/total
-    for epoch in range(3):
-        net.train()
-        for x,y in train_loader:
-            x,y=x.to(device),y.to(device)
-            optimizer.zero_grad()
-            loss=criterion(net(x),y)
-            loss.backward()
-            optimizer.step()
-        print(epoch+1, "验证准确率", accuracy(valid_loader))
-    print("测试准确率",accuracy(test_loader))
-    torch.save(net.cpu().state_dict(),"lenet_complete.pth")
-\end{tpython}
-\end{example}
-
-\begin{exercise}
-先仅取训练集前 128 张图跑一轮，检查输入和输出形状；确认代码闭环后再恢复完整数据集。
-\end{exercise}
-\paragraph*{模型的导出和使用}
-我们利用torch.save() 函数将模型参数保存下来后，可以在其他地方加载模型，继续训练或者是直接使用。
-
-\textbf{模型的使用:}
-\begin{tpython}
-    model = LeNet()
-    model.load_state_dict(torch.load("lenet.pth", map_location="cpu", weights_only=True))
-    model.eval() # 将模型设置为评估模式
-    with torch.no_grad():
-        output=model(torch.zeros(1, 1, 28, 28)) # 检查接口形状
-        print(output)
-\end{tpython}
-
-
-\begin{example}
-独立的参数保存与加载实验，不需要数据集。保存后重新创建相同结构，输出应一致。
-\begin{tpython}
-import torch
-from torch import nn
-torch.manual_seed(42)
-model=nn.Linear(2,1).eval()
-x=torch.tensor([[1.,2.]])
-with torch.no_grad(): expected=model(x)
-torch.save(model.state_dict(),"linear_demo.pth")
-restored=nn.Linear(2,1)
-restored.load_state_dict(torch.load("linear_demo.pth",weights_only=True))
-restored.eval()
-with torch.no_grad(): actual=restored(x)
-assert torch.allclose(actual,expected)
-print(actual)
-\end{tpython}
-
-\end{example}
-
-\begin{exercise}
-将新模型的输入维度改为 3，观察加载错误，解释只保存参数为何还需要结构定义。
-\end{exercise}
-\textbf{\textit{*利用GPU加速训练:}}
-
-如果你有NVIDIA显卡，并且按照上面的步骤安装了pytorch-GPU版本，只需要在代码中简单加几行代码，就可以实现在
-GPU上训练我们的模型。由于显卡的特性，GPU运算过程中，需要指令和数据都存储在显存中。
-对于我们的神经网络就是，将网络结构，损失函数和数据都加载到显存中，然后进行运算。
-可以使用$.cuda()$函数将模型加载到GPU上，然后在训练过程中，将数据也加载到GPU上进行运算，
-使用$.to('cpu')$将数据转移到内存中，便于后续的处理。
-GPU相比于CPU牺牲了大部分在CPU上属于缓存区等区域的面积，用来放更多的运算核心，因此GPU比
-CPU更适合并行运算，运算速度更快，更适合网络模型训练，去处理大量的数据。
-
-完整参考实现通过 device 同时移动模型和数据，CPU 与 CUDA 使用同一条训练路径。
-模型应在创建优化器之前放到目标设备。模型和数据必须位于同一设备；是否加速应测量端到端用时。
-
-\textbf{\textit{*关于YOLO等框架:}}
-
-YOLO是一个非常优秀的目标检测框架，它的全称是You Only Look Once，它的特点是速度快，准确率高，适合实时目标检测。
-YOLO 有多个实现与版本；下图以 YOLOv5 的历史结构为例。
-其支持不同功能模型的训练，比如detect（检测），classify（分类），pose（姿态估计）等。
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{YOLOv5.jpeg}
-    \caption{YOLOv5网络架构}
-    \label{fig:YOLOv5}
-\end{figure}
-
-
-\begin{note}
-YOLOv10 实现入口：\url{https://github.com/THU-MIG/yolov10}。使用前核对仓库版本、数据格式与许可。
-\end{note}
-
-
 \begin{conclusion}
-\begin{itemize}
-\item 输入形状为 N×1×28×28，最后展平为 N×256，输出为 N×10。
-\item 交叉熵接收 logits 与整数标签；不要预先调用 softmax。
-\item 训练前清梯度，反向传播后更新参数；评估时使用 eval 和 no\_grad。
-\item 模型与数据放同一设备；保存参数后还要保留网络定义和预处理设置。
-\end{itemize}
+训练集用于更新参数，验证集用于选择配置与停止时机，测试集留到最后评价。训练误差小不等于泛化好，验证误差也不能证明所有赛场场景都可靠；把同一段视频的相邻帧分到训练和验证两边，很容易得到看起来漂亮的成绩。
 \end{conclusion}
 
-\subsubsection{简单了解模型部署}
-如果我们已经拥有了一个训练好的模型，但是事实上这并不能草草的生搬硬套在我们实际的项目中。
-一个项目通常不会是在拥有着高性能的NVIDIA显卡和高性能的CPU上运行的，通常是在一些性能较低的设备上，比如
-在机器人上，代码运行在minipc，而minipc的性能和配置有限（intel旗下的nuc甚至没有GPU），因此我们需要尽量激发设备的性能，提高模型的推理速度。
-这就要涉及到模型的部署。
-
-\begin{enumerate}
-    \item \textbf{CPU上的模型部署}: intel官方提供了一个完整的开源的部署工具——openvino，利用openvino提供的C++接口，可以将训练好的模型转换为openvino支持的模型，然后在CPU上运行，可以大大提高模型的推理速度。
-    \item \textbf{GPU上的模型部署}: NVIDIA也提供了一个完整的开源的部署工具——tensorRT，同样也可以利用相应的API使得模型在GPU上实施推理，拥有更快的推理速度.
-\end{enumerate}
-
-\textbf{\textit{*有关模型文件类型:}}
-
-模型文件的类型并不是单一的，不同的框架支持的是不同的文件类型。
-譬如pytorch导出的模型为.pth文件，YOLO框架导出的是.pt文件。
-而在openvino部署模型的时候，又需要把模型转换没xml和bin文件。
-tensorrt所需的又是.engine文件。
-
-模型文件类型的不同确实是一件麻烦的事情，因此领域内出现了一种.onnx文件，它使得不同的深度学习框架之间可以互操作。
-openvino和tensorrt都支持对onnx文件的转换。有相应的API可以将onnx文件转换为自身所需要的文件类型。YOLO官方也给出了
-相关的指令能够一键转换将.pt转换为.onnx文件。onnx文件就像是一个中间文件，使得不同框架之间的转换变得更加容易。
-
-
-\begin{note}
-模型结构查看工具：\url{https://netron.app/}。结构能帮助核对输入输出，但不能替代数值一致性验证。
-\end{note}
-
-
-\textbf{应用回顾}
-对于当今的科研工作相关人员来说，神经网络是不得不去学习的领域，同样也是一个非常重要的领域。
-AI已经走进了我们的生活，无论是在自动驾驶，人脸识别，语音识别等领域，AI都有着广泛的应用。
-在我们机器人的自瞄系统中，识别装甲板上的数字，识别敌方机器人，识别装甲板; 以及雷达系统，都有神经网络的身影。
-感兴趣的同学可以多多学习，多多实践，祝大家学有所成。
-
-\begin{example}
-用 PyTorch 自带计时器测一个 CPU 前向过程，避免只计异步提交耗时。各机器耗时不同，应报告中位数及线程数。
-\begin{tpython}
-import torch
-from torch.utils.benchmark import Timer
-net = torch.nn.Sequential(torch.nn.Linear(4,8),torch.nn.ReLU(),torch.nn.Linear(8,2)).eval()
-x = torch.ones(1,4)
-with torch.no_grad():
-    result = Timer(stmt="net(x)", globals={"net":net,"x":x}).blocked_autorange(min_run_time=0.1)
-print(result)
-\end{tpython}
+\subsubsection{先把 Python 环境选对}
+卷一已经讲过虚拟环境。你可以继续用 Conda，也可以按下面的 venv 方法新建一个；不需要为了学习网络再配一遍整个系统。在 Distrobox 里先进入 Ubuntu，再进入工程目录。安装通用形式是 \texttt{python -m pip install [选项] 包名}；\texttt{-m pip} 使用当前解释器的包管理器，\texttt{==版本} 固定组合，\texttt{--index-url} 选择构建索引。
+\begin{example}[先在 CPU 上把闭环跑通]
+从项目目录执行。固定 PyTorch 2.6.0 与 torchvision 0.21.0，作为本章已验证的复现组合，不表示它们是最新版本。最后应看到解释器路径、两个版本与 \texttt{torch.Size([2,3])}。
+\begin{tbash}
+sudo apt install python3-venv
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cpu
+python -c "import sys,torch,torchvision; print(sys.executable,torch.__version__,torchvision.__version__,torch.ones(2,3).shape)"
+\end{tbash}
 \end{example}
-
-\begin{exercise}
-将批量从 1 改为 32，比较每批用时和每样本用时，说明吞吐率与单帧延迟的区别。
+如果终端能运行而 IDE 找不到 torch，先检查 IDE 选择的解释器是不是这个 \texttt{.venv/bin/python}。不是每个 import 错误都值得重装显卡驱动。CPU 包的 \texttt{torch.cuda.is\_available()} 为 False 很正常，需要 CUDA 时另选构建。
+\begin{exercise}\label{ex:v2-dl-env}
+分别在已激活与未激活虚拟环境的终端运行版本检查，记录解释器路径或实际导入错误。说明编辑器与终端版本不一致时先改哪项设置。
 \end{exercise}
 
+\subsubsection{数据：图片、标签和批量怎样配合}
+MNIST 提供 60000 张训练来源图片和 10000 张测试图片，都是 $28\times28$ 手写数字灰度图，标签为 0 到 9。我们从前者固定划出 55000 张训练、5000 张验证，不拿测试集决定训练轮数。首次需要网络下载，torchvision 会校验资源；下载失败时先处理连接或缓存，不要用随机标签假装训练成功。
 
+Dataset 保存取样规则，DataLoader 按批量（batch）交付图片与标签。ToTensor 对这里的 PIL 灰度图把 0--255 转成浮点 0--1，并增加通道维；Normalize 再按 $(x-\mathrm{mean})/\mathrm{std}$ 处理。本例沿用 MNIST 参考常数 0.1307、0.3081，没有从测试集重新估计。部署仍须使用相同处理，不是把图片 resize 成 28 就结束了。
+\begin{example}[把三个集合分开]
+data.py 返回三个 loader，训练打乱、评估不打乱，固定随机生成器让划分可重现。\texttt{train\_limit}=128 只缩小训练子集，验证和测试不动。后面的 train 入口直接调用它，显示首批形状。
+\end{example}
+\begin{dlblock}
+\lstinputlisting[numbers=left,language=Python,basicstyle=\footnotesize\ttfamily,caption={data.py}]{examples/dl/lenet-training-demo/data.py}
+\end{dlblock}
+\begin{exercise}\label{ex:v2-dl-data}
+以 \texttt{--train-limit 128 --batch-size 50 --epochs 1 --out smoke50} 运行入口。预测三个训练批量大小，核对训练样本数；解释最后一批为什么不能按 50 个样本计算平均损失。
+\end{exercise}
+
+\subsubsection{卷积、池化与激活：先算一个小窗口}
+搭网络之前，我们先看看层到底做什么。卷积层（convolution layer）用可训练的核提取局部特征。同一个核在不同位置复用参数，各输出通道使用自己的核；多输入通道还要把各通道结果求和并加偏置。Conv2d 实际使用不翻转核的互相关（cross-correlation）约定，工程里仍习惯叫卷积。图 \ref{fig:v2-dl-conv} 的左上输出为 19，你可以拿四个乘法核对，不必先背一页公式。
+\begin{equation}
+Y_{o,i,j}=b_o+\sum_c\sum_{a=0}^{k_h-1}\sum_{b=0}^{k_w-1}
+ W_{o,c,a,b}X_{c,is_h+a-p_h,js_w+b-p_w}.
+\end{equation}
+越界位置按零填充处理。膨胀率为 1 时，高度输出为
+$\left\lfloor(n_h+2p_h-k_h)/s_h\right\rfloor+1$，宽度同理；$p_h$ 是每侧填充量，$s_h$ 是步幅（stride）。核不必是奇数，图中 $2\times2$ 就能算，只是 $3\times3$、$5\times5$ 很常见。
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{images/dl_conv_revised.pdf}
+\caption{不翻转核的互相关，保留原图的输入、核与输出数值}
+\label{fig:v2-dl-conv}
+\end{figure}
+池化层（pooling layer）也滑动窗口，不过没有这里的可训练核权重：最大池化取最大值，平均池化取平均值。它常用于减少空间尺寸，对局部位置变化有一定容忍，但不保证任意平移后结果都相同。图 \ref{fig:v2-dl-pool} 两个结果分别来自原输入，窗口是 $2\times2$、步幅是 1；本章网络中步幅为 2，别照抄图的尺寸。
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{images/dl_pool_revised.pdf}
+\caption{同一输入的最大和平均池化，右侧不是再处理中间结果}
+\label{fig:v2-dl-pool}
+\end{figure}
+激活函数（activation function）引入非线性。只叠多个线性层而不加非线性，最终仍能合并为一个仿射变换。我们用 ReLU（rectified linear unit，修正线性单元）：$\mathrm{ReLU}(x)=\max(0,x)$，负输入输出零，不是删除参数。另一个常见函数 $\mathrm{sigmoid}(x)=1/(1+e^{-x})$ 把有限实数压到 0--1 之间；本章多类别输出没有使用它。
+\begin{example}[公式算完，让程序再算一次]
+运行 \texttt{python ops\_demo.py}，互相关为 19/25/37/43，最大池化为 4/5/7/8，平均为 2/3/5/6；随后比较两种激活对负数、零、正数的结果。
+\end{example}
+\begin{dlblock}
+\lstinputlisting[numbers=left,language=Python,caption={ops\_demo.py}]{examples/dl/lenet-training-demo/ops_demo.py}
+\end{dlblock}
+\begin{exercise}\label{ex:v2-dl-ops}
+把两个池化调用的步幅改为 2，预测尺寸和数值后运行；再将核改为全 1，核对互相关。两次修改分别保存，不要把窗口、步幅和核一起改得认不出来。
+\end{exercise}
+
+\subsubsection{搭建 LeNet：每一层都能对上形状}
+现在我们把这些层串起来。nn.Module 管理参数与子模块，\texttt{\_\_init\_\_} 创建层，forward 定义数据经过它们的顺序。本例是 LeNet 风格的教学网络，两组卷积/ReLU/最大池化后接三个全连接层（fully connected layer）；没有照搬原始 LeNet-5 的激活、汇聚和输出形式。旧图常见的是 32 输入，本章 MNIST 为 28 输入，图 \ref{fig:v2-dl-lenet} 将两条尺寸链分开了。
+
+Conv2d(1,6,5) 的位置参数是输入通道、输出通道和核大小；MaxPool2d(2) 默认步幅等于核大小。尺寸为 $28\to24\to12\to8\to4$，一个样本最终有 $16\times4\times4=256$ 个特征。flatten(1) 保留第零维批量，展平其余维；Linear(84,10) 给十类输出未归一化分数（logits），暂时没有概率。
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{images/dl_lenet_revised.pdf}
+\caption{本章形状与原图 32 输入的区别，$N$ 为批量大小}
+\label{fig:v2-dl-lenet}
+\end{figure}
+\begin{example}[先前向，再训练]
+运行 \texttt{python model.py}，看到特征 \texttt{(2,16,4,4)}、展平 \texttt{(2,256)}、分数 \texttt{(2,10)}。Sequential 将连续层组合为容器，作用与同序逐个调用一致；特征与分类器分开，方便你检查中间形状。
+\end{example}
+\begin{dlblock}
+\lstinputlisting[numbers=left,language=Python,basicstyle=\footnotesize\ttfamily,caption={model.py}]{examples/dl/lenet-training-demo/model.py}
+\end{dlblock}
+\begin{exercise}\label{ex:v2-dl-shape}
+将入口输入改为 $32\times32$，记录特征与展平形状，再看分类器报错。手算并修改第一层 Linear 输入数，使它输出 \texttt{(2,10)}；此变体不要覆盖后面的 28 输入模型。
+\end{exercise}
+
+\subsubsection{损失、反向传播和优化器各做什么}
+前向能输出分数，不过随机参数还不会认数字。损失函数（loss function）衡量预测与标签的差距，反向传播（backpropagation）按链式法则计算参数梯度，优化器（optimizer）才用梯度更新参数。这三步不要混成“调用 backward 就学会了”。
+
+本章交叉熵（cross entropy）针对单个正确类别 $y$：
+$L=-\log\bigl(e^{z_y}/\sum_j e^{z_j}\bigr)$，$z$ 是 logits。CrossEntropyLoss 内部完成稳定的 log-softmax，给它整数标签与原分数；你若先 softmax，就让它把概率又当分数处理，损失含义变了。
+\begin{example}[分数、概率和损失别重复加工]
+运行 \texttt{python loss\_demo.py}，交叉熵与负对数正确类概率一致，约 0.16985；提前 softmax 后约 0.65785。随后打印的是分数梯度，不是更新后的分数。
+\end{example}
+\begin{dlblock}
+\lstinputlisting[numbers=left,language=Python,caption={loss\_demo.py}]{examples/dl/lenet-training-demo/loss_demo.py}
+\end{dlblock}
+简单梯度下降为 $\theta\leftarrow\theta-\eta\nabla_\theta L$，学习率（learning rate）$\eta$ 控制步长。我们先用一个参数算清楚，再在网络中使用 Adam。Adam 用梯度的一、二阶矩估计调整更新量，不保证必然稳定或达到全局最优；学习率、批量与轮数仍按验证结果选择。
+\begin{example}[梯度算出来了，参数还没动]
+\texttt{grad\_demo} 的 $w=0$、$L=(2w-4)^2$，第一次梯度 -16；重新建图反传但不清梯度，变为 -32。清零后以学习率 0.1 更新一步，$w=1.6$、损失约 0.64。运行 \texttt{python grad\_demo.py} 核对三次状态。
+\end{example}
+\begin{dlblock}
+\lstinputlisting[numbers=left,language=Python,caption={grad\_demo.py}]{examples/dl/lenet-training-demo/grad_demo.py}
+\end{dlblock}
+\begin{exercise}\label{ex:v2-dl-grad}
+把 SGD 学习率改为 0.05，手算清零后一步的参数和损失，再运行。说明保留 -32 梯度会有什么不同，以及 backward 与 step 的分工。
+\end{exercise}
+
+\subsubsection{训练与评估：不用训练时的状态考自己}
+每批先清梯度，前向求分数和损失，再反传、更新；评估只前向统计。engine 将两者放在同一函数，是否传入 optimizer 决定行为。损失按样本数累加，因为最后一批可能较小，直接平均每批均值会给小批量同样的权重。
+
+train/eval 改变 Dropout、BatchNorm 等层行为，\texttt{no\_grad} 关闭梯度记录，两者不是同一开关。本例 LeNet 没有这两类层，数值可能看不出区别，但仍保留正确评估路径，否则以后换网络就容易踩坑。
+\begin{example}[两个开关分开看]
+运行 \texttt{python mode\_demo.py}。训练状态即使在 \texttt{no\_grad} 中，Dropout 仍将部分输入置零并缩放；eval 输出全 1，但输入需要梯度时仍保留梯度关系。代码在 Dropout 后 clone 一次，避免 p=0 直接返回原输入时把原输入的 \texttt{requires\_grad} 误当作新计算图。eval 与 \texttt{no\_grad} 一起使用才是此处推理状态。
+\end{example}
+\begin{dlblock}
+\lstinputlisting[numbers=left,language=Python,caption={mode\_demo.py}]{examples/dl/lenet-training-demo/mode_demo.py}
+\end{dlblock}
+\begin{example}[一套循环负责训练和验证]
+下面的 engine 被 train 实际调用。评估不会清梯度、反传或更新，也不记录计算图；统计返回样本数，能与集合大小对照。完整运行紧接在入口后。
+\end{example}
+\begin{dlblock}
+\lstinputlisting[numbers=left,language=Python,basicstyle=\footnotesize\ttfamily,caption={engine.py}]{examples/dl/lenet-training-demo/engine.py}
+\end{dlblock}
+\begin{exercise}\label{ex:v2-dl-mode}
+将 Dropout 概率改为 0，重复三种状态。输出相同是否说明两个开关可以互相代替？指出 engine 控制层状态和梯度记录的两条语句。
+\end{exercise}
+\begin{conclusion}
+forward 给预测，loss 衡量差距，backward 算梯度，step 更新参数，\texttt{zero\_grad} 防止意外累加。train/eval 控制层行为，梯度记录另有开关。训练保留反向所需中间值，较大批量或网络可能占用更多内存/显存；显存不足时先缩小批量并检查是否留住了旧计算图，不能只看参数文件大小。
+\end{conclusion}
+
+\subsubsection{完整入口：小批量检查，再恢复训练}
+文件职责已经清楚了：data 给集合，model 给结构，engine 执行一轮，train 配置、选模型与保存，infer 在另一进程使用结果。其他 demo 只为了缩小观察难点，不参与主线训练。项目目录如下：
+\begin{tbash}
+lenet-training-demo/
+  model.py  data.py  engine.py  train.py  infer.py
+  fit_demo.py  ops_demo.py  loss_demo.py  grad_demo.py  mode_demo.py
+  device_demo.py  nms_demo.py  export_compare.py  benchmark.py
+  requirements-export.txt  README.md
+\end{tbash}
+入口前半段的 --data 是缓存目录，--out 是结果目录，默认 CPU、一个线程、批量 64、三轮；train-limit 0 是完整训练子集。先移动模型，再创建优化器，每批输入与标签也移到同一设备。固定种子便于本机对照，不保证跨设备和版本逐位相同。
+\begin{dlblock}
+\lstinputlisting[numbers=left,language=Python,firstline=1,lastline=40,basicstyle=\footnotesize\ttfamily,caption={train.py：参数与准备}]{examples/dl/lenet-training-demo/train.py}
+\end{dlblock}
+后半段逐轮记录训练与验证，只在验证损失改善时保存。结束后载入选中的参数，最后评价一次测试集；测试没有回头影响选择。除了权重，还保存结构名称、归一化与类别表，避免留下不知道怎样使用的“存档”。metrics.json 记录版本、配置与曲线。
+\begin{dlblock}
+\lstinputlisting[numbers=left,language=Python,firstline=41,firstnumber=41,basicstyle=\footnotesize\ttfamily,caption={train.py：选模型、保存与最终评价}]{examples/dl/lenet-training-demo/train.py}
+\end{dlblock}
+\begin{example}[先确认代码能绕回来]
+从工程目录执行。128 张一轮的首批为 \texttt{(64,1,28,28)}、标签 \texttt{(64,)}、输出 \texttt{(64,10)}；随后恢复完整训练。每轮 train 记录为 55000 样本，valid 为 5000，最终 test 为 10000。
+\begin{tbash}
+python train.py --epochs 1 --train-limit 128 --out smoke
+python train.py --epochs 3 --out runs
+python infer.py --index 0 1 2
+\end{tbash}
+\end{example}
 \begin{note}
-网络训练流程参考 PyTorch 官方教程：\url{https://docs.pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html}。卷积尺寸参数见 \url{https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv2d.html}。
+再次用同一输出目录会覆盖 best.pth 与 metrics.json，比较实验请换 --out。128 张只检查流程，准确率低不说明环境坏了，也别凭这点样本给模型下结论。训练启动后无需一直按运行按钮，等一轮统计出来再判断。
 \end{note}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.96\textwidth]{images/dl_curve_revised.pdf}
+\caption{本次 CPU 三轮完整训练的真实记录，成绩随版本与配置变化}
+\label{fig:v2-dl-curve}
+\end{figure}
+图 \ref{fig:v2-dl-curve} 来自 Ubuntu 24.04/PyTorch 2.6.0 CPU 实际运行，最终测试准确率 0.9853。它说明此教学任务的结果，不证明装甲板数字也能直接识别；真实数据的裁剪、类别、模糊和光照不同，赛场训练见卷三。
+\begin{exercise}\label{ex:v2-dl-train}
+完成小规模与完整训练，记录版本、集合样本数及每轮验证损失。根据 metrics 判断保存哪一轮，解释只看最后一轮训练损失为什么不能替代这个选择。
+\end{exercise}
+
+\subsubsection{保存与加载：参数还需要使用说明}
+参数文件有了，不过 \texttt{state\_dict} 主要是参数与持久缓冲，不替你保存完整网络定义、预处理和类别含义。加载时先创建相同结构，再填参数；仅把后缀从 .pth 改成 .onnx 可不会施展格式转换魔法。
+
+infer 使用保存的结构标记与归一化，对指定测试样本输出十个分数和预测类别，取最大分数索引。想显示概率时再 softmax，概率大小也不自动等于校准后的可靠程度。\texttt{map\_location}='cpu' 让 CUDA 权重能在 CPU 读取，\texttt{weights\_only}=True 限制加载形式；仍应使用自己训练或可信来源的文件。
+\begin{example}[换一个进程读存档]
+运行 \texttt{python infer.py --index 0 1 2}，三行给索引、真标签、预测与分数。检查者可指定 0--9999 索引。--checkpoint 换权重路径，--data 与训练缓存一致，不需要再训练。
+\end{example}
+\begin{dlblock}
+\lstinputlisting[numbers=left,language=Python,firstline=1,lastline=16,basicstyle=\footnotesize\ttfamily,caption={infer.py：结构与参数}]{examples/dl/lenet-training-demo/infer.py}
+\end{dlblock}
+\begin{dlblock}
+\lstinputlisting[numbers=left,language=Python,firstline=17,firstnumber=17,basicstyle=\footnotesize\ttfamily,caption={infer.py：指定样本与分数}]{examples/dl/lenet-training-demo/infer.py}
+\end{dlblock}
+\begin{exercise}\label{ex:v2-dl-load}
+复制 model，将第一层 Linear 输入改为 400，再在变体工程用原权重运行 infer，记录报错。恢复结构后核对同一图片输出，说明改变归一化为什么可能不报错却改变预测。
+\end{exercise}
+
+\subsubsection{选用 CUDA：先确认构建和设备，再谈速度}
+如果有可用 NVIDIA 显卡，可选 PyTorch CUDA 构建，让相同循环使用 GPU。CPU 包不会因装了驱动就变成 CUDA 包；PyTorch 附带的运行库也不是下一章的完整 nvcc 工具链。先查驱动，再从 \href{https://docs.pytorch.org/get-started/previous-versions/}{官方固定版本组合}选匹配构建，建议保留能用的 CPU 环境。
+\begin{example}[本机可用时走相同训练路径]
+在新环境安装下面已验证的组合，再进入相同工程。前提是驱动与容器能使用此 CUDA 构建。不能使用的机器继续 CPU 主线。
+\begin{tbash}
+python3 -m venv .venv-cuda
+source .venv-cuda/bin/activate
+python -m pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cu126
+python -c "import torch; print(torch.__version__,torch.version.cuda,torch.cuda.is_available())"
+python train.py --epochs 1 --train-limit 128 --device cuda --out gpu-smoke
+python device_demo.py
+\end{tbash}
+\end{example}
+\texttt{device\_demo} 用主线 runs/best.pth 的相同参数与输入比较 CPU/CUDA，不拿两个随机网络硬比。本次 Distrobox 的 RTX 3070 Ti Laptop GPU 实际跑通 CUDA 12.6 构建；其他设备仍按实际检查。没有传输、预热与同步的计时，不能证明 GPU 更快。
+\begin{dlblock}
+\lstinputlisting[numbers=left,language=Python,caption={device\_demo.py}]{examples/dl/lenet-training-demo/device_demo.py}
+\end{dlblock}
+\begin{exercise}\label{ex:v2-dl-device}
+记录两个环境的版本与可用性；有设备时跑 gpu-smoke 和同参数比较，提交设备名与误差。无设备时指出 train 移动模型、输入、标签的位置，如实写未完成 GPU 实测。
+\end{exercise}
+
+\subsubsection{从分类到检测：框还要解码和去重}
+数字分类只输出类别分数，机器人检测还要告诉我们物体在哪。YOLO（You Only Look Once）是一类检测方法和多个实现的名字，不是永远相同的架构。图 \ref{fig:v2-dl-yolo} 保留原图历史 YOLOv5s 的 Focus/CSP/SPP、多尺度融合与三个预测尺度，用 \href{https://github.com/ultralytics/yolov5/blob/v1.0/models/yolov5s.yaml}{v1.0 配置}定位；608 输入对应 76、38、19 网格，255 来自三组 anchor 和 80 类，不能直接套任意新版。
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\textwidth]{images/dl_yolo_revised.pdf}
+\caption{历史 YOLOv5s 的多尺度路径和模块含义，不是本章训练网络}
+\label{fig:v2-dl-yolo}
+\end{figure}
+用现成框架仍须核对提交、许可、类别表、颜色与归一化、缩放/补边、输出解码。网络给候选框后，常用非极大值抑制（non-maximum suppression，NMS）去掉同类高重叠框；交并比（intersection over union，IoU）是交集面积除以并集面积。分数高不等于框正确，NMS 也不负责修错分类。
+\begin{example}[三个同类框的去重]
+运行 \texttt{python nms\_demo.py}，保留索引 0、2。前两个框 IoU 为 $81/119\approx0.681$，低分框被抑制；第三个在另一处。这是人工候选框后处理，没有训练好的 YOLO 权重，不要当检测成绩。
+\end{example}
+\begin{dlblock}
+\lstinputlisting[numbers=left,language=Python,caption={nms\_demo.py}]{examples/dl/lenet-training-demo/nms_demo.py}
+\end{dlblock}
+\begin{exercise}\label{ex:v2-dl-nms}
+将 IoU 阈值改为 0.8，预测保留索引后运行。说明改变的是去重条件还是网络预测；不同类别的重叠框能否直接沿用这个同类示例。
+\end{exercise}
+
+\subsubsection{部署入口：先核对数值，再测用时}
+机器人程序可能使用不同语言、运行时和硬件。ONNX（Open Neural Network Exchange）用于交换计算图，OpenVINO、TensorRT 等可为目标设备转换或优化；算子支持、尺寸、精度与速度仍由实际模型和设备决定。.pth/.pt 常见于 PyTorch 保存，OpenVINO IR 常见 .xml/.bin，TensorRT 引擎常见 .engine，这些不能靠改名互换。
+
+先做能核验的导出。依赖集中在 \path{requirements-export.txt}，固定 onnx 1.17.0 与 onnxruntime 1.20.1。随后 \texttt{export\_compare} 从主线权重读结构、预处理，用同一真实测试图分别在 PyTorch 与 CPU ONNX Runtime 前向，比较完整分数。输入固定 $1\times1\times28\times28$、opset 17；dynamo=False 明确此次实测路径，不靠新版默认值猜行为。
+\begin{dlblock}
+\lstinputlisting[numbers=left,caption={requirements-export.txt}]{examples/dl/lenet-training-demo/requirements-export.txt}
+\end{dlblock}
+\begin{example}[导出成功还要比较]
+在 CPU 环境、项目目录执行。结果显示 \texttt{[1,10]}、最大绝对误差与类别，满足代码容差。默认写到已有 runs，换 --output 时确保父目录存在。
+\begin{tbash}
+python -m pip install -r requirements-export.txt
+python export_compare.py
+\end{tbash}
+\end{example}
+\begin{dlblock}
+\lstinputlisting[numbers=left,language=Python,firstline=1,lastline=24,basicstyle=\footnotesize\ttfamily,caption={export\_compare.py：同一预处理输入}]{examples/dl/lenet-training-demo/export_compare.py}
+\end{dlblock}
+\begin{dlblock}
+\lstinputlisting[numbers=left,language=Python,firstline=25,firstnumber=25,basicstyle=\footnotesize\ttfamily,caption={export\_compare.py：图与完整输出误差}]{examples/dl/lenet-training-demo/export_compare.py}
+\end{dlblock}
+onnx.checker 检查图，数值比较检查这些输入的实际输出，不能证明所有输入正确。当前图未包含外部预处理，部署须保存 mean/std、颜色、尺寸与类别表。查看结构可用 \href{https://netron.app/}{Netron}，导出限制查 \href{https://docs.pytorch.org/docs/2.6/onnx.html}{本章版本的导出文档}；结构能打开不是部署完成。
+
+然后测 CPU 前向。计时器（benchmark）预热并多次测量，以中位数减少偶然波动；固定一个线程，比较批量 1 与 32。每样本成本与吞吐率说明批处理效率，单帧响应还包含预处理、排队、传输和后处理。CUDA 异步提交也不能直接用普通时钟相减测完整 GPU 用时，需要同步或事件计时。
+\begin{example}[同一模型比较两个批量]
+在有主线权重的 CPU 工程运行 \texttt{python benchmark.py}，报告每批毫秒、每样本毫秒、每秒样本数与线程数，不预先承诺快多少。
+\end{example}
+\begin{dlblock}
+\lstinputlisting[numbers=left,language=Python,caption={benchmark.py}]{examples/dl/lenet-training-demo/benchmark.py}
+\end{dlblock}
+\begin{exercise}\label{ex:v2-dl-deploy}
+换测试索引 1、2 分别导出比较，记录误差与类别。再把 benchmark 批量 32 改为 8，报告三个时间/吞吐指标，说明此计时没覆盖哪些单帧工作。
+\end{exercise}
+\begin{conclusion}
+参数需要结构与预处理，交换图需要算子、尺寸与数值检查，部署还需要目标运行时、后处理与端到端计时。本章跑通 CPU ONNX Runtime 固定输入对照，OpenVINO/TensorRT 是后续目标，未实测就不写加速完成。
+\end{conclusion}
+到这里，我们能训练小网络、存下参数、在新进程识别指定样本，并跨运行时核对输出。神经网络在自瞄数字、装甲板与雷达感知中都有用，不过下一步应换成代表性真实数据与明确任务。想继续看自动求导与数据加载，可以顺着 \href{https://docs.pytorch.org/tutorials/beginner/basics/}{PyTorch 官方基础教程}查，先把当前闭环解释清楚再加新框架。

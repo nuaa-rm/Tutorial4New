@@ -1,0 +1,6 @@
+.venv/
+.venv-cuda/
+data/
+runs/
+smoke*/
+gpu-smoke*/

@@ -14,8 +14,8 @@
 | 二 | 1 ROS2 基础 | 已单章提交 5eb75ed；内容、项目与 Jazzy/rqt 核验已整理；CLion 图形断点与第二主机发现范围仍未完成，详见 volume-2-chapter-1.md。 |
 | 二 | 2 多机通信方法 | 已单章提交 f6934b2；30 条 Ubuntu/Jazzy 记录通过，跨物理主机与真实串口设备验证待补，详见 volume-2-chapter-2.md。 |
 | 二 | 3 SDR 与电磁波解析 | 已单章提交 a80b582；内容、完整 IQ 项目、题解与 PDF 已整理；23 条记录（含 75 组参数变体）通过，Pluto/射频实机未完成，详见 volume-2-chapter-3.md。 |
-| 二 | 4 OpenCV 与图像处理基础 | 内容、完整图像/ROS 工程、12+10 题解与 PDF 已整理；64 条 Ubuntu/Jazzy 记录通过，物理相机未完成，详见 volume-2-chapter-4.md。 |
-| 二 | 5 神经网络与深度学习 | 待整理。 |
+| 二 | 4 OpenCV 与图像处理基础 | 已单章提交 95c3d92；内容、完整图像/ROS 工程、12+10 题解与 PDF 已整理；64 条 Ubuntu/Jazzy 记录通过，物理相机未完成，详见 volume-2-chapter-4.md。 |
+| 二 | 5 神经网络与深度学习 | 内容、完整 LeNet 工程、12+10 题解与 PDF 已整理；42 条 CPU/CUDA/ONNX 记录及 20 项检查通过，准备单章提交，详见 volume-2-chapter-5.md。 |
 | 二 | 6 CUDA 与 GPU 加速 | 待整理。 |
 | 二 | 7 相机与成像原理 | 待整理。 |
 | 二 | 8 信号处理与滤波 | 待整理。 |

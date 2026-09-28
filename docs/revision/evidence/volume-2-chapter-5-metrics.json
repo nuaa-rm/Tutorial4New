@@ -1,0 +1,57 @@
+{
+  "torch": "2.6.0+cpu",
+  "torchvision": "0.21.0+cpu",
+  "device": "cpu",
+  "epochs": 3,
+  "batch_size": 64,
+  "threads": 1,
+  "train_limit": 0,
+  "seed": 42,
+  "history": [
+    {
+      "epoch": 1,
+      "train": {
+        "loss": 0.2592967553543604,
+        "accuracy": 0.9210181818181818,
+        "samples": 55000
+      },
+      "valid": {
+        "loss": 0.0916984380364418,
+        "accuracy": 0.97,
+        "samples": 5000
+      }
+    },
+    {
+      "epoch": 2,
+      "train": {
+        "loss": 0.07702637539221482,
+        "accuracy": 0.9754727272727273,
+        "samples": 55000
+      },
+      "valid": {
+        "loss": 0.07315188798904419,
+        "accuracy": 0.9784,
+        "samples": 5000
+      }
+    },
+    {
+      "epoch": 3,
+      "train": {
+        "loss": 0.05370711875469847,
+        "accuracy": 0.9832909090909091,
+        "samples": 55000
+      },
+      "valid": {
+        "loss": 0.06032166957855225,
+        "accuracy": 0.982,
+        "samples": 5000
+      }
+    }
+  ],
+  "test": {
+    "loss": 0.04591728748418391,
+    "accuracy": 0.9853,
+    "samples": 10000
+  },
+  "selection": "最低验证损失"
+}
