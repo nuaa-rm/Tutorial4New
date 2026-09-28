@@ -399,118 +399,95 @@ radio 年龄 0.4 s 过期，vision 年龄 0.1 s 有效，选择 vision。两路�
 \phantomsection
 \addcontentsline{toc}{section}{第四章题解：OpenCV 与图像处理基础}
 \subsubsection*{随堂练习}
-
-\paragraph*{随堂练习 4.1}
+\paragraph*{随堂练习 \ref{ex:v2-cv-build}}
 \begin{solution}
-把 add\_executable、target\_include\_directories 和 target\_link\_libraries 中的目标名全部改为 image\_demo，不能只改其中一行。
-\begin{tbash}
-cmake -S . -B build
-cmake --build build --target image_demo
-./build/image_demo
-\end{tbash}
-源码目录为当前目录，包含 main.cpp 和 CMakeLists.txt；构建目录为其下的 build。目标名称与 project 名称可以不同。
+当前 foreach 按名称同时生成目标和源码路径；可把 version 改为 image，并同步将 src/version\_demo.cpp 改为 src/image\_demo.cpp。若想保留文件名，就为该目标明确指定原来的源码路径，并让 include/link 设置仍指向新目标。源文件名与目标并非语言要求必须相同，是本例循环采用了这个约定。重新配置后执行 \texttt{cmake --build build --target image\_demo} 和 \texttt{./build/image\_demo}。源码目录为工程当前目录，构建目录为其下 build。
 \end{solution}
-
-\paragraph*{随堂练习 4.2}
+\paragraph*{随堂练习 \ref{ex:v2-cv-mat}}
 \begin{solution}
-把 b 定义为 \texttt{cv::Mat b = a(cv::Rect(0,0,1,1));}，仍通过 b 修改其第一个像素。a 的对应像素变为 9，事先 clone 得到的 c 仍为 1。ROI 创建的是共享原数据的表头，clone 分配独立数据，因此修改传播范围不同。
+b 改成 \texttt{a(cv::Rect(0,0,1,1))}，仍修改 b 的 (0,0)，输出保持 9 1。ROI 共享底层数据，clone 独立；访问矩形和像素必须在范围内。ROI 的行步长仍可能沿用原图，不保证裁下后连续。
 \end{solution}
-
-\paragraph*{随堂练习 4.3}
+\paragraph*{随堂练习 \ref{ex:v2-cv-io}}
 \begin{solution}
-仅把 imread 的路径改为不存在的文件，保留前面的图像生成步骤。程序应在 empty 检查处返回 2。在 Linux 终端运行程序后立即执行 \texttt{echo \$?}，应输出 2。空 Mat 没有有效像素数据，继续转换颜色或访问像素可能触发断言或错误。
+io 保留生成 input.png，把 imread 路径改成不存在的文件，在 empty 检查处返回 2；终端紧接着 \texttt{echo \$?} 核对。正确 viewer 窗口按 s 后生成 saved.png，尺寸仍为 48×32。空 Mat 没有有效像素，不能继续转换和访问。
 \end{solution}
-
-\paragraph*{随堂练习 4.4}
+\paragraph*{随堂练习 \ref{ex:v2-cv-hsv}}
 \begin{solution}
-第二个像素 H=90，不属于任一红色区间，第一次修改后 countNonZero 为 1。再将第一个像素 S 设为 0，它低于饱和度下限 70，非零数变为 0。色调、饱和度和亮度条件需要同时满足。
+第二个 H=90 不属于两段红色，数量由 2 变成 1；第一个 S=0 低于下限 70，数量再变为 0。H/S/V 条件同时满足，颜色不能只按一个通道判断。
 \end{solution}
-
-\paragraph*{随堂练习 4.5}
+\paragraph*{随堂练习 \ref{ex:v2-cv-threshold}}
 \begin{solution}
-输入为 126、127、128，阈值为 127。反向二值阈值在输入小于或等于阈值时输出 255，大于阈值时输出 0，因此结果为 255、255、0。边界值 127 属于前一类。
+首个固定阈值改 INV 后为 255 255 0，等于 127 属于反向模式的白色。只在 adaptiveThreshold 的 C 改为 -2，局部阈值从加权均值减 2 变成加 2，平坦区域更难入选；比较两份 adaptive.png 与非零计数。Otsu 示例保持原模式，应仍选出右半 400 像素。本次 OpenCV 4.6.0 的自适应非零数从 720 变成 80，判断还要结合输出图。
 \end{solution}
-
-\paragraph*{随堂练习 4.6}
+\paragraph*{随堂练习 \ref{ex:v2-cv-filter}}
 \begin{solution}
-改用 \texttt{cv::blur(a, out, cv::Size(3,3));}。中心邻域中一个值为 255、八个为 0，均值为 $255/9\approx28.33$，存回 8 位图时中心约为 28；中值是排序后的第五个值，即 0。均值会让孤立点影响邻居，中值能够在该例中直接消除它。
+第一个操作改均值后，中心约为 $255/9$，存回 uchar 为 28；中值原来是 0。双边增大 sigmaColor 后，亮点和邻居的颜色差不再被强烈排斥，本次中心为 31，明显低于原来的 255；它不是无条件“保留边缘”。保边与去孤立噪点可能相互冲突，需对实际目标选择参数。
 \end{solution}
-
-\paragraph*{随堂练习 4.7}
+\paragraph*{随堂练习 \ref{ex:v2-cv-morphology}}
 \begin{solution}
-7×7 核大于 5×5 方块，腐蚀阶段没有任何位置能完全容纳结构元素，方块和孤立点都被去掉；后续膨胀不能恢复已经消失的前景，非零数为 0。核越大越可能删掉真正的小目标或细结构。
+7×7 核无法完全落入 5×5 方块，腐蚀后前景消失，再膨胀也不能恢复，非零数为 0。核与真实目标宽度比较，过大既去噪也去目标。
 \end{solution}
-
-\paragraph*{随堂练习 4.8}
+\paragraph*{随堂练习 \ref{ex:v2-cv-contour}}
 \begin{solution}
-先对 a 执行 Canny，再在边缘图上使用相同的外轮廓模式，打印轮廓数量、各轮廓面积与边缘非零像素数。可使用阈值 50、150；具体边界位置及数值以该版本实测为准。原实心图的非零像素数是 200，而几何轮廓面积是 171；Canny 输出的是边缘像素，既不是实心区域计数，也不保证与原轮廓几何面积相等。
+在 findContours 前另建 edges 并运行 Canny，分别打印原掩膜 200 像素、边缘像素和边缘外轮廓面积。本次 OpenCV 4.6.0 的边缘像素为56、外轮廓1、面积197；原掩膜连续面积为171，Canny 的梯度边缘会改变几何边界。轮廓面积、前景像素和边缘像素是三种量，不能预设相等。
 \end{solution}
-
-\paragraph*{随堂练习 4.9}
+\paragraph*{随堂练习 \ref{ex:v2-cv-resize}}
 \begin{solution}
-把缩放插值改为 \texttt{cv::INTER\_NEAREST}，保存为另一个文件与 small.png 对照。最近邻只复制源像素，边缘容易呈台阶；INTER\_AREA 在缩小时按覆盖面积综合像素，更适合彩色图像下采样。对于类别掩膜，通常用最近邻避免产生不存在的类别值。
+最近邻从已有像素取值，圆边缘更锯齿，类别掩膜不插出新类别；AREA 在缩小时综合像素贡献，显示图通常更平滑。输出圆心为 (20,10)，图像尺寸40×20，不能再按原来 (40,20) 绘制。
 \end{solution}
-
-\paragraph*{随堂练习 4.10}
+\paragraph*{随堂练习 \ref{ex:v2-cv-features}}
 \begin{solution}
-以平移矩阵 $\left[\begin{smallmatrix}1&0&5\\0&1&0\end{smallmatrix}\right]$ 调用 warpAffine 得到第二张图，分别计算两图 ORB 描述子，再用 Hamming 距离匹配。记录两图特征数、匹配数与匹配点坐标差；正确对应大多应满足横向约 5 pixel、纵向约 0 的位移。数量受裁剪、检测器与版本影响。重复纹理也可能有低描述子距离，因此还需几何一致性检查。
+用二维仿射矩阵平移图像，再对两图分别 detectAndCompute，非空后以 Hamming、crossCheck 匹配；记录数量，并比较 trainIdx/queryIdx 对应关键点的横向偏移是否接近 +5、纵向是否接近0。本次匹配285个，其中222个偏移在(5,0)的2像素范围内。数量/距离会随裁剪、纹理和版本变化，可进一步用一致偏移或 RANSAC 检查几何，不能只看距离或数量。
 \end{solution}
-
-\paragraph*{随堂练习 4.11}
+\paragraph*{随堂练习 \ref{ex:v2-cv-pipeline}}
 \begin{solution}
-保留原消息编码 bgr8，把 \texttt{toCvCopy(msg,"bgr8")} 的目标编码改为 mono8，并打印 \texttt{out->image.channels()}，应为 1。转换函数执行颜色到灰度的变换；仅把消息编码标签改成 mono8，而仍放三通道数据，会使声明与数据不符。编码还描述颜色顺序、元素深度和语义，不能仅凭字节数填写。
+面积下限 2000 大于两个轮廓的1711，最终保留0，但 mask/opened/closed/edges及外轮廓仍相同，annotated只是不再画框。生成视频正常读完为20帧；提前Esc则少于20，这也是有效退出。筛选只决定哪些几何对象保留，不应倒过来改变前面分割输入。
+\end{solution}
+\paragraph*{随堂练习 \ref{ex:v2-cv-bridge}}
+\begin{solution}
+把首个 toCvCopy 的目标改为 mono8，打印 channels 应为1；输入仍是 bgr8，实际进行灰度转换，红色像素为76。保留后面的 Header检查，输出秒/纳秒和frame不变。真实回调输入头由教学timer生成，在convert中沿用；若换实机输入，应使用相机采集头。只将标签改成mono8而保持CV\_8UC3数据，会导致编码与类型不符或错误解释，不能这样“转换”。
 \end{solution}
 
 \subsubsection*{章末习题}
-
-\paragraph*{第四章章末第 1 题}
+\paragraph*{第四章章末第 \ref{prob:v2-cv-1} 题}
 \begin{solution}
-检查目标头文件目录、链接库、源码路径，以及配置时找到的 OpenCV 版本与安装位置。
+检查实际目标的 include目录、链接库、源码路径、缓存中OpenCV位置，以及构建日志与版本输出。find\_package成功不意味着每个目标都已使用这些设置，也不能保证找的是你期望的安装。
 \end{solution}
-
-\paragraph*{第四章章末第 2 题}
+\paragraph*{第四章章末第 \ref{prob:v2-cv-2} 题}
 \begin{solution}
-共 600 字节；赋值共享数据，修改 b 的像素会影响 a，clone 才创建独立副本。
+600字节。ROI可能保留原图的行步长，行末仍隔着原图其他列；不能只按裁剪宽度连续读全部行。clone复制独立数据，对b共享修改影响a，对clone不影响；实际布局仍用isContinuous/step核对。
 \end{solution}
-
-\paragraph*{第四章章末第 3 题}
+\paragraph*{第四章章末第 \ref{prob:v2-cv-3} 题}
 \begin{solution}
-不能，应先判空并报告路径；imwrite 通常按文件扩展名选择编码器。
+空图必须停止并报告，不能调用cvtColor。文件正常到尾可能使read返回false，摄像头却可能因断开/超时/驱动失败而停止；接口返回不自动说明原因，要结合来源、日志与恢复策略。cap.set也需要读回和帧形状核对。
 \end{solution}
-
-\paragraph*{第四章章末第 4 题}
+\paragraph*{第四章章末第 \ref{prob:v2-cv-4} 题}
 \begin{solution}
-都可能是红色，需考虑色环两端；灰度值等于阈值时输出 0。
+两端都可能是红色，还需S/V条件；普通二值在等于阈值时输出0。自适应阈值按邻域均值/高斯加权值减C，C变大通常更易成为白色，变负则阈值升高；具体掩膜仍按实际输入查看。
 \end{solution}
-
-\paragraph*{第四章章末第 5 题}
+\paragraph*{第四章章末第 \ref{prob:v2-cv-5} 题}
 \begin{solution}
-可先试中值滤波；开运算先腐蚀后膨胀，闭运算先膨胀后腐蚀。
+先试中值。开先腐蚀后膨胀，闭先膨胀后腐蚀；大核可能吞掉细目标或连上原本分离的区域，不能只以噪点数量评价。
 \end{solution}
-
-\paragraph*{第四章章末第 6 题}
+\paragraph*{第四章章末第 \ref{prob:v2-cv-6} 题}
 \begin{solution}
-轮廓坐标围成的连续矩形边长为 19 与 9，面积 171；200 是非零像素计数。
+边界点跨度19×9，连续面积171；栅格计数20×10=200。Canny提取灰度变化的边缘，可能与实心区域边界不同，轮廓模式和输入对象都要明确。
 \end{solution}
-
-\paragraph*{第四章章末第 7 题}
+\paragraph*{第四章章末第 \ref{prob:v2-cv-7} 题}
 \begin{solution}
-输出 50×30；绘图使用输出图像坐标，位置与尺度需匹配。
+尺寸50×30，点变为(20,10)。类别掩膜通常需保留离散值，用最近邻；显示图可按缩放方向选择AREA/LINEAR等，平滑程度与用途不同。
 \end{solution}
-
-\paragraph*{第四章章末第 8 题}
+\paragraph*{第四章章末第 \ref{prob:v2-cv-8} 题}
 \begin{solution}
-常用 Hamming 距离；还需对应关系和几何一致性检查，不能只看描述子距离。
+本例默认WTA\_K=2用Hamming，其他配置查是否应Hamming2。先用匹配索引取对应关键点，再统计偏移/几何模型内点；重复纹理可以有低距离但错误位置，因此仍需几何一致性与有效匹配检查。
 \end{solution}
-
-\paragraph*{第四章章末第 9 题}
+\paragraph*{第四章章末第 \ref{prob:v2-cv-9} 题}
 \begin{solution}
-相同通道数可能具有不同颜色顺序或含义；应按 encoding 转换并保留消息头，必要时捕获转换异常。
+三通道可能是RGB、BGR或别的语义，必须查encoding。只改成mono8不转换像素会让类型、行步长或颜色解释不符，使用toCvCopy等做实际转换。处理后now是处理时刻，替换输入头会丢失采集时间，影响同步与融合；保留原Header并另记处理时延。
 \end{solution}
-
-\paragraph*{第四章章末第 10 题}
+\paragraph*{第四章章末第 \ref{prob:v2-cv-10} 题}
 \begin{solution}
-两个输出都变为 9；各变量指向同一底层像素数据。
+只用low掩膜后，H=179的右矩形消失，左矩形和孤立低H红点仍入选。预期mask1801、opened1800、closed1800，外轮廓1/保留1，连续面积1711。保存阶段图证明发生在颜色分割；面积筛选无法找回已被颜色条件排除的区域。
 \end{solution}
 
 \section*{第五章：神经网络与深度学习}

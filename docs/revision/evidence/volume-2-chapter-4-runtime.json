@@ -1,0 +1,660 @@
+{
+  "scope": "OpenCV4.6/Jazzy；真实独立窗口与视频文件，相机硬件未验证",
+  "records": [
+    {
+      "step": "configure",
+      "command": [
+        "cmake",
+        "-S",
+        "/tmp/opencv-textbook-j_44b9og/lab",
+        "-B",
+        "/tmp/opencv-textbook-j_44b9og/build"
+      ],
+      "returncode": 0,
+      "output": "-- The CXX compiler identification is GNU 13.3.0\n-- Detecting CXX compiler ABI info\n-- Detecting CXX compiler ABI info - done\n-- Check for working CXX compiler: /usr/bin/c++ - skipped\n-- Detecting CXX compile features\n-- Detecting CXX compile features - done\n-- Found OpenCV: /usr (found version \"4.6.0\") found components: core imgproc imgcodecs highgui videoio features2d \n-- OpenCV: 4.6.0\n-- Configuring done (0.1s)\n-- Generating done (0.0s)\n-- Build files have been written to: /tmp/opencv-textbook-j_44b9og/build\n"
+    },
+    {
+      "step": "build",
+      "command": [
+        "cmake",
+        "--build",
+        "/tmp/opencv-textbook-j_44b9og/build",
+        "--parallel",
+        "4"
+      ],
+      "returncode": 0,
+      "output": "[ 10%] Building CXX object CMakeFiles/version_demo.dir/src/version_demo.cpp.o\n[ 10%] Building CXX object CMakeFiles/viewer_demo.dir/src/viewer_demo.cpp.o\n[ 10%] Building CXX object CMakeFiles/mat_demo.dir/src/mat_demo.cpp.o\n[ 14%] Building CXX object CMakeFiles/video_demo.dir/src/video_demo.cpp.o\n[ 17%] Linking CXX executable mat_demo\n[ 21%] Linking CXX executable version_demo\n[ 25%] Linking CXX executable viewer_demo\n[ 28%] Linking CXX executable video_demo\n[ 28%] Built target version_demo\n[ 28%] Built target mat_demo\n[ 32%] Building CXX object CMakeFiles/io_demo.dir/src/io_demo.cpp.o\n[ 35%] Building CXX object CMakeFiles/hsv_demo.dir/src/hsv_demo.cpp.o\n[ 35%] Built target viewer_demo\n[ 39%] Building CXX object CMakeFiles/threshold_demo.dir/src/threshold_demo.cpp.o\n[ 39%] Built target video_demo\n[ 42%] Building CXX object CMakeFiles/filter_demo.dir/src/filter_demo.cpp.o\n[ 46%] Linking CXX executable io_demo\n[ 50%] Linking CXX executable hsv_demo\n[ 50%] Built target hsv_demo\n[ 53%] Building CXX object CMakeFiles/morphology_demo.dir/src/morphology_demo.cpp.o\n[ 53%] Built target io_demo\n[ 57%] Building CXX object CMakeFiles/contour_demo.dir/src/contour_demo.cpp.o\n[ 60%] Linking CXX executable threshold_demo\n[ 64%] Linking CXX executable filter_demo\n[ 64%] Built target filter_demo\n[ 67%] Building CXX object CMakeFiles/resize_demo.dir/src/resize_demo.cpp.o\n[ 67%] Built target threshold_demo\n[ 71%] Building CXX object CMakeFiles/features_demo.dir/src/features_demo.cpp.o\n[ 75%] Linking CXX executable morphology_demo\n[ 75%] Built target morphology_demo\n[ 78%] Building CXX object CMakeFiles/sample_demo.dir/src/sample_demo.cpp.o\n[ 82%] Linking CXX executable contour_demo\n[ 82%] Built target contour_demo\n[ 85%] Building CXX object CMakeFiles/pipeline_demo.dir/src/pipeline_demo.cpp.o\n[ 89%] Linking CXX executable resize_demo\n[ 92%] Linking CXX executable features_demo\n[ 92%] Built target features_demo\n[ 92%] Built target resize_demo\n[ 96%] Linking CXX executable sample_demo\n[100%] Linking CXX executable pipeline_demo\n[100%] Built target sample_demo\n[100%] Built target pipeline_demo\n"
+    },
+    {
+      "step": "version",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/version_demo"
+      ],
+      "returncode": 0,
+      "output": "4.6.0\n"
+    },
+    {
+      "step": "mat",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/mat_demo"
+      ],
+      "returncode": 0,
+      "output": "9 1\n"
+    },
+    {
+      "step": "io",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/io_demo"
+      ],
+      "returncode": 0,
+      "output": "32 48\n"
+    },
+    {
+      "step": "hsv",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/hsv_demo"
+      ],
+      "returncode": 0,
+      "output": "2\n"
+    },
+    {
+      "step": "threshold",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/threshold_demo"
+      ],
+      "returncode": 0,
+      "output": "0 0 255 \nOtsu=50 非零=400 adaptive非零=720\n"
+    },
+    {
+      "step": "filter",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/filter_demo"
+      ],
+      "returncode": 0,
+      "output": "0\n均值/高斯/双边中心=28,64,255\n"
+    },
+    {
+      "step": "morphology",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/morphology_demo"
+      ],
+      "returncode": 0,
+      "output": "26 25\n"
+    },
+    {
+      "step": "contour",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/contour_demo"
+      ],
+      "returncode": 0,
+      "output": "1 171 200\n"
+    },
+    {
+      "step": "resize",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/resize_demo"
+      ],
+      "returncode": 0,
+      "output": "40 20\n"
+    },
+    {
+      "step": "features",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/features_demo"
+      ],
+      "returncode": 0,
+      "output": "454\n"
+    },
+    {
+      "step": "sample",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/sample_demo"
+      ],
+      "returncode": 0,
+      "output": "scene.png: 160x120; scene.avi: 20 帧\n"
+    },
+    {
+      "step": "pipeline",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/pipeline_demo",
+        "scene.png"
+      ],
+      "returncode": 0,
+      "output": "保留面积=1711 长宽比=2.03448\n保留面积=1711 长宽比=2.03448\n像素数=3600,3599,3600 外轮廓=2 保留=2\n"
+    },
+    {
+      "step": "pipeline",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/pipeline_demo"
+      ],
+      "returncode": 1,
+      "output": "用法: pipeline_demo 图片路径\n"
+    },
+    {
+      "step": "pipeline",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/pipeline_demo",
+        "missing.png"
+      ],
+      "returncode": 2,
+      "output": "[ WARN:0@0.001] global ./modules/imgcodecs/src/loadsave.cpp (239) findDecoder imread_('missing.png'): can't open/read file: check file path/integrity\n"
+    },
+    {
+      "step": "viewer",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/viewer_demo"
+      ],
+      "returncode": 1,
+      "output": "用法: viewer_demo 图片路径\n"
+    },
+    {
+      "step": "viewer",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/viewer_demo",
+        "missing.png"
+      ],
+      "returncode": 2,
+      "output": "[ WARN:0@0.001] global ./modules/imgcodecs/src/loadsave.cpp (239) findDecoder imread_('missing.png'): can't open/read file: check file path/integrity\n无法读取: missing.png\n"
+    },
+    {
+      "step": "video",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/video_demo"
+      ],
+      "returncode": 1,
+      "output": "用法: video_demo 视频路径 或 --camera 设备编号\n"
+    },
+    {
+      "step": "video",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/video_demo",
+        "missing.avi"
+      ],
+      "returncode": 2,
+      "output": "[ WARN:0@0.002] global ./modules/videoio/src/cap_gstreamer.cpp (1127) open OpenCV | GStreamer warning: Error opening bin: unexpected reference \"missing\" - ignoring\n[ WARN:0@0.002] global ./modules/videoio/src/cap_gstreamer.cpp (862) isPipelinePlaying OpenCV | GStreamer warning: GStreamer: pipeline have not been created\n[ERROR:0@0.008] global ./modules/videoio/src/cap.cpp (164) open VIDEOIO(CV_IMAGES): raised OpenCV exception:\n\nOpenCV(4.6.0) ./modules/videoio/src/cap_images.cpp:253: error: (-5:Bad argument) CAP_IMAGES: can't find starting number (in the name of file): missing.avi in function 'icvExtractPattern'\n\n\n无法打开视频源\n"
+    },
+    {
+      "step": "build-mat-variant",
+      "command": [
+        "cmake",
+        "--build",
+        "/tmp/opencv-textbook-j_44b9og/build",
+        "--target",
+        "mat_demo"
+      ],
+      "returncode": 0,
+      "output": "[ 50%] Building CXX object CMakeFiles/mat_demo.dir/src/mat_demo.cpp.o\n[100%] Linking CXX executable mat_demo\n[100%] Built target mat_demo\n"
+    },
+    {
+      "step": "mat",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/mat_demo"
+      ],
+      "returncode": 0,
+      "output": "9 1\n"
+    },
+    {
+      "step": "build-mat-variant",
+      "command": [
+        "cmake",
+        "--build",
+        "/tmp/opencv-textbook-j_44b9og/build",
+        "--target",
+        "mat_demo"
+      ],
+      "returncode": 0,
+      "output": "[ 50%] Building CXX object CMakeFiles/mat_demo.dir/src/mat_demo.cpp.o\n[100%] Linking CXX executable mat_demo\n[100%] Built target mat_demo\n"
+    },
+    {
+      "step": "mat",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/mat_demo"
+      ],
+      "returncode": 0,
+      "output": "9 9\n"
+    },
+    {
+      "step": "build-io-variant",
+      "command": [
+        "cmake",
+        "--build",
+        "/tmp/opencv-textbook-j_44b9og/build",
+        "--target",
+        "io_demo"
+      ],
+      "returncode": 0,
+      "output": "[ 50%] Building CXX object CMakeFiles/io_demo.dir/src/io_demo.cpp.o\n[100%] Linking CXX executable io_demo\n[100%] Built target io_demo\n"
+    },
+    {
+      "step": "io",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/io_demo"
+      ],
+      "returncode": 2,
+      "output": "[ WARN:0@0.001] global ./modules/imgcodecs/src/loadsave.cpp (239) findDecoder imread_('absent.png'): can't open/read file: check file path/integrity\n"
+    },
+    {
+      "step": "build-hsv-variant",
+      "command": [
+        "cmake",
+        "--build",
+        "/tmp/opencv-textbook-j_44b9og/build",
+        "--target",
+        "hsv_demo"
+      ],
+      "returncode": 0,
+      "output": "[ 50%] Building CXX object CMakeFiles/hsv_demo.dir/src/hsv_demo.cpp.o\n[100%] Linking CXX executable hsv_demo\n[100%] Built target hsv_demo\n"
+    },
+    {
+      "step": "hsv",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/hsv_demo"
+      ],
+      "returncode": 0,
+      "output": "1\n"
+    },
+    {
+      "step": "build-hsv-variant",
+      "command": [
+        "cmake",
+        "--build",
+        "/tmp/opencv-textbook-j_44b9og/build",
+        "--target",
+        "hsv_demo"
+      ],
+      "returncode": 0,
+      "output": "[ 50%] Building CXX object CMakeFiles/hsv_demo.dir/src/hsv_demo.cpp.o\n[100%] Linking CXX executable hsv_demo\n[100%] Built target hsv_demo\n"
+    },
+    {
+      "step": "hsv",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/hsv_demo"
+      ],
+      "returncode": 0,
+      "output": "0\n"
+    },
+    {
+      "step": "build-threshold-variant",
+      "command": [
+        "cmake",
+        "--build",
+        "/tmp/opencv-textbook-j_44b9og/build",
+        "--target",
+        "threshold_demo"
+      ],
+      "returncode": 0,
+      "output": "[ 50%] Building CXX object CMakeFiles/threshold_demo.dir/src/threshold_demo.cpp.o\n[100%] Linking CXX executable threshold_demo\n[100%] Built target threshold_demo\n"
+    },
+    {
+      "step": "threshold",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/threshold_demo"
+      ],
+      "returncode": 0,
+      "output": "255 255 0 \nOtsu=50 非零=400 adaptive非零=720\n"
+    },
+    {
+      "step": "build-threshold-variant",
+      "command": [
+        "cmake",
+        "--build",
+        "/tmp/opencv-textbook-j_44b9og/build",
+        "--target",
+        "threshold_demo"
+      ],
+      "returncode": 0,
+      "output": "[ 50%] Building CXX object CMakeFiles/threshold_demo.dir/src/threshold_demo.cpp.o\n[100%] Linking CXX executable threshold_demo\n[100%] Built target threshold_demo\n"
+    },
+    {
+      "step": "threshold",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/threshold_demo"
+      ],
+      "returncode": 0,
+      "output": "0 0 255 \nOtsu=50 非零=400 adaptive非零=80\n"
+    },
+    {
+      "step": "build-filter-variant",
+      "command": [
+        "cmake",
+        "--build",
+        "/tmp/opencv-textbook-j_44b9og/build",
+        "--target",
+        "filter_demo"
+      ],
+      "returncode": 0,
+      "output": "[ 50%] Building CXX object CMakeFiles/filter_demo.dir/src/filter_demo.cpp.o\n[100%] Linking CXX executable filter_demo\n[100%] Built target filter_demo\n"
+    },
+    {
+      "step": "filter",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/filter_demo"
+      ],
+      "returncode": 0,
+      "output": "28\n均值/高斯/双边中心=28,64,255\n"
+    },
+    {
+      "step": "build-filter-variant",
+      "command": [
+        "cmake",
+        "--build",
+        "/tmp/opencv-textbook-j_44b9og/build",
+        "--target",
+        "filter_demo"
+      ],
+      "returncode": 0,
+      "output": "[ 50%] Building CXX object CMakeFiles/filter_demo.dir/src/filter_demo.cpp.o\n[100%] Linking CXX executable filter_demo\n[100%] Built target filter_demo\n"
+    },
+    {
+      "step": "filter",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/filter_demo"
+      ],
+      "returncode": 0,
+      "output": "0\n均值/高斯/双边中心=28,64,31\n"
+    },
+    {
+      "step": "build-morphology-variant",
+      "command": [
+        "cmake",
+        "--build",
+        "/tmp/opencv-textbook-j_44b9og/build",
+        "--target",
+        "morphology_demo"
+      ],
+      "returncode": 0,
+      "output": "[ 50%] Building CXX object CMakeFiles/morphology_demo.dir/src/morphology_demo.cpp.o\n[100%] Linking CXX executable morphology_demo\n[100%] Built target morphology_demo\n"
+    },
+    {
+      "step": "morphology",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/morphology_demo"
+      ],
+      "returncode": 0,
+      "output": "26 0\n"
+    },
+    {
+      "step": "build-contour-variant",
+      "command": [
+        "cmake",
+        "--build",
+        "/tmp/opencv-textbook-j_44b9og/build",
+        "--target",
+        "contour_demo"
+      ],
+      "returncode": 0,
+      "output": "[ 50%] Building CXX object CMakeFiles/contour_demo.dir/src/contour_demo.cpp.o\n[100%] Linking CXX executable contour_demo\n[100%] Built target contour_demo\n"
+    },
+    {
+      "step": "contour",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/contour_demo"
+      ],
+      "returncode": 0,
+      "output": "边缘像素=56\n1 197 200\n"
+    },
+    {
+      "step": "build-resize-variant",
+      "command": [
+        "cmake",
+        "--build",
+        "/tmp/opencv-textbook-j_44b9og/build",
+        "--target",
+        "resize_demo"
+      ],
+      "returncode": 0,
+      "output": "[ 50%] Building CXX object CMakeFiles/resize_demo.dir/src/resize_demo.cpp.o\n[100%] Linking CXX executable resize_demo\n[100%] Built target resize_demo\n"
+    },
+    {
+      "step": "resize",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/resize_demo"
+      ],
+      "returncode": 0,
+      "output": "40 20\n"
+    },
+    {
+      "step": "build-features-variant",
+      "command": [
+        "cmake",
+        "--build",
+        "/tmp/opencv-textbook-j_44b9og/build",
+        "--target",
+        "features_demo"
+      ],
+      "returncode": 0,
+      "output": "[ 50%] Building CXX object CMakeFiles/features_demo.dir/src/features_demo.cpp.o\n[100%] Linking CXX executable features_demo\n[100%] Built target features_demo\n"
+    },
+    {
+      "step": "features",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/features_demo"
+      ],
+      "returncode": 0,
+      "output": "几何近似平移=222 总数=285\n285\n"
+    },
+    {
+      "step": "build-pipeline-variant",
+      "command": [
+        "cmake",
+        "--build",
+        "/tmp/opencv-textbook-j_44b9og/build",
+        "--target",
+        "pipeline_demo"
+      ],
+      "returncode": 0,
+      "output": "[ 50%] Building CXX object CMakeFiles/pipeline_demo.dir/src/pipeline_demo.cpp.o\n[100%] Linking CXX executable pipeline_demo\n[100%] Built target pipeline_demo\n"
+    },
+    {
+      "step": "pipeline",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/pipeline_demo",
+        "scene.png"
+      ],
+      "returncode": 0,
+      "output": "像素数=3600,3599,3600 外轮廓=2 保留=0\n"
+    },
+    {
+      "step": "build-low-h",
+      "command": [
+        "cmake",
+        "--build",
+        "/tmp/opencv-textbook-j_44b9og/build",
+        "--target",
+        "pipeline_demo"
+      ],
+      "returncode": 0,
+      "output": "[ 50%] Building CXX object CMakeFiles/pipeline_demo.dir/src/pipeline_demo.cpp.o\n[100%] Linking CXX executable pipeline_demo\n[100%] Built target pipeline_demo\n"
+    },
+    {
+      "step": "pipeline",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/build/pipeline_demo",
+        "scene.png"
+      ],
+      "returncode": 0,
+      "output": "保留面积=1711 长宽比=2.03448\n像素数=1801,1800,1800 外轮廓=1 保留=1\n"
+    },
+    {
+      "step": "rename-configure",
+      "command": [
+        "cmake",
+        "-S",
+        "/tmp/opencv-textbook-j_44b9og/lab",
+        "-B",
+        "/tmp/opencv-textbook-j_44b9og/rename"
+      ],
+      "returncode": 0,
+      "output": "-- The CXX compiler identification is GNU 13.3.0\n-- Detecting CXX compiler ABI info\n-- Detecting CXX compiler ABI info - done\n-- Check for working CXX compiler: /usr/bin/c++ - skipped\n-- Detecting CXX compile features\n-- Detecting CXX compile features - done\n-- Found OpenCV: /usr (found version \"4.6.0\") found components: core imgproc imgcodecs highgui videoio features2d \n-- OpenCV: 4.6.0\n-- Configuring done (0.1s)\n-- Generating done (0.0s)\n-- Build files have been written to: /tmp/opencv-textbook-j_44b9og/rename\n"
+    },
+    {
+      "step": "rename-build",
+      "command": [
+        "cmake",
+        "--build",
+        "/tmp/opencv-textbook-j_44b9og/rename",
+        "--target",
+        "image_demo"
+      ],
+      "returncode": 0,
+      "output": "[ 50%] Building CXX object CMakeFiles/image_demo.dir/src/image_demo.cpp.o\n[100%] Linking CXX executable image_demo\n[100%] Built target image_demo\n"
+    },
+    {
+      "step": "renamed-version",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/rename/image_demo"
+      ],
+      "returncode": 0,
+      "output": "4.6.0\n"
+    },
+    {
+      "step": "window-viewer",
+      "command": [
+        "xvfb-run",
+        "-a",
+        "-s",
+        "-screen 0 800x600x24",
+        "/usr/bin/python3",
+        "/home/mijiao/Apps/Tutorial4New/scripts/verify_opencv_examples.py",
+        "--gui-worker",
+        "viewer",
+        "/tmp/opencv-textbook-j_44b9og/build/viewer_demo",
+        "scene.png",
+        "/home/mijiao/Apps/Tutorial4New/docs/revision/evidence/volume-2-chapter-4-assets/viewer.xwd"
+      ],
+      "returncode": 0,
+      "output": "XGetInputFocus returned the focused window of 1. This is likely a bug in the X server.\n尺寸=160x120\n"
+    },
+    {
+      "step": "window-video-natural",
+      "command": [
+        "xvfb-run",
+        "-a",
+        "-s",
+        "-screen 0 800x600x24",
+        "/usr/bin/python3",
+        "/home/mijiao/Apps/Tutorial4New/scripts/verify_opencv_examples.py",
+        "--gui-worker",
+        "video-natural",
+        "/tmp/opencv-textbook-j_44b9og/build/video_demo",
+        "scene.avi",
+        "/home/mijiao/Apps/Tutorial4New/docs/revision/evidence/volume-2-chapter-4-assets/video-natural.xwd"
+      ],
+      "returncode": 0,
+      "output": "读取帧数=20\n"
+    },
+    {
+      "step": "window-video-escape",
+      "command": [
+        "xvfb-run",
+        "-a",
+        "-s",
+        "-screen 0 800x600x24",
+        "/usr/bin/python3",
+        "/home/mijiao/Apps/Tutorial4New/scripts/verify_opencv_examples.py",
+        "--gui-worker",
+        "video-escape",
+        "/tmp/opencv-textbook-j_44b9og/build/video_demo",
+        "scene.avi",
+        "/home/mijiao/Apps/Tutorial4New/docs/revision/evidence/volume-2-chapter-4-assets/video-escape.xwd"
+      ],
+      "returncode": 0,
+      "output": "XGetInputFocus returned the focused window of 1. This is likely a bug in the X server.\n读取帧数=4\n"
+    },
+    {
+      "step": "ros-build",
+      "command": [
+        "colcon",
+        "--log-base",
+        "/tmp/opencv-textbook-j_44b9og/log",
+        "build",
+        "--base-paths",
+        "/tmp/opencv-textbook-j_44b9og/bridge",
+        "--build-base",
+        "/tmp/opencv-textbook-j_44b9og/ros-build",
+        "--install-base",
+        "/tmp/opencv-textbook-j_44b9og/install"
+      ],
+      "returncode": 0,
+      "output": "Starting >>> image_bridge_demo\nFinished <<< image_bridge_demo [6.08s]\n\nSummary: 1 package finished [6.18s]\n"
+    },
+    {
+      "step": "roundtrip",
+      "command": [
+        "/tmp/opencv-textbook-j_44b9og/install/image_bridge_demo/lib/image_bridge_demo/roundtrip"
+      ],
+      "returncode": 0,
+      "output": "8 8\n通道=1 灰度=76 sec=12 nanosec=345 frame=camera_optical_frame\n"
+    },
+    {
+      "step": "ros-image-fields",
+      "command": [
+        "python3",
+        "-c",
+        "import time\nimport rclpy\nfrom sensor_msgs.msg import Image\nrclpy.init();node=rclpy.create_node('image_check');incoming={};outgoing={}\ndef key(msg):return (msg.header.stamp.sec,msg.header.stamp.nanosec,msg.header.frame_id)\ndef receive_input(msg):incoming[key(msg)]=msg\ndef receive_output(msg):outgoing[key(msg)]=msg\none=node.create_subscription(Image,'image_in',receive_input,10)\ntwo=node.create_subscription(Image,'image_out',receive_output,10)\ndeadline=time.monotonic()+8\nwhile time.monotonic()<deadline:\n rclpy.spin_once(node,timeout_sec=.1)\n common=incoming.keys()&outgoing.keys()\n if common:\n  tag=next(iter(common));a,b=incoming[tag],outgoing[tag]\n  assert a.encoding=='bgr8' and b.encoding=='mono8'\n  assert a.height==b.height==8 and a.width==b.width==8\n  assert a.step==24 and b.step==8 and len(b.data)==64 and set(b.data)=={76}\n  assert tag[2]=='camera_optical_frame' and tag[0]>0\n  print('输入/输出Header相同，bgr8→mono8，64像素均76',tag);break\nelse:raise RuntimeError('未收到对应输入输出')\nnode.destroy_node();rclpy.shutdown()"
+      ],
+      "returncode": 0,
+      "output": "输入/输出Header相同，bgr8→mono8，64像素均76 (1790628461, 931091979, 'camera_optical_frame')\n"
+    },
+    {
+      "step": "cli-image-echo",
+      "command": [
+        "ros2",
+        "topic",
+        "echo",
+        "/image_out",
+        "sensor_msgs/msg/Image",
+        "--once"
+      ],
+      "returncode": 0,
+      "output": "header:\n  stamp:\n    sec: 1790628463\n    nanosec: 431077543\n  frame_id: camera_optical_frame\nheight: 8\nwidth: 8\nencoding: mono8\nis_bigendian: 0\nstep: 8\ndata:\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n- 76\n---\n"
+    },
+    {
+      "step": "bad-encoding",
+      "command": [
+        "ros2",
+        "topic",
+        "pub",
+        "--once",
+        "/image_in",
+        "sensor_msgs/msg/Image",
+        "{height: 1, width: 1, encoding: invalid, step: 1, data: [0]}"
+      ],
+      "returncode": 0,
+      "output": "Waiting for at least 1 matching subscription(s)...\npublisher: beginning loop\npublishing #1: sensor_msgs.msg.Image(header=std_msgs.msg.Header(stamp=builtin_interfaces.msg.Time(sec=0, nanosec=0), frame_id=''), height=1, width=1, encoding='invalid', is_bigendian=0, step=1, data=[0])\n\n"
+    },
+    {
+      "step": "ros-image-window",
+      "command": [
+        "xvfb-run",
+        "-a",
+        "-s",
+        "-screen 0 800x600x24",
+        "/usr/bin/python3",
+        "/home/mijiao/Apps/Tutorial4New/scripts/verify_opencv_examples.py",
+        "--gui-worker",
+        "ros",
+        "unused",
+        "unused",
+        "/home/mijiao/Apps/Tutorial4New/docs/revision/evidence/volume-2-chapter-4-assets/ros-image.xwd"
+      ],
+      "returncode": 0,
+      "output": "[INFO] [1790628466.473964866] [showimage]: Subscribing to topic 'image'\n[INFO] [1790628468.431597198] [showimage]: Received image #camera_optical_frame\n[INFO] [1790628468.595095760] [rclcpp]: signal_handler(SIGINT/SIGTERM)\n"
+    },
+    {
+      "step": "bridge-node-log",
+      "returncode": 0,
+      "output": "[INFO] [1790628461.931360771] [image_bridge_demo]: 输入=bgr8 输出=mono8 通道=1 frame=camera_optical_frame\n[INFO] [1790628462.431218528] [image_bridge_demo]: 输入=bgr8 输出=mono8 通道=1 frame=camera_optical_frame\n[INFO] [1790628462.931208699] [image_bridge_demo]: 输入=bgr8 输出=mono8 通道=1 frame=camera_optical_frame\n[INFO] [1790628463.431198135] [image_bridge_demo]: 输入=bgr8 输出=mono8 通道=1 frame=camera_optical_frame\n[INFO] [1790628463.931207067] [image_bridge_demo]: 输入=bgr8 输出=mono8 通道=1 frame=camera_optical_frame\n[INFO] [1790628464.431151578] [image_bridge_demo]: 输入=bgr8 输出=mono8 通道=1 frame=camera_optical_frame\n[INFO] [1790628464.931265209] [image_bridge_demo]: 输入=bgr8 输出=mono8 通道=1 frame=camera_optical_frame\n[ERROR] [1790628465.126753468] [image_bridge_demo]: cv_bridge: Unrecognized image encoding [invalid]\n[INFO] [1790628465.431282803] [image_bridge_demo]: 输入=bgr8 输出=mono8 通道=1 frame=camera_optical_frame\n[INFO] [1790628465.931203514] [image_bridge_demo]: 输入=bgr8 输出=mono8 通道=1 frame=camera_optical_frame\n[INFO] [1790628466.431213113] [image_bridge_demo]: 输入=bgr8 输出=mono8 通道=1 frame=camera_optical_frame\n[INFO] [1790628466.931205280] [image_bridge_demo]: 输入=bgr8 输出=mono8 通道=1 frame=camera_optical_frame\n[INFO] [1790628467.431206507] [image_bridge_demo]: 输入=bgr8 输出=mono8 通道=1 frame=camera_optical_frame\n[INFO] [1790628467.931209649] [image_bridge_demo]: 输入=bgr8 输出=mono8 通道=1 frame=camera_optical_frame\n[INFO] [1790628468.431246771] [image_bridge_demo]: 输入=bgr8 输出=mono8 通道=1 frame=camera_optical_frame\n[INFO] [1790628468.765785400] [rclcpp]: signal_handler(SIGINT/SIGTERM)\n"
+    },
+    {
+      "step": "stop-own-domain-daemon",
+      "command": [
+        "ros2",
+        "daemon",
+        "stop"
+      ],
+      "returncode": 0,
+      "output": "The daemon has been stopped\n"
+    }
+  ]
+}
