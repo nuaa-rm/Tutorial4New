@@ -1495,14 +1495,14 @@ myMax(1,2.5) 为同一个 T 推出不同类型，不能直接匹配；显式 myM
 \subsubsection*{随堂练习}
 第三章的操作题沿用正文里的目录和源文件。下面只列出要改的配置、要执行的命令和结果，完整工程见对应示例。
 
-\paragraph*{随堂练习 3.1：改源文件与改程序}
+\paragraph*{随堂练习~\ref{ex:v1-build-stages}：改源文件与改程序}
 \begin{solution}
 只把源文件中的编号改为 7，直接运行旧程序时仍输出 \texttt{armor=3}。
 重新执行四步构建，或执行正文的一步构建命令后，才会输出 \texttt{armor=7}。第二行始终为 \texttt{function=main}。
 少写普通语句末尾的分号时，预处理通常仍能完成，翻译成汇编的编译阶段会首先报错。修复后要重新构建，不要把上次残留的可执行文件当成这次成功的证据。
 \end{solution}
 
-\paragraph*{随堂练习 3.2：修改目标名}
+\paragraph*{随堂练习~\ref{ex:v1-build-target-name}：修改目标名}
 \begin{solution}
 把原配置中创建和设置 hello 目标的两行同步改成：
 \begin{lstlisting}[language=cmake,frame=single,numbers=left]
@@ -1518,14 +1518,15 @@ cmake --build build-rename --parallel 2
 程序输出与改名前相同。项目名标识整个项目，目标名标识产物，二者可以不同，所以不用改 project。
 \end{solution}
 
-\paragraph*{随堂练习 3.3：缺路径与缺实现}
+\paragraph*{随堂练习~\ref{ex:v1-build-missing-files}：缺路径与缺实现}
 \begin{solution}
 去掉 \texttt{-I include} 后，编译器找不到 \texttt{armor.hpp}，通常在预处理头文件时报告缺失。
 保留包含路径但去掉 \texttt{src/armor.cpp} 后，声明仍可见，源文件可以编译，但链接器找不到 \texttt{armor\_score(int)} 的定义，会报告未定义引用。
 恢复原来的完整命令后，应重新得到 \texttt{score=30}。
 \end{solution}
 
-\paragraph*{随堂练习 3.4：修改源码和配置开关}
+\Needspace{16\baselineskip}
+\paragraph*{随堂练习~\ref{ex:v1-build-incremental-switch}：修改源码和配置开关}
 \begin{solution}
 在多文件版本的 \texttt{armor-demo} 中把乘数改为 20，然后执行：
 \begin{tbash}
@@ -1540,7 +1541,7 @@ cmake --build build --parallel 2
 最后把乘数改回 10，再构建一次，确认恢复为 \texttt{score=30}。
 \end{solution}
 
-\paragraph*{随堂练习 3.5：共享库版本}
+\paragraph*{随堂练习~\ref{ex:v1-build-shared-library}：共享库版本}
 \begin{solution}
 把库目标改为 \texttt{add\_library(armor SHARED src/armor.cpp)}，然后在 Ubuntu 中运行：
 \begin{tbash}
@@ -1553,7 +1554,7 @@ ls build-shared/libarmor.so
 最后改回 STATIC，回到正文的静态库版本继续安装练习。
 \end{solution}
 
-\paragraph*{随堂练习 3.6：更换安装前缀}
+\paragraph*{随堂练习~\ref{ex:v1-build-install-prefix}：更换安装前缀}
 \begin{solution}
 在静态库版本已配置、已构建的前提下，运行：
 \begin{tbash}
@@ -1564,14 +1565,25 @@ cmake --install build-lib --prefix "$PWD/stage-check"
 程序应输出 \texttt{score=30}。若你上一步还没恢复静态库版本，先恢复并重新配置、构建。
 \end{solution}
 
-\paragraph*{随堂练习 3.7：PUBLIC 改成 PRIVATE}
+\paragraph*{随堂练习~\ref{ex:v1-build-module}：空值与未定义变量}
+\begin{solution}
+在加载 Function.cmake 之后写入：
+\begin{lstlisting}[language=cmake,frame=single,numbers=left]
+set(EMPTY_VALUE "")
+print_var(EMPTY_VALUE)
+print_var(NOT_DEFINED_YET)
+\end{lstlisting}
+重新配置时分别打印 \texttt{EMPTY\_VALUE = []} 与 \texttt{NOT\_DEFINED\_YET is not defined}。前者已定义，值为空；后者根本没定义。print\_var 是 CMake 函数，在配置阶段执行，C++ 程序此时可以还没编译。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:v1-build-public-scope}：PUBLIC 改成 PRIVATE}
 \begin{solution}
 armor 库自己仍能使用 include 目录，所以其源码能编译。
 但这个目录不再作为使用要求传给链接它的 \texttt{armor\_demo}，后者在编译 \texttt{src/main.cpp} 时找不到 \texttt{armor.hpp}。
 恢复 PUBLIC 后重新配置并构建，应该通过。要是只改了文件却看到旧程序还能运行，先确认你检查的是本次构建结果。
 \end{solution}
 
-\paragraph*{随堂练习 3.8：检查退出码}
+\paragraph*{随堂练习~\ref{ex:v1-build-exit-code}：检查退出码}
 \begin{solution}
 在 \texttt{opencv-demo} 目录执行：
 \begin{tbash}
@@ -1582,55 +1594,56 @@ echo $?
 \end{tbash}
 两次退出码分别为 1、2。前者参数数量不对，后者读图失败；两种情况下都已成功启动程序，因此不应靠改链接配置解决。
 \texttt{echo \$?} 必须紧跟待检查的命令，其他命令会覆盖这个状态值。
+把包名改成 RMTrainingMissingPackage 后，运行 \texttt{cmake -S . -B build-missing}，应在配置阶段报告找不到包信息，还没进入 C++ 编译。恢复 OpenCV 后重新配置并构建，应该通过。这和“程序已启动，但读图失败”属于不同阶段。
 \end{solution}
 
 \subsubsection*{章末习题}
-\paragraph*{章末第 1 题：编译阶段}
+\paragraph*{章末第~\ref{prob:v1-build-1}~题：编译阶段}
 \begin{solution}
 预处理得到 \texttt{.ii}，编译得到 \texttt{.s}，汇编得到 \texttt{.o}，链接得到可执行文件。\texttt{-c} 在生成目标文件后停止，不执行链接。
 \end{solution}
 
-\paragraph*{章末第 2 题：项目名与目标名}
+\paragraph*{章末第~\ref{prob:v1-build-2}~题：项目名与目标名}
 \begin{solution}
 项目名是整个项目的名字，目标名是要构建的产物的名字。此时只准备好了构建文件，还要执行 \texttt{cmake --build 构建目录}。
 \end{solution}
 
-\paragraph*{章末第 3 题：头文件路径与源文件}
+\paragraph*{章末第~\ref{prob:v1-build-3}~题：头文件路径与源文件}
 \begin{solution}
 需要。头文件搜索路径只帮助编译器找到声明。\texttt{score.cpp} 里的实现仍要参与编译，也可以先做成库，再链接给程序。
 \end{solution}
 
-\paragraph*{章末第 4 题：库类型}
+\paragraph*{章末第~\ref{prob:v1-build-4}~题：库类型}
 \begin{solution}
 \texttt{STATIC} 创建静态库，\texttt{SHARED} 创建共享库。省略类型时取决于 \texttt{BUILD\_SHARED\_LIBS}；该变量未设置或为假时默认静态库。
 \end{solution}
 
-\paragraph*{章末第 5 题：目标名与变量}
+\paragraph*{章末第~\ref{prob:v1-build-5}~题：目标名与变量}
 \begin{solution}
 不一样。\texttt{score} 指向已创建的库目标；\texttt{\$\{score\}} 读取同名变量。题目中没设置这个变量，展开后是空的，程序就没有通过这项配置链接该库。
 \end{solution}
 
-\paragraph*{章末第 6 题：安装位置}
+\paragraph*{章末第~\ref{prob:v1-build-6}~题：安装位置}
 \begin{solution}
 可执行文件路径为 \texttt{/home/student/demo-stage/bin/viewer}。安装不会自动构建，应先配置、构建，再安装。
 \end{solution}
 
-\paragraph*{章末第 7 题：配置作用域}
+\paragraph*{章末第~\ref{prob:v1-build-7}~题：配置作用域}
 \begin{solution}
 第一个设为 \texttt{PUBLIC}，库自己和下游都能用；第二个设为 \texttt{PRIVATE}，只给库自己用。\texttt{INTERFACE} 只把要求传给下游，常用于只提供头文件的接口库。
 \end{solution}
 
-\paragraph*{章末第 8 题：OpenCV 查找}
+\paragraph*{章末第~\ref{prob:v1-build-8}~题：OpenCV 查找}
 \begin{solution}
 不会自动安装。先检查 C++ 开发包是否安装。找到包配置文件 \texttt{OpenCVConfig.cmake} 后，把它所在的目录赋给 \texttt{OpenCV\_DIR}，不能随意指定一个头文件目录。
 \end{solution}
 
-\paragraph*{章末第 9 题：配置开关与重新构建}
+\paragraph*{章末第~\ref{prob:v1-build-9}~题：配置开关与重新构建}
 \begin{solution}
-漏了重新构建。开关决定是否调用 \texttt{target\_compile\_definitions}，这条命令会把宏加入目标的编译要求。重新构建后，条件编译的结果才会出现在新程序里；原程序不会自动变化。
+漏了重新构建。模块里的 print\_var 只是读取并打印配置变量；日志 ON 不能证明旧程序已经改变。开关决定是否调用 \texttt{target\_compile\_definitions}，这条命令会把宏加入目标的编译要求。重新构建后，条件编译的结果才会出现在新程序里；原程序不会自动变化。
 \end{solution}
 
-\paragraph*{章末第 10 题：增量构建}
+\paragraph*{章末第~\ref{prob:v1-build-10}~题：增量构建}
 \begin{solution}
 按本章的构建规则，文件没变时，不需要重新编译或链接。改了 \texttt{armor.cpp} 后，要重新编译它、更新静态库，再重新链接程序。\texttt{main.cpp} 和它的依赖都没变，所以不用重新编译。不同生成器的日志长得不一样，看实际执行了哪些命令就好。
 \end{solution}

@@ -221,16 +221,16 @@
 以后再遇到满屏报错，至少知道从哪里查起——这已经比对着终端许愿靠谱多了。
 
 \begin{problemset}
-\item （基础）写出从 \texttt{demo.cpp} 到可执行文件的四个阶段及其中间文件扩展名，并说明 \texttt{g++ -c demo.cpp} 停在哪一步。
-\item （基础）你把项目命名为 \texttt{training}，把可执行目标命名为 \texttt{viewer}。这两个名字分别管什么？终端出现 \texttt{Generating done} 时，程序已经编译好了吗？
-\item （基础）程序需要 \texttt{main.cpp} 和 \texttt{score.cpp}，头文件放在 \texttt{include} 目录。你已经设置了头文件搜索路径，还需要把 \texttt{score.cpp} 加进目标吗？说说理由。
-\item （基础）比较 \texttt{add\_library(score STATIC score.cpp)}、显式写 \texttt{SHARED} 和省略类型三种写法的含义。
-\item （基础）你用 \texttt{add\_library(score STATIC score.cpp)} 创建了库，但没定义名为 \texttt{score} 的变量。链接时写 \texttt{score} 和 \texttt{\$\{score\}}，结果一样吗？
-\item （基础）安装规则的目标目录为 \texttt{bin}，安装前缀为 \texttt{/home/student/demo-stage}。目标 \texttt{viewer} 会安装到哪里？只运行安装命令能否替代构建？
-\item （基础）库需要两个头文件目录：一个是库自己和使用这个库的程序都要用的，另一个只供库内部使用。它们分别该设成什么作用域？\texttt{INTERFACE} 又适合什么情况？
-\item （基础）\texttt{find\_package(OpenCV REQUIRED)} 在配置阶段失败。它会自动安装 OpenCV 吗？自行安装 OpenCV 后，\texttt{OpenCV\_DIR} 应指向哪类目录？
-\item （提高）你把 \texttt{SAVE\_OUTPUT} 从 \texttt{OFF} 改成 \texttt{ON}，配置完成后就运行了原程序，却没看到新提示。请按 CMake 变量、编译宏、可执行文件的顺序，解释中间漏了哪一步。
-\item （实践）观察一次“哪些文件需要重新编译”。在静态库工程中，先不改任何文件，连续构建两次；然后只改 \texttt{src/armor.cpp} 中的乘数，再构建一次。用 \texttt{--verbose} 保存后两次构建的输出，看看各自做了哪些工作。最后把乘数改回来。
+\item\label{prob:v1-build-1} （基础）写出从 \texttt{demo.cpp} 到可执行文件的四个阶段及其中间文件扩展名，并说明 \texttt{g++ -c demo.cpp} 停在哪一步。
+\item\label{prob:v1-build-2} （基础）你把项目命名为 \texttt{training}，把可执行目标命名为 \texttt{viewer}。这两个名字分别管什么？终端出现 \texttt{Generating done} 时，程序已经编译好了吗？
+\item\label{prob:v1-build-3} （基础）程序需要 \texttt{main.cpp} 和 \texttt{score.cpp}，头文件放在 \texttt{include} 目录。你已经设置了头文件搜索路径，还需要把 \texttt{score.cpp} 加进目标吗？说说理由。
+\item\label{prob:v1-build-4} （基础）比较 \texttt{add\_library(score STATIC score.cpp)}、显式写 \texttt{SHARED} 和省略类型三种写法的含义。
+\item\label{prob:v1-build-5} （基础）你用 \texttt{add\_library(score STATIC score.cpp)} 创建了库，但没定义名为 \texttt{score} 的变量。链接时写 \texttt{score} 和 \texttt{\$\{score\}}，结果一样吗？
+\item\label{prob:v1-build-6} （基础）安装规则的目标目录为 \texttt{bin}，安装前缀为 \texttt{/home/student/demo-stage}。目标 \texttt{viewer} 会安装到哪里？只运行安装命令能否替代构建？
+\item\label{prob:v1-build-7} （基础）库需要两个头文件目录：一个是库自己和使用这个库的程序都要用的，另一个只供库内部使用。它们分别该设成什么作用域？\texttt{INTERFACE} 又适合什么情况？
+\item\label{prob:v1-build-8} （基础）\texttt{find\_package(OpenCV REQUIRED)} 在配置阶段失败。它会自动安装 OpenCV 吗？自行安装 OpenCV 后，\texttt{OpenCV\_DIR} 应指向哪类目录？
+\item\label{prob:v1-build-9} （提高）你把 \texttt{SAVE\_OUTPUT} 从 \texttt{OFF} 改成 \texttt{ON}，\texttt{print\_var(SAVE\_OUTPUT)} 已经打印出 ON；配置完成后就运行原程序，却没看到新提示。请按模块函数、CMake 变量、编译宏、可执行文件的顺序，解释中间漏了哪一步。
+\item\label{prob:v1-build-10} （实践）观察一次“哪些文件需要重新编译”。在静态库工程中，先不改任何文件，连续构建两次；然后只改 \texttt{src/armor.cpp} 中的乘数，再构建一次。用 \texttt{--verbose} 保存后两次构建的输出，看看各自做了哪些工作。最后把乘数改回来。
 \end{problemset}
 
 \section{本章验收}

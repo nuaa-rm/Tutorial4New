@@ -1,0 +1,673 @@
+{
+  "versions": {
+    "gcc": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+    "cmake": "cmake version 3.28.3",
+    "opencv": "4.6.0"
+  },
+  "records": [
+    {
+      "step": "preprocess",
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-E",
+        "hello.cpp",
+        "-o",
+        "hello.ii"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "step": "compile",
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-S",
+        "hello.ii",
+        "-o",
+        "hello.s"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "step": "assemble",
+      "command": [
+        "g++",
+        "-c",
+        "hello.s",
+        "-o",
+        "hello.o"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "step": "link",
+      "command": [
+        "g++",
+        "hello.o",
+        "-o",
+        "hello"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "step": "four-stage-output",
+      "command": [
+        "./hello"
+      ],
+      "exit": 0,
+      "stdout": "armor=3\nfunction=main\n",
+      "stderr": ""
+    },
+    {
+      "step": "old-binary",
+      "command": [
+        "./hello"
+      ],
+      "exit": 0,
+      "stdout": "armor=3\nfunction=main\n",
+      "stderr": ""
+    },
+    {
+      "step": "one-step",
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-Wall",
+        "-Wextra",
+        "hello.cpp",
+        "-o",
+        "hello"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "step": "new-binary",
+      "command": [
+        "./hello"
+      ],
+      "exit": 0,
+      "stdout": "armor=7\nfunction=main\n",
+      "stderr": ""
+    },
+    {
+      "step": "syntax-error",
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-S",
+        "hello.cpp",
+        "-o",
+        "bad.s"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "hello.cpp: In function ‘int main()’:\nhello.cpp:5:46: error: expected ‘;’ before ‘std’\n    5 |     std::cout << \"armor=\" << ARMOR_ID << '\\n'\n      |                                              ^\n      |                                              ;\n    6 |     std::cout << \"function=\" << __func__ << '\\n';\n      |     ~~~                                       \n"
+    },
+    {
+      "step": "configure-build",
+      "command": [
+        "cmake",
+        "-S",
+        ".",
+        "-B",
+        "build",
+        "-DCMAKE_BUILD_TYPE=Debug"
+      ],
+      "exit": 0,
+      "stdout": "-- The CXX compiler identification is GNU 13.3.0\n-- Detecting CXX compiler ABI info\n-- Detecting CXX compiler ABI info - done\n-- Check for working CXX compiler: /usr/bin/c++ - skipped\n-- Detecting CXX compile features\n-- Detecting CXX compile features - done\n-- Armor: training_armor\n-- Compiler: /usr/bin/c++\n-- Configuring done (0.1s)\n-- Generating done (0.0s)\n-- Build files have been written to: /tmp/build-chapter-check-gtgr4lko/lab/hello-cmake/build\n",
+      "stderr": ""
+    },
+    {
+      "step": "build-build",
+      "command": [
+        "cmake",
+        "--build",
+        "build",
+        "--parallel",
+        "2"
+      ],
+      "exit": 0,
+      "stdout": "[ 50%] Building CXX object CMakeFiles/hello.dir/hello.cpp.o\n[100%] Linking CXX executable hello\n[100%] Built target hello\n",
+      "stderr": ""
+    },
+    {
+      "step": "cmake-hello",
+      "command": [
+        "./build/hello"
+      ],
+      "exit": 0,
+      "stdout": "armor=3\nfunction=main\n",
+      "stderr": ""
+    },
+    {
+      "step": "configure-build-rename",
+      "command": [
+        "cmake",
+        "-S",
+        ".",
+        "-B",
+        "build-rename",
+        "-DCMAKE_BUILD_TYPE=Debug"
+      ],
+      "exit": 0,
+      "stdout": "-- The CXX compiler identification is GNU 13.3.0\n-- Detecting CXX compiler ABI info\n-- Detecting CXX compiler ABI info - done\n-- Check for working CXX compiler: /usr/bin/c++ - skipped\n-- Detecting CXX compile features\n-- Detecting CXX compile features - done\n-- Armor: training_armor\n-- Compiler: /usr/bin/c++\n-- Configuring done (0.1s)\n-- Generating done (0.0s)\n-- Build files have been written to: /tmp/build-chapter-check-gtgr4lko/lab/hello-cmake/build-rename\n",
+      "stderr": ""
+    },
+    {
+      "step": "build-build-rename",
+      "command": [
+        "cmake",
+        "--build",
+        "build-rename",
+        "--parallel",
+        "2"
+      ],
+      "exit": 0,
+      "stdout": "[ 50%] Building CXX object CMakeFiles/armor_hello.dir/hello.cpp.o\n[100%] Linking CXX executable armor_hello\n[100%] Built target armor_hello\n",
+      "stderr": ""
+    },
+    {
+      "step": "renamed-target",
+      "command": [
+        "./build-rename/armor_hello"
+      ],
+      "exit": 0,
+      "stdout": "armor=3\nfunction=main\n",
+      "stderr": ""
+    },
+    {
+      "step": "manual-multifile",
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-I",
+        "include",
+        "src/main.cpp",
+        "src/armor.cpp",
+        "-o",
+        "armor_manual"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "step": "manual-score",
+      "command": [
+        "./armor_manual"
+      ],
+      "exit": 0,
+      "stdout": "score=30\n",
+      "stderr": ""
+    },
+    {
+      "step": "missing-header",
+      "command": [
+        "g++",
+        "-std=c++17",
+        "src/main.cpp",
+        "src/armor.cpp",
+        "-o",
+        "bad"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "src/main.cpp:1:10: fatal error: armor.hpp: No such file or directory\n    1 | #include \"armor.hpp\"\n      |          ^~~~~~~~~~~\ncompilation terminated.\nsrc/armor.cpp:1:10: fatal error: armor.hpp: No such file or directory\n    1 | #include \"armor.hpp\"\n      |          ^~~~~~~~~~~\ncompilation terminated.\n"
+    },
+    {
+      "step": "missing-implementation",
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-I",
+        "include",
+        "src/main.cpp",
+        "-o",
+        "bad"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "/usr/bin/ld: /tmp/ccGgAysn.o: in function `main':\nmain.cpp:(.text+0x2f): undefined reference to `armor_score(int)'\ncollect2: error: ld returned 1 exit status\n"
+    },
+    {
+      "step": "configure-build",
+      "command": [
+        "cmake",
+        "-S",
+        ".",
+        "-B",
+        "build",
+        "-DCMAKE_BUILD_TYPE=Debug"
+      ],
+      "exit": 0,
+      "stdout": "-- The CXX compiler identification is GNU 13.3.0\n-- Detecting CXX compiler ABI info\n-- Detecting CXX compiler ABI info - done\n-- Check for working CXX compiler: /usr/bin/c++ - skipped\n-- Detecting CXX compile features\n-- Detecting CXX compile features - done\n-- Configuring done (0.1s)\n-- Generating done (0.0s)\n-- Build files have been written to: /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build\n",
+      "stderr": ""
+    },
+    {
+      "step": "build-build",
+      "command": [
+        "cmake",
+        "--build",
+        "build",
+        "--parallel",
+        "2"
+      ],
+      "exit": 0,
+      "stdout": "[ 33%] Building CXX object CMakeFiles/armor_demo.dir/src/main.cpp.o\n[ 66%] Building CXX object CMakeFiles/armor_demo.dir/src/armor.cpp.o\n[100%] Linking CXX executable armor_demo\n[100%] Built target armor_demo\n",
+      "stderr": ""
+    },
+    {
+      "step": "multifile",
+      "command": [
+        "./build/armor_demo"
+      ],
+      "exit": 0,
+      "stdout": "score=30\n",
+      "stderr": ""
+    },
+    {
+      "step": "configure-build",
+      "command": [
+        "cmake",
+        "-S",
+        ".",
+        "-B",
+        "build",
+        "-DCMAKE_BUILD_TYPE=Debug",
+        "-DSAVE_OUTPUT=ON"
+      ],
+      "exit": 0,
+      "stdout": "-- Configuring done (0.0s)\n-- Generating done (0.0s)\n-- Build files have been written to: /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build\n",
+      "stderr": ""
+    },
+    {
+      "step": "build-build",
+      "command": [
+        "cmake",
+        "--build",
+        "build",
+        "--parallel",
+        "2"
+      ],
+      "exit": 0,
+      "stdout": "[ 33%] Building CXX object CMakeFiles/armor_demo.dir/src/main.cpp.o\n[ 66%] Building CXX object CMakeFiles/armor_demo.dir/src/armor.cpp.o\n[100%] Linking CXX executable armor_demo\n[100%] Built target armor_demo\n",
+      "stderr": ""
+    },
+    {
+      "step": "macro-on",
+      "command": [
+        "./build/armor_demo"
+      ],
+      "exit": 0,
+      "stdout": "score=30\nsave output enabled\n",
+      "stderr": ""
+    },
+    {
+      "step": "incremental-multifile",
+      "command": [
+        "cmake",
+        "--build",
+        "build",
+        "--parallel",
+        "2"
+      ],
+      "exit": 0,
+      "stdout": "[ 33%] Building CXX object CMakeFiles/armor_demo.dir/src/armor.cpp.o\n[ 66%] Linking CXX executable armor_demo\n[100%] Built target armor_demo\n",
+      "stderr": ""
+    },
+    {
+      "step": "double-score",
+      "command": [
+        "./build/armor_demo"
+      ],
+      "exit": 0,
+      "stdout": "score=60\nsave output enabled\n",
+      "stderr": ""
+    },
+    {
+      "step": "configure-build",
+      "command": [
+        "cmake",
+        "-S",
+        ".",
+        "-B",
+        "build",
+        "-DCMAKE_BUILD_TYPE=Debug",
+        "-DSAVE_OUTPUT=OFF"
+      ],
+      "exit": 0,
+      "stdout": "-- Configuring done (0.0s)\n-- Generating done (0.0s)\n-- Build files have been written to: /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build\n",
+      "stderr": ""
+    },
+    {
+      "step": "build-build",
+      "command": [
+        "cmake",
+        "--build",
+        "build",
+        "--parallel",
+        "2"
+      ],
+      "exit": 0,
+      "stdout": "[ 66%] Building CXX object CMakeFiles/armor_demo.dir/src/main.cpp.o\n[ 66%] Building CXX object CMakeFiles/armor_demo.dir/src/armor.cpp.o\n[100%] Linking CXX executable armor_demo\n[100%] Built target armor_demo\n",
+      "stderr": ""
+    },
+    {
+      "step": "macro-off",
+      "command": [
+        "./build/armor_demo"
+      ],
+      "exit": 0,
+      "stdout": "score=60\n",
+      "stderr": ""
+    },
+    {
+      "step": "configure-build-lib",
+      "command": [
+        "cmake",
+        "-S",
+        ".",
+        "-B",
+        "build-lib",
+        "-DCMAKE_BUILD_TYPE=Debug"
+      ],
+      "exit": 0,
+      "stdout": "-- The CXX compiler identification is GNU 13.3.0\n-- Detecting CXX compiler ABI info\n-- Detecting CXX compiler ABI info - done\n-- Check for working CXX compiler: /usr/bin/c++ - skipped\n-- Detecting CXX compile features\n-- Detecting CXX compile features - done\n-- Configuring done (0.1s)\n-- Generating done (0.0s)\n-- Build files have been written to: /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib\n",
+      "stderr": ""
+    },
+    {
+      "step": "build-build-lib",
+      "command": [
+        "cmake",
+        "--build",
+        "build-lib",
+        "--parallel",
+        "2"
+      ],
+      "exit": 0,
+      "stdout": "[ 25%] Building CXX object CMakeFiles/armor.dir/src/armor.cpp.o\n[ 50%] Linking CXX static library libarmor.a\n[ 50%] Built target armor\n[ 75%] Building CXX object CMakeFiles/armor_demo.dir/src/main.cpp.o\n[100%] Linking CXX executable armor_demo\n[100%] Built target armor_demo\n",
+      "stderr": ""
+    },
+    {
+      "step": "static-library",
+      "command": [
+        "./build-lib/armor_demo"
+      ],
+      "exit": 0,
+      "stdout": "score=30\n",
+      "stderr": ""
+    },
+    {
+      "step": "unchanged-build",
+      "command": [
+        "cmake",
+        "--build",
+        "build-lib",
+        "--verbose"
+      ],
+      "exit": 0,
+      "stdout": "Change Dir: '/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib'\n\nRun Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile\n/usr/bin/cmake -S/tmp/build-chapter-check-gtgr4lko/lab/armor-demo -B/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib --check-build-system CMakeFiles/Makefile.cmake 0\n/usr/bin/cmake -E cmake_progress_start /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib/CMakeFiles /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib//CMakeFiles/progress.marks\n/usr/bin/gmake  -f CMakeFiles/Makefile2 all\ngmake[1]: Entering directory '/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib'\n/usr/bin/gmake  -f CMakeFiles/armor.dir/build.make CMakeFiles/armor.dir/depend\ngmake[2]: Entering directory '/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib'\ncd /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib && /usr/bin/cmake -E cmake_depends \"Unix Makefiles\" /tmp/build-chapter-check-gtgr4lko/lab/armor-demo /tmp/build-chapter-check-gtgr4lko/lab/armor-demo /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib/CMakeFiles/armor.dir/DependInfo.cmake \"--color=\"\nDependencies file \"CMakeFiles/armor.dir/src/armor.cpp.o.d\" is newer than depends file \"/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib/CMakeFiles/armor.dir/compiler_depend.internal\".\nConsolidate compiler generated dependencies of target armor\ngmake[2]: Leaving directory '/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib'\n/usr/bin/gmake  -f CMakeFiles/armor.dir/build.make CMakeFiles/armor.dir/build\ngmake[2]: Entering directory '/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib'\ngmake[2]: Nothing to be done for 'CMakeFiles/armor.dir/build'.\ngmake[2]: Leaving directory '/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib'\n[ 50%] Built target armor\n/usr/bin/gmake  -f CMakeFiles/armor_demo.dir/build.make CMakeFiles/armor_demo.dir/depend\ngmake[2]: Entering directory '/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib'\ncd /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib && /usr/bin/cmake -E cmake_depends \"Unix Makefiles\" /tmp/build-chapter-check-gtgr4lko/lab/armor-demo /tmp/build-chapter-check-gtgr4lko/lab/armor-demo /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib/CMakeFiles/armor_demo.dir/DependInfo.cmake \"--color=\"\nDependencies file \"CMakeFiles/armor_demo.dir/src/main.cpp.o.d\" is newer than depends file \"/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib/CMakeFiles/armor_demo.dir/compiler_depend.internal\".\nConsolidate compiler generated dependencies of target armor_demo\ngmake[2]: Leaving directory '/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib'\n/usr/bin/gmake  -f CMakeFiles/armor_demo.dir/build.make CMakeFiles/armor_demo.dir/build\ngmake[2]: Entering directory '/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib'\ngmake[2]: Nothing to be done for 'CMakeFiles/armor_demo.dir/build'.\ngmake[2]: Leaving directory '/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib'\n[100%] Built target armor_demo\ngmake[1]: Leaving directory '/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib'\n/usr/bin/cmake -E cmake_progress_start /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib/CMakeFiles 0\n\n",
+      "stderr": ""
+    },
+    {
+      "step": "changed-library",
+      "command": [
+        "cmake",
+        "--build",
+        "build-lib",
+        "--verbose"
+      ],
+      "exit": 0,
+      "stdout": "Change Dir: '/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib'\n\nRun Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile\n/usr/bin/cmake -S/tmp/build-chapter-check-gtgr4lko/lab/armor-demo -B/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib --check-build-system CMakeFiles/Makefile.cmake 0\n/usr/bin/cmake -E cmake_progress_start /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib/CMakeFiles /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib//CMakeFiles/progress.marks\n/usr/bin/gmake  -f CMakeFiles/Makefile2 all\ngmake[1]: Entering directory '/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib'\n/usr/bin/gmake  -f CMakeFiles/armor.dir/build.make CMakeFiles/armor.dir/depend\ngmake[2]: Entering directory '/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib'\ncd /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib && /usr/bin/cmake -E cmake_depends \"Unix Makefiles\" /tmp/build-chapter-check-gtgr4lko/lab/armor-demo /tmp/build-chapter-check-gtgr4lko/lab/armor-demo /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib/CMakeFiles/armor.dir/DependInfo.cmake \"--color=\"\ngmake[2]: Leaving directory '/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib'\n/usr/bin/gmake  -f CMakeFiles/armor.dir/build.make CMakeFiles/armor.dir/build\ngmake[2]: Entering directory '/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib'\n[ 25%] Building CXX object CMakeFiles/armor.dir/src/armor.cpp.o\n/usr/bin/c++  -I/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/include -g -Wall -Wextra -MD -MT CMakeFiles/armor.dir/src/armor.cpp.o -MF CMakeFiles/armor.dir/src/armor.cpp.o.d -o CMakeFiles/armor.dir/src/armor.cpp.o -c /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/src/armor.cpp\n[ 50%] Linking CXX static library libarmor.a\n/usr/bin/cmake -P CMakeFiles/armor.dir/cmake_clean_target.cmake\n/usr/bin/cmake -E cmake_link_script CMakeFiles/armor.dir/link.txt --verbose=1\n/usr/bin/ar qc libarmor.a CMakeFiles/armor.dir/src/armor.cpp.o\n/usr/bin/ranlib libarmor.a\ngmake[2]: Leaving directory '/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib'\n[ 50%] Built target armor\n/usr/bin/gmake  -f CMakeFiles/armor_demo.dir/build.make CMakeFiles/armor_demo.dir/depend\ngmake[2]: Entering directory '/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib'\ncd /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib && /usr/bin/cmake -E cmake_depends \"Unix Makefiles\" /tmp/build-chapter-check-gtgr4lko/lab/armor-demo /tmp/build-chapter-check-gtgr4lko/lab/armor-demo /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib/CMakeFiles/armor_demo.dir/DependInfo.cmake \"--color=\"\ngmake[2]: Leaving directory '/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib'\n/usr/bin/gmake  -f CMakeFiles/armor_demo.dir/build.make CMakeFiles/armor_demo.dir/build\ngmake[2]: Entering directory '/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib'\n[ 75%] Linking CXX executable armor_demo\n/usr/bin/cmake -E cmake_link_script CMakeFiles/armor_demo.dir/link.txt --verbose=1\n/usr/bin/c++ -g CMakeFiles/armor_demo.dir/src/main.cpp.o -o armor_demo  libarmor.a \ngmake[2]: Leaving directory '/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib'\n[100%] Built target armor_demo\ngmake[1]: Leaving directory '/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib'\n/usr/bin/cmake -E cmake_progress_start /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-lib/CMakeFiles 0\n\n",
+      "stderr": ""
+    },
+    {
+      "step": "changed-score",
+      "command": [
+        "./build-lib/armor_demo"
+      ],
+      "exit": 0,
+      "stdout": "score=60\n",
+      "stderr": ""
+    },
+    {
+      "step": "configure-build-shared",
+      "command": [
+        "cmake",
+        "-S",
+        ".",
+        "-B",
+        "build-shared",
+        "-DCMAKE_BUILD_TYPE=Debug"
+      ],
+      "exit": 0,
+      "stdout": "-- The CXX compiler identification is GNU 13.3.0\n-- Detecting CXX compiler ABI info\n-- Detecting CXX compiler ABI info - done\n-- Check for working CXX compiler: /usr/bin/c++ - skipped\n-- Detecting CXX compile features\n-- Detecting CXX compile features - done\n-- Configuring done (0.1s)\n-- Generating done (0.0s)\n-- Build files have been written to: /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-shared\n",
+      "stderr": ""
+    },
+    {
+      "step": "build-build-shared",
+      "command": [
+        "cmake",
+        "--build",
+        "build-shared",
+        "--parallel",
+        "2"
+      ],
+      "exit": 0,
+      "stdout": "[ 25%] Building CXX object CMakeFiles/armor.dir/src/armor.cpp.o\n[ 50%] Linking CXX shared library libarmor.so\n[ 50%] Built target armor\n[ 75%] Building CXX object CMakeFiles/armor_demo.dir/src/main.cpp.o\n[100%] Linking CXX executable armor_demo\n[100%] Built target armor_demo\n",
+      "stderr": ""
+    },
+    {
+      "step": "shared-library",
+      "command": [
+        "./build-shared/armor_demo"
+      ],
+      "exit": 0,
+      "stdout": "score=30\n",
+      "stderr": ""
+    },
+    {
+      "step": "module-log",
+      "command": [
+        "cmake",
+        "-S",
+        ".",
+        "-B",
+        "build-final",
+        "-DCMAKE_BUILD_TYPE=Debug"
+      ],
+      "exit": 0,
+      "stdout": "-- The CXX compiler identification is GNU 13.3.0\n-- Detecting CXX compiler ABI info\n-- Detecting CXX compiler ABI info - done\n-- Check for working CXX compiler: /usr/bin/c++ - skipped\n-- Detecting CXX compile features\n-- Detecting CXX compile features - done\n-- CMAKE_CXX_COMPILER = [/usr/bin/c++]\n-- CMAKE_BUILD_TYPE = [Debug]\n-- NOT_DEFINED_YET is not defined\n-- Configuring done (0.1s)\n-- Generating done (0.0s)\n-- Build files have been written to: /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-final\n",
+      "stderr": ""
+    },
+    {
+      "step": "final-build",
+      "command": [
+        "cmake",
+        "--build",
+        "build-final",
+        "--parallel",
+        "2"
+      ],
+      "exit": 0,
+      "stdout": "[ 25%] Building CXX object CMakeFiles/armor.dir/src/armor.cpp.o\n[ 50%] Linking CXX static library libarmor.a\n[ 50%] Built target armor\n[ 75%] Building CXX object CMakeFiles/armor_demo.dir/src/main.cpp.o\n[100%] Linking CXX executable armor_demo\n[100%] Built target armor_demo\n",
+      "stderr": ""
+    },
+    {
+      "step": "install-stage",
+      "command": [
+        "cmake",
+        "--install",
+        "build-final",
+        "--prefix",
+        "/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/stage"
+      ],
+      "exit": 0,
+      "stdout": "-- Install configuration: \"Debug\"\n-- Installing: /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/stage/bin/armor_demo\n",
+      "stderr": ""
+    },
+    {
+      "step": "installed-stage",
+      "command": [
+        "./stage/bin/armor_demo"
+      ],
+      "exit": 0,
+      "stdout": "score=30\n",
+      "stderr": ""
+    },
+    {
+      "step": "install-stage-check",
+      "command": [
+        "cmake",
+        "--install",
+        "build-final",
+        "--prefix",
+        "/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/stage-check"
+      ],
+      "exit": 0,
+      "stdout": "-- Install configuration: \"Debug\"\n-- Installing: /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/stage-check/bin/armor_demo\n",
+      "stderr": ""
+    },
+    {
+      "step": "installed-stage-check",
+      "command": [
+        "./stage-check/bin/armor_demo"
+      ],
+      "exit": 0,
+      "stdout": "score=30\n",
+      "stderr": ""
+    },
+    {
+      "step": "scope-configure",
+      "command": [
+        "cmake",
+        "-S",
+        ".",
+        "-B",
+        "build-private"
+      ],
+      "exit": 0,
+      "stdout": "-- The CXX compiler identification is GNU 13.3.0\n-- Detecting CXX compiler ABI info\n-- Detecting CXX compiler ABI info - done\n-- Check for working CXX compiler: /usr/bin/c++ - skipped\n-- Detecting CXX compile features\n-- Detecting CXX compile features - done\n-- CMAKE_CXX_COMPILER = [/usr/bin/c++]\n-- CMAKE_BUILD_TYPE = []\n-- NOT_DEFINED_YET is not defined\n-- Configuring done (0.1s)\n-- Generating done (0.0s)\n-- Build files have been written to: /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-private\n",
+      "stderr": ""
+    },
+    {
+      "step": "scope-header-failure",
+      "command": [
+        "cmake",
+        "--build",
+        "build-private",
+        "--parallel",
+        "2"
+      ],
+      "exit": 2,
+      "stdout": "[ 25%] Building CXX object CMakeFiles/armor.dir/src/armor.cpp.o\n[ 50%] Linking CXX static library libarmor.a\n[ 50%] Built target armor\n[ 75%] Building CXX object CMakeFiles/armor_demo.dir/src/main.cpp.o\n",
+      "stderr": "/tmp/build-chapter-check-gtgr4lko/lab/armor-demo/src/main.cpp:1:10: fatal error: armor.hpp: No such file or directory\n    1 | #include \"armor.hpp\"\n      |          ^~~~~~~~~~~\ncompilation terminated.\ngmake[2]: *** [CMakeFiles/armor_demo.dir/build.make:76: CMakeFiles/armor_demo.dir/src/main.cpp.o] Error 1\ngmake[1]: *** [CMakeFiles/Makefile2:111: CMakeFiles/armor_demo.dir/all] Error 2\ngmake: *** [Makefile:136: all] Error 2\n"
+    },
+    {
+      "step": "empty-variable",
+      "command": [
+        "cmake",
+        "-S",
+        ".",
+        "-B",
+        "build-empty"
+      ],
+      "exit": 0,
+      "stdout": "-- The CXX compiler identification is GNU 13.3.0\n-- Detecting CXX compiler ABI info\n-- Detecting CXX compiler ABI info - done\n-- Check for working CXX compiler: /usr/bin/c++ - skipped\n-- Detecting CXX compile features\n-- Detecting CXX compile features - done\n-- CMAKE_CXX_COMPILER = [/usr/bin/c++]\n-- CMAKE_BUILD_TYPE = []\n-- NOT_DEFINED_YET is not defined\n-- EMPTY_VALUE = []\n-- Configuring done (0.1s)\n-- Generating done (0.0s)\n-- Build files have been written to: /tmp/build-chapter-check-gtgr4lko/lab/armor-demo/build-empty\n",
+      "stderr": ""
+    },
+    {
+      "step": "configure-build",
+      "command": [
+        "cmake",
+        "-S",
+        ".",
+        "-B",
+        "build",
+        "-DCMAKE_BUILD_TYPE=Debug"
+      ],
+      "exit": 0,
+      "stdout": "-- The CXX compiler identification is GNU 13.3.0\n-- Detecting CXX compiler ABI info\n-- Detecting CXX compiler ABI info - done\n-- Check for working CXX compiler: /usr/bin/c++ - skipped\n-- Detecting CXX compile features\n-- Detecting CXX compile features - done\n-- Found OpenCV: /usr (found version \"4.6.0\") \n-- Configuring done (0.1s)\n-- Generating done (0.0s)\n-- Build files have been written to: /tmp/build-chapter-check-gtgr4lko/lab/opencv-demo/build\n",
+      "stderr": ""
+    },
+    {
+      "step": "build-build",
+      "command": [
+        "cmake",
+        "--build",
+        "build",
+        "--parallel",
+        "2"
+      ],
+      "exit": 0,
+      "stdout": "[ 50%] Building CXX object CMakeFiles/image_viewer.dir/main.cpp.o\n[100%] Linking CXX executable image_viewer\n[100%] Built target image_viewer\n",
+      "stderr": ""
+    },
+    {
+      "step": "no-argument",
+      "command": [
+        "./build/image_viewer"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Usage: image_viewer <image_path>\n"
+    },
+    {
+      "step": "missing-image",
+      "command": [
+        "./build/image_viewer",
+        "missing.png"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "[ WARN:0@0.001] global ./modules/imgcodecs/src/loadsave.cpp (239) findDecoder imread_('missing.png'): can't open/read file: check file path/integrity\nCannot read image: missing.png\n"
+    },
+    {
+      "step": "opencv-window-2x2",
+      "command": [
+        "xvfb-run",
+        "-a",
+        "-s",
+        "-screen 0 800x600x24",
+        "/usr/bin/python3",
+        "/home/mijiao/Apps/Tutorial4New/scripts/verify_ch3_examples.py",
+        "--gui-worker",
+        "/tmp/build-chapter-check-gtgr4lko/lab/opencv-demo/build/image_viewer",
+        "/tmp/build-chapter-check-gtgr4lko/lab/opencv-demo/test.ppm",
+        "/home/mijiao/Apps/Tutorial4New/docs/revision/evidence/opencv-two-pixels.xwd"
+      ],
+      "exit": 0,
+      "stdout": "XGetInputFocus returned the focused window of 1. This is likely a bug in the X server.\nsize=2x2\n",
+      "stderr": ""
+    },
+    {
+      "step": "opencv-window-320x240",
+      "command": [
+        "xvfb-run",
+        "-a",
+        "-s",
+        "-screen 0 800x600x24",
+        "/usr/bin/python3",
+        "/home/mijiao/Apps/Tutorial4New/scripts/verify_ch3_examples.py",
+        "--gui-worker",
+        "/tmp/build-chapter-check-gtgr4lko/lab/opencv-demo/build/image_viewer",
+        "/tmp/build-chapter-check-gtgr4lko/lab/opencv-demo/large.ppm",
+        "/home/mijiao/Apps/Tutorial4New/docs/revision/evidence/volume-1-chapter-3-window.xwd"
+      ],
+      "exit": 0,
+      "stdout": "XGetInputFocus returned the focused window of 1. This is likely a bug in the X server.\nsize=320x240\n",
+      "stderr": ""
+    }
+  ]
+}

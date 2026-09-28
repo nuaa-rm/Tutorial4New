@@ -1,0 +1,14 @@
+Starting >>> training_tools
+Finished <<< training_tools [3.54s]
+
+Summary: 1 package finished [3.63s]
+Starting >>> training_tools
+Finished <<< training_tools [0.07s]
+
+Summary: 1 package finished [0.18s]
+Summary: 3 tests, 0 errors, 0 failures, 0 skipped
+[INFO] [1790620589.173440664] [heartbeat]: first heartbeat
+[INFO] [1790620589.173534135] [heartbeat]: heartbeat alive
+[INFO] [1790620591.173570482] [heartbeat]: heartbeat alive
+[INFO] [1790620591.819585491] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+heartbeat timeout exit=124

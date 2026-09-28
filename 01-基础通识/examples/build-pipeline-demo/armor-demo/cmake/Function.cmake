@@ -1,0 +1,7 @@
+function(print_var var)
+    if(DEFINED ${var})
+        message(STATUS "${var} = [${${var}}]")
+    else()
+        message(STATUS "${var} is not defined")
+    endif()
+endfunction()

@@ -1,0 +1,14 @@
+[
+  {
+    "step": "missing",
+    "exit": 1,
+    "stdout": "-- The CXX compiler identification is GNU 13.3.0\n-- Detecting CXX compiler ABI info\n-- Detecting CXX compiler ABI info - done\n-- Check for working CXX compiler: /usr/bin/c++ - skipped\n-- Detecting CXX compile features\n-- Detecting CXX compile features - done\n-- Configuring incomplete, errors occurred!\n",
+    "stderr": "CMake Error at CMakeLists.txt:4 (find_package):\n  By not providing \"FindRMTrainingMissingPackage.cmake\" in CMAKE_MODULE_PATH\n  this project has asked CMake to find a package configuration file provided\n  by \"RMTrainingMissingPackage\", but CMake did not find one.\n\n  Could not find a package configuration file provided by\n  \"RMTrainingMissingPackage\" with any of the following names:\n\n    RMTrainingMissingPackageConfig.cmake\n    rmtrainingmissingpackage-config.cmake\n\n  Add the installation prefix of \"RMTrainingMissingPackage\" to\n  CMAKE_PREFIX_PATH or set \"RMTrainingMissingPackage_DIR\" to a directory\n  containing one of the above files.  If \"RMTrainingMissingPackage\" provides\n  a separate development package or SDK, be sure it has been installed.\n\n\n"
+  },
+  {
+    "step": "restored",
+    "exit": 0,
+    "stdout": "-- Found OpenCV: /usr (found version \"4.6.0\") \n-- Configuring done (0.0s)\n-- Generating done (0.0s)\n-- Build files have been written to: /tmp/ch3-package-o2hv1z5n/opencv-demo/build-missing\n",
+    "stderr": ""
+  }
+]
