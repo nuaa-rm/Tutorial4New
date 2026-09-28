@@ -1,0 +1,565 @@
+{
+  "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "results": [
+    {
+      "source": "examples/class-basics-demo/class-template.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "1 2.5\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/class-basics-demo/constant-template.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "42\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/class-basics-demo/constructors.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "你调用了默认构造函数\n你调用了含参构造函数，参数是Hello World\n你调用了拷贝构造函数\nobj1:10\nobj2:2\nobj3:10\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/class-basics-demo/designated.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "1 3\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/class-basics-demo/function-template.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "1\n10\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/class-basics-demo/inheritance.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "基类的构造函数已经被调用\nCircle类的构造函数已经被调用，面积：3.14\n基类的构造函数已经被调用\nRectangle类的构造函数已经被调用，面积为2\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/class-basics-demo/operators.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "a:2 b:4\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/class-basics-demo/overload.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "3\n4\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/class-basics-demo/skeleton.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "1\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/class-basics-demo/static-friend.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "10\n10\n友元函数访问私有成员：42\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/lambda-move-demo/capture.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "2 1\n2\n5 1\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/lambda-move-demo/forward.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "左值引用\n左值引用\n左值引用\nconst 左值引用\nconst 左值引用\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/lambda-move-demo/function.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "3 1\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/lambda-move-demo/move-construction.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "a1,你调用了含参构造\n\na2,你调用了拷贝构造\nval值为：a1\n\n你调用了等号赋值\n\na3,你调用了拷贝构造\nval值为：a1\n\na4,val值为：a1\n\na5,val值为：a1\n\na1的val值为：a1\na1的val值为：new a4\na5的val值为：new a4\n\na6,你调用了移动构造\nval值为：new a4\na1被传入移动构造后,val值为：\n\n对象被析构，val为：new a4\n对象被析构，val为：a1\n对象被析构，val为：new a2\n对象被析构，val为：\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/lambda-move-demo/move-overloads.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "右值引用\n左值引用\n右值引用\nconst 左值引用\nconst 右值引用\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/lambda-move-demo/mutable.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "1 0\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/lambda-move-demo/reference.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "20\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/lambda-move-demo/rvalue-reference.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "c的值为：10\na的地址：0x7ffeb356acbc\n经过函数之后，c的值为：20\nc的地址为0x7ffeb356acbc\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/lambda-move-demo/sort.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "3\nch:t  id:7\nch:d  id:4\nch:a  id:2\nch:q  id:1\nch:s  id:-1\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/smart-pointer-demo/cycle.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "你调用了A的默认构造函数\n你调用了B的默认构造函数\n1\n1\nB对象已被析构，val值为：0\nA对象已被析构，val值为：0\n上面是符合我们预期的\n\n你调用了A的默认构造函数\n你调用了B的默认构造函数\n2\n2\n咦？这是什么情况呢？为什么没有被析构呢？\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/smart-pointer-demo/shared.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "你调用了A的默认构造函数\nptr1对象的引用次数为：2\nptr2对象的引用次数为：2\nptr2已经被析构了\n但A对象还活着，引用次数为：1\nA对象已被析构，val值为：1\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/smart-pointer-demo/unique.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "你调用了A的默认构造函数\nptr1是一个空指针\nptr2的val值为：1\n你调用了A的默认构造函数\nA对象已被析构，val值为：1\nA对象已被析构，val值为：2\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/smart-pointer-demo/weak.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "你调用了A的默认构造函数\n你调用了B的默认构造函数\n1\n2\nA对象已被析构，val值为：1234\nB对象已被析构，val值为：0\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/stl-container-demo/adapters.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "1 3 2 \n2 3 1 \n3 2 1 \n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/stl-container-demo/erase.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "1 3 5 7 9 \n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/stl-container-demo/iterate.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/stl-container-demo/list.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "2\n2 3 \n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/stl-container-demo/map.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "90\n0\nalice: 90\nbob: 85\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/stl-container-demo/modify.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "5 4 3 2 1 0 \n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/stl-container-demo/vector.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "size=1 capacity=10\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/thread-coordination-demo/async.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "144\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/thread-coordination-demo/atomic.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "received stop signal\ncounter = 200000\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/thread-coordination-demo/bounded-queue.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "consume 0\nconsume 1\nconsume 2\nconsume 3\nconsume 4\nconsume 5\nconsume 6\nconsume 7\nconsume 8\nconsume 9\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/thread-coordination-demo/condition.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "data is ready\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/thread-coordination-demo/deadlock.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "source": "examples/thread-coordination-demo/lifecycle.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "1 2 3 \nvalue = 1\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/thread-coordination-demo/mutex.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "200000\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/thread-coordination-demo/philosophers.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "philosopher 1 is eating\nphilosopher 3 is eating\nphilosopher 2 is eating\nphilosopher 0 is eating\nphilosopher 4 is eating\nphilosopher 3 is eating\nphilosopher 1 is eating\nphilosopher philosopher 4 is eating\n2 is eating\nphilosopher 0 is eating\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/thread-coordination-demo/pool.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "task 0 is running\ntask 3 is running\ntask 4 is running\ntask 5 is running\ntask 6 is running\ntask 7 is running\ntask 1 is running\ntask 2 is running\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/thread-coordination-demo/promise.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "answer = 42\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/thread-coordination-demo/readers-writers.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "reader reader 10: : 00reader 2: 0\n\n\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/thread-coordination-demo/shared-lock.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "10\n12\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/memory-lifetime-demo/main.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "construct local\nconstruct dynamic\ndestroy local\nuse dynamic\ndestroy dynamic\nowner empty=1\n",
+      "stderr": ""
+    },
+    {
+      "source": "examples/memory-lifetime-demo/recursion.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "enter 4\nenter 3\nenter 2\nenter 1\nreturn 3\nreturn 7\nreturn 15\nreturn 31\n",
+      "stderr": ""
+    },
+    {
+      "source": "answer-point.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "(1, 2)\n(3.5, 4.5)\n",
+      "stderr": ""
+    },
+    {
+      "source": "answer-point_count.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "0\n1\n3\n1\n0\n",
+      "stderr": ""
+    },
+    {
+      "source": "answer-point_operators.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "(4, 6)\n",
+      "stderr": ""
+    },
+    {
+      "source": "answer-shapes.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "3.14\n2\n",
+      "stderr": ""
+    },
+    {
+      "source": "answer-mymax.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "5\n2.5\n2.5\n",
+      "stderr": ""
+    },
+    {
+      "source": "answer-lambda_sort.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "1 2 3 4 \n4 3 2 1 \n",
+      "stderr": ""
+    },
+    {
+      "source": "answer-swap.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "1 2\n2 1\n",
+      "stderr": ""
+    },
+    {
+      "source": "answer-unique_factory.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "42\n",
+      "stderr": ""
+    },
+    {
+      "source": "answer-weak_cycle.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "1 2\nA is alive\ndestroy A\ndestroy B\n",
+      "stderr": ""
+    },
+    {
+      "source": "answer-vector_capacity.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "1 1\n2 2\n3 4\n4 4\n5 8\n6 8\n7 8\n8 8\n9 16\n10 16\n",
+      "stderr": ""
+    },
+    {
+      "source": "answer-parentheses.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "matched\n",
+      "stderr": ""
+    },
+    {
+      "source": "answer-word_count.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "armor 2\ncamera 1\n",
+      "stderr": ""
+    },
+    {
+      "source": "answer-erase_even.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "1 3 5 \n",
+      "stderr": ""
+    },
+    {
+      "source": "answer-thread_print.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "1\n6\n2\n7\n3\n8\n4\n9\n5\n10\n",
+      "stderr": ""
+    },
+    {
+      "source": "answer-counters.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "200000 200000\n",
+      "stderr": ""
+    },
+    {
+      "source": "answer-shared_config.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "10 10 10\nfinal=14\n",
+      "stderr": ""
+    },
+    {
+      "source": "answer-task_ids.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "400 400 1\n",
+      "stderr": ""
+    },
+    {
+      "source": "answer-wait_timeout.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 2,
+      "stdout": "timeout\n",
+      "stderr": ""
+    },
+    {
+      "source": "answer-async_armor.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "1 0\n",
+      "stderr": ""
+    },
+    {
+      "source": "answer-pool_future.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "36 49\n",
+      "stderr": ""
+    },
+    {
+      "source": "answer-multi_consumer.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "100 1\n",
+      "stderr": ""
+    },
+    {
+      "source": "answer-writer_wait.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "before=0\nafter=1\n",
+      "stderr": ""
+    },
+    {
+      "source": "answer-lambda_capture.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "2 1\n2\n",
+      "stderr": ""
+    },
+    {
+      "source": "answer-value_categories.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "source": "answer-erase_methods.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "1 3 5 \n1 3 5 \n",
+      "stderr": ""
+    },
+    {
+      "source": "answer-armor_summary.cpp",
+      "compile": 0,
+      "diagnostics": "",
+      "run": 0,
+      "stdout": "2:0.9\n4:0.7\n3:0.5\n1:0.3\nhigh=2 low=1\n",
+      "stderr": ""
+    }
+  ]
+}

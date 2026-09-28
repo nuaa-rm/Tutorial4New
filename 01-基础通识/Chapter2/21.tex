@@ -6,26 +6,41 @@
 面向对象编程的优点是代码的可重用性、可扩展性和可维护性都得到了提高。
 
 在C++中，类是一种抽象数据类型，它定义了对象的行为和状态，并提供了对这些数据的访问接口。
-类可以包含数据成员、成员函数、构造函数、析构函数等，这些成员构成了类的接口。
+类可以包含数据成员、成员函数、构造函数、析构函数等，其中能从外部访问的成员构成了类的接口，私有成员则留给类自己管理。
 类可以派生出新的类，从而实现代码的重用和扩展。
 
+类的语法看起来零碎，我们先用小程序把成员声明、创建对象和调用连起来。项目放在 \path{examples/class-basics-demo}，文件组成如下。每个 cpp 都有自己的 main，分别编译；不要把它们拼成一个文件。
+\begin{lstlisting}[language={}]
+class-basics-demo/
+  README.md
+  class-template.cpp
+  constant-template.cpp
+  constructors.cpp
+  designated.cpp
+  function-template.cpp
+  inheritance.cpp
+  operators.cpp
+  overload.cpp
+  skeleton.cpp
+  static-friend.cpp
+\end{lstlisting}
+编译命令里，-std 指定 C++ 标准，-Wall/-Wextra 打开常用警告，-pthread 配置线程编译与链接；-o 指定临时输出文件。先进入项目目录，后面的源码名按当前示例替换。
+
+\Needspace{9\baselineskip}
 \begin{example}
-类的基本结构（骨架代码，先混个眼熟）：
-\begin{tcode}
-class ClassName{        //类名
-    public:             //修饰限定符public
-        ClassName();    //构造函数
-        ~ClassName();   //析构函数
-        void memberFunction();  //成员函数
-    private:                    //修饰限定符private
-        int dataMember;         //数据成员
-        void privateFunction(); //私有成员函数
-};  //注意：类定义结束的花括号后面有一个分号
-\end{tcode}
+类的基本结构（先认识成员，再创建对象调用）：
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/class-basics-demo/skeleton.cpp}
+
+从本卷目录进入 \path{examples/class-basics-demo}，保存的源码就是 \texttt{skeleton.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread skeleton.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+这里输出 1，说明对象已经构造，公有成员函数可以使用私有数据。
 \end{example}
 
 \begin{enumerate}
-    \item \textbf{构造函数和析构函数}：负责对象的初始化和释放，其特点是函数名与类名相同，没有返回值。
+    \item \textbf{构造函数和析构函数}：负责对象的初始化和释放，构造函数与类同名，析构函数在类名前加 \texttt{\textasciitilde}，两者都不写返回类型。
     \item \textbf{成员函数}：实现类的行为，它们实现了类的功能。
     \item \textbf{数据成员}：存储类的数据信息。
 \end{enumerate}
@@ -35,9 +50,9 @@ class ClassName{        //类名
         \toprule[1.5pt]
         修饰限定符 & 作用 \\
         \midrule[1pt]
-        private & 只能被类的成员函数使用或调用 \\
+        private & 该类的成员和友元可以访问 \\
         public & 可以被类外的其他函数或派生类中函数调用 \\
-        protected & 只能被类的成员函数和派生类使用或调用 \\
+        protected & 该类的成员、友元与派生类按规则访问 \\
         \bottomrule[1.5pt]
     \end{tabular}
 \end{center}
@@ -53,19 +68,25 @@ class ClassName{        //类名
 \end{note}
 
 \textbf{番外：指名初始化（Designated Initializers）。}
-对于没有自定义构造函数的简单结构体（聚合类型，Aggregate Type），C++20 允许在初始化时指名道姓地给成员赋值，
-而不必按照成员的声明顺序来写：
+对于下面这种成员公开、没有用户声明构造函数的简单结构体（聚合类型，Aggregate Type），C++20 允许在初始化时指名道姓地给成员赋值。
+不过成员名仍要按声明顺序写，不能因为写了名字就随意调换；这里先认识最简单的用法：
 
+\Needspace{9\baselineskip}
 \begin{example}
 指名初始化：
-\begin{tcode}
-//类型名 对象名{.成员名1 = 初始值1, .成员名2 = 初始值2, ...};
-struct Foo {int a, b};
-Foo foo = {.b = 3, .a = 1};
-\end{tcode}
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/class-basics-demo/designated.cpp}
+
+
+从本卷目录进入 \path{examples/class-basics-demo}，保存的源码就是 \texttt{designated.cpp}。
+\begin{tbash}
+g++ -std=c++20 -Wall -Wextra -pthread designated.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+这里输出 1 3。把 .a、.b 的顺序调换后，C++20 编译应失败，名字不能替代顺序规则。
 \end{example}
 
-\begin{exercise}
+\begin{exercise}\label{ex:v1-cpp-point}
+
 定义一个 \texttt{Point} 类，包含私有数据成员 \texttt{x}、\texttt{y}（\texttt{double} 类型），
 编写含参构造函数和打印坐标的成员函数，并在 \texttt{main} 中创建两个点验证。
 \end{exercise}
@@ -74,54 +95,37 @@ Foo foo = {.b = 3, .a = 1};
 
 \textbf{静态成员}（static member）属于整个类，而不是某个具体对象。
 无论创建多少个对象，静态成员在内存中只有一份，被类的所有对象共享，因此可以实现一些全局变量的功能。
-静态成员在类内用 $static$ 关键字\textbf{声明}，但必须在类外\textbf{定义}（分配内存），且只定义一次。
-静态成员的生命周期和整个程序相同，程序结束时才释放。
+普通静态数据成员在类内用 \texttt{static} 关键字\textbf{声明}，用到时在类外提供一次\textbf{定义}。
+从 C++17 起，也可以写成 \texttt{inline static int count = 0;}，直接在类内定义。静态成员函数没有 \texttt{this}，不能直接访问某个对象的非静态成员。
+这里的静态数据成员具有静态存储期，不会随着某一个对象的析构一起消失。
 
 \textbf{友元函数}（friend function）：有时我们希望某个函数可以访问类的私有成员，但又不希望它成为类的成员函数。
-这时可以在类的声明中用 $friend$ 关键字把它声明为友元函数。友元函数不是类的成员，实现时不加类的作用域，
+这时可以在类的声明中用 \texttt{friend} 关键字把它声明为友元函数。友元函数不是类的成员，实现时不加类的作用域，
 但可以访问类的私有成员。
 
+\Needspace{9\baselineskip}
 \begin{example}
 静态成员与友元函数的用法：
-\begin{tcode}
-#include <iostream>
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/class-basics-demo/static-friend.cpp}
 
-class ClassName {
-    public:
-        ClassName() = default;
-        ~ClassName() = default;
 
-        static void memberFunction();           //静态成员函数
-        static int dataMember;                  //静态数据成员，类内声明
-        friend void FriendFunction(ClassName& obj); //友元函数声明
-    private:
-        int secret = 42;                        //私有数据成员
-};
-
-int ClassName::dataMember = 10; //静态数据成员在类外定义，且只定义一次
-
-void FriendFunction(ClassName& obj){ //友元函数实现时，不可以添加类的作用域
-    std::cout << "友元函数访问私有成员：" << obj.secret << std::endl;
-}
-
-int main(int argc, char *argv[]) {
-    ClassName obj1, obj2;
-    std::cout << obj1.dataMember << std::endl;  //输出10
-    std::cout << obj2.dataMember << std::endl;  //还是10，两个对象共享同一份
-    FriendFunction(obj1);
-    return 0;
-}
-\end{tcode}
+从本卷目录进入 \path{examples/class-basics-demo}，保存的源码就是 \texttt{static-friend.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread static-friend.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+两行都是 10，最后友元读到 42；两个对象访问的是同一份静态数据。
 \end{example}
 
 \begin{note}
-友元函数不属于类，它破坏了类的封装性，因此不建议使用！把私有成员的访问权随意送出去，
-相当于把家门钥匙配了一把给邻居——邻居是不是好人另说，钥匙给多了总会出事。
+友元函数不属于类，但它是类主动授予的访问接口，流插入运算符就经常这样写。
+这就像给需要帮忙的人配一把钥匙：有明确用途可以给，不要为了省事把所有函数都声明成友元。
 \end{note}
 
-\begin{exercise}
+\begin{exercise}\label{ex:v1-cpp-count}
+
 为 \texttt{Point} 类添加一个静态数据成员 \texttt{count}，在构造函数中令其加一、析构函数中令其减一，
-在 \texttt{main} 中分不同作用域创建若干对象，打印 \texttt{count} 观察对象数量的变化。
+在 \texttt{main} 中分不同作用域创建若干对象，打印 \texttt{count} 观察对象数量的变化。再在 static-friend.cpp 中调用静态成员函数，说明它为什么没有 this；指出 FriendFunction 访问私有成员的授权来自哪里。
 \end{exercise}
 
 \subsubsection{函数重载}
@@ -134,91 +138,70 @@ int main(int argc, char *argv[]) {
     \item 参数个数不同，或参数类型不同。
 \end{enumerate}
 
+\Needspace{9\baselineskip}
 \begin{example}
 同名不同参的 \texttt{CalSum}：
-\begin{tcode}
-#include <iostream>
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/class-basics-demo/overload.cpp}
 
-class ClassName {
-public:
-    ClassName() = default;
-    ~ClassName() = default;
 
-    int CalSum(int a,int b){
-        return a+b;
-    }
-
-    double CalSum(double a,double b){
-        return a+b;
-    }
-};
-
-int main(int argc, char *argv[]) {
-    ClassName obj;
-    std::cout << obj.CalSum(1,2) << std::endl;
-    std::cout << obj.CalSum(1.5,2.5) << std::endl;
-    return 0;
-}
-\end{tcode}
+从本卷目录进入 \path{examples/class-basics-demo}，保存的源码就是 \texttt{overload.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread overload.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+两行分别是 3 和 4，整数参数与小数参数选择了不同重载。
 \end{example}
 
 在上例中，CalSum函数的两个版本参数类型不同，编译器会根据调用时传入的实参，自动选择最匹配的函数版本。
 
 \begin{note}
 \textbf{仅返回值不同不能构成重载}。调用函数时编译器看不到你打算把结果赋给什么类型，
-如果只靠返回值区分，编译器将无法确定该调用哪一个版本，直接报二义性错误。
+如果只靠返回值区分，这两个声明本身就会冲突，不能等调用时再靠接收结果的变量区分。
 \end{note}
+
+\begin{exercise}
+\label{ex:v1-cpp-overload}
+把 overload.cpp 的两个调用换成同类型的另一组参数，核验选择的版本；再在练习副本中只改变返回类型、保留相同参数列表，记录编译失败的原因。
+\end{exercise}
 
 \subsubsection{构造函数}
 
 \textbf{构造函数的类型：}
 
 \begin{enumerate}
-    \item 默认构造：默认构造函数是指没有参数的构造函数，它会创建一个对象，并对其进行初始化。
+    \item 默认构造：默认构造函数是指可以不提供实参就调用的构造函数（没有参数，或所有参数都有默认值），它会创建一个对象，并对其进行初始化。
     \item 含参构造：含参构造函数是指有参数的构造函数，可以根据参数的值对对象进行初始化。
     \item 拷贝构造：拷贝构造函数是指将一个对象拷贝到另一个对象时，会调用拷贝构造函数。
 \end{enumerate}
 
+\Needspace{9\baselineskip}
 \begin{example}
 三种构造函数的调用时机，注意每一次的输出：
-\begin{tcode}
-#include<iostream>
-#include<string>
-class ClassName {
-public:
-    ClassName():member(1) //初始化列表
-    {std::cout << "你调用了默认构造函数" << std::endl;}
-    ClassName(std::string& str)
-    {std::cout << "你调用了含参构造函数，参数是" << str << std::endl;member=2;}
-    ClassName(ClassName &obj) //这里必须是引用传参，思考一下为什么
-    {std::cout << "你调用了拷贝构造函数" << std::endl;
-    this->member = obj.member;}
-    ~ClassName() = default;
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/class-basics-demo/constructors.cpp}
 
-    int member;
-};
 
-int main(int argc, char *argv[]) {
-    ClassName obj1;
-    std::string str = "Hello World";
-    ClassName obj2(str);
-    obj1.member = 10;
-    ClassName obj3(obj1);
-
-    std::cout << "obj1:" << obj1.member << std::endl;
-    std::cout << "obj2:" << obj2.member << std::endl;
-    std::cout << "obj3:" << obj3.member << std::endl;
-
-    return 0;
-}
-\end{tcode}
+从本卷目录进入 \path{examples/class-basics-demo}，保存的源码就是 \texttt{constructors.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread constructors.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+依次看到默认、含参、拷贝构造的提示；最后三个 member 分别为 10、2、10。
 \end{example}
 
 有一些tips可以快速设置构造函数：
 \begin{tcode}
 ClassName() = default;              //默认构造函数,使用默认的方式
-ClassName(ClassName& obj) = delete; //禁止拷贝构造，单例实现对象
+ClassName(const ClassName& obj) = delete; //禁止拷贝，不等于实现了单例
 \end{tcode}
+
+\begin{exercise}
+\label{ex:v1-cpp-constructors}
+在 constructors.cpp 中依次执行构造新对象、拷贝构造新对象，并解释它们与给已有对象赋值的区别。把拷贝构造设为 delete，再只编译，指出哪一行不能继续使用；不要把“不允许拷贝”解释成“只能创建一个对象”。
+\end{exercise}
+
+\begin{conclusion}
+先分清“创建新对象”与“给已有对象赋值”：构造和拷贝构造做前者，赋值运算符做后者。重载靠参数区分，默认构造是可以无实参调用；delete 禁止的是指定操作，不是限制对象数量。静态成员属于类，this 指向具体对象，友元则来自类的主动授权。
+\end{conclusion}
 
 \subsubsection{运算符重载与 this 指针}
 
@@ -231,48 +214,26 @@ ClassName(ClassName& obj) = delete; //禁止拷贝构造，单例实现对象
 }
 \end{tcode}
 
+\Needspace{9\baselineskip}
 \begin{example}
 重载加法运算符与流插入运算符：
-\begin{tcode}
-#include <iostream>
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/class-basics-demo/operators.cpp}
 
-class ClassName {
-public:
-    ClassName():a(1),b(2) {}
 
-    ClassName& operator+(ClassName& obj){//重载加法运算符
-        this->b += obj.b;   //this指针，指向自己
-        this->a += obj.a;
-        std::cout << "这里执行过了" << std::endl;
-        return *this;   //*this表示当前对象的引用
-    }
-
-    //重载流插入运算符，思考一下为什么是这样写？
-    friend std::ostream& operator<<(std::ostream& out, ClassName& obj);
-
-    int a;
-    int b;
-};
-
-std::ostream& operator<<(std::ostream& out, ClassName& obj){
-    out << "a:" << obj.a << " b:" << obj.b << std::endl;
-    return out;
-}
-
-int main(int argc, char *argv[]) {
-    ClassName obj1;
-    ClassName res = obj1 + obj1;
-    std::cout << res;
-    return 0;
-}
-\end{tcode}
+从本卷目录进入 \path{examples/class-basics-demo}，保存的源码就是 \texttt{operators.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread operators.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+输出 a:2 b:4；加法返回新对象，obj1 本身仍为 1、2。
 \end{example}
 
-\textbf{$this$指针}是一个隐指针，指向这个类本身。
-在类的成员函数中，$this$指针可以用来访问类的成员变量和成员函数。
-一般情况下，$this$指针可以不写，编译器会自动生成。但是有些情况，出于项目代码可读性的目的，会写显式的$this$指针。
+\textbf{\texttt{this}指针}是一个隐式指针，指向当前调用成员函数的对象，不是指向类这个类型。
+在类的成员函数中，\texttt{this}指针可以用来访问类的成员变量和成员函数。
+一般情况下，\texttt{this}指针可以不写，编译器会自动生成。但是有些情况，出于项目代码可读性的目的，会写显式的\texttt{this}指针。
 
-\begin{exercise}
+\begin{exercise}\label{ex:v1-cpp-operators}
+
 为 \texttt{Point} 类重载 \texttt{+} 运算符（对应坐标相加）和 \texttt{<<} 运算符（以 \texttt{(x, y)} 格式输出），
 在 \texttt{main} 中验证 \texttt{Point(1,2) + Point(3,4)} 的输出。
 \end{exercise}
@@ -282,7 +243,7 @@ int main(int argc, char *argv[]) {
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{A111.png}
+    \includegraphics[width=0.7\textwidth]{inheritance_revised.pdf}
     \caption{类的继承} % 图片标题
     \label{fig:A111} % 图片标签，用于引用
 \end{figure}
@@ -291,7 +252,7 @@ int main(int argc, char *argv[]) {
 派生类可以重写基类中的成员虚函数，从而实现新的功能。
 派生类可以重载基类中的运算符，从而实现新的运算。
 
-基类成员的访问限定符，决定了派生类和类外部能否访问它们。
+下面按 public 继承、普通成员访问来比较（友元按授权另行处理）。protected 的派生类访问还受对象类型等规则约束，不能理解成对任意基类对象都随意访问。
 这张表和"类的基本概念"中的是同一张，这里从继承的视角再看一次——重点关注"派生类"这一行：
 
 \begin{center}
@@ -308,57 +269,22 @@ int main(int argc, char *argv[]) {
 
 继承可以用下面的写法实现：
 
+\Needspace{9\baselineskip}
 \begin{example}
 抽象基类与两个派生类：
-\begin{tcode}
-#include <iostream>
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/class-basics-demo/inheritance.cpp}
 
-class Shape {//这个基类只含有纯虚函数，又叫做抽象类
-public:
-    Shape() = delete;
-    Shape(double A):Area(A)
-    {std::cout << "基类的构造函数已经被调用" << std::endl;}
-    virtual double calArea() = 0; //这里是纯虚函数，也可以使用普通函数
-    double Area;
-};
 
-class Rectangle
-        : public Shape{
-public:
-    Rectangle() = delete;
-    Rectangle(double a,double b):Shape(a*b),a(a),b(b)
-    {std::cout << "Rectangle类的构造函数已经被调用，面积为" << Area << std::endl;}
-    double a;
-    double b;
-    double calArea() override{  //重写基类的函数
-        return a*b;
-    }
-
-};
-
-class Circle
-        : public Shape{
-public:
-    Circle() = delete;
-    explicit Circle(double r):Shape(3.14*r*r),r(r)
-    {std::cout << "Circle类的构造函数已经被调用，面积：" << Area << std::endl;}
-    double r;
-    double calArea() override{
-        return 3.14*r*r;
-    }
-
-};
-
-int main(int argc, char *argv[]) {
-    Circle circle(1.0);
-    Rectangle rect(1.0,2.0);
-    return 0;
-}
-\end{tcode}
+从本卷目录进入 \path{examples/class-basics-demo}，保存的源码就是 \texttt{inheritance.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread inheritance.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+先看到基类、再看到派生类的构造提示；下一道练习会通过基类指针调用面积函数。
 \end{example}
 
 \begin{note}
-继承方式有三种：\texttt{public}、\texttt{protected}、\texttt{private}（不写时默认 \texttt{private}），
+继承方式有三种：\texttt{public}、\texttt{protected}、\texttt{private}（\texttt{class} 默认 private，\texttt{struct} 默认 public），
 它决定了基类成员在派生类中的访问权限上限。工程中绝大多数情况都用 \texttt{public} 继承，
 另外两种仅作了解。含纯虚函数的抽象类不能直接实例化，只能作为基类使用。
 
@@ -371,24 +297,25 @@ int main(int argc, char *argv[]) {
 
 \begin{itemize}
 \item 重载 overload：同一作用域内的同名函数，参数列表不同，编译期由编译器选择版本，与继承无关；
-\item 重写 override：派生类重新实现基类的 \texttt{virtual} 函数，函数签名必须相同，运行期根据对象实际类型决定调用哪个版本（多态），建议显式标注 \texttt{override} 让编译器帮忙检查；
-\item 纯虚函数 \texttt{= 0}：基类只给接口不给实现，含有纯虚函数的类是抽象类，不能实例化。
+\item 重写 override：派生类重新实现基类的 \texttt{virtual} 函数，函数签名必须相同，通过基类指针或引用调用时，根据对象实际类型决定调用哪个版本（多态），建议显式标注 \texttt{override} 让编译器帮忙检查；
+\item 纯虚函数 \texttt{= 0}：基类只给接口不给实现，仍有纯虚函数没有最终实现的类是抽象类，不能实例化。纯虚函数也能在类外提供定义，这里先只把它作为接口使用。
 \end{itemize}
 \end{conclusion}
 
-\begin{exercise}
+\begin{exercise}\label{ex:v1-cpp-inheritance}
+
 在上例基础上，于 \texttt{main} 中创建 \texttt{Shape*} 数组分别指向 \texttt{Circle} 和 \texttt{Rectangle} 对象，
 循环调用 \texttt{calArea()}，观察多态的调用结果。
 \end{exercise}
 
- \subsubsection{模版}
+ \subsubsection{模板}
 在开发过程中，我们可能会遇到这样的场景：我们有一个函数或者类，但是它只适用于特定的数据类型，
-比如$int$或者$double$。为了让这两种类型都可以调用函数，
-就得把代码复制一遍，但这样做就造成了代码冗余，不利于维护。这时候就需要用到模版（$template$）。
+比如\texttt{int}或者\texttt{double}。为了让这两种类型都可以调用函数，
+就得把代码复制一遍，但这样做就造成了代码冗余，不利于维护。这时候就需要用到模板（\texttt{template}）。
 
-模版是C++中一个重要的特性，它允许我们定义一个类或函数，使其可以接受不同的数据类型或者不同的参数。
-模版的定义和使用都比较复杂，这里只介绍最基本的用法。
-\textbf{函数模版}用 $template$ 加尖括号声明一个类型参数（习惯命名为 $T$），之后 $T$ 就可以像普通类型一样使用。语法如下：
+模板是C++中一个重要的特性，它允许我们定义一个类或函数，使其可以接受不同的数据类型或者不同的参数。
+模板的定义和使用都比较复杂，这里只介绍最基本的用法。
+\textbf{函数模板}用 \texttt{template} 加尖括号声明一个类型参数（习惯命名为 \texttt{T}），之后 \texttt{T} 就可以像普通类型一样使用。语法如下：
 \begin{tcode}
 template<class T>
 T function(T a){
@@ -396,115 +323,92 @@ T function(T a){
 }
 \end{tcode}
 
-这里的$class \quad T$表示一种数据类型，可以是任意类型。
-在函数的定义中，$T$可以作为函数的参数，也可以作为函数的局部变量。在使用函数模板时，需要首先进行函数的实例化。
+这里的\texttt{class T}表示一种数据类型，可以是任意类型。
+在函数的定义中，\texttt{T}可以作为函数的参数，也可以作为函数的局部变量。在使用函数模板时，需要首先进行函数的实例化。
 
+\Needspace{9\baselineskip}
 \begin{example}
-函数模版的实例化与调用：
-\begin{tcode}
-#include <iostream>
-#include <functional>
+函数模板的实例化与调用：
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/class-basics-demo/function-template.cpp}
 
-template<class T>
-T function(T a){
-    return a;
-}
 
-int main() {
-    //调用的时候实际上分为两步，实例化和调用
-    function<int>(10);
-    function<double>(20.0);
-    //在编译器可以推导出类型的时候可以不加<>
-    auto a = function(1.0);
-    //在无法推导的时候，要先进行实例化
-    std::function<int(int)> ptr = function<int>;
-    return 0;
-}
-\end{tcode}
+从本卷目录进入 \path{examples/class-basics-demo}，保存的源码就是 \texttt{function-template.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread function-template.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+这里输出 1 和 10。实例化把模板参数换成具体类型，调用才执行函数体。
 \end{example}
 
-模版的优点：
+模板的优点：
 \begin{enumerate}
     \item 代码重用性高：可以定义一个通用的函数，然后根据需要实例化不同的类型，实现代码的重用。
-    \item 类型安全：模版可以保证类型安全，避免类型错误。
-    \item 效率高：模版可以提高效率，因为编译器可以对代码进行优化。
+    \item 类型安全：不符合类型要求的用法通常能在编译时发现，而不是等运行时猜数据是什么。
+    \item 效率高：编译器可以针对具体类型优化；实际速度仍要看算法与使用方式。
 \end{enumerate}
 
-\textbf{类模版}：
-类模板的语法和函数模板类似，只不过在类名而不是函数名前面加上关键字$template$。
-在普通类中也可以添加成员函数模版，只需要在函数名前面加上关键字$template$即可。
+\textbf{类模板}：
+类模板的语法和函数模板类似，只不过在类名而不是函数名前面加上关键字\texttt{template}。
+在普通类中也可以添加成员函数模板，只需要在函数名前面加上关键字\texttt{template}即可。
 
+\Needspace{9\baselineskip}
 \begin{example}
-类模版的基本写法：
-\begin{tcode}
-#include <iostream>
+类模板的基本写法：
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/class-basics-demo/class-template.cpp}
 
-template<class T1,class T2>
-class A{
-public:
-    A() = default;
-    ~A() = default;
-    T1 val;
-    T2 id;
-    void print(){
-        std::cout << val << " " << id << std::endl;
-    }
-};
 
-int main() {
-    A<int, double> a; //实例化时填具体类型
-    a.val = 1;
-    a.id = 2.5;
-    a.print();
-    return 0;
-}
-\end{tcode}
+从本卷目录进入 \path{examples/class-basics-demo}，保存的源码就是 \texttt{class-template.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread class-template.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+这里输出 1 2.5，同一个类模板按两个类型参数组成了这个对象。
 \end{example}
 
 模板参数除了类型，还可以是\textbf{编译期常量}（非类型模板参数），常用于指定数组长度这类编译期就要确定的值：
 
+\Needspace{9\baselineskip}
 \begin{example}
 非类型模板参数：
-\begin{tcode}
-template<int N>
-int getConst(){
-    return N;
-}
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/class-basics-demo/constant-template.cpp}
 
-int main() {
-    int v = getConst<42>(); //v = 42
-    return 0;
-}
-\end{tcode}
+
+从本卷目录进入 \path{examples/class-basics-demo}，保存的源码就是 \texttt{constant-template.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread constant-template.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+这里输出 42，N 在编译时已经确定。
 \end{example}
 
-在$template$后面，可以定义多个类型参数，用逗号分隔。需要注意的是，类中的函数模版需要在头文件中实现，
-也就是说，模版的声明和实现不可以分离，否则会出现很多问题。
+在\texttt{template}后面，可以定义多个类型参数，用逗号分隔。需要注意的是，类中的函数模板需要在头文件中实现，
+这使编译器在需要实例化时看得到定义。也可以显式实例化后分离编译，但初学阶段先把定义放进头文件，省去链接时找不到实现的麻烦。
 对于类模板也可以实现继承和多态，与普通类相同，这里不再展开，感兴趣的同学可以自行探索。
 
 \textbf{模板的实例化}：
 模板的实例化指的是将模板定义和具体的模板参数绑定在一起，生成一个具体的类或函数。
-写 $A<int, double>$ 时，编译器会根据尖括号里的参数生成对应的版本。模板参数可以填两类东西：
+写 \texttt{A<int, double>} 时，编译器会根据尖括号里的参数生成对应的版本。模板参数可以填两类东西：
 
 \begin{enumerate}
-    \item 具体类型：如$int$、$double$等基本类型，$struct$、$class$、$union$等复合类型，以及指针和引用类型；
-    \item 编译期可以确定的常量：字面常量、宏、$constexpr$，对应上面的非类型模板参数。
+    \item 具体类型：如\texttt{int}、\texttt{double}等基本类型，\texttt{struct}、\texttt{class}、\texttt{union}等复合类型，以及指针和引用类型；
+    \item 编译期可以确定的常量：字面常量、宏、\texttt{constexpr}，对应上面的非类型模板参数。
 \end{enumerate}
 
-平时我们写的 $function<int>(10)$ 其实叫\textbf{隐式实例化}——用到时才生成；
+平时我们写的 \texttt{function<int>(10)} 其实叫\textbf{隐式实例化}——用到时才生成；
 也可以在代码里写 \texttt{template class A<int, double>;} 主动要求编译器立刻生成，这叫\textbf{显式实例化}，
 常用于模板分离编译的场景，初学阶段了解即可。
 
-除此之外，还有一种变参模版，它可以接受任意数量的类型参数，但是在实例化时，必须指定具体的类型。
+除此之外，还有一种变参模板，它可以接受任意数量的类型参数，但是在实例化时，必须指定具体的类型。
 这种情况比较复杂，这里不再展开。
 
 \begin{note}
-对变参模版感兴趣的同学可以自行探讨：
+对变参模板感兴趣的同学可以自行探讨：
 
 \url{https://blog.csdn.net/fl2011sx/article/details/128077440}
 \end{note}
 
-\begin{exercise}
-编写函数模版 \texttt{myMax}，返回两个同类型参数中较大的一个，分别用 \texttt{int}、\texttt{double} 测试，
-并尝试用 \texttt{myMax(1, 2.5)} 调用，观察编译器的报错信息，思考为什么。
+\begin{exercise}\label{ex:v1-cpp-template}
+
+编写函数模板 \texttt{myMax}，返回两个同类型参数中较大的一个，分别用 \texttt{int}、\texttt{double} 测试，
+并尝试用 \texttt{myMax(1, 2.5)} 调用，观察编译器的报错信息，思考为什么。再运行 class-template.cpp 与 constant-template.cpp，分别指出类型参数与非类型参数；不能把运行时读入的整数直接当成编译期 N。
 \end{exercise}

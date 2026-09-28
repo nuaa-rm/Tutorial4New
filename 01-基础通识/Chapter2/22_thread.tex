@@ -23,31 +23,39 @@ C++11 的 \texttt{<thread>} 头文件提供了 \texttt{std::thread}。它解决�
 std::thread 线程对象(可调用对象, 参数...);
 \end{tcode}
 
-参数默认按值复制到新线程。需要在线程中修改原对象时，应显式使用 \texttt{std::ref} 传递引用。
+参数按值复制或移动到新线程。需要在线程中修改原对象时，应显式使用 \texttt{std::ref} 传递引用。
 
+线程一多，输出先后就不一定了。我们先从两个线程开始，再逐步把共享数据、等待和退出安排清楚。项目放在 \path{examples/thread-coordination-demo}，文件组成如下。每个 cpp 都有自己的 main，分别编译；不要把它们拼成一个文件。
+\begin{lstlisting}[language={}]
+thread-coordination-demo/
+  README.md
+  async.cpp
+  atomic.cpp
+  bounded-queue.cpp
+  condition.cpp
+  deadlock.cpp
+  lifecycle.cpp
+  mutex.cpp
+  philosophers.cpp
+  pool.cpp
+  promise.cpp
+  readers-writers.cpp
+  shared-lock.cpp
+\end{lstlisting}
+编译命令里，-std 指定 C++ 标准，-Wall/-Wextra 打开常用警告，-pthread 配置线程编译与链接；-o 指定临时输出文件。先进入项目目录，后面的源码名按当前示例替换。
+
+\Needspace{9\baselineskip}
 \begin{example}
 创建线程、传递参数并等待线程结束：
-\begin{tcode}
-#include <iostream>
-#include <thread>
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/thread-coordination-demo/lifecycle.cpp}
 
-void print_range(int begin, int end) {
-    for (int i = begin; i <= end; ++i) std::cout << i << ' ';
-    std::cout << '\\n';
-}
 
-void add_one(int& value) { ++value; }
-
-int main() {
-    std::thread first(print_range, 1, 3);
-    int value = 0;
-    std::thread second(add_one, std::ref(value));
-    first.join();
-    second.join();
-    std::cout << "value = " << value << '\\n';
-    return 0;
-}
-\end{tcode}
+从本卷目录进入 \path{examples/thread-coordination-demo}，保存的源码就是 \texttt{lifecycle.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread lifecycle.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+first 按序打印 1 2 3，等待两个线程结束后输出 value = 1。
 \end{example}
 
 \texttt{join()} 会阻塞当前线程，直到目标线程结束；\texttt{detach()} 会把线程与 \texttt{std::thread} 对象分离。分离后的线程仍可能访问原来的数据，因此初学阶段应优先使用 \texttt{join()}。
@@ -56,7 +64,8 @@ int main() {
 \texttt{std::thread} 对象析构时，如果仍然处于可连接状态，程序会调用 \texttt{std::terminate()}。每个线程都必须明确 \texttt{join()} 或 \texttt{detach()}；还要避免在线程函数中引用已经销毁的局部变量。
 \end{note}
 
-\begin{exercise}
+\begin{exercise}\label{ex:v1-cpp-thread-print}
+
 创建两个线程，分别打印 $1\sim5$ 和 $6\sim10$，在每次打印之间调用 \texttt{std::this\_thread::sleep\_for} 暂停一小段时间。观察输出是否交错，并说明为什么输出顺序不能依赖。
 \end{exercise}
 
@@ -65,35 +74,21 @@ int main() {
 
 下面的自增操作看起来只有一行，实际上包含读取、计算和写回三个步骤。两个线程可能读到同一个旧值，造成更新丢失。
 
+\Needspace{9\baselineskip}
 \begin{example}
 使用互斥锁保护共享计数器：
-\begin{tcode}
-#include <iostream>
-#include <mutex>
-#include <thread>
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/thread-coordination-demo/mutex.cpp}
 
-int counter = 0;
-std::mutex counter_mutex;
 
-void add_many_times() {
-    for (int i = 0; i < 100000; ++i) {
-        std::lock_guard<std::mutex> lock(counter_mutex);
-        ++counter;
-    }
-}
-
-int main() {
-    std::thread first(add_many_times);
-    std::thread second(add_many_times);
-    first.join();
-    second.join();
-    std::cout << counter << '\\n';
-    return 0;
-}
-\end{tcode}
+从本卷目录进入 \path{examples/thread-coordination-demo}，保存的源码就是 \texttt{mutex.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread mutex.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+输出 200000，两个线程的整个自增操作都在锁内。
 \end{example}
 
-\texttt{std::lock\_guard} 是 RAII（资源获取即初始化）锁。构造时加锁，离开作用域时自动解锁，即使临界区中途抛出异常也能释放锁。需要手动解锁、延迟加锁或转移锁所有权时，可以使用 \texttt{std::unique\_lock}。
+\texttt{std::lock\_guard} 是 RAII（资源获取即初始化）锁。构造时加锁，离开作用域时自动解锁，即使临界区中途抛出异常也能释放锁。RAII 的英文是 Resource Acquisition Is Initialization，后面的智能资源管理也用同样的思路。需要手动解锁、延迟加锁或转移锁所有权时，可以使用 \texttt{std::unique\_lock}。
 
 \begin{tcode}
 std::unique_lock<std::mutex> lock(mtx);  // 默认立即加锁
@@ -105,8 +100,9 @@ lock.lock();                             // 也可以再次加锁
 不要把共享数据的读操作放在锁外、写操作放在锁内，除非你能证明这样做是安全的。锁保护的不是某一行代码，而是一个必须保持一致性的临界区。
 \end{note}
 
-\begin{exercise}
-将示例中的两个线程改成四个线程，每个线程自增 50000 次。分别使用普通 \texttt{int}、互斥锁和原子变量实现，并比较三种写法的结果。
+\begin{exercise}\label{ex:v1-cpp-counter}
+
+将示例中的两个线程改成四个线程，每个线程自增 50000 次。分别使用互斥锁和原子变量实现并核对结果；再解释直接使用普通 int 为什么存在数据竞争，即使偶然数对了也不能证明正确。
 \end{exercise}
 
 \subsubsection{共享锁与相容性矩阵}
@@ -131,39 +127,18 @@ lock.lock();                             // 也可以再次加锁
 \texttt{std::shared\_mutex} 和 \texttt{std::scoped\_lock} 需要 C++17 或更新的标准。编译示例时可使用 \texttt{g++ -std=c++17}；如果项目仍使用 C++11，应先用普通 \texttt{std::mutex} 实现等价逻辑。
 \end{note}
 
+\Needspace{35\baselineskip}
 \begin{example}
 用共享锁保护读多写少的配置表：
-\begin{tcode}
-#include <iostream>
-#include <mutex>
-#include <shared_mutex>
-#include <string>
-#include <thread>
-#include <unordered_map>
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/thread-coordination-demo/shared-lock.cpp}
 
-std::unordered_map<std::string, int> config{{"exposure", 10}};
-std::shared_mutex config_mutex;
 
-int read_config(const std::string& key) {
-    std::shared_lock<std::shared_mutex> lock(config_mutex);
-    return config.at(key);
-}
-
-void write_config(const std::string& key, int value) {
-    std::unique_lock<std::shared_mutex> lock(config_mutex);
-    config[key] = value;
-}
-
-int main() {
-    std::thread reader1([] { std::cout << read_config("exposure") << '\\n'; });
-    std::thread reader2([] { std::cout << read_config("exposure") << '\\n'; });
-    std::thread writer([] { write_config("exposure", 12); });
-    reader1.join();
-    reader2.join();
-    writer.join();
-    return 0;
-}
-\end{tcode}
+从本卷目录进入 \path{examples/thread-coordination-demo}，保存的源码就是 \texttt{shared-lock.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread shared-lock.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+读者可能读到 10 或 12，写入与读取不会同时进入；多次流插入仍可能交错，输出次序不是锁相容性的证据。
 \end{example}
 
 \begin{conclusion}
@@ -175,7 +150,8 @@ int main() {
 \end{itemize}
 \end{conclusion}
 
-\begin{exercise}
+\begin{exercise}\label{ex:v1-cpp-shared-lock}
+
 把配置表示例改成三个读者和两个写者，并在读写函数中加入短暂延时。根据相容性矩阵，解释哪些线程可能并行、哪些线程必须等待。
 \end{exercise}
 
@@ -184,37 +160,18 @@ int main() {
 
 原子变量不是“万能同步工具”。两个原子变量之间的联合不变量仍可能被其他线程观察到中间状态；一组复杂数据结构也不能仅靠把某个整数改成原子类型来保护。
 
+\Needspace{9\baselineskip}
 \begin{example}
 用原子变量实现并发计数和停止信号：
-\begin{tcode}
-#include <atomic>
-#include <iostream>
-#include <thread>
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/thread-coordination-demo/atomic.cpp}
 
-std::atomic<int> counter{0};
-std::atomic<bool> stop{false};
 
-void add_many_times() {
-    for (int i = 0; i < 100000; ++i) ++counter;
-}
-
-void wait_for_stop() {
-    while (!stop.load()) std::this_thread::yield();
-    std::cout << "received stop signal\\n";
-}
-
-int main() {
-    std::thread first(add_many_times);
-    std::thread second(add_many_times);
-    std::thread observer(wait_for_stop);
-    first.join();
-    second.join();
-    stop.store(true);
-    observer.join();
-    std::cout << "counter = " << counter.load() << '\\n';
-    return 0;
-}
-\end{tcode}
+从本卷目录进入 \path{examples/thread-coordination-demo}，保存的源码就是 \texttt{atomic.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread atomic.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+看到停止提示与 counter = 200000；yield 是轮询让步，不等于条件变量的休眠等待。
 \end{example}
 
 常用操作包括 \texttt{load()}、\texttt{store()}、\texttt{fetch\_add()} 和 \texttt{exchange()}。直接使用自增运算符也可以执行原子自增。若需要多个共享对象保持整体一致，应回到互斥锁或更高层的并发结构。
@@ -223,7 +180,8 @@ int main() {
 不要用普通的 \texttt{bool} 作为多个线程共享的停止标志，也不要用“先读取再判断再写回”的普通变量操作代替原子操作。数据竞争属于未定义行为，不能依靠多运行几次没有出错来证明程序正确。
 \end{note}
 
-\begin{exercise}
+\begin{exercise}\label{ex:v1-cpp-atomic}
+
 使用 \texttt{std::atomic<int>} 实现一个线程安全的任务编号分配器，让四个线程各领取 100 个不重复编号，并验证最终编号数量。
 \end{exercise}
 
@@ -250,45 +208,24 @@ cv.notify_all();       // 唤醒所有等待线程
 
 \texttt{wait} 在等待期间会暂时释放互斥锁，被唤醒后重新加锁再返回。必须使用谓词版本，因为可能出现虚假唤醒，而且其他线程被唤醒后可能已经先一步改变了共享状态。
 
+\Needspace{9\baselineskip}
 \begin{example}
 一个线程准备数据，另一个线程等待数据准备完成：
-\begin{tcode}
-#include <condition_variable>
-#include <iostream>
-#include <mutex>
-#include <thread>
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/thread-coordination-demo/condition.cpp}
 
-std::mutex mtx;
-std::condition_variable cv;
-bool ready = false;
 
-void consumer() {
-    std::unique_lock<std::mutex> lock(mtx);
-    cv.wait(lock, [] { return ready; });
-    std::cout << "data is ready\\n";
-}
-
-void producer() {
-    {
-        std::lock_guard<std::mutex> lock(mtx);
-        ready = true;
-    }
-    cv.notify_one();
-}
-
-int main() {
-    std::thread c(consumer);
-    std::thread p(producer);
-    c.join();
-    p.join();
-    return 0;
-}
-\end{tcode}
+从本卷目录进入 \path{examples/thread-coordination-demo}，保存的源码就是 \texttt{condition.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread condition.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+输出 data is ready。即使生产者先完成，消费者也会依据 ready 条件继续，不依赖通知被“记住”。
 \end{example}
 
 通知通常放在修改共享状态并释放锁之后。正确性的关键仍然是“状态由锁保护、等待带谓词”。
 
-\begin{exercise}
+\begin{exercise}\label{ex:v1-cpp-condition}
+
 给上例增加超时：如果 1 秒内没有准备完成，就输出超时信息并退出。提示：使用 \texttt{wait\_for} 的带谓词版本。
 \end{exercise}
 
@@ -297,59 +234,42 @@ int main() {
 
 可以把它们理解为一次性的结果通道：\texttt{promise} 是写端，负责设置值或异常；\texttt{future} 是读端，负责等待并取得结果。一个 \texttt{future} 通常只能成功调用一次 \texttt{get()}。
 
+\Needspace{9\baselineskip}
 \begin{example}
 使用 promise/future 从工作线程取得结果：
-\begin{tcode}
-#include <chrono>
-#include <exception>
-#include <future>
-#include <iostream>
-#include <thread>
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/thread-coordination-demo/promise.cpp}
 
-void calculate(std::promise<int> result) {
-    try {
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
-        result.set_value(6 * 7);
-    } catch (...) {
-        result.set_exception(std::current_exception());
-    }
-}
 
-int main() {
-    std::promise<int> promise;
-    std::future<int> future = promise.get_future();
-    std::thread worker(calculate, std::move(promise));
-    std::cout << "answer = " << future.get() << '\\n';
-    worker.join();
-    return 0;
-}
-\end{tcode}
+从本卷目录进入 \path{examples/thread-coordination-demo}，保存的源码就是 \texttt{promise.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread promise.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+输出 answer = 42，future 取得工作线程设置的值。
 \end{example}
 
-如果只是想异步调用一个函数，\texttt{std::async} 可以自动建立任务和结果通道。使用 \texttt{std::launch::async} 时，明确要求异步执行；返回的 \texttt{future} 会在调用 \texttt{get()} 时等待任务完成。
+如果只是想异步调用一个函数，可以让 std::async 自动建立任务和结果通道。这里显式指定异步策略 \texttt{std::launch::async}，避免任务被延后到等待结果时才执行；调用返回对象的 get() 会等待并取得结果。
 
+\Needspace{9\baselineskip}
 \begin{example}
 调用 async 函数并取得返回值：
-\begin{tcode}
-#include <future>
-#include <iostream>
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/thread-coordination-demo/async.cpp}
 
-int square(int value) { return value * value; }
 
-int main() {
-    std::future<int> result = std::async(
-        std::launch::async, square, 12);
-    std::cout << result.get() << '\\n';       // 输出 144
-    return 0;
-}
-\end{tcode}
+从本卷目录进入 \path{examples/thread-coordination-demo}，保存的源码就是 \texttt{async.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread async.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+输出 144，get 等待结果后取回平方值。
 \end{example}
 
 \begin{conclusion}
 三种工具的分工：\texttt{condition\_variable} 等待共享状态发生变化；\texttt{promise/future} 传递一次性的值或异常；\texttt{async} 用更短的代码启动异步函数，并通过 \texttt{future} 取得结果。
 \end{conclusion}
 
-\begin{exercise}
+\begin{exercise}\label{ex:v1-cpp-async}
+
 编写函数 \texttt{is\_armor\_valid}，使用 \texttt{std::async} 异步判断一组装甲板数据是否满足阈值，主线程通过 \texttt{future} 获取判断结果。
 \end{exercise}
 
@@ -358,201 +278,68 @@ int main() {
 
 实现线程池时至少要处理三件事：任务队列的互斥、空队列时的等待、析构时的停止与唤醒。工作线程取出任务后应先释放队列锁，再执行任务，避免一个慢任务阻塞其他线程提交或取任务。
 
+\Needspace{9\baselineskip}
 \begin{example}
 一个可正常停止的简易线程池：
-\begin{tcode}
-#include <condition_variable>
-#include <functional>
-#include <iostream>
-#include <mutex>
-#include <queue>
-#include <stdexcept>
-#include <thread>
-#include <vector>
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/thread-coordination-demo/pool.cpp}
 
-class ThreadPool {
-private:
-    std::vector<std::thread> workers_;
-    std::queue<std::function<void()>> tasks_;
-    std::mutex mtx_;
-    std::condition_variable cv_;
-    bool stopping_ = false;
 
-public:
-    explicit ThreadPool(std::size_t count) {
-        for (std::size_t i = 0; i < count; ++i) {
-            workers_.emplace_back([this] {
-                while (true) {
-                    std::function<void()> task;
-                    {
-                        std::unique_lock<std::mutex> lock(mtx_);
-                        cv_.wait(lock, [this] {
-                            return stopping_ || !tasks_.empty();
-                        });
-                        if (stopping_ && tasks_.empty()) return;
-                        task = std::move(tasks_.front());
-                        tasks_.pop();
-                    }
-                    task();
-                }
-            });
-        }
-    }
-
-    ~ThreadPool() {
-        {
-            std::lock_guard<std::mutex> lock(mtx_);
-            stopping_ = true;
-        }
-        cv_.notify_all();
-        for (auto& worker : workers_) worker.join();
-    }
-
-    void enqueue(std::function<void()> task) {
-        {
-            std::lock_guard<std::mutex> lock(mtx_);
-            if (stopping_) throw std::runtime_error("thread pool is stopping");
-            tasks_.push(std::move(task));
-        }
-        cv_.notify_one();
-    }
-};
-
-int main() {
-    ThreadPool pool(3);
-    for (int i = 0; i < 8; ++i) {
-        pool.enqueue([i] {
-            std::cout << "task " << i << " is running\\n";
-        });
-    }
-    return 0;       // 析构函数等待任务完成并回收线程
-}
-\end{tcode}
+从本卷目录进入 \path{examples/thread-coordination-demo}，保存的源码就是 \texttt{pool.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread pool.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+0 到 7 的任务各执行一次，输出片段可能交错；析构会等待已有任务处理完。这个教学实现约定任务不向外抛异常，线程创建失败时也未做完整恢复。
 \end{example}
 
 停止条件是“正在停止且任务队列为空”。析构时会先停止接收新任务，再唤醒所有工作线程；工作线程会把队列中已有的任务处理完，最后退出并被 \texttt{join()} 回收。若要让任务返回结果，可以在任务内部使用 \texttt{promise}，或设计返回 \texttt{future} 的提交接口。
 
-\begin{exercise}
+\begin{exercise}\label{ex:v1-cpp-pool}
+
 为线程池增加一个返回 \texttt{std::future<int>} 的 \texttt{enqueue} 重载，使调用方可以提交“计算平方”的任务并取得结果。提示：结合 \texttt{std::packaged\_task} 或 \texttt{std::promise} 实现。
 \end{exercise}
 
 \subsubsection{并发进阶：经典问题}
-前面的互斥锁、条件变量和共享锁是零件；下面四个问题练习的是“看到场景后，知道该拿哪块零件”。先不要急着记解法。每个问题都先回答三件事：	extbf{谁在同时做事}、	extbf{谁在共享什么}、	extbf{不协调会发生什么}。视觉工程里的帧队列、参数表和设备资源竞争，都能在这里找到原型。
+前面的互斥锁、条件变量和共享锁是零件；下面四个问题带我们练习的是“看到场景后，知道该拿哪块零件”。先不要急着记解法。每个问题都先回答三件事：\textbf{谁在同时做事}、\textbf{谁在共享什么}、\textbf{不协调会发生什么}。视觉工程里的帧队列、参数表和设备资源竞争，都能在这里找到原型。
 
 \textbf{生产者—消费者问题。}
-想象相机线程不断产生图像帧，识别线程不断取帧处理。前者是	extbf{生产者}，后者是	extbf{消费者}，两者之间只有一个容量为 3 的帧队列。它们共享的是队列，而不是“某一帧图像”。
+想象相机线程不断产生图像帧，识别线程不断取帧处理。前者是\textbf{生产者}，后者是\textbf{消费者}，两者之间只有一个容量为 3 的帧队列。它们共享的是队列，而不是“某一帧图像”。
 
 这个问题要保证三件事：每个放入的任务只取出一次；队列不能超过容量；队列空时消费者不能取一个不存在的任务，队列满时生产者也不能继续塞。若用循环反复检查队列，会白白占用 CPU；因此队列空或满时，对应线程应该睡眠，状态变化后再被唤醒。生产者把数据放入有限容量的缓冲区，消费者从缓冲区取出数据；这正是条件变量最典型的使用场景。
 
+\Needspace{9\baselineskip}
 \begin{example}
 有限容量的线程安全队列：
-\begin{tcode}
-#include <condition_variable>
-#include <iostream>
-#include <mutex>
-#include <queue>
-#include <thread>
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/thread-coordination-demo/bounded-queue.cpp}
 
-class BoundedQueue {
-private:
-    std::queue<int> queue_;
-    const std::size_t capacity_;
-    std::mutex mtx_;
-    std::condition_variable not_empty_;
-    std::condition_variable not_full_;
-    bool closed_ = false;
 
-public:
-    explicit BoundedQueue(std::size_t capacity) : capacity_(capacity) {}
-
-    bool push(int value) {
-        std::unique_lock<std::mutex> lock(mtx_);
-        not_full_.wait(lock, [this] {
-            return queue_.size() < capacity_ || closed_;
-        });
-        if (closed_) return false;
-        queue_.push(value);
-        not_empty_.notify_one();
-        return true;
-    }
-
-    bool pop(int& value) {
-        std::unique_lock<std::mutex> lock(mtx_);
-        not_empty_.wait(lock, [this] {
-            return !queue_.empty() || closed_;
-        });
-        if (queue_.empty()) return false;
-        value = queue_.front();
-        queue_.pop();
-        not_full_.notify_one();
-        return true;
-    }
-
-    void close() {
-        {
-            std::lock_guard<std::mutex> lock(mtx_);
-            closed_ = true;
-        }
-        not_empty_.notify_all();
-        not_full_.notify_all();
-    }
-};
-
-int main() {
-    BoundedQueue queue(3);
-    std::thread producer([&] {
-        for (int i = 0; i < 10; ++i) queue.push(i);
-        queue.close();
-    });
-    std::thread consumer([&] {
-        int value = 0;
-        while (queue.pop(value)) std::cout << "consume " << value << '\\n';
-    });
-    producer.join();
-    consumer.join();
-    return 0;
-}
-\end{tcode}
+从本卷目录进入 \path{examples/thread-coordination-demo}，保存的源码就是 \texttt{bounded-queue.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread bounded-queue.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+依次消费 0 到 9，然后退出；close 唤醒等待者，剩余元素仍会被取完。
 \end{example}
 
 这里的 \texttt{closed\_} 很重要。没有关闭状态，消费者无法区分“暂时没有数据”和“以后永远不会有数据”，线程就可能永久等待。
 
 \textbf{读者—写者问题。}
-想象多个线程都要读取一份曝光参数表，只有调参线程偶尔会修改它。读参数的线程是	extbf{读者}，修改参数的线程是	extbf{写者}，共享资源是这份参数表。两个读者同时看到同一份稳定的参数没有问题；但写者写到一半时，任何读者都不能读，两个写者也不能同时写。
+想象多个线程都要读取一份曝光参数表，只有调参线程偶尔会修改它。读参数的线程是\textbf{读者}，修改参数的线程是\textbf{写者}，共享资源是这份参数表。两个读者同时看到同一份稳定的参数没有问题；但写者写到一半时，任何读者都不能读，两个写者也不能同时写。
 
 这个问题关心的不只是“正确”，还关心“效率”：若所有人都用普通互斥锁，读者之间也只能排队，读多写少时就浪费了并行机会。因此读者可以并行，写者必须独占。还要留意公平性：如果系统总让新读者先进入，写者可能长期得不到机会，这叫写者饥饿。\texttt{std::shared\_mutex} 能表达基本的读写互斥关系，公平性则要根据具体需求额外设计。
 
+\Needspace{9\baselineskip}
 \begin{example}
 多个读者共享读取、写者独占更新：
-\begin{tcode}
-#include <iostream>
-#include <mutex>
-#include <shared_mutex>
-#include <thread>
-#include <vector>
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/thread-coordination-demo/readers-writers.cpp}
 
-int score = 0;
-std::shared_mutex score_mutex;
 
-void reader(int id) {
-    std::shared_lock<std::shared_mutex> lock(score_mutex);
-    std::cout << "reader " << id << ": " << score << '\\n';
-}
-
-void writer(int value) {
-    std::unique_lock<std::shared_mutex> lock(score_mutex);
-    score = value;
-}
-
-int main() {
-    std::vector<std::thread> readers;
-    for (int i = 0; i < 3; ++i) readers.emplace_back(reader, i);
-    std::thread writer_thread(writer, 100);
-    for (auto& reader_thread : readers) reader_thread.join();
-    writer_thread.join();
-    return 0;
-}
-\end{tcode}
+仍在本节项目目录中，编译并运行 \texttt{readers-writers.cpp}：
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread readers-writers.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+每个读者读到 0 或 100，读取有共享锁，更新有独占锁；谁先执行由调度决定。
 \end{example}
 
 \textbf{哲学家进餐问题。}
@@ -560,38 +347,20 @@ int main() {
 
 麻烦出在“先拿到一份资源，再等另一份资源”。若每个人都先拿左叉子，就可能五个人各拿一把叉子，再一起等右边那把；谁也不能继续。真实工程中的“同时锁住相机和串口”“同时更新两个关联缓存”也是同一种结构。
 
-一种简单的规避办法是打破对称性；更通用的办法是使用 \texttt{std::scoped\_lock} 一次性获取两把锁，避免拿到第一把后长期等待第二把。
+一种简单的规避办法是打破对称性；更通用的办法是使用 \texttt{std::scoped\_lock} 采用避免死锁的算法共同管理两把锁，不让各线程永久持有一把又等另一把；这不等于一次硬件原子操作拿齐锁，也不保证公平性。
 
+\Needspace{9\baselineskip}
 \begin{example}
-使用 scoped\_lock 安全获取两把叉子：
-\begin{tcode}
-#include <chrono>
-#include <iostream>
-#include <mutex>
-#include <thread>
-#include <vector>
+使用 \texttt{scoped\_lock} 安全获取两把叉子：
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/thread-coordination-demo/philosophers.cpp}
 
-const int philosopher_count = 5;
-std::mutex forks[philosopher_count];
 
-void dine(int id) {
-    int left = id;
-    int right = (id + 1) % philosopher_count;
-    for (int round = 0; round < 2; ++round) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        std::scoped_lock lock(forks[left], forks[right]);
-        std::cout << "philosopher " << id << " is eating\\n";
-    }
-}
-
-int main() {
-    std::vector<std::thread> philosophers;
-    for (int i = 0; i < philosopher_count; ++i)
-        philosophers.emplace_back(dine, i);
-    for (auto& philosopher : philosophers) philosopher.join();
-    return 0;
-}
-\end{tcode}
+从本卷目录进入 \path{examples/thread-coordination-demo}，保存的源码就是 \texttt{philosophers.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread philosophers.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+每位哲学家吃两次后所有线程退出，输出可能交错；共同获取两锁避免这一组资源的循环等待。
 \end{example}
 
 \textbf{死锁。}
@@ -607,36 +376,21 @@ int main() {
 
 只要破坏其中一个条件，就能避免死锁。工程中最常用的做法是给资源规定全局获取顺序；需要同时获取多把锁时使用 \texttt{std::lock} 或 \texttt{std::scoped\_lock}；还可以设置超时，让等待失败后回滚。
 
+\Needspace{9\baselineskip}
 \begin{example}
 两个线程以相反顺序获取两把锁，会形成循环等待：
-\begin{tcode}
-#include <mutex>
-#include <thread>
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/thread-coordination-demo/deadlock.cpp}
 
-std::mutex first;
-std::mutex second;
 
-void left_to_right() {
-    std::lock_guard<std::mutex> a(first);
-    std::lock_guard<std::mutex> b(second);
-}
-
-void right_to_left() {
-    std::lock_guard<std::mutex> b(second);
-    std::lock_guard<std::mutex> a(first);
-}
-
-int main() {
-    std::thread one(left_to_right);
-    std::thread two(right_to_left);
-    one.join();
-    two.join();
-    return 0;
-}
-\end{tcode}
+从本卷目录进入 \path{examples/thread-coordination-demo}，保存的源码就是 \texttt{deadlock.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread deadlock.cpp -o /tmp/cpp-demo
+timeout 2s /tmp/cpp-demo
+\end{tbash}
+可能正常退出，也可能被 timeout 以状态 124 停止。没有卡死只说明本次没碰到那个交错顺序，不能证明正确。
 \end{example}
 
-上例可能卡死：线程一持有 \texttt{first} 等待 \texttt{second}，线程二持有 \texttt{second} 等待 \texttt{first}。下面的写法使用 \texttt{std::scoped\_lock} 同时获取两把锁，由标准库负责避免这种中间状态。
+这是可能死锁的错误示范，只在独立练习程序中用 timeout 限时观察，不能把它放进实际工程。上例可能卡死：线程一持有 \texttt{first} 等待 \texttt{second}，线程二持有 \texttt{second} 等待 \texttt{first}。下面改用 \texttt{std::scoped\_lock}，由标准库执行避免死锁的多锁获取算法。它只处理这一组锁，不会自动消除程序里其他资源形成的等待环。
 
 \begin{tcode}
 void safe_update() {
@@ -652,7 +406,7 @@ void safe_update() {
 \begin{conclusion}
 经典问题对应的解决工具：
 \begin{center}
-\begin{tabular}{p{3.2cm}p{4.2cm}p{5.2cm}}
+\begin{tabular}{p{2.7cm}p{3.5cm}p{5.5cm}}
 \toprule[1.5pt]
 问题 & 共享状态 & 主要思路 \\
 \midrule[1pt]
@@ -665,10 +419,15 @@ void safe_update() {
 \end{center}
 \end{conclusion}
 
-\begin{exercise}
+\begin{exercise}\label{ex:v1-cpp-classic}
+
 \begin{enumerate}
     \item 给线程安全队列增加两个消费者，验证每个数据只被一个消费者取出。
     \item 写出哲学家进餐问题中的四个死锁条件，并指出 \texttt{std::scoped\_lock} 如何避免中间等待。
     \item 构造一个“读者长期占用、写者迟迟不能进入”的场景，并思考如何改善写者饥饿。
 \end{enumerate}
 \end{exercise}
+
+\subsubsection{进程内存与对象寿命}
+线程共享同一进程中的对象，但每个线程有自己的调用栈。说清“对象放在哪里、谁负责让它活多久”，才能判断一个引用能不能安全交给线程。下面先在单线程里看明白，再把同样的判断用到前面的线程程序中。
+\input{Chapter2/22_memory.tex}

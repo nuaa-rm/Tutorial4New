@@ -86,7 +86,7 @@
 \item \textbf{安装与维护}：双系统安装的四个流程（分区、制作启动盘、安装、设置）需要亲手走一遍；Timeshift 保护系统文件与设置，个人资料另备份；恢复前检查快照范围、目标与新数据，不能把快照当成整盘无损回档。系统扩容、grub 美化、卸载重装属于选修内容，用到时再回来查即可。
 \item \textbf{命令行基础}：目录结构、"一切皆文件"与挂载是必须理解的概念；文件管理（ls/cp/mv/rm）、查找（find/grep）、重定向与管道、vim 基本操作是每天都要用的基本功，要求熟练；各命令的参数不必死记，会用参数表和 man 手册查即可。
 \item \textbf{shell 与环境变量}：会编写并运行简单的 shell 脚本；理解 PATH 的作用，区分普通变量、export 与 source，按 Shell 启动方式核对配置读取；日常交互 Bash 配置优先放在 \textasciitilde/.bashrc。
-\item \textbf{git}：理解工作区、暂存区、本地版本库、远程仓库四个区域的流转关系，熟练掌握 add/commit/push/pull 的日常闭环，会写基本的 .gitignore。
+\item \textbf{git}：理解工作区、暂存区、本地版本库、远程仓库四个区域的流转关系，熟练掌握 add、commit、push、pull 的日常闭环，会写基本的 .gitignore。
 \item \textbf{conda}（选修）：会创建、激活、退出和删除虚拟环境，配环境时先在虚拟环境中试错。
 \item \textbf{图形开发工具}：安装 CLion 与 VS Code，识别菜单、项目树、工具栏、输出面板和状态栏；用同一份 CMake 工程完成配置、构建、运行和断点调试，能区分编辑器与编译工具链。
 \item \textbf{串口通信}：识别队内 USB CDC ACM 设备及所属组，用 udev 为目标板绑定固定别名；区分 USB 通信与 UART 参数的含义，通过约定的测试协议验证收发；按设备、权限、命名、占用和协议逐层排错。
@@ -100,7 +100,7 @@
 \item \label{prob:v1-linux-2} 解释"挂载"的含义，并说明 U 盘插入 Ubuntu 后一般被自动挂载到哪个目录下。
 \item \label{prob:v1-linux-3} 写出命令：以易读单位统计当前目录下各子目录的磁盘占用（只统计一层）。
 \item \label{prob:v1-linux-4} （基础）解释 \texttt{chmod 755 run.sh} 中三个数字各自的含义，并写出等价的符号写法。串口设备属于 \texttt{dialout} 组但当前用户不在该组时，应如何取得访问权限？
-\item \label{prob:v1-linux-5} 写出命令：在 \texttt{/etc} 目录下查找所有以 \texttt{.conf} 结尾的文件，并把结果保存到家目录下的 \texttt{conf\_list.txt} 中。
+\item \label{prob:v1-linux-5} 写出命令：在 \texttt{/etc} 目录下查找所有以 \texttt{.conf} 结尾的文件，并把结果保存到家目录下的 \path{conf_list.txt} 中。
 \item \label{prob:v1-linux-6} 说明 \texttt{./test.sh} 与 \texttt{bash test.sh} 两种脚本运行方式的区别，以及前者为什么需要先执行 \texttt{chmod +x}。
 \item \label{prob:v1-linux-7} 说明 git 中工作区、暂存区、本地版本库三者的区别，以及 \texttt{git add} 与 \texttt{git commit} 各自的作用。
 \item \label{prob:v1-linux-8} （基础）分别说明 CLion 的锤子、绿色三角、小虫按钮的作用，以及 VS Code 的 Explorer、Extensions、Terminal、Output 各负责什么。为什么装好 VS Code 的 C/C++ 扩展后仍可能无法编译？
@@ -122,11 +122,13 @@
 \chapter{现代 C++ 基础}
 
 \begin{introduction}
-  \item 学习目标：掌握类、继承与模板；编写 lambda；理解引用与移动；使用智能指针与常用 STL；掌握多线程同步与常见模型，并理解进程内存分区与堆栈差异。
+  \item 学习目标：编写并运行类、继承与模板示例；用 lambda 排序并核验捕获；区分引用绑定与移动；选择智能指针和容器；用锁、原子量、条件变量协调线程；依据对象寿命判断地址能否继续使用。
   \item 建议学时：约 1.5--2 周。
   \item 本卷边界：ROS2 执行器与节点生命周期中的多线程用法见卷二；本节只讲标准 C++ 并发工具、经典问题与基础线程池。
 \end{introduction}
 
+\begingroup
+\setlength{\emergencystretch}{3em}
 \section{面向对象编程：类}
 \input{Chapter2/21.tex}
 
@@ -136,7 +138,7 @@
 \section{智能指针}
 \input{Chapter2/22_smartptr.tex}
 
-\section{标准模版库（STL）}
+\section{标准模板库（STL）}
 本节介绍常用数据结构对应的 STL 容器，以及迭代器的基本用法与失效问题。
 \input{Chapter2/22_stl.tex}
 
@@ -149,7 +151,7 @@
 
 \begin{itemize}
 \item \textbf{类与面向对象}：类的三大成员（数据成员、成员函数、构造/析构函数）和三种访问限定符是天天要用的基本功，要求熟练；函数重载、运算符重载、继承与多态是阅读和编写类代码的必备能力；模板只需掌握最基本的函数模板和类模板写法，遇到变参模板等进阶内容会查文档即可。
-\item \textbf{lambda、引用与移动}：lambda 的捕获列表（值捕获 vs 引用捕获）和 \texttt{std::function} 承接要熟练使用，回调和排序比较器里到处都是它；左值/右值、两种引用与 \texttt{std::move}/\texttt{std::forward} 是本章最容易混淆的部分，记住"能取地址的是左值、有名字的右值引用是左值"这两句就够应付日常，其余在实践中慢慢消化。
+\item \textbf{lambda、引用与移动}：lambda 的捕获列表（值捕获 vs 引用捕获）和 \texttt{std::function} 承接要熟练使用，回调和排序比较器里到处都是它；左值/右值、两种引用与 \texttt{std::move}/\texttt{std::forward} 是本章最容易混淆的部分，值类别属于表达式，有名字的右值引用表达式仍是左值；move 本身不搬数据，forward 保留传入的值类别。用实际调用记录核验，不能把取地址当作通用定义。
 \item \textbf{智能指针}：掌握 \texttt{unique\_ptr}（独占）、\texttt{shared\_ptr}（计数共享）、\texttt{weak\_ptr}（观察不占有）的分工，默认优先 \texttt{make\_unique}/\texttt{make\_shared}；循环引用的成因和用 \texttt{weak\_ptr} 破解的方法必须理解。
 \item \textbf{STL}：\texttt{vector} 的常用成员函数和扩容机制要熟练；队列、堆栈、映射等容器知道各自解决什么问题、会去 cppreference 查用法即可；迭代器失效是新手重灾区，删除元素时牢记用 \texttt{erase} 的返回值更新迭代器。
 \item \textbf{多线程与内存}：会创建线程，使用 \texttt{mutex}/\texttt{lock\_guard}、共享锁、原子变量和条件变量；能用 \texttt{future}、\texttt{promise}、\texttt{async} 传递异步结果；理解生产者—消费者、读者—写者、哲学家进餐和死锁；进程内存分区（代码/常量/静态/堆/栈）和栈帧机制是理解悬垂指针、栈溢出等经典 bug 的地基，务必建立图景。
@@ -157,20 +159,37 @@
 
 本章验收通过后，恭喜你已经掌握了阅读现代 C++ 工程代码的主要语法设施。下一章我们来看看这些代码是如何被编译器组装成可执行文件的——CMake 见。
 
+本章安排 12 道自测题：核心语法、容器与并发都要覆盖，最后两题补模板和寿命判断；现场验收则检查独立运行与解释，不重复抄题。
 \begin{problemset}
-\item 说出 \texttt{public}、\texttt{private}、\texttt{protected} 三种访问限定符的区别，并说明基类的 \texttt{private} 成员能否被派生类直接访问。
-\item 判断并说明理由：\texttt{int f(int)} 与 \texttt{double f(int)} 能否构成函数重载？
-\item 写出 lambda 表达式的简化语法形式，并说明值捕获 \texttt{[a]} 与引用捕获 \texttt{[\&a]} 在"修改原变量"这一点上的区别。
-\item 解释左值与右值的区别，写出判断一个表达式是左值还是右值的最常用方法。
-\item 说明 \texttt{std::move} 的作用，并回答：对一个对象执行 \texttt{std::move} 之后，该对象本身的数据被搬走了吗？
-\item 比较 \texttt{unique\_ptr} 与 \texttt{shared\_ptr} 的所有权语义，并说明为什么前者的拷贝构造被禁用。
-\item 解释 \texttt{shared\_ptr} 循环引用的成因，以及如何用 \texttt{weak\_ptr} 解决。
-\item （提高）写出遍历 \texttt{std::vector} 时安全删除满足某条件元素的两种写法（提示：一种利用 \texttt{erase} 的返回值，一种是 erase-remove 惯用法）。
-\item （提高）解释死锁产生的四个必要条件，并结合"两把锁以相反顺序获取"的例子说明破坏哪一个条件可以修复它。
-\item （实践）综合本章内容实现一个小程序：定义 \texttt{Armor} 类（含编号、置信度数据成员），用 \texttt{std::vector} 管理若干对象，使用 lambda 作为比较器按置信度降序排序，最后以多线程方式（两个线程）分别统计其中置信度高于/低于 0.5 的数量并打印，注意线程安全。
+\item \label{prob:v1-cpp-1} 说出 \texttt{public}、\texttt{private}、\texttt{protected} 三种访问限定符的区别，并说明基类的 \texttt{private} 成员能否被派生类直接访问。
+\item \label{prob:v1-cpp-2} 判断并说明理由：\texttt{int f(int)} 与 \texttt{double f(int)} 能否构成函数重载？
+\item \label{prob:v1-cpp-3} 写出 lambda 表达式的简化语法形式，并说明值捕获 \texttt{[a]} 与引用捕获 \texttt{[\&a]} 在"修改原变量"这一点上的区别。
+\item \label{prob:v1-cpp-4} 解释左值与右值的区别，分别判断 x、x+1、std::move(x) 和有名字的右值引用表达式，说明取地址法有什么边界。
+\item \label{prob:v1-cpp-5} 说明 \texttt{std::move} 的作用，并回答：对一个对象执行 \texttt{std::move} 之后，该对象本身的数据被搬走了吗？
+\item \label{prob:v1-cpp-6} 比较 \texttt{unique\_ptr} 与 \texttt{shared\_ptr} 的所有权语义，并说明为什么前者的拷贝构造被禁用。
+\item \label{prob:v1-cpp-7} 解释 \texttt{shared\_ptr} 循环引用的成因，以及如何用 \texttt{weak\_ptr} 解决。
+\item \label{prob:v1-cpp-8} （提高）写出遍历 \texttt{std::vector} 时安全删除满足某条件元素的两种写法；再比较 map 的 find 与 operator[]，以及 queue 与 priority\_queue 的取值规则。（提示：两种删除写法中一种利用 \texttt{erase} 的返回值，一种是 erase-remove 惯用法）。
+\item \label{prob:v1-cpp-9} （提高）解释死锁产生的四个必要条件，并结合"两把锁以相反顺序获取"的例子说明破坏哪一个条件可以修复它。
+\item \label{prob:v1-cpp-10} （实践）综合本章内容实现一个小程序：定义 \texttt{Armor} 类（含编号、置信度数据成员），用 \texttt{std::vector} 管理若干对象，使用 lambda 作为比较器按置信度降序排序，最后以多线程方式（两个线程）分别统计其中置信度高于/低于 0.5 的数量并打印，注意线程安全。
+
+\item \label{prob:v1-cpp-11}（基础）解释 myMax(1,2.5) 为什么推导失败，如何显式指定类型；比较类模板的类型参数与 getConst 的非类型参数，说明模板定义为什么通常放在头文件。
+\item \label{prob:v1-cpp-12}（提高）局部 vector 变量和它保存的元素是否必定在同一片栈内存？全局变量是否比 static 变量寿命短？把局部对象的地址交给线程后，至少要核对哪两个条件？
 \end{problemset}
 
 % ============================================================
+
+\section{本章验收}
+学长检查时可以查本章源码，重点是你能改、能跑、能解释看到的现象。不要只拿一份旧可执行文件证明“我的代码没问题”。
+\begin{enumerate}
+    \item 从新的输出路径编译一个类模板或继承示例，按考核者给定的数据修改调用，说明构造顺序、访问权限与实际选择的函数。
+    \item 用捕获项目现场预测输出，修改一个关键值后运行；再指出移动项目里只绑定引用与真正创建新对象的区别，不假定移后字符串一定为空。
+    \item 演示 shared 与 weak 两个程序，逐次指出强引用计数和析构时机；给定一个对象关系，说明谁拥有谁、谁只观察。
+    \item 用容器项目选择一种适合考核者给定取值规则的容器，运行并解释；修复练习副本中的失效迭代器，说明为什么接住 erase 返回值。
+    \item 从空输出目录构建线程安全队列，改变容量、数据量或消费者数量后，提交收发记录，核对没有丢失与重复；指出队列锁、等待谓词与退出条件各负责什么。再对比锁与原子计数，说明为什么正常输出不能证明未同步代码正确。
+    \item 用内存项目解释局部对象与动态对象的寿命，并检查一个传给线程的引用是否可能悬垂。提交源码、编译命令和工具版本，让另一位同学可以复现。
+\end{enumerate}
+\endgroup
+
 \chapter{编译过程与 CMake 基础}
 
 \begin{introduction}

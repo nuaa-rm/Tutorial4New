@@ -1,0 +1,76 @@
+[
+  {
+    "variant": "designated-wrong-order",
+    "compile": 1,
+    "diagnostics": "/tmp/ch2-variants-8d7ohtqa/designated-wrong-order.cpp: In function ‘int main()’:\n/tmp/ch2-variants-8d7ohtqa/designated-wrong-order.cpp:5:27: warning: missing initializer for member ‘Foo::a’ [-Wmissing-field-initializers]\n    5 |     Foo foo{.b = 3, .a = 1};\n      |                           ^\n/tmp/ch2-variants-8d7ohtqa/designated-wrong-order.cpp:5:27: error: designator order for field ‘Foo::a’ does not match declaration order in ‘Foo’\n"
+  },
+  {
+    "variant": "forward-enabled",
+    "compile": 0,
+    "diagnostics": "",
+    "run": 0,
+    "stdout": "右值引用\n左值引用\n右值引用\nconst 左值引用\nconst 右值引用\n",
+    "stderr": ""
+  },
+  {
+    "variant": "capture-nine",
+    "compile": 0,
+    "diagnostics": "",
+    "run": 0,
+    "stdout": "2 1\n2\n9 1\n",
+    "stderr": ""
+  },
+  {
+    "variant": "shared-move",
+    "compile": 0,
+    "diagnostics": "",
+    "run": 0,
+    "stdout": "你调用了A的默认构造函数\nptr1对象的引用次数为：1\nptr2对象的引用次数为：0\nptr2已经被析构了\n但A对象还活着，引用次数为：1\nA对象已被析构，val值为：1\n",
+    "stderr": ""
+  },
+  {
+    "variant": "adapters-repeat",
+    "compile": 0,
+    "diagnostics": "",
+    "run": 0,
+    "stdout": "2 5 1 5 \n5 1 5 2 \n5 5 2 1 \n",
+    "stderr": ""
+  },
+  {
+    "variant": "minimum-priority",
+    "compile": 0,
+    "diagnostics": "",
+    "run": 0,
+    "stdout": "2 5 1 5 \n5 1 5 2 \n1 2 5 5 \n",
+    "stderr": ""
+  },
+  {
+    "variant": "overload-return-conflict",
+    "compile": 1,
+    "diagnostics": "/tmp/ch2-variants-8d7ohtqa/overload-return-conflict.cpp:2:8: error: ambiguating new declaration of ‘double f(int)’\n    2 | double f(int x) {return x;}\n      |        ^\n/tmp/ch2-variants-8d7ohtqa/overload-return-conflict.cpp:1:5: note: old declaration ‘int f(int)’\n    1 | int f(int x) {return x;}\n      |     ^\n"
+  },
+  {
+    "variant": "invalid-iterator-debug",
+    "compile": 0,
+    "diagnostics": "",
+    "run": -6,
+    "stdout": "",
+    "stderr": "/usr/include/c++/16/debug/safe_iterator.h:392:\nIn function:\n    gnu_debug::_Safe_iterator<_Iterator, _Sequence, _Category>& \n    gnu_debug::_Safe_iterator<_Iterator, _Sequence, _Category>::operator++() \n    [with _Iterator = gnu_cxx::normal_iterator<int*, std::vector<int, \n    std::allocator<int> > >; _Sequence = std::debug::vector<int>; _Category \n    = std::forward_iterator_tag]\n\nError: attempt to increment a singular iterator.\n\nObjects involved in the operation:\n    iterator \"this\" @ 0x7ffe3e095db0 {\n      type = gnu_cxx::normal_iterator<int*, std::vector<int, std::allocator<int> > > (mutable iterator);\n      state = singular;\n      references sequence with type 'std::debug::vector<int, std::allocator<int> >' @ 0x7ffe3e095e40\n    }\ntimeout: the monitored command dumped core\n"
+  },
+  {
+    "variant": "bounded-queue-two-consumers",
+    "compile": 0,
+    "diagnostics": "",
+    "run": 0,
+    "stdout": "consume 0\nconsume 1\nconsume 2\nconsume 3\nconsume 4\nconsume 5\nconsume 6\nconsume 7\nconsume 8\nconsume 9\nconsume 10\nconsume 11\nconsume 12\nconsume 13\nconsume 14\nconsume 15\nconsume 16\nconsume 17\nconsume 18\nconsume 19\n",
+    "stderr": ""
+  },
+  {
+    "variant": "pool-all-tasks",
+    "compile": 0,
+    "diagnostics": "",
+    "run": 0,
+    "stdout": "1 1 1 1 1 1 1 1 \n",
+    "stderr": ""
+  }
+]

@@ -36,8 +36,7 @@
 #include <map>      //映射map 是一种快速查找关联容器
 \end{tcode}
 
-需要注意的是，上面所列举的数据结构类型并不是并列的，三大数据结构分别是：线性表（包括1、2、3、4、5）
-，树（包括6、7、8），图（太复杂，暂时不介绍）。
+需要注意的是，上面所列举的数据结构类型并不是并列的，这里混合了存储结构与访问规则：数组、链表关心怎样存；队列、栈关心怎样取；优先队列常用堆来实现，不能把它简单算作线性表。图结构较复杂，本章暂不展开。
 
 \subsubsection{顺序容器}
 \textbf{数组与 vector。}
@@ -46,20 +45,20 @@
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{数组.png}
+    \includegraphics[width=0.7\textwidth]{array-layout_revised.pdf}
     \caption{数组} % 图片标题
     \label{fig:数组} % 图片标签，用于引用
 \end{figure}
 
-\textbf{数组（Array）}，又称\textbf{顺序表}，它的STL容器有两种，分别是$array$和$vector$。
+\textbf{数组（Array）}，又称\textbf{顺序表}，它的STL容器有两种，分别是\texttt{array}和\texttt{vector}。
 
-$array$是固定大小的数组。$vector$是一种动态数组，可以动态增长，可以根据需要自动分配内存。两者的声明方式如下：
+\texttt{array}是固定大小的数组。\texttt{vector}是一种动态数组，可以动态增长，可以根据需要自动分配内存。两者的声明方式如下：
 \begin{tcode}
-std::array<int,5> arr;
+std::array<int,5> arr{}; //花括号使五个整数初始化为0
 std::vector<int> vec;
 \end{tcode}
 
-$array$并不常用，因为它是固定大小的，如果需要改变大小，只能重新声明一个新的数组。
+大小编译时已知且保持不变时，array 很合适；需要增删元素时，再选 vector。
 
 \begin{note}
 想详细了解 \texttt{array} 可以参考这篇 blog：
@@ -67,30 +66,36 @@ $array$并不常用，因为它是固定大小的，如果需要改变大小，�
 \url{https://blog.csdn.net/qq_38410730/article/details/102802239}
 \end{note}
 
-$vector$由于其动态性，可以根据需要自动分配内存，因此使用起来比较方便，在工程实践中也更常用。
-$vector$的实现原理是当检测到$vector$的容量不足时，会自动分配新的内存（原来的大小$\times$2），并将原有数据复制到新内存中。
-这个复制的过程非常缓慢，因此，在使用大型的资源时，$vector$的效率可能会比较低。
+\texttt{vector}由于其动态性，可以根据需要自动分配内存，因此使用起来比较方便，在工程实践中也更常用。
+\texttt{vector}的实现原理是当检测到\texttt{vector}的容量不足时，会自动分配新的内存（增长策略由标准库实现决定），并把原有元素移动或复制到新内存中。
+搬动元素有成本，知道大致数量时可以用 reserve 预留容量，避免反复搬家。reserve 改的是容量，resize 才会改变元素数量。
 
+容器名字不少，先不用全背下来。下面拿同一份小数据试几种存取方式，看输出次序和位置怎么变。项目放在 \path{examples/stl-container-demo}，文件组成如下。每个 cpp 都有自己的 main，分别编译；不要把它们拼成一个文件。
+\begin{lstlisting}[language={}]
+stl-container-demo/
+  README.md
+  adapters.cpp
+  erase.cpp
+  iterate.cpp
+  list.cpp
+  map.cpp
+  modify.cpp
+  vector.cpp
+\end{lstlisting}
+编译命令里，-std 指定 C++ 标准，-Wall/-Wextra 打开常用警告，-pthread 配置线程编译与链接；-o 指定临时输出文件。先进入项目目录，后面的源码名按当前示例替换。
+
+\Needspace{9\baselineskip}
 \begin{example}
 \texttt{vector} 的常用成员函数：
-\begin{tcode}
-#include <vector>
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/stl-container-demo/vector.cpp}
 
-std::vector<int> vec{1,2,3,4,5,6};
-vec[0];         //访问（快速）
-vec.at(0);      //访问（安全，越界会抛异常）
-vec.front();    //第一个元素
-vec.back();     //最后一个元素
-vec.empty();    //检查是否为空
-vec.size();     //返回容器大小
-vec.reserve(10);//预留空间，避免反复扩容
-vec.clear();    //清除所有元素
-vec.insert(vec.begin(),1);//插入元素
-vec.erase(vec.begin());//删除元素
-vec.push_back(1); //在最后添加
-vec.emplace_back(); //在最后原位构造，省去一次拷贝
-vec.pop_back();     //删除最后一个
-\end{tcode}
+
+从本卷目录进入 \path{examples/stl-container-demo}，保存的源码就是 \texttt{vector.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread vector.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+最终 size 为 1、capacity 不小于 10；reserve 预留空间而 clear 没有释放这份容量。
 \end{example}
 
 \textbf{链表。}
@@ -106,18 +111,29 @@ vec.pop_back();     //删除最后一个
 \end{note}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{链表1.png}
+    \includegraphics[width=0.7\textwidth]{linked-list_revised.pdf}
     \caption{链表} % 图片标题
     \label{fig:链表} % 图片标签，用于引用
 \end{figure}
 
-它的STL容器是$list$（双向链表）和$forward\_list$（单向链表）。比较简单，请自行查阅相关文档：
+它的STL容器是\texttt{list}（双向链表）和\texttt{forward\_list}（单向链表）。比较简单，请自行查阅相关文档：
 
 \url{https://zh.cppreference.com/w/cpp/container/list}
 
-\begin{exercise}
+\Needspace{10\baselineskip}
+\begin{example}
+链表与容器适配器的小实验都在本节项目里。先看 \texttt{list.cpp}：保存第二个节点的位置，再删第一个节点，看看这个位置是否仍然有效。
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/stl-container-demo/list.cpp}
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra list.cpp -o /tmp/list-demo
+/tmp/list-demo
+\end{tbash}
+先输出 2，再输出 2 3；list 的 erase 只使被删节点的位置失效，与 vector 的规则不同。
+\end{example}
+\begin{exercise}\label{ex:v1-cpp-capacity}
+
 向 \texttt{std::vector<int>} 中依次 \texttt{push\_back} 数字 $1 \sim 10$，在每次插入后打印 \texttt{size()} 和 \texttt{capacity()}，
-观察容量翻倍的时机，验证"容量不足时扩容为原来 2 倍"的说法。
+记录哪些插入触发了扩容，说明 size 与 capacity 的区别；不要把本机增长倍率当作标准保证。再对照 list.cpp，说明为什么删除第一个节点后还可以使用保存的第二个节点迭代器。
 \end{exercise}
 
 \subsubsection{队列、优先队列与堆栈}
@@ -128,19 +144,19 @@ vec.pop_back();     //删除最后一个
 （很常用）
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{队列1.png}
+    \includegraphics[width=0.7\textwidth]{queue-operations_revised.pdf}
     \caption{入队和出队操作} % 图片标题
     \label{fig:入队和出队操作} % 图片标签，用于引用
 \end{figure}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{队列2.png}
+    \includegraphics[width=0.7\textwidth]{queue-states_revised.pdf}
     \caption{队列实现方式} % 图片标题
     \label{fig:队列实现方式} % 图片标签，用于引用
 \end{figure}
 
-它的STL容器是$deque$，基于双向队列，C++还实现了3种容器适配器：
-$stack$（堆栈）、$queue$（单向队列）、$priority\_queue$（优先队列）。相较于$deque$，我们更常用$queue$
+它的STL容器是\texttt{deque}，基于双向队列，C++还实现了3种容器适配器：
+\texttt{stack}（堆栈）、\texttt{queue}（单向队列）、\texttt{priority\_queue}（优先队列）。相较于\texttt{deque}，我们更常用\texttt{queue}
 进行队列操作。
 
 \begin{note}
@@ -159,12 +175,12 @@ $stack$（堆栈）、$queue$（单向队列）、$priority\_queue$（优先队�
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{优先队列1.png}
+    \includegraphics[width=0.7\textwidth]{priority-queue_revised.pdf}
     \caption{优先队列} % 图片标题
     \label{fig:优先队列} % 图片标签，用于引用
 \end{figure}
 
-它的实现是容器适配器$priority\_queue$，
+它的实现是容器适配器\texttt{priority\_queue}，
 具体用法请自行查阅相关文档：
 
 \url{https://zh.cppreference.com/w/cpp/container/priority_queue}
@@ -176,23 +192,38 @@ $stack$（堆栈）、$queue$（单向队列）、$priority\_queue$（优先队�
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{堆栈1.png}
+    \includegraphics[width=0.7\textwidth]{stack-operations_revised.pdf}
     \caption{压栈和弹栈操作} % 图片标题
     \label{fig:压栈和弹栈操作} % 图片标签，用于引用
 \end{figure}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{堆栈2.png}
+    \includegraphics[width=0.7\textwidth]{stack-states_revised.pdf}
     \caption{堆栈实现方式} % 图片标题
     \label{fig:堆栈实现方式} % 图片标签，用于引用
 \end{figure}
 
-它的实现是容器适配器$stack$，
+它的实现是容器适配器\texttt{stack}，
 具体用法请自行查阅相关文档：
 
 \url{https://zh.cppreference.com/w/cpp/container/stack}
 
+\Needspace{10\baselineskip}
+\begin{example}
+\texttt{adapters.cpp} 给同一份数据安排三种出场顺序：queue 按先来后到，stack 从最后一个开始，\texttt{priority\_queue} 每次先拿当前最大值。
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/stl-container-demo/adapters.cpp}
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra adapters.cpp -o /tmp/adapters-demo
+/tmp/adapters-demo
+\end{tbash}
+三行依次为 1 3 2、2 3 1、3 2 1。pop 只删除，不返回值，所以先读取 front 或 top；读取前先确认不为空。
+\end{example}
 \begin{exercise}
+\label{ex:v1-cpp-adapters}
+把 adapters.cpp 的数据换为 2、5、1、5，预测并核验三种顺序；把 \texttt{priority\_queue} 的比较类型换为 std::greater<int>（需 functional），观察堆顶。指出这两种堆每个父节点与子节点的大小关系，并解释为什么堆不保证所有节点从左到右有序。
+\end{exercise}
+\begin{exercise}\label{ex:v1-cpp-parentheses}
+
 使用 \texttt{std::stack<char>} 编写括号匹配检查：读入一串只含 \texttt{(}、\texttt{)} 的字符串，
 判断括号是否配对（提示：遇左括号压栈，遇右括号弹栈，弹空或结束时栈非空则不匹配）。
 \end{exercise}
@@ -211,40 +242,40 @@ $stack$（堆栈）、$queue$（单向队列）、$priority\_queue$（优先队�
 树的种类很多，如二叉树、二叉搜索树、AVL树、红黑树、B树、B+树、B*树等。
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{树1.png}
+    \includegraphics[width=0.7\textwidth]{tree-overview_revised.pdf}
     \caption{树的逻辑图（了解即可）} % 图片标题
     \label{fig:树的逻辑图} % 图片标签，用于引用
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{树2.png}
+    \includegraphics[width=0.7\textwidth]{tree-levels_revised.pdf}
     \caption{树的示意图} % 图片标题
     \label{fig:树的示意图} % 图片标签，用于引用
 \end{figure}
 
 \textbf{堆。}
 
-堆是一种特殊的树，它是一个\textbf{完全二叉树}，即除叶节点外，其他的每个节点都有两个子节点。
+堆是一种特殊的树，它是一个\textbf{完全二叉树}，即除最后一层外各层都填满，最后一层从左到右连续排列；最后一层的父节点可能只有左孩子。
 每个节点都有一个值，并且每个节点\textbf{都大于或等于其子节点}（这是最大堆max-heap，类似的，还有最小堆min-heap）。堆的应用场景有很多，如排序、优先队列、图算法、堆排序等。
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{最大堆.png}
+    \includegraphics[width=0.7\textwidth]{heap-examples_revised.pdf}
     \caption{最大堆的示意图} % 图片标题
     \label{fig:最大堆} % 图片标签，用于引用
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{堆1.png}
+    \includegraphics[width=0.7\textwidth]{heap-order_revised.pdf}
     \caption{最大堆和最小堆} % 图片标题
     \label{fig:最大堆和最小堆} % 图片标签，用于引用
 \end{figure}
 
 上一小节介绍的优先队列正是基于堆实现的：它通过为每个任务的重要程度编号，把编号大的任务放在堆顶，
 从而快速取出最重要的任务；堆的调整算法很快，因此优先队列被广泛应用于\textbf{任务管理}中。
-优先队列的容器用法已在上一小节给出，这里不再重复。
+优先队列的容器用法已在上一小节的 adapters.cpp 中给出。它默认使用最大堆的顺序，刚才的改比较器练习同时覆盖这里的堆性质，避免再抄一遍同样的程序。
 
 \subsubsection{映射}
 
@@ -252,46 +283,28 @@ $stack$（堆栈）、$queue$（单向队列）、$priority\_queue$（优先队�
 映射有两种主流实现：基于哈希表的实现查找、插入、删除的平均时间复杂度是$O(1)$；
 基于红黑树的实现则是$O(logN)$，但能保持键有序。
 
-\textbf{红黑树（Red-Black Tree）}是一种随机查找速度比较快的\textbf{平衡二叉树}\footnote{
-    平衡二叉树，也叫AVL树，它或者是一棵空树，或者具有以下性质的二叉排序树：它的左子树和右子树的高度之差（平衡因子）的绝对值不超过1，且它的左子树和右子树都是一棵平衡二叉树}
+\textbf{红黑树（Red-Black Tree）}是一种支持有序查找的\textbf{自平衡二叉搜索树}。它与 AVL 树采用不同的平衡规则，并不是同一种树
 ，它的查找、插入、删除操作的时间复杂度都是$O(logN)$\footnote{
     O(logN)表示时间复杂度，N是问题的规模，O表示运行消耗时间的上界
 }。
 
-\textbf{哈希表（HashTable）}是一种\textbf{散列表}，它通过\textbf{哈希函数}将键映射到值。
-由于其使用计算来查找，因此，查找操作的平均时间复杂度是$O(1)$
-\footnote{常数的时间复杂度意味着不管问题的规模如何，
-对于同一个长度的HashTable，算法的运行时间都不会随着问题的规模增加而增长。}。
-但是哈希表的建立比较困难，需要消耗很多资源。
-而且存储长度有限，当元素过多时，哈希表的性能会下降。当哈希表满时，需要执行\textbf{再散列（Rehashing）}，解决\textbf{哈希冲突（Hash Collision）}问题，
-这个过程需要消耗大量时间。
+\textbf{哈希表（Hash Table）}通过哈希函数把键映射到桶，再在桶中寻找对应键值。平均查找复杂度是 $O(1)$，最坏情况仍可到 $O(N)$，不能把“算一个哈希”理解成“整个查询永远只做一步”。不同键可能落进同一桶，这叫哈希冲突（Hash Collision）。元素增加、负载因子超过阈值时，可能重散列（Rehashing）并调整桶数；这个过程有成本，还会使 \texttt{unordered\_map} 的迭代器失效。
 
 两者各有优劣，在实际应用中，需要根据具体问题选择。
-红黑树型映射的STL容器是$map$，哈希表型映射的STL容器是$unordered\_map$。
+常见以红黑树实现的有序映射容器是\texttt{map}，哈希表型映射的STL容器是\texttt{unordered\_map}。
 
+\Needspace{9\baselineskip}
 \begin{example}
 \texttt{map} 与 \texttt{unordered\_map} 的基本用法：
-\begin{tcode}
-#include <iostream>
-#include <map>
-#include <unordered_map>
-#include <string>
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/stl-container-demo/map.cpp}
 
-int main() {
-    std::map<std::string,int> score;            //红黑树实现，按键有序
-    score["alice"] = 90;                        //插入或修改
-    score.emplace("bob", 85);
-    std::cout << score["alice"] << std::endl;   //按键访问
-    std::cout << score.count("carol") << std::endl; //判断键是否存在：0
-    for(auto& [name, s] : score){               //遍历，按字母序输出
-        std::cout << name << ": " << s << std::endl;
-    }
 
-    std::unordered_map<std::string,int> fastScore; //哈希表实现，无序但更快
-    fastScore["alice"] = 90;
-    return 0;
-}
-\end{tcode}
+从本卷目录进入 \path{examples/stl-container-demo}，保存的源码就是 \texttt{map.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread map.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+先输出 90 和 0，再按键顺序输出 alice:90、bob:85；\texttt{unordered\_map} 不保证遍历顺序。
 \end{example}
 
 \begin{note}
@@ -303,41 +316,40 @@ int main() {
 只想查询不想改动时，请用 \texttt{find()} 或 \texttt{count()}。
 \end{note}
 
-\begin{exercise}
+\begin{exercise}\label{ex:v1-cpp-words}
+
 使用 \texttt{std::map<std::string,int>} 统计一段文字中每个单词出现的次数，并按键的字母序打印结果。
 \end{exercise}
 
 \subsubsection{迭代器与失效}
 
 迭代器是一种检查容器内元素并遍历元素的数据类型，通常用于对C++中各种容器内元素的访问，
-但不同的容器有不同的迭代器，初学者可以将迭代器理解为一个可以\textbf{自动向后移动的指针}。
+但不同的容器有不同的迭代器，初学者可以将迭代器理解为一个可以\textbf{按所属容器规则移动的位置标记}。
 
 常用的可迭代的容器有：
 
 \begin{enumerate}
-    \item 序列容器：$array$、$vector$、$deque$、$list$、$forward\_list$等
-    \item 关联容器：$set$、$map$、$multimap$等
+    \item 序列容器：\texttt{array}、\texttt{vector}、\texttt{deque}、\texttt{list}、\texttt{forward\_list}等
+    \item 关联容器：\texttt{set}、\texttt{map}、\texttt{multimap}等
 \end{enumerate}
 
-$queue$、$stack$、$priority\_queue$是容器适配器，必须满足一定规则，没有迭代器。
+\texttt{queue}、\texttt{stack}、\texttt{priority\_queue}是容器适配器，必须满足一定规则，没有迭代器。
 
 对于可迭代容器，一般可以使用.begin()和.end()方法获取迭代器，.begin()方法返回指向第一个元素的迭代器，
 .end()方法返回指向最\textbf{后一个元素的迭代器的下一位置}。
 
+\Needspace{9\baselineskip}
 \begin{example}
 用迭代器遍历容器：
-\begin{tcode}
-#include <iostream>
-#include <vector>
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/stl-container-demo/iterate.cpp}
 
-int main() {
-    std::vector<int> vec{1,2,3,4,5,6,7,8,9,0};
-    for(auto it = vec.begin();it != vec.end();++it){
-        std::cout << *it << std::endl;
-    }
-    return 0;
-}
-\end{tcode}
+
+从本卷目录进入 \path{examples/stl-container-demo}，保存的源码就是 \texttt{iterate.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread iterate.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+按容器顺序输出 1 到 9，最后是 0；end 是尾后位置，不能解引用。
 \end{example}
 
 也可以简写为范围for循环：
@@ -348,29 +360,18 @@ for (auto it : vec) {
 }
 \end{tcode}
 
+\Needspace{9\baselineskip}
 \begin{example}
 迭代器的常见修改操作：
-\begin{tcode}
-#include <algorithm> //sort、remove_if、iter_swap 都在这个头文件里
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/stl-container-demo/modify.cpp}
 
-std::vector<int> vec{1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
-vec.erase(vec.begin()+5);            //删除第6个元素
-vec.erase(vec.begin()+5, vec.end()); //删除第6个元素之后的所有
 
-std::vector<int> vec1{1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
-std::iter_swap(vec1.begin(), vec1.begin()+1); //交换第一个和第二个元素
-
-std::vector<int> vec2{1, 2, 3, 4, 5, 6, 7, 8, 9, 0};
-std::sort(vec2.begin(), vec2.end(), [](int a, int b){
-    return a >= b;                  //降序排序
-});
-
-//remove_if 只把不满足条件的元素挪到前面，并不真正删除
-//正确姿势是 erase-remove 惯用法：
-vec2.erase(std::remove_if(vec2.begin(), vec2.end(), [](int a){
-    return a > 5;
-}), vec2.end());                    //这才真正删除了大于5的元素
-\end{tcode}
+从本卷目录进入 \path{examples/stl-container-demo}，保存的源码就是 \texttt{modify.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread modify.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+最后输出 5 4 3 2 1 0；比较器使用严格的大于，erase 才真正缩小了容器。
 \end{example}
 
 \begin{note}
@@ -402,32 +403,30 @@ vec的大小发生了变化，这导致了迭代器失效。
 
 在实践过程中，下面的几种情况下迭代器会失效，需要\textbf{避免}出现：
 \begin{enumerate}
-    \item 当执行erase方法时，指向删除节点的迭代器失效，指向删除节点之后的迭代器也全部失效
+    \item 对 vector 执行 erase 时，指向删除节点的迭代器失效，指向删除节点之后的迭代器也全部失效
     \item 当进行push\_back()方法时，end操作返回的迭代器肯定失效
     \item 当插入（push\_back）一个元素后，capacity返回值与插入之前相比有改变，
     则说明容器整体搬了家，此时所有迭代器都会失效
     \item 当插入（push\_back）一个元素后，如果空间未重新分配，指向插入位置之前的元素的迭代器仍然有效，但指向插入位置之后元素的迭代器全部失效
 \end{enumerate}
 
-对于关联容器，删除一个键值对只会使当前这个迭代器失效，别的迭代器不会受到影响，
-这可能是由于底层使用红黑树实现的原因。但是实际应用中，仍然不应该冒这个风险，因此，
-必须\textbf{坚决避免迭代器失效问题的发生}。
+对 map，erase 只使被删除元素的迭代器和引用失效，这是接口保证，可以据此设计遍历。\texttt{unordered\_map} 的 erase 也只使被删元素失效，但 rehash 会使所有迭代器失效。不同容器规则不同，不能把上面的 vector 规则直接搬过去。
 
-在具体的应用中，我们在使用迭代器遍历时，应该注意不要对容器进行增删操作，更不应该改变容器的大小。
+在具体的应用中，我们在遍历中增删元素之前，要先核对容器规则，再更新手里的迭代器。
 正确的删除写法是利用 erase 的返回值——它会返回指向被删元素\textbf{下一个}元素的有效迭代器：
 
+\Needspace{9\baselineskip}
 \begin{example}
 遍历中安全删除元素：
-\begin{tcode}
-std::vector<int> vec={1,2,3,4,5,6,7,8,9,10};
-for(auto it = vec.begin(); it != vec.end(); ){ //注意：这里没有++it
-    if(*it % 2 == 0){
-        it = vec.erase(it); //erase返回下一个有效迭代器
-    }else{
-        ++it;
-    }
-}
-\end{tcode}
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/stl-container-demo/erase.cpp}
+
+
+从本卷目录进入 \path{examples/stl-container-demo}，保存的源码就是 \texttt{erase.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread erase.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+最后剩下 1 3 5 7 9；删除分支接住返回值后不用再自增。
 \end{example}
 
 \begin{conclusion}
@@ -441,7 +440,8 @@ for(auto it = vec.begin(); it != vec.end(); ){ //注意：这里没有++it
 \end{itemize}
 \end{conclusion}
 
-\begin{exercise}
-把"错误示范"的代码抄下来运行，观察运行结果或崩溃现象；再用"遍历中安全删除元素"的写法修复它，
+\begin{exercise}\label{ex:v1-cpp-erase}
+
+在练习副本中用 GCC 的 \texttt{-D\_GLIBCXX\_DEBUG} 编译“错误示范”，记录失效迭代器诊断（属于 libstdc++ 的调试功能）；再用"遍历中安全删除元素"的写法修复它，
 删除所有偶数并打印剩余的奇数。
 \end{exercise}

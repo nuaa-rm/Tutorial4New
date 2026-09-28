@@ -4,62 +4,51 @@
 
 \subsubsection{lambda表达式}
 
-\textbf{匿名函数（anonymous function）}是一种在程序中定义的函数，它没有名字，只能在运行时创建。C++11引入了lambda表达式，
+\textbf{匿名函数（anonymous function）}是一种在程序中定义的函数，它没有普通函数那样的名字。C++11引入了lambda表达式，
 它是一种更简洁的语法，可以用来创建匿名函数。lambda表达式的语法如下：
 
 \begin{tcode}
-完成版：[捕获列表](参数列表) mutable throw(异常列表) -> 返回值 {函数体}
+常见形式：[捕获列表](参数列表) mutable noexcept -> 返回类型 {函数体}
 简化版：[捕获列表](参数列表) {函数体}
 \end{tcode}
 
 \begin{enumerate}
     \item 捕获列表：捕获列表可以用来捕获外部作用域中的变量，使得lambda表达式可以访问这些变量。
     \item 参数列表：参数列表定义了lambda表达式的参数，可以有0到多个参数。
-    \item mutable[可选]：mutable关键字用来声明lambda表达式的捕获列表中的变量是可修改的。
-    \item throw(异常列表)[可选]：throw关键字用来指定lambda表达式可能抛出的异常。
+    \item mutable[可选]：mutable 允许修改值捕获的副本，不会自动修改原变量。
+    \item noexcept[可选]：声明调用不会抛出异常；违反承诺会终止程序。旧的 throw(类型列表) 已在 C++17 中移除，这里不用它。
     \item 返回值：返回值定义了lambda表达式的返回类型，编译器一般可以自动推导，可以省略。
     \item 函数体：函数体定义了lambda表达式的主体，可以是一条表达式或多条语句。
 \end{enumerate}
 
+刚才的函数都起了名字，接下来会遇到“把一段行为交给另一个函数”的写法。我们把排序、捕获与移动分成独立程序，一次只看一个区别。项目放在 \path{examples/lambda-move-demo}，文件组成如下。每个 cpp 都有自己的 main，分别编译；不要把它们拼成一个文件。
+\begin{lstlisting}[language={}]
+lambda-move-demo/
+  README.md
+  capture.cpp
+  forward.cpp
+  function.cpp
+  move-construction.cpp
+  move-overloads.cpp
+  mutable.cpp
+  reference.cpp
+  rvalue-reference.cpp
+  sort.cpp
+\end{lstlisting}
+编译命令里，-std 指定 C++ 标准，-Wall/-Wextra 打开常用警告，-pthread 配置线程编译与链接；-o 指定临时输出文件。先进入项目目录，后面的源码名按当前示例替换。
+
+\Needspace{9\baselineskip}
 \begin{example}
 用 lambda 作为比较器，对自定义结构体数组排序：
-\begin{tcode}
-#include<iostream>
-#include<functional>
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/lambda-move-demo/sort.cpp}
 
-template<class T>
-void sort(T* array,int n,std::function<bool(T&,T&)> compare){
-    for(int i=0;i<n;i++){
-        for(int j=i;j<n;j++){
-            if(!compare(array[i],array[j])){    //为false时，交换（按照指标降序）
-                std::swap(array[i],array[j]);
-            }
-        }
-    }
-}
 
-typedef struct Block{
-    char ch;
-    int id;
-}Block;
-
-int main(int argc, char *argv[]) {
-    auto sum = [](int a,int b){
-        return a+b;
-    };
-
-    std::cout << sum(1,2) << std::endl;
-
-    Block blocks[5]={{'a',2},{'d',4},{'q',1},{'t',7},{'s',-1}};
-    sort<Block>(blocks,5,[](Block& a1,Block& a2){//lambda表达式作为参数传递
-        return a1.id > a2.id;
-    });
-    for(int i=0;i<5;i++){
-        std::cout << "ch:" << blocks[i].ch << "  id:" << blocks[i].id << std::endl;
-    }
-    return 0;
-}
-\end{tcode}
+从本卷目录进入 \path{examples/lambda-move-demo}，保存的源码就是 \texttt{sort.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread sort.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+先输出和 3，再看到 id 依次为 7、4、2、1、-1；比较器决定了降序规则。
 \end{example}
 
 \textbf{捕获列表：}可以捕获外部作用域中的变量，包括this指针。捕获的方式包括两种，即值捕获和引用捕获。
@@ -69,41 +58,47 @@ int main(int argc, char *argv[]) {
         \toprule[1.5pt]
         捕获方式 & 拷贝方式 & 是否可以修改值 & 语法示例 \\
         \midrule[1pt]
-        值捕获 & 通常深拷贝 & 否（配合 mutable 可改副本） & [a,b]，全捕获 [=] \\
-        引用捕获 & 浅拷贝 & 是 & [\&a,\&b]，全捕获 [\&] \\
+        值捕获 & 保存副本 & 默认不能改副本 & [a,b]，全捕获 [=] \\
+        引用捕获 & 引用原对象 & 原对象可修改时可以 & [\&a,\&b]，全捕获 [\&] \\
         \bottomrule[1.5pt]
     \end{tabular}
 \end{center}
 
-如果使用值捕获，这里是否是深拷贝取决于拷贝构造函数，如果拷贝构造函数中是移动或者引用语义，
-那么遵从拷贝构造的语义。
-但是这个值会被设置成不可操作的状态，它的值被视为常量，不能被修改。
-这时，可以使用mutable关键字来声明这个值是\textbf{可修改}的。
+值捕获保存的是变量的副本，具体复制什么取决于类型。例如捕获一个指针，只复制地址，不会顺便复制它指向的对象。
+默认的调用运算符是 const，所以不能修改捕获的普通整数副本；加上 mutable 后可以改副本，原整数仍不受影响。
+引用捕获则直接使用原对象，不过你要保证调用时它还活着，不能把引用局部变量的 lambda 留到函数返回后再调用。
 
+\Needspace{9\baselineskip}
 \begin{example}
 mutable 与值捕获：
-\begin{tcode}
-int a = 0;
-auto f = [a]() mutable {
-    return ++a;//如果不写mutable，编译器会报错
-};
-\end{tcode}
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/lambda-move-demo/mutable.cpp}
+
+
+从本卷目录进入 \path{examples/lambda-move-demo}，保存的源码就是 \texttt{mutable.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread mutable.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+输出 1 0：被加一的是副本，外面的 a 仍是 0。
 \end{example}
 
 使用lambda表达式可以简化代码，提高可读性。由于捕获列表的存在，使得lambda表达式可以访问外部作用域的变量，
 相比于普通函数，lambda表达式更加灵活。
-lambda表达式的本质是一个\textbf{匿名的函数对象}（闭包），可以用 $auto$ 或 $\texttt{std::function}$ 承接；
+lambda表达式的本质是一个\textbf{匿名的函数对象}（闭包），可以用 \texttt{auto} 或 \texttt{std::function} 承接；
 没有任何捕获的 lambda 还可以隐式转换为函数指针，作为函数参数进行传递。
 
+\Needspace{9\baselineskip}
 \begin{example}
 用 \texttt{std::function} 和 \texttt{auto} 承接 lambda：
-\begin{tcode}
-//使用function承接返回值
-std::function<int(int,int)> add = [](int a,int b){return a+b;};
-int result = add(1,2);//调用lambda表达式
-//也可以使用auto关键字自动推导返回类型
-auto sub = [](int a,int b){return a-b;};
-\end{tcode}
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/lambda-move-demo/function.cpp}
+
+
+从本卷目录进入 \path{examples/lambda-move-demo}，保存的源码就是 \texttt{function.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread function.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+输出 3 1；两种变量都能保存可调用对象，auto 并不是“自动推导函数的返回值”。
 \end{example}
 
 在C++14和C++17中，lambda表达式增加了一些新的用法，使用这些新的特性可以简化代码，更加灵活地解决实际问题。
@@ -116,15 +111,14 @@ std::cout << f(1,2) << " " << f('a',2.0) << std::endl;
 \end{tcode}
 
 \textbf{this指针捕获：}
-可以使用[this]的方式捕获类中的$this$指针，$this$和$*this$都可以。
-给一个简单的例子，可以自己理解：
+可以用 [this] 保存当前对象的指针，也可以从 C++17 起用 [*this] 保存当前对象的副本。两者不一样：对象后来变了，前者会看到新值，后者仍使用捕获时的副本。先看指针捕获的片段，完整对照见后面的捕获项目：
 \begin{tcode}
 class A{
 private:
-    int a;
+    int a = 1;
 public:
     A(){
-        auto function = [this](){//[]中使用*this作用相同
+        auto function = [this](){//保存this指针，调用时对象须仍存活
             return a+1;
         };
     }
@@ -140,19 +134,32 @@ auto f = [a=1]() mutable {
 };
 \end{tcode}
 
+
+\Needspace{10\baselineskip}
+\begin{example}
+项目的 \texttt{capture.cpp} 把捕获的区别放在一起。先保存两个 lambda，再修改对象，这时候看看它们分别读到了谁：
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/lambda-move-demo/capture.cpp}
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra capture.cpp -o /tmp/capture-demo
+/tmp/capture-demo
+\end{tbash}
+前两行是 2 1、2：mutable 改副本，引用捕获改原整数。最后是 5 1：保存 this 指针的 lambda 看到修改后的对象，保存 *this 副本的 lambda 看到旧值。本例对象一直活到调用结束；指针捕获不会替它延长寿命。
+\end{example}
 \begin{exercise}
+\label{ex:v1-cpp-capture}
+在 capture.cpp 中把对象的新值改为 9，先预测两种对象捕获的输出，再运行核验；解释为什么不能把保存 this 指针的 lambda 留到对象析构后使用。
+\end{exercise}
+\begin{exercise}\label{ex:v1-cpp-sort}
+
 使用 \texttt{std::sort}（头文件 \texttt{<algorithm>}）配合 lambda 比较器，把一个 \texttt{std::vector<int>}
 先按升序排序、再按降序排序，分别打印结果。
 \end{exercise}
 
 \subsubsection{引用和移动}
 \textbf{左值与右值：}
-左值一般为我们自己定义的变量，在定义时开辟了内存，我们可以对这块内存赋值，修改内存中的值，如果有const也仅从语法层面上不允许修改，这块内存在其生命周期结束的时候销毁。
+先别急着按“等号左边、等号右边”来记，值类别描述的是\textbf{表达式}。普通变量名、解引用表达式通常是左值（lvalue），它们能指明已有对象；整数字面量和普通计算结果通常是纯右值（prvalue），例如 10 和 a+1。还有一种将亡值（xvalue），例如 \texttt{std::move(a)}：它仍指明已有对象，但允许后续操作复用其资源。纯右值与将亡值统称右值（rvalue）。
 
-右值一般为临时变量，是程序运行时产生的中间产物，它不是我们用户自己定义开辟空间的，是由编译器帮我们开辟空间，并且在用完就立即销毁。右值的生命周期一般只在当前语句，当我们要对右值进行赋值时，它已经释放空间了，此时我们再进行访问就是野访问（与野指针一样造成内存问题），所以我们不能对右值进行修改，编译器强制语法检查，遇到修改操作就报错。
-
-右值中特殊的就是字面常量，它们存储在内存的常量区，内存为只读属性，不可以修改，不可以取地址，它们的生命周期与程序的生命周期一样。
-\textbf{分辨左右值最常用方法就是判断它是否可以取地址。如果不可以就为右值。}
+对普通整数，能否取地址可以帮助判断，但不是定义：位域是左值却不能取地址，字符串字面量也是左值；右值也不一定不可修改，例如临时类对象可以调用修改自身的成员函数。别把“临时”与“常量”混在一起。临时对象通常在完整表达式结束时销毁，满足条件的引用绑定可以延长其寿命，下面就来看这个区别。
 \begin{tcode}
 int a;
 a = 10;//这个赋值过程中，a是左值，10是右值（字面常量）
@@ -160,229 +167,127 @@ int b;
 b = a;//这个赋值过程中，b是左值，a是左值（左值可以作为右值使用）
 //10 = a;//这样的语句显然是错误的，即右值不能被修改
 \end{tcode}
-显而易见的是，左值可以被隐式地转换为右值，而右值不可以被转换为左值（从这一点上看，右值类似于常量）。
+把 a 放在赋值右边，只是在这里读取它的值，a 这个表达式本身仍是左值；值类别不由它在等号哪边决定。
 
 \textbf{引用：}
-C++的引用是一种别名，用于引用已存在的变量。引用一旦初始化，就不能再引用其他变量。在创建引用时，编译器不会重新开辟内存，而是直接引用已存在的内存（这一点引用类似于指针）。
+C++的引用是一种别名，用于引用已存在的变量。引用一旦初始化，就不能再引用其他变量。引用不会为被引用对象再复制一份数据，底层是否需要保存地址由实现决定。
 引用的主要用途包括函数参数传递和返回值优化。使用引用可以避免复制，提高效率，特别是在处理大型对象时。
 引用通过 \& 符号来声明。例如:
 \begin{tcode}
 int& ref = var;
 \end{tcode}
-这段代码创建了一个名为 $ref$ 的引用，它引用了变量 $var$。引用分为两种，左值引用（\&）和右值引用（\&\&）。
-顾名思义，左值引用只能绑定一个左值，而右值引用只能绑定一个右值。
+这段代码创建了一个名为 \texttt{ref} 的引用，它引用了变量 \texttt{var}。引用分为两种，左值引用（\&）和右值引用（\&\&）。
+普通 \texttt{T\&} 绑定左值，\texttt{const T\&} 还可以绑定临时对象。普通 \texttt{T\&\&} 绑定右值；模板参数推导中的转发引用另有规则，稍后单独讲。
 
 首先说左值引用，这个十分简单，可以认为是取别名，操作左值引用就相当于操作被绑定的那个左值本身，这一点就算在函数传参过程中也是如此。
+\Needspace{9\baselineskip}
 \begin{example}
 左值引用传参：
-\begin{tcode}
-#include <iostream>
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/lambda-move-demo/reference.cpp}
 
-void func(int& A){//可以试一下把引用去掉
-    A *= 2;
-}
 
-int main(int argc, char *argv[]) {
-    int a = 10;
-    func(a);
-    std::cout << a << std::endl; //输出20
-    return 0;
-}
-\end{tcode}
+从本卷目录进入 \path{examples/lambda-move-demo}，保存的源码就是 \texttt{reference.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread reference.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+输出 20，引用参数修改了 main 中的整数。
 \end{example}
-在这里a的值被修改为20，因为传入$func()$的a是引用，所以操作的是a本身，而不是a的拷贝。
+在这里a的值被修改为20，因为传入\texttt{func()}的a是引用，所以操作的是a本身，而不是a的拷贝。
 这就是引用在传参和提高函数效率上的用处。
 
 再说右值引用，这个就有点复杂了，右值引用是为了解决左值引用不能绑定右值的限制。
+\Needspace{9\baselineskip}
 \begin{example}
 右值引用绑定右值：
-\begin{tcode}
-#include <iostream>
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/lambda-move-demo/rvalue-reference.cpp}
 
-void func(int&& a){
-    std::cout << "a的地址：" << &a << std::endl;
-    a *= 2;
-}
 
-int main(int argc, char *argv[]) {
-    int&& c = 10;
-    std::cout << "c的值为：" << c << std::endl;
-    func(std::move(c)); //c本身是左值，需要move转换为右值才能传入
-    std::cout << "经过函数之后，c的值为：" << c << std::endl;
-    std::cout << "c的地址为" << &c << std::endl;
-    return 0;
-}
-\end{tcode}
+从本卷目录进入 \path{examples/lambda-move-demo}，保存的源码就是 \texttt{rvalue-reference.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread rvalue-reference.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+c 从 10 变为 20，地址由本次运行决定；这个修改本身没有发生资源移动。
 \end{example}
 
 咦？c 明明绑定了一个右值，为什么能取到地址、还能被修改？
 
-原因在于两点：一是用右值引用绑定右值后，编译器不再在语句结束时自动回收这块临时内存，而是把它的操控权交给了引用；
+原因在于两点：一是这里直接用临时值初始化局部右值引用，临时对象的寿命被延长到了这个引用的作用域结束；
 二是\textbf{有名字的右值引用本身会被当作左值来使用}——既然有名字，就能取地址、能修改，用起来和普通左值引用没有区别。
 
-那右值引用存在的意义是什么？设想一个超级大的对象：如果只有左值引用，想把它传出函数就只能整份拷贝，效率太低。
-右值引用让我们可以直接"接管"临时对象的内存，避免这次拷贝——它不创造新数据，只转移资源的所有权。
+那右值引用存在的意义是什么？设想一个超级大的对象：传出函数时，我们希望把它的资源交给新对象，避免不必要的复制。实际返回还可能经过返回值优化，不能把所有返回都算成复制。
+右值引用让我们可以直接"接管"临时对象的内存，避免这次拷贝——具体能否转移、怎样转移，由类型的移动构造或移动赋值实现决定。仅仅绑定右值引用，并不会替你搬数据。
 这就是移动构造函数存在的理由，马上就能在下面的例子里看到。
 
+\Needspace{9\baselineskip}
 \begin{example}
-一个写全了五种函数（默认/含参/拷贝/移动/赋值）的类，请仔细体会每一行的输出：
-\begin{tcode}
-#include <iostream>
-class A {
-public:
-    A() : val("a0") { std::cout << "你调用了默认构造" << std::endl; }
+一个演示默认、含参、拷贝、移动构造与拷贝赋值的类（不代表写全了所有特殊成员函数），请仔细体会每一行的输出：
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/lambda-move-demo/move-construction.cpp}
 
-    A(std::string a) : val(a) { std::cout << "你调用了含参构造" << std::endl; }
 
-    A(A &obj) {
-        std::cout << "你调用了拷贝构造" << std::endl;
-        this->val = obj.val;
-    }
-
-    A(A &&obj) noexcept {
-        std::cout << "你调用了移动构造" << std::endl;
-        this->val = std::move(obj.val);
-    }
-
-    A &operator=(A &obj) {
-        if (this == &obj)
-            return *this;
-        std::cout << "你调用了等号赋值" << std::endl;
-        this->val = obj.val;
-
-        return *this;
-    }
-
-    ~A() { std::cout << "对象被析构，val为：" << val << std::endl; }
-
-    std::string val;
-};
-
-int main(int argc, char *argv[]) {
-    std::cout << "a1,";
-    A a1("a1");
-    std::cout << std::endl;
-
-    std::cout << "a2,";
-    A a2 = a1;
-    std::cout << "val值为：" << a2.val << std::endl;
-    std::cout << std::endl;
-
-    a2 = a1;//区别上面的
-    std::cout << std::endl;
-
-    std::cout << "a3,";
-    A a3(a2);
-    std::cout << "val值为：" << a3.val << std::endl;
-    std::cout << std::endl;
-
-    std::cout << "a4,";
-    A &a4 = a1;
-    std::cout << "val值为：" << a4.val << std::endl;
-    std::cout << std::endl;
-
-    std::cout << "a5,";
-    A &&a5 = std::move(a1);
-    std::cout << "val值为：" << a5.val << std::endl;
-    std::cout << std::endl;
-
-    a2.val = "new a2";
-    std::cout << "a1的val值为：" << a1.val << std::endl;
-    a4.val = "new a4";
-    std::cout << "a1的val值为：" << a1.val << std::endl;
-    std::cout << "a5的val值为：" << a5.val << std::endl;
-    std::cout << std::endl;
-
-    std::cout << "a6,";
-    A a6(std::move(a1));
-    std::cout << "val值为：" << a6.val << std::endl;
-    std::cout << "a1被传入移动构造后,";
-    std::cout << "val值为：" << a1.val << std::endl;
-    std::cout << std::endl;
-
-    return 0;
-}
-\end{tcode}
+从本卷目录进入 \path{examples/lambda-move-demo}，保存的源码就是 \texttt{move-construction.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread move-construction.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+对照上面的执行顺序检查构造、赋值和析构记录。
 \end{example}
-请读者仔细体会一下这段代码的输出。
+这时候回头看 a5 和 a6：a5 只是给 a1 多取了一个别名，没有调用移动构造；a6 才创建新对象并调用移动构造。移动后的字符串仍有效，但内容不保证一定为空，不要把某次输出当成固定规则。
 
 \textbf{移动语义：}
 首先了解一个std中的函数move，它的作用是将参数类型强制转换为右值，不管参数原来是左值还是右值。
+\Needspace{9\baselineskip}
 \begin{example}
 \texttt{std::move} 的效果：
-\begin{tcode}
-#include <iostream>
-using namespace std;
-void Fun(int& x) { cout << "左值引用" << endl; }
-void Fun(const int& x) { cout << "const 左值引用" << endl; }
-void Fun(int&& x) { cout << "右值引用" << endl; }
-void Fun(const int&& x) { cout << "const 右值引用" << endl; }
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/lambda-move-demo/move-overloads.cpp}
 
-int main() {
-    Fun(10);           // 右值
-    int a = 1;
-    Fun(a);            // 左值
-    Fun(std::move(a)); // 右值
-    const int b = 8;
-    Fun(b);      // const 左值
-    Fun(std::move(b)); // const 右值
-    return 0;
-}
-\end{tcode}
+
+从本卷目录进入 \path{examples/lambda-move-demo}，保存的源码就是 \texttt{move-overloads.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread move-overloads.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+调用类别依次是右值、左值、右值、const 左值、const 右值。
 \end{example}
 如代码所见，当我们使用std::move()时，编译器将左值转换为右值。
 
-再介绍一种利用模版实现完美转发的方式。在模板中，T\&\&可以接收左值和右值，要利用到forward<>()函数，它会保留引用的类型，并将其转发给另一个函数，
-否则，传参的引用都会被转换为左值引用。
+再介绍一种利用模板实现完美转发的方式。在模板中，T\&\&可以接收左值和右值，要利用到forward<>()函数，它会保留引用的类型，并将其转发给另一个函数，
+因为有名字的参数 t 在函数体中是左值表达式，直接传 t 会选择左值重载。这里的 T 必须是被推导的模板参数；并非所有 T\&\& 都是转发引用。
 
+\Needspace{9\baselineskip}
 \begin{example}
 完美转发：
-\begin{tcode}
-#include <iostream>
-using namespace std;
-void Fun(int& x) { cout << "左值引用" << endl; }
-void Fun(const int& x) { cout << "const 左值引用" << endl; }
-void Fun(int&& x) { cout << "右值引用" << endl; }
-void Fun(const int&& x) { cout << "const 右值引用" << endl; }
+\lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/lambda-move-demo/forward.cpp}
 
-template<typename T>
-void PerfectForward(T&& t)
-{
-    Fun(t);
-    //Fun(std::forward<T>(t));//使用完美转发
-}
 
-int main() {
-    PerfectForward(10);           // 右值
-    int a = 1;
-    PerfectForward(a);            // 左值
-    PerfectForward(std::move(a)); // 右值
-    const int b = 8;
-    PerfectForward(b);            // const 左值
-    PerfectForward(std::move(b)); // const 右值
-    return 0;
-}
-\end{tcode}
+从本卷目录进入 \path{examples/lambda-move-demo}，保存的源码就是 \texttt{forward.cpp}。
+\begin{tbash}
+g++ -std=c++17 -Wall -Wextra -pthread forward.cpp -o /tmp/cpp-demo
+/tmp/cpp-demo
+\end{tbash}
+先运行原版，再按紧邻的提示替换 Fun(t)，比较两次记录。只有后者会保留右值调用类别。
 \end{example}
 
 \begin{note}
-先把上面注释里不带 \texttt{forward} 的版本跑一遍，再取消注释跑一遍，对比两次输出的差异——这就是"引用塌缩成左值"和"完美转发"的区别。
+先运行 \texttt{Fun(t)}，再把这一行换成 \texttt{Fun(std::forward<T>(t))}，不要两行同时保留。对比调用记录：前者把有名字的参数作为左值传入，后者保留传入时的值类别。引用折叠是类型规则，与表达式有名字后成为左值要分开看。
 \end{note}
 
 \begin{conclusion}
 左值、右值与两种引用的对照：
 
 \begin{itemize}
-\item 左值：有名字、可取地址的变量；右值：临时变量与字面常量，不可取地址，语句结束即销毁；
-\item 左值引用 \texttt{T\&}：只能绑定左值，是变量的别名，常用于传参避免拷贝；
-\item 右值引用 \texttt{T\&\&}：只能绑定右值，接过临时对象内存的操控权，避免深拷贝；有名字的右值引用本身是左值；
+\item 值类别属于表达式：变量名通常是左值，10 是纯右值，std::move(x) 是将亡值；不要只按取地址或等号位置判断；
+\item 普通 T\& 绑定左值，const T\& 还能绑定临时对象；引用必须在对象有效期内使用；
+\item 普通 T\&\& 绑定右值，有名字的右值引用作为表达式仍是左值；绑定本身不转移资源；
 \item \texttt{std::move}：把左值强制转成右值（本身不移动任何数据），\texttt{std::forward}：在模板中保留参数的左右值属性。
 \end{itemize}
 \end{conclusion}
 
 左值引用和右值引用的概念比较容易混淆，要在实践中不断运用，才能熟练掌握。
 
-\begin{exercise}
+\begin{exercise}\label{ex:v1-cpp-reference}
+
 编写一个函数 \texttt{void swapVal(int\& a, int\& b)} 交换两个整数的值，在 \texttt{main} 中调用并验证；
-再把参数类型改为按值传递（去掉 \texttt{\&}），观察交换是否仍然生效，解释原因。
+再把参数类型改为按值传递（去掉 \texttt{\&}），观察交换是否仍然生效，解释原因。再对照 move-construction.cpp 的 a5、a6，说明哪一处真正调用了移动构造；按提示切换 forward.cpp 的调用语句，预测并核验五次重载选择。
 \end{exercise}
