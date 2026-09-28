@@ -1,13 +1,34 @@
-\section{任务定义}
+\subsubsection{任务定义}
 
 自瞄要在对抗中完成：
-\begin{center}
-检测装甲 $\rightarrow$ 跟踪与预测 $\rightarrow$ 云台到达可击打位姿 $\rightarrow$ 开火窗口
-\end{center}
+\begin{figure}[H]
+\centering
+\resizebox{0.9\textwidth}{!}{%
+\begin{tikzpicture}[box/.style={draw=cyan!60!black,rounded corners,align=center,
+  minimum height=12mm,text width=30mm,fill=cyan!5},>=stealth]
+\node[box] (detect) at (0,0) {检测与空间解算\\像素点 → 相机系位置};
+\node[box] (track) at (4.4,0) {跟踪与预测\\状态 → 预计命中位置};
+\node[box] (control) at (8.8,0) {弹道与云台控制\\目标角 → 执行反馈};
+\draw[->,thick] (detect) -- (track);
+\draw[->,thick] (track) -- (control);
+\node[align=center] at (4.4,-1.15) {各段共同核对：目标身份、坐标系、时间戳与有效标志};
+\end{tikzpicture}}
+\caption{自瞄三段链路；开火窗口还需结合状态有效性与实际执行条件判断}
+\label{fig:v3-aim-chain}
+\end{figure}
 
 成功不只看「偶尔打中」，而看：命中率、稳定性、抗小陀螺、端到端延迟、暗光/曝晒下的可复现性。
 
-\section{目标检测（概述）}
+\begin{example}[把结果指标拆开]
+假设两段各 20 次的教学回放都命中 12 次：A 在亮光下稳定，B 有多次失跟但偶然命中。为两段记录命中次数、失跟次数、延迟范围与光照。检查：同样 60\% 的命中率，并不能说明两套链路表现相同。
+\end{example}
+
+\begin{exercise}
+\label{v3-ex-aim-1}
+命中率相同的两次实验，还应记录哪三类信息才能比较稳定性？
+\end{exercise}
+
+\subsubsection{目标检测（概述）}
 
 检测输出通常是装甲板在图像中的位置（常落实到灯条\textbf{角点}），再进入空间解算。
 
@@ -16,25 +37,43 @@
     \item \textbf{深度路径}：检测网络泛化更好，需权衡输入分辨率、算力与 TensorRT 部署。
 \end{itemize}
 
-空间位置解算本质是投影的反问题，工程上归结为 \textbf{PnP}：已知装甲三维模型点与图像点，求相机（或云台）相对位姿。
+空间位置解算本质是投影的反问题，常用透视 n 点位姿估计（Perspective-n-Point，PnP）：已知装甲三维模型点、对应图像点、相机内参与畸变参数，求模型系到相机系的旋转和平移。转换到云台系还需外参，不能直接把相机系当成云台系。
 有噪声时，鲁棒性往往比「理想四点精密解」更关键。细节回卷二 OpenCV、深度学习与 BA/PnP 章。
 
-\section{目标跟踪与预测（概述）}
+\begin{example}[检查 PnP 输入清单]
+画一块矩形装甲，给四个模型角点与图像角点按同一绕行顺序编号。再列出相机内参、畸变参数和装甲实际尺寸。逐一连线检查对应关系；如果 2、3 号图像点交换，输入的物理对应已错误，不能靠滤波补救。
+\end{example}
+
+\begin{exercise}
+\label{v3-ex-aim-2}
+相机型号没变，但图像缩放了，能直接沿用原像素尺度的内参吗？说明要核对的内容。
+\end{exercise}
+
+\subsubsection{目标跟踪与预测（概述）}
 
 单帧检测会跳变、丢帧；跟踪把多帧状态连贯起来，并为开火提供\textbf{预测}。
 
 由于小陀螺等，单块装甲板运动极复杂，常见做法是对\textbf{整车}建模（位置、速度、姿态相关量），再映射到当前可见装甲。
-\textbf{Kalman / EKF} 等在链路中承担「带噪声的状态估计」：过程噪声与观测噪声定得不好，会出现滞后或抖动。细节回卷二滤波章。
+卡尔曼滤波（Kalman Filter）与扩展卡尔曼滤波（Extended Kalman Filter，EKF）等在链路中承担「带噪声的状态估计」：过程噪声与观测噪声定得不好，会出现滞后或抖动。细节回卷二滤波章。
 
 主要噪声来源（口述链路时请标出）：
 \begin{itemize}
     \item 检测：误检、漏检、角点抖动；
-    \item 解算：标定误差、运动模糊、深度接近退化；
-    \item 估计：模型不匹配、参数 $Q/R$ 不当；
+    \item 解算：标定误差、运动模糊、远距离下图像点几何约束变弱；
+    \item 估计：模型不匹配、过程噪声协方差 $Q$ 与观测噪声协方差 $R$ 设置不当；
     \item 控制：云台延迟、饱和、机械间隙。
 \end{itemize}
 
-\section{云台控制（概述）}
+\begin{example}[画一条预测时间线]
+教学数据：曝光参考时刻为 0 ms，控制开始生效为 30 ms，弹丸飞行 70 ms。画出三个时刻：0、30、100 ms。若状态仍定义在 0 ms，则要向 100 ms 预测；若状态已外推到 30 ms，则只需再外推 70 ms。检查：同一段延迟不能计算两遍。
+\end{example}
+
+\begin{exercise}
+\label{v3-ex-aim-3}
+采样到控制生效为 25 ms，飞行 60 ms。状态定义在采样时刻时，向前预测多久？若已外推到控制生效时刻呢？
+\end{exercise}
+
+\subsubsection{云台控制（概述）}
 
 有了「期望射击角」仍不够：云台有惯量、延迟与限幅，弹丸飞行期间目标还在动。
 
@@ -43,11 +82,32 @@
     \item \textbf{云台}：从指令到实际转角是动态系统；简单「看到就拉」在高速目标上易失跟。
 \end{itemize}
 
-\textbf{MPC} 一类方法在模型与约束下规划短时域控制，滚动执行，用于提升可响应范围内的跟踪质量。细节回卷二 MPC 章。
+模型预测控制（Model Predictive Control，MPC）一类方法在模型与约束下规划短时域控制，滚动执行，用于提升可响应范围内的跟踪质量。细节回卷二 MPC 章。
 
-\section{最小二乘统一视角（导读）}
+\begin{example}[检查限幅造成的滞后]
+在纸上写出目标角 20 度、当前角 0 度、教学最大角速度 100 度每秒，忽略加减速。至少需要 0.2 s 才能转到位。检查：即使检测完全正确，也无法要求云台在 10 ms 内完成这个动作。
+\end{example}
 
-BA、Kalman、MPC 都可看成：定义误差指标，在约束下优化使之最小。
+\begin{note}
+不要把相机系位置直接当云台系位置，也不要把预测时长重复叠加。PnP 输出约定见 OpenCV 官方文档：\url{https://docs.opencv.org/4.x/d5/d1f/calib3d_solvePnP.html}。
+\end{note}
+
+\begin{conclusion}
+\begin{itemize}
+  \item 检测给观测，解算给空间量，滤波给状态。
+  \item 预测需对齐未来时刻，控制受执行器约束。
+  \item 先确认坐标与时间，再讨论如何调参。
+\end{itemize}
+\end{conclusion}
+
+\begin{exercise}
+\label{v3-ex-aim-4}
+同样条件下目标角改为 15 度，最短转动时间是多少？为什么这只是理想下界？
+\end{exercise}
+
+\subsubsection{最小二乘统一视角（导读）}
+
+束调整（Bundle Adjustment，BA）、Kalman、MPC 可以用共同的“误差与代价”视角来读，但不是同一个最小二乘问题。标准线性 Kalman 的最优性有模型和噪声假设，MPC 也可以使用不同代价与约束。
 \begin{itemize}
     \item BA：重投影误差；
     \item Kalman：估计误差方差意义下的最优融合；
@@ -55,6 +115,11 @@ BA、Kalman、MPC 都可看成：定义误差指标，在约束下优化使之�
 \end{itemize}
 本卷不展开公式；学有余力进入卷二 G/F/H，调车时则优先用已验证实现。
 
-\section{自瞄验收（本卷）}
+\begin{example}[按误差对象认算法]
+把“像素投影与观测不一致”“带噪观测与状态预测不一致”“预测轨迹偏离参考且控制量过大”写在纸上，分别连到 BA、Kalman、MPC。检查：相似的优化视角不意味着三者可互相替换。
+\end{example}
 
-能在一页纸或口头画清三段链路，并在每一段标出至少一种主要噪声或故障表现。
+\begin{exercise}
+\label{v3-ex-aim-5}
+把重投影误差、状态不确定性、轨迹与控制代价分别对应到 BA、Kalman、MPC。
+\end{exercise}

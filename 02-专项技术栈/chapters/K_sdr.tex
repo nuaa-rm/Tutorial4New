@@ -1,12 +1,20 @@
-\section{软件无线电在做什么}
+\subsubsection{软件无线电在做什么}
 
 \textbf{软件定义无线电（SDR, Software Defined Radio）}把本应由模拟电路固定的混频、滤波、解调等步骤，尽可能放到数字域用软件完成。
 硬件负责射频前端与采样；主机或板载处理器对复数基带样本做同步、均衡、译码。
 
-在 RoboMaster 雷达站场景中，SDR 常用于接收赛场规定的干扰波 / 信息波等波形，解出坐标、密钥等字段，再交给地面视觉融合与裁判上报。
+在采用无线电信息链路的教学场景中，SDR 可用于接收赛场规定的干扰波 / 信息波等波形，解出坐标、密钥等字段，再交给地面视觉融合与裁判上报。
 \textbf{方向名「雷达」}指高台感知站；本章的射频硬件与导航章中的\textbf{激光雷达（LiDAR）}无关。
 
-\section{从天线到 IQ}
+\begin{example}
+假设一段基带录音已保存在文件中。改变软件滤波器可以重新处理同一段样本；但无法恢复采样前已被模拟滤波器丢掉的频段。这说明硬件带宽与软件处理能力是两个不同限制。
+\end{example}
+
+\begin{exercise}
+把“天线、ADC、相关峰搜索、CRC 校验”分到硬件采集或数字处理环节，并说明录包能复现哪些环节。
+\end{exercise}
+
+\subsubsection{从天线到 IQ}
 
 简化接收链：
 \begin{enumerate}
@@ -21,29 +29,66 @@ IQ 可看成复信号 $x = I + jQ$。采样率决定可观察的带宽量级；�
 常用教学 / 开发板基于 Analog Devices 的 AD936x 系列收发器（如 ADALM-PLUTO 一类平台）。
 主机侧常见软件栈：\textbf{libiio}（Industrial I/O）与 Python 封装 \textbf{pyadi-iio}，用于设置本振频率、采样率、增益，并读取 RX 缓冲。
 
-示意（非赛场参数）：
+\begin{example}
+硬件接收示意：需要已安装 pyadi-iio 与 libiio 的 ADALM-PLUTO，设备可达后运行。只配置接收，不启动发射。
 \begin{tpython}
 import adi
-sdr = adi.ad9361(uri="ip:192.168.2.1")
+sdr = adi.Pluto(uri="ip:192.168.2.1")
 sdr.sample_rate = 1_000_000
 sdr.rx_lo = 2_400_000_000
-iq = sdr.rx()  # complex 数组
+iq = sdr.rx()  # 复数样本数组
+print(iq.shape, iq.dtype)
 \end{tpython}
+输出应是接收缓冲长度与复数数据类型。此例只检查采样接口，不解调真实协议。
+\end{example}
 
 实战中 URI、网段、天线与功率必须按队内部署文档配置；\textbf{任何发射}都须遵守当地频谱法规与比赛规则。
 
-\section{波形、信道与「分阶段切换」}
+\begin{example}
+无硬件时运行 Python 3 合成复数基带信号。1 MHz 采样下，125 kHz 信号每周期有 8 个样本，前两个样本的相位差为 π/4。
+\begin{tpython}
+import cmath, math
+fs, f = 1_000_000, 125_000
+iq = [cmath.exp(2j*math.pi*f*n/fs) for n in range(8)]
+phase_step = cmath.phase(iq[1] * iq[0].conjugate())
+assert abs(phase_step - math.pi/4) < 1e-12
+print(round(phase_step, 6))
+\end{tpython}
+\end{example}
 
-赛场无线电往往不是单一载波一直不变，而是多种 profile（中心频、带宽、调制）分阶段出现，例如：
+\begin{exercise}
+把频率改为负 125 kHz，检查相位差的符号；解释为什么只有幅值不足以区分两者。
+\end{exercise}
+
+\subsubsection{波形、信道与「分阶段切换」}
+
+以下是教学状态机示意，不代表通用赛制：多种 profile（中心频、带宽、调制）分阶段处理，例如：
 \begin{center}
 干扰波一级 $\rightarrow$ 干扰波二级 $\rightarrow$ 信息波
 \end{center}
-同一块单通道 SDR 在任一时刻只盯一个 profile：确认上一级成功后再切换，避免「同时解两路」带来的复杂度与未验证风险。
+本章简化方案让同一块单通道 SDR 在任一时刻只处理一个 profile：确认上一级成功后再切换，避免「同时解两路」带来的复杂度与未验证风险。
 
 工程上把每套射频参数做成 \textbf{radio profile}（本振、采样率、滤波系数等），由状态机驱动切换。
 状态机输入可来自地面程序下发的阵营、干扰等级等控制字节。
 
-\section{电磁波解析：从 IQ 到有效帧}
+\begin{example}
+用离线状态机检查阶段切换。错误事件不会跳级，只有当前阶段成功才推进。
+\begin{tpython}
+state = "level1"
+transitions = {("level1","ok1"):"level2",
+               ("level2","ok2"):"information"}
+for event in ["ok2", "ok1", "timeout", "ok2"]:
+    state = transitions.get((state,event),state)
+    print(state)
+assert state == "information"
+\end{tpython}
+\end{example}
+
+\begin{exercise}
+增加 reset 事件，让任意阶段回到 level1。写出超时重试与主动复位的区别。
+\end{exercise}
+
+\subsubsection{电磁波解析：从 IQ 到有效帧}
 
 「解析」指从 IQ 流中恢复出协议定义的比特与字段。常见阶段：
 
@@ -60,15 +105,52 @@ iq = sdr.rx()  # complex 数组
 
 无硬件时，可用录制的 IQ 短样做离线回放，验证解码器回归——这是射频模块可复现测试的重要手段。
 
-\section{与地面视觉的衔接}
+\begin{example}
+这是已完成载波与符号同步的 BPSK 理想样本，每符号一个样本：负实部映射为 1，正实部为 0。结果为 1010；不包含完整射频解码器。
+\begin{tpython}
+samples = [-1+0.1j, 1-0.1j, -0.8+0j, 0.9+0.2j]
+bits = [int(x.real < 0) for x in samples]
+assert bits == [1,0,1,0]
+print(bits)
+\end{tpython}
+\end{example}
+
+\begin{exercise}
+把全部样本乘以 -1，观察比特翻转。说明为何实际接收机需要同步与前导校验。
+\end{exercise}
+
+\begin{conclusion}
+\begin{itemize}
+\item IQ 是采样数据，符号不是协议字段。
+\item 同步确定时间和相位参考，解调恢复比特，组帧找到边界。
+\item CRC 拒绝坏帧，但不能证明发送者身份；上层还要验证字段与时效。
+\end{itemize}
+\end{conclusion}
+
+\subsubsection{与地面视觉的衔接}
 
 解码成功的坐标帧（示意命令字如坐标上报）经本机 TCP 送给视觉进程后，融合层通常按\textbf{新鲜度}取舍：
-无线电新数据优先；过期则回退视觉定位或其它兜底。
+本教学策略让通过校验的新鲜无线电数据优先；过期则回退视觉定位。实际优先级还需考虑置信度与时间同步。
 非坐标信息（血量、弹药、密钥等）可另槽转发，不阻塞坐标最新值。
 
 通信层细节见本卷「多机通信方法」章；场地图定位与检测流水线见雷达方向其它专项与卷三。
 
-\section{安全与合规*}
+\begin{example}
+统一时钟下设有效期 0.2 s。当前时间 10.0 s，无线电样本 9.7 s 已过期，视觉样本 9.9 s 有效，应选择 vision。
+\begin{tpython}
+now, ttl = 10.0, 0.2
+sources = [("radio",9.7),("vision",9.9)]
+selected = next((name for name,t in sources if 0 <= now-t <= ttl),None)
+assert selected == "vision"
+print(selected)
+\end{tpython}
+\end{example}
+
+\begin{exercise}
+令两路时间戳均为 9.0 s，验证输出 None，并说明为何不能继续沿用最后一个坐标。
+\end{exercise}
+
+\subsubsection{安全与合规*}
 
 \begin{itemize}
     \item 开源或实验配置中的发射功率可能极低，\textbf{不等于}可以随意发射；须遵守法规与赛场管理。
@@ -76,12 +158,12 @@ iq = sdr.rx()  # complex 数组
     \item 射频线缆、供电与接地不良会导致锁失、误码，排障时先分「射频前端 / 解码软件 / 上层通信」。
 \end{itemize}
 
-\section{练习建议}
+\begin{example}
+离线实验目录只包含合成 IQ、采样率说明和解码结果，没有硬件发射调用。这样能验证数字处理逻辑；接入射频设备前仍要单独核对设备、频谱与场地要求。
+\end{example}
 
-\begin{enumerate}
-    \item 用框图默写：天线 $\rightarrow$ IQ $\rightarrow$ 同步 $\rightarrow$ CRC $\rightarrow$ 上层消息。
-    \item 说明为何单通道方案常用「分阶段切换」而不是同时解两路。
-    \item 在无 SDR 条件下，对一段公开 IQ 样例跑通官方/队内离线解码脚本（若有），记录有效帧数。
-\end{enumerate}
+\begin{exercise}
+为自己的离线样本写出采样率、数据类型、字节序、样本数四项元数据，解释缺少任意一项可能产生什么误读。
+\end{exercise}
 
 延伸阅读：Analog Devices Pluto / AD936x 用户文档；GNU Radio 与 libiio 入门；队内雷达开源中的无线电架构与射频安全说明。

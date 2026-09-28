@@ -1,4 +1,4 @@
-\section{为何需要「多机通信」}
+\subsubsection{为何需要「多机通信」}
 
 ROS2 话题适合同一机器人内多个节点协作。雷达站、反制机、电控裁判链路等场景里，进程往往分布在\textbf{不同机器或不同进程模型}上：
 有的用 Python 独立进程，有的只提供 TCP/串口，并不暴露完整 ROS 图。
@@ -7,7 +7,15 @@ ROS2 话题适合同一机器人内多个节点协作。雷达站、反制机、
 本章讨论三类常见手段：\textbf{本机 TCP}、\textbf{串口帧协议}、\textbf{可靠投递与故障隔离}。
 赛场完整帧定义以当年裁判系统协议与队内仓库为准；此处讲模式与工程要点。
 
-\section{通信拓扑与角色}
+\begin{example}
+已有一个只输出串口帧的电控板和一个 ROS2 视觉进程。可由桥接进程独占串口，将有效帧转换为 ROS2 消息；视觉模块只订阅消息。设备只有一个读取者，因此不必争抢字节流。
+\end{example}
+
+\begin{exercise}
+相机进程与非 ROS 的 Python 记录进程需要共享检测结果。画出两个进程和连接，并指定协议边界。
+\end{exercise}
+
+\subsubsection{通信拓扑与角色}
 
 先分清谁听、谁连、谁拥有资源：
 
@@ -24,13 +32,38 @@ ROS2 话题适合同一机器人内多个节点协作。雷达站、反制机、
 \end{tbash}
 本机环回地址避免把比赛数据接口裸露到局域网；跨机部署须另行考虑鉴权与防火墙。
 
-\section{本机 TCP：粘包、拆包与最新值优先}
+\begin{example}
+运行单进程环回实验：只监听 127.0.0.1，操作系统分配空闲端口，客户端连接后应打印 ping。
+\begin{tpython}
+import socket
+with socket.socket() as server:
+    server.bind(("127.0.0.1", 0))
+    server.listen(1)
+    with socket.create_connection(server.getsockname(), timeout=2) as client:
+        conn, addr = server.accept()
+        with conn:
+            conn.settimeout(2)
+            client.sendall(b"ping")
+            data = bytearray()
+            while len(data) < 4:
+                part = conn.recv(4 - len(data))
+                if not part: raise EOFError("连接提前关闭")
+                data.extend(part)
+            print(data.decode())
+\end{tpython}
+\end{example}
+
+\begin{exercise}
+指出 bind、listen、connect、accept 各属于哪个角色；解释为何示例循环接收。
+\end{exercise}
+
+\subsubsection{本机 TCP：粘包、拆包与最新值优先}
 
 TCP 是字节流，没有「一帧消息」边界。接收端必须自行组帧：缓存字节，按协议切出完整帧，处理粘包（多帧连在一起）与拆包（一帧分多次到达）。
 
 对雷达类高频状态，队列策略比「无限 FIFO」更重要：
 \begin{itemize}
-    \item \textbf{Latest-value}：同类命令只保留最新一条（如最新坐标、最新密钥），避免旧数据积压导致越发越旧。
+    \item \textbf{Latest-value}：同类命令只保留最新一条（如最新坐标；需要确认的密钥切换应另用可靠事件通道），避免旧数据积压导致越发越旧。
     \item \textbf{优先级}：密钥、坐标通常高于次要状态信息。
     \item \textbf{连接代次（generation）}：每次新连接递增代数；旧连接线程禁止关闭或污染新 socket，防止重连竞态。
 \end{itemize}
@@ -50,7 +83,40 @@ bytes take_highest_priority() {
 
 发送与接收均应校验连接代次；断开时清空待发槽与缓存，避免把上局数据发给新客户端。
 
-\section{串口帧：定界、CRC 与重同步}
+\begin{example}
+教学协议使用一字节长度前缀。输入同时包含半包和粘包，应恢复 AB 与 XYZ 两帧；长度上限为 16。
+\begin{tpython}
+buffer = bytearray()
+frames = []
+for chunk in [b"\x02A", b"B\x03X", b"YZ"]:
+    buffer.extend(chunk)
+    while buffer:
+        n = buffer[0]
+        if not 1 <= n <= 16: raise ValueError("非法长度")
+        if len(buffer) < n + 1: break
+        frames.append(bytes(buffer[1:n+1]))
+        del buffer[:n+1]
+assert frames == [b"AB", b"XYZ"]
+slots = {}
+for value in [10, 20, 30]: slots["position"] = value
+assert slots.pop("position") == 30
+print(frames)
+\end{tpython}
+\end{example}
+
+\begin{exercise}
+把第一帧拆成三个输入片段，确认输出不变；再说明购买指令这类必须逐次执行的事件为何不适合覆盖槽。
+\end{exercise}
+
+\begin{conclusion}
+\begin{itemize}
+\item TCP 保证有序字节流，不承诺一次 recv 对应一次 send。
+\item 状态可用最新值覆盖，事件需要确认、序号与去重策略。
+\item 重连代次隔离旧回调；清理前先核对归属，不能关闭新连接。
+\end{itemize}
+\end{conclusion}
+
+\subsubsection{串口帧：定界、CRC 与重同步}
 
 裁判系统、云台板、反制计数链路多用串口。典型二进制帧结构（示意，字段以官方协议为准）：
 \begin{center}
@@ -67,7 +133,35 @@ bytes take_highest_priority() {
 
 短控制包亦可更简，例如双字节定界 + 单字节命令（阵营、等级），同样需要粘包处理与非法字节跳过。
 
-\section{与 ROS2 的关系}
+\begin{example}
+以下是教学协议：AA 帧头、1 字节数据、2 字节大端 CRC。采用 CRC-16/XMODEM（多项式 0x1021，初值 0，无反射、无异或输出）。不是裁判帧定义。坏帧之后仍应解析出 7。
+\begin{tpython}
+import binascii
+def encode(v):
+    payload = bytes([v])
+    crc = binascii.crc_hqx(payload, 0)
+    return b"\xaa" + payload + crc.to_bytes(2, "big")
+assert binascii.crc_hqx(b"123456789",0) == 0x31c3
+bad = bytearray(encode(3)); bad[-1] ^= 1
+buf = bytearray(b"noise" + bad + encode(7))
+values = []
+while len(buf) >= 4:
+    if buf[0] != 0xaa:
+        del buf[0]; continue
+    crc = binascii.crc_hqx(bytes(buf[1:2]),0)
+    if crc != int.from_bytes(buf[2:4],"big"):
+        del buf[0]; continue
+    values.append(buf[1]); del buf[:4]
+assert values == [7]
+print(values)
+\end{tpython}
+\end{example}
+
+\begin{exercise}
+把有效帧的数据字节改坏，确认不会被输出。解释重同步为何从下一个字节重新搜索。
+\end{exercise}
+
+\subsubsection{与 ROS2 的关系}
 
 \begin{itemize}
     \item 机内模块多、已有生态：优先 ROS2 话题 / 服务 / Action，配合 \texttt{qos}。
@@ -75,23 +169,49 @@ bytes take_highest_priority() {
     \item 调试：先单进程回环（模拟器发固定帧），再上实机；用 Wireshark / 串口抓包核对时序。
 \end{itemize}
 
-ROS2 的 DDS 发现与跨机组网是另一套问题（域名、防火墙、\texttt{ROS\_DOMAIN\_ID}）；雷达站常见部署是「同机多进程 + 串口出站」，与全场 ROS 多机发现不同。
+ROS2 的 DDS 发现与跨机组网是另一套问题（域标识、防火墙、\texttt{ROS\_DOMAIN\_ID}）；雷达站常见部署是「同机多进程 + 串口出站」，与全场 ROS 多机发现不同。
 
-\section{故障隔离清单}
+\begin{example}
+外部帧为 (seq=8, yaw=250)，协议规定 yaw 的单位为毫弧度。桥接后 ROS 消息 yaw 应为 0.250 rad，并记录采集时间及坐标系；不能把整数 250 原样解释为弧度。
+\end{example}
 
-| 故障 | 期望行为 |
-|------|----------|
-| 对端未启动 | 本端继续采集/解码；发送侧只保留最新槽 |
-| TCP 断开 | 清空旧代次；Client 指数退避重连 |
-| 串口拔出 | 打开失败可重试；其它链路不阻塞 |
-| 数据过期 | 融合层丢弃陈旧源，回退次优源（见雷达融合） |
+\begin{exercise}
+外部距离字段为 1250 mm，而内部接口使用 m。写出转换结果，并指出应在哪个模块统一单位。
+\end{exercise}
 
-\section{练习建议}
+\subsubsection{故障隔离清单}
 
-\begin{enumerate}
-    \item 实现一个本机 TCP echo：Client 重连后 Server 不混用旧连接。
-    \item 解析带 SOF + 长度 + CRC 的字节流（可用假数据），覆盖粘包与半包。
-    \item 为两类消息实现 latest-value 发送槽，并验证积压时始终发出最新坐标。
-\end{enumerate}
+\begin{center}
+\begin{tabular}{lp{0.65\textwidth}}
+\toprule[1.5pt]
+故障 & 期望行为 \\
+\midrule[1pt]
+对端未启动 & 采集继续，发送侧只保留最新状态 \\
+TCP 断开 & 清理旧代次，客户端退避重连 \\
+串口拔出 & 有限频率重试，其它链路继续运行 \\
+数据过期 & 丢弃陈旧源，按约定回退次优源 \\
+\bottomrule[1.5pt]
+\end{tabular}
+\end{center}
+
+\begin{example}
+用连接代次模拟旧线程迟到：旧代次不能清空新连接的最新值。
+\begin{tpython}
+current_generation = 2
+slots = {"position": 42}
+def disconnect(generation):
+    if generation != current_generation: return
+    slots.clear()
+disconnect(1)
+assert slots == {"position": 42}
+disconnect(2)
+assert not slots
+print("代次检查通过")
+\end{tpython}
+\end{example}
+
+\begin{exercise}
+给 disconnect 加调用记录，说明代次为 1 与 2 时应分别记录什么。真实多线程程序还需要什么同步措施？
+\end{exercise}
 
 延伸阅读：队内雷达开源架构说明（TCP / 裁判帧 / 多串口隔离），以及当年 RoboMaster 裁判系统通信协议文档。

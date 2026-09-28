@@ -1,7 +1,7 @@
 
-\section{投影与相机模型}
+\subsubsection{投影与相机模型}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.8\linewidth]{相机模型.jpg}
     \caption{相机成像过程：CMOS应该位于透镜后，图中作了修改以便于理解}
@@ -65,7 +65,22 @@ CMOS传感器是一个平面，被称为\textbf{成像平面}，距离镜头光�
 
 这就是最基本的相机模型。
 
-\section{相机内参与标定}
+\begin{example}
+无畸变针孔模型中，fx=fy=800、cx=320、cy=240，相机坐标 (0.2,0.1,2) m 投影为 (400,280) pixel。
+\begin{tpython}
+fx,fy,cx,cy=800,800,320,240
+X,Y,Z=0.2,0.1,2.0
+u,v=fx*X/Z+cx,fy*Y/Z+cy
+assert (u,v)==(400,280)
+print(u,v)
+\end{tpython}
+\end{example}
+
+\begin{exercise}
+把距离 Z 加倍，计算新的像素坐标。说明像素坐标为何不是简单除以 2。
+\end{exercise}
+
+\subsubsection{相机内参与标定}
 
 实际中镜头并不是理想的，会产生畸变，所以仅直到焦距这些数据并不足以完整地描述相机成像过程中的坐标变换关系。
 引入畸变矩阵$\mathbf{D}$，使其与原来的投影矩阵$\mathbf{C}$相乘，得到内参矩阵$\mathbf{K}$：
@@ -86,7 +101,7 @@ CMOS传感器是一个平面，被称为\textbf{成像平面}，距离镜头光�
 我们不对畸变矩阵进行过多的讨论，对于畸变的产生和消除也不做过多的探讨，因为其与当前主题无关，
 主要关注于内参矩阵$\mathbf{K}$的标定。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.8\linewidth]{标定板.jpeg}
     \caption{相机标定：\textbf{一般采用张正友标定法}}
@@ -96,10 +111,18 @@ CMOS传感器是一个平面，被称为\textbf{成像平面}，距离镜头光�
 使用ROS的calibration包可以很方便地进行相机标定，标定的过程主要是通过拍摄一系列不同位置和姿态的标定板（如图\ref{fig:calibration}所示），来计算出相机的内参矩阵$\mathbf{K}$。
 标定的结果包括焦距、主点位置和畸变参数等，这些参数对于后续的图像处理和空间位置解算非常重要。
 
-\section{坐标系变换与相机外参}
+\begin{example}
+原图 640×480，fx=800、cx=320。仅进行各方向等比例 0.5 缩放且不裁剪时，fx 变为 400、cx 变为 160；标准归一化畸变系数保持不变。若裁剪左侧 20 pixel，主点还要相应平移。
+\end{example}
+
+\begin{exercise}
+原图 fy=820、cy=240，缩小到一半后再从顶部裁去 10 pixel，求新的 fy 与 cy。
+\end{exercise}
+
+\subsubsection{坐标系变换与相机外参}
 除了相机成像的过程，要想实现自瞄系统，就需要对目标进行空间位置解算，这就需要引入坐标系变换的概念。
 
-\subsection{三维空间刚体运动}
+\paragraph*{三维空间刚体运动}
 三维空间中，通过设置一组基向量$[\mathbf{e_1},\mathbf{e_2},\mathbf{e_3}]$，就可以通过线性变换表示这个空间中任意一个点的位置。
 \begin{equation}
     \mathbf{a} = [\mathbf{e_1},\mathbf{e_2},\mathbf{e_3}] [a_1, a_2, a_3]^T
@@ -206,7 +229,7 @@ $SE(n)$被称为\textbf{特殊欧式群}，描述了n维空间中的旋转和平
 SO(n)和SE(n)是李群，具有连续性和平滑性，可以通过指数映射和对数映射在李代数和李群之间进行转换。
 这些性质在~\ref{sec:李代数}中会有简要的介绍。
 
-\subsection{自瞄系统的常见坐标系}
+\paragraph*{自瞄系统的常见坐标系}
 在自瞄系统中，常见的坐标系主要有以下几种：
 
 \textbf{图像坐标系：} 图像坐标系是以图像中心为原点，x轴和y轴分别指向图像的右侧和下方的坐标系，z轴指向图像平面的法线方向.
@@ -217,16 +240,33 @@ SO(n)和SE(n)是李群，具有连续性和平滑性，可以通过指数映射�
 
 \textbf{世界坐标系：} 自瞄系统的世界系指的是，上电初始位置的云台坐标系，但是不与云台绑定，始终保持不变.
 
-\subsection{相机外参}
+\paragraph*{相机外参}
 
 指的是描述相机坐标系与世界坐标系之间关系的变换矩阵$\mathbf{T}$，它包含了旋转和平移两个部分。
 一般来说，相机的位态都可以称为相机外参，一般是相对于世界系的，但是在不同的应用场景和需求下，也不绝对。
 
-\section{PnP问题与求解}
+\begin{example}
+列向量约定下，R 为单位阵，t=(1,0,0)。物体点 (0,2,3) 变到相机系为 (1,2,3)；逆变换应恢复原点坐标。需要 NumPy。
+\begin{tpython}
+import numpy as np
+R=np.eye(3); t=np.array([1.,0.,0.])
+p=np.array([0.,2.,3.])
+q=R@p+t
+recovered=R.T@(q-t)
+assert np.allclose(q,[1,2,3]) and np.allclose(recovered,p)
+print(q,recovered)
+\end{tpython}
+\end{example}
+
+\begin{exercise}
+绕 z 轴旋转 90°，平移不变，手算并修改 R 验证结果。
+\end{exercise}
+
+\subsubsection{PnP问题与求解}
 
 PnP问题是指在已知空间中n个点的坐标以及它们在图像中的投影位置的情况下，求解相机的位姿（位置和姿态）的问题。
 
-\subsection{直接线性变换DLT}
+\paragraph*{直接线性变换DLT}
 
 直接考虑这样一个问题：已知一组3D点的位置，以及他们在某个相机中的投影位置，求解该相机的位姿。
 
@@ -302,19 +342,19 @@ $\mathbf{t}$是待求的变量，可以看到，每个特征点可以提供两�
 这种方法被称为\textbf{直接线性变换DLT}。当匹配点的数量大于6时，可以通过$SVD$等方法对超定方程求最小二乘解。
 
 在DLT求解中，我们忽略了$\mathbf{T}$的各元素关系。旋转矩阵$R \in SO(3)$，DLT求解得到的$\mathbf{T}$不一定满足这个约束，所以需要对求解结果进行后续处理，来满足旋转矩阵的约束。
-所以应该选择一个最优的矩阵对$R$进行近似。这可以由QR分解得到，或者这样计算:
+若内参已知，先恢复旋转部分并消除尺度，再做旋转投影。满秩时可用极分解，例如：
 
 \begin{equation}
     \mathbf{R} \gets (\mathbf{R}\mathbf{R}^T)^{-\frac{1}{2}}\mathbf{R}
 \end{equation}
 
-这两种方法的具体操作将在附录中提及(参考~\ref{sec:DLT的QR求解} 和~\ref{sec:DLT的极分解求解})。
+内外参分离与旋转投影的区别见后文(参考~\ref{sec:DLT的QR求解} 和~\ref{sec:DLT的极分解求解})。
 
-\subsection{P3P}
+\paragraph*{P3P}
 
 P3P是另一种求解PnP问题的方法，它仅使用三对匹配点，对数据要求较少。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.99\linewidth]{p3p.png}
     \caption{P3P求解示意图}
@@ -381,15 +421,43 @@ P3P也存在一些问题：
     \item 如果3D点或2D点存在噪声，或存在误匹配，则算法失效
 \end{itemize}
 
-\section{最小化重投影误差BA}
+\begin{example}
+用已知位姿合成八个非共面的点，再调用 solvePnP 恢复。Python 环境需 numpy 与 opencv-python。无噪声时重投影均方根误差应小于 0.001 pixel。
+\begin{tpython}
+import cv2
+import numpy as np
+obj=np.array([[x,y,z] for x in [-.1,.1] for y in [-.1,.1]
+              for z in [0.,.2]],dtype=np.float64)
+K=np.array([[800.,0,320],[0,800,240],[0,0,1]])
+dist=np.zeros(5)
+r=np.array([.1,.2,0.]); t=np.array([0.,0.,2.])
+image,_=cv2.projectPoints(obj,r,t,K,dist)
+ok,r_hat,t_hat=cv2.solvePnP(obj,image,K,dist,flags=cv2.SOLVEPNP_ITERATIVE)
+if not ok: raise RuntimeError("PnP 求解失败")
+reprojected,_=cv2.projectPoints(obj,r_hat,t_hat,K,dist)
+rms=np.sqrt(np.mean(np.sum((reprojected-image)**2,axis=2)))
+assert rms < 1e-3
+print(t_hat.ravel(),rms)
+\end{tpython}
+\end{example}
+
+\begin{exercise}
+打乱两个二维点的对应顺序，比较误差。说明只看求解函数返回成功为何不够。
+\end{exercise}
+
+\begin{note}
+solvePnP 输出把物体系点变到相机系的旋转和平移。点数要求取决于解法；共面、共线与错误对应都可能造成歧义或退化。
+\end{note}
+
+\subsubsection{最小化重投影误差BA}
 
 除了使用线性方法，还可以把PnP问题构建成一个关于重投影误差的非线性最小二乘问题。
 可以用它对PnP或ICP的结果进行优化，得到更准确的位姿估计。
 这一类把相机和三维点放在一起优化的问题，统称为\textbf{Bundle Adjustment}，简称BA。
 
-\subsection{问题引入}
+\paragraph*{问题引入}
 
-考虑\(n\)个三维空间点\(P\)和它们的投影\(p\)，我们希望基于此计算相机位姿。假设某点\(\mathbf{P}_i=[X_i,Y_i,Z_i]^T\)，其投影\(\mathbf{p}_i=[u_i,v_i]^T\)，相机位姿的李群表示为\(\mathbf{T}\)。它们的空间位置关系可以表示为：
+考虑\(n\)个三维空间点\(P\)和它们的投影\(p\)，我们希望基于此计算相机位姿。假设某点\(\mathbf{P}\_i=[X\_i,Y\_i,Z\_i]^T\)，其投影\(\mathbf{p}\_i=[u\_i,v\_i]^T\)，相机位姿的李群表示为\(\mathbf{T}\)。它们的空间位置关系可以表示为：
 \begin{equation}
     s_i\begin{bmatrix}
         u_i \\
@@ -416,11 +484,11 @@ P3P也存在一些问题：
     \mathbf{T}^* = \arg\min_{\mathbf{T}} \frac{1}{2}\sum_{i=1}^n \|s_i\mathbf{p}_i - \mathbf{K}\mathbf{T}\mathbf{P}_i\|^2_2
 \end{equation}
 
-更一般地，设\(z_{ij}\)为在位姿\(\boldsymbol{\xi}_i\)处观察路标\(\mathbf{p}_j\)产生的像素坐标，观测方程抽象为：
+更一般地，设\(z\_{ij}\)为在位姿\(\boldsymbol{\xi}\_i\)处观察路标\(\mathbf{p}\_j\)产生的像素坐标，观测方程抽象为：
 \begin{equation}
     z_{ij} = h(\boldsymbol{\xi}_i, \mathbf{p}_j)
 \end{equation}
-其中\(\boldsymbol{\xi}_i\)为相机位姿\(\mathbf{T}_i\)对应的李代数。观测误差定义为：
+其中\(\boldsymbol{\xi}\_i\)为相机位姿\(\mathbf{T}\_i\)对应的李代数。观测误差定义为：
 \begin{equation}
     \mathbf{e}_{ij} = z_{ij} - h(\boldsymbol{\xi}_i, \mathbf{p}_j)
 \end{equation}
@@ -430,9 +498,9 @@ P3P也存在一些问题：
     F(\mathbf{x}) = \frac{1}{2}\sum_{i=1}^m\sum_{j=1}^n \|\mathbf{e}_{ij}\|^2
     = \frac{1}{2}\sum_{i=1}^m\sum_{j=1}^n \|z_{ij} - h(\boldsymbol{\xi}_i, \mathbf{p}_j)\|^2
 \end{equation}
-其中\(\mathbf{x} = [\boldsymbol{\xi}_1, \dots, \boldsymbol{\xi}_m, \mathbf{p}_1, \dots, \mathbf{p}_n]^T\)为所有待优化的变量，包括所有相机位姿和三维路标点。对这个最小二乘进行求解，相当于对位姿和路标同时进行调整，这就是BA。
+其中\(\mathbf{x} = [\boldsymbol{\xi}\_1, \dots, \boldsymbol{\xi}\_m, \mathbf{p}\_1, \dots, \mathbf{p}\_n]^T\)为所有待优化的变量，包括所有相机位姿和三维路标点。对这个最小二乘进行求解，相当于对位姿和路标同时进行调整，这就是BA。
 
-\subsection{求解方法}
+\paragraph*{求解方法}
 
 观测模型\(h(\boldsymbol{\xi}, \mathbf{p})\)是非线性函数，因此需要使用非线性优化手段来求解。根据高斯—牛顿法（G-N）或列文伯格—马夸尔特法（L-M），我们从某个初始值开始，不断地寻找下降方向\(\Delta\mathbf{x}\)来逼近目标函数的最优解。
 
@@ -440,7 +508,7 @@ P3P也存在一些问题：
 \begin{equation}
     F(\mathbf{x}+\Delta\mathbf{x}) \approx \frac{1}{2}\sum_{i=1}^m\sum_{j=1}^n \|\mathbf{e}_{ij} + \mathbf{F}_{ij}\Delta\boldsymbol{\xi}_i + \mathbf{E}_{ij}\Delta\mathbf{p}_j\|^2
 \end{equation}
-其中\(\mathbf{F}_{ij}\)为代价函数对相机位姿的偏导数，\(\mathbf{E}_{ij}\)为代价函数对路标点位置的偏导数。令：
+其中\(\mathbf{F}\_{ij}\)为代价函数对相机位姿的偏导数，\(\mathbf{E}\_{ij}\)为代价函数对路标点位置的偏导数。令：
 \begin{equation}
     \mathbf{J} = [\mathbf{F} \quad \mathbf{E}], \quad \Delta\mathbf{x} = [\Delta\boldsymbol{\xi}^T, \Delta\mathbf{p}^T]^T
 \end{equation}
@@ -527,7 +595,7 @@ P3P也存在一些问题：
 
 拿到偏导数之后，后面的事情就很简单了，使用GN或者LM等优化方法就可以进行迭代求解了。为了减少迭代次数，可以使用PnP或ICP的结果作为BA的初始值。
 
-\textbf{稀疏性与舒尔消元：} \(\mathbf{H}\)矩阵具有典型的稀疏结构——相机位姿之间、路标点之间的关联分别形成分块对角结构，而位姿与路标点之间则通过观测形成关联。将\(\mathbf{H}\)按相机位姿部分\(\mathbf{H}_{cc}\)和空间点部分\(\mathbf{H}_{pp}\)进行分块：
+\textbf{稀疏性与舒尔消元：} \(\mathbf{H}\)矩阵具有典型的稀疏结构——相机位姿之间、路标点之间的关联分别形成分块对角结构，而位姿与路标点之间则通过观测形成关联。将\(\mathbf{H}\)按相机位姿部分\(\mathbf{H}\_{cc}\)和空间点部分\(\mathbf{H}\_{pp}\)进行分块：
 \begin{equation}
     \begin{bmatrix}
         \mathbf{H}_{cc} & \mathbf{H}_{cp} \\
@@ -544,20 +612,35 @@ P3P也存在一些问题：
     \end{bmatrix}
 \end{equation}
 
-利用\(\mathbf{H}_{pp}\)为对角块矩阵的性质，可通过舒尔消元（Schur消元，也称边缘化，Marginalization）将空间点部分消去：
+利用\(\mathbf{H}\_{pp}\)为对角块矩阵的性质，可通过舒尔消元（Schur消元，也称边缘化，Marginalization）将空间点部分消去：
 \begin{equation}
     (\mathbf{H}_{cc} - \mathbf{H}_{cp}\mathbf{H}_{pp}^{-1}\mathbf{H}_{pc})\Delta\mathbf{x}_c
     = \mathbf{g}_c - \mathbf{H}_{cp}\mathbf{H}_{pp}^{-1}\mathbf{g}_p
 \end{equation}
 
-先求解上式得到相机位姿的增量\(\Delta\mathbf{x}_c\)，再回代求得空间点的增量：
+先求解上式得到相机位姿的增量\(\Delta\mathbf{x}\_c\)，再回代求得空间点的增量：
 \begin{equation}
     \Delta\mathbf{x}_p = \mathbf{H}_{pp}^{-1}(\mathbf{g}_p - \mathbf{H}_{pc}\Delta\mathbf{x}_c)
 \end{equation}
 
 这种方法大大降低了增量方程的维度，使得BA即使在包含大量路标点的情况下也能高效求解。
 
-\section{BA与图优化}
+\begin{example}
+用标量平移展示最小二乘更新：预测值为 x+t，观测值比 x 大 2。残差平方和在 t=2 时为 0。该例只演示优化目标，不代表完整 BA。
+\begin{tpython}
+x=[0.,1.,2.]; observed=[2.,3.,4.]
+t=sum(y-a for a,y in zip(x,observed))/len(x)
+cost=sum((a+t-y)**2 for a,y in zip(x,observed))
+assert t==2 and cost==0
+print(t,cost)
+\end{tpython}
+\end{example}
+
+\begin{exercise}
+把最后一个观测改为 10，计算最优 t。解释异常点为何会拉动普通最小二乘解。
+\end{exercise}
+
+\subsubsection{BA与图优化}
 
 BA问题可以很自然地表示成图优化（Graph Optimization）的形式。在图优化框架中，将待优化的变量（相机位姿和三维路标点）作为图的\textbf{顶点（Vertex）}，将观测方程作为连接对应位姿顶点和路标顶点的\textbf{边（Edge）}。边的约束由重投影误差定义，优化的目标即调整所有顶点的位置，使得所有边的误差之和最小。
 
@@ -567,7 +650,7 @@ BA问题可以很自然地表示成图优化（Graph Optimization）的形式。
 
 （2）\textbf{位姿图（Pose Graph）：} 当特征点的数量远大于相机位姿数量时，路标点在经过若干次优化后通常已基本收敛。此时不再继续优化路标点的位置，而仅把它们视为对位姿节点的约束，从而得到一个只包含相机位姿顶点的图优化问题。
 
-在位姿图中，节点\(\boldsymbol{\xi}_i\)和\(\boldsymbol{\xi}_j\)之间的一条边，对应于两者之间的相对运动估计\(\Delta\boldsymbol{\xi}_{ij}\)。该相对运动的观测方程可抽象为：
+在位姿图中，节点\(\boldsymbol{\xi}\_i\)和\(\boldsymbol{\xi}\_j\)之间的一条边，对应于两者之间的相对运动估计\(\Delta\boldsymbol{\xi}\_{ij}\)。该相对运动的观测方程可抽象为：
 \begin{equation}
     \Delta\boldsymbol{\xi}_{ij} = \boldsymbol{\xi}_i^{-1} \circ \boldsymbol{\xi}_j
 \end{equation}
@@ -580,18 +663,26 @@ BA问题可以很自然地表示成图优化（Graph Optimization）的形式。
 \begin{equation}
     \mathbf{e}_{ij} = \ln\bigl(\mathbf{T}_{ij}^{-1}\,\mathbf{T}_i^{-1}\,\mathbf{T}_j\bigr)^\vee
 \end{equation}
-其中\(\mathbf{T}_{ij}\)为从\(i\)到\(j\)的观测相对位姿。整体的位姿图优化目标函数为：
+其中\(\mathbf{T}\_{ij}\)为从\(i\)到\(j\)的观测相对位姿。整体的位姿图优化目标函数为：
 \begin{equation}\label{eq:pose_graph_cost}
     \min_{\boldsymbol{\xi}} \frac{1}{2}\sum_{i,j\in\mathcal{E}} \mathbf{e}_{ij}^T\,\boldsymbol{\Sigma}_{ij}^{-1}\,\mathbf{e}_{ij}
 \end{equation}
 
-其中\(\mathcal{E}\)为所有边的集合，\(\boldsymbol{\Sigma}_{ij}\)为信息矩阵。位姿图将BA中大量的路标点“收缩”为位姿间的约束，
+其中\(\mathcal{E}\)为所有边的集合，\(\boldsymbol{\Sigma}\_{ij}\)为信息矩阵。位姿图将BA中大量的路标点“收缩”为位姿间的约束，
 其优化问题的规模远远小于完整的BA，因此在大规模建图中具有重要的实用价值。所有节点的位姿仍旧可以利用非线性优化方法（如G-N法或L-M法）进行迭代求解，
 其最终形式与增量方程(公式~\ref{eq:normal_equation})一致，只是自变量的维度被大幅压缩。
 
 工程上常采用g2o、Ceres等图优化库来实现BA和位姿图优化，这些库提供了高效的稀疏矩阵求解器和灵活的接口，支持各种类型的误差项和约束。
 
-\section{基于QR分解的旋转矩阵近似}\label{sec:DLT的QR求解}
+\begin{example}
+两个相机观测同一个三维点，可画成两个位姿顶点、一个路标顶点和两条观测边。若同时平移所有相机与路标，图像不变；优化时必须固定参考坐标系，避免规范自由度导致不唯一。
+\end{example}
+
+\begin{exercise}
+三个相机分别观测两个路标，且观测全部存在。统计顶点与边数，标出可固定的参考顶点。
+\end{exercise}
+
+\subsubsection{基于 QR 与 RQ 分解的内外参分离}\label{sec:DLT的QR求解}
 
 在针孔相机模型中，投影矩阵 $\mathbf{P}$ 可分解为内参矩阵 $\mathbf{K}$（上三角，对角元为正）与位姿矩阵的乘积：
 \[
@@ -601,17 +692,39 @@ DLT直接估计出 $\mathbf{P}$ 后，取其左边 $3\times3$ 的子矩阵
 \[
 \mathbf{M} = \mathbf{P}_{:,1:3} = \mathbf{K}\mathbf{R}.
 \]
-对 $\mathbf{M}$ 进行带符号限制的QR分解：
+这里需要的是 RQ 分解（上三角矩阵在左、正交矩阵在右），而不是直接把普通 QR 的结果交换名字：
 \[
-\mathbf{M} = \mathbf{Q}\,\mathbf{R}_{\text{up}},
+\mathbf{M}=\mathbf{K}\mathbf{R}.
 \]
-其中 $\mathbf{Q}$ 是正交矩阵，$\mathbf{R}_{\text{up}}$ 是上三角矩阵且对角元素强制为正。根据QR分解的唯一性，在符号规定下该分解将直接给出
-\[
-\mathbf{Q} = \mathbf{R},\qquad \mathbf{R}_{\text{up}} = \mathbf{K}.
-\]
-即使 $\mathbf{M}$ 受噪声影响不再严格满足旋转矩阵约束，$\mathbf{Q}$ 依然是一个正交矩阵，且对角元为正时可保证 $\det(\mathbf{Q})=+1$（若行列式为 $-1$，只需将对应列反向并相应调整 $\mathbf{R}_{\text{up}}$ 即可）。此法本质是对矩阵的列向量依次执行格拉姆-施密特正交化，利用内参矩阵的上三角结构将误差归并到 $\mathbf{K}$ 中，从而获得一个满足约束的旋转矩阵。
+普通 QR 给出 $\mathbf{M}=\mathbf{Q}\mathbf{R}_{\mathrm{up}}$，通常不能令 $\mathbf{Q}=\mathbf{R}$、$\mathbf{R}_{\mathrm{up}}=\mathbf{K}$。
+RQ 可借助行列反序后的 QR 实现，也可使用 OpenCV 的 \texttt{RQDecomp3x3}。
+处理投影矩阵的整体尺度与符号后，应核对内参对角元为正、$R^TR=I$、$\det R=1$；最后将 $K_{33}$ 归一化为 1。
+如果已知 $K$，则先计算 $K^{-1}M$，消除尺度，再按下一节的 SVD 方法投影到旋转矩阵集合。
+\begin{note}
+QR、RQ 与旋转投影解决的问题不同。交换两个矩阵的乘法顺序，通常会改变结果。
+\end{note}
 
-\section{基于极分解的旋转矩阵投影}\label{sec:DLT的极分解求解}
+\begin{example}
+使用 OpenCV 的 RQ 分解验证 M=KR，而不是直接交换 QR 的结果。已知内参对角元为正，示例不含投影矩阵的整体尺度歧义。
+\begin{tpython}
+import cv2
+import numpy as np
+K=np.array([[800.,10,320],[0,820,240],[0,0,1]])
+R,_=cv2.Rodrigues(np.array([.1,.2,.3]))
+M=K@R
+result=cv2.RQDecomp3x3(M)
+K_hat,R_hat=result[1],result[2]
+assert np.allclose(K_hat@R_hat,M)
+assert np.allclose(K_hat,K) and np.allclose(R_hat,R)
+print(np.linalg.det(R_hat))
+\end{tpython}
+\end{example}
+
+\begin{exercise}
+用 numpy.linalg.qr(M) 替换分解，检查重建顺序，并验证其正交因子是否等于原 R。
+\end{exercise}
+
+\subsubsection{基于极分解的旋转矩阵投影}\label{sec:DLT的极分解求解}
 
 任意方阵 $\tilde{\mathbf{R}}$（由DLT得到的含噪声旋转部分）可寻找一个在Frobenius范数意义下最接近的正交矩阵 $\mathbf{Q}$，即求解正交Procrustes问题：
 \[
@@ -641,13 +754,31 @@ DLT直接估计出 $\mathbf{P}$ 后，取其左边 $3\times3$ 的子矩阵
 \[
 \mathbf{Q} = \tilde{\mathbf{R}}\,(\tilde{\mathbf{R}}^T\tilde{\mathbf{R}})^{-\frac12},
 \]
-该式在工程实现中常被直接使用。为保证最终结果为旋转矩阵 ($\det=+1$)，需附加修正：
+该式要求矩阵满秩；退化或接近奇异时，优先使用 SVD。为保证最终结果为旋转矩阵 ($\det=+1$)，需附加修正：
 \[
 \mathbf{R}^* = \mathbf{U}\,\mathrm{diag}\big(1,\,1,\,\det(\mathbf{U}\mathbf{V}^T)\big)\,\mathbf{V}^T.
 \]
 当 $\det(\mathbf{U}\mathbf{V}^T)=1$ 时，$\mathbf{R}^* = \mathbf{U}\mathbf{V}^T$；当其为 $-1$ 时，将最后一列反向以消除反射。由于DLT给出的 $\tilde{\mathbf{R}}$ 通常已接近旋转矩阵，实际中常直接使用 $\mathbf{U}\mathbf{V}^T$ 或矩阵平方根求逆的公式。
 
-\section{ICP——迭代最近点}
+\begin{example}
+把带小误差的矩阵投影到 SO(3)。核对正交性与行列式，不只观察矩阵元素。
+\begin{tpython}
+import numpy as np
+M=np.array([[1.,.02,0],[-.01,.99,0],[0,.01,1.01]])
+U,s,Vt=np.linalg.svd(M)
+D=np.diag([1.,1.,np.linalg.det(U@Vt)])
+R=U@D@Vt
+assert np.allclose(R.T@R,np.eye(3))
+assert abs(np.linalg.det(R)-1)<1e-12
+print(np.linalg.norm(R-M))
+\end{tpython}
+\end{example}
+
+\begin{exercise}
+将 M 改为 diag(1,1,-1)，观察未修正的 UVᵀ 行列式，解释反射与旋转的区别。
+\end{exercise}
+
+\subsubsection{ICP——迭代最近点}
 \label{sec:ICP求解}
 
 在RGB-D SLAM或激光SLAM中，常遇到3D-3D的位姿估计问题：
@@ -655,9 +786,9 @@ DLT直接估计出 $\mathbf{P}$ 后，取其左边 $3\times3$ 的子矩阵
 这一问题可用迭代最近点（Iterative Closest Point, ICP）方法求解。
 在视觉SLAM中，特征匹配为我们提供了较好的点对对应关系，因此ICP问题简化为匹配点对间的运动估计问题。
 
-\subsection{问题引入与代价函数}
+\paragraph*{问题引入与代价函数}
 
-设有两组已匹配的三维点集 \(P=\{p_1,\dots ,p_n\}\) 和 \(P'=\{p_1',\dots ,p_n'\}\)，寻找一个欧氏变换 \(\boldsymbol{R},\boldsymbol{t}\)，使得：
+设有两组已匹配的三维点集 \(P=\{p\_1,\dots ,p\_n\}\) 和 \(P'=\{p\_1',\dots ,p\_n'\}\)，寻找一个欧氏变换 \(\boldsymbol{R},\boldsymbol{t}\)，使得：
 \[
 \forall i,\quad p_i=\boldsymbol{R}p_i'+\boldsymbol{t}.
 \]
@@ -672,7 +803,7 @@ DLT直接估计出 $\mathbf{P}$ 后，取其左边 $3\times3$ 的子矩阵
 \label{eq:icp_cost}
 \end{equation}
 
-\subsection{SVD方法求解}
+\paragraph*{SVD方法求解}
 
 ICP的SVD解法基本思想是先解耦平移与旋转，再分别求解。
 
@@ -689,7 +820,7 @@ q_i = p_i - p,\qquad q_i' = p_i' - p'.
 
 \textbf{步骤二：解耦旋转与平移。}
 
-将 \(p_i = q_i + p\) 和 \(\boldsymbol{R}p_i'+\boldsymbol{t} = \boldsymbol{R}q_i' + \boldsymbol{R}p' + \boldsymbol{t}\) 代入误差项：
+将 \(p\_i = q\_i + p\) 和 \(\boldsymbol{R}p\_i'+\boldsymbol{t} = \boldsymbol{R}q\_i' + \boldsymbol{R}p' + \boldsymbol{t}\) 代入误差项：
 \[
 \begin{aligned}
 \mathbf{e}_i &= q_i + p - \left(\boldsymbol{R}q_i' + \boldsymbol{R}p' + \boldsymbol{t}\right) \\
@@ -758,7 +889,7 @@ q_i = p_i - p,\qquad q_i' = p_i' - p'.
 \boldsymbol{t} = p - \boldsymbol{R}p'.
 \]
 
-\subsection{非线性优化方法}
+\paragraph*{非线性优化方法}
 
 也可以将ICP构建为类似于BA的非线性优化问题。以李代数\(\boldsymbol{\xi}\)表达相机位姿时，单个点的误差项为：
 \[
@@ -772,7 +903,7 @@ q_i = p_i - p,\qquad q_i' = p_i' - p'.
 
 \textbf{与SVD方法的关系：} 在匹配点已知的前提下，该最小二乘问题具有唯一的全局最小值（SVD给出的解析解）；以该解析解为初值，非线性优化能进一步收敛到同一最优值附近，通常无需大量迭代即可得到稳定结果。
 
-\subsection{ICP的变体与实际考虑}
+\paragraph*{ICP的变体与实际考虑}
 
 完整的ICP算法流程可概述如下（包含迭代找最近点的广义情况）：
 \begin{enumerate}
@@ -789,11 +920,27 @@ q_i = p_i - p,\qquad q_i' = p_i' - p'.
 \textbf{匹配与效率：} 在已知视觉特征匹配的SLAM中，最邻近搜索这一步可以跳过，直接使用特征匹配提供的对应关系。
 在无匹配信息的激光点云配准中，则常用KD树加速最近邻搜索，将复杂度从 \(O(n^2)\) 降至 \(O(n\log n)\)。
 
+\begin{example}
+先验证已知对应关系下的平移解。两组三维点只相差 (1,2,3)，质心之差应恢复平移。真正 ICP 还需迭代更新最近邻对应。
+\begin{tpython}
+import numpy as np
+P=np.array([[0.,0,0],[1,0,0],[0,1,0]])
+Q=P+np.array([1.,2,3])
+t=Q.mean(axis=0)-P.mean(axis=0)
+assert np.allclose(t,[1,2,3])
+assert np.allclose(P+t,Q)
+print(t)
+\end{tpython}
+\end{example}
 
-\section{李群与李代数简述}
+\begin{exercise}
+在 Q 中加入旋转后，检查仅估计平移的残差，说明为何还要求旋转矩阵。
+\end{exercise}
+
+\subsubsection{李群与李代数简述}
 \label{sec:李代数}
 
-\subsection{向量与反对称矩阵}
+\paragraph*{向量与反对称矩阵}
 
 考虑向量$\mathbf{a}$和$\mathbf{b}$,
 \begin{equation}
@@ -816,7 +963,7 @@ a_3 & 0 & -a_1 \\
     \mathbf{a}^\wedge = \mathbf{A}, \qquad \mathbf{A}^\vee = \mathbf{a}.
 \end{equation}
 
-\subsection{李代数的引入}
+\paragraph*{李代数的引入}
 
 考虑到任意的旋转矩阵$\mathbf{R}$，它满足：
 \begin{equation}
@@ -859,7 +1006,7 @@ $\boldsymbol{\phi}$反映了$\mathbf{R}$的导数性质，故称它在SO(3)原�
     \mathbf{R}(t) = \exp(\boldsymbol{\phi}_0^\wedge t).
 \end{equation}
 
-\subsection{李代数的定义}
+\paragraph*{李代数的定义}
 
 每个李群都有与之对应的李代数。李代数描述了李群的局部性质，准确地说，是李群在单位元附近的正切空间。李代数由集合$V$、数域$F$和二元运算$[\,\cdot\,,\,\cdot\,]$（称为李括号）组成，需满足封闭性、双线性、自反性和雅可比等价四条性质。
 
@@ -895,7 +1042,7 @@ $\mathfrak{se}(3)$是定义在$\mathbb{R}^6$上的六维向量：
 \end{bmatrix}_{4\times 4}.
 \end{equation}
 
-\subsection{指数映射与对数映射}
+\paragraph*{指数映射与对数映射}
 
 \textbf{SO(3) 上的指数映射：}
 
@@ -932,7 +1079,7 @@ $\mathfrak{se}(3)$是定义在$\mathbb{R}^6$上的六维向量：
 
 指数映射把 $\mathfrak{se}(3)$ 的六维向量映射为 SE(3) 中的 $4\times4$ 变换矩阵。其逆运算对数映射将 SE(3) 矩阵映射回 $\mathfrak{se}(3)$。
 
-\subsection{BCH 公式与近似形式}
+\paragraph*{BCH 公式与近似形式}
 
 两个李代数指数映射的乘积由 Baker-Campbell-Hausdorff（BCH）公式给出。考虑 SO(3) 上的李代数 $\phi_1$ 和 $\phi_2$，有：
 \begin{equation}
@@ -962,7 +1109,7 @@ $\mathfrak{se}(3)$是定义在$\mathbb{R}^6$上的六维向量：
     &\approx \mathbf{J}_l^{-1}(-\boldsymbol{\phi})\,\Delta\boldsymbol{\phi} + \boldsymbol{\phi} \qquad &\text{(右乘近似)}.
 \end{align}
 
-\subsection{SO(3) 上的李代数求导与扰动模型}
+\paragraph*{SO(3) 上的李代数求导与扰动模型}
 
 SLAM 中常需对旋转后的空间点求位姿导数。设点 $\mathbf{p}$ 经 $\mathbf{R}$ 旋转后为 $\mathbf{R}\mathbf{p}$，对其做关于 $\mathbf{R}$ 的李代数求导：
 \begin{equation}
@@ -994,3 +1141,34 @@ SLAM 中常需对旋转后的空间点求位姿导数。设点 $\mathbf{p}$ 经 
     \mathbf{0}^T & \mathbf{0}^T
     \end{bmatrix}_{4\times 6}.
 \end{equation}
+
+\begin{example}
+用 Rodrigues 指数映射将旋转向量 (0,0,π/2) 变为旋转矩阵。x 轴单位向量应变到 y 轴。
+\begin{tpython}
+import cv2
+import numpy as np
+phi=np.array([0.,0.,np.pi/2])
+R,_=cv2.Rodrigues(phi)
+q=R@np.array([1.,0.,0.])
+assert np.allclose(q,[0,1,0])
+print(q)
+\end{tpython}
+\end{example}
+
+\begin{exercise}
+把角度改为 -π/2，验证旋转方向；说明直接对旋转矩阵元素相加为何不保证仍是旋转。
+\end{exercise}
+
+\begin{conclusion}
+\begin{itemize}
+\item 投影前先把点变到相机坐标系，再除以深度并应用内参。
+\item PnP 估位姿，BA 优化观测残差，ICP 对齐三维点；输入不同。
+\item RQ 分离内外参，SVD 旋转投影恢复正交约束。
+\item 旋转扰动有左乘和右乘约定，推导雅可比前必须统一。
+\end{itemize}
+\end{conclusion}
+
+
+\begin{note}
+OpenCV PnP 接口、点数要求和解法约束见 \url{https://docs.opencv.org/4.x/d5/d1f/calib3d_solvePnP.html}。
+\end{note}

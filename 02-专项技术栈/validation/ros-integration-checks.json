@@ -1,0 +1,17 @@
+{
+  "python_launch_syntax": "2 passed",
+  "package_xml": "passed",
+  "yaml": "parser unavailable; checked indentation and scalar manually",
+  "tex_environments": "passed",
+  "new_exercises": 5,
+  "new_chapter_questions": 4,
+  "total_solutions": 170,
+  "ros_runtime": "not available on Windows host; target Ubuntu 22.04 + Humble validation required",
+  "xelatex": "two successful final passes",
+  "pdf_pages": 167,
+  "overfull": 0,
+  "missing_glyphs": 0,
+  "undefined_references": 0,
+  "example_files_match_tex": true,
+  "visual_review": "physical pages 15, 18, 21, 22, 25, 153; moved orphan launch example start to next page"
+}

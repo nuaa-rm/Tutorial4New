@@ -1,4 +1,4 @@
-\section{两条技术路线如何在赛场结合}
+\subsubsection{两条技术路线如何在赛场结合}
 
 视觉组常用两条互补路线：
 
@@ -7,10 +7,19 @@
     \item \textbf{机器学习 / 深度学习}：检测、分类、分割网络，上限高、适应复杂背景，但需数据、算力与部署（TensorRT 等）。
 \end{itemize}
 
-赛场上几乎从不是「二选一」：深度网络出框或类别后，仍常接几何解算、滤波与控制；传统方法也可为网络提供 ROI 或校验。
+赛场上几乎从不是「二选一」：深度网络出框或类别后，仍常接几何解算、滤波与控制；传统方法也可为网络提供感兴趣区域（Region of Interest，ROI）或校验。
 细节分别见卷二 OpenCV 与深度学习章。
 
-\section{三个方向}
+\begin{example}[把网络与几何接起来]
+在纸上写下“图像 → 网络框 → 框内灯条角点 → 位姿”。逐项标注数据：图像为像素阵列，框和角点为像素坐标，位姿为带坐标系的旋转与平移。检查结果：网络给出候选区域，几何模块还需标定与目标尺寸，检测框本身不能直接当距离。
+\end{example}
+
+\begin{exercise}
+\label{v3-ex-overview-1}
+网络已给出装甲检测框，为什么仍可能需要传统图像处理？写出一种组合方式。
+\end{exercise}
+
+\subsubsection{三个方向}
 
 组内方向固定为：
 
@@ -23,16 +32,37 @@
 「识别」「CUDA」「激光雷达传感器」等是\textbf{技能或器件}，不是与上述三者并列的方向名。
 工具链与部署支撑三个方向，但不单独算作第四方向。
 
-\section{视觉数据流（总览）}
+\begin{example}[给需求分配方向]
+将“跟随装甲转云台”“绕开障碍到补给点”“共享全场目标位置”写成三张卡，分别放到自瞄、导航、雷达栏。再把 GPU 加速贴在三个栏下方，表示可共同使用的技术。检查：需求按输出对象分类，器件不单独成为方向。
+\end{example}
+
+\begin{exercise}
+\label{v3-ex-overview-2}
+把“用激光雷达定位”“用网络识别装甲”“把敌方位置广播给队友”分别归类；哪项仅凭描述不能唯一归类？
+\end{exercise}
+
+\subsubsection{视觉数据流（总览）}
 
 典型路径可概括为：
 
-\begin{quote}
-相机 / 传感器
-$\rightarrow$ 识别与跟踪
-$\rightarrow$ 估计 / 定位 / 融合
-$\rightarrow$ 云台控制 \textbf{或} 导航速度指令 \textbf{或} 裁判广播
-\end{quote}
+\begin{figure}[H]
+\centering
+\resizebox{0.9\textwidth}{!}{%
+\begin{tikzpicture}[box/.style={draw=cyan!60!black,rounded corners,align=center,
+  minimum height=10mm,text width=27mm,fill=cyan!5},>=stealth]
+\node[box] (sensor) at (0,0) {相机 / 传感器\\图像、量测};
+\node[box] (state) at (4.2,0) {识别、估计\\定位或融合};
+\node[box] (aim) at (8.4,1.6) {自瞄\\目标角与有效性};
+\node[box] (nav) at (8.4,0) {导航\\路径与速度};
+\node[box] (radar) at (8.4,-1.6) {雷达\\场地坐标广播};
+\draw[->,thick] (sensor) -- (state);
+\draw[->,thick] (state.east) -- (aim.west);
+\draw[->,thick] (state) -- (nav);
+\draw[->,thick] (state.east) -- (radar.west);
+\end{tikzpicture}}
+\caption{按输出职责区分三个方向；中间处理模块按任务选择}
+\label{fig:v3-dataflow}
+\end{figure}
 
 \begin{itemize}
     \item 自瞄走到「云台控制」闭环；
@@ -40,22 +70,66 @@ $\rightarrow$ 云台控制 \textbf{或} 导航速度指令 \textbf{或} 裁判�
     \item 雷达走到「广播与辅助决策」，一般不直接拧本车云台。
 \end{itemize}
 
-\section{与其它组别的接口边界}
+\begin{example}[追踪一条观测]
+在纸上按顺序填写：相机产生第 42 帧，检测输出像素角点，解算输出相机系位置，跟踪输出带时间戳的状态，控制接口输出目标角。给每个箭头写上数据名称。检查：图像坐标不能直接送入要求角度的接口。
+\end{example}
+
+\begin{exercise}
+\label{v3-ex-overview-3}
+雷达检测得到像素点后，能否直接把这两个数当作地图坐标广播？指出缺少的步骤。
+\end{exercise}
+
+\subsubsection{与其它组别的接口边界}
 
 \begin{itemize}
-    \item \textbf{机械}：相机位姿、云台限位、线束与减振；视觉提出 FOV/刚度需求，不代替结构设计。
+    \item \textbf{机械}：相机位姿、云台限位、线束与减振；视觉提出视场（Field of View，FOV）与刚度需求，不代替结构设计。
     \item \textbf{电控}：云台/底盘控制接口、裁判系统串口、时间同步约定；视觉给目标角或速度建议，执行器闭环多在电控。
     \item \textbf{运营 / 战术}：雷达与导航的信息如何服务于决策；视觉保证数据时效与协议正确。
 \end{itemize}
 
 接口变更必须书面同步（消息字段、单位、坐标系、频率），禁止「口头改了但仓库未改」。
 
-\section{本卷读法}
+\begin{example}[一张最小接口卡]
+以教学接口为例，写下：发送方视觉、接收方电控；yaw 为相对当前云台的偏航增量，单位 rad，正方向由双方坐标约定决定；另含采样时刻与有效标志。让接收方按卡片解释正负号与失效处理。双方解释一致才算填写完成；具体字段名以队内协议为准。
+\end{example}
 
-| 问题 | 去哪 |
-|------|------|
-| 不会装环境 / CMake / C++ | 卷一 |
-| 不会写节点、不懂 PnP/Kalman 公式 | 卷二 |
-| 不知道链路怎么串、调车守什么规矩 | \textbf{本卷} |
+\begin{note}
+接口必须说明单位、坐标系、时间语义和失效行为。同名字段不代表双方理解一致，变更后用已知输入验证。
+\end{note}
 
-开营建议先精读第 1、2、5 章；通识过关后按方向选修卷二；中期用第 2--4 章做链路答辩。
+\begin{conclusion}
+\begin{itemize}
+  \item 按任务输出区分自瞄、雷达、导航。
+  \item 像素、空间位置、控制量各有单位和坐标约定。
+  \item 工具与器件可被多个方向复用。
+\end{itemize}
+\end{conclusion}
+
+\begin{exercise}
+\label{v3-ex-overview-4}
+同一个 yaw 字段从度改成弧度，至少要同步哪些信息？
+\end{exercise}
+
+\subsubsection{本卷读法}
+
+\begin{center}
+\begin{tabular}{@{}p{0.30\textwidth}p{0.62\textwidth}@{}}
+\toprule[1.5pt]
+问题 & 去哪 \\
+\midrule[1pt]
+不会装环境 / CMake / C++ & 卷一 \\
+不会写节点、不懂 PnP/Kalman 公式 & 卷二 \\
+不知道链路怎么串、调车守什么规矩 & \textbf{本卷} \\
+\bottomrule[1.5pt]
+\end{tabular}
+\end{center}
+开营建议先读第\ref{ch:v3-overview}、\ref{ch:v3-aim}、\ref{ch:v3-engineering}章；相机上机前读第\ref{ch:v3-camera}章。通识过关后按方向选修卷二；中期用第\ref{ch:v3-aim}--\ref{ch:v3-radar}章做链路答辩。
+
+\begin{example}[查找下一本书]
+以“会识别却不懂为什么位置跳变”为例：先用本卷标出检测、解算、估计三段，再到卷二查相机标定、几何视觉与滤波。记录章名及要找的输入输出，而非只写“去看算法”。
+\end{example}
+
+\begin{exercise}
+\label{v3-ex-overview-5}
+编译报错、PnP 输入点顺序错误、接口坐标系未约定，分别优先去哪里查？
+\end{exercise}

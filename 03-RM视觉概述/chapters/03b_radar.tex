@@ -1,20 +1,29 @@
-\section{雷达站是什么}
+\subsubsection{雷达站是什么}
 
 \textbf{雷达}方向：利用场地高处视角与算力，识别全场目标等信息，经裁判系统向队友共享。
 它与导航章中的\textbf{激光雷达（LiDAR）}不是同一概念。
 
 与自瞄的核心差异：
 \begin{itemize}
-    \item 自瞄：单车、近距、云台闭环、毫秒级跟瞄；
+    \item 自瞄：单车、近距、云台闭环、持续跟瞄；
     \item 雷达：全场、多目标、俯视几何、\textbf{广播}为主，不直接拧本车云台。
 \end{itemize}
 
-\section{典型软件架构（概述）}
+\begin{example}[区分站与传感器]
+写下“高台相机识别目标并共享坐标”和“车载 LiDAR 量测墙面帮助定位”，圈出最终输出：前者是全场目标信息，后者服务本车位姿。检查：名称含“雷达”并不能说明承担同一种比赛任务。
+\end{example}
 
-成熟开源方案常拆成多进程，例如：
+\begin{exercise}
+\label{v3-ex-radar-1}
+一套高台视觉系统没有 LiDAR，还可以属于雷达方向吗？说明依据。
+\end{exercise}
+
+\subsubsection{典型软件架构（概述）}
+
+可把软件拆成以下教学架构；其中无线电与反制均为可选示意，不代表每个赛季都有相同任务或权限：
 \begin{enumerate}
     \item \textbf{地面视觉}：工业相机 → 检测/跟踪 → 场地图坐标 → 融合 → 裁判串口；
-    \item \textbf{无线电（可选）}：SDR 接收信息波/干扰波等，解出坐标或密钥，经本机 TCP 交给视觉；
+    \item \textbf{无线电（可选）}：软件定义无线电（Software Defined Radio，SDR）按适用协议接收与解析信息，经本机 TCP 交给视觉；
     \item \textbf{反制（可选）}：长焦检测与云台，和地面端用独立串口同步次数。
 \end{enumerate}
 
@@ -22,31 +31,98 @@
 
 数据流可记为：工业相机经识别跟踪得到场地图坐标；可选的 SDR 解码坐标按新鲜度与视觉融合后，经裁判系统广播；反制计数为可选旁路。
 
-\section{俯视定位 vs 车载 PnP}
+\begin{figure}[H]
+\centering
+\resizebox{0.9\textwidth}{!}{%
+\begin{tikzpicture}[box/.style={draw=cyan!60!black,rounded corners,align=center,
+  minimum height=11mm,text width=27mm,fill=cyan!5},>=stealth]
+\node[box] (vision) at (0,1) {视觉检测与映射\\场地系坐标};
+\node[box,dashed] (radio) at (0,-1) {可选无线电解析\\有效坐标};
+\node[box] (fusion) at (4.2,0) {身份、质量与时效\\检查后选源};
+\node[box] (send) at (8.4,0) {协议封装与广播\\坐标或无效状态};
+\draw[->,thick] (vision.east) -- (fusion.west);
+\draw[->,thick,dashed] (radio.east) -- (fusion.west);
+\draw[->,thick] (fusion) -- (send);
+\end{tikzpicture}}
+\caption{雷达站坐标主路；需按序处理的事件不与最新坐标共用覆盖队列}
+\label{fig:v3-radar-chain}
+\end{figure}
 
-雷达常用\textbf{场地图关键点 / 单应或区域映射}，把图像落到赛场平面坐标；
+\begin{example}[把旁路从主路分开]
+画出视觉进程 → 融合 → 广播三框，再从可选无线电进程画箭头接到融合。用手遮住无线电框，检查主路是否仍能输入视觉坐标；再给非坐标事件单画一条有序处理支路。检查：可选模块故障不应在设计上阻塞仍有效的坐标主路。
+\end{example}
+
+\begin{exercise}
+\label{v3-ex-radar-2}
+为何坐标可以只保留最新值，反制计数或任务事件却不能随意覆盖？
+\end{exercise}
+
+\subsubsection{俯视定位 vs 车载 PnP}
+
+雷达可用场地图关键点与单应变换（Homography）或区域映射，把适用平面上的图像点映射到场地坐标；有高度差时需分区域、补充高度信息或使用三维方法验证，不能把任意车顶像素都当作地面点。
 自瞄常用装甲板模型 + PnP 求相对位姿。二者标定物、误差来源与调参方式都不同，不要混用术语。
 
 检测上常见级联：车辆检测 → 装甲/灯条 → 数字分类；再接多目标跟踪。细节回卷二 B/C。
 
-\section{融合与时效}
+\begin{example}[验证平面假设]
+在教学场地图上标出四个任意三点不共线的地面角点，声明它们是图像与场地的对应点。再选一个未参与标定的地面点检查映射误差。把验证点移到高台上后，标注“高度不在同一平面，原映射不保证有效”。检查：映射适用范围必须写在配置旁。
+\end{example}
 
-若存在无线电坐标：通常\textbf{新鲜无线电优先}，过期则回退视觉或其它兜底。
-非坐标信息（血量、密钥等）可并行转发，但不要阻塞最新坐标发送（latest-value 思想）。
+\begin{exercise}
+\label{v3-ex-radar-3}
+直接把车顶检测框中心用地面单应映射到场地，为什么可能产生偏差？
+\end{exercise}
+
+\subsubsection{融合与时效}
+
+若存在无线电坐标，可采用一种教学策略：先检查身份、坐标系、质量与时效，再让\textbf{合格且新鲜的无线电优先}；否则回退有效视觉或显式标记无效。这不是所有系统通用的优先级。
+非坐标事件可走独立处理通道，避免阻塞坐标。坐标可采用只保留最新值（latest-value）的方式；计数增量、事件或需确认的消息不能直接套用覆盖策略。
 
 对队友有用的是「对的坐标系 + 可接受延迟」；错系、堵包、过期坐标比「偶尔缺一帧」更具破坏性。
 
-\section{技能映射}
+\begin{example}[按有效性与时效选源]
+教学策略：同一目标、同一坐标系且质量合格时，无线电年龄不超过 100 ms 则优先；否则选择年龄不超过 150 ms 的视觉；二者均不合格就输出无效。当前时刻 1000 ms，无线电采样于 850 ms，视觉采样于 950 ms，年龄分别为 150、50 ms，应选视觉。这些阈值仅用于演练。
+\end{example}
 
-| 能力 | 卷二 |
-|------|------|
-| 节点与工程 | ROS2 |
-| TCP/串口/裁判帧 | 多机通信 |
-| SDR/IQ/状态机 | SDR 与电磁波解析 |
-| 检测与跟踪 | OpenCV、深度学习 |
-| 相机与标定 | 相机成像 |
-| 部署加速 | CUDA |
+\begin{note}
+本章不提供当年比赛的功能授权、频率或协议常量。无线电、反制与裁判广播须由负责人核对参赛赛季官方规则与协议后采用。平面映射前提见 OpenCV 官方说明：\url{https://docs.opencv.org/4.x/d9/dab/tutorial_homography.html}。
+\end{note}
 
-\section{验收（本卷）}
+\begin{conclusion}
+\begin{itemize}
+  \item 先确认同一目标与坐标，再检查质量与年龄，最后选源。
+  \item 接收时刻不等于采样时刻。
+  \item 两源均无效时明确报告失效。
+\end{itemize}
+\end{conclusion}
 
-口述：雷达站输入输出各是什么；与自瞄、导航的边界各一句；为何要强调「激光雷达 ≠ 雷达方向」。
+\begin{exercise}
+\label{v3-ex-radar-4}
+沿用示例策略，当前 1000 ms，无线电采样 930 ms 但校验失败，视觉采样 960 ms 且有效，选谁？若视觉也过期呢？
+\end{exercise}
+
+\subsubsection{技能映射}
+
+\begin{center}
+\begin{tabular}{@{}p{0.30\textwidth}p{0.62\textwidth}@{}}
+\toprule[1.5pt]
+能力 & 卷二 \\
+\midrule[1pt]
+节点与工程 & ROS2 \\
+TCP/串口/裁判帧 & 多机通信 \\
+SDR/IQ/状态机 & SDR 与电磁波解析 \\
+检测与跟踪 & OpenCV、深度学习 \\
+相机与标定 & 相机成像 \\
+部署加速 & CUDA \\
+\bottomrule[1.5pt]
+\end{tabular}
+\end{center}
+
+\begin{example}[沿故障查专项]
+教学问题是“识别框稳定，队友收到的位置总是很旧”。先沿发送队列、融合取值、接收消费画检查点，再到卷二多机通信查最新值与故障隔离。检查：此时优先补通信知识，比立即换检测模型更直接。
+\end{example}
+
+\begin{exercise}
+\label{v3-ex-radar-5}
+若画面上目标清楚但数字类别经常错，应先查卷二哪些章？若坐标正确但串口帧被拒收呢？
+\end{exercise}

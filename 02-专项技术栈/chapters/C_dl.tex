@@ -1,4 +1,4 @@
-\section{了解神经网络}
+\subsubsection{了解神经网络}
 如今神经网络在各个领域都有涉及, 在计算机视觉领域更是有极大的优越性。从机器学习再到深度学习,几乎已经形成一个完整的
 技术体系并且仍然在高速发展。
 通常来说，神经网络一般有以下三个作用：
@@ -13,52 +13,80 @@
 的数据在经过这群参数组成的\textbf{“函数"}映射后，得到一个可信度高的答案。
 那么在拟合这群参数后，如果没有处理好，会出现\textbf{欠拟合}和\textbf{过拟合}的问题
 
-\begin{figure}[h]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{拟合.png}
     \caption{欠拟合与过拟合}
     \label{fig:拟合}
 \end{figure}
 
-如图所示，欠拟合就是参数调整的太差了，根本没有预测的能力，得到的答案和实际上差距非常大，这时候我们就应该考虑增加训练数据或者
-是增强数据的特征。
-
-另一个过拟合，就是数据的特征过于明显或者是训练的过强导致网络没有足够的泛化能力，那么当传入的数据不是训练的数据的时候，将无法正确
-预测，这时候就应该减少训练的次数，减少数据集的数量或者是降低数据的特征，提高泛化能力，
+欠拟合表现为训练集和验证集误差都较大，可检查模型容量、输入特征与训练是否充分。
+过拟合表现为训练误差继续下降而验证误差上升。可尝试增加有代表性的训练数据、数据增强、正则化或早停；不要把减少训练数据当作通用解法。
+验证集用于选模型和调参，测试集留作最终评价，不能反复用测试成绩决定训练轮数。
 
 通过简单的了解，我们知道神经网络的作用以及神经网络是如何训练出来的，现在我们将通过自己动手搭建一个神经网络，在学习搭建的过程中对
 更深入的内容进行讲述。
-\section{动手搭建神经网络}
+
+\begin{example}
+用均方误差区分训练表现与泛化表现。模型把训练样本记住，但验证误差为 1。
+\begin{tpython}
+def mse(pred, target):
+    return sum((a-b)**2 for a,b in zip(pred,target))/len(target)
+train_error = mse([1,2,3],[1,2,3])
+valid_error = mse([2,3,4],[1,2,3])
+assert (train_error,valid_error) == (0,1)
+print(train_error,valid_error)
+\end{tpython}
+\end{example}
+
+\begin{exercise}
+另构造训练与验证误差都为 1 的情况，说明仅凭训练误差为何不能判断泛化。
+\end{exercise}
+
+\subsubsection{动手搭建神经网络}
 如果我们的网络只有简单的功能需求，那么用当今主流的pytorch就可以快速构建起一个神经网络，pytorch中封装好了很多搭建网络所需要的功能
 我们只需要简单理解就能够直接调用使用。如果我们对准确性，效率等有更高的要求，可以使用已有的框架比如yolo，只需要准备好数据集和标注，按照需求
 简单调整一下框架的参数，就可以训练出一个高性能的网络。
 
 我们将从安装开始，一步步利用\textbf{pytorch}搭建出一个简单的识别图像中数字的网络。
-\subsection{Python 环境与 PyTorch 安装}
+\paragraph*{Python 环境与 PyTorch 安装}
 
 Conda 虚拟环境的创建与切换已在卷一介绍。本节在已激活的 conda 环境中安装 PyTorch。
 卷一未选修 Conda 的同学，请先完成 \texttt{01-基础通识} 中 Conda 小节，或自行安装 Miniconda。
 在激活了pytorch环境后，我们就可以安装pytorch了。
-在命令行输入
+安装命令的通用形式为：
+\[
+python\enspace {-}m\enspace pip\enspace install\enspace [OPTIONS]\enspace PACKAGE
+\]
+\begin{center}
+\begin{tabular}{lp{0.58\textwidth}}
+\toprule[1.5pt]
+参数 & 作用 \\
+\midrule[1pt]
+\texttt{-m pip} & 使用当前 Python 解释器对应的包管理器 \\
+\texttt{--index-url URL} & 指定软件包索引 \\
+\texttt{PACKAGE==VERSION} & 固定包版本，便于复现 \\
+\bottomrule[1.5pt]
+\end{tabular}
+\end{center}
+其余选项见 $python\enspace {-}m\enspace pip\enspace install\enspace {-}{-}help$。
+\begin{example}
+先用 CPU 版本完成本章，环境已激活后执行：
 \begin{tbash}
-    pip install pytorch torchvision
+python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+python -c "import torch; print(torch.__version__); print(torch.ones(2, 3).shape)"
 \end{tbash}
-这样我们就安装好了pytorch，同时还安装了torchvision这个包是pytorch的辅助包，用于处理图像。
-\textit{如果你出现了诸如网络问题导致无法安装，请改变虚拟环境的源为国内源，具体操作请自行搜索}
+最后一行应包含 torch.Size([2, 3])。包名是 torch。
+\end{example}
+\begin{note}
+GPU 安装组合应从官方选择器取得：\url{https://pytorch.org/get-started/locally/}。
+不要自行拼接 CUDA 下载索引；先记录驱动版本，再选择兼容的 PyTorch 软件包。
+\end{note}
+\begin{exercise}
+记录当前 Python 路径、torch 版本和张量形状。说明为何激活环境后仍建议使用 python -m pip。
+\end{exercise}
 
-这样我们就安装好了pytorch-CPU,如果你有NVIDIA的显卡，可以考虑安装pytorch-GPU，网络的训练速度和推理速度会更快。
-可以在命令行输入
-\begin{tbash}
-    nvidia-smi
-\end{tbash}
-查看自己的显卡型号，然后在官网上查看对应的CUDA版本，再安装对应的pytorch-GPU版本。
-这里给上CUDA的官网下载地址:\url{https://developer.nvidia.com/cuda-toolkit-archive}
-刚刚的pip install命令可以改为
-\begin{tbash}
-    pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu{你的CUDA版本}
-\end{tbash}
-
-\subsection{搭建神经网络}
+\paragraph*{搭建神经网络}
 接下来用pytorch搭建一个简单的LeNet网络，识别MNIST数据集中的手写数字
 
 选择一个你喜欢的IDE，比如VSCode, Pycharm, Clion等，创建一个python文件，选择解释器为刚刚创建的虚拟环境。
@@ -71,7 +99,6 @@ Conda 虚拟环境的创建与切换已在卷一介绍。本节在已激活的 c
     import torch.optim as optim
     import torchvision
     import torchvision.transforms as transforms
-    import matplotlib.pyplot as plt
 \end{tpython}
 \begin{enumerate}
     \item torch: pytorch的核心包，包含pytorch的核心数据结构，以及所有的操作
@@ -79,12 +106,11 @@ Conda 虚拟环境的创建与切换已在卷一介绍。本节在已激活的 c
     \item torch.optim: pytorch的优化器包，包含了所有的优化器。
     \item torchvision: pytorch的图像处理包，包含了图像处理的所有操作。
     \item torchvision.transforms: pytorch的图像变换包，包含了所有的图像变换操作。
-    \item matplotlib.pyplot: 画图的包，我们用来画出训练过程中的一些曲线。
 \end{enumerate}
 
-接下来准备MINST数据集
+接下来准备MNIST数据集
 
-MINST数据集是一个包含了6万张训练图片和1万张测试图片的数据集，每张图片都是各式各样的手写的数组，每张图片上都有一个0-9的数字标签。
+MNIST数据集是一个包含了6万张训练图片和1万张测试图片的数据集，每张图片都是各式各样的手写的数字，每张图片上都有一个0-9的数字标签。
 我们可以通过torchvision包中的datasets来下载这个数据集。
 \begin{tpython}
     train_dataset = torchvision.datasets.MNIST(root='./data', train=True, transform=transforms.ToTensor(), download=True)
@@ -111,7 +137,9 @@ MINST数据集是一个包含了6万张训练图片和1万张测试图片的数�
 
 然后通过DataLoader加载数据集，使我们可以迭代访问数据集
 \begin{tpython}
-    train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=64, shuffle=True)
+    train_part, valid_part = torch.utils.data.random_split(train_dataset, [55000, 5000])
+    train_loader = torch.utils.data.DataLoader(dataset=train_part, batch_size=64, shuffle=True)
+    valid_loader = torch.utils.data.DataLoader(dataset=valid_part, batch_size=64, shuffle=False)
     test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=64, shuffle=False)
 \end{tpython}
 这里的参数含义分别是：
@@ -157,9 +185,9 @@ MINST数据集是一个包含了6万张训练图片和1万张测试图片的数�
 \end{enumerate}
 一般输出图像的形状为
 \begin{equation}
-    (n_{h}-k_{h}+p{h}+1) \times (n_{w}-k_{w}+p_{w}+1)
+    \left\lfloor\frac{n_h+2p_h-k_h}{s_h}+1\right\rfloor\times\left\lfloor\frac{n_w+2p_w-k_w}{s_w}+1\right\rfloor
 \end{equation}
-其中$n_{h},n_{w}$是输入图像的高和宽，$k_{h},k_{w}$是卷积核的高和宽，$p_{h},p_{w}$是填充的高和宽。
+其中$n_{h},n_{w}$是输入图像的高和宽，$k_{h},k_{w}$是卷积核的高和宽，$p_{h},p_{w}$是每侧填充量，$s_h,s_w$ 是步幅；此式假定膨胀率为 1。
 
 \textbf{池化操作}:
 
@@ -177,20 +205,20 @@ MINST数据集是一个包含了6万张训练图片和1万张测试图片的数�
 
 \textbf{全连接层}:
 
-全连接层通常作为输出层使用，负责将网络的高层特征映射到最终的类别概率。
+全连接层可作为输出层，将高层特征映射为类别分数（logits）；分数经 softmax 才成为概率。
 通常是为了整合特征，减少特征的维度，得到最终的输出类别。
 
 \textbf{激活函数}:
 
 这里我们涉及一下激活函数。
-激活函数是神经网络中非常重要的一部分，它的作用是引入非线性因素，使得神经网络可以拟合任意复杂的函数。
-通过加权和以及偏置来确定神经元是否应该激活，将输入信号转换为输出的
+激活函数是神经网络中非常重要的一部分，它的作用是引入非线性因素，使网络能够表达非线性关系。
+通过加权和以及偏置计算神经元的输入，将输入信号转换为输出的
 可微运算。大多数激活函数都是非线性的。
 我们将主要用到ReLU激活函数，这是一个非常纯粹的函数:
 \begin{equation}
     ReLU(x)=max(0,x)
 \end{equation}
-抛弃所有负元素，它求导表现得特别好：要么让参数消失，要么让参数通过
+负输入对应输出为零，正输入保持原值；这不等于把网络参数删除。
 
 除此之外，还有sigmoid函数:
 \begin{equation}
@@ -211,7 +239,7 @@ MINST数据集是一个包含了6万张训练图片和1万张测试图片的数�
             self.pool1=nn.MaxPool2d(2,2)
             self.conv2=nn.Conv2d(6,16,5)
             self.pool2=nn.MaxPool2d(2,2)
-            self.fc1=nn.Linear(16*5*5,120)
+            self.fc1=nn.Linear(16*4*4,120)
             self.fc2=nn.Linear(120,84)
             self.fc3=nn.Linear(84,10)
 \end{tpython}
@@ -220,10 +248,10 @@ MINST数据集是一个包含了6万张训练图片和1万张测试图片的数�
 显而易见
 \textbf{卷积层}:
 \begin{tpython}
-    self.conv1=nn.Conv2d(3,16,5)
+    self.conv1=nn.Conv2d(1,6,5)
 \end{tpython}
 参数分别是\textbf{输入通道数，输出通道数，卷积核大小}。
-我们知道图片是由RGB三个通道组成，因此这里输入通道数为3，按照LeNet的结构，让输出通道数为16，这是第一个卷积层。第二个卷积层同理，输入通道数为16，输出通道数为32。
+MNIST 是单通道灰度图，因此第一层输入通道为 1、输出为 6；第二层输入为 6、输出为 16。28×28 输入经过两次无填充的 5×5 卷积和 2×2 池化后，得到 16×4×4 特征。
 
 \textbf{池化层}:
 \begin{tpython}
@@ -234,7 +262,7 @@ MINST数据集是一个包含了6万张训练图片和1万张测试图片的数�
 
 \textbf{全连接层}:
 \begin{tpython}
-    self.fc1=nn.Linear(16*5*5,120)
+    self.fc1=nn.Linear(16*4*4,120)
 \end{tpython}
 参数分别是\textbf{输入特征数，输出特征数}。
 输入特征数数根据上一层也就是池化层的输出决定。后面两个全连接层同理。
@@ -243,26 +271,26 @@ MINST数据集是一个包含了6万张训练图片和1万张测试图片的数�
 接下来我们定义前向传播函数，也就是网络的计算过程，处理输入数据，输出预测结果。
 \begin{tpython}
     def forward(self, x):
-        x=nn.relu(self.conv1(x))
+        x=torch.relu(self.conv1(x))
         x=self.pool1(x)
-        x=nn.relu(self.conv2(x))
+        x=torch.relu(self.conv2(x))
         x=self.pool2(x)
-        x=x.view(-1,16*5*5)
-        x=nn.relu(self.fc1(x))
-        x=nn.relu(self.fc2(x))
+        x=x.view(-1,16*4*4)
+        x=torch.relu(self.fc1(x))
+        x=torch.relu(self.fc2(x))
         x=self.fc3(x)
         return x
 \end{tpython}
 和上面的架构一样，只是在每次卷积操作后进行了激活操作，以及全连接层后进行了激活操作。
 \textbf{x.view}:
-这个函数是将一个多维的tensor转换为一维的tensor，参数-1表示自动计算，这里是将16*5*5的tensor转换为一维的tensor。
+这个函数是重排张量形状，参数-1表示自动计算，这里保留批量维，将每个样本展平为 256 个特征。
 符合后面的全连接层输入。
 
 如果想让网络每个处理更加简洁，可以使用\text{Sequential容器}，将网络的层组合在一起。
 比如我们可以将一次卷积，激活，池化操作组合在一起
 \begin{tpython}
     self.conv1=nn.Sequential(
-        nn.Conv2d(3,16,5),
+        nn.Conv2d(1,6,5),
         nn.ReLU(),
         nn.MaxPool2d(2,2)
     )
@@ -292,7 +320,7 @@ $\hat{y}$表示预测值，$y$表示实际值，公式代表在$w$权重，$b$�
 \begin{equation}
     H(y,\hat{y})=-\sum_{i}y_{i}\log{\hat{y}_{i}}
 \end{equation}
-其中y是实际值，$\hat{y}$是预测值，交叉熵损失函数是一个非负函数，当预测值和实际值相等时，交叉熵为0，否则交叉熵越大，预测值和实际值差距越大。
+其中y是实际值，$\hat{y}$是预测值，交叉熵损失函数是一个非负函数，对单一正确类别，预测给该类别的概率越接近 1，损失越接近 0。PyTorch 的 CrossEntropyLoss 接收未经过 softmax 的 logits 与整数类别标签。
 
 代码中我们定义损失函数:
 \begin{tpython}
@@ -313,7 +341,24 @@ Adam优化器是一种自适应学习率的优化器，它可以根据梯度的�
 
 我们已经定义好了网络，损失函数，优化器，接下来我们就可以开始训练网络了。
 
-\subsection{训练与测试网络}
+
+\begin{example}
+以下最小程序验证 28×28 输入的卷积、池化尺寸；应输出 [2,16,4,4] 与 [2,256]。
+\begin{tpython}
+import torch
+from torch import nn
+features=nn.Sequential(nn.Conv2d(1,6,5),nn.ReLU(),nn.MaxPool2d(2),
+                       nn.Conv2d(6,16,5),nn.ReLU(),nn.MaxPool2d(2))
+y=features(torch.zeros(2,1,28,28))
+assert tuple(y.shape)==(2,16,4,4)
+print(y.shape,y.flatten(1).shape)
+\end{tpython}
+\end{example}
+
+\begin{exercise}
+将输入改为 32×32，手算展平维度，再用程序验证。
+\end{exercise}
+\paragraph*{训练与测试网络}
 在定义训练函数之前，我们需要了解一下网络训练过程中调整参数的主要方式——\textbf{反向传播}:
 
 首先是\textbf{前向传播}，前向传播是指从输入层到输出层的计算过程，通过输入数据，经过一系列的计算，得到输出结果。
@@ -332,12 +377,12 @@ Adam优化器是一种自适应学习率的优化器，它可以根据梯度的�
 梯度下降是一种优化算法，通过不断的往损失函数减小的方向上来更新参数以此降低误差，来达到优化模型的目的。
 更新过程:
 \begin{equation}
-    (\textbf{w},b) \longleftarrow (\textbf{w},b) - \frac{\eta}{\left\lvert\mathcal{B}\right\rvert}\sum_{i\in\mathcal{B}}\partial_(\textbf{w},b)l^{(i)}(\textbf{w},b)
+    (\textbf{w},b) \longleftarrow (\textbf{w},b) - \frac{\eta}{\left\lvert\mathcal{B}\right\rvert}\sum_{i\in\mathcal{B}}\nabla_{(\textbf{w},b)}l^{(i)}(\textbf{w},b)
 \end{equation}
 \begin{enumerate}
     \item $\eta$: 学习率，控制参数更新的步长
-    \item $\mathcal{B}$ : 批量大小，每次更新参数的样本数
-    \item $\partial$ : 偏导数，迭代的是哪个参数就对哪个参数求偏导
+    \item $\mathcal{B}$：本次抽取的样本集合，$|\mathcal{B}|$ 是批量大小
+    \item $\nabla$：对参数计算的梯度
     \item $l^{(i)}$ : 损失函数求得的损失
 \end{enumerate}
 这其中\textbf{学习率和批量}是手动设置的，是\textbf{超参数}。需要不断调整来达到最优效果。
@@ -347,7 +392,8 @@ Adam优化器是一种自适应学习率的优化器，它可以根据梯度的�
 
 接下来我们定义train函数，用于训练网络
 \begin{tpython}
-    def train(epoch) # 传入当前的轮次
+    def train(epoch): # 传入当前的轮次
+        Net.train()
         running_loss=0.0 # 累加损失
         running_total=0 # 累加样本总数
         running_correct=0 # 累加正确样本数
@@ -355,7 +401,7 @@ Adam优化器是一种自适应学习率的优化器，它可以根据梯度的�
             inputs, labels=data # 获取输入和标签
             optimizer.zero_grad() # 梯度清零
 
-            # forward + backward + optimize
+            # 前向传播、反向传播、更新参数
             outputs=Net(inputs) # 前向传播
             loss=criterion(outputs,labels) # 计算损失
             loss.backward() # 反向传播
@@ -382,36 +428,38 @@ Adam优化器是一种自适应学习率的优化器，它可以根据梯度的�
 
 这样就完整的定义了一个训练函数，你也可以通过：
 \begin{tpython}
-    torch.save(model, f"../save/model_{epoch+1}.pth")
+    torch.save(Net.state_dict(), "lenet.pth")
 \end{tpython}
 在指定路径下保存模型，以便后续使用。
 
 \textbf{测试函数}:
 
-训练完网络后，我们需要测试网络的性能，测试函数和训练函数类似，只是不需要反向传播和更新参数。
+训练完网络后，我们需要测试网络的性能，评价函数和训练函数类似，只是不需要反向传播和更新参数。
 \begin{tpython}
-    def test(epoch):
+    def evaluate(loader):
+        Net.eval()
         correct=0 # 正确样本数
         total=0 # 总样本数
         with torch.no_grad(): # 测试集不需要算梯度
-            for data in test_loader:
+            for data in loader:
                 images, labels=data # 获取输入和标签
-                ouputs=Net(images)
+                outputs=Net(images)
                 _, predicted=torch.max(outputs,dim=1)
                 total+=labels.size(0)
                 correct+=(predicted==labels).sum().item()
         acc=correct/total
-        print('[%d / %d]: Accuracy on test set: %.1f %% ' % (epoch + 1, EPOCH, 100 * acc))  # 求测试的准确率，正确数/总数
+        print("Accuracy: %.1f %%" % (100 * acc))  # 求测试的准确率，正确数/总数
 \end{tpython}
-测试函数和训练函数类似，只是获取在不需要梯度的情况下进行的。
+评价函数和训练函数类似，只是获取在不需要梯度的情况下进行的。
 correct和total是用来计算正确率的，方便我们看到网络的性能。
 
-这样就定义了一个测试函数，接下来只需要在主函数中调用这两个函数，就可以训练和测试网络了。
+这样就定义了一个测试函数，接下来只需要在主函数中调用训练与评价函数，就可以训练和测试网络了。
 \begin{tpython}
     if __name__ == '__main__':
         for epoch in range(50):
             train(epoch)
-            test(epoch)
+            evaluate(valid_loader)
+        evaluate(test_loader)
 \end{tpython}
 
 到此，成功完成了LeNet网络的训练和测试。这并不是一个很复杂的网络，但是确实包含了当今主流网络的主要操作。
@@ -419,18 +467,102 @@ correct和total是用来计算正确率的，方便我们看到网络的性能�
 它们都是基于LeNet的基础上不断发展而来，通过不断的尝试和改进，才有了现在的网络结构。
 如果你掌握了LeNet的基本操作，那么学习其他网络结构就会变得更加容易。
 
-\subsection{模型的导出和使用}
-我们利用torch.save()函数将模型保存下来后，可以在其他地方加载模型，继续训练或者是直接使用。
+
+\begin{example}
+完整参考实现：保存为 lenet\_complete.py，运行 python lenet\_complete.py。首次运行会下载 MNIST；应逐轮输出 0 到 1 之间的验证准确率，最后输出测试准确率并保存参数。具体成绩与设备、版本有关。
+\begin{tpython}
+import torch
+from torch import nn
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader, random_split
+
+torch.manual_seed(42)
+class LeNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.layers = nn.Sequential(
+            nn.Conv2d(1,6,5), nn.ReLU(), nn.MaxPool2d(2),
+            nn.Conv2d(6,16,5), nn.ReLU(), nn.MaxPool2d(2),
+            nn.Flatten(), nn.Linear(256,120), nn.ReLU(),
+            nn.Linear(120,84), nn.ReLU(), nn.Linear(84,10))
+    def forward(self,x): return self.layers(x)
+
+if __name__ == "__main__":
+    transform = transforms.Compose([transforms.ToTensor(),
+        transforms.Normalize((0.1307,), (0.3081,))])
+    dataset = datasets.MNIST("data",train=True,download=True,transform=transform)
+    train_set, valid_set = random_split(dataset,[55000,5000])
+    train_loader = DataLoader(train_set,batch_size=64,shuffle=True,num_workers=0)
+    valid_loader = DataLoader(valid_set,batch_size=256,num_workers=0)
+    test_set = datasets.MNIST("data",train=False,download=True,transform=transform)
+    test_loader = DataLoader(test_set,batch_size=256,num_workers=0)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    net = LeNet().to(device)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(net.parameters(),lr=0.001)
+    def accuracy(loader):
+        net.eval()
+        correct = total = 0
+        with torch.no_grad():
+            for x,y in loader:
+                x,y=x.to(device),y.to(device)
+                correct += (net(x).argmax(1)==y).sum().item()
+                total += len(y)
+        return correct/total
+    for epoch in range(3):
+        net.train()
+        for x,y in train_loader:
+            x,y=x.to(device),y.to(device)
+            optimizer.zero_grad()
+            loss=criterion(net(x),y)
+            loss.backward()
+            optimizer.step()
+        print(epoch+1, "验证准确率", accuracy(valid_loader))
+    print("测试准确率",accuracy(test_loader))
+    torch.save(net.cpu().state_dict(),"lenet_complete.pth")
+\end{tpython}
+\end{example}
+
+\begin{exercise}
+先仅取训练集前 128 张图跑一轮，检查输入和输出形状；确认代码闭环后再恢复完整数据集。
+\end{exercise}
+\paragraph*{模型的导出和使用}
+我们利用torch.save() 函数将模型参数保存下来后，可以在其他地方加载模型，继续训练或者是直接使用。
 
 \textbf{模型的使用:}
 \begin{tpython}
-    model=torch.load('model.pth')
+    model = LeNet()
+    model.load_state_dict(torch.load("lenet.pth", map_location="cpu", weights_only=True))
     model.eval() # 将模型设置为评估模式
     with torch.no_grad():
-        output=model(input) # 得到输出
+        output=model(torch.zeros(1, 1, 28, 28)) # 检查接口形状
         print(output)
 \end{tpython}
 
+
+\begin{example}
+独立的参数保存与加载实验，不需要数据集。保存后重新创建相同结构，输出应一致。
+\begin{tpython}
+import torch
+from torch import nn
+torch.manual_seed(42)
+model=nn.Linear(2,1).eval()
+x=torch.tensor([[1.,2.]])
+with torch.no_grad(): expected=model(x)
+torch.save(model.state_dict(),"linear_demo.pth")
+restored=nn.Linear(2,1)
+restored.load_state_dict(torch.load("linear_demo.pth",weights_only=True))
+restored.eval()
+with torch.no_grad(): actual=restored(x)
+assert torch.allclose(actual,expected)
+print(actual)
+\end{tpython}
+
+\end{example}
+
+\begin{exercise}
+将新模型的输入维度改为 3，观察加载错误，解释只保存参数为何还需要结构定义。
+\end{exercise}
 \textbf{\textit{*利用GPU加速训练:}}
 
 如果你有NVIDIA显卡，并且按照上面的步骤安装了pytorch-GPU版本，只需要在代码中简单加几行代码，就可以实现在
@@ -441,32 +573,13 @@ GPU上训练我们的模型。由于显卡的特性，GPU运算过程中，需�
 GPU相比于CPU牺牲了大部分在CPU上属于缓存区等区域的面积，用来放更多的运算核心，因此GPU比
 CPU更适合并行运算，运算速度更快，更适合网络模型训练，去处理大量的数据。
 
-比如在代码中，我们加上
-\begin{tpython}
-    # model声明后
-    model.cuda()
-    ....
-    ....
-    # train函数中
-    inputs, labels=data
-    inputs=inputs.cuda()
-    labels=labels.cuda()
-    ....
-    ....
-    # test函数中
-    images, labels = data
-    images = images.cuda()
-    labels = labels.cuda()
-    
-    # 在损失函数下也可以加上
-    loss_function = loss_function.cuda()
-\end{tpython}
-再次训练，你会发现训练速度大大提升，从loss的输出就可以看出。
+完整参考实现通过 device 同时移动模型和数据，CPU 与 CUDA 使用同一条训练路径。
+模型应在创建优化器之前放到目标设备。模型和数据必须位于同一设备；是否加速应测量端到端用时。
 
 \textbf{\textit{*关于YOLO等框架:}}
 
 YOLO是一个非常优秀的目标检测框架，它的全称是You Only Look Once，它的特点是速度快，准确率高，适合实时目标检测。
-YOLO如今仍然在不断迭代更新，如今已有诸如YOLO-v5,YOLO-v8,YOLO-v10等一系列的版本。
+YOLO 有多个实现与版本；下图以 YOLOv5 的历史结构为例。
 其支持不同功能模型的训练，比如detect（检测），classify（分类），pose（姿态估计）等。
 
 \begin{figure}[H]
@@ -476,11 +589,22 @@ YOLO如今仍然在不断迭代更新，如今已有诸如YOLO-v5,YOLO-v8,YOLO-v
     \label{fig:YOLOv5}
 \end{figure}
 
-可以通过这里了解：\url{https://github.com/THU-MIG/yolov10}
 
-\url{https://blog.csdn.net/WZZ18191171661/article/details/113789486}
+\begin{note}
+YOLOv10 实现入口：\url{https://github.com/THU-MIG/yolov10}。使用前核对仓库版本、数据格式与许可。
+\end{note}
 
-\section{简单了解模型部署}
+
+\begin{conclusion}
+\begin{itemize}
+\item 输入形状为 N×1×28×28，最后展平为 N×256，输出为 N×10。
+\item 交叉熵接收 logits 与整数标签；不要预先调用 softmax。
+\item 训练前清梯度，反向传播后更新参数；评估时使用 eval 和 no\_grad。
+\item 模型与数据放同一设备；保存参数后还要保留网络定义和预处理设置。
+\end{itemize}
+\end{conclusion}
+
+\subsubsection{简单了解模型部署}
 如果我们已经拥有了一个训练好的模型，但是事实上这并不能草草的生搬硬套在我们实际的项目中。
 一个项目通常不会是在拥有着高性能的NVIDIA显卡和高性能的CPU上运行的，通常是在一些性能较低的设备上，比如
 在机器人上，代码运行在minipc，而minipc的性能和配置有限（intel旗下的nuc甚至没有GPU），因此我们需要尽量激发设备的性能，提高模型的推理速度。
@@ -502,10 +626,36 @@ tensorrt所需的又是.engine文件。
 openvino和tensorrt都支持对onnx文件的转换。有相应的API可以将onnx文件转换为自身所需要的文件类型。YOLO官方也给出了
 相关的指令能够一键转换将.pt转换为.onnx文件。onnx文件就像是一个中间文件，使得不同框架之间的转换变得更加容易。
 
-\textit{如果你有一个ONNX文件，你可以访问网站:\url{https://netron.app/}查看ONNX文件的结构，方便了解模型的结构}
 
-\section{总结}
+\begin{note}
+模型结构查看工具：\url{https://netron.app/}。结构能帮助核对输入输出，但不能替代数值一致性验证。
+\end{note}
+
+
+\textbf{应用回顾}
 对于当今的科研工作相关人员来说，神经网络是不得不去学习的领域，同样也是一个非常重要的领域。
 AI已经走进了我们的生活，无论是在自动驾驶，人脸识别，语音识别等领域，AI都有着广泛的应用。
 在我们机器人的自瞄系统中，识别装甲板上的数字，识别敌方机器人，识别装甲板; 以及雷达系统，都有神经网络的身影。
 感兴趣的同学可以多多学习，多多实践，祝大家学有所成。
+
+\begin{example}
+用 PyTorch 自带计时器测一个 CPU 前向过程，避免只计异步提交耗时。各机器耗时不同，应报告中位数及线程数。
+\begin{tpython}
+import torch
+from torch.utils.benchmark import Timer
+net = torch.nn.Sequential(torch.nn.Linear(4,8),torch.nn.ReLU(),torch.nn.Linear(8,2)).eval()
+x = torch.ones(1,4)
+with torch.no_grad():
+    result = Timer(stmt="net(x)", globals={"net":net,"x":x}).blocked_autorange(min_run_time=0.1)
+print(result)
+\end{tpython}
+\end{example}
+
+\begin{exercise}
+将批量从 1 改为 32，比较每批用时和每样本用时，说明吞吐率与单帧延迟的区别。
+\end{exercise}
+
+
+\begin{note}
+网络训练流程参考 PyTorch 官方教程：\url{https://docs.pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html}。卷积尺寸参数见 \url{https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv2d.html}。
+\end{note}

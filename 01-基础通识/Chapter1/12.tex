@@ -94,7 +94,7 @@ tar -cvpzf /media/Disk/myDisk/ubuntu_backup@$(date +%Y-%m-%d).tar.gz --exclude=/
 
 下面解释一下上面这条命令：tar就是一个打包命令，各参数的含义见第1.4节的 tar 参数表。
 
-\texttt{/media/Disk/myDisk/} 是备份文件的存放路径，其中 \texttt{myDisk} 表示你的移动硬盘名字，挂载在 \texttt{/media/Disk} 目录下。文件名中的 \texttt{\$(date +\%Y-\%m-\%d)} 是一条 shell 命令，会把执行时的日期写进文件名，方便日后辨认不同时间的备份。接下来看看 --exclude 参数中的内容。
+\path{/media/Disk/myDisk/} 是备份文件的存放路径。这里，\texttt{myDisk} 表示你的移动硬盘名字；移动硬盘挂载在 \path{/media/Disk} 目录下。文件名中的 \texttt{\$(date +\%Y-\%m-\%d)} 是一条 shell 命令，会把执行时的日期写进文件名，方便日后辨认不同时间的备份。接下来看看 --exclude 参数中的内容。
 
 假设现在ubuntu中有四个分区：/、/home、/boot、swap，其中/home、/boot两个分区出问题的概率很小，而且变动也不会太频繁，因此在定期备份时可以减小对这两个分区的备份频率。一般系统坏了都是/分区的问题，/home没什么关系。再来看看其他排除的目录：
 

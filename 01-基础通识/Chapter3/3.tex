@@ -179,6 +179,15 @@ g++ -std=c++17 -Wall -Wextra hello.cpp -o hello
 
 看到 \texttt{Configuring done} 和 \texttt{Generating done}，先别开香槟。构建文件准备好了，程序还得接着编译。
 
+\begin{conclusion}
+\begin{itemize}
+    \item \texttt{CMakeLists.txt} 描述目标和依赖；CMake 读取它并生成构建文件。
+    \item Make 或 Ninja 读取生成的规则，安排需要执行的任务。
+    \item 编译器和链接器执行这些任务，生成目标文件、库与可执行文件。
+    \item 安装按规则复制已有产物；配置成功、构建成功和安装成功是三个不同的检查点。
+\end{itemize}
+\end{conclusion}
+
 \subsubsection{项目配置}
 \label{sec:cmake-config}
 
@@ -374,6 +383,16 @@ $SHARED$ & 生成共享库。\\
 \end{tabular}
 \end{center}
 
+下面还会用到 \texttt{target\_compile\_options}，它为指定目标添加编译选项。
+通用形式为：
+\begin{quote}
+$target\_compile\_options(\text{目标}\enspace \text{作用域}\enspace \text{选项}\ldots)$
+\end{quote}
+本节用 \texttt{PRIVATE} 把 \texttt{-Wall} 和 \texttt{-Wextra} 仅加给当前目标。
+这些选项适用于 GCC、Clang，因此示例先检查编译器标识，再添加它们。
+其他选项可查阅编译器手册；这条 CMake 命令的参数可用
+\texttt{cmake --help-command target\_compile\_options} 查询。
+
 \begin{example}[一次构建两个源文件]
 在示例~\ref{ex:armor-sources}~的 \texttt{armor-demo} 根目录创建 \texttt{CMakeLists.txt}：
 \begin{lstlisting}[language=cmake,frame=single,numbers=left]
@@ -501,9 +520,26 @@ ls build-lib/libarmor.a
 \label{sec:cmake-install}
 
 程序已经能在构建目录里运行了。接下来，我们把它放到指定位置，方便以后使用，这一步叫安装（Install）。
-声明可执行文件安装规则的通用形式为
-\texttt{install(TARGETS 目标... RUNTIME DESTINATION 相对目录)}。
-\texttt{TARGETS} 后写目标名，\texttt{RUNTIME} 指定运行程序这一类产物，\texttt{DESTINATION} 指定相对安装前缀的目录。
+按目标声明安装规则的通用形式为：
+\begin{quote}
+$install(TARGETS\enspace \text{目标}\ldots\enspace[\text{产物类别}\enspace DESTINATION\enspace \text{目录}]\ldots)$
+\end{quote}
+\begin{center}
+\begin{tabular}{p{0.30\textwidth}p{0.60\textwidth}}
+\toprule[1.5pt]
+参数 & 作用 \\
+\midrule[1pt]
+$TARGETS$ & 后接已创建的目标名，不写源文件名。\\
+$RUNTIME$ & 选择运行时产物；本章用它安装可执行文件。\\
+$ARCHIVE$ & 选择归档产物；在本章的 Linux 环境中可用于静态库。\\
+$LIBRARY$ & 选择库产物；在本章的 Linux 环境中可用于共享库。\\
+$DESTINATION\enspace \text{目录}$ & 指定安装目录；相对目录按安装前缀解析。\\
+\bottomrule[1.5pt]
+\end{tabular}
+\end{center}
+本节只安装可执行文件，使用 \texttt{RUNTIME DESTINATION bin}。
+安装前缀由终端中的 \texttt{--prefix} 指定；\texttt{bin} 是前缀下的子目录。
+其余参数请查阅 \texttt{cmake --help-command install}。
 
 \begin{example}[安装到自己的练习目录]
 在示例~\ref{ex:armor-library}~的 \texttt{CMakeLists.txt} 末尾追加：
@@ -556,6 +592,9 @@ cmake --install build-lib --prefix "$PWD/stage"
 我们把打印操作写成函数，再放进单独的文件，以后就能重复使用。
 自定义函数写成 \texttt{function(函数名 参数...) ... endfunction()}。
 \texttt{include(模块名)} 用来载入模块，\texttt{list(APPEND 变量 元素...)} 用来往列表中追加元素。
+\texttt{CMAKE\_MODULE\_PATH} 是查找自定义模块时使用的目录列表。
+把 \texttt{cmake} 目录加入它后，\texttt{include(Function)} 就能找到其中的 \texttt{Function.cmake}。
+函数中的 \texttt{if(DEFINED 变量名)} 检查变量是否已定义；已定义但值为空，和根本没定义是两种情况。
 
 \begin{example}[打印编译器与构建类型]
 先在 \texttt{armor-demo} 根目录创建模块目录：
@@ -685,11 +724,6 @@ cmake --build build --parallel 2
 如果 OpenCV 是你自己安装的，就找到 \texttt{OpenCVConfig.cmake}，再用 \texttt{-DOpenCV\_DIR=目录} 指向它所在的目录。这里不能随手填一个头文件目录。
 \end{note}
 
-\begin{exercise}
-不传参数运行程序，再传入不存在的 \texttt{missing.png}。每次运行后立刻执行 \texttt{echo \$?}，检查退出码分别为 \texttt{1} 和 \texttt{2}。
-说明为什么这两种错误不需要修改链接配置。
-\end{exercise}
-
 \textbf{阅读原有 ROS2 工程片段（选读）}
 
 最后看一眼实际工程，就当是卷二的预告片。
@@ -775,3 +809,9 @@ ament_auto_package()
 \end{itemize}
 查到当前问题需要的那一条就好，不用把手册从头刷到尾。其他功能，等用到时再回来查。
 \end{note}
+
+\begin{exercise}
+回到本节的 \texttt{opencv-demo} 工程，不传参数运行程序，再传入不存在的 \texttt{missing.png}。
+每次运行后立刻执行 \texttt{echo \$?}，检查退出码分别为 \texttt{1} 和 \texttt{2}。
+说明为什么这两种错误不需要修改链接配置。本题不要求运行上面的 ROS2 选读片段。
+\end{exercise}

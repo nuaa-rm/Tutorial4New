@@ -1,4 +1,4 @@
-\section{CUDA 简介}
+\subsubsection{CUDA 简介}
 
 2006 年，NVIDIA 发布 \textbf{CUDA}（Compute Unified Device Architecture）：
 一套在 NVIDIA GPU 上做通用并行计算的平台与编程模型。
@@ -13,10 +13,21 @@
 \end{itemize}
 
 配套库常见有：运行时 API、\textbf{cuBLAS}（线性代数）、\textbf{cuFFT}（FFT）、
-\textbf{cuDNN}（深度网络原语）等。官方文档见
-\url{https://docs.nvidia.com/cuda/cuda-programming-guide/}。
+\textbf{cuDNN}（深度网络原语）等。
+\begin{note}
+官方编程指南：\url{https://docs.nvidia.com/cuda/cuda-programming-guide/}。
+\end{note}
 
-\section{配置 CUDA 环境}
+
+\begin{example}
+一幅 640×480 图像有 307200 个像素，逐像素加亮可独立处理每个像素，适合并行。若每个像素依赖前一个像素的新结果，则不能直接照搬这种分工。
+\end{example}
+
+\begin{exercise}
+对“逐像素阈值”和“累计前缀和”分别说明是否存在跨元素依赖。
+\end{exercise}
+
+\subsubsection{配置 CUDA 环境}
 
 版本需与显卡驱动、Ubuntu 发行版匹配。安装前先确认驱动：
 \begin{tbash}
@@ -24,13 +35,15 @@ nvidia-smi
 \end{tbash}
 能显示 GPU 型号与 Driver Version 再继续；无输出则先装专有驱动。
 
-\subsection{安装 CUDA Toolkit}
+\paragraph*{安装 CUDA Toolkit}
 
-下面以 Ubuntu 22.04 + CUDA 11.8 的 \texttt{.run} 安装为例（版本号请按官网当前推荐调整）。
+下面以 Ubuntu 22.04 + CUDA 11.8 的 \texttt{.run} 安装为例（仅适用于已确认与 11.8 兼容的旧环境；新环境按官方安装指南选版本）。
 
 \begin{tbash}
-wget https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/cuda_11.8.0_520.61.05_linux.run
-sudo sh cuda_11.8.0_520.61.05_linux.run
+base=https://developer.download.nvidia.com/compute/cuda
+file=cuda_11.8.0_520.61.05_linux.run
+wget "$base/11.8.0/local_installers/$file"
+sudo sh "$file"
 \end{tbash}
 
 \begin{figure}[H]
@@ -56,8 +69,11 @@ sudo sh cuda_11.8.0_520.61.05_linux.run
     \label{fig:cuda_install3}
 \end{figure}
 
-\textbf{关键：}若系统已有可用 NVIDIA 驱动，安装 Toolkit 时应用空格键\textbf{取消勾选 Driver}，只装 toolkit。
-否则可能覆盖驱动导致黑屏。
+
+\begin{note}
+若系统已有可用 NVIDIA 驱动，使用本节 runfile 安装时应取消勾选 Driver，只安装 Toolkit。覆盖现有驱动可能破坏图形环境；不要混用未核对兼容性的安装方式。
+\end{note}
+
 
 按提示配置环境变量，例如：
 \begin{tbash}
@@ -78,19 +94,26 @@ nvcc --version
 
 亦可用发行版包管理或 NVIDIA 官方 apt 源安装，原理相同：驱动与 toolkit 版本兼容即可。
 
-\subsection{安装 cuDNN*}
+\paragraph*{安装 cuDNN*}
 
-cuDNN 是面向深度网络的加速库。需与 CUDA 主版本匹配，从 NVIDIA 开发者站点下载对应包后解压拷贝：
-\begin{tbash}
-tar -xzvf cudnn-*-linux-x64-*.tgz
-sudo cp cuda/include/cudnn*.h /usr/local/cuda/include
-sudo cp cuda/lib64/libcudnn* /usr/local/cuda/lib64
-sudo chmod a+r /usr/local/cuda/include/cudnn*.h /usr/local/cuda/lib64/libcudnn*
-\end{tbash}
+cuDNN 是面向深度网络的加速库。需要显式调用其 API 时，按所选版本的官方支持矩阵安装开发包，不能只比较 CUDA 主版本。
+旧版压缩包中的目录结构并不通用，不要把通配符拷贝命令直接用于新版本。
 训练框架（如带 GPU 的 PyTorch）通常自带或通过 pip/conda 拉取匹配的运行时；
 手写调用 cuDNN API 时才必须显式安装开发文件。
 
-\section{异构计算：Host 与 Device}
+\begin{example}
+安装前后分别记录版本。nvidia-smi 中的 CUDA Version 表示驱动支持的 CUDA 版本信息，nvcc 显示本机编译工具版本，两者不必相同。
+\begin{tbash}
+nvidia-smi
+nvcc --version
+\end{tbash}
+\end{example}
+
+\begin{exercise}
+说明“nvidia-smi 正常但 nvcc 找不到”能证明什么、不能证明什么。
+\end{exercise}
+
+\subsubsection{异构计算：Host 与 Device}
 
 GPU 一般不独立运行完整操作系统任务，而是作为 CPU 的协处理器。
 CPU 端称为 \textbf{host}，GPU 端称为 \textbf{device}，二者经 PCIe 等总线连接。
@@ -113,11 +136,19 @@ CPU 端称为 \textbf{host}，GPU 端称为 \textbf{device}，二者经 PCIe 等
 数据搬运开销不可忽视：若计算量很小而拷贝很重，整体可能比纯 CPU 更慢。
 工程上应尽量减少往返拷贝，或把多步处理串在 Device 侧完成。
 
-\section{CUDA 编程基础}
+\begin{example}
+三个长度为 1024 的 float 数组共需 12288 字节设备内存。上传两个输入、下载一个输出，总搬运量也是 12288 字节；如果连续执行多个算子，中间结果留在设备端可减少往返。
+\end{example}
+
+\begin{exercise}
+长度改为 4096，元素类型仍为 float，分别计算设备内存和一次完整流程的拷贝字节数。
+\end{exercise}
+
+\subsubsection{CUDA 编程基础}
 
 以下内容依据 NVIDIA \emph{CUDA Programming Guide} 中 Intro / Writing Kernels 章节整理。
 
-\subsection{线程层次：Thread、Block、Grid}
+\paragraph*{线程层次：Thread、Block、Grid}
 
 Kernel 启动时创建大量线程，组织为：
 \begin{itemize}
@@ -141,11 +172,38 @@ kernel<<<gridDim, blockDim>>>(args...);
 第一参数为 Grid 维度，第二参数为每个 Block 的线程数。
 Block 大小常取 128、256 等，需结合占用率与问题规模调试。
 
-\subsection{第一个例子：向量加法}
+编译器将 CUDA 源文件构建为程序，通用形式为 $nvcc\enspace [OPTIONS]\enspace INPUT$。
+\begin{center}
+\begin{tabular}{lp{0.58\textwidth}}
+\toprule[1.5pt]
+参数 & 作用 \\
+\midrule[1pt]
+\texttt{-o FILE} & 指定输出文件 \\
+\texttt{-O2} & 启用常用优化级别 \\
+\texttt{-std=c++17} & 选择 C++ 语言标准 \\
+\texttt{-arch=ARCH} & 指定目标 GPU 架构，按设备填写 \\
+\texttt{--version} & 查看编译工具版本 \\
+\bottomrule[1.5pt]
+\end{tabular}
+\end{center}
+其余参数请查阅 nvcc 帮助或对应版本手册。
 
+\paragraph*{第一个例子：向量加法}
+
+\begin{example}
+将完整程序保存为 vec\_add.cu，检查全部元素而不只看首元素。
 \begin{tcode}
 #include <cuda_runtime.h>
 #include <cstdio>
+#include <cstdlib>
+
+#define CUDA_CHECK(call) do { \
+    cudaError_t e = (call); \
+    if (e != cudaSuccess) { \
+        fprintf(stderr, "%s\n", cudaGetErrorString(e)); \
+        std::exit(1); \
+    } \
+} while (0)
 
 __global__ void vecAdd(const float* A, const float* B, float* C, int n) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -153,25 +211,27 @@ __global__ void vecAdd(const float* A, const float* B, float* C, int n) {
 }
 
 int main() {
-    const int n = 1 << 20;
+    const int n = (1 << 20) + 3;
     size_t bytes = n * sizeof(float);
     float *hA = new float[n], *hB = new float[n], *hC = new float[n];
     for (int i = 0; i < n; ++i) { hA[i] = 1.f; hB[i] = 2.f; }
 
     float *dA, *dB, *dC;
-    cudaMalloc(&dA, bytes); cudaMalloc(&dB, bytes); cudaMalloc(&dC, bytes);
-    cudaMemcpy(dA, hA, bytes, cudaMemcpyHostToDevice);
-    cudaMemcpy(dB, hB, bytes, cudaMemcpyHostToDevice);
+    CUDA_CHECK(cudaMalloc(&dA, bytes)); CUDA_CHECK(cudaMalloc(&dB, bytes)); CUDA_CHECK(cudaMalloc(&dC, bytes));
+    CUDA_CHECK(cudaMemcpy(dA, hA, bytes, cudaMemcpyHostToDevice));
+    CUDA_CHECK(cudaMemcpy(dB, hB, bytes, cudaMemcpyHostToDevice));
 
     int threads = 256;
     int blocks = (n + threads - 1) / threads;
     vecAdd<<<blocks, threads>>>(dA, dB, dC, n);
-    cudaDeviceSynchronize();
+    CUDA_CHECK(cudaGetLastError());
+    CUDA_CHECK(cudaDeviceSynchronize());
 
-    cudaMemcpy(hC, dC, bytes, cudaMemcpyDeviceToHost);
-    printf("C[0]=%f\n", hC[0]); // 期望 3
+    CUDA_CHECK(cudaMemcpy(hC, dC, bytes, cudaMemcpyDeviceToHost));
+    for (int i=0; i<n; ++i) if (hC[i] != 3.f) return 2;
+    printf("C[0]=%f, all %d checked\n", hC[0], n); // 应全部为 3
 
-    cudaFree(dA); cudaFree(dB); cudaFree(dC);
+    CUDA_CHECK(cudaFree(dA)); CUDA_CHECK(cudaFree(dB)); CUDA_CHECK(cudaFree(dC));
     delete[] hA; delete[] hB; delete[] hC;
     return 0;
 }
@@ -190,7 +250,12 @@ nvcc -O2 vec_add.cu -o vec_add
 ./vec_add
 \end{tbash}
 
-\subsection{内存层次（入门）}
+\end{example}
+
+\begin{exercise}
+将 n 改为 257、线程数保持 256，计算块数和多余线程数，再运行程序确认没有越界。
+\end{exercise}
+\paragraph*{内存层次（入门）}
 
 \begin{itemize}
     \item \textbf{Global memory}：容量大、延迟高，\texttt{cudaMalloc} 得到的指针通常指向此处；
@@ -200,18 +265,18 @@ nvcc -O2 vec_add.cu -o vec_add
 
 Shared memory 示例骨架：
 \begin{tcode}
-__global__ void demo(float* out, const float* in) {
+__global__ void demo(float* out, const float* in, int n) {
     __shared__ float tile[256];
     int tid = threadIdx.x;
     int i = blockIdx.x * blockDim.x + tid;
-    tile[tid] = in[i];
+    tile[tid] = (i < n) ? in[i] : 0.f;
     __syncthreads(); // 等待块内全部写完再读
-    out[i] = tile[tid]; // 示意：实际可做归约、卷积滑窗等
+    if (i < n) out[i] = tile[tid]; // 示意：实际可做归约、卷积滑窗等
 }
 \end{tcode}
-块内协作读写前务必 \texttt{\_\_syncthreads()}，否则存在数据竞争。
+上述骨架要求每块恰好 256 个线程，不能让部分线程提前返回后再执行块内屏障。块内协作读写前务必 \texttt{\_\_syncthreads()}，否则存在数据竞争。
 
-\subsection{错误检查习惯}
+\paragraph*{错误检查习惯}
 
 生产代码应对每次 CUDA API 检查返回值，例如：
 \begin{tcode}
@@ -226,7 +291,7 @@ __global__ void demo(float* out, const float* in) {
 \end{tcode}
 Kernel 启动为异步，常用 \texttt{cudaGetLastError()} 与 \texttt{cudaDeviceSynchronize()} 捕获启动/执行错误。
 
-\subsection{与 CMake 集成}
+\paragraph*{与 CMake 集成}
 
 现代 CMake（3.18+）推荐启用 CUDA 语言并链接 Toolkit 目标：
 \begin{tcode}
@@ -237,7 +302,16 @@ add_executable(vec_add vec_add.cu)
 target_link_libraries(vec_add PRIVATE CUDA::cudart)
 \end{tcode}
 
-\section{从算子到推理部署*}
+\begin{conclusion}
+\begin{itemize}
+\item Thread 执行代码，Block 内线程协作，Grid 包含所有 Block。
+\item 索引必须检查边界；网格向上取整后，多余线程不应访问数组。
+\item 共享内存只在块内共享；屏障要求块内线程正确参与。
+\item 先检查启动错误，再检查同步错误；性能计时也必须考虑异步执行。
+\end{itemize}
+\end{conclusion}
+
+\subsubsection{从算子到推理部署*}
 
 手写 kernel 适合学习与关键热点优化；多数视觉推理优先走成熟栈：
 \begin{enumerate}
@@ -249,7 +323,15 @@ TensorRT 依赖 CUDA；引擎往往与具体 GPU 架构相关，换卡常需重�
 深度学习章中的部署小节与此衔接：本卷强调 CUDA 是 GPU 路径的底座，
 具体 TensorRT API 可在项目仓库与 NVIDIA 文档中深入。
 
-\section{常见问题与边界}
+\begin{example}
+某流水线上传 2 ms、计算 1 ms、下载 2 ms，总延迟为 5 ms。把 kernel 优化为 0.5 ms 后总延迟为 4.5 ms，只减少 10\%；仅报告算子“快一倍”会掩盖整体瓶颈。
+\end{example}
+
+\begin{exercise}
+若连续三个算子共需 3 ms，比较每个算子各自上传下载与统一上传下载一次的总用时。假定每次传输仍为 2 ms。
+\end{exercise}
+
+\subsubsection{常见问题与边界}
 
 \begin{itemize}
     \item 笔记本双显卡：确认进程跑在 NVIDIA 独显上（\texttt{nvidia-smi} 看进程）。
@@ -257,5 +339,17 @@ TensorRT 依赖 CUDA；引擎往往与具体 GPU 架构相关，换卡常需重�
     \item 无 GPU 环境：可学概念与写可在 CPU 回退的代码路径；本章验收中的运行项需有可用设备。
 \end{itemize}
 
-延伸阅读：
-\url{https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-cpp.html}。
+
+\begin{note}
+入门阅读：\url{https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-cpp.html}。
+\end{note}
+
+
+\begin{example}
+程序报告 no CUDA-capable device，而 nvcc 能输出版本：编译工具存在不代表运行环境能访问 GPU。排查顺序是设备与驱动、容器或 WSL 透传、再到程序选择的设备号。
+\end{example}
+
+\begin{exercise}
+列出你所在机器能完成的检查，并把需要 GPU 才能验证的项目单独标出。
+\end{exercise}
+

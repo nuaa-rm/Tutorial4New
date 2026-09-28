@@ -1,0 +1,261 @@
+\begingroup
+\setlength{\emergencystretch}{3em}
+\subsubsection{串口连接了什么}
+\label{sec:linux-serial}
+
+视觉程序算出了目标角度，还需要把结果发给电控板。串口通信（Serial Communication）是常见的传输方式：发送端把数据逐位送出，接收端按约定还原成字节。本节先学会在 Ubuntu 中找到设备、取得权限并验证收发；帧头、校验和重同步等工程协议见卷二“多机通信方法”。
+
+\textbf{我们队使用的是 USB CDC ACM 设备。}CDC 是通信设备类（Communication Device Class），ACM 是抽象控制模型（Abstract Control Model）。电控板通过 USB 数据线连接电脑，Linux 通常由 \texttt{cdc\_acm} 驱动将其呈现为 \texttt{/dev/ttyACM0} 等串口设备，程序仍可按串口接口读写字节。
+
+这条链路是“视觉程序 → Linux 串口接口 → USB → 电控板固件”。它与“USB 转串口模块 → TX/RX → UART”不同：队内这种 USB 连接不需要在电脑和板子之间另接 TX/RX，也不能通过短接 USB 的 D+/D- 来做回环。板端是否回传数据、是否要求 DTR 控制信号，应查看电控固件约定。
+
+下面先补充 UART 参数作为通用知识。
+
+UART 的全称是 Universal Asynchronous Receiver/Transmitter，中文为通用异步收发器。它没有单独的时钟线，因此两端必须约定相同的通信参数。USB 转串口模块连接板上 UART 时，这些参数直接影响线路收发。
+
+\begin{center}
+\begin{tabular}{p{0.23\textwidth}p{0.67\textwidth}}
+\toprule[1.5pt]
+参数 & 作用 \\
+\midrule[1pt]
+波特率（Baud rate） & 每秒传输的符号数；常见 UART 中一个符号承载一位，例如 115200。两端须匹配。\\
+数据位（Data bits） & 每个字符承载的数据位数，常用 8 位。\\
+校验位（Parity） & 可选的奇偶校验，N 表示无校验，E 为偶校验，O 为奇校验。\\
+停止位（Stop bits） & 标记字符结束的位，常用 1 位。\\
+流控（Flow control） & 防止接收方来不及处理；可使用 RTS/CTS 硬件流控或 XON/XOFF 软件流控。本节均关闭。\\
+\bottomrule[1.5pt]
+\end{tabular}
+\end{center}
+
+\textbf{115200、8N1} 表示波特率为 115200、8 个数据位、无校验、1 个停止位。对于 UART，加上 1 个起始位，每传一个字节需要 10 位，因此理论数据吞吐上限约为 $115200/10=11520$ 字节每秒；实际有效载荷还要扣除协议开销。
+
+\begin{note}
+\textbf{不要把 UART 的波特率公式套到原生 USB CDC ACM 上。}电脑设置的波特率、数据位等会作为线路编码配置交给设备，固件可能使用，也可能忽略；它们不是 USB 总线速率。队内工程应采用电控固件约定的配置，不能推断“设置 115200 就把 USB 限速为 11520 字节每秒”，也不能断言所有 CDC 设备都不关心这些配置。
+\end{note}
+
+\begin{example}[先核对接线，再打开软件]
+连接两个兼容电平的 UART 接口时，将电脑侧模块的 TX（发送）接到板端 RX（接收），模块 RX 接板端 TX，GND 接 GND。记录板端要求的电平、波特率和 8N1 等参数，再进入后面的设备识别步骤。
+\end{example}
+
+\begin{note}
+TTL/CMOS 电平 UART、RS-232 和 RS-485 的电气接口不同，不能直接互接。先按硬件说明确认 3.3 V/5 V 电平兼容性，并在断电时接线；开发板已有供电时，不要随手再接模块的 VCC。以下物理回环实验只对\textbf{脱离电控板的 USB 转 TTL 串口模块}进行，不向连接电机的控制板发送测试字符。
+\end{note}
+
+\subsubsection{找到设备并取得访问权限}
+
+Linux 把串口暴露为 \texttt{/dev} 下的字符设备。USB 转串口模块常见名称为 \texttt{/dev/ttyUSB0}，USB CDC ACM 设备常见名称为 \texttt{/dev/ttyACM0}，板载串口也可能叫 \texttt{/dev/ttyS0}。名称取决于设备与驱动，不能仅凭名字判断它连接了哪块板。
+
+\begin{example}[通过插拔确认设备]
+在终端运行下面命令观察内核日志，然后通过 USB 数据线连接电控板；记下新出现的 \texttt{ttyACM} 设备名，按 Ctrl+C 结束观察。
+\begin{tbash}
+sudo dmesg -w
+\end{tbash}
+接着列出设备及其稳定链接：
+\begin{tbash}
+ls -l /dev/ttyUSB* /dev/ttyACM*
+ls -l /dev/serial/by-id/
+\end{tbash}
+未匹配的类型或不存在的目录可能提示“没有那个文件或目录”，不代表所有串口都不可用。\texttt{ttyACM0} 和 \texttt{ttyUSB0} 的编号都可能随插拔顺序变化；若设备提供可用的唯一标识，优先使用实际列出的 \texttt{/dev/serial/by-id/} 链接。下一小节将为队内 ACM 设备配置更易读的固定别名。
+\end{example}
+
+访问串口需要读写权限。先用 \texttt{ls -l} 查看设备所属组，用 \texttt{id -nG} 查看当前会话的组。Ubuntu 中串口设备通常属于 \texttt{dialout} 组。\texttt{usermod -aG 组名 用户名} 可以把用户追加到组中；\texttt{-a} 必须保留，避免替换用户已有的附加组。
+
+\begin{example}[为普通用户配置串口权限]
+下面假设刚才确认的设备是 \texttt{/dev/ttyACM0}，且所属组为 \texttt{dialout}。在自己的普通用户终端执行：
+\begin{tbash}
+PORT=/dev/ttyACM0
+ls -l "$PORT"
+id -nG
+sudo usermod -aG dialout "$USER"
+\end{tbash}
+保存工作，\textbf{完整注销桌面会话并重新登录}，再执行 \texttt{id -nG} 确认含有 \texttt{dialout}。仅新开一个终端可能仍继承旧会话的组信息。后续示例都需要在当前终端重新设置 \texttt{PORT}；若实际设备名不同，请替换它。
+\end{example}
+
+\begin{note}
+不要把 \texttt{chmod 777 /dev/ttyACM0} 当成长期方案：它把设备开放给所有用户，重新插拔后权限还可能被重建。也不要长期用 sudo 启动整个开发工具来绕过权限问题。若设备所属组不是 \texttt{dialout}，应先核对本机设备规则。
+\end{note}
+
+\begin{exercise}\label{ex:serial-device}
+连接队内 USB CDC ACM 板，记录设备名、所属组和可用的稳定链接，解释为什么不能在工程中永远假定它叫 \texttt{ttyACM0}。没有硬件时，解释“设备不存在”与“权限不足”分别应先检查什么。
+\end{exercise}
+
+\subsubsection{用 udev 绑定固定名称}
+\label{sec:serial-udev}
+
+udev 是 Linux 用户空间的设备管理机制，设备出现时会根据规则设置权限、创建符号链接。我们的目标是让程序始终打开 \texttt{/dev/rm\_control}，由 udev 将它指向当前的 \texttt{ttyACM0} 或 \texttt{ttyACM1}。\textbf{固定的是程序使用的别名，不是内核分配的编号。}这里的别名是教学示例，队内工程已有命名约定时应使用工程约定。
+
+\texttt{udevadm info --name=设备 --attribute-walk} 查看设备及其父设备属性；\texttt{--query=property} 查看设备属性记录。厂商编号 VID（Vendor ID）、产品编号 PID（Product ID）通常只能识别型号；还应匹配设备的唯一序列号。
+
+\begin{example}[识别目标板并写入规则]
+先确认目标板对应的设备，再查看完整属性：
+\begin{tbash}
+udevadm info --name=/dev/ttyACM0 --attribute-walk
+udevadm info --name=/dev/ttyACM0 --query=property
+\end{tbash}
+在属性遍历输出中，找到\textbf{同一个 USB 父设备块}里的 \texttt{idVendor}、\texttt{idProduct} 和 \texttt{serial}。不要把 USB 集线器的属性当作电控板属性，也不要把不同父设备块的 \texttt{ATTRS} 条件拼成一条规则。
+
+用编辑器创建本地规则文件：
+\begin{tbash}
+sudo nano /etc/udev/rules.d/99-rm-control.rules
+\end{tbash}
+文件内容如下。\textbf{先将三个大写占位值替换为刚才查到的真实值}，VID/PID 按输出填写四位十六进制数字，不加 \texttt{0x}；它们不是队内板子的已知编号。
+\begin{tbash}
+SUBSYSTEM=="tty", KERNEL=="ttyACM*", \
+  ATTRS{idVendor}=="YOUR_VID", ATTRS{idProduct}=="YOUR_PID", \
+  ATTRS{serial}=="YOUR_SERIAL", \
+  SYMLINK+="rm_control", GROUP="dialout", MODE="0660"
+\end{tbash}
+这是\textbf{规则文件内容，不是 Shell 命令}。行末反斜杠表示续行，反斜杠后不要再留空格；也可合成一整行。\texttt{==} 表示匹配，\texttt{SYMLINK+=} 表示追加链接名称；名称不带 \texttt{/dev/} 前缀。\texttt{GROUP} 与 \texttt{MODE} 设置目标设备节点的组及读写权限，用户仍需加入该组。
+\end{example}
+
+\begin{example}[重载、插拔并验证固定路径]
+保存规则并退出编辑器，然后重载规则：
+\begin{tbash}
+sudo udevadm control --reload-rules
+\end{tbash}
+重载只让后续设备事件使用新规则，不会立即重建已有设备链接。先停止串口程序，在允许断开板子的状态下拔插目标 USB 设备，再运行：
+\begin{tbash}
+udevadm settle
+ls -l /dev/rm_control
+readlink -f /dev/rm_control
+ls -lL /dev/rm_control
+udevadm info --name=/dev/rm_control --query=property
+\end{tbash}
+应看到别名指向一个实际的 \texttt{ttyACM} 节点；\texttt{ls -lL} 检查的是目标节点权限，不能把符号链接自身的 \texttt{lrwxrwxrwx} 当作设备开放给所有人。再次插拔、换 USB 端口或改变两块板的插入顺序，核对别名仍指向相同序列号的板。
+
+最后将程序配置中的设备路径改为 \texttt{/dev/rm\_control}。程序不会因为创建了别名就自动修改原来的配置。拔出设备时链接会消失；重新插入时 udev 重新创建链接，程序仍需关闭旧句柄并重新打开。
+\end{example}
+
+\begin{note}
+若两块同型号板没有唯一序列号，只匹配 VID/PID 会让它们争用同一个别名，不能可靠区分。优先由电控固件提供稳定、唯一的 USB 序列号；临时也可使用实际存在的 \texttt{/dev/serial/by-path/} 路径，但它绑定的是 USB 端口拓扑，换插口或集线器后可能变化。若一块复合设备暴露多个 ACM 端口，还须区分接口，例如核对属性记录中的 \texttt{ID\_USB\_INTERFACE\_NUM}，再用对应的 \texttt{ENV} 条件匹配，不能让同一块板的多个端口抢同一个别名。
+\end{note}
+
+规则未生效时，依次检查文件是否以 \texttt{.rules} 结尾、占位值是否替换、父设备属性是否匹配，以及是否重载后重新插拔。不要把 \texttt{ln -s /dev/ttyACM0 /dev/rm\_control} 当作持久绑定：它仍指向会变化的编号，也没有建立设备身份匹配规则。
+
+\begin{exercise}\label{ex:serial-udev}
+为一块 ACM 板编写固定别名规则，说明每个匹配条件和权限设置的作用。验证换 USB 插口后别名对应的序列号不变。若两块板的 VID/PID 相同，为什么不能只用这两个条件？没有硬件时提交带占位值的规则草稿和验证步骤，不将它记为实机通过。
+\end{exercise}
+
+\subsubsection{设置参数与观察收发}
+
+\texttt{stty} 用于查看或修改终端设备的通信参数，通用形式为 \texttt{stty -F 设备 [设置项]}。一定指定 \texttt{-F}，否则可能修改当前终端。常用设置如下，其余参数请查阅 \texttt{man stty}。
+
+\begin{center}
+\begin{tabular}{p{0.30\textwidth}p{0.60\textwidth}}
+\toprule[1.5pt]
+参数 & 作用 \\
+\midrule[1pt]
+\texttt{-F 设备}、\texttt{-a} & 选择设备；显示全部当前设置。\\
+\texttt{115200}、\texttt{cs8} & 设置波特率与 8 个数据位。\\
+\texttt{-parenb -cstopb} & 禁用奇偶校验，采用 1 个停止位。\\
+\texttt{raw -echo} & 使用原始模式，关闭终端行处理与自动回显。\\
+\texttt{-ixon -ixoff -crtscts} & 关闭软件流控与 RTS/CTS 硬件流控。\\
+\texttt{clocal cread} & 忽略调制解调器控制信号，启用接收。\\
+\bottomrule[1.5pt]
+\end{tabular}
+\end{center}
+
+\begin{example}[检查并设置 115200、8N1]
+确认设备空闲后执行：
+\begin{tbash}
+PORT=/dev/rm_control
+stty -F "$PORT" raw -echo 115200 cs8 -parenb -cstopb \
+    -ixon -ixoff -crtscts clocal cread
+stty -F "$PORT" -a
+\end{tbash}
+本例需先完成别名绑定；也可临时填写已确认的实际设备路径。输出中应能找到波特率 115200、\texttt{cs8}、\texttt{-parenb}、\texttt{-cstopb} 等。对 ACM 设备，这些是主机请求的配置，固件如何使用须查板端约定。后续程序打开串口时可能重新设置参数，因此在终端设好一次不等于所有程序都会沿用。
+\end{example}
+
+使用 pySerial 附带的 miniterm 可以交互收发；通用形式为 \texttt{python3 -m serial.tools.miniterm [选项] 设备 波特率}。本节在 Ubuntu 中安装系统包，并显式使用系统 Python，避免 Conda 环境读不到系统包。
+
+\begin{example}[队内 ACM 设备的收发验证]
+先由电控同学确认测试固件的协议和安全状态。只有\textbf{固件明确提供文本回显测试}时，才使用下面的交互实验；若板端只支持二进制帧，应使用对应的协议测试程序，不能随意输入 \texttt{hello} 来判定链路好坏。
+\begin{tbash}
+sudo apt update
+sudo apt install python3-serial
+PORT=/dev/rm_control
+/usr/bin/python3 -m serial.tools.miniterm --parity N \
+    --eol LF "$PORT" 115200
+\end{tbash}
+参数按测试固件约定调整。在文本回显固件下，输入约定的测试文字并回车，应收到相同内容；此处未开启本地回显，文字来自板端返回。按 Ctrl+] 退出。没有文本回显固件时，先做下一节软件回环，保留实板协议测试为待完成项。ACM 收发不需要短接板上 UART 引脚。
+\end{example}
+
+\begin{example}[扩展：USB 转 TTL 模块的物理回环]
+将 USB 转 TTL 串口模块从电脑拔下，确认它没有连接开发板，再短接\textbf{该模块自身的 TX 与 RX}，重新插入电脑。配置权限后运行：
+\begin{tbash}
+sudo apt update
+sudo apt install python3-serial
+PORT=/dev/ttyUSB0
+/usr/bin/python3 -m serial.tools.miniterm --parity N \
+    --eol LF "$PORT" 115200
+\end{tbash}
+miniterm 默认使用 8 个数据位、1 个停止位，未指定流控选项时关闭流控；这里也未开启本地回显。输入 \texttt{hello} 并回车，应看到从 RX 返回的文字。按 \textbf{Ctrl+]} 退出；Ctrl+T 后按 Ctrl+H 可查看快捷键帮助。
+
+退出并拔下模块，移除短接线，再插入并重开 miniterm。此时输入同样内容应没有返回，用以区分真正收到数据与本地回显。回环通过只能说明该模块及电脑侧收发基本正常，不能证明开发板协议或双方波特率配置正确。
+\end{example}
+
+\subsubsection{没有硬件时：用软件回环练习字节收发}
+
+pySerial 提供 \texttt{loop://} 软件回环：写入的数据会回到同一个程序的接收端。它不创建真实设备，也不检验 Linux 设备权限、驱动或接线。下面的代码只是收发实验工具，不要求先掌握 Python 编程。
+
+\begin{example}[验证原始字节与读取超时]
+先按上一例安装依赖。将以下代码保存为 \texttt{serial\_loop.py}：
+\begin{tpython}
+import serial
+
+with serial.serial_for_url(
+    "loop://", baudrate=115200, bytesize=8, parity="N",
+    stopbits=1, timeout=1, write_timeout=1,
+    xonxoff=False, rtscts=False, dsrdtr=False
+) as port:
+    payload = b"hello\n"
+    port.write(payload)
+    received = port.read(len(payload))
+    print("RX:", repr(received))
+    print("HEX:", received.hex(" "))
+    assert received == payload
+    print("EMPTY:", repr(port.read(1)))
+\end{tpython}
+运行 \texttt{/usr/bin/python3 serial\_loop.py}，预期依次输出 \texttt{RX: b'hello\textbackslash n'}、\texttt{HEX: 68 65 6c 6c 6f 0a}，最后等待约 1 秒输出 \texttt{EMPTY: b''}。这里读取设置了超时；默认无限等待可能让程序看起来“卡住”。最后一次空读取表示超时期间没有读到字节，并不自动等于设备断开。
+\end{example}
+
+\textbf{串口传输的是字节流，不自带消息边界。}发送一次 20 字节，接收端可能分几次读到；连续发送两条消息，也可能被一次读到。真实设备上，带超时的 \texttt{read(n)} 可能返回少于 $n$ 个字节，必须累计并按协议解析。文本协议可以约定换行结束，二进制协议则需要明确的帧结构；不要把任意二进制数据直接当 UTF-8 文本解码。
+
+\begin{exercise}\label{ex:serial-bytes}
+将软件回环的发送内容改为 \texttt{bytes([0x00, 0x41, 0xFF, 0x0A])}，记录十六进制输出。解释为什么终端未显示四个可见字符，以及为什么真实串口上一次读取不足四字节不能直接判定丢包。
+\end{exercise}
+
+\subsubsection{常见问题：按层排查}
+
+\begin{center}
+\begin{tabular}{p{0.24\textwidth}p{0.66\textwidth}}
+\toprule[1.5pt]
+现象 & 优先检查 \\
+\midrule[1pt]
+设备不存在 & 查看插拔日志，检查 USB 数据线、供电与驱动；确认设备名是否变化。虚拟机还需将 USB 设备交给 Ubuntu。\\
+\texttt{Permission denied} & 对比设备所属组与当前会话的组，确认加组后已完整重新登录。\\
+设备忙或数据残缺 & 退出其他串口终端、旧程序；避免多个读取者抢走同一条字节流。\\
+收到乱码 & 先确认是否为二进制协议；UART 链路还需核对波特率等参数，ACM 则按固件约定检查配置。\\
+能打开但没有数据 & ACM 检查固件是否发送、协议及 DTR 约定；UART 另查 TX/RX、共地、电平和流控。\\
+插拔后程序失效 & 关闭失效句柄，重新识别并打开设备；路径仍相同不代表旧句柄恢复可用。\\
+\bottomrule[1.5pt]
+\end{tabular}
+\end{center}
+
+\begin{example}[查找设备占用者]
+\texttt{fuser [选项] 设备} 用于查找正在使用该设备的进程，\texttt{-v} 显示详细信息。在 Ubuntu 中可通过 \texttt{sudo apt install psmisc} 安装，然后执行：
+\begin{tbash}
+PORT=/dev/rm_control
+sudo fuser -v "$PORT"
+\end{tbash}
+根据进程名确认是否为自己的调试工具，再从对应窗口正常退出；不要直接批量杀进程。若怀疑系统服务探测串口，先用日志确认具体服务及其用途，再针对该设备处理。
+\end{example}
+
+\begin{conclusion}
+串口排错依次看\textbf{接线与电平 → 设备与权限 → 参数与占用 → 字节与协议}。能打开不等于能通信，回环通过不等于板端协议通过；同一串口应由一个程序负责读写，再向其他模块分发数据。先用有限超时和十六进制记录看清收到的字节，再进入卷二的协议设计。
+\end{conclusion}
+
+\begin{note}
+工具细节参考官方文档：Linux ACM 驱动：\url{https://www.kernel.org/doc/html/latest/usb/acm.html}；udev 规则：\url{https://www.freedesktop.org/software/systemd/man/latest/udev.html}；GNU stty：\url{https://www.gnu.org/software/coreutils/manual/html_node/stty-invocation.html}；pySerial 工具与软件回环：\url{https://pyserial.readthedocs.io/en/latest/tools.html}、\url{https://pyserial.readthedocs.io/en/latest/url_handlers.html}。
+\end{note}
+\endgroup

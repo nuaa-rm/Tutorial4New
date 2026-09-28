@@ -1,4 +1,4 @@
-\section{无处不在噪声}
+\subsubsection{无处不在噪声}
 噪声存在于各个前后端的各个环节，按产生的逻辑可以分为系统噪声和观测噪声。
 
 \noindent\textbf{系统噪声：}
@@ -12,7 +12,15 @@
     \item 环境噪声：光照变化、反射镜面等之余视觉图像，IMU漂移之余位置估计
 \end{itemize}
 
-\section{滤波的基本概念}
+\begin{example}
+常速度模型预测位置为 1.0 m，真实位置因突然加速变为 1.2 m，传感器读到 1.18 m。模型未解释的变化是 0.2 m，测量误差是 -0.02 m；不能只把两者统称为“相机不准”。
+\end{example}
+
+\begin{exercise}
+若真实位置不变而传感器偏移 0.1 m，应优先检查过程模型还是观测模型？给出理由。
+\end{exercise}
+
+\subsubsection{滤波的基本概念}
 通过传感器得到的测量值，会包括信号的真实值和无处不在噪声。滤波就是分离有用的信号和噪声，提高系统的信噪比。
 根据滤波方式，常被分为时域滤波和频域滤波，这里就先不做展开。
 
@@ -24,8 +32,23 @@
     \item 优化传感器数据：如IMU的数据融合，消除抖动的噪声
 \end{itemize}
 
-\section{常见滤波器及其原理}
-\subsection{低通滤波器}
+\begin{example}
+常量真值 10，观测为 9、11、9、11。均值消除这组交替误差，但若目标突然移动，旧窗口仍会拖慢输出。
+\begin{tpython}
+z=[9,11,9,11]
+y=sum(z)/len(z)
+raw_mse=sum((v-10)**2 for v in z)/len(z)
+assert y==10 and raw_mse==1
+print(y,raw_mse)
+\end{tpython}
+\end{example}
+
+\begin{exercise}
+将最后一次观测改为真实运动后的 15，比较窗口均值与新真值，解释平滑不等于准确。
+\end{exercise}
+
+\subsubsection{常见滤波器及其原理}
+\paragraph*{低通滤波器}
 对时域信号进行操作，平滑信号，去除高频噪声。如图像里的随机噪声，IMU的高速震动等。
 $$Y(n)=aX(n)+(1-a)Y(n-1)$$
 其中a为滤波系数，控制平滑程度，a=1时无效果
@@ -46,11 +69,28 @@ double low_pass(double x, double& y_prev, double a) {
 }
 \end{tcode}
 
-\subsection{高通滤波器}
-取出低频分量，保留高频信息，常应用在边缘检测。
+\paragraph*{高通滤波器}
+抑制低频分量，保留高频信息，常应用在边缘检测。
 
-\section{卡尔曼滤波}
-卡尔曼滤波（Kalman filter）是一种高效的时域递归滤波器，能够从不完全且含有噪声的测量数据中，对动态系统的状态进行最优估计。
+\begin{example}
+初始输出为 0，输入跳为 1，一阶低通系数为 0.5。前三步输出应为 0.5、0.75、0.875。
+\begin{tpython}
+y=0.0
+values=[]
+for x in [1,1,1]:
+    y=0.5*x+0.5*y
+    values.append(y)
+assert values==[0.5,0.75,0.875]
+print(values)
+\end{tpython}
+\end{example}
+
+\begin{exercise}
+将系数改为 0.2 与 1，比较前三步结果，说明平滑强度与跟随速度的取舍。
+\end{exercise}
+
+\subsubsection{卡尔曼滤波}
+卡尔曼滤波（Kalman filter）是一种高效的时域递归滤波器，能够从不完全且含有噪声的测量数据中，对动态系统进行递推估计。在线性、噪声零均值且满足相应独立性条件时，它给出最优线性估计；高斯假设下也是最小均方误差估计。
 
 卡尔曼滤波的核心思想是利用\textbf{预测（Predict）}和\textbf{更新（Update）}两个步骤来估计系统的状态：
 \begin{itemize}
@@ -66,7 +106,7 @@ double low_pass(double x, double& y_prev, double a) {
     \item 姿态估计：进行陀螺仪数据解算
 \end{itemize}
 
-\subsection{公式推导}
+\paragraph*{公式推导}
 抛开令人头大的定义，我们可以从数据融合的角度来理解卡尔曼滤波的推导过程。它的本质是融合先验状态估计和测量数据，并通过计算\textbf{卡尔曼增益（Kalman Gain）}来确定融合的最佳权重。
 
 \begin{enumerate}
@@ -114,19 +154,19 @@ double low_pass(double x, double& y_prev, double a) {
 
     卡尔曼增益的计算如下：
     \begin{equation}
-        \mathbf{K}_k = \frac{\mathbf{P}_{k}^- \mathbf{H}^T}{\mathbf{H} \mathbf{P}_{k}^- \mathbf{H}^T + \mathbf{R}}
+        \mathbf{K}_k = \mathbf{P}_{k}^- \mathbf{H}^T(\mathbf{H} \mathbf{P}_{k}^- \mathbf{H}^T + \mathbf{R})^{-1}
     \end{equation}
 
     最终的最优状态估计值：
     \begin{equation}
-        \mathbf{\hat{x}_{k}} = \mathbf{\hat{x}_{k}} + \mathbf{K}_k (\mathbf{Z}_k - \mathbf{H} \mathbf{\hat{x}_k^-})
+        \mathbf{\hat{x}_{k}} = \mathbf{\hat{x}_{k}^-} + \mathbf{K}_k (\mathbf{Z}_k - \mathbf{H} \mathbf{\hat{x}_k^-})
     \end{equation}
 
     其中：
 
     $\mathbf{K}_k$：卡尔曼增益，决定了预测值和测量值的加权比例。
 
-    $\mathbf{P}_{k}^-$：上一时刻的状态协方差矩阵，表示预测的不确定性。
+    $\mathbf{P}_{k}^-$：当前时刻的先验状态协方差矩阵，表示预测的不确定性。
 
     $\mathbf{R}_k$：测量噪声协方差，表示测量值的可信度。
 
@@ -140,25 +180,49 @@ double low_pass(double x, double& y_prev, double a) {
 
 卡尔曼滤波本质上是一种动态数据融合方法，它在预测和测量之间找到一个平衡点，使得最终的状态估计值更接近真实值。它广泛用于目标跟踪、姿态估计、机器人定位等应用中，极大提高了测量精度。
 
-\subsection{算法实现}
+\paragraph*{算法实现}
 实现分为两步，一个是预测，一个是更新。
 预测部分就是获得先验的状态，和先验估计和真实值的误差的协方差。
 更新即根据先验状态方差更新卡尔曼增益，使用卡尔曼增益来融合数据，得到估计的状态，再去更新估计值和真实值的误差的协方差。
 
-\subsection{拓展部分}
-拓展卡尔曼
-轨迹卡尔曼
+\paragraph*{拓展部分}
+非线性状态或观测模型可使用扩展卡尔曼滤波（EKF）与无迹卡尔曼滤波（UKF），见后文。
 
-\subsection{卡尔曼滤波实战}
-\section{Kalman滤波}
+\begin{example}
+一维随机游走模型：初始估计 0、方差 1，Q=0.1、R=0.9、首次观测 2。预测方差为 1.1，增益为 0.55，更新位置为 1.1，方差为 0.495。
+\begin{tpython}
+x,P,Q,R,z=0.0,1.0,0.1,0.9,2.0
+P_prior=P+Q
+K=P_prior/(P_prior+R)
+x=x+K*(z-x)
+P=(1-K)*P_prior
+assert abs(x-1.1)<1e-12
+assert abs(P-0.495)<1e-12
+print(K,x,P)
+\end{tpython}
+\end{example}
+
+\begin{exercise}
+仅把 R 改为 9，计算增益与更新值，并解释对测量信任程度的变化。
+\end{exercise}
+
+\begin{conclusion}
+\begin{itemize}
+\item 先预测状态和协方差，再用新观测更新，两步顺序不能交换。
+\item Q 描述过程不确定性，R 描述测量不确定性，P 是估计误差协方差。
+\item 矩阵增益使用矩阵逆或线性方程求解，不能用逐元素除法代替。
+\end{itemize}
+\end{conclusion}
+
+\subsubsection{Kalman 滤波的融合推导}
 
 所谓滤波，就是从一系列的观测数据中提取出有用的信息，去除掉噪声和干扰。
 
-\subsection{数据融合}
+\paragraph*{数据融合}
 
 假设存在一个传感器，每次观测到的目标位置都存在一定的误差。我们该如何对这个传感器进行建模呢？
 
-\subsubsection{随机变量角度}
+\subparagraph*{随机变量角度}
 
 引入噪声
 
@@ -210,7 +274,7 @@ double low_pass(double x, double& y_prev, double a) {
 那么考虑一种特殊情况，如果$\sigma = \tau$，那么$\hat{X} = \frac{1}{2} X + \frac{1}{2} Y$，
 这符合我们的多次测量求平均可以减少误差的直觉。
 
-\subsubsection{信号角度*}
+\subparagraph*{信号角度*}
 
 假设，存在两个传感器独立得到两个测量信号$s_1$和$s_2$，他们都被噪声污染了：
 
@@ -240,7 +304,7 @@ $N_1(t) \sim \mathcal{N}(0, \sigma_1^2)$，$N_2(t) \sim \mathcal{N}(0, \sigma_2^
 同样的，可以得到同样的结论。也就是说无论从哪个角度来看，
 权重的分配都是根据噪声的方差来进行的，方差越小，权重越大.
 
-\subsection{状态空间和递推模型}
+\paragraph*{状态空间和递推模型}
 
 通过多种测量方式进行数据融合在实际工程中往往是昂贵的，面对一些不可以直接进行测量的物理量，往往也是难以实现的。
 那么是否可以根据对于系统的先验知识进行一些噪声去除呢？答案是肯定的.
@@ -249,10 +313,11 @@ $N_1(t) \sim \mathcal{N}(0, \sigma_1^2)$，$N_2(t) \sim \mathcal{N}(0, \sigma_2^
 已知这个目标的运动状态变化是缓慢的，那么在对他的两次观测之间，目标的速度变换可以认为是近似不变的。
 
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\linewidth]{一维小滑块.jpg}
     \caption{运动的小滑块}
+\label{fig:F_filter-1}
 \end{figure}
 
 这样我们就可以建立一个匀速模型来描述这个系统的动态行为。
@@ -292,7 +357,7 @@ $N_1(t) \sim \mathcal{N}(0, \sigma_1^2)$，$N_2(t) \sim \mathcal{N}(0, \sigma_2^
     \end{bmatrix}
 \end{equation}
 
-\subsection{噪声评价方式：协方差矩阵}
+\paragraph*{噪声评价方式：协方差矩阵}
 
 考虑到一个多维的随机变量，以二维为例，随机变量$\mathbf{X} = [X_1, X_2]^T$，我们可以通过协方差矩阵来描述这个随机变量的分布情况。
 协方差矩阵$\mathbf{M}$可以表示为:
@@ -312,7 +377,7 @@ $N_1(t) \sim \mathcal{N}(0, \sigma_1^2)$，$N_2(t) \sim \mathcal{N}(0, \sigma_2^
 
 下面简要讨论一下多维随机变量的线性性质：
 
-\subsubsection{可加性}
+\subparagraph*{可加性}
 
 \begin{align}
     \mathbf{E}(\mathbf{X_1} + \mathbf{X_2}) &= \mathbf{E}(\mathbf{X_1}) + \mathbf{E}(\mathbf{X_2}) \\
@@ -336,7 +401,7 @@ D(X_{11}+X_{21}) & \operatorname{Cov}(X_{11}+X_{21},\,X_{12}+X_{22}) \\
 \end{bmatrix}
 \end{align}
 
-\subsubsection{其次性}
+\subparagraph*{其次性}
 
 \begin{equation}
     \begin{aligned}
@@ -345,7 +410,7 @@ D(X_{11}+X_{21}) & \operatorname{Cov}(X_{11}+X_{21},\,X_{12}+X_{22}) \\
     \end{aligned}
 \end{equation}
 
-\subsection{数据融合方法}
+\paragraph*{数据融合方法}
 
 根据我们上面提到的，重新表述一下状态方程和观测方程：
 \begin{align}
@@ -391,7 +456,7 @@ $\mathbf{H}^{-1}$就无法求取了，那么我们应该如何进行融合呢？
 
 $\mathbf{K}$是\textbf{Kalman增益}，它的作用是根据噪声的情况来调整修正的程度。
 
-\subsection{噪声分析}
+\paragraph*{噪声分析}
 
 现在的问题就是如何求解Kaman增益。
 
@@ -442,7 +507,7 @@ $\mathbf{K}$是\textbf{Kalman增益}，它的作用是根据噪声的情况来�
     \end{aligned}
 \end{equation}
 
-\subsection{Kalman增益的求解}
+\paragraph*{Kalman增益的求解}
 
 重新说一下这个问题吧，
 
@@ -472,7 +537,7 @@ $\mathbf{K}$是\textbf{Kalman增益}，它的作用是根据噪声的情况来�
     \mathbf{P}_k = (\mathbf{I} - \mathbf{KH})\mathbf{P}^{-}_{k}
 \end{equation}
 
-\subsection{总结}
+\paragraph*{总结}
 
 Kalman的滤波核心公式就是下面的五条:
 
@@ -484,7 +549,7 @@ Kalman的滤波核心公式就是下面的五条:
     \mathbf{P}_k &= (\mathbf{I} - \mathbf{K}_k\mathbf{H})\mathbf{P}^{-}_k
 \end{align}
 
-\subsection{拓展Kalman(EKF)}
+\paragraph*{拓展Kalman(EKF)}
 
 回顾上面的推到，Kalman滤波存在一定的局限性，即状态转移矩阵$\mathbf{F}$和观测矩阵$\mathbf{H}$是线性的。
 但是在实际工程中，很多系统都是非线性的，那么我们该如何处理非线性系统呢？这就引出了扩展Kalman滤波（EKF）的概念。
@@ -519,14 +584,39 @@ Kalman的滤波核心公式就是下面的五条:
 
 接下来按照正常步骤完成求解算法即可，只需要使用雅可比矩阵代替原来的状态转移矩阵和观测矩阵。
 
-\section{最优估计理论与无迹kalman(UKF)}
+\begin{example}
+两个独立无偏位置估计分别为 2 和 4，方差分别为 1 和 3。按逆方差加权得到 2.5，融合方差为 0.75。
+\begin{tpython}
+x1,x2,v1,v2=2.,4.,1.,3.
+w1=(1/v1)/(1/v1+1/v2)
+x=w1*x1+(1-w1)*x2
+variance=1/(1/v1+1/v2)
+assert (x,variance)==(2.5,0.75)
+print(x,variance)
+\end{tpython}
+\end{example}
+
+\begin{exercise}
+把第二个方差改为 1，计算融合结果；若两个估计来自同一传感器的同一帧，解释独立性假设为何可能失效。
+\end{exercise}
+
+\begin{conclusion}
+\begin{itemize}
+\item 状态空间先规定变量和单位，矩阵尺寸由此决定。
+\item 协方差不只包含方差，还包含分量之间的相关性。
+\item 线性 KF 直接传播均值与协方差；EKF 用雅可比局部线性化。
+\item EKF 的线性化点与误差大小有关，不能把局部近似当成全局准确。
+\end{itemize}
+\end{conclusion}
+
+\subsubsection{最优估计理论与无迹kalman(UKF)}
 
 \textbf{最优估计理论}是一种在统计意义上实现对未知量最优估计的方法，广泛应用于控制工程、导航测控及信号处理领域。
 核心工作是通过对目标进行直接或者间接观测，以估计其某些状态。
 
-\subsubsection{EKF的局限性}
+\subparagraph*{EKF的局限性}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.8\linewidth]{kalman流程.png}
     \caption{Kalman流程}
@@ -567,7 +657,7 @@ $\mathbf{D}(Y) = \mathbf{D}(X) = \frac{1}{3}$，可以看到，近似的结果�
 
 这里不再举例更加复杂的例子了，使用更高阶的近似（高阶EKF），可以使得更加接近真值，但是计算量会大大增加。
 
-\subsection{从另一个视角看Kalman滤波公式}
+\paragraph*{从另一个视角看Kalman滤波公式}
 
 Kalman增益的计算公式：
 
@@ -605,7 +695,7 @@ Kalman增益的计算公式：
 
 那么，这就很简单了，只需要求解出$\mathbf{P}_{xz}(k+1|k)$和$\mathbf{P}_{zz}(k+1|k)$就可以了。
 
-\subsection{无迹变换(UT)}
+\paragraph*{无迹变换(UT)}
 
 那么有没有一种方法，既能够处理非线性系统，又能够保证计算量不大呢？答案是肯定的，这就是无迹变换（UT）的概念。
 
@@ -617,13 +707,13 @@ Kalman增益的计算公式：
 如果取的点足够多，那么理论上就可以得到精准的结果了，但是计算量会大大增加，
 所以一般来说，取的点的数量是有限的。那么点的选取就十分重要了，所以要选择最有特点的点。
 
-\subsection{协方差矩阵}
+\paragraph*{协方差矩阵}
 
 为了找到最优的取点分布情况，先考虑变换前吧。假设存在两个随机变量$\mathbf{X},\mathbf{Y}$,都是正态分布的。
 
 将其在二维空间中进行可视化，可以得到如下图所示的分布情况：
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\linewidth]{相关系数.jpg}
     \caption{相关系数}
@@ -641,7 +731,7 @@ Kalman增益的计算公式：
 
 而相关系数又与协方差矩阵存在关系，就是其反对角线乘积与主对角线的比值。\textbf{这说明了协方差矩阵和分布特征存在某种关联}。
 
-\subsection{sigma点的选取}
+\paragraph*{sigma点的选取}
 
 $\mathbf{P}$是实对称矩阵，因此，它存在一个正交矩阵$\mathbf{U}$，他可以进行分解：
 
@@ -683,24 +773,50 @@ $(*)_i$运算表示取矩阵的第$i$列。对于sigma点，我们对他同样�
 $\mathbf{W}_i$是权重，当他取值为$\frac{1}{2n+1}$时，退化为正常的计算方法。但是考虑到采样点数较少，
 事实上直接平均计算出来的误差较大，权重的设计暂时不去讨论，有兴趣的同学自行探索。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\linewidth]{经验权重公式.png}
     \caption{权重设计经验公式：这一段来自资料，这些参数的确定通常有经验公式，但具体怎么来的目前我不知道}
     \label{fig:weight}
 \end{figure}
 
-\subsection{UKF流程}
+\paragraph*{UKF流程}
 
-\subsubsection{选取sigma点} 按照公式\ref{eq:sigma}
+\subparagraph*{选取sigma点} 按照公式\ref{eq:sigma}
 
-\subsubsection{计算预测} 计算出$\tilde{\mathbf{X}}(k+1|k)$(也就是均值),然后计算$P_{xx}$，类似与公式\ref{eq:Px}
+\subparagraph*{计算预测} 计算出$\tilde{\mathbf{X}}(k+1|k)$(也就是均值),然后计算$P_{xx}$，类似与公式\ref{eq:Px}
 \begin{equation}
     \mathbf{P}_{xx} = \sum_{i=0}^{2n} \mathbf{W}_i (\mathbf{X}_i(k+1|k)-\tilde{\mathbf{X}})(\mathbf{X}_i(k+1|k)-\tilde{\mathbf{X}})^T + \mathbf{Q}
 \end{equation}
 
-\subsubsection{计算先验观测} 以$\tilde{\mathbf{X}}(k+1|k)$为均值新生成sigma点，使用观测方程生成先验观测$Y$
+\subparagraph*{计算先验观测} 以$\tilde{\mathbf{X}}(k+1|k)$为均值新生成sigma点，使用观测方程生成先验观测$Y$
 
-\subsubsection{计算Kalman增益} 公式\ref{eq:ukf-K}计算
+\subparagraph*{计算Kalman增益} 公式\ref{eq:ukf-K}计算
 
-\subsubsection{数据融合和更新等} 公式\ref{eq:final}计算
+\subparagraph*{数据融合和更新等} 公式\ref{eq:final}计算
+
+\begin{example}
+无迹变换的标量示例：均值 0、方差 1，sigma 点为 0、√3、-√3，均值权重为 2/3、1/6、1/6。经 y=x² 后预测均值为 1，而直接计算 f(均值) 为 0。
+\begin{tpython}
+import math
+points=[0.,math.sqrt(3),-math.sqrt(3)]
+weights=[2/3,1/6,1/6]
+mean=sum(w*x*x for w,x in zip(weights,points))
+assert abs(mean-1)<1e-12
+print(mean)
+\end{tpython}
+\end{example}
+
+\begin{exercise}
+改为线性函数 y=2x+1，计算均值并与 f(均值) 比较；指出此例为何不能证明 UKF 对任意函数都精确。
+\end{exercise}
+
+\begin{conclusion}
+\begin{itemize}
+\item EKF 传播局部导数，UKF 传播选定 sigma 点。
+\item sigma 点及权重必须共同匹配均值与协方差。
+\item 均值权重与协方差权重在常见缩放 UT 中可能不同。
+\item 非线性强或模型不合适时，两种方法都需要残差检验。
+\end{itemize}
+\end{conclusion}
+

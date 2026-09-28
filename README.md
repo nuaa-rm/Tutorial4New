@@ -59,7 +59,7 @@
 
 入口：[`01-基础通识/main.tex`](01-基础通识/main.tex)
 
-1. Linux 工作环境（安装、备份*、文件系统、Shell、Git、Conda*；选修小节含 zsh 美化*、AstroNvim*、桌面美化*）
+1. Linux 工作环境（安装、备份*、文件系统、Shell、Git、Conda*、CLion 与 VS Code 安装及图形界面操作、Linux 串口通信基础；选修小节含 zsh 美化*、AstroNvim*、桌面美化*）
 2. 现代 C++（类、lambda / 引用与移动、智能指针、STL、多线程）
 3. 编译过程与 CMake
 

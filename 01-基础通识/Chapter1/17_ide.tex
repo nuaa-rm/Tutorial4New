@@ -1,0 +1,331 @@
+\label{sec:ide-tools}
+\begingroup
+\setlength{\emergencystretch}{3em}
+\subsubsection{先分清编辑器、工具链和工程}
+
+写代码需要编辑器，把代码变成程序需要编译器，暂停程序并查看变量需要调试器。
+集成开发环境（Integrated Development Environment，IDE）把这些操作放进同一个窗口。
+CLion 面向 C/C++ 工程，集成了 CMake 和调试入口；Visual Studio Code（简称 VS Code）以编辑器为基础，通过扩展接入 C++ 和 CMake。
+\textbf{VS Code 与 Visual Studio 是两个软件}，下载时看清名字。
+
+工具链（Toolchain）包括编译器、构建工具和调试器等。CMake 读取工程描述，生成构建规则；编译器把源码编译成程序。
+本节只要求把现成的小工程跑起来，C++ 语法见第 2 章，CMake 原理见第 3 章。
+
+\begingroup
+\begin{longtable}{p{0.19\textwidth}p{0.34\textwidth}p{0.34\textwidth}}
+\toprule[1.5pt]
+项目 & CLion & VS Code\\
+\midrule[1pt]\endhead
+C++ 支持 & 内置代码分析、CMake 与调试界面 & 安装 C/C++、CMake Tools 扩展\\
+Windows 工具链 & 可使用随安装包提供的 MinGW & 另装工具链，本节采用 MSYS2 UCRT64\\
+Ubuntu 工具链 & 使用系统 GCC、GDB 等 & 使用系统 GCC、GDB 等\\
+打开工程 & 打开含 CMakeLists.txt 的文件夹 & File（文件）→ Open Folder（打开文件夹）\\
+\bottomrule[1.5pt]
+\end{longtable}
+\endgroup
+
+两套软件都要会认界面，日常使用可以任选一套。\textbf{先完成所用系统的一条安装路线}，不要把 Windows、Ubuntu、WSL 的路径混着填。
+Windows 截图用于认按钮；在 Ubuntu 中，同名工具窗口和工作流程基本相同。
+图标位置会随版本、语言包、窗口宽度和扩展变化，找不到时先悬停看提示，再用菜单或动作搜索按名称查找。
+
+\subsubsection{安装 CLion：从安装包到工具链检查}
+
+\paragraph*{Windows 安装步骤}
+\begin{enumerate}
+\item 从 JetBrains 官网下载与系统架构匹配的 CLion 安装包，运行安装程序，选择安装位置。
+\item 在 Installation Options（安装选项）中按需勾选桌面快捷方式；Add launchers dir to the PATH 让终端能找到启动器，\textbf{不等于安装了编译器}；Open Folder as Project 增加资源管理器右键入口；文件关联决定双击 \texttt{.cpp} 等文件时用什么打开。这些选项不影响本节核心流程。
+\item 完成安装后启动 CLion。首次启动可跳过导入旧设置，选择主题；若出现许可证页面，按实际用途选择适用的授权或试用方式，具体条件以官网为准。
+\item 欢迎页的 New Project（新建项目）用于生成工程；Open（打开）用于打开已有工程；Get from VCS（从版本控制获取）用于克隆仓库；Customize（自定义）调整外观；Plugins（插件）管理扩展。中文界面可在插件页搜索 Chinese Language Pack，安装后按提示重启。
+\item 打开工程后进入 File → Settings → Build, Execution, Deployment → Toolchains（文件→设置→构建、执行、部署→工具链）。选择 MinGW，Toolset 选 Bundled（捆绑），等待 C/C++ Compiler、Debugger 和 Build Tool 检测完成。若安装版本未附带工具链，先按官方 Windows 工具链教程安装，不能把编辑器目录当作编译器目录。
+\end{enumerate}
+
+\paragraph*{Ubuntu 安装步骤}
+先准备本机编译工具，然后从 JetBrains 官网下载 Linux 版 CLion，或通过 JetBrains Toolbox 安装。
+以下命令在 \textbf{Ubuntu 终端}执行，不能粘贴到 Windows PowerShell。
+\begin{example}
+安装并检查 Ubuntu 工具链：
+\begin{tbash}
+sudo apt update
+sudo apt install build-essential gdb cmake ninja-build
+g++ --version
+gdb --version
+cmake --version
+\end{tbash}
+三个版本命令都应打印版本信息。若下载的是压缩包，在文件管理器中解压到自己的软件目录，进入解压目录的 \texttt{bin}，在终端执行 \texttt{./clion.sh} 启动。
+然后在 Toolchains 中选择 System（系统），检查编译器和 GDB 路径；CMake 可用捆绑版本或已安装的系统版本。
+\end{example}
+
+\Needspace{7\baselineskip}
+\begin{note}
+安装与工具链参考：
+\par{\footnotesize\url{https://www.jetbrains.com/help/clion/installation-guide.html}\par}
+{\footnotesize\url{https://www.jetbrains.com/help/clion/quick-tutorial-on-configuring-clion-on-windows.html}\par}
+Windows 的 MinGW 不能直接构建依赖 Ubuntu/ROS2 的工程；本节的跨平台小程序可以，后续 ROS2 实验应使用相应 Linux 环境。
+\end{note}
+
+\subsubsection{准备两套软件共用的练习工程}
+教材附带 \texttt{examples/ide-demo} 目录。先复制一份作为自己的练习工程。
+Windows 可放在 \texttt{C:/dev/ide-demo}，Ubuntu 可放在 \texttt{\textasciitilde/dev/ide-demo}。
+也可以手动建立文件夹并创建下面两个文件。打开时选这一层目录，文件树顶层应直接出现 \texttt{CMakeLists.txt} 和 \texttt{main.cpp}。
+
+\begin{example}[计分器：预期输出 total = 75]
+\texttt{main.cpp} 的完整内容如下：
+\lstinputlisting[language=C++,frame=single,numbers=left,showstringspaces=false]{examples/ide-demo/main.cpp}
+\texttt{CMakeLists.txt} 的完整内容如下：
+\lstinputlisting[language=cmake,frame=single,numbers=left]{examples/ide-demo/CMakeLists.txt}
+先记住：\texttt{ide\_demo} 是可执行目标名；\texttt{main.cpp} 是它的源文件；工程使用 C++17。
+两套软件操作同一份源码时，分别使用自己的构建目录，避免不同编译器共用 CMake 缓存。
+\end{example}
+
+\subsubsection{CLion 主界面：每一块负责什么}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{ide/clion-overview.jpg}
+\caption{CLion 2025.1.3 Windows 中文界面：教学工程与运行结果（本机截图）}
+\label{fig:clion-overview}
+\end{figure}
+
+\textbf{先沿窗口边缘找入口，再看中央编辑区。} 下表按位置说明常用按钮；被折叠的工具窗口可从 View → Tool Windows（视图→工具窗口）重新打开。
+\begingroup\small
+\begin{longtable}{p{0.30\textwidth}p{0.60\textwidth}}
+\toprule[1.5pt]
+位置／按钮 & 点击后的功能与使用时机\\
+\midrule[1pt]\endhead
+左上角三横线主菜单 & 展开 File、Edit、View、Navigate、Code、Refactor、Build、Run、Tools、Git、Window、Help；打开项目、设置与退出从这里找。\\
+顶部项目名下拉 & 切换或打开项目；先看名称，避免在别的工程中运行。\\
+顶部 Git 分支名 & 查看、切换和新建分支；提交前核对分支。未启用 Git 时可能不显示。\\
+顶部 Debug／Release 下拉 & 选择 CMake 配置；初学调试选 Debug。配置决定构建参数和构建目录。\\
+顶部目标名下拉 & 选择运行目标；Edit Configurations（编辑配置）设置参数、环境变量、工作目录。\\
+锤子 Build（构建） & 编译并链接所选目标，成功后生成程序；只构建不会执行程序。\\
+三角 Run（运行） & 通常先构建再运行当前目标，在 Run 窗口看输出；普通运行不在断点暂停。\\
+小虫 Debug（调试） & 带调试器启动目标，可在断点暂停并观察变量。\\
+方块 Stop（停止） & 终止当前运行或调试进程；仅有活动进程时可用。\\
+放大镜 Search Everywhere & 查找文件、符号和动作；连按两次 Shift 也能打开。\\
+齿轮 Settings（设置） & 配置字体、快捷键、工具链等；注意区分全局设置与工程设置。\\
+右侧铃铛 Notifications（通知） & 查看后台任务、更新和错误提示；读清内容再处理，通知不是编译结果的替代品。\\
+顶部 AI／协作图标（若启用） & AI 入口提供代码辅助，Code With Me 等协作入口用于共享会话；本节的本机构建和调试不依赖它们。\\
+窗口最小化／最大化／关闭 & 控制整个应用窗口；不同于关闭一个编辑标签或隐藏一个工具面板。\\
+\bottomrule[1.5pt]
+\end{longtable}\endgroup
+
+\begingroup\small
+\begin{longtable}{p{0.30\textwidth}p{0.60\textwidth}}
+\toprule[1.5pt]
+位置／按钮 & 点击后的功能与使用时机\\
+\midrule[1pt]\endhead
+左侧文件夹 Project（项目） & 展开目录；双击文件打开；右键目录→New 新建文件，右键文件→Refactor → Rename 重命名并更新引用。\\
+左侧 Structure（结构） & 列出当前文件的函数、类等符号，点击可跳转。\\
+编辑区顶部文件标签及叉号 & 切换／关闭文件；关闭标签不会删除磁盘文件。CLion 有自动保存机制，运行前仍可按 Ctrl+S 明确保存。\\
+行号旁空白槽 & 单击添加／取消红色断点；右键断点可加条件。主函数旁的绿色三角可为相应目标运行或调试。\\
+代码旁灯泡／波浪线 & 查看检查结果与建议修复；Alt+Enter 展开动作，先读说明再应用。\\
+右侧滚动条标记 & 定位错误、警告和搜索命中；悬停查看提示，点击跳到相应位置。\\
+CMake 工具窗口 & 查看配置与生成日志；Reload CMake Project（重新加载）重新读取构建描述，不等于编译。\\
+Build（构建）窗口 & 查编译器、链接器输出；点击报错中的文件与行号跳转。\\
+Run（运行）窗口 & 看程序输出与退出码；程序等待标准输入时，点击控制台输入。\\
+Debug（调试）窗口 & 看调用栈、局部变量、监视表达式与单步控制，详见后面的调试表。\\
+Terminal（终端） & 打开当前机器的 shell；Windows 默认终端不因此变成 Ubuntu。\\
+Git／Commit 工具窗口 & 查看差异、选择提交文件、写提交说明；提交到本地与推送到远程是两步。\\
+工具窗口的省略号／隐藏按钮 & 省略号管理该面板的选项与布局；隐藏只收起面板，不代表停止进程。\\
+底部状态栏 & 行列号用于定位，UTF-8 是编码，LF/CRLF 是换行格式，缩进项控制空格／Tab。点击可调整，勿为消除提示随意改全文件。\\
+\bottomrule[1.5pt]
+\end{longtable}\endgroup
+
+\subsubsection{在 CLion 中构建、运行和调试}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{ide/clion-cmake.jpg}
+\caption{CLion 打开项目向导：构建类型、工具链、生成器与构建目录}
+\label{fig:clion-cmake}
+\end{figure}
+\begin{example}
+\begin{enumerate}
+\item 用 Open 打开练习目录。若出现 CMake 向导，选 Debug、已检测成功的工具链和默认构建目录；等待配置完成。
+\item 在顶部选择 \texttt{ide\_demo}，点锤子。Build 窗口应显示成功；再点绿色三角，Run 窗口应出现 \texttt{total = 75} 和退出码 0。
+\item 打开 \texttt{main.cpp}，在第 11 行（调用 \texttt{add\_score}）左侧放断点，点小虫。程序暂停时该行\textbf{还没有执行}，所以此时不要读取尚未完成初始化的 \texttt{total}。
+\item 在变量区确认 \texttt{score=60}、\texttt{bonus=15}。点 Step Into（步入）进入函数，查看形参 \texttt{current} 和 \texttt{bonus}；单步执行加法，再看 \texttt{result=75}。
+\item 点 Step Out（步出）返回调用者，必要时再单步到下一条语句，确认 \texttt{total=75}；点 Resume（继续）直到输出并正常结束。
+\end{enumerate}
+\end{example}
+
+运行参数位于目标下拉→Edit Configurations。本例不用参数，工作目录设为工程目录即可；以后程序使用相对路径读图片时，这个目录决定从哪里找文件。
+设置里的 Toolchains 选择“用哪些工具”，CMake 配置选择“怎样构建”，运行配置选择“启动哪个程序、传什么参数”。三个入口各管一层。
+
+\begin{exercise}\label{ex:ide-clion}
+在 CLion 中将 \texttt{bonus} 改成 20，预测输出，再构建运行验证。在函数内部设置断点，记录执行加法前后的变量值，最后恢复为 15。
+\end{exercise}
+
+\Needspace{10\baselineskip}
+\subsubsection{安装 VS Code 与 C++ 扩展}
+\paragraph*{Windows 安装步骤}
+\begin{enumerate}
+\item 从 VS Code 官网下载对应架构的 Windows User Installer。运行后选择安装目录，按需勾选桌面快捷方式、右键“通过 Code 打开”与“添加到 PATH”。安装结束后重新打开终端，PATH 才会在新终端中生效。
+\item 启动 VS Code，左侧点四个方块的 Extensions（扩展），搜索并核对发布者 Microsoft，安装 \textbf{C/C++}（\texttt{ms-vscode.cpptools}）和 \textbf{CMake Tools}（\texttt{ms-vscode.cmake-tools}）。二者分别提供 C++ 语言／调试支持和 CMake 工程操作。
+\item 如需中文，安装 Microsoft 的 Chinese (Simplified) Language Pack，在命令面板中执行 Configure Display Language，选简体中文并重启。主题和语言不会改变工程的编译方式。
+\item 安装 C++ 编译工具。Windows 本节采用 MSYS2：从其官网安装到默认 \texttt{C:/msys64}，打开 \textbf{MSYS2 UCRT64} 终端执行下面命令；遇到包组选择可回车使用默认项，再按提示确认安装。
+\end{enumerate}
+\begin{tbash}
+pacman -S --needed mingw-w64-ucrt-x86_64-toolchain
+pacman -S --needed mingw-w64-ucrt-x86_64-cmake mingw-w64-ucrt-x86_64-ninja
+\end{tbash}
+在 Windows“编辑账户的环境变量”中编辑用户 Path，新增 \texttt{C:\textbackslash msys64\textbackslash ucrt64\textbackslash bin}（自定义安装则换成实际路径）。完全退出并重新打开 VS Code，在新 PowerShell 终端运行 \texttt{g++ --version}、\texttt{gdb --version}、\texttt{cmake --version}、\texttt{ninja --version}，应分别得到版本号。
+若有多套工具链，用 \texttt{where.exe g++} 检查搜索结果，随后在 CMake Tools 中选择同一套 UCRT64 编译器和调试器。
+
+\paragraph*{Ubuntu 安装步骤}
+从官网选择 Linux 的 \texttt{.deb} 安装包，架构与机器一致。在下载目录执行 \texttt{sudo apt install ./实际下载的文件名.deb}；这里要替换为真实文件名，不要原样照抄。
+编译工具使用前面 Ubuntu 示例的安装命令。启动 VS Code 后同样安装 C/C++ 和 CMake Tools，工具链选系统 GCC。
+\begin{note}
+VS Code 本体及 C/C++ 扩展\textbf{不包含 C++ 编译器}。先确认版本命令能运行，再处理编辑器配置。
+安装参考：\par{\footnotesize\url{https://code.visualstudio.com/docs/setup/windows}\par
+\url{https://code.visualstudio.com/docs/setup/linux}\par}
+Windows GCC 配置：\par{\footnotesize\url{https://code.visualstudio.com/docs/cpp/config-mingw}\par}
+MSYS2 下载：\url{https://www.msys2.org/}。
+\end{note}
+
+\subsubsection{VS Code 主界面：活动栏、编辑器和底部面板}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{ide/vscode-overview.jpg}
+\caption{VS Code 1.137.0 Windows 中文界面：文件树、编辑区和面板入口（本机截图）}
+\label{fig:vscode-overview}
+\end{figure}
+
+\begingroup\small
+\begin{longtable}{p{0.30\textwidth}p{0.60\textwidth}}
+\toprule[1.5pt]
+位置／按钮 & 点击后的功能与使用时机\\
+\midrule[1pt]\endhead
+顶部 File／Edit／Selection & 文件菜单管理打开、保存；编辑菜单提供撤销、查找与替换；选择菜单提供多光标等选择操作。\\
+顶部 View／Go／Run & 视图菜单显示面板与命令面板；转到菜单定位文件、行和定义；运行菜单管理调试。窄窗口可能折进省略号。\\
+顶部 Terminal／Help & 终端菜单新建终端、运行任务；帮助菜单查看版本、文档和快捷键。\\
+顶部搜索框／命令中心 & 快速打开文件、查找命令；Ctrl+P 搜索文件，Ctrl+Shift+P 打开命令面板。\\
+左侧纸张 Explorer（资源管理器） & 显示文件树。悬停目录标题出现新建文件、新建文件夹、刷新和折叠全部按钮；双击文件固定标签，单击常为预览。\\
+左侧放大镜 Search（搜索） & 跨文件搜索；展开替换框可批量替换。Aa 区分大小写，整词按钮限制完整单词，.* 启用正则表达式。\\
+左侧分支 Source Control（源代码管理） & 查看差异；文件旁加号暂存，暂存区减号取消暂存，提交按钮创建本地提交。同步／推送会访问远程。\\
+左侧三角加小虫 Run and Debug & 选择调试配置，查看变量、监视、调用堆栈和断点；单击大运行按钮可能要求先配置调试器。\\
+左侧四方块 Extensions（扩展） & 搜索、安装、禁用或卸载扩展；齿轮管理某个扩展，核对发布者后再安装。\\
+左侧 CMake 图标（安装扩展后） & 展开项目状态与项目大纲，选择工具链、配置、构建目标、启动目标并运行／调试。\\
+左下角头像／齿轮 Manage & 头像用于账户相关功能；齿轮打开设置、快捷键、主题等。设置里区分 User（用户）和 Workspace（工作区）作用范围。\\
+标题栏布局按钮 & 显示或隐藏主侧栏、底部面板、辅助侧栏等；隐藏侧栏不会关闭工程。\\
+额外的活动栏图标 & Python、远程开发、AI 等扩展会增加入口；悬停看名称，用活动栏右键菜单管理显示项。\\
+\bottomrule[1.5pt]
+\end{longtable}\endgroup
+
+\begingroup\small
+\begin{longtable}{p{0.30\textwidth}p{0.60\textwidth}}
+\toprule[1.5pt]
+位置／按钮 & 点击后的功能与使用时机\\
+\midrule[1pt]\endhead
+编辑标签、圆点和叉号 & 标签切换文件；圆点表示有未保存修改，Ctrl+S 保存；叉号关闭标签，不删除文件。\\
+编辑区右上分栏／省略号 & 分栏可并排查看两个文件；省略号包含当前编辑器的更多动作。\\
+编辑区右上三角及下拉 & 含义由语言与扩展决定，可能是运行当前文件；CMake 工程按后文的 CMake 命令运行整个目标。\\
+面包屑／缩略图 & 面包屑显示文件路径与函数层级，点击定位；右侧缩略图帮助快速滚动长文件。\\
+行号左侧与折叠箭头 & 点空白槽设断点；点折叠箭头收起代码块，不会删除代码。\\
+Problems（问题） & 汇总诊断；点某条跳转到对应行，错误计数不等于本次构建一定失败，须结合构建日志判断。\\
+Output（输出） & 看扩展日志，右侧下拉选择 CMake 等通道；通常不能在这里给程序输入。\\
+Debug Console（调试控制台） & 看调试信息、求表达式值；C++ 程序的标准输入一般使用终端或外部控制台。\\
+Terminal（终端） & 运行 shell 命令或与程序交互；加号新建终端，下拉选 PowerShell/Bash 等，分栏并排显示，垃圾桶结束该终端及其会话。\\
+面板最大化／叉号 & 最大化扩大面板，叉号隐藏面板；隐藏终端面板不会自动结束里面的程序。\\
+底部行列号、Spaces、UTF-8、CRLF/LF & 分别控制定位、缩进、编码和换行格式；C++ 表示当前语言模式，若误为 Plain Text，应改为 C++。\\
+底部错误／警告、分支、远程标记 & 点计数打开问题；分支项处理版本控制；远程标记用于连接 WSL/SSH 等环境。先确认当前到底连在哪台机器。\\
+\bottomrule[1.5pt]
+\end{longtable}\endgroup
+
+\Needspace{10\baselineskip}
+\subsubsection{在 VS Code 中运行同一个 CMake 工程}
+\begin{example}
+\begin{enumerate}
+\item File → Open Folder 打开练习目录。检查文件树顶层的两个文件。自己创建或已检查的教材工程可按提示信任；未知工程先在受限模式下检查内容。
+\item 按 Ctrl+Shift+P 打开命令面板，输入 \texttt{CMake: Select a Kit}，选实际安装的 GCC：Windows 用 UCRT64，Ubuntu 用系统 GCC。若找不到，先运行 \texttt{CMake: Scan for Kits}。
+\item 执行 \texttt{CMake: Select Variant}，选择 Debug；再执行 \texttt{CMake: Configure}。在 Output 中选 CMake 通道，确认配置、生成成功。
+\item 执行 \texttt{CMake: Build}，等待成功，再执行 \texttt{CMake: Run Without Debugging}。若询问启动目标，选择 \texttt{ide\_demo}；终端应输出 \texttt{total = 75}。
+\item 在第 11 行左侧点出红色断点，执行 \texttt{CMake: Debug}，观察程序停在该行。按后面表格单步并检查变量，再继续到退出。
+\end{enumerate}
+\end{example}
+
+本例没有 CMake Presets，因而使用 Kit（工具链组合）与 Variant（构建类型）路线。
+如果工作区启用了 Presets，命令可能变成 Select Configure Preset；先在工作区设置中将 \texttt{cmake.useCMakePresets} 设为 \texttt{never} 再做本例。
+以后接手带 \texttt{CMakePresets.json} 的队内工程时，应使用工程提供的预设。
+CMake Tools 的按钮可能在侧栏 Project Status，也可能在底部；\textbf{上述命令面板是布局变化时的备用入口}。
+若需要显式指定构建目录，可在工作区设置搜索 \texttt{cmake.buildDirectory}，使用 \texttt{\$\{workspaceFolder\}/build-vscode}。
+
+\begin{note}
+本例用 CMake Tools 直接启动调试，不要求手写 \texttt{launch.json}。
+以后需要自定义时，\texttt{tasks.json} 描述任务，\texttt{launch.json} 描述如何启动调试，\texttt{c\_cpp\_properties.json} 配置代码分析；它们都不代替 \texttt{CMakeLists.txt}。
+代码补全无红线只能说明分析器接受配置，不能证明程序已经编译成功。
+\end{note}
+
+\begin{exercise}\label{ex:ide-vscode}
+用 VS Code 打开同一练习工程，搜索 \texttt{bonus}，跳转到定义，再将它重命名为 \texttt{reward}（使用 Rename Symbol／重命名符号，而非无差别全文替换）。保存、构建并运行，确认输出仍为 75；最后撤销并保存。
+\end{exercise}
+
+\subsubsection{调试工具栏：不要只记小虫和三角}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{ide/clion-debug.jpg}
+\caption{CLion 在调用前暂停：高亮执行行、底部单步按钮、调用栈与局部变量}
+\label{fig:clion-debug}
+\end{figure}
+调试（Debugging）的目标是观察程序如何执行。断点让程序在某行执行前暂停，单步决定下一次停在哪里。
+以下快捷键为 Windows/Linux 常见默认键位；若换过 Keymap，以按钮悬停提示为准。
+\begingroup\small
+\begin{longtable}{p{0.28\textwidth}p{0.14\textwidth}p{0.16\textwidth}p{0.31\textwidth}}
+\toprule[1.5pt]
+按钮／功能 & CLion & VS Code & 使用时机\\
+\midrule[1pt]\endhead
+Continue／Resume 继续（三角） & F9 & F5 & 跑到下一断点或程序结束。\\
+Pause 暂停（双竖线） & 看工具栏 & F6 & 运行中请求暂停，排查卡在哪里。\\
+Step Over 步过（弯箭头） & F8 & F10 & 执行当前行，函数调用整体完成。\\
+Step Into 步入（向下箭头） & F7 & F11 & 进入当前行调用的函数内部。\\
+Step Out 步出（向上箭头） & Shift+F8 & Shift+F11 & 执行到当前函数返回调用者。\\
+Restart／Rerun 重新开始（回转箭头） & 看工具栏 & Ctrl+Shift+F5 & 重新启动进程，不是把时间倒回上一行。\\
+Stop 停止（方块） & Ctrl+F2 & Shift+F5 & 结束当前调试会话／启动的程序。\\
+Toggle Breakpoint 切换断点 & Ctrl+F8 & F9 & 在当前行添加或取消断点。\\
+\bottomrule[1.5pt]
+\end{longtable}\endgroup
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{ide/vscode-debug.jpg}
+\caption{VS Code 单步执行调用后暂停：顶部调试工具栏与左侧变量 total = 75}
+\label{fig:vscode-debug}
+\end{figure}
+\textbf{变量（Variables）}显示当前栈帧的局部变量；\textbf{监视（Watches/Watch）}可以添加 \texttt{score + bonus} 等表达式；
+\textbf{调用栈（Frames/Call Stack）}显示函数调用关系，点击不同帧会切换变量作用域；\textbf{断点列表（Breakpoints）}集中启用、禁用或移除断点。
+表达式必须在当前作用域有效：进入 \texttt{add\_score} 后看形参 \texttt{current}，想查看 \texttt{main} 的 \texttt{score} 则切回它的栈帧。
+在暂停状态下查看简单表达式即可；会修改变量或调用函数的表达式可能改变被调试程序。
+
+\begin{conclusion}
+\begin{itemize}
+\item 保存只把修改写到磁盘；配置读取 CMake 规则；构建生成程序；运行启动程序；调试带着调试器启动程序。
+\item Run 不停在断点，Debug 才会；断点高亮行尚未执行，变量也必须已初始化才有可解释的值。
+\item 工具链、构建配置、运行配置分开检查；界面布局变了就按动作名搜索，不凭图标颜色猜功能。
+\end{itemize}
+\end{conclusion}
+
+\subsubsection{常见问题与排查顺序}
+\begingroup\small
+\begin{longtable}{p{0.29\textwidth}p{0.61\textwidth}}
+\toprule[1.5pt]
+现象 & 先检查什么\\
+\midrule[1pt]\endhead
+找不到编译器或 CMake & 在当前环境的终端查版本和路径；安装后重启 IDE。CLion 检查 Toolchains，VS Code 检查 Kit，不能只安装扩展。\\
+运行按钮灰色／没有目标 & 是否打开了含 CMakeLists.txt 的目录？CMake 配置是否成功？该文件中是否创建了可执行目标？\\
+修改了代码但输出不变 & 保存文件，检查当前工程、构建目录和启动目标，再构建运行，避免运行另一份旧程序。\\
+断点空心／不停／变量被优化 & 使用 Debug 构建并启动调试；确认正在运行刚构建的程序，断点所在代码确实会执行。\\
+更换工具链后 CMake 报缓存冲突 & 为新工具链换一个构建目录并重新配置；不要让 MSVC、MinGW、Linux 共用缓存。\\
+终端有输出却不能输入 & 确认是 Terminal/Run 控制台，且程序还活着并在读输入；Output 只是日志。本例输出后立即退出。\\
+编辑器红线与构建结果不一致 & 检查 C++ 扩展的编译器路径、标准与 CMake 配置提供者，再查看真实构建日志。\\
+Windows 能跑，Ubuntu 找不到文件 & 检查路径大小写、斜杠、工作目录和系统依赖；不要复制 Windows 可执行文件到 Ubuntu 当作本机程序。\\
+\bottomrule[1.5pt]
+\end{longtable}\endgroup
+
+\begin{note}
+界面与操作核对资料（2026 年 9 月查阅；本机截图版本以图注为准）：
+\par\footnotesize
+\url{https://www.jetbrains.com/help/clion/guided-tour-around-the-user-interface.html}\par
+\url{https://www.jetbrains.com/help/clion/debugging-code.html}\par
+\url{https://code.visualstudio.com/docs/getstarted/userinterface}\par
+\url{https://code.visualstudio.com/docs/cpp/cmake-linux}\par
+\url{https://code.visualstudio.com/docs/debugtest/debugging}
+\end{note}
+\endgroup

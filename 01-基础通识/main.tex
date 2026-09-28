@@ -13,6 +13,7 @@
 ]{../templates/elegantbook}
 
 \input{../templates/preamble.tex}
+\usepackage{longtable}
 
 \title{长空御风视觉组培训教材}
 \subtitle{卷一 · 基础通识}
@@ -45,9 +46,9 @@
 \chapter{Linux 工作环境}
 
 \begin{introduction}
-  \item 学习目标：独立完成 Ubuntu 22.04 双系统的分区与安装；使用 timeshift 制作并恢复系统快照；运用常用命令完成文件管理、查找与权限修改；编写并运行简单的 shell 脚本，正确配置环境变量；使用 git 完成克隆、修改、提交与推送的完整流程。
-  \item 建议学时：约 1 周，含安装与练习。
-  \item 本卷边界：不涉及 ROS2 工作空间细节，相关内容见卷二；标 $*$ 的小节（备份、重装、美化、conda 等）为选修，不计入考核。
+  \item 学习目标：独立完成 Ubuntu 22.04 双系统的分区与安装；使用 timeshift 制作并恢复系统快照；运用常用命令完成文件管理、查找与权限修改；编写并运行简单的 shell 脚本，正确配置环境变量；使用 git 完成克隆、修改、提交与推送；安装 CLion 与 VS Code，识别界面按钮并完成 C++ 工程的构建、运行和断点调试；识别队内 USB CDC ACM 设备、配置权限与固定别名、完成收发实验，记录收发字节并定位常见连接故障。
+  \item 建议学时：约 1 周，另留半天完成 CLion 与 VS Code 安装、运行和调试练习，另用 2--3 小时完成串口识别、权限配置与回环实验。
+  \item 本卷边界：不涉及 ROS2 工作空间细节，相关内容见卷二；串口只讲 Linux 设备访问与基础收发，帧协议、CRC 和 ROS2 桥接见卷二“多机通信方法”；标 $*$ 的小节（备份、重装、美化、conda 等）为选修，不计入考核。
 \end{introduction}
 
 \section{安装 Ubuntu 22.04 双系统}
@@ -72,6 +73,12 @@
 \section{Conda 的简单使用*}
 \input{Chapter1/16.tex}
 
+\section{CLion 与 VS Code 开发环境}
+\input{Chapter1/17_ide.tex}
+
+\section{Linux 串口通信基础}
+\input{Chapter1/18_serial.tex}
+
 \section{本章小结}
 本章围绕"装好系统 → 用好系统 → 护好系统"这条主线展开：
 
@@ -81,6 +88,8 @@
 \item \textbf{shell 与环境变量}：会编写并运行简单的 shell 脚本；理解 PATH 的作用，掌握修改环境变量的三种方式及其生效范围，日常配置优先写入 \textasciitilde/.bashrc。
 \item \textbf{git}：理解工作区、暂存区、本地版本库、远程仓库四个区域的流转关系，熟练掌握 add/commit/push/pull 的日常闭环，会写基本的 .gitignore。
 \item \textbf{conda}（选修）：会创建、激活、退出和删除虚拟环境，配环境时先在虚拟环境中试错。
+\item \textbf{图形开发工具}：安装 CLion 与 VS Code，识别菜单、项目树、工具栏、输出面板和状态栏；用同一份 CMake 工程完成配置、构建、运行和断点调试，能区分编辑器与编译工具链。
+\item \textbf{串口通信}：识别队内 USB CDC ACM 设备及所属组，用 udev 为目标板绑定固定别名；区分 USB 通信与 UART 参数的含义，通过约定的测试协议验证收发；按设备、权限、命名、占用和协议逐层排错。
 \end{itemize}
 
 完成本章验收后，就可以揣着新装好的系统进入第 2 章了。配置环境的道路还会不断延伸——不要停下来啊，第 2 章现代 C++ 见。
@@ -89,14 +98,23 @@
 \item 说出双系统安装的四个主要流程，并解释安装类型为什么必须选择"其它选项"。
 \item 解释"挂载"的含义，并说明 U 盘插入 Ubuntu 后一般被自动挂载到哪个目录下。
 \item 写出命令：以易读单位统计当前目录下各子目录的磁盘占用（只统计一层）。
-\item 解释 \texttt{chmod 755 run.sh} 中三个数字各自的含义，并写出与之等价的符号写法。
+\item （基础）解释 \texttt{chmod 755 run.sh} 中三个数字各自的含义，并写出等价的符号写法。串口设备属于 \texttt{dialout} 组但当前用户不在该组时，应如何取得访问权限？
 \item 写出命令：在 \texttt{/etc} 目录下查找所有以 \texttt{.conf} 结尾的文件，并把结果保存到家目录下的 \texttt{conf\_list.txt} 中。
 \item 说明 \texttt{./test.sh} 与 \texttt{bash test.sh} 两种脚本运行方式的区别，以及前者为什么需要先执行 \texttt{chmod +x}。
 \item 说明 git 中工作区、暂存区、本地版本库三者的区别，以及 \texttt{git add} 与 \texttt{git commit} 各自的作用。
-\item （提高）比较 timeshift 快照与 tar 系统镜像两种备份方式，说明各自适用的场景。
+\item （基础）分别说明 CLion 的锤子、绿色三角、小虫按钮的作用，以及 VS Code 的 Explorer、Extensions、Terminal、Output 各负责什么。为什么装好 VS Code 的 C/C++ 扩展后仍可能无法编译？
 \item （提高）若把 PATH 误写为 \texttt{export PATH=/opt/app/bin}（未包含原来的 \texttt{\$PATH}），会出现什么现象？分别就"终端内直接修改"和"写入 .bashrc"两种情况说明恢复方法。
 \item （实践）编写脚本 \texttt{backup.sh}：将家目录下指定的某个目录打包为以当天日期命名的 \texttt{tar.gz} 文件，保存到 \texttt{\textasciitilde/backups} 目录中，并解压验证内容完整。
+\item （串口综合）队内两块 USB CDC ACM 板的 VID/PID 相同，序列号分别为 \texttt{CTRL-A} 和 \texttt{CTRL-B}。解释 ACM 与 USB 转 UART 的区别，说明为什么设置 115200、8N1 不能直接推出原生 USB 的吞吐上限。以 VID/PID 占位值写出将 A 板绑定为 \texttt{/dev/rm\_control} 的 udev 规则，给出重载和核验步骤，并解释为什么绑定后仍需处理断线重连、一次读取仍不一定得到一条完整消息。
 \end{problemset}
+
+\section{本章验收}
+\begin{enumerate}
+\item 演示在 Ubuntu 中定位目录、检查文件权限、运行自己的 Shell 脚本，并解释一次 Git 暂存与提交的差别；安装与备份部分使用已有操作记录核验。
+\item 在 CLion 和 VS Code 中分别打开教学工程，指出菜单、文件树、编辑区、构建入口、运行入口、调试入口、终端和状态栏；两套软件均成功输出 \texttt{total = 75}。
+\item 任选一套工具现场断点调试：在函数调用处暂停，演示步入、步过、步出、继续；指出当前栈帧与变量值，并解释为什么暂停行的赋值尚未生效。
+\item 使用队内 USB CDC ACM 板，演示设备识别、普通用户权限检查和固定别名绑定，改变插入顺序后仍能定位同一块板；在电控确认的安全测试状态下，按约定协议验证收发。由考核者给出一个权限或命名故障，说明定位依据。无硬件时先演示软件回环、十六进制输出和超时，提交 udev 规则草稿，并注明设备绑定与板端协议验收待补。
+\end{enumerate}
 
 % ============================================================
 \chapter{现代 C++ 基础}
@@ -132,7 +150,7 @@
 \item \textbf{lambda、引用与移动}：lambda 的捕获列表（值捕获 vs 引用捕获）和 \texttt{std::function} 承接要熟练使用，回调和排序比较器里到处都是它；左值/右值、两种引用与 \texttt{std::move}/\texttt{std::forward} 是本章最容易混淆的部分，记住"能取地址的是左值、有名字的右值引用是左值"这两句就够应付日常，其余在实践中慢慢消化。
 \item \textbf{智能指针}：掌握 \texttt{unique\_ptr}（独占）、\texttt{shared\_ptr}（计数共享）、\texttt{weak\_ptr}（观察不占有）的分工，默认优先 \texttt{make\_unique}/\texttt{make\_shared}；循环引用的成因和用 \texttt{weak\_ptr} 破解的方法必须理解。
 \item \textbf{STL}：\texttt{vector} 的常用成员函数和扩容机制要熟练；队列、堆栈、映射等容器知道各自解决什么问题、会去 cppreference 查用法即可；迭代器失效是新手重灾区，删除元素时牢记用 \texttt{erase} 的返回值更新迭代器。
-\item \textbf{多线程与内存}：会创建线程，使用 \texttt{mutex}/\texttt{lock\_guard}、共享锁、原子变量和条件变量；能用 \texttt{future}/\texttt{promise}/\texttt{async} 传递异步结果；理解生产者—消费者、读者—写者、哲学家进餐和死锁；进程内存分区（代码/常量/静态/堆/栈）和栈帧机制是理解悬垂指针、栈溢出等经典 bug 的地基，务必建立图景。
+\item \textbf{多线程与内存}：会创建线程，使用 \texttt{mutex}/\texttt{lock\_guard}、共享锁、原子变量和条件变量；能用 \texttt{future}、\texttt{promise}、\texttt{async} 传递异步结果；理解生产者—消费者、读者—写者、哲学家进餐和死锁；进程内存分区（代码/常量/静态/堆/栈）和栈帧机制是理解悬垂指针、栈溢出等经典 bug 的地基，务必建立图景。
 \end{itemize}
 
 本章验收通过后，恭喜你已经掌握了阅读现代 C++ 工程代码的主要语法设施。下一章我们来看看这些代码是如何被编译器组装成可执行文件的——CMake 见。
@@ -193,6 +211,21 @@
 \item （提高）你把 \texttt{SAVE\_OUTPUT} 从 \texttt{OFF} 改成 \texttt{ON}，配置完成后就运行了原程序，却没看到新提示。请按 CMake 变量、编译宏、可执行文件的顺序，解释中间漏了哪一步。
 \item （实践）观察一次“哪些文件需要重新编译”。在静态库工程中，先不改任何文件，连续构建两次；然后只改 \texttt{src/armor.cpp} 中的乘数，再构建一次。用 \texttt{--verbose} 保存后两次构建的输出，看看各自做了哪些工作。最后把乘数改回来。
 \end{problemset}
+
+\section{本章验收}
+由考核者现场检查以下任务。可查阅本章参数表，重点是能独立完成操作，并根据实际输出解释结果。
+章末习题中的增量构建日志用于自测；这里检查从拿到源码到交付程序的完整过程。
+\begin{enumerate}
+    \item \textbf{独立构建}：在新的练习目录中，只保留自己编写的头文件、源文件和 \texttt{CMakeLists.txt}，从空构建目录开始配置、构建并运行装甲板程序。现场指出源码目录、构建目录、库目标和可执行目标，展示实际输出 \texttt{score=30}。
+    \item \textbf{调整工程}：按考核者给定的新目标名修改构建描述，在另一个空构建目录中构建。先说出预期产物的位置，再运行验证；说明每处目标名修改的用途。
+    \item \textbf{定位故障}：由考核者在工程副本中设置一个故障，例如源文件路径拼错、函数声明与定义不一致，或把 \texttt{OpenCV\_DIR} 指向不含包配置文件的目录。先展示实际错误并判断失败阶段，再修复并重新构建。若错误配置没有触发失败，应说明依赖是否从其他路径被找到，不能把猜测当作错误记录。
+    \item \textbf{安装与交付}：使用静态库版本，将程序安装到考核者指定的练习目录，从该目录启动。提交源码和一份简短的构建说明，写明工具版本、配置与构建命令、安装位置和预期输出，使另一位同学能从源码复现。
+    \item \textbf{接入外部依赖}：在 Ubuntu 桌面环境中构建图像读取示例，使用考核者提供的图片，展示窗口与实际尺寸输出。指出查找 OpenCV、设置包含目录和链接库分别是哪条配置，并解释三者的用途。
+\end{enumerate}
+\begin{note}
+验收以本次构建成功和实际运行输出为依据，不能只展示旧构建目录中的可执行文件。
+若暂时没有图形桌面，可先核验 OpenCV 的查找与构建，但图像窗口演示须注明待补验；ROS2 选读片段不计入本章验收。
+\end{note}
 
 \endgroup
 

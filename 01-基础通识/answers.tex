@@ -261,6 +261,44 @@ conda env list
 \end{note}
 \end{solution}
 
+\paragraph*{新增随堂练习题解（第\ref{sec:ide-tools}节）}
+\begin{solution}
+CLion 练习：将 bonus 改为 20 后，输出应为 \texttt{total = 80}。在加法行暂停时 current 为 60、bonus 为 20，result 尚未完成初始化；执行该行后 result 为 80。恢复 bonus 为 15 后重新构建，输出恢复为 75。
+
+VS Code 练习：把光标放在 main 中 bonus 的声明或引用上，执行 Rename Symbol（默认 F2），输入 reward。该局部变量的声明与调用处引用一起变化；函数形参 bonus 是另一个作用域的符号，不应被同步改名。程序仍输出 75。撤销后保存，再检查构建和输出。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:serial-device}：识别串口设备}
+\begin{solution}
+实际设备名、所属组与链接以插拔日志及 \texttt{ls -l} 输出为准。队内 USB CDC ACM 设备通常呈现为 \texttt{ttyACM0} 等节点，编号可能因设备发现顺序改变；有唯一标识时可优先使用对应的 \texttt{/dev/serial/by-id/} 链接，或按下一题配置 udev 别名。设备不存在先查连接、驱动、虚拟机 USB 直通及路径；权限不足先对比设备权限、所属组与当前会话的组。Ubuntu 中常见的处理是加入 \texttt{dialout} 后完整注销并重新登录，而不是放宽为所有用户可写。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:serial-udev}：绑定 ACM 固定名称}
+\begin{solution}
+先运行 \texttt{udevadm info --name=/dev/ttyACM0 --attribute-walk}，从目标板的同一个 USB 父设备块中记录 VID、PID 和唯一序列号。规则模板如下，三个大写占位值必须用实测值替换：
+\begin{tbash}
+SUBSYSTEM=="tty", KERNEL=="ttyACM*", \
+  ATTRS{idVendor}=="YOUR_VID", ATTRS{idProduct}=="YOUR_PID", \
+  ATTRS{serial}=="YOUR_SERIAL", \
+  SYMLINK+="rm_control", GROUP="dialout", MODE="0660"
+\end{tbash}
+前两个条件限定 tty 子系统与 ACM 节点；VID/PID 匹配型号，序列号区分同型号的板。\texttt{SYMLINK+=} 创建别名，\texttt{GROUP} 与 \texttt{MODE} 设置目标节点所属组及读写权限。规则保存到 \texttt{/etc/udev/rules.d/99-rm-control.rules} 后，重载规则并重新插拔设备：
+\begin{tbash}
+sudo udevadm control --reload-rules
+# 先停止串口程序，再拔插目标设备
+udevadm settle
+readlink -f /dev/rm_control
+ls -lL /dev/rm_control
+udevadm info --name=/dev/rm_control --query=property
+\end{tbash}
+换插口后应仍通过该别名查到同一序列号；底层 ACM 编号允许变化。VID/PID 相同的两块板若不匹配唯一序列号，会争用别名。没有唯一序列号时需完善固件标识，或按实际条件使用绑定端口位置的路径，并说明换插口会影响该路径。仅完成规则草稿不能替代硬件验证。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:serial-bytes}：字节与消息边界}
+\begin{solution}
+十六进制输出应为 \texttt{00 41 ff 0a}。其中 \texttt{00} 是空字符，\texttt{41} 对应 ASCII 字母 A，\texttt{ff} 不是合法的单字节 UTF-8 字符，\texttt{0a} 为换行，因此不能期待四个可见字符。串口是字节流，数据分批到达或读取超时都可能导致短读，应累计字节并按约定边界解析，不能仅凭一次短读判定丢包。软件回环成功不检验真实设备权限、接线或波特率匹配。
+\end{solution}
+
 \subsubsection*{章末习题}
 
 \paragraph*{章末第 1 题：双系统安装流程}
@@ -286,7 +324,7 @@ du -h --max-depth=1 .
 \texttt{-h} 使用易读单位，\texttt{--max-depth=1} 限制显示层级。输出通常包含各子目录和当前目录总计；统计时仍会递归计算子目录里的内容。
 \end{solution}
 
-\paragraph*{章末第 4 题：权限 755}
+\paragraph*{章末第 4 题：文件权限与串口访问权限}
 \begin{solution}
 三位依次对应所有者、所属组、其他用户。\texttt{7=4+2+1} 表示读写执行，\texttt{5=4+1} 表示读和执行。
 普通脚本可写成：
@@ -294,6 +332,8 @@ du -h --max-depth=1 .
 chmod u=rwx,go=rx run.sh
 \end{tbash}
 这里用 \texttt{=} 明确设置权限，比在未知原权限上用 \texttt{+} 更准确。若文件原先带有特殊权限位，要精确清除它们可再执行 \texttt{chmod u-s,g-s,o-t run.sh}。
+
+对于题设串口，在普通用户终端运行 \texttt{sudo usermod -aG dialout "\$USER"}，完整注销并重新登录，再用 \texttt{id -nG} 检查当前会话的组。\texttt{-aG} 表示追加附加组；不要用 \texttt{chmod 777} 或长期以 root 运行程序来代替正确的组权限配置。
 \end{solution}
 
 \paragraph*{章末第 5 题：查找配置文件并保存}
@@ -319,14 +359,11 @@ find /etc -type f -name '*.conf' > "$HOME/conf_list.txt"
 \texttt{git commit} 把暂存区里的内容保存为一次本地提交，并不会自动推送到远程。
 \end{solution}
 
-\paragraph*{章末第 8 题：Timeshift 与 tar 备份}
+\paragraph*{章末第 8 题：开发工具界面与编译器}
 \begin{solution}
-Timeshift 适合在升级或改配置前保存系统状态，出问题时回退。它通常侧重系统文件，用户数据是否包含取决于配置，不能默认家目录也已经备份。
-tar 把选定目录归档，便于把文件备份搬到其他存储介质；覆盖范围、排除目录、权限以及恢复步骤都需要自己安排。
-\begin{note}
-正文所说的“tar 系统镜像”实际是文件级归档，不是逐扇区磁盘镜像。分区表和引导信息不会因为打包根目录就自动完整保存；恢复整个系统时还要处理这些部分。
-备份是否可靠，要看能否恢复，不是看压缩包够不够大。
-\end{note}
+CLion 的锤子构建目标，绿色三角启动普通运行，小虫带调试器启动；普通运行不会因为设置了断点而暂停。
+VS Code 的 Explorer 管理文件树，Extensions 管理扩展，Terminal 提供可输入命令的 shell，Output 显示扩展日志。
+C/C++ 扩展提供代码分析和调试接入，本身不包含编译器；必须另外安装并选中 GCC、MSVC 等工具链。本例还需要 CMake 和相应构建工具。
 \end{solution}
 
 \paragraph*{章末第 9 题：修复 PATH}
@@ -386,6 +423,23 @@ bash backup.sh "$HOME/backup-answer-source"
 成功时会打印备份路径和解压目录，文件名包含当天日期，同一天重复运行也不会覆盖上次归档。
 \texttt{diff -r} 无输出且退出码为 0，表示本例的目录内容一致；它不验证所有扩展属性和权限。备份期间不要修改源目录，需要一致的在线系统备份时应采用适合的快照方案。
 验证目录保留下来供你查看，确认无误后再自行清理。
+\end{solution}
+
+\clearpage
+\paragraph*{章末第 11 题：USB CDC ACM 与固定别名}
+\begin{solution}
+ACM 是 USB 通信设备类中的抽象控制模型，队内板端直接通过 USB 与电脑通信，Linux 提供 \texttt{ttyACM} 串口接口。USB 转 UART 则在转换芯片另一侧通过 TX/RX 传输 UART 信号。115200、8N1 表示波特率、8 数据位、无校验、1 停止位；UART 每字节再加一个起始位，才得到每字节 10 位的估算。原生 USB ACM 的线路编码配置是否影响行为由固件决定，它不是 USB 总线速率，所以不能直接套用该吞吐上限。
+
+将 A 板绑定为指定别名的规则为：
+\begin{tbash}
+SUBSYSTEM=="tty", KERNEL=="ttyACM*", \
+  ATTRS{idVendor}=="YOUR_VID", ATTRS{idProduct}=="YOUR_PID", \
+  ATTRS{serial}=="CTRL-A", \
+  SYMLINK+="rm_control", GROUP="dialout", MODE="0660"
+\end{tbash}
+VID/PID 按题意留为占位值，部署时必须替换为目标板的真实值；\texttt{CTRL-A} 是本题给定序列号，不是队内设备的默认值。重载及核验命令见随堂练习~\ref{ex:serial-udev}~的答案。先只接 A，再接 B，并交换插入顺序，核对别名始终对应 A 的序列号和正确权限；仅看 \texttt{readlink} 指向哪个编号还不能证明身份正确。程序配置必须改为该别名。
+
+udev 在设备重新出现时重建链接，但旧的已打开句柄不会恢复，程序需处理断线并重新打开。ACM 提供的仍是字节流接口，一次读取可能只得到半条消息或同时读到多条消息，应累计字节并按协议定界。USB 底层的数据包边界不能当作应用层消息边界。
 \end{solution}
 
 \clearpage

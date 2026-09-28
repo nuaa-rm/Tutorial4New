@@ -1,0 +1,264 @@
+[
+  [
+    "C_dl.tex",
+    1,
+    "pass",
+    "0.0 1.0",
+    ""
+  ],
+  [
+    "C_dl.tex",
+    3,
+    "syntax-only: requires external runtime/data"
+  ],
+  [
+    "C_dl.tex",
+    4,
+    "syntax-only: requires external runtime/data"
+  ],
+  [
+    "C_dl.tex",
+    5,
+    "syntax-only: requires external runtime/data"
+  ],
+  [
+    "C_dl.tex",
+    6,
+    "syntax-only: requires external runtime/data"
+  ],
+  [
+    "E_camera.tex",
+    5,
+    "pass",
+    "186",
+    ""
+  ],
+  [
+    "E_camera.tex",
+    6,
+    "pass",
+    "6416.0",
+    ""
+  ],
+  [
+    "E_camera.tex",
+    7,
+    "pass",
+    "1 0.8\n2 1.6\n5 4.0",
+    ""
+  ],
+  [
+    "E_camera.tex",
+    9,
+    "syntax-only: requires external runtime/data"
+  ],
+  [
+    "E_camera.tex",
+    10,
+    "pass",
+    "0.024",
+    ""
+  ],
+  [
+    "F_filter.tex",
+    2,
+    "pass",
+    "10.0 1.0",
+    ""
+  ],
+  [
+    "F_filter.tex",
+    3,
+    "pass",
+    "[0.5, 0.75, 0.875]",
+    ""
+  ],
+  [
+    "F_filter.tex",
+    4,
+    "pass",
+    "0.55 1.1 0.495",
+    ""
+  ],
+  [
+    "F_filter.tex",
+    5,
+    "pass",
+    "2.5 0.75",
+    ""
+  ],
+  [
+    "F_filter.tex",
+    6,
+    "pass",
+    "0.9999999999999999",
+    ""
+  ],
+  [
+    "G_ba.tex",
+    1,
+    "pass",
+    "400.0 280.0",
+    ""
+  ],
+  [
+    "G_ba.tex",
+    3,
+    "pass",
+    "[1. 2. 3.] [0. 2. 3.]",
+    ""
+  ],
+  [
+    "G_ba.tex",
+    4,
+    "syntax-only: requires external runtime/data"
+  ],
+  [
+    "G_ba.tex",
+    5,
+    "pass",
+    "2.0 0.0",
+    ""
+  ],
+  [
+    "G_ba.tex",
+    7,
+    "syntax-only: requires external runtime/data"
+  ],
+  [
+    "G_ba.tex",
+    8,
+    "pass",
+    "0.017255987458257727",
+    ""
+  ],
+  [
+    "G_ba.tex",
+    9,
+    "pass",
+    "[1. 2. 3.]",
+    ""
+  ],
+  [
+    "G_ba.tex",
+    10,
+    "syntax-only: requires external runtime/data"
+  ],
+  [
+    "H_mpc.tex",
+    1,
+    "pass",
+    "[0.2, 0.36000000000000004, 0.48800000000000004]",
+    ""
+  ],
+  [
+    "H_mpc.tex",
+    2,
+    "pass",
+    "1 -0.126\n10 -1.257",
+    ""
+  ],
+  [
+    "H_mpc.tex",
+    3,
+    "pass",
+    "0.01 0.573",
+    ""
+  ],
+  [
+    "H_mpc.tex",
+    4,
+    "pass",
+    "0.2 0.6800000000000002",
+    ""
+  ],
+  [
+    "H_mpc.tex",
+    5,
+    "pass",
+    "0 0.2 0.2\n1 0.2 0.4\n2 0.2 0.6000000000000001\n3 0.19999999999999996 0.8\n4 0.09999999999999998 0.9\n5 0.04999999999999999 0.95",
+    ""
+  ],
+  [
+    "I_nav.tex",
+    3,
+    "pass",
+    "0.525 1.0250000000000001",
+    ""
+  ],
+  [
+    "I_nav.tex",
+    4,
+    "pass",
+    "{'A': 0, 'B': 1, 'C': 3}",
+    ""
+  ],
+  [
+    "I_nav.tex",
+    5,
+    "pass",
+    "状态检查通过",
+    ""
+  ],
+  [
+    "J_comm.tex",
+    2,
+    "pass",
+    "ping",
+    ""
+  ],
+  [
+    "J_comm.tex",
+    3,
+    "pass",
+    "[b'AB', b'XYZ']",
+    ""
+  ],
+  [
+    "J_comm.tex",
+    4,
+    "pass",
+    "[7]",
+    ""
+  ],
+  [
+    "J_comm.tex",
+    6,
+    "pass",
+    "代次检查通过",
+    ""
+  ],
+  [
+    "K_sdr.tex",
+    2,
+    "syntax-only: requires external runtime/data"
+  ],
+  [
+    "K_sdr.tex",
+    3,
+    "pass",
+    "0.785398",
+    ""
+  ],
+  [
+    "K_sdr.tex",
+    4,
+    "pass",
+    "level1\nlevel2\nlevel2\ninformation",
+    ""
+  ],
+  [
+    "K_sdr.tex",
+    5,
+    "pass",
+    "[1, 0, 1, 0]",
+    ""
+  ],
+  [
+    "K_sdr.tex",
+    6,
+    "pass",
+    "vision",
+    ""
+  ]
+]

@@ -1,83 +1,128 @@
-\section{从代码到机器人控制}
-通过之前的学习，相信大家已经对如何再CMake的帮助下使用C++编写代码有了一定的了解。
-之后你们会学习一些针对特殊需求的库，比如OpenCV、cuda等。他们能解决一些特定的问题，比如视觉处理
+\subsubsection{从代码到机器人控制}
+通过之前的学习，相信大家已经对如何在CMake的帮助下使用C++编写代码有了一定的了解。
+之后你们会学习一些针对特殊需求的库，比如OpenCV、cuda等。它们能解决一些特定的问题，比如视觉处理
 和模型运行等。
 
 在此之前，你们需要学会如何把将要学的这些内容连接起来。比如，机器人的相机、传感器、MCU发来的信息会不断地
-想你发送信息，我们需要一种“系统”能够从容地处理这些信息，对这些信息进行运算再发送出去。
-这个“系统”其实就是操作系统（OS, Operating System）。对于个人计算机，我们使用的是Windows、Linux、Mac OS等,
-他们帮我们进行了很多底层的工作，比如处理硬件、网络、驱动程序等。
-而对于机器人来说，我们使用的是\textbf{ROS}(Robot Operating System)，它帮助我们管理多个信息来源和不同信息，同时负责不同模块之间的通信。
-这样一来，我们就不必要关注多个线程之间的同步、死锁等问题，只需要专注于业务逻辑的实现。
-可以理解为如果不使用ROS2，我们需要自己使用C++的多线程库编写一个复杂的多线程系统，而ROS2可以替代你们上一章学的C++多线程，因为一个复多线程系统的编写
-往往setTimeOut、wait等操作非常复杂，而ROS2使用DDS(Data Distribution Service)来实现通信，它已经帮我们处理了很多底层的细节。
-\subsection{ROS2的版本}
+向你发送信息，我们需要一种“系统”能够从容地处理这些信息，对这些信息进行运算再发送出去。
+ROS2（Robot Operating System 2）是运行在 Linux 等操作系统之上的机器人软件框架。
+它用节点组织功能，用话题、服务与动作连接模块；底层通信通常由 DDS（Data Distribution Service，数据分发服务）实现。
+它不会替你消除所有并发问题。执行器决定回调怎样被调度，多个回调访问共享数据时，仍需考虑同步和对象生命周期。
+\paragraph*{ROS2的版本}
 和Linux与Ubuntu的关系类似，ROS2也有不同的版本或者说分支，比如ROS2 Foxy、ROS2 Eloquent等。
-现在，我们队伍中主流使用的版本是\textbf{ROS2 Humble Hawksbill}。
-\begin{figure}
+本章固定以 Ubuntu 22.04 与\textbf{ROS2 Humble Hawksbill} 为教学环境。
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{ros2_logo.png}
-    \caption{ROS2的最新版本跟新情况}
+    \caption{ROS2 发行版示意（历史截图）}
     \label{fig:ros2_logo}
 \end{figure}
 
-\subsection{ROS2的安装}
+\paragraph*{ROS2的安装}
 
-首先，我们需要安装ROS2的Humble Hawksbill 版本。
+先完成官方 Humble 安装页中的系统检查与软件源配置，再安装软件包。不要把其它 Ubuntu 版本的源混进来。
+\begin{note}
+安装步骤与系统版本必须匹配：\url{https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debs.html}。
+第三方一键安装脚本会修改软件源和系统配置，先下载并检查内容，再决定是否执行。
+\end{note}
+命令通用形式为 $ros2\enspace COMMAND\enspace [OPTIONS]$。
+\begin{center}
+\begin{tabular}{ll}
+\toprule[1.5pt]
+命令 & 作用 \\
+\midrule[1pt]
+$ros2\enspace run\enspace PACKAGE\enspace EXECUTABLE$ & 启动包中的程序 \\
+$ros2\enspace node\enspace list$ & 列出已发现的节点 \\
+$ros2\enspace topic\enspace list$ & 列出话题 \\
+$ros2\enspace topic\enspace echo\enspace TOPIC$ & 查看消息 \\
+$ros2\enspace interface\enspace show\enspace TYPE$ & 查看接口字段 \\
+\bottomrule[1.5pt]
+\end{tabular}
+\end{center}
+其余选项用 $ros2\enspace COMMAND\enspace {-}{-}help$ 查询；Shell 命令参数见 man 手册。
+\begin{example}
+在已配置官方软件源的 Ubuntu 22.04 终端安装并验证环境：
 \begin{tbash}
-    wget http://fishros.com/install -O fishros && . fishros
+sudo apt update
+sudo apt install ros-humble-desktop python3-colcon-common-extensions
+source /opt/ros/humble/setup.bash
+ros2 pkg executables demo_nodes_cpp
 \end{tbash}
-这条命令会帮你下载并运行一个脚本，根据它的引导选择下载ROS humble即可。
-大概的输出为：
-\begin{tbash}
-    some output should be here...
-\end{tbash}
-这是一个非常好用的网站，江湖人称鱼香ROS。
+应能找到 talker 和 listener。每开一个新终端，都要先加载上述环境。
+\end{example}
+\begin{exercise}
+运行示例中的查询命令，记录 talker 所属包名，并用帮助命令找到启动它的语法。
+\end{exercise}
 
-这个命令在配置一个白板的Ubuntu系统时一般第一个运行，它会引导你更换系统源、安装必要的依赖包、配置环境变量等（甚至是下载QQ和微信）
-这就减少了去官网上一个个寻找ubuntu版本的麻烦。
-
-\section{ROS2架构}
-\subsection{ROS2的系统架构}
+\subsubsection{ROS2架构}
+\paragraph*{ROS2的系统架构}
 ROS2的系统架构如下图所示：
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{ros2_arch.png}
     \caption{ROS2 架构（学完本章后可再回顾）}
     \label{fig:ros2_arch}
 \end{figure}
-一些需要听说过的属于的翻译：
+常见术语的含义：
 \begin{itemize}
     \item \textbf{rclcpp}: ROS Client Library for C++，它是ROS2的C++客户端库，负责ROS2节点的创建、通信、生命周期管理等，我们使用的主要是这个库。
     \item \textbf{rmw}: ROS Middleware，它是ROS2的中间件，负责底层通信的实现。
-    \item \textbf{Qos}: Quality of Service，它是ROS2的通信质量保证机制，用来控制通信的延迟、带宽等。
+    \item \textbf{QoS}: Quality of Service，它是ROS2的通信质量保证机制，用来控制通信的延迟、带宽等。
     \item \textbf{DDS}: Data Distribution Service，它是ROS2的分布式数据服务，用来实现ROS2节点之间的通信。
 \end{itemize}
-\subsection{ROS2的节点与组件}
+\paragraph*{ROS2的节点与组件}
 \textbf{ROS2的基本思想是分布式的、模块化的。}
 
-ROS2的节点是ROS2系统的基本单元，它可以包含多个ROS2组件。
+节点（Node）是组织功能的逻辑单元。组件（Component）是可动态装载的节点实现，组件容器可在同一进程内装载多个节点。
 
 我们可以用这个图来直观地理解ROS2的\textbf{节点}：
-\begin{figure}[h]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{ros2_node.png}
     \caption{ROS2节点与组件}
     \label{fig:ros2_node}
 \end{figure}
-这是一个动图，你可以去\underline{\href{https://docs.ros.org/en/humble/_Nodes-TopicandService.gif}{这里}}播放看看。
+
+\begin{note}
+节点通信动图见 \url{https://docs.ros.org/en/humble/_Nodes-TopicandService.gif}。
+\end{note}
+
 
 这个图直观的反映了ROS2的模块化是依靠\textbf{节点}完成的，节点的职责可以是接收某个传感器的信息（比如相机），也可以是对数据进行处理的流程（比如对相机的图像进行滤波），也可以是提供服务（比如反馈相机的参数信息）
-当然这些功能也可以在一个节点中完成。同时可以注意到，节点之间的信息交流是依靠组件(Component)来实现的，一般来说一个节点的运行入口函数也是某个组件的回调函数。
+这些功能也可以在一个节点中完成。节点之间通过话题、服务或动作通信；回调由执行器（Executor）调度，组件不是通信通道。
 
 
 对于我们实际上手操作的情况下，我们更感知的操作方式有两种。
 一是使用CLI tools（command-line interface），二是使用Client Libraries。
 我们一般使用CLI tools来创建、运行、调试节点，而Client Libraries则用于编写节点的逻辑。
 
-\section{使用RCLCPP接口}
+\begin{example}
+在终端一加载 Humble 环境后启动 talker；终端二加载相同环境，查询节点与话题：
+\begin{tbash}
+# 终端一
+ros2 run demo_nodes_cpp talker
+# 终端二
+ros2 node list
+ros2 topic info /chatter
+ros2 topic echo /chatter
+\end{tbash}
+\end{example}
+
+\begin{exercise}
+记录 /chatter 的消息类型、发布者数量。停止 talker 后重新查询，说明节点与话题的关系。
+\end{exercise}
+
+\begin{conclusion}
+\begin{itemize}
+\item 包组织源码和依赖，节点承担运行时功能，话题传递同类型消息。
+\item 组件把节点装入进程；执行器调度回调，不能代替共享数据的同步。
+\item QoS 决定通信策略，双方兼容才可能建立连接。
+\end{itemize}
+\end{conclusion}
+
+\subsubsection{使用RCLCPP接口}
 由图\ref{fig:ros2_arch}可以看到，rclcpp是ROS2的C++接口，我们在C++中使用这个来描述机器人的节点和节点之间的行为。
-\subsection{创建ROS2工作空间和第一个包}
+\paragraph*{创建ROS2工作空间和第一个包}
 首先，你需要寻找一个你喜欢的地方新建一个文件夹，这个名字不重要，但建议起个有意义的名字。
 \begin{tbash}
     mkdir -p ~/ros2_ws/src
@@ -86,21 +131,21 @@ ROS2的节点是ROS2系统的基本单元，它可以包含多个ROS2组件。
 
 这里把工作空间（就是文件夹）命名为ros2\_ws，并在其下创建了一个src文件夹，这个文件夹是ROS2的源代码存放的地方。
 
-接着，我们需要创建一个ROS2包，这个包就是我们要编写的节点。
+接着创建功能包（Package）。包组织代码和依赖，一个包可以包含多个节点程序。
 \begin{tbash}
     ros2 pkg create --build-type ament_cmake my_package
 \end{tbash}
 此时的目录结构应类似：
 \begin{tbash}
 ros2_ws/
-├── src/
-│   └── my_package/
-│       ├── CMakeLists.txt
-│       ├── package.xml
-│       └── src/
-├── build/      # colcon build 后生成
-├── install/
-└── log/
++-- src/
+|   +-- my_package/
+|       +-- CMakeLists.txt
+|       +-- package.xml
+|       +-- src/
++-- build/      # colcon build 后生成
++-- install/
++-- log/
 \end{tbash}
 
 然后回到工作空间的根目录(ros2\_ws),输入以下命令编译这个包：
@@ -109,23 +154,23 @@ ros2_ws/
     colcon build
 \end{tbash}
 
-编译好的包会产生,build、install、log三个文件夹，其中build文件夹是编译好的可执行文件，install文件夹是编译好的库文件，log文件夹是编译过程的日志。
+编译好的包会产生,build、install、log三个文件夹，其中 build 保存构建中间文件，install 保存安装后的程序、库和环境脚本，log 保存构建日志。
 
-除此之外，我们还有有一个神秘小工具介绍一下。一般来说，如果按照普通的编写流程，在ros2的包中链接一个库会有多步操作，但是如果使用ament\_cmake\_auto，就可以一步到位。
-我们只需要将CMakeLists.txt文件改为\ref{lst:ament_cmake_auto_config}。之后再加入库的依赖关系，至于需要在xml文件中添加depend命令就可以，就可以自动下载、编译、链接库。
-可以参考\url{https://zhuanlan.zhihu.com/p/438191834}
+本章附录给出普通 ament\_cmake 配置（代码\ref{lst:ament_cmake_auto_config}），先学会显式声明依赖与安装目标。
 
+
+ament\_cmake\_auto 可减少重复配置，但不会自动下载缺少的系统依赖；依赖安装需另行使用 apt 或 rosdep。
 之后我们就可以开始编写代码了。
-\subsection{编写第一个ROS2节点}
+\paragraph*{编写第一个ROS2节点}
 
 新建my\_node.cpp和my\_node.h文件。并在这两个文件中新建一个类my\_node，继承自rclcpp::Node。
 Node类是ROS2提供的基础的类，我们会在这个基类上进行扩展。
 
-其构造函数一般是用来设置节点的发布者和订阅者，绑定对应的回调函数。实现为代码\ref{lst:my_node_cpp}（其实这个数字可以点击）的3-38行。
-\subsection{编写发布者和订阅者}
+其构造函数一般是用来设置节点的发布者和订阅者，绑定对应的回调函数。实现为代码\ref{lst:my_node_cpp}（其实这个数字可以点击）中的构造函数。
+\paragraph*{编写发布者和订阅者}
 要编写发布者和订阅者，我们需要使用rclcpp::Publisher和rclcpp::Subscription。
 现在节点的类中定义一个私有成员变量，用来保存订阅者的句柄，并在构造函数中初始化。
-需要注意，定义的应该是$rclcpp::Publisher<T>::SharedPtr/create\_subscription<T>::SharedPtr$即共享指针，
+需要注意，定义的应该是$rclcpp::Publisher<T>::SharedPtr/rclcpp::Subscription<T>::SharedPtr$即共享指针，
 
 初始化的时候需要使用$create\_publisher<T>/create\_subscription<T>$这个模版函数,它传入的模版参数是消息类型，函数参数是topic名称、QoS等（这个等一般是指的一个回调函数的函数指针）。
 
@@ -136,9 +181,12 @@ Node类是ROS2提供的基础的类，我们会在这个基类上进行扩展。
          10
          );
 \end{tcode}
-这个代码将类的成员变量string\_publisher\_绑定到话题名称为"send"的发布者，QoS为10。这个话题名称是我随便起的，
-QoS是Quality of Service的缩写，用来控制发布者和订阅者之间的通信质量，一般来说基本的数据通讯用$1$，图像用$10$，当然也有更高级的办法确定通讯质量。
-
+这个代码将类的成员变量string\_publisher\_绑定到话题名称为"send"的发布者，历史队列深度为10。这个话题名称是我随便起的，
+QoS（Quality of Service，服务质量）包含历史深度、可靠性和持久性等策略。
+整数 10 是 KeepLast 历史深度，不是“质量等级”。图像话题常使用 SensorDataQoS；发布与订阅策略必须兼容。
+\begin{note}
+把队列调大不会让处理更快。图像处理跟不上时，可能只是在积压更旧的帧。
+\end{note}
 这样变量string\_publisher\_所指的空间就有了一个发布者，他会发布std\_msgs::msg::String类型的消息。但是很明显你能发现他并不会发布消息，因为还没有编写发布消息的逻辑。
 不妨在订阅回调中进行发布。
 
@@ -149,9 +197,10 @@ QoS是Quality of Service的缩写，用来控制发布者和订阅者之间的�
          std::bind(&my_node::subscription_callback, this, std::placeholders::_1)
          );
 \end{tcode}
-这个代码将类的成员变量string\_subscription\_绑定到话题名称为"receive"的订阅者，QoS为10。
-std::bind其实在C++11之后已经可以被lambda函数平替了，但是某些时候会报神秘段错误，所以这里还是使用bind来绑定一个成员函数。（这里相当于$[this] \{ timer\_callback(); \}$）
-this是所有类的成员函数的第一个参数（这个知识应该不冷门吧），用来绑定当前类的实例，$std::placeholders::_1$是C++的占位符，用来指第一个参数，也就是收到的消息。
+这个代码将类的成员变量string\_subscription\_绑定到话题名称为"receive"的订阅者，历史队列深度为10。
+std::bind 将成员函数与当前对象 this 绑定，占位符 \texttt{std::placeholders::\_1} 接收传入的消息。
+也可使用签名匹配的 lambda：\texttt{[this](std\_msgs::msg::String::SharedPtr msg)}。
+二者都要确保对象在回调执行时仍然存活，不能把段错误归因于 lambda 本身。
 这个绑定的成员函数就是所谓的订阅回调函数，他会在收到消息时被调用。然后就可以在这个函数中写收到信息之后要干什么了。
 \begin{tcode}
 void my_node::subscription_callback(const std_msgs::msg::String::SharedPtr msg)
@@ -163,14 +212,7 @@ void my_node::subscription_callback(const std_msgs::msg::String::SharedPtr msg)
 }
 \end{tcode}
 
-函数体中第一行是通过RCLCPP的日志系统打印收到的消息。RCLCPP的日志系统可以输出以下几种信息：
-\begin{itemize}
-    \item RCLCPP\_INFO: 一般用于输出一些信息，比如发布者发布消息、订阅者收到消息等。
-    \item RCLCPP\_WARN: 一般用于输出一些警告信息，比如有一些错误发生。
-    \item RCLCPP\_ERROR: 一般用于输出一些错误信息，比如有一些不可预料的错误发生。
-    \item RCLCPP\_FATAL: 一般用于输出一些致命错误信息，比如程序崩溃了。
-\end{itemize}
-这些消息一方面打印在终端之外，另一方面也会被ROS2的日志系统记录下来，方便后续分析。
+函数体中第一行通过 RCLCPP 的日志系统打印收到的消息。这里使用 INFO 记录正常收包事件；日志级别、输出位置和高频日志限流统一见第\ref{sec:ros2-logging}节。
 
 之后的三行是创建一个String消息类型，并设置它的data字段为收到的消息加上一段文字。然后使用刚刚定义的发布者发布这个消息。
 
@@ -179,37 +221,17 @@ void my_node::subscription_callback(const std_msgs::msg::String::SharedPtr msg)
 正式一点来说（比如在实车测试的时候），我们需要在终端中工作空间下，输入以下命令：
 \begin{tbash}
     colcon build
+    source install/setup.bash
     ros2 run my_package my_node
 \end{tbash}
 然后打开 rqt 的 Message Publisher 与 Message Monitor，或 Foxglove Studio，分别向话题发布与订阅消息，查看节点运行情况。
 
-顺带一提，这前面的一长串数字是时间戳，用来记录消息的发布时间，这个时间是从Linux内核中以1970年1月1日午夜（00:00:00）为基准的系统时间，这个基准是C语言time
-\begin{tcode}
-    1969年8月，贝尔实验室的程序员肯汤普逊利用妻儿离开一个月的机会，
 
-    开始着手创造一个全新的革命性的操作系统，
-    
-    他使用B编译语言在老旧的PDP-7机器上开发出了Unix的一个版本。
-
-    随后，汤普逊和同事丹尼斯里奇改进了B语言，
-    
-    开发出了C语言，重写了UNIX，新版于1971年发布。
-
-    那时的计算机操作系统是32位，时间用32位有符号数表示，则可表示 68 年,
-
-    用32位无符号数表示，可表示136年。他们认为以1970年为时间原点足够可以了。 
-
-    因此，C 的 time 函数 就这么 定了，后来的 java 等也用它，
-    
-    微机也用它，工作站本来就是unix系统当然也用它。
-    
-    （今后若用64位机年限更没问题。）
-
-    1970年1月1日 算 UNIX 和 C语言 生日。
-\end{tcode}
-
-\subsection{定时器回调}
-这个非常简单，定义RCLCPP的TimeBase类型，然后用C++中的$chrono$库来提供定时器时间，再使用$create_wall_timer$绑定一个函数作为回调函数即可。
+\begin{note}
+日志中的时间用于排查事件顺序。Unix 时间以 UTC 1970 年 1 月 1 日为纪元；ROS 时间还可能由仿真时钟提供，跨节点比较前先确认时钟来源。
+\end{note}
+\paragraph*{定时器回调}
+这个非常简单，定义rclcpp::TimerBase 类型，然后用C++中的$chrono$库来提供定时器时间，再使用\texttt{create\_wall\_timer}绑定一个函数作为回调函数即可。
 \begin{tcode}
     //定义成员变量
     rclcpp::TimerBase::SharedPtr timer_;
@@ -228,9 +250,9 @@ void my_node::subscription_callback(const std_msgs::msg::String::SharedPtr msg)
 \end{tcode}
 这个回调函数是每秒钟被调用一次，打印一下计数器的值，并发布一个计数器的消息。
 
-\subsection{编写自定义消息类型}
-所谓自定义消息类型，就是使用基本的数据类型加上ros2中$std_msgs$或$sensor_msgs$等消息包中的消息类型，来定义我们自己的消息类型。
-以实际应用例子，我们的机器人在自瞄时传输瞄准的装甲板数据时，需要知道id(地方装甲板的编号)，yaw(装甲板的偏航角度)等信息。
+\paragraph*{编写自定义消息类型}
+自定义消息由字段组成。字段可使用基本类型，也可使用 ROS2 已有的消息类型，例如 \texttt{std\_msgs/Header}。
+以实际应用例子，我们的机器人在自瞄时传输瞄准的装甲板数据时，需要知道id(敌方装甲板的编号)，yaw(装甲板的偏航角度)等信息。
 同时我们还要知道识别到的时间信息等，所以只有自定义消息类型才能满足需求。
 
 
@@ -245,11 +267,15 @@ void my_node::subscription_callback(const std_msgs::msg::String::SharedPtr msg)
 
 然后在该包中创建msg目录，用于存放自定义消息文件。
 
-\textbf{消息包名必须大写字母开头，只包含数字和字母，内容中不能有大写字母。}
+
+\begin{note}
+包名如 \texttt{my\_msgs} 使用小写字母、数字和下划线，并以字母开头。消息文件名如 \texttt{My.msg} 以大写字母开头，只含字母和数字。两种名字不要混淆。
+\end{note}
+
 
 2. 定义自定义消息
 
-在msg目录中创建.msg文件，定义消息的结构。
+在 msg 目录中创建 My.msg 文件，定义消息结构；yaw 在本例中以弧度表示。
 \begin{tbash}
     std_msgs/Header header
     uint8 id
@@ -268,14 +294,27 @@ void my_node::subscription_callback(const std_msgs::msg::String::SharedPtr msg)
     source install/setup.bash
 \end{tbash}
 
-编译完成后，自定义消息的C++头文件将生成在install/my\_msgs/include/my\_msgs/msg目录下。
+编译后以 \texttt{\#include <my\_msgs/msg/my.hpp>} 引用生成的头文件；实际安装目录可含包名子目录，不应手工硬编码头文件搜索路径。
 
 5. 在节点中使用自定义消息
 
 在其他节点中使用自定义消息时，需要在CMakeLists.txt中添加对my\_msgs的依赖，并在代码中包含自定义消息的头文件。例如：
 就像其他ROS2自带的消息类型一样。
 
-\subsection{ROS2的消息类型}
+
+\begin{example}
+完成完整工程附录的消息包后，加载工作空间环境，检查定义是否生成：
+\begin{tbash}
+source ~/ros2_ws/install/setup.bash
+ros2 interface show my_msgs/msg/My
+\end{tbash}
+输出应包含 header、id、yaw、detect\_success 四个字段；Header 的内部字段会展开显示。
+\end{example}
+
+\begin{exercise}
+给消息加入 float64 distance 字段，重新构建消息包，检查接口输出。约定 distance 单位为米。
+\end{exercise}
+\paragraph*{ROS2的消息类型}
 
 1.\ std\_msgs
 
@@ -294,12 +333,34 @@ Transform、TransformStamped是传输坐标系变换关系的消息类型。
 
 主要用的就上面三种消息类型。
 
-\dots \dots \dots
+
 
 更多更详细内容请参考官方文档。
 
-\section{提升内容}
-这部分是一些ROS2的较高级内容，主要是介绍名字和基本用途。（主要是有的我也不熟）
+\begin{example}
+完成本章完整工程附录后，查看接口定义并只接收一次定时器消息：
+\begin{tbash}
+source /opt/ros/humble/setup.bash
+source ~/ros2_ws/install/setup.bash
+ros2 interface show my_msgs/msg/My
+ros2 topic echo /timer_ --once
+\end{tbash}
+\end{example}
+
+\begin{exercise}
+将定时器间隔改为 500 ms，重编译并用 ros2 topic hz /timer\_ 检查频率；再解释消息中的时间戳与计数器有何不同。
+\end{exercise}
+
+\begin{conclusion}
+\begin{itemize}
+\item 编辑 src 中的文件，回到工作空间根目录编译。
+\item build 是构建过程，install 是运行入口，使用前加载 setup.bash。
+\item 自定义接口先声明字段与依赖，再生成代码；订阅、发布和定时器句柄要持续存活。
+\end{itemize}
+\end{conclusion}
+
+\subsubsection{提升内容}
+这部分是一些ROS2的较高级内容，主要是介绍名字和基本用途。
 可以在需要的时候查找对应关键词。
 
 \textbf{功能:}
@@ -314,9 +375,30 @@ Transform、TransformStamped是传输坐标系变换关系的消息类型。
 \textbf{包:}
 \begin{enumerate}
     \item cv\_bridge 包，用于ROS2和OpenCV之间的互相转换。
+    \item camera\_calibration 用于相机标定，配合参数管理与 image\_proc 图像校正；完整流程见第\ref{sec:ros2-camera-calibration}节。
     \item tf2 包，提供了一个坐标变换的框架。
     \item rviz 包，用于可视化ROS2的消息。（或者用foxglove studio）
     \item moveit2 包，用于机械臂控制。
     \item navigation2 包，用于导航。
     \item fmt 包，可以自定义打印日志的格式。
 \end{enumerate}
+
+\begin{example}
+使用已安装的 demo 服务，无需自写服务端。终端一运行服务端，终端二调用后应得到 sum: 5。
+\begin{tbash}
+# 两个终端都先加载 Humble 环境
+# 终端一
+ros2 run demo_nodes_cpp add_two_ints_server
+# 终端二
+ros2 service call /add_two_ints example_interfaces/srv/AddTwoInts "{a: 2, b: 3}"
+\end{tbash}
+\end{example}
+
+\begin{exercise}
+用服务列表和接口查询命令查出该服务的请求、响应字段；说明这种一次请求与持续发布话题的区别。
+\end{exercise}
+
+
+\begin{note}
+QoS 策略与兼容性表见官方文档：\url{https://docs.ros.org/en/humble/Concepts/Intermediate/About-Quality-of-Service-Settings.html}。
+\end{note}

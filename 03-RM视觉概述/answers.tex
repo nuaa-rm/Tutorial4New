@@ -1,0 +1,437 @@
+% 卷三统一题解：只在全文末尾载入；所有答案均使用 solution 环境。
+\begingroup
+\setlength{\emergencystretch}{3em}
+先独立完成题目，再核对解题依据。下面按章分别列随堂练习与章末习题；题号通过正文标签引用，避免目录调整后对应错位。
+本卷以链路分析和现场判断为主：纸面题给出推理，实践题给出步骤、预期结果和通过条件。题中的时限、尺寸与数据均为教学设定，不是赛场协议参数。
+本章验收由学长现场考核，不列可照抄的验收答案。
+\section*{第1章：视觉组在 RM 中的职责与技术全景}
+\phantomsection
+\addcontentsline{toc}{section}{第1章题解：视觉组在 RM 中的职责与技术全景}
+\subsubsection*{随堂练习}
+\paragraph*{随堂练习 \ref{v3-ex-overview-1}}
+\begin{solution}
+可在框内做亮度分割与轮廓筛选，取得几何角点，再交给位姿解算。网络框负责缩小搜索范围，不等于精确角点或三维位置。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{v3-ex-overview-2}}
+\begin{solution}
+激光雷达定位在此场景归导航；位置广播归雷达；网络识别装甲可能服务自瞄或雷达，须继续确认输出用途。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{v3-ex-overview-3}}
+\begin{solution}
+不能。需经有效标定和空间映射得到约定场地坐标，再检查单位、目标身份、时间戳和协议字段，才能进入广播接口。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{v3-ex-overview-4}}
+\begin{solution}
+同步消息或协议版本、字段单位、发送端转换、接收端解析与限幅、接口文档和验证样例；联调时用已知角度确认解释一致。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{v3-ex-overview-5}}
+\begin{solution}
+编译基础查卷一；PnP 点序查卷二几何视觉与 BA；接口约定先查本卷职责边界和队内接口文档。
+\end{solution}
+
+\subsubsection*{章末习题}
+\paragraph*{第1章章末第 \ref{v3-prob-overview-1} 题}
+\begin{solution}
+传统方法可给灯条角点，网络可给候选框或类别；网络筛选候选区域后提取角点，再作几何解算。二者是可组合的观测方法。
+\end{solution}
+
+\paragraph*{第1章章末第 \ref{v3-prob-overview-2} 题}
+\begin{solution}
+CUDA 是 GPU 计算工具，可用于自瞄、雷达等任务的加速。方向按比赛任务和输出职责区分，为自瞄、雷达、导航。
+\end{solution}
+
+\paragraph*{第1章章末第 \ref{v3-prob-overview-3} 题}
+\begin{solution}
+三者含义、维度和单位不同，还涉及不同坐标系与有效时间。即使存储类型相同，接收方也不能据此判断其物理意义。
+\end{solution}
+
+\paragraph*{第1章章末第 \ref{v3-prob-overview-4} 题}
+\begin{solution}
+机械确认安装姿态、刚度和限位；视觉检查外参、视场及成像；电控与视觉确认坐标变换和控制方向。不能仅在某一端静默改补偿量。
+\end{solution}
+
+\paragraph*{第1章章末第 \ref{v3-prob-overview-5} 题}
+\begin{solution}
+先在本卷明确滤波器输入观测与输出状态，再到卷二滤波章完成示例与练习，最后用录包验证估计输出；若构建不熟，先补卷一 C++ 与 CMake。
+\end{solution}
+
+\paragraph*{第1章章末第 \ref{v3-prob-overview-6} 题}
+\begin{solution}
+可从本章云台接口入手：来源为自瞄目标角需求，发送方视觉，接收方电控；记录单位、坐标系、时间戳、频率、失效策略及协议版本的确认状态。通过条件是来源可定位、未知项明确标注，不能把教学接口冒充现行协议。
+\end{solution}
+
+\section*{第2章：自瞄系统概述}
+\phantomsection
+\addcontentsline{toc}{section}{第2章题解：自瞄系统概述}
+\subsubsection*{随堂练习}
+\paragraph*{随堂练习 \ref{v3-ex-aim-1}}
+\begin{solution}
+至少记录失跟或误检情况、端到端延迟分布、场景条件；也可补充样本数、距离、目标速度与配置版本。控制条件一致后再比较。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{v3-ex-aim-2}}
+\begin{solution}
+不能直接假定可用。需按实际缩放更新焦距和主点的像素尺度；裁剪还会改变主点位置。核对分辨率、裁剪区域及标定配置。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{v3-ex-aim-3}}
+\begin{solution}
+分别为 85 ms 与 60 ms。关键是状态所对应的时刻，不能仅凭“延迟补偿已打开”判断。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{v3-ex-aim-4}}
+\begin{solution}
+为 0.15 s。计算忽略了加减速、指令延迟、负载与限位；实际到位时间可能更长。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{v3-ex-aim-5}}
+\begin{solution}
+依次对应 BA、Kalman、MPC。BA 调整几何量，Kalman 递推估计状态，MPC 在模型与约束下选择控制序列。
+\end{solution}
+
+\subsubsection*{章末习题}
+\paragraph*{第2章章末第 \ref{v3-prob-aim-1} 题}
+\begin{solution}
+缺少样本量与命中率、场景条件、失跟情况、延迟、配置版本和重复测试证据。单次成功只能说明这一发成功。
+\end{solution}
+
+\paragraph*{第2章章末第 \ref{v3-prob-aim-2} 题}
+\begin{solution}
+需要已知三维模型点、对应二维像点、相机内参和畸变参数。OpenCV 的输出表达模型系到相机系的变换；转到云台系还需相机安装外参与相应时刻的变换。
+\end{solution}
+
+\paragraph*{第2章章末第 \ref{v3-prob-aim-3} 题}
+\begin{solution}
+状态模型可从历史估计向前预测，但缺少观测更新时不确定性会增长，运动模型也可能失配。应结合丢失时长、质量和开火策略标记状态有效性。
+\end{solution}
+
+\paragraph*{第2章章末第 \ref{v3-prob-aim-4} 题}
+\begin{solution}
+控制还有机械动态、通信延迟、角速度或加速度限制和限位。弹道只解决预计射击方向的一部分问题，不能消除执行器约束。
+\end{solution}
+
+\paragraph*{第2章章末第 \ref{v3-prob-aim-5} 题}
+\begin{solution}
+不准确。它们有共同的误差或代价视角，但变量、假设和约束不同；标准 Kalman 的最优性依赖模型假设，MPC 代价也不必是简单最小二乘。
+\end{solution}
+
+\paragraph*{第2章章末第 \ref{v3-prob-aim-6} 题}
+\begin{solution}
+先检查第 120 帧附近的检测输入与角点，而非先调控制器。保留原图、角点、解算、状态及指令的同一时间线，再判断角点跳变来自误检、遮挡还是成像。
+\end{solution}
+
+\paragraph*{第2章章末第 \ref{v3-prob-aim-7} 题}
+\begin{solution}
+命中时刻为 110 ms，预测时长为 100 ms。记录中应写明同一时钟、状态在 10 ms、45 ms 已含前端和执行延迟、飞行时间取定值。重新加一次 35 ms 会重复补偿。
+\end{solution}
+
+\section*{第3章：导航在 RM 中的应用}
+\phantomsection
+\addcontentsline{toc}{section}{第3章题解：导航在 RM 中的应用}
+\subsubsection*{随堂练习}
+\paragraph*{随堂练习 \ref{v3-ex-nav-1}}
+\begin{solution}
+不应继续硬走。先按局部障碍信息停止或安全等待，满足条件后重规划；没有可行通路时报告任务无法继续，不能靠擦碰通过。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{v3-ex-nav-2}}
+\begin{solution}
+先检查定位源和坐标变换，因为规划器使用的位置已经异常。保留跳变时刻的位姿、传感器和变换记录，再判断是否为定位重置或时间不同步。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{v3-ex-nav-3}}
+\begin{solution}
+需求宽 0.7 m，能通过直线宽度检查；但转弯、定位误差、动态障碍、车体形状和控制误差仍需检查，不能据此保证导航成功。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{v3-ex-nav-4}}
+\begin{solution}
+不能。单位换算仅改变尺度，还需已知的坐标旋转和平移、方向约定及时间语义；之后由决策产生可达任务目标。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{v3-ex-nav-5}}
+\begin{solution}
+不能。还应查定位与 TF 是否连续、局部代价地图是否残留障碍、局部控制器输出与底盘执行反馈。转圈也可能是已触发的恢复动作。
+\end{solution}
+
+\subsubsection*{章末习题}
+\paragraph*{第3章章末第 \ref{v3-prob-nav-1} 题}
+\begin{solution}
+分别回答去哪里、大致经哪里走、当前怎样运动。路径由规划产生，控制依据路径与局部状态产生速度。
+\end{solution}
+
+\paragraph*{第3章章末第 \ref{v3-prob-nav-2} 题}
+\begin{solution}
+不能。地图描述环境；定位结合传感器等估计位姿；行为树依据任务与执行状态编排动作。它们负责不同层次。
+\end{solution}
+
+\paragraph*{第3章章末第 \ref{v3-prob-nav-3} 题}
+\begin{solution}
+静态地图不包含比赛中新出现的机器人等障碍。局部传感器和代价地图需反映当前环境，控制才能判断运动是否可行。
+\end{solution}
+
+\paragraph*{第3章章末第 \ref{v3-prob-nav-4} 题}
+\begin{solution}
+不能。敌方目标位置与己方机器人位姿的对象不同，坐标系与时间也需校验；雷达信息可辅助决策，不会自动替代自身定位。
+\end{solution}
+
+\paragraph*{第3章章末第 \ref{v3-prob-nav-5} 题}
+\begin{solution}
+穿墙先核对地图、定位和全局代价地图及路径所属坐标系；不走核对速度是否新鲜、是否送达、电控模式、急停与执行反馈。两种现象都不能只靠调同一个规划参数解决。
+\end{solution}
+
+\paragraph*{第3章章末第 \ref{v3-prob-nav-6} 题}
+\begin{solution}
+例如 0.6 m 车宽加两侧各 0.1 m 裕量，需要 0.8 m；0.7 m 通道不通过。保存输入尺寸、计算和结论，动态障碍不得只画在静态底图上而忽略更新时间。通过条件是单位一致且结论可重算。
+\end{solution}
+
+\section*{第4章：雷达站与全场感知概述}
+\phantomsection
+\addcontentsline{toc}{section}{第4章题解：雷达站与全场感知概述}
+\subsubsection*{随堂练习}
+\paragraph*{随堂练习 \ref{v3-ex-radar-1}}
+\begin{solution}
+可以。本书按全场感知与广播职责分类，不按是否使用某种激光测距传感器分类；具体比赛器材要求仍须另查规则。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{v3-ex-radar-2}}
+\begin{solution}
+坐标关心当前状态，旧坐标积压通常降低时效；计数增量或事件若被覆盖，会遗漏事实，需按协议保留、确认或去重。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{v3-ex-radar-3}}
+\begin{solution}
+车顶点不在地面标定平面上，其图像射线落到地面的位置会受视角与高度影响。应选有意义的接地点或使用高度、区域或三维几何模型验证。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{v3-ex-radar-4}}
+\begin{solution}
+选择视觉。无线电虽然只有 70 ms，但无效数据不能参与优先级比较；若视觉也过期，则输出无有效位置或执行明确的失效策略，不伪装成新观测。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{v3-ex-radar-5}}
+\begin{solution}
+类别错误先查 OpenCV、深度学习及成像质量；串口拒收先查多机通信、裁判协议版本、长度和校验。两者的观测证据不同。
+\end{solution}
+
+\subsubsection*{章末习题}
+\paragraph*{第4章章末第 \ref{v3-prob-radar-1} 题}
+\begin{solution}
+雷达站主要输出全场目标信息供队友或决策使用；自瞄输出本车跟瞄和射击所需信息，进入云台执行链路。雷达站通常不直接控制某车云台。
+\end{solution}
+
+\paragraph*{第4章章末第 \ref{v3-prob-radar-2} 题}
+\begin{solution}
+使无线电输入失效，按既定策略继续使用有效视觉并记录故障；不能永久等待已退出进程。若视觉也无效，应显式报告无有效位置。
+\end{solution}
+
+\paragraph*{第4章章末第 \ref{v3-prob-radar-3} 题}
+\begin{solution}
+前者依赖图像与同一场地平面的对应关系及标定；后者依赖装甲三维模型点、二维对应点与相机参数。不能拿地面平面映射无条件解释不同高度目标。
+\end{solution}
+
+\paragraph*{第4章章末第 \ref{v3-prob-radar-4} 题}
+\begin{solution}
+不能，时钟偏差可能被误当成延迟。需同步时钟或明确换算关系；本机接收时刻只能给接收后年龄，不能自动补上未知采样和传输时间。
+\end{solution}
+
+\paragraph*{第4章章末第 \ref{v3-prob-radar-5} 题}
+\begin{solution}
+多机通信中的队列、最新值、超时与故障隔离，同时核对发送限制及协议。不能因为问题出现在雷达站就一律先改检测。
+\end{solution}
+
+\paragraph*{第4章章末第 \ref{v3-prob-radar-6} 题}
+\begin{solution}
+前一种二者均过期，应输出无效；后一种若身份、坐标与质量也合格，无线电在“不超过 100 ms”的边界内，可以采用。阈值是教学值，实际值须验证。
+\end{solution}
+
+\paragraph*{第4章章末第 \ref{v3-prob-radar-7} 题}
+\begin{solution}
+可分别用无线电/视觉年龄 50/40、120/40、50/40 但无线电校验失败、120/160 ms；对应输出无线电、视觉、视觉、无效。统一采用本章阈值，并在表中写出有效性、时钟、目标身份与坐标系前提。
+\end{solution}
+
+\section*{第5章：相机与前端的赛场实践要点}
+\phantomsection
+\addcontentsline{toc}{section}{第5章题解：相机与前端的赛场实践要点}
+\subsubsection*{随堂练习}
+\paragraph*{随堂练习 \ref{v3-ex-camera-1}}
+\begin{solution}
+缺少具体型号或序列号、分辨率、曝光时间、增益、触发方式、镜头和标定文件等；默认值可能随配置或设备变化。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{v3-ex-camera-2}}
+\begin{solution}
+不能。全局快门也在有限曝光时间内积分，运动足够快或曝光足够长仍会模糊；应查曝光和运动条件，而非仅凭拖影认定快门类型。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{v3-ex-camera-3}}
+\begin{solution}
+采样帧率为 50 帧每秒，逐帧延迟为 50 ms。计算要求逐帧配对且时钟一致，不能用帧率的倒数代替延迟。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{v3-ex-camera-4}}
+\begin{solution}
+核对内参、畸变和实际图像坐标尺度；更换镜头或焦距可能改变成像模型，裁剪改变主点位置，旧配置不能未经验证直接沿用。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{v3-ex-camera-5}}
+\begin{solution}
+先确认查看器是否仍独占设备，再查序列号、权限、SDK 与驱动匹配、像素格式及接口资源。不能仅凭查看器成功排除程序配置问题。
+\end{solution}
+
+\subsubsection*{章末习题}
+\paragraph*{第5章章末第 \ref{v3-prob-camera-1} 题}
+\begin{solution}
+设备与标定身份、成像参数与样图、采集和处理的时间性能。每项应有实际值或明确的未核对状态及来源。
+\end{solution}
+
+\paragraph*{第5章章末第 \ref{v3-prob-camera-2} 题}
+\begin{solution}
+卷帘的不同行曝光时刻不同，相对运动会使几何形状失真；长曝光在曝光期间累积不同位置的光，导致拖影。全局快门主要解决前一种时序差异，不会消除后一种运动模糊。
+\end{solution}
+
+\paragraph*{第5章章末第 \ref{v3-prob-camera-3} 题}
+\begin{solution}
+8.3 ms 是采样间隔。结果还经历曝光、读出、传输、排队、处理和执行；并行流水线的吞吐率与单帧延迟不同，应配对采样和执行时间戳实测。
+\end{solution}
+
+\paragraph*{第5章章末第 \ref{v3-prob-camera-4} 题}
+\begin{solution}
+它可能拉长曝光导致拖影，改变灰度分布或有效帧率；应在目标速度、光照变化下验证。是否锁定或限制自动曝光范围由实验决定。
+\end{solution}
+
+\paragraph*{第5章章末第 \ref{v3-prob-camera-5} 题}
+\begin{solution}
+可能使用错误内参、畸变或外参，导致空间位置和角度有系统偏差。检测框看起来正常不能证明几何解算有效。
+\end{solution}
+
+\paragraph*{第5章章末第 \ref{v3-prob-camera-6} 题}
+\begin{solution}
+回到已记录的基线，固定其余条件逐项改变，并同时记录成像、检测与配对延迟。检查曝光、处理负载及队列；漏检率与时效需一起比较。
+\end{solution}
+
+\paragraph*{第5章章末第 \ref{v3-prob-camera-7} 题}
+\begin{solution}
+提交能打开的样图或录包路径与记录表。尺寸可从文件查看器读取；饱和、拖影写明观察区域和现象。普通图片没有可靠曝光或时间戳时应写“未知”，不能从亮度猜出精确曝光。通过条件是观察可复核、未知项不编造。
+\end{solution}
+
+\section*{第6章：工程准则与调车文化}
+\phantomsection
+\addcontentsline{toc}{section}{第6章题解：工程准则与调车文化}
+\subsubsection*{随堂练习}
+\paragraph*{随堂练习 \ref{v3-ex-engineering-1}}
+\begin{solution}
+写明仿真场景、版本和已通过的指标，同时明确实车表现未验证；下一步安排受控实测，覆盖光照、振动和延迟等实际条件。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{v3-ex-engineering-2}}
+\begin{solution}
+将重写放到学习分支和后续计划；临场使用已验证组件。若现有模块存在阻断问题，先复现、做最小修复并验证，写明回滚方案，不能只靠学习收益决定上线。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{v3-ex-engineering-3}}
+\begin{solution}
+丢失了排除假设的证据和参数适用条件，后来者可能重复失败实验；也无法判断最终改善是否来自其他条件变化。应保留失败记录和恢复基线过程。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{v3-ex-engineering-4}}
+\begin{solution}
+记录接收、融合、入队和发送时间，以及队列长度或覆盖次数；先找到积压最早出现的位置，再改队列策略或耗时模块，并用同一输入对照。
+\end{solution}
+
+\subsubsection*{章末习题}
+\paragraph*{第6章章末第 \ref{v3-prob-engineering-1} 题}
+\begin{solution}
+仿真可能没有准确覆盖真实光照、振动、机械间隙、弹道散布、通信和调度延迟等条件。应选与当前模块相关的实际因素验证。
+\end{solution}
+
+\paragraph*{第6章章末第 \ref{v3-prob-engineering-2} 题}
+\begin{solution}
+下游补偿或偶然误差抵消可能掩盖上游问题。还应观测检测、解算、估计和控制各段，检查稳定性、延迟与重复性。
+\end{solution}
+
+\paragraph*{第6章章末第 \ref{v3-prob-engineering-3} 题}
+\begin{solution}
+需有明确收益、可复现验证、接口兼容检查和回滚方案，并通过约定复核；不是代码写完就可替代已验证组件。
+\end{solution}
+
+\paragraph*{第6章章末第 \ref{v3-prob-engineering-4} 题}
+\begin{solution}
+时间对应测试窗口或截止时间；进度对应里程碑和完成标准；合作对应责任人及接口约定；钻研对应假设、资料出处和验证结果。
+\end{solution}
+
+\paragraph*{第6章章末第 \ref{v3-prob-engineering-5} 题}
+\begin{solution}
+输入与场景、基线和改动版本、单一变量、指标与观察、失败结论、恢复方式。保留失败也能让后续人员排除相同假设。
+\end{solution}
+
+\paragraph*{第6章章末第 \ref{v3-prob-engineering-6} 题}
+\begin{solution}
+现有证据无法唯一归因。以可复现基线为起点，一次只改变一项，保持场景和指标一致并重复比较；若存在交互作用，再安排组合实验。
+\end{solution}
+
+\paragraph*{第6章章末第 \ref{v3-prob-engineering-7} 题}
+\begin{solution}
+例如雷达坐标变旧：假设发送队列积压；观察入队与发送年龄；单独改为保留最新坐标；相同输入下年龄下降且有效目标无异常丢失为通过；出现错误覆盖事件或坐标失效则恢复基线。阈值、输入和版本必须明确记录，尚未执行就标为计划。
+\end{solution}
+
+\section*{第7章：进阶地图与资料索引}
+\phantomsection
+\addcontentsline{toc}{section}{第7章题解：进阶地图与资料索引}
+\subsubsection*{随堂练习}
+\paragraph*{随堂练习 \ref{v3-ex-index-1}}
+\begin{solution}
+Git 查卷一；通信积压查卷二多机通信并结合本卷雷达链路；过程记录查本卷工程准则。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{v3-ex-index-2}}
+\begin{solution}
+先补卷一构建基础和卷二多机通信，结合本卷雷达数据流核对接口；需要处理无线电再学 SDR。MPC 与眼前串口问题不是直接对应的前置。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{v3-ex-index-3}}
+\begin{solution}
+不够。需确认协议完整来源、适用赛季或版本、修订日期、相关字段上下文及负责确认的人；截图可能遗漏条件，也可能过期。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{v3-ex-index-4}}
+\begin{solution}
+不够。活页更新入口；协议字段变更还需同步消息定义、收发实现、验证用例和责任记录。不能把“只改索引”误解为接口变更无需联调。
+\end{solution}
+
+\subsubsection*{章末习题}
+\paragraph*{第7章章末第 \ref{v3-prob-index-1} 题}
+\begin{solution}
+卷一解决环境、语言与构建基础；卷二解决专项技能实现；卷三解决赛场链路、接口与工程过程。选择入口时先判断问题性质。
+\end{solution}
+
+\paragraph*{第7章章末第 \ref{v3-prob-index-2} 题}
+\begin{solution}
+产出可确认是否能实际使用知识，暴露前置缺口，也便于安排反馈与进度。只列书名无法区分读过与会做。
+\end{solution}
+
+\paragraph*{第7章章末第 \ref{v3-prob-index-3} 题}
+\begin{solution}
+记录原入口、检查日期、不可访问现象、待确认责任人及替代入口状态；不得编造地址或声称已验证可用。
+\end{solution}
+
+\paragraph*{第7章章末第 \ref{v3-prob-index-4} 题}
+\begin{solution}
+至少记录适用协议或分支版本、修订或检查日期、文档维护人、接口双方责任人和验证状态；具体姓名与日期由队内确认。
+\end{solution}
+
+\paragraph*{第7章章末第 \ref{v3-prob-index-5} 题}
+\begin{solution}
+先保留两份来源及版本，确认实际部署分支和当年规则，由接口双方核对有效定义，再同步实现、文档与验证。不能只凭文件名“最新”自行混用字段。
+\end{solution}
+
+\paragraph*{第7章章末第 \ref{v3-prob-index-6} 题}
+\begin{solution}
+例如雷达方向打开 chapters/J\_comm.tex 与 chapters/K\_sdr.tex，分别记录“接收字节到有效消息”“IQ 数据到解析结果”。提交能重新打开的真实路径和当天日期；不可访问的队内资料另列待确认，不能当作已完成项。
+\end{solution}
+
+\endgroup

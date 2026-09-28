@@ -1,0 +1,20 @@
+{
+  "python_syntax": "2 examples passed",
+  "numerical_example": "executed, assertions passed",
+  "exercise_answer_numbering": "7.1-7.13, chapter-end 1-10",
+  "tex_environment_pairs": "passed",
+  "xelatex": "two successful passes",
+  "pdf_pages": 174,
+  "overfull": 0,
+  "missing_characters": 0,
+  "undefined_references": 0,
+  "visual_review_pages": [
+    94,
+    95,
+    96,
+    97,
+    98,
+    168
+  ],
+  "runtime_limit": "No OpenCV/ROS2/camera on host; hardware verification required"
+}

@@ -12,6 +12,8 @@
 ]{elegantbook}
 
 \input{../templates/preamble.tex}
+% 题解引用只显示题号，保留模板原有的题目列表外观。
+\setlist[enumerate,1]{ref=\arabic*}
 
 \title{长空御风视觉组培训教材}
 \subtitle{卷三 · RM 比赛中视觉技术概述}
@@ -32,120 +34,239 @@
 本卷把通识与专项\textbf{串成比赛故事}：读完应能画清视觉数据流、指认接口边界、复述工程红线。
 \textbf{不替代}卷二公式与实现细节。
 
-\noindent 建议学时：开营 $0.5$--$1$ 天精讲第 1、2、5 章；全文通读约 $1$--$2$ 周。
+\noindent 建议学时：开营 $0.5$--$1$ 天精讲第\ref{ch:v3-overview}、\ref{ch:v3-aim}、\ref{ch:v3-engineering}章；全文通读约 $1$--$2$ 周。
 考核重心：画链路、指接口、说红线——不考手推 BA/MPC。
 
 \tableofcontents
 
 \mainmatter
 
-% ============================================================
 \chapter{视觉组在 RM 中的职责与技术全景}
-
 \begin{introduction}
-  \item 学习目标：区分自瞄 / 雷达 / 导航；理解图像处理与深度学习如何结合；能画视觉数据流并说明与机械、电控的边界。
-  \item 建议学时：开营半天内讲完。
-  \item 产出：一张「相机 $\rightarrow$ 识别 $\rightarrow$ 估计 $\rightarrow$ 控制 / 导航 / 广播」示意图。
+  \item 学习目标：区分三个方向，画出数据流，填写包含单位与坐标系的接口卡。
+  \item 建议学时：约 1.5 小时，含纸面演练。
+  \item 本卷边界：本章只讲任务与接口；环境搭建见卷一，算法实现见卷二。
 \end{introduction}
+\label{ch:v3-overview}
 
+\section{方向、数据流与协作边界}
 \input{chapters/01_overview.tex}
 
+\section{本章小结}
+两条技术路线提供观测，三个方向决定观测最终服务于什么任务。必须熟练画出输入、处理中间量和输出，写清跨组接口；具体算法与工具用法回卷一、卷二查阅。
+
+\begin{problemset}
+\item \label{v3-prob-overview-1}\textbf{基础题}：传统方法和深度学习各举一种输出，并说明它们怎样接入同一条链路。
+\item \label{v3-prob-overview-2}\textbf{基础题}：为什么“CUDA 方向”不是本书的正式方向名？
+\item \label{v3-prob-overview-3}\textbf{基础题}：像素坐标、空间位置、控制指令为什么不能用同一种无说明的二元数组传递？
+\item \label{v3-prob-overview-4}\textbf{基础题}：相机安装角变化时，视觉、机械、电控应分别核对什么？
+\item \label{v3-prob-overview-5}\textbf{提高题}：同学想直接靠本卷学会写滤波器。请给出一条可检查的补课路径。
+\item \label{v3-prob-overview-6}\textbf{实践题}：在本地教材中查找一个真实跨组接口需求，写出需求来源、发送方、接收方和仍需向队内确认的字段。
+\end{problemset}
+
 \section{本章验收}
 \begin{enumerate}
-    \item 说出三个方向各自一句话职责，并指出一个「不是方向名」的常见误称。
-    \item 在纸上画出总数据流，并标出自瞄、雷达、导航各走到哪一条出口。
+  \item 面对学长给出的陌生任务，当场画出输入到输出的链路，并说明三个方向的分工与一个常见误称。
+  \item 两人分别扮演接口两端，用自己的接口卡解释同一组测试值；发现歧义后现场修订并复述。
 \end{enumerate}
 
-% ============================================================
 \chapter{自瞄系统概述}
-
 \begin{introduction}
-  \item 学习目标：掌握检测 $\rightarrow$ 跟踪预测 $\rightarrow$ 云台控制三段；知道 PnP、Kalman、MPC 各处在哪一环；能标出主要噪声来源。
-  \item 细节回卷二：B/C（检测）、G（PnP/BA）、F（滤波）、H（MPC）。
+  \item 学习目标：画出自瞄三段链路，指认 PnP、滤波、控制的位置，并用观测定位故障。
+  \item 建议学时：约 2 小时，含时间线练习。
+  \item 本卷边界：不推导弹道与优化公式；检测、PnP、滤波、MPC 的实现分别见卷二相关章。
 \end{introduction}
+\label{ch:v3-aim}
 
+\section{检测、预测与控制链路}
 \input{chapters/02_aim.tex}
 
+\section{本章小结}
+自瞄从图像观测出发，经空间解算、状态估计和预测，形成云台与开火窗口所需的信息。必须分清采样时刻、执行时刻与预计命中时刻；先看哪一段开始异常，再决定回卷二查哪种算法。
+
+\begin{problemset}
+\item \label{v3-prob-aim-1}\textbf{基础题}：一次测试只报告“打中了”，缺少哪些信息才能说明系统有效？
+\item \label{v3-prob-aim-2}\textbf{基础题}：PnP 需要哪些输入？其输出能直接当作云台系目标位置吗？
+\item \label{v3-prob-aim-3}\textbf{基础题}：丢失一帧后，跟踪器为什么仍可给出状态？为什么又不能无限相信它？
+\item \label{v3-prob-aim-4}\textbf{基础题}：为什么弹道补偿正确，云台仍可能无法及时跟上目标？
+\item \label{v3-prob-aim-5}\textbf{基础题}：“BA、Kalman、MPC 都是在解同一个最小二乘问题”是否准确？
+\item \label{v3-prob-aim-6}\textbf{提高题}：角点在第 120 帧跳变，空间位置随后跳变，云台最后抖动。先检查哪一段，保留什么证据？
+\item \label{v3-prob-aim-7}\textbf{实践题}：在本机新建一份时间线记录：采样 10 ms、控制生效 45 ms、飞行 65 ms。算出目标命中时刻与从采样时刻起的预测时长，并注明假设。
+\end{problemset}
+
 \section{本章验收}
 \begin{enumerate}
-    \item 口述或一页纸画出自瞄三段链路。
-    \item 在每一段标注至少一种噪声或故障表现。
+  \item 用一页图向学长讲清检测、跟踪预测、云台控制三段，并在每段标出一个主要噪声来源。
+  \item 在给定回放上选择一个异常时刻，展示至少两段中间量，说明证据能支持和不能支持的故障判断。
 \end{enumerate}
 
-% ============================================================
 \chapter{导航在 RM 中的应用}
-
 \begin{introduction}
-  \item 学习目标：用比赛语言理解地图、定位、规划、控制与恢复；能把常见故障归到模块；区分 LiDAR 与雷达站方向。
-  \item 细节回卷二导航章。
+  \item 学习目标：说明地图、定位、规划、控制与恢复的分工，按证据定位常见故障。
+  \item 建议学时：约 2 小时，含纸面地图演练。
+  \item 本卷边界：只讲比赛任务与接口；建图、坐标变换和 Nav2 配置见卷二导航章。
 \end{introduction}
+\label{ch:v3-nav}
 
+\section{比赛任务与导航模块}
 \input{chapters/03_sentry.tex}
 
+% 章末复习与验收集中排版，避免末页只剩一个条目。
+\clearpage
+\section{本章小结}
+任务给出目的地，定位给出当前位置，地图与代价地图描述环境，规划和控制把路线变成速度。行为树编排流程，恢复处理异常。必须能沿这些接口查故障；算法细节与参数到卷二查阅。
+
+\begin{problemset}
+\item \label{v3-prob-nav-1}\textbf{基础题}：去补给点的任务中，目标点、全局路径、速度指令分别回答什么问题？
+\item \label{v3-prob-nav-2}\textbf{基础题}：地图、定位、行为树能相互替代吗？分别举一个输入或输出。
+\item \label{v3-prob-nav-3}\textbf{基础题}：为什么静态地图正确仍需更新局部障碍？
+\item \label{v3-prob-nav-4}\textbf{基础题}：导航能否把雷达广播中的敌方坐标直接当成自身定位？
+\item \label{v3-prob-nav-5}\textbf{提高题}：全局路径穿墙与“指令有但不走”分别优先检查哪些证据？
+\item \label{v3-prob-nav-6}\textbf{实践题}：在本地保存一张纸面地图照片或绘图文件，标出车体尺寸、通道宽度和一处动态障碍；对一个直通道作宽度核算。
+\end{problemset}
+
 \section{本章验收}
 \begin{enumerate}
-    \item 对照 Nav2 示意，说明全局规划与局部控制在比赛中的分工。
-    \item 给出两种「车卡住」时优先检查的模块。
+  \item 对照 Nav2 框图讲清全局规划、局部控制与恢复的分工；学长临时改变障碍位置后重新解释流程。
+  \item 给定一段卡住的日志或回放，当场指出两个候选模块并展示下一步取证位置，不凭现象直接定责。
 \end{enumerate}
 
-% ============================================================
 \chapter{雷达站与全场感知概述}
-
 \begin{introduction}
-  \item 学习目标：理解雷达站广播职责与多进程数据流；区分俯视定位与车载 PnP；知道通信 / SDR 能力在卷二的位置。
-  \item 细节回卷二：多机通信、SDR、OpenCV、深度学习。
+  \item 学习目标：画出雷达站数据流，区分平面映射和 PnP，按明确条件选择有效坐标。
+  \item 建议学时：约 2 小时，含融合状态表练习。
+  \item 本卷边界：可选无线电与反制链路仅作架构示例，是否采用须核对参赛赛季规则；实现见卷二通信、SDR 与视觉相关章。
 \end{introduction}
+\label{ch:v3-radar}
 
+\section{全场定位、通信与时效}
 \input{chapters/03b_radar.tex}
 
+% 章末复习与验收集中排版，避免末页只剩一个条目。
+\clearpage
+\section{本章小结}
+雷达方向围绕全场观测、定位、融合与广播组织软件。必须说清广播对象、坐标系和新鲜度，分清雷达站与 LiDAR 器件。可选功能及裁判协议回当年规则核对，具体实现回卷二与队内版本化文档。
+
+\begin{problemset}
+\item \label{v3-prob-radar-1}\textbf{基础题}：雷达站与自瞄的主要输出及闭环对象有什么不同？
+\item \label{v3-prob-radar-2}\textbf{基础题}：多进程链路中，无线电进程退出后，视觉仍正常，融合进程应如何处理？
+\item \label{v3-prob-radar-3}\textbf{基础题}：地面单应映射与装甲 PnP 的输入约束各是什么？
+\item \label{v3-prob-radar-4}\textbf{基础题}：来自两台未同步机器的时间戳能直接相减判断观测年龄吗？
+\item \label{v3-prob-radar-5}\textbf{基础题}：检测正常而广播持续积压，应优先回卷二查哪类内容？
+\item \label{v3-prob-radar-6}\textbf{提高题}：有效无线电年龄 120 ms，视觉年龄 160 ms。按本章 100/150 ms 阈值应输出什么？若无线电年龄恰为 100 ms 呢？
+\item \label{v3-prob-radar-7}\textbf{实践题}：在本机保存一张选源表，覆盖有效无线电、无线电过期、无线电无效、两源均无效四种情况，记录输入年龄与输出。
+\end{problemset}
+
 \section{本章验收}
 \begin{enumerate}
-    \item 说明雷达与自瞄在「闭环对象」上的区别。
-    \item 解释「无线电新鲜优先、过期回退视觉」在说什么。
+  \item 口述雷达站输入输出，画出视觉与可选无线电的数据流，并分别说清与自瞄、导航的职责边界。
+  \item 学长现场给出两源的有效性与时间状态，演示如何判定过期与回退，同时解释 LiDAR 与雷达方向的区别。
 \end{enumerate}
 
-% ============================================================
 \chapter{相机与前端的赛场实践要点}
-
 \begin{introduction}
-  \item 学习目标：掌握卷帘/全局与帧率陷阱；能按 checklist 检查曝光与触发；原理回卷二相机章。
+  \item 学习目标：执行相机检查清单，区分快门畸变与拖影，记录有效帧率和端到端延迟。
+  \item 建议学时：约 2 小时，含相机或现成图像检查。
+  \item 本卷边界：本章只讲现场检查；成像原理、标定与 SDK 编程见卷二相机章。
 \end{introduction}
+\label{ch:v3-camera}
 
+\section{成像质量与采集检查}
 \input{chapters/04_camera_field.tex}
 
+% 章末复习与验收集中排版，避免末页只剩一个条目。
+\clearpage
+\section{本章小结}
+按相机身份与配置、成像质量、帧流时效、后端输入的顺序检查前端。必须会区分快门类型与曝光时长、采集帧率与端到端延迟；型号参数与 SDK 细节按对应设备手册查阅。
+
+\begin{problemset}
+\item \label{v3-prob-camera-1}\textbf{基础题}：一份前端检查记录至少应覆盖哪三类信息？
+\item \label{v3-prob-camera-2}\textbf{基础题}：卷帘几何畸变与长曝光拖影分别由什么机制引起？
+\item \label{v3-prob-camera-3}\textbf{基础题}：相机能采集 120 帧每秒，为什么不能据此宣称系统延迟只有约 8.3 ms？
+\item \label{v3-prob-camera-4}\textbf{基础题}：自动曝光使静止画面更亮，为什么不能直接证明它适合高速对抗？
+\item \label{v3-prob-camera-5}\textbf{基础题}：相机序列号与标定文件不匹配时，即使检测框正常，还可能出什么问题？
+\item \label{v3-prob-camera-6}\textbf{提高题}：同时增大分辨率、曝光和增益后漏检减少，但云台更滞后，该如何拆分验证？
+\item \label{v3-prob-camera-7}\textbf{实践题}：用一张本地图片或一段录包做前端检查，保存原始文件路径、图像尺寸、饱和与拖影的观察及缺失的采集元数据。
+\end{problemset}
+
 \section{本章验收}
 \begin{enumerate}
-    \item 说明为何「高帧率标称」仍可能不够用。
-    \item 现场演练：按 checklist 检查一项曝光或触发设置。
+  \item 现场按清单检查一台相机，演示一项曝光或触发设置的读取与确认，并说明改动如何保存和恢复。
+  \item 面对学长提供的型号页和实际帧流记录，说明标称高帧率为何不保证实用，指出当前证据仍缺哪项。
 \end{enumerate}
 
-% ============================================================
 \chapter{工程准则与调车文化}
-
 \begin{introduction}
-  \item 学习目标：熟记五条工程准则；能区分学习时间与工程时间；开营与结营各复习一次。
+  \item 学习目标：复述五条准则，编写可复现测试记录，并据证据安排一次单变量验证。
+  \item 建议学时：约 1.5 小时；开营与结营各复习一次。
+  \item 本卷边界：本章规定开发和协作过程；具体调参与测试脚本回卷二和方向仓库。
 \end{introduction}
+\label{ch:v3-engineering}
 
+\section{五条准则与问题定位}
 \input{chapters/05_engineering.tex}
 
+% 章末复习与验收集中排版，避免末页只剩一个条目。
+\clearpage
+\section{本章小结}
+五条准则把算法开发变成可复现的协作过程：实测给证据，逐段观察解释结果，复用稳定组件控制变更，明确分工保障进度，先定位再验证避免盲改。必须熟练写记录与回滚条件，具体工具按卷一、卷二查阅。
+
+\begin{problemset}
+\item \label{v3-prob-engineering-1}\textbf{基础题}：仿真通过后仍需实测的两个原因是什么？
+\item \label{v3-prob-engineering-2}\textbf{基础题}：为什么评价链路时不能只看最终命中率？
+\item \label{v3-prob-engineering-3}\textbf{基础题}：学习时间的重构成果何时才适合进入比赛工程？
+\item \label{v3-prob-engineering-4}\textbf{基础题}：“时间、进度、合作、钻研”各对应一项怎样的记录？
+\item \label{v3-prob-engineering-5}\textbf{基础题}：一个合格的失败实验记录至少保留什么？
+\item \label{v3-prob-engineering-6}\textbf{提高题}：换相机、换模型、改滤波参数后效果改善，能归因于哪一项？设计最小后续验证。
+\item \label{v3-prob-engineering-7}\textbf{实践题}：在本地写一条导航或雷达问题的实验计划，包含假设、最早可观测异常、单一变量、通过条件与回滚条件。
+\end{problemset}
+
 \section{本章验收}
 \begin{enumerate}
-    \item 不看讲义背出五条准则的标题。
-    \item 举一例说明「只看最终命中率」为什么不够。
+  \item 不看讲义复述五条准则标题，再用自己的经历解释为何只看最终命中率不够。
+  \item 给学长演示一次从基线、复现、单变量验证到回滚的完整记录；由另一人按记录复核关键证据。
 \end{enumerate}
 
-% ============================================================
 \chapter{进阶地图与资料索引}
-
 \begin{introduction}
-  \item 学习目标：按方向得到推荐阅读顺序；知道资料入口与版本责任字段。
+  \item 学习目标：按方向列出学习路径，定位教材入口，并填写可追溯的资料与责任记录。
+  \item 建议学时：约 1 小时，含本地索引检查。
+  \item 本卷边界：本章只维护入口和版本；知识正文留在相应卷章，队内地址和人员由负责人确认。
 \end{introduction}
+\label{ch:v3-index}
 
+\section{学习路径与资料维护}
 \input{chapters/06_index.tex}
+
+% 章末复习与验收集中排版，避免末页只剩一个条目。
+\clearpage
+\section{本章小结}
+先按问题找到卷册，再按方向建立学习顺序，用真实入口、版本、责任人和复核日期把资料连起来。必须能判断资料是否适用；不必背路径，但要能查到并验证。活页负责入口变更，专项正文负责知识解释。
+
+\begin{problemset}
+\item \label{v3-prob-index-1}\textbf{基础题}：三卷分别主要解决什么问题？
+\item \label{v3-prob-index-2}\textbf{基础题}：为什么专项学习计划应包含验收产出而不只是章节列表？
+\item \label{v3-prob-index-3}\textbf{基础题}：资料索引中的路径在本机打不开，应该怎样记录？
+\item \label{v3-prob-index-4}\textbf{基础题}：接口文档应记录哪些版本与责任信息？
+\item \label{v3-prob-index-5}\textbf{提高题}：旧协议字段说明和新部署文档不一致时，下一步是什么？
+\item \label{v3-prob-index-6}\textbf{实践题}：在本地实际打开两个卷二章节文件，记录文件路径、章名、一个与你方向相关的输入输出概念和核对日期。
+\end{problemset}
+
+\section{本章验收}
+\begin{enumerate}
+  \item 现场在本地教材中找到学长指定的专项入口，并说明这份材料解决链路中的哪一步。
+  \item 展示自己的方向学习计划与资料卡；学长临时更换一个入口或版本后，完成核对、更新和待确认项说明。
+\end{enumerate}
 
 \chapter*{卷三小结}
 \addcontentsline{toc}{chapter}{卷三小结}
-本卷给出比赛视角的链路与规矩。下一步：按方向深入卷二专项，并在实车仓库中用五条准则约束开发过程。
-通识未过关者，应回到\textbf{卷一}补齐底座。
+本卷用比赛任务把三条方向链路串起来：输入要可解释，坐标与时间要对齐，输出要有失效策略，改动要能复现。
+下一步按方向完成卷二专项练习，再用本卷的接口卡、检查清单与五条准则约束实车开发；通识未过关者先回卷一补齐基础。
+
+% 题解独立成文件，放在卷三小结之后，位于全卷末尾。
+\chapter*{参考题解}
+\addcontentsline{toc}{chapter}{参考题解}
+\markboth{参考题解}{参考题解}
+\input{answers.tex}
 
 \end{document}

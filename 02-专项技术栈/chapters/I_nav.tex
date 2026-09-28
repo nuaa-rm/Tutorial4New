@@ -1,4 +1,4 @@
-\section{导航技术总览}
+\subsubsection{导航技术总览}
 
 \noindent\textbf{用语说明：}视觉组三个方向之一是\textbf{导航}（赛场上主要落地在哨兵等移动平台）。
 本章出现的「激光雷达 / LiDAR」指测距传感器，与方向名「雷达」（高台全场感知站）不是同一概念。
@@ -21,7 +21,8 @@
     \centering
     \includegraphics[width=0.8\textwidth]{Nav2导航框架.png}
     \caption{Nav2导航框架}
-    \end{figure}
+    \label{fig:I_nav-1}
+\end{figure}
 从上面可以看出，导航需要：
 
 \textbf{[1]地图（全局代价地图Global Costmap）}
@@ -44,10 +45,23 @@
 根据局部代价地图，利用局部规划器算出车各个方向的速度应该是多少，发给下位机；
 如果遇到特殊情况则进入恢复行为树，暂停部分服务，直到脱离特殊情况；
 根据规定的时间间隔（或情况），重新获取定位和目标，规划全局路径，并一直循环。
-\section{定位}
+
+\begin{example}
+机器人从 A 到 B：定位给出当前位姿，地图表示环境，规划器输出路径，控制器根据路径和局部障碍计算速度，恢复逻辑在失败时组织重试。将这五项写成五个模块，比“导航坏了”更容易定位问题。
+\end{example}
+
+\begin{exercise}
+已有路径但没有速度输出，先检查哪一模块？没有可用位姿时又应从哪里查起？
+\end{exercise}
+
+\subsubsection{定位}
 导航最重要的技术就是
 \textbf{SLAM（simultaneous localization and mapping,实时定位和建图技术）}简称SM(不是)。
-先通过一个视频直观了解一下\url{https://www.bilibili.com/video/BV1tS4y1S7qE}
+
+\begin{note}
+定位演示视频：\url{https://www.bilibili.com/video/BV1tS4y1S7qE}。
+\end{note}
+
 视频中随着机器人的移动，机器人的传感器获取到了环境信息，然后完成对博物馆地图的构建。
 有小伙伴可能会问，只看到建图没看到定位呀。细心观察可以发现建图的过程中，其实一直都在计算机器人的位置。
 
@@ -73,16 +87,18 @@ tf的主要信息包含父子节点（即两个坐标系，注意有父子关系
         \centering
         \includegraphics[width=0.8\textwidth]{tf树.png}
         \caption{map到livox到livox\_192\_168\_1\_104的tf树}
+\label{fig:I_nav-2}
 \end{figure}
 \begin{figure}[H]
         \centering
-        \includegraphics[width=1.0\textwidth]{REP-105标准.png}
+        \includegraphics[width=0.8\textwidth]{REP-105标准.png}
         \caption{REP-105标准}
+\label{fig:I_nav-3}
 \end{figure}
 但是可怜的小哨兵并没有GPS直接定位。
 所以他只能用其他的定位技术，比如激光雷达、IMU、里程计、视觉相机等。
 
-\subsubsection{ 激光雷达定位}
+\subparagraph*{ 激光雷达定位}
 先简单介绍一下激光雷达的工作原理：激光雷达的工作原理是通过发射一束激光，然后接收到反射回来的信号，通过解码，得到反射点的坐标，根据反射光的强弱还能获得强度信息。
 
 激光雷达定位主要分为四步：
@@ -107,16 +123,16 @@ tf的主要信息包含父子节点（即两个坐标系，注意有父子关系
                 （如刚刚上电不知道自己在哪；被狠狠地创飞了，定位可能歪了；被神秘的力量干扰，导致进入恢复行为树；刚从恢复行为里出来，与定位系统失联许久……），将原先的tf清除，重新进行定位。
 \end{itemize}
 运动过程中多用动态的匹配，以便较快的更新定位，提高实时性。与整张全局地图的匹配，一般在特定情况下（如刚开机上电不知道自己在哪的时候；定位可能出现偏差的情况；或者执行完恢复行为之后。也可以时不时重定位一下，上赛季就是这么干的，效果好像不太行QAQ）才进行，又叫重定位，即直接清零更新baselink和map之间的tf。
-\subsubsection{ 里程计，IMU定位}
+\subparagraph*{ 里程计，IMU定位}
 里程计定位较为简单，直接获取机器人各个方向运动的里程，加在map坐标系下的位置即为小哨兵的位置。
 IMU，即惯性测量单元，可以测量各方向的角速度和线加速度，通过积分，获得类似里程计的数据，加在map坐标系下的位置即为小哨兵的位置。
 这两个方法一般电控端就可以独立完成，纯电控的机器人常用。
 
-\subsubsection{ 视觉定位}
+\subparagraph*{ 视觉定位}
 视觉定位也是近年来较为流行的SLAM技术，它与激光雷达定位类似，但他获取的特征信息在相同情况下比激光雷达多。
 它通过提取图像中的特征点（一般是角点），与原先存储的地图里的特征点对比匹配，计算出相机的相对位移，累加后得到小哨兵在map坐标系的坐标变换。
 
-\subsubsection{ 多传感器融合}
+\subparagraph*{ 多传感器融合}
 以上各个定位方法都有自己的局限性：
 \begin{itemize}
 \item imu,里程计定位：由于IMU和里程计对运动（速度，加速度）测量的精度较高，定位较为准确。但由于其本身稳定性较差，易受干扰（如IMU受热噪声干扰的零漂，轮式里程计打滑等情况）；
@@ -149,6 +165,7 @@ IMU，即惯性测量单元，可以测量各方向的角速度和线加速度�
         \centering
         \includegraphics[width=0.8\textwidth]{经典视觉SLAM结构.png}
         \caption{经典视觉SLAM结构}
+\label{fig:I_nav-4}
 \end{figure}
 
 从算法的对数据的处理方式上看，目前常用的SLAM开源算法可以分为两类
@@ -160,8 +177,30 @@ ROS中的gmapping、hector\_slam算法都是基于滤波实现的。
 
 2.基于图优化，先通过传感器进行构图，然后对图进行优化。
 
+\begin{example}
+仅演示静态 TF 接口，使用独立演示坐标系，避免覆盖真实定位节点的变换。终端二应看到平移 (1,0,0)。
+\begin{tbash}
+# 先在两个终端加载 Humble 环境
+# 终端一
+ros2 run tf2_ros static_transform_publisher --x 1 --y 0 --z 0 --yaw 0 --pitch 0 --roll 0 --frame-id demo_map --child-frame-id demo_base
+# 终端二
+ros2 run tf2_ros tf2_echo demo_map demo_base
+\end{tbash}
+\end{example}
 
-\section{建图}
+\begin{exercise}
+将 x 改为 2 并重启发布程序，核对输出；说明真实 map 到 odom 的定位修正为何不能用固定值长期代替。
+\end{exercise}
+
+\begin{conclusion}
+\begin{itemize}
+\item map 提供全局参考，定位修正可能使位姿跳变。
+\item odom 提供局部连续参考，长期可能漂移。
+\item base\_link 固连机器人；同一子坐标系不要由多个节点争相发布父变换。
+\end{itemize}
+\end{conclusion}
+
+\subsubsection{建图}
 \textbf{导航需要地图。}
 
 
@@ -169,7 +208,7 @@ ROS中的gmapping、hector\_slam算法都是基于滤波实现的。
 在机器人导航的时候，仅仅靠一张SLAM建立的原始地图是不够的，机器人在运动过程中可能会出现新的障碍物，
 也有可能发现原始地图中某一块的障碍物消失了，所以在机器人导航过程中维护的地图是一个动态的地图。那么怎么样才能建立一个动态的地图呢？
 
-\subsubsection{ 地图的获取}
+\subparagraph*{ 地图的获取}
 首先，我们接收激光雷达扫描到的点云图，然后对其进行处理，压缩到二维，得到地图。
 
 处理的第一步是进行点云的滤波。下面是一些常用的滤波方法：
@@ -226,16 +265,16 @@ ROS中的gmapping、hector\_slam算法都是基于滤波实现的。
 这张地图可以为三维点云格式（.pcd文件），也可以压缩成二维栅格地图格式（ .pgm, .png, .jpg文件），因为是按照真实世界按比例缩小，所以要有一个yaml文件来记录比例尺等参数来表示缩小比例。。
 
 \textbf{*栅格地图：即用二维图片记录地图信息。用一个个像素表示地图上的障碍物的位置、大小信息，灰度表示障碍物置信度，支持pgm,png,jpg格式，可人工修改。
-比如建完的图有一些噪声导致的奇怪黑点，我们就可以打开PhotoShop，用白色笔刷手动擦除；又如，我们不想让哨兵到某个地方，就可以用黑笔画地为牢，桀桀桀}
+用于定位的地图应保留可复核的真实几何信息；禁止区使用 keepout 等导航约束表达，编辑地图前保留原始版本并实地核对}
 
-\subsubsection{ 地图的处理}
+\subparagraph*{ 地图的处理}
 现在的地图以及可以满足定位这一功能的需求了，但是为了满足地图的另一功能——路径规划的需求，我们还需要对地图进行处理。
 
-\paragraph{ 代价地图}
+\paragraph*{ 代价地图}
 首先我们引入代价地图的概念,想要计算出最佳的路径，我们就要给每一条路径一个分值。所以我们把不想去的地方设置一个大大的代价，
-比如我们不希望哨兵出现在障碍物的内部，那么就给把它的代价设为无穷大，在路径规划的时候路径就会避开它（具体的算法见10.4节）。
+比如不希望机器人进入障碍物内部，就用致命代价标记不可通行区域，在路径规划的时候路径就会避开它（具体算法见本章路径规划小节）。
 
-\paragraph{ 地图层layer}
+\paragraph*{ 地图层layer}
 为了让人们方便对地图进行自定义操作和拓展（“掺点小料”），nav2提供了一种非常灵活的地图处理机制，即地图的“层”，又叫$plugins$“插件”。
 将一层层的地图层叠加在一起，就可以形成一个完整的地图（根据不同的需求，我们可以有很多张完整的地图，用在不同的地方，最常见的就是，
 根据更新频率方式和用途不同，可以分为全局代价地图和局部代价地图）。
@@ -281,9 +320,28 @@ ROS中的gmapping、hector\_slam算法都是基于滤波实现的。
 除了这些地图层，还可以自定义的地图层。比如你想哨兵不走回头路，那么你就可以把哨兵走过的路径当成障碍物，
 变成一层地图层，添加在整张地图里，这样路径规划时就不会考虑这片区域了。
 
-*值得注意的是，地图层之间是有顺序的。比如一般膨胀层都在最后（最上面），这样它就会把下面的静态层，障碍层，自定义层……都进行膨胀。
+*值得注意的是，地图层之间是有顺序的。比如膨胀层通常在需膨胀的障碍层之后，这样它就会把下面的静态层，障碍层，自定义层……都进行膨胀。
 
-\section{路径规划}
+\begin{example}
+分辨率 0.05 m/cell、原点 (0,0)、原点偏航为 0 时，栅格索引 (10,20) 的格心为 (0.525,1.025) m。图像行号与地图 y 轴还需按文件格式转换。
+\begin{tpython}
+resolution=0.05
+i,j=10,20
+x,y=(i+0.5)*resolution,(j+0.5)*resolution
+assert abs(x-0.525)<1e-12 and abs(y-1.025)<1e-12
+print(x,y)
+\end{tpython}
+\end{example}
+
+\begin{exercise}
+地图原点改为 (-2,-1)，求同一格心位置；解释分辨率与图像像素数共同决定了什么。
+\end{exercise}
+
+\begin{note}
+不要只保存地图图片；原点、分辨率和阈值等元数据也是地图的一部分。标记未知区域时，不要误当作已确认的空地。
+\end{note}
+
+\subsubsection{路径规划}
 现在我们有了地图和定位，终于可以进入我们的正题导航了。
 我们使用的是Nav2导航框架，该项目力求以安全的方式让移动机器人从A点移动到B点。
 Nav2也可以应用于其他应用，包括机器人导航，如下动态点跟踪，在这个过程中需要完成动态路径规划、
@@ -295,7 +353,7 @@ Nav2使用行为树（详情见下一个章节）调用模块化服务器来完�
 一大：
 BT Navigator Server 导航行为树服务，
 通过这个大的服务来进行下面三个小服务组织和调用。
-\subsubsection{全局规划器}
+\subparagraph*{全局规划器}
 
 Planner Server，规划服务器，（全局规划器）是Nav2中的核心模块之一，
 它负责根据所选的命名法和算法规划机器人的全局路径，即从起始点到目标点的路径。
@@ -303,24 +361,29 @@ Planner Server，规划服务器，（全局规划器）是Nav2中的核心模�
 他们通过全局代价地图global\_costmap，根据当前机器人的位置和目标位置，计算出从当前位置到目标位置的(时间或路程)最优路径。
 路径规划算法有很多种，还有他们的优化版本。
 这里，我们介绍两个最经典好用的算法：$Dijkstra$算法和$A*$算法
-\paragraph{$Dijkstra$算法}
-$Dijkstra$算法是一种最简单的广度优先的路径规划算法，它通过计算从起始点到其他所有点的最短路径，直到覆盖到终点。
-
-\url{https://www.bilibili.com/video/BV19b4y1d7Hz/}
+\paragraph*{$Dijkstra$算法}
+$Dijkstra$ 算法适用于非负边权，每次扩展当前累计代价最小的候选点；普通广度优先搜索仅在所有边代价相等时能这样求最短路径。A* 在累计代价上再加到目标的启发式估计。
 
 
-\subsubsection{控制器}
+\begin{note}
+最短路演示视频：\url{https://www.bilibili.com/video/BV19b4y1d7Hz/}。
+\end{note}
+
+
+
+\subparagraph*{控制器}
 如果只有规划器会怎么样呢？
 
-现在，登录你舍友的LOL账号，开一把排位晋级赛，在小地图上点击敌方基地。
+想象在一张游戏地图上，给角色指定一个远处目标。
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{英雄联盟.png}
     \caption{全局路径（用A*算法根据障碍物（建筑）算出来的）}
+\label{fig:I_nav-5}
 \end{figure}
-好的，一条全局导航路径生成出来了；好的，你的英雄沿着规划好的路径动起来了；好的，你被对面拿下一血并被队友问候全家。
-这是为什么？因为敌方是动态的，他的位置不是事先知道的，事先知道的只有地图，而全局规划器只考虑了地图，未考虑动态障碍物。
+全局路线生成后，移动目标仍可能突然挡住前方。
+这是为什么？因为敌方是动态的，他的位置不是事先知道的，事先知道的只有地图，而规划时使用的代价地图未必包含后来出现的障碍；局部控制还要持续检查最新观测。
 局部规划器就是在你的视野里出现动态障碍物的时候，规划出一条道路绕开他，然后继续跟着全局路径走。
 
 回到缺德地图，你这位车手就是局部规划器，缺德地图（全局规划器）只给大致的路线。
@@ -339,13 +402,37 @@ $Dijkstra$算法是一种最简单的广度优先的路径规划算法，它通�
 然而，有多个控制器类和局部规划器类。
 Nav2项目的目标就是所有控制器算法都可以作为此服务器中的插件，以用于一般研究和产业任务中。
 
-常用的局部规划器有DWA,TEB等，我们使用的是TEB算法。
-\section{恢复行为与行为树}
+DWA、TEB 是常见局部规划思路。Nav2 可用控制器插件随版本与项目配置而异，查验参数文件中的 plugin 字段后再确定实际算法。
+
+\begin{example}
+用三顶点非负权图检查 Dijkstra：A 到 C 的直达代价为 5，经 B 的代价为 3，因此最短距离应为 3。
+\begin{tpython}
+import heapq
+graph={"A":[("B",1),("C",5)],"B":[("C",2)],"C":[]}
+dist={"A":0}; queue=[(0,"A")]
+while queue:
+    cost,node=heapq.heappop(queue)
+    if cost!=dist[node]: continue
+    for other,weight in graph[node]:
+        candidate=cost+weight
+        if candidate<dist.get(other,float("inf")):
+            dist[other]=candidate
+            heapq.heappush(queue,(candidate,other))
+assert dist["C"]==3
+print(dist)
+\end{tpython}
+\end{example}
+
+\begin{exercise}
+把 A 到 C 的权重改为 2，验证新结果；说明为什么最少边数与最低代价不是同一目标。
+\end{exercise}
+
+\subsubsection{恢复行为与行为树}
 
 当局部规划失败、代价地图被完全堵住，或机器人长时间无法推进时，Nav2 会进入\textbf{恢复（Recovery）}流程：
 尝试一系列动作使系统回到可规划状态，再继续导航。
 
-\subsection{常见恢复行为}
+\paragraph*{常见恢复行为}
 \begin{itemize}
     \item 原地旋转：清理周围未知区域或等待障碍离开；
     \item 后退一小段：脱离当前局部死锁；
@@ -353,7 +440,7 @@ Nav2项目的目标就是所有控制器算法都可以作为此服务器中的�
     \item 重新规划全局路径：目标仍有效但原路径不可行时。
 \end{itemize}
 
-\subsection{行为树（Behavior Tree）简介}
+\paragraph*{行为树（Behavior Tree）简介}
 Nav2 用行为树编排「规划—控制—恢复」逻辑，而非写死的巨型状态机。
 树节点大致分为：
 \begin{itemize}
@@ -365,3 +452,29 @@ Nav2 用行为树编排「规划—控制—恢复」逻辑，而非写死的巨
 典型逻辑可理解为：Fallback\{ 跟随路径成功；否则执行恢复后再试 \}。
 具体 XML 行为树配置随 Nav2 版本变化，以官方文档与队内导航仓库为准。
 赛场「偷家」叙事与建图作业流程见卷三；本章掌握模块职责与接口即可。
+
+\begin{example}
+简化 Fallback：只有当前子项失败才尝试下一个。Running 应立即向上传递，不能一边跟踪一边错误启动恢复。
+\begin{tpython}
+def fallback(statuses):
+    for status in statuses:
+        if status != "Failure": return status
+    return "Failure"
+assert fallback(["Failure","Success"])=="Success"
+assert fallback(["Running","Success"])=="Running"
+print("状态检查通过")
+\end{tpython}
+\end{example}
+
+\begin{exercise}
+补充所有分支均失败的测试，并说明应由哪一层决定重试上限。
+\end{exercise}
+
+\begin{conclusion}
+\begin{itemize}
+\item 规划器输出路径，控制器输出可执行运动命令。
+\item 代价地图反映障碍与通行代价，必须匹配机器人外形和制动需求。
+\item 恢复不是无限重试；超时、重试上限和失败出口都要明确。
+\end{itemize}
+\end{conclusion}
+

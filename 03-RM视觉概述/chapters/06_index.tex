@@ -1,23 +1,47 @@
-\section{三卷分工}
+\subsubsection{三卷分工}
 
-| 卷 | 内容 | 何时读 |
-|----|------|--------|
-| 卷一 · 基础通识 | Linux、C++、CMake、Git | 入门必过 |
-| 卷二 · 专项技术栈 | ROS2、通信、SDR、OpenCV、深度学习、CUDA、相机、滤波、BA、MPC、导航 | 按方向选修 |
-| 卷三 · 本卷 | 赛场链路、接口边界、工程准则 | 开营精读 + 中期答辩 |
+\begin{center}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.43\textwidth}>{\raggedright\arraybackslash}p{0.24\textwidth}@{}}
+\toprule[1.5pt]
+卷 & 内容 & 何时读 \\
+\midrule[1pt]
+卷一 · 基础通识 & Linux、C++、CMake、Git & 入门必过 \\
+卷二 · 专项技术栈 & ROS2、通信、SDR、OpenCV、深度学习、CUDA、相机、滤波、BA、MPC、导航 & 按方向选修 \\
+卷三 · 本卷 & 赛场链路、接口边界、工程准则 & 开营精读 + 中期答辩 \\
+\bottomrule[1.5pt]
+\end{tabular}
+\end{center}
 
-\section{按方向的推荐顺序}
+\begin{example}[把问题放回正确卷册]
+建立三行书签：卷一编译与 CMake、卷二几何视觉与 BA、卷三工程准则。分别给“链接错误”“PnP 点序”“联调前如何留证据”连线。检查：先按问题性质找入口，避免从头翻整套书。
+\end{example}
+
+\begin{exercise}
+\label{v3-ex-index-1}
+Git 操作不熟、坐标广播积压、调车没有版本记录，分别优先查哪卷？
+\end{exercise}
+
+\subsubsection{按方向的推荐顺序}
 
 \textbf{自瞄（学习时间 $\rightarrow$ 工程时间）：}
-卷一 $\rightarrow$ 本卷第 1、2、5 章 $\rightarrow$ 卷二 ROS2、OpenCV、深度学习、相机、滤波、BA、MPC $\rightarrow$ 回本卷做链路答辩 $\rightarrow$ 实车仓库。
+卷一 $\rightarrow$ 本卷第\ref{ch:v3-overview}、\ref{ch:v3-aim}、\ref{ch:v3-engineering}章 $\rightarrow$ 卷二 ROS2、OpenCV、深度学习、相机、滤波、BA、MPC $\rightarrow$ 回本卷做链路答辩 $\rightarrow$ 实车仓库。
 
 \textbf{雷达：}
-卷一 $\rightarrow$ 本卷第 1、4、5 章 $\rightarrow$ 卷二 ROS2、多机通信、SDR、OpenCV、深度学习、相机 $\rightarrow$ 开源/队内雷达仓库部署文档。
+卷一 $\rightarrow$ 本卷第\ref{ch:v3-overview}、\ref{ch:v3-radar}、\ref{ch:v3-engineering}章 $\rightarrow$ 卷二 ROS2、多机通信、SDR、OpenCV、深度学习、相机 $\rightarrow$ 开源/队内雷达仓库部署文档。
 
 \textbf{导航：}
-卷一 $\rightarrow$ 本卷第 1、3、5 章 $\rightarrow$ 卷二 ROS2、导航（通信建议）$\rightarrow$ 建图与实车。
+卷一 $\rightarrow$ 本卷第\ref{ch:v3-overview}、\ref{ch:v3-nav}、\ref{ch:v3-engineering}章 $\rightarrow$ 卷二 ROS2、导航（通信建议）$\rightarrow$ 建图与实车。
 
-\section{资料索引（活页）}
+\begin{example}[给导航新人排顺序]
+写出“卷一通识 → 本卷职责、导航、工程准则 → 卷二 ROS2 与导航 → 回到本卷答辩 → 受控实车”。在每一步旁标注输出：基础小工程、链路图、专项练习、现场演示。检查：学习计划包含产出，不能只有书单。
+\end{example}
+
+\begin{exercise}
+\label{v3-ex-index-2}
+雷达新人不会串口帧解析，是否应先因“看起来高级”而跳去 MPC？写出更直接的补课顺序。
+\end{exercise}
+
+\subsubsection{资料索引（活页）}
 
 \begin{itemize}
     \item 卷二各章：\texttt{02-专项技术栈/}
@@ -27,13 +51,48 @@
     \item 裁判系统协议：当年官方文档（勿依赖过期拷贝）
 \end{itemize}
 
-\section{版本与责任}
+\begin{example}[检查一个真实入口]
+在本地文件浏览器依次打开项目目录、02-专项技术栈、main.tex，搜索“多机通信方法”，沿其 input 找到章节文件。记录入口、章名和检查日期。若队内讲义路径在本机不存在，记录“本机未取得访问入口”，交负责人确认。检查：书中提到的路径不等于当前电脑必定存在。
+\end{example}
 
-| 项目 | 填写 |
-|------|------|
-| 教材版本 | \texttt{2026.08} |
-| 本卷维护 | 视觉组培训负责人 |
-| 接口文档责任人 | （队内填写） |
-| 下次复盘日期 | （队内填写） |
+\begin{note}
+队内仓库地址、接口责任人和复盘日期由负责人填写。本书不虚构这些信息；本机没有路径时应记录待确认，不要把未访问的资料标成已核验。
+\end{note}
 
-本章为活页：仓库路径与开源链接变更时，只改本章，不必改专项公式正文。
+\begin{conclusion}
+\begin{itemize}
+  \item 路径回答在哪里，版本回答适用哪套实现。
+  \item 责任人回答由谁确认，核对日期回答何时验证。
+  \item 四项一起记录，才能让索引可追溯。
+\end{itemize}
+\end{conclusion}
+
+\begin{exercise}
+\label{v3-ex-index-3}
+只有一个没有版本号的协议截图，够不够作为联调依据？还需取得什么信息？
+\end{exercise}
+
+\subsubsection{版本与责任}
+
+\begin{center}
+\begin{tabular}{@{}p{0.30\textwidth}p{0.62\textwidth}@{}}
+\toprule[1.5pt]
+项目 & 填写 \\
+\midrule[1pt]
+教材版本 & \texttt{2026.08} \\
+本卷维护 & 视觉组培训负责人 \\
+接口文档责任人 & （队内填写） \\
+下次复盘日期 & （队内填写） \\
+\bottomrule[1.5pt]
+\end{tabular}
+\end{center}
+本章为活页：仅入口路径变化时更新本章即可；协议字段或行为变化时，还须同步接口文档、实现和验证，不能只换链接。
+
+\begin{example}[完成一次索引变更]
+教学情景：部署说明从路径 A 迁到 B。记录旧入口、新入口、适用分支或版本、检查日期与维护人；用新入口实际打开文档，再让另一位同学复核。无法访问 B 时记录受阻原因，不能标成已完成。
+\end{example}
+
+\begin{exercise}
+\label{v3-ex-index-4}
+教材活页改了协议链接，但消息字段定义也变了，仅修改活页是否足够？
+\end{exercise}
