@@ -1,0 +1,771 @@
+{
+  "ROS_DISTRO": "jazzy",
+  "records": [
+    {
+      "command": [
+        "ros2",
+        "daemon",
+        "stop"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "The daemon has been stopped\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "daemon",
+        "stop"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "The daemon is not running\n"
+    },
+    {
+      "command": [
+        "rosdep",
+        "check",
+        "--from-paths",
+        "src",
+        "--ignore-src"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "All system dependencies have been satisfied\n"
+    },
+    {
+      "command": [
+        "colcon",
+        "build",
+        "--cmake-args",
+        "-DBUILD_TESTING=ON",
+        "-DCMAKE_BUILD_TYPE=Debug",
+        "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "Starting >>> my_msgs\nStarting >>> training_tools\nFinished <<< my_msgs [3.96s]\nStarting >>> my_package\nFinished <<< training_tools [4.08s]\nFinished <<< my_package [7.43s]\n\nSummary: 3 packages finished [11.5s]\n"
+    },
+    {
+      "command": [
+        "colcon",
+        "test",
+        "--packages-select",
+        "training_tools"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "Starting >>> training_tools\nFinished <<< training_tools [0.07s]\n\nSummary: 1 package finished [0.18s]\n"
+    },
+    {
+      "command": [
+        "colcon",
+        "test-result",
+        "--verbose"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "Summary: 3 tests, 0 errors, 0 failures, 0 skipped\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "echo",
+        "/my_msg",
+        "my_msgs/msg/My",
+        "--once"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "header:\n  stamp:\n    sec: 1790622574\n    nanosec: 838549924\n  frame_id: camera_link\nid: 1\nyaw: 0.25\ndetect_success: true\n---\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "pub",
+        "--once",
+        "/receive",
+        "std_msgs/msg/String",
+        "{data: armor_found}"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "Waiting for at least 1 matching subscription(s)...\npublisher: beginning loop\npublishing #1: std_msgs.msg.String(data='armor_found')\n\n"
+    },
+    {
+      "check": "string callback round trip",
+      "output": "data: I can hear:armor_found\n---\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "hz",
+        "/timer_",
+        "--window",
+        "5"
+      ],
+      "returncode": 124,
+      "expected": 124,
+      "output": "average rate: 1.000\n\tmin: 1.000s max: 1.000s std dev: 0.00010s window: 2\naverage rate: 1.000\n\tmin: 1.000s max: 1.000s std dev: 0.00017s window: 4\naverage rate: 1.000\n\tmin: 1.000s max: 1.000s std dev: 0.00016s window: 5\naverage rate: 1.000\n\tmin: 1.000s max: 1.000s std dev: 0.00014s window: 5\naverage rate: 1.000\n\tmin: 1.000s max: 1.000s std dev: 0.00010s window: 5\naverage rate: 1.000\n\tmin: 1.000s max: 1.000s std dev: 0.00020s window: 5\n"
+    },
+    {
+      "background": "basic node 1Hz",
+      "returncode": 0,
+      "output": "[INFO] [1790622573.837690971] [my_node]: init\n[INFO] [1790622574.838427205] [my_node]: timer count=1\n[INFO] [1790622574.838651635] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622575.838463993] [my_node]: timer count=2\n[INFO] [1790622575.838555062] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622576.838464800] [my_node]: timer count=3\n[INFO] [1790622576.838571840] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622577.838404493] [my_node]: timer count=4\n[INFO] [1790622577.838569566] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622578.838443603] [my_node]: timer count=5\n[INFO] [1790622578.838551587] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622579.838445710] [my_node]: timer count=6\n[INFO] [1790622579.838546198] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622580.579797312] [my_node]: I hear armor_found\n[INFO] [1790622580.838544089] [my_node]: timer count=7\n[INFO] [1790622580.838645237] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622581.838450181] [my_node]: timer count=8\n[INFO] [1790622581.838595415] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622582.838407743] [my_node]: timer count=9\n[INFO] [1790622582.838553726] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622583.838535597] [my_node]: timer count=10\n[INFO] [1790622583.838686784] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622584.838459712] [my_node]: timer count=11\n[INFO] [1790622584.838582632] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622585.838609516] [my_node]: timer count=12\n[INFO] [1790622585.838747913] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622586.838571092] [my_node]: timer count=13\n[INFO] [1790622586.838691043] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622587.838538256] [my_node]: timer count=14\n[INFO] [1790622587.838647754] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622588.838409687] [my_node]: timer count=15\n[INFO] [1790622588.838536177] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622589.838546513] [my_node]: timer count=16\n[INFO] [1790622589.838683583] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622590.838415929] [my_node]: timer count=17\n[INFO] [1790622590.838542614] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622591.838558860] [my_node]: timer count=18\n[INFO] [1790622591.838695043] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622592.838547746] [my_node]: timer count=19\n[INFO] [1790622592.838649928] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622592.978430818] [rclcpp]: signal_handler(SIGINT/SIGTERM)\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "pub",
+        "--once",
+        "--wait-matching-subscriptions",
+        "0",
+        "/receive",
+        "std_msgs/msg/String",
+        "{data: stopped}"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "publisher: beginning loop\npublishing #1: std_msgs.msg.String(data='stopped')\n\n"
+    },
+    {
+      "command": [
+        "colcon",
+        "build",
+        "--packages-up-to",
+        "my_package"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "Starting >>> my_msgs\nFinished <<< my_msgs [2.16s]\nStarting >>> my_package\nFinished <<< my_package [6.98s]\n\nSummary: 2 packages finished [9.22s]\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "interface",
+        "show",
+        "my_msgs/msg/My"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "# yaw 单位为弧度；header.stamp 来自节点时钟。\nstd_msgs/Header header\n\tbuiltin_interfaces/Time stamp\n\t\tint32 sec\n\t\tuint32 nanosec\n\tstring frame_id\nuint8 id\nfloat64 yaw\nbool detect_success\nfloat64 distance # 米\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "echo",
+        "/my_msg",
+        "my_msgs/msg/My",
+        "--once"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "header:\n  stamp:\n    sec: 1790622604\n    nanosec: 862839420\n  frame_id: camera_link\nid: 1\nyaw: 0.25\ndetect_success: true\ndistance: 3.5\n---\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "hz",
+        "/timer_",
+        "--window",
+        "5"
+      ],
+      "returncode": 124,
+      "expected": 124,
+      "output": "average rate: 2.000\n\tmin: 0.500s max: 0.500s std dev: 0.00009s window: 3\naverage rate: 2.000\n\tmin: 0.500s max: 0.500s std dev: 0.00016s window: 5\naverage rate: 2.000\n\tmin: 0.500s max: 0.500s std dev: 0.00024s window: 5\naverage rate: 2.000\n\tmin: 0.500s max: 0.500s std dev: 0.00020s window: 5\naverage rate: 2.000\n\tmin: 0.500s max: 0.500s std dev: 0.00015s window: 5\naverage rate: 2.000\n\tmin: 0.500s max: 0.500s std dev: 0.00017s window: 5\naverage rate: 2.000\n\tmin: 0.500s max: 0.500s std dev: 0.00013s window: 5\n"
+    },
+    {
+      "background": "basic node 2Hz and distance",
+      "returncode": 0,
+      "output": "[INFO] [1790622603.862035679] [my_node]: init\n[INFO] [1790622604.362808275] [my_node]: timer count=1\n[INFO] [1790622604.362981201] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622604.862786318] [my_node]: timer count=2\n[INFO] [1790622604.862923877] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622605.362762844] [my_node]: timer count=3\n[INFO] [1790622605.362891680] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622605.862753198] [my_node]: timer count=4\n[INFO] [1790622605.862896094] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622606.362755782] [my_node]: timer count=5\n[INFO] [1790622606.362910672] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622606.862757694] [my_node]: timer count=6\n[INFO] [1790622606.862908583] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622607.362810487] [my_node]: timer count=7\n[INFO] [1790622607.362951017] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622607.862755802] [my_node]: timer count=8\n[INFO] [1790622607.862912400] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622608.362757650] [my_node]: timer count=9\n[INFO] [1790622608.362904166] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622608.862920727] [my_node]: timer count=10\n[INFO] [1790622608.863064197] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622609.362760808] [my_node]: timer count=11\n[INFO] [1790622609.362937309] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622609.862899526] [my_node]: timer count=12\n[INFO] [1790622609.863043107] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622610.362882599] [my_node]: timer count=13\n[INFO] [1790622610.363034622] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622610.862760449] [my_node]: timer count=14\n[INFO] [1790622610.862918265] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622611.362793383] [my_node]: timer count=15\n[INFO] [1790622611.362938351] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622611.862759575] [my_node]: timer count=16\n[INFO] [1790622611.862908836] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622612.362940606] [my_node]: timer count=17\n[INFO] [1790622612.363081317] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622612.862760854] [my_node]: timer count=18\n[INFO] [1790622612.862910277] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622613.362775943] [my_node]: timer count=19\n[INFO] [1790622613.362918978] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622613.862889723] [my_node]: timer count=20\n[INFO] [1790622613.863037672] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622614.362913324] [my_node]: timer count=21\n[INFO] [1790622614.363056374] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622614.862962396] [my_node]: timer count=22\n[INFO] [1790622614.863109890] [my_node]: id 1 , yaw 0.250000 , detect_success 1 \n[INFO] [1790622615.162131994] [rclcpp]: signal_handler(SIGINT/SIGTERM)\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "echo",
+        "/qos_demo",
+        "std_msgs/msg/String",
+        "--qos-reliability",
+        "reliable",
+        "--once"
+      ],
+      "returncode": 124,
+      "expected": 124,
+      "output": "[WARN] [1790622616.101445211] [_ros2cli_508916]: New publisher discovered on topic '/qos_demo', offering incompatible QoS. No messages will be received from it. Last incompatible policy: RELIABILITY\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "info",
+        "/qos_demo",
+        "--verbose"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "Type: std_msgs/msg/String\n\nPublisher count: 1\n\nNode name: _ros2cli_508915\nNode namespace: /\nTopic type: std_msgs/msg/String\nTopic type hash: RIHS01_df668c740482bbd48fb39d76a70dfd4bd59db1288021743503259e948f6b1a18\nEndpoint type: PUBLISHER\nGID: 01.0f.e8.b9.f3.c3.83.4c.00.00.00.00.00.00.07.03\nQoS profile:\n  Reliability: BEST_EFFORT\n  History (Depth): UNKNOWN\n  Durability: VOLATILE\n  Lifespan: Infinite\n  Deadline: Infinite\n  Liveliness: AUTOMATIC\n  Liveliness lease duration: Infinite\n\nSubscription count: 0\n\n"
+    },
+    {
+      "background": "QoS best_effort -> reliable",
+      "returncode": 2,
+      "output": "publisher: beginning loop\npublishing #1: std_msgs.msg.String(data='hello')\n\n[WARN] [1790622616.101701069] [_ros2cli_508915]: New subscription discovered on topic '/qos_demo', requesting incompatible QoS. No messages will be sent to it. Last incompatible policy: RELIABILITY\npublishing #2: std_msgs.msg.String(data='hello')\n\npublishing #3: std_msgs.msg.String(data='hello')\n\npublishing #4: std_msgs.msg.String(data='hello')\n\npublishing #5: std_msgs.msg.String(data='hello')\n\npublishing #6: std_msgs.msg.String(data='hello')\n\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "echo",
+        "/qos_demo",
+        "std_msgs/msg/String",
+        "--qos-reliability",
+        "best_effort",
+        "--once"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "data: hello\n---\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "info",
+        "/qos_demo",
+        "--verbose"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "Type: std_msgs/msg/String\n\nPublisher count: 1\n\nNode name: _ros2cli_509122\nNode namespace: /\nTopic type: std_msgs/msg/String\nTopic type hash: RIHS01_df668c740482bbd48fb39d76a70dfd4bd59db1288021743503259e948f6b1a18\nEndpoint type: PUBLISHER\nGID: 01.0f.e8.b9.c2.c4.f4.e8.00.00.00.00.00.00.07.03\nQoS profile:\n  Reliability: BEST_EFFORT\n  History (Depth): UNKNOWN\n  Durability: VOLATILE\n  Lifespan: Infinite\n  Deadline: Infinite\n  Liveliness: AUTOMATIC\n  Liveliness lease duration: Infinite\n\nSubscription count: 0\n\n"
+    },
+    {
+      "background": "QoS best_effort -> best_effort",
+      "returncode": 2,
+      "output": "publisher: beginning loop\npublishing #1: std_msgs.msg.String(data='hello')\n\npublishing #2: std_msgs.msg.String(data='hello')\n\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "echo",
+        "/qos_demo",
+        "std_msgs/msg/String",
+        "--qos-reliability",
+        "best_effort",
+        "--once"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "data: hello\n---\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "info",
+        "/qos_demo",
+        "--verbose"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "Type: std_msgs/msg/String\n\nPublisher count: 1\n\nNode name: _ros2cli_509202\nNode namespace: /\nTopic type: std_msgs/msg/String\nTopic type hash: RIHS01_df668c740482bbd48fb39d76a70dfd4bd59db1288021743503259e948f6b1a18\nEndpoint type: PUBLISHER\nGID: 01.0f.e8.b9.12.c5.37.93.00.00.00.00.00.00.07.03\nQoS profile:\n  Reliability: RELIABLE\n  History (Depth): UNKNOWN\n  Durability: VOLATILE\n  Lifespan: Infinite\n  Deadline: Infinite\n  Liveliness: AUTOMATIC\n  Liveliness lease duration: Infinite\n\nSubscription count: 0\n\n"
+    },
+    {
+      "background": "QoS reliable -> best_effort",
+      "returncode": 2,
+      "output": "publisher: beginning loop\npublishing #1: std_msgs.msg.String(data='hello')\n\npublishing #2: std_msgs.msg.String(data='hello')\n\n"
+    },
+    {
+      "command": [
+        "/opt/ros/jazzy/lib/demo_nodes_cpp/listener"
+      ],
+      "returncode": 124,
+      "expected": 124,
+      "output": "[INFO] [1790622629.673601234] [rclcpp]: signal_handler(SIGINT/SIGTERM)\n"
+    },
+    {
+      "command": [
+        "/opt/ros/jazzy/lib/demo_nodes_cpp/listener"
+      ],
+      "returncode": 124,
+      "expected": 124,
+      "output": "[INFO] [1790622630.693682243] [listener]: I heard: [Hello World: 4]\n[INFO] [1790622631.693806787] [listener]: I heard: [Hello World: 5]\n[INFO] [1790622632.693732539] [listener]: I heard: [Hello World: 6]\n[INFO] [1790622632.788179705] [rclcpp]: signal_handler(SIGINT/SIGTERM)\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "node",
+        "list"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "/talker\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "info",
+        "/chatter"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "Type: std_msgs/msg/String\nPublisher count: 1\nSubscription count: 0\n"
+    },
+    {
+      "background": "talker domain 76",
+      "returncode": 0,
+      "output": "[INFO] [1790622627.693273594] [talker]: Publishing: 'Hello World: 1'\n[INFO] [1790622628.693385352] [talker]: Publishing: 'Hello World: 2'\n[INFO] [1790622629.693266190] [talker]: Publishing: 'Hello World: 3'\n[INFO] [1790622630.693411978] [talker]: Publishing: 'Hello World: 4'\n[INFO] [1790622631.693380251] [talker]: Publishing: 'Hello World: 5'\n[INFO] [1790622632.693364864] [talker]: Publishing: 'Hello World: 6'\n[INFO] [1790622633.481220238] [rclcpp]: signal_handler(SIGINT/SIGTERM)\n"
+    },
+    {
+      "command": [
+        "/opt/ros/jazzy/lib/demo_nodes_cpp/listener"
+      ],
+      "returncode": 124,
+      "expected": 124,
+      "output": "[INFO] [1790622634.612683301] [listener]: I heard: [Hello World: 1]\n[INFO] [1790622635.612710102] [listener]: I heard: [Hello World: 2]\n[INFO] [1790622636.612545024] [listener]: I heard: [Hello World: 3]\n[INFO] [1790622637.597572251] [rclcpp]: signal_handler(SIGINT/SIGTERM)\n"
+    },
+    {
+      "background": "Cyclone talker",
+      "returncode": 0,
+      "output": "[INFO] [1790622634.612486605] [talker]: Publishing: 'Hello World: 1'\n[INFO] [1790622635.612533523] [talker]: Publishing: 'Hello World: 2'\n[INFO] [1790622636.612415018] [talker]: Publishing: 'Hello World: 3'\n[INFO] [1790622637.612468358] [talker]: Publishing: 'Hello World: 4'\n[INFO] [1790622637.811364915] [rclcpp]: signal_handler(SIGINT/SIGTERM)\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "service",
+        "list",
+        "-t"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "/listener/describe_parameters [rcl_interfaces/srv/DescribeParameters]\n/listener/get_parameter_types [rcl_interfaces/srv/GetParameterTypes]\n/listener/get_parameters [rcl_interfaces/srv/GetParameters]\n/listener/get_type_description [type_description_interfaces/srv/GetTypeDescription]\n/listener/list_parameters [rcl_interfaces/srv/ListParameters]\n/listener/set_parameters [rcl_interfaces/srv/SetParameters]\n/listener/set_parameters_atomically [rcl_interfaces/srv/SetParametersAtomically]\n/talker/describe_parameters [rcl_interfaces/srv/DescribeParameters]\n/talker/get_parameter_types [rcl_interfaces/srv/GetParameterTypes]\n/talker/get_parameters [rcl_interfaces/srv/GetParameters]\n/talker/get_type_description [type_description_interfaces/srv/GetTypeDescription]\n/talker/list_parameters [rcl_interfaces/srv/ListParameters]\n/talker/set_parameters [rcl_interfaces/srv/SetParameters]\n/talker/set_parameters_atomically [rcl_interfaces/srv/SetParametersAtomically]\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "interface",
+        "show",
+        "example_interfaces/srv/AddTwoInts"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "int64 a\nint64 b\n---\nint64 sum\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "service",
+        "call",
+        "/add_two_ints",
+        "example_interfaces/srv/AddTwoInts",
+        "{a: 2, b: 3}"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "waiting for service to become available...\nrequester: making request: example_interfaces.srv.AddTwoInts_Request(a=2, b=3)\n\nresponse:\nexample_interfaces.srv.AddTwoInts_Response(sum=5)\n\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "service",
+        "call",
+        "/add_two_ints",
+        "example_interfaces/srv/AddTwoInts",
+        "{a: -4, b: 9}"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "waiting for service to become available...\nrequester: making request: example_interfaces.srv.AddTwoInts_Request(a=-4, b=9)\n\nresponse:\nexample_interfaces.srv.AddTwoInts_Response(sum=5)\n\n"
+    },
+    {
+      "background": "AddTwoInts",
+      "returncode": 0,
+      "output": "[INFO] [1790622639.120657487] [add_two_ints_server]: Incoming request\na: 2 b: 3\n[INFO] [1790622639.834673283] [add_two_ints_server]: Incoming request\na: -4 b: 9\n[INFO] [1790622639.969667625] [rclcpp]: signal_handler(SIGINT/SIGTERM)\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "echo",
+        "/red/health",
+        "std_msgs/msg/String",
+        "--once"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "data: tracking\n---\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "param",
+        "get",
+        "/red/heartbeat",
+        "text"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "String value is: tracking\n"
+    },
+    {
+      "background": "heartbeat launch red",
+      "returncode": 0,
+      "output": "[INFO] [launch]: All log files can be found below /home/mijiao/.ros/log/2026-09-29-03-10-40-292816-mijiao-arch-510500\n[INFO] [launch]: Default logging verbosity is set to INFO\n[INFO] [heartbeat-1]: process started with pid [510547]\n[heartbeat-1] \u001b[0m[INFO] [1790622640.553381013] [red.heartbeat]: first heartbeat\u001b[0m\n[heartbeat-1] \u001b[0m[INFO] [1790622640.553451176] [red.heartbeat]: heartbeat alive\u001b[0m\n[heartbeat-1] \u001b[0m[INFO] [1790622642.553510066] [red.heartbeat]: heartbeat alive\u001b[0m\n[WARNING] [launch]: user interrupted with ctrl-c (SIGINT)\n[INFO] [heartbeat-1]: sending signal 'SIGINT' to process[heartbeat-1]\n[heartbeat-1] \u001b[0m[INFO] [1790622644.547836235] [rclcpp]: signal_handler(SIGINT/SIGTERM)\u001b[0m\n[heartbeat-1] \u001b[0m[INFO] [1790622644.548529096] [rclcpp]: signal_handler(SIGINT/SIGTERM)\u001b[0m\n[INFO] [heartbeat-1]: process has finished cleanly [pid 510547]\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "echo",
+        "/blue/health",
+        "std_msgs/msg/String",
+        "--once"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "data: 'true'\n---\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "param",
+        "get",
+        "/blue/heartbeat",
+        "text"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "String value is: true\n"
+    },
+    {
+      "background": "heartbeat launch blue",
+      "returncode": 0,
+      "output": "[INFO] [launch]: All log files can be found below /home/mijiao/.ros/log/2026-09-29-03-10-44-889055-mijiao-arch-510652\n[INFO] [launch]: Default logging verbosity is set to INFO\n[INFO] [heartbeat-1]: process started with pid [510661]\n[heartbeat-1] \u001b[0m[INFO] [1790622645.141473748] [blue.heartbeat]: first heartbeat\u001b[0m\n[heartbeat-1] \u001b[0m[INFO] [1790622645.141553757] [blue.heartbeat]: heartbeat alive\u001b[0m\n[WARNING] [launch]: user interrupted with ctrl-c (SIGINT)\n[INFO] [heartbeat-1]: sending signal 'SIGINT' to process[heartbeat-1]\n[heartbeat-1] \u001b[0m[INFO] [1790622646.839647120] [rclcpp]: signal_handler(SIGINT/SIGTERM)\u001b[0m\n[heartbeat-1] \u001b[0m[INFO] [1790622646.840379506] [rclcpp]: signal_handler(SIGINT/SIGTERM)\u001b[0m\n[INFO] [heartbeat-1]: process has finished cleanly [pid 510661]\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "echo",
+        "/red/health",
+        "std_msgs/msg/String",
+        "--once"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "data: team ready\n---\n"
+    },
+    {
+      "background": "team red",
+      "returncode": 0,
+      "output": "[INFO] [launch]: All log files can be found below /home/mijiao/.ros/log/2026-09-29-03-10-47-179911-mijiao-arch-510721\n[INFO] [launch]: Default logging verbosity is set to INFO\n[INFO] [launch.user]: Observing /red/health\n[INFO] [heartbeat-1]: process started with pid [510728]\n[INFO] [ros2-2]: process started with pid [510729]\n[heartbeat-1] \u001b[0m[INFO] [1790622647.433654195] [red.heartbeat]: first heartbeat\u001b[0m\n[heartbeat-1] \u001b[0m[INFO] [1790622647.433708050] [red.heartbeat]: heartbeat alive\u001b[0m\n[ros2-2] data: team ready\n[ros2-2] ---\n[INFO] [ros2-2]: process has finished cleanly [pid 510729]\n[INFO] [launch.user]: Observer exited; heartbeat keeps running.\n[heartbeat-1] \u001b[0m[INFO] [1790622649.433762204] [red.heartbeat]: heartbeat alive\u001b[0m\n[heartbeat-1] \u001b[0m[INFO] [1790622651.633647642] [red.heartbeat]: heartbeat alive\u001b[0m\n[WARNING] [launch]: user interrupted with ctrl-c (SIGINT)\n[INFO] [heartbeat-1]: sending signal 'SIGINT' to process[heartbeat-1]\n[heartbeat-1] \u001b[0m[INFO] [1790622651.966672215] [rclcpp]: signal_handler(SIGINT/SIGTERM)\u001b[0m\n[heartbeat-1] \u001b[0m[INFO] [1790622651.967397376] [rclcpp]: signal_handler(SIGINT/SIGTERM)\u001b[0m\n[INFO] [heartbeat-1]: process has finished cleanly [pid 510728]\n"
+    },
+    {
+      "command": [
+        "colcon",
+        "build",
+        "--packages-select",
+        "training_tools"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "Starting >>> training_tools\nFinished <<< training_tools [0.49s]\n\nSummary: 1 package finished [0.58s]\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "echo",
+        "/blue/health",
+        "std_msgs/msg/String",
+        "--once"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "data: team ready\n---\n"
+    },
+    {
+      "background": "team blue watch=true",
+      "returncode": 0,
+      "output": "[INFO] [launch]: All log files can be found below /home/mijiao/.ros/log/2026-09-29-03-10-53-169760-mijiao-arch-510942\n[INFO] [launch]: Default logging verbosity is set to INFO\n[INFO] [launch.user]: Observing /blue/health\n[INFO] [heartbeat-1]: process started with pid [510945]\n[INFO] [ros2-2]: process started with pid [510946]\n[heartbeat-1] \u001b[0m[INFO] [1790622653.425910177] [blue.heartbeat]: first heartbeat\u001b[0m\n[heartbeat-1] \u001b[0m[INFO] [1790622653.425966898] [blue.heartbeat]: heartbeat alive\u001b[0m\n[ros2-2] data: team ready\n[ros2-2] ---\n[INFO] [ros2-2]: process has finished cleanly [pid 510946]\n[INFO] [launch.user]: Observer exited; heartbeat keeps running.\n[heartbeat-1] \u001b[0m[INFO] [1790622655.625852635] [blue.heartbeat]: heartbeat alive\u001b[0m\n[WARNING] [launch]: user interrupted with ctrl-c (SIGINT)\n[INFO] [heartbeat-1]: sending signal 'SIGINT' to process[heartbeat-1]\n[heartbeat-1] \u001b[0m[INFO] [1790622656.960075248] [rclcpp]: signal_handler(SIGINT/SIGTERM)\u001b[0m\n[heartbeat-1] \u001b[0m[INFO] [1790622656.960851729] [rclcpp]: signal_handler(SIGINT/SIGTERM)\u001b[0m\n[INFO] [heartbeat-1]: process has finished cleanly [pid 510945]\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "echo",
+        "/blue/health",
+        "std_msgs/msg/String",
+        "--once"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "data: team ready\n---\n"
+    },
+    {
+      "background": "team blue watch=false",
+      "returncode": 0,
+      "output": "[INFO] [launch]: All log files can be found below /home/mijiao/.ros/log/2026-09-29-03-10-57-305346-mijiao-arch-511071\n[INFO] [launch]: Default logging verbosity is set to INFO\n[INFO] [launch.user]: Observing /blue/health\n[INFO] [heartbeat-1]: process started with pid [511074]\n[heartbeat-1] \u001b[0m[INFO] [1790622657.563393566] [blue.heartbeat]: first heartbeat\u001b[0m\n[heartbeat-1] \u001b[0m[INFO] [1790622657.563459882] [blue.heartbeat]: heartbeat alive\u001b[0m\n[heartbeat-1] \u001b[0m[INFO] [1790622659.763393083] [blue.heartbeat]: heartbeat alive\u001b[0m\n[WARNING] [launch]: user interrupted with ctrl-c (SIGINT)\n[INFO] [heartbeat-1]: sending signal 'SIGINT' to process[heartbeat-1]\n[heartbeat-1] \u001b[0m[INFO] [1790622661.096901604] [rclcpp]: signal_handler(SIGINT/SIGTERM)\u001b[0m\n[heartbeat-1] \u001b[0m[INFO] [1790622661.097718946] [rclcpp]: signal_handler(SIGINT/SIGTERM)\u001b[0m\n[INFO] [heartbeat-1]: process has finished cleanly [pid 511074]\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "hz",
+        "/status",
+        "--window",
+        "10"
+      ],
+      "returncode": 124,
+      "expected": 124,
+      "output": "average rate: 5.001\n\tmin: 0.200s max: 0.200s std dev: 0.00008s window: 7\naverage rate: 5.000\n\tmin: 0.200s max: 0.200s std dev: 0.00004s window: 10\naverage rate: 5.000\n\tmin: 0.200s max: 0.200s std dev: 0.00005s window: 10\naverage rate: 5.000\n\tmin: 0.200s max: 0.200s std dev: 0.00010s window: 10\naverage rate: 5.000\n\tmin: 0.200s max: 0.200s std dev: 0.00012s window: 10\naverage rate: 5.001\n\tmin: 0.200s max: 0.200s std dev: 0.00010s window: 10\n"
+    },
+    {
+      "background": "log level debug",
+      "returncode": 0,
+      "output": "[DEBUG] [1790622661.274193001] [rclcpp]: signal handler installed\n[DEBUG] [1790622661.274242778] [rclcpp]: deferred_signal_handler(): waiting for SIGINT/SIGTERM or uninstall\n[DEBUG] [1790622661.274277076] [rcl]: Initializing node 'heartbeat' in namespace ''\n[DEBUG] [1790622661.274290791] [rcl]: Using domain ID of '76'\n[DEBUG] [1790622661.280896724] [rcl]: Node initialized\n[DEBUG] [1790622661.280931762] [rcl]: Initializing publisher for topic name '/rosout'\n[DEBUG] [1790622661.280948761] [rcl]: Expanded and remapped topic name '/rosout'\n[DEBUG] [1790622661.282178997] [rcl]: Publisher initialized\n[DEBUG] [1790622661.282357737] [rcl]: Initializing service for service name 'heartbeat/get_parameters'\n[DEBUG] [1790622661.282365797] [rcl]: Expanded and remapped service name '/heartbeat/get_parameters'\n[DEBUG] [1790622661.283058107] [rmw_fastrtps_cpp]: ************ Service Details *********\n[DEBUG] [1790622661.283068470] [rmw_fastrtps_cpp]: Sub Topic rq/heartbeat/get_parametersRequest\n[DEBUG] [1790622661.283071133] [rmw_fastrtps_cpp]: Pub Topic rr/heartbeat/get_parametersReply\n[DEBUG] [1790622661.283073208] [rmw_fastrtps_cpp]: ***********\n[DEBUG] [1790622661.283143397] [rcl]: Service initialized\n[DEBUG] [1790622661.283169448] [rcl]: Initializing service for service name 'heartbeat/get_parameter_types'\n[DEBUG] [1790622661.283178105] [rcl]: Expanded and remapped service name '/heartbeat/get_parameter_types'\n[DEBUG] [1790622661.283612257] [rmw_fastrtps_cpp]: ************ Service Details *********\n[DEBUG] [1790622661.283621819] [rmw_fastrtps_cpp]: Sub Topic rq/heartbeat/get_parameter_typesRequest\n[DEBUG] [1790622661.283624426] [rmw_fastrtps_cpp]: Pub Topic rr/heartbeat/get_parameter_typesReply\n[DEBUG] [1790622661.283626533] [rmw_fastrtps_cpp]: ***********\n[DEBUG] [1790622661.283673507] [rcl]: Service initialized\n[DEBUG] [1790622661.283685503] [rcl]: Initializing service for service name 'heartbeat/set_parameters'\n[DEBUG] [1790622661.283691155] [rcl]: Expanded and remapped service name '/heartbeat/set_parameters'\n[DEBUG] [1790622661.284007536] [rmw_fastrtps_cpp]: ************ Service Details *********\n[DEBUG] [1790622661.284016438] [rmw_fastrtps_cpp]: Sub Topic rq/heartbeat/set_parametersRequest\n[DEBUG] [1790622661.284018899] [rmw_fastrtps_cpp]: Pub Topic rr/heartbeat/set_parametersReply\n[DEBUG] [1790622661.284020895] [rmw_fastrtps_cpp]: ***********\n[DEBUG] [1790622661.284087879] [rcl]: Service initialized\n[DEBUG] [1790622661.284099779] [rcl]: Initializing service for service name 'heartbeat/set_parameters_atomically'\n[DEBUG] [1790622661.284105693] [rcl]: Expanded and remapped service name '/heartbeat/set_parameters_atomically'\n[DEBUG] [1790622661.284404960] [rmw_fastrtps_cpp]: ************ Service Details *********\n[DEBUG] [1790622661.284413686] [rmw_fastrtps_cpp]: Sub Topic rq/heartbeat/set_parameters_atomicallyRequest\n[DEBUG] [1790622661.284416256] [rmw_fastrtps_cpp]: Pub Topic rr/heartbeat/set_parameters_atomicallyReply\n[DEBUG] [1790622661.284418338] [rmw_fastrtps_cpp]: ***********\n[DEBUG] [1790622661.284484123] [rcl]: Service initialized\n[DEBUG] [1790622661.284501067] [rcl]: Initializing service for service name 'heartbeat/describe_parameters'\n[DEBUG] [1790622661.284506597] [rcl]: Expanded and remapped service name '/heartbeat/describe_parameters'\n[DEBUG] [1790622661.284808508] [rmw_fastrtps_cpp]: ************ Service Details *********\n[DEBUG] [1790622661.284816367] [rmw_fastrtps_cpp]: Sub Topic rq/heartbeat/describe_parametersRequest\n[DEBUG] [1790622661.284818661] [rmw_fastrtps_cpp]: Pub Topic rr/heartbeat/describe_parametersReply\n[DEBUG] [1790622661.284820576] [rmw_fastrtps_cpp]: ***********\n[DEBUG] [1790622661.284876227] [rcl]: Service initialized\n[DEBUG] [1790622661.284887471] [rcl]: Initializing service for service name 'heartbeat/list_parameters'\n[DEBUG] [1790622661.284894411] [rcl]: Expanded and remapped service name '/heartbeat/list_parameters'\n[DEBUG] [1790622661.285168096] [rmw_fastrtps_cpp]: ************ Service Details *********\n[DEBUG] [1790622661.285175895] [rmw_fastrtps_cpp]: Sub Topic rq/heartbeat/list_parametersRequest\n[DEBUG] [1790622661.285200702] [rmw_fastrtps_cpp]: Pub Topic rr/heartbeat/list_parametersReply\n[DEBUG] [1790622661.285203776] [rmw_fastrtps_cpp]: ***********\n[DEBUG] [1790622661.285249020] [rcl]: Service initialized\n[DEBUG] [1790622661.285266046] [rcl]: Initializing publisher for topic name '/parameter_events'\n[DEBUG] [1790622661.285270908] [rcl]: Expanded and remapped topic name '/parameter_events'\n[DEBUG] [1790622661.286236397] [rcl]: Publisher initialized\n[DEBUG] [1790622661.286368876] [rcl]: Initializing subscription for topic name '/parameter_events'\n[DEBUG] [1790622661.286376324] [rcl]: Expanded and remapped topic name '/parameter_events'\n[DEBUG] [1790622661.286662766] [rcl]: Subscription initialized\n[DEBUG] [1790622661.286738357] [rcl]: Initializing service for service name '/heartbeat/get_type_description'\n[DEBUG] [1790622661.286745009] [rcl]: Expanded and remapped service name '/heartbeat/get_type_description'\n[DEBUG] [1790622661.287154832] [rmw_fastrtps_cpp]: ************ Service Details *********\n[DEBUG] [1790622661.287163047] [rmw_fastrtps_cpp]: Sub Topic rq/heartbeat/get_type_descriptionRequest\n[DEBUG] [1790622661.287165485] [rmw_fastrtps_cpp]: Pub Topic rr/heartbeat/get_type_descriptionReply\n[DEBUG] [1790622661.287167419] [rmw_fastrtps_cpp]: ***********\n[DEBUG] [1790622661.287242634] [rcl]: Service initialized\n[DEBUG] [1790622661.287365965] [rcl]: Initializing publisher for topic name 'status'\n[DEBUG] [1790622661.287372960] [rcl]: Expanded and remapped topic name '/status'\n[DEBUG] [1790622661.287941812] [rcl]: Publisher initialized\n[DEBUG] [1790622661.287973992] [rcl]: Initializing timer with period: 200000000ns\n[DEBUG] [1790622661.287995259] [rcl]: Initializing wait set with '0' subscriptions, '0' guard conditions, '0' timers, '0' clients, '0' services\n[DEBUG] [1790622661.288100056] [rcl]: Subscription taking message\n[DEBUG] [1790622661.288134898] [rcl]: Subscription take succeeded: true\n[DEBUG] [1790622661.288167330] [rcl]: Subscription taking message\n[DEBUG] [1790622661.288175317] [rcl]: Subscription take succeeded: true\n[DEBUG] [1790622661.288185210] [rcl]: Subscription taking message\n[DEBUG] [1790622661.288191182] [rcl]: Subscription take succeeded: true\n[DEBUG] [1790622661.288199320] [rcl]: Subscription taking message\n[DEBUG] [1790622661.288204938] [rcl]: Subscription take succeeded: true\n[DEBUG] [1790622661.288212673] [rcl]: Subscription taking message\n[DEBUG] [1790622661.288218292] [rcl]: Subscription take succeeded: true\n[DEBUG] [1790622661.288226217] [rcl]: Subscription taking message\n[DEBUG] [1790622661.288232269] [rcl]: Subscription take succeeded: true\n[DEBUG] [1790622661.488199833] [rcl]: Calling timer\n[DEBUG] [1790622661.488264492] [heartbeat]: publish: ready\n[INFO] [1790622661.488301315] [heartbeat]: first heartbeat\n[INFO] [1790622661.488308219] [heartbeat]: heartbeat alive\n[DEBUG] [1790622661.688148600] [rcl]: Calling timer\n[DEBUG] [1790622661.688194597] [heartbeat]: publish: ready\n[DEBUG] [1790622661.888102807] [rcl]: Calling timer\n[DEBUG] [1790622661.888153165] [heartbeat]: publish: ready\n[DEBUG] [1790622662.088099548] [rcl]: Calling timer\n[DEBUG] [1790622662.088168140] [heartbeat]: publish: ready\n[DEBUG] [1790622662.288196801] [rcl]: Calling timer\n[DEBUG] [1790622662.288269643] [heartbeat]: publish: ready\n[DEBUG] [1790622662.488101245] [rcl]: Calling timer\n[DEBUG] [1790622662.488176356] [heartbeat]: publish: ready\n[DEBUG] [1790622662.688140571] [rcl]: Calling timer\n[DEBUG] [1790622662.688214776] [heartbeat]: publish: ready\n[DEBUG] [1790622662.888131399] [rcl]: Calling timer\n[DEBUG] [1790622662.888206768] [heartbeat]: publish: ready\n[DEBUG] [1790622663.088127663] [rcl]: Calling timer\n[DEBUG] [1790622663.088200302] [heartbeat]: publish: ready\n[DEBUG] [1790622663.288099447] [rcl]: Calling timer\n[DEBUG] [1790622663.288169330] [heartbeat]: publish: ready\n[DEBUG] [1790622663.488074030] [rcl]: Calling timer\n[DEBUG] [1790622663.488147587] [heartbeat]: publish: ready\n[DEBUG] [1790622663.688107512] [rcl]: Calling timer\n[DEBUG] [1790622663.688180136] [heartbeat]: publish: ready\n[INFO] [1790622663.688196617] [heartbeat]: heartbeat alive\n[DEBUG] [1790622663.888124315] [rcl]: Calling timer\n[DEBUG] [1790622663.888201130] [heartbeat]: publish: ready\n[DEBUG] [1790622664.088105575] [rcl]: Calling timer\n[DEBUG] [1790622664.088297101] [heartbeat]: publish: ready\n[DEBUG] [1790622664.288117211] [rcl]: Calling timer\n[DEBUG] [1790622664.288194463] [heartbeat]: publish: ready\n[DEBUG] [1790622664.488149433] [rcl]: Calling timer\n[DEBUG] [1790622664.488222674] [heartbeat]: publish: ready\n[DEBUG] [1790622664.688105486] [rcl]: Calling timer\n[DEBUG] [1790622664.688179581] [heartbeat]: publish: ready\n[DEBUG] [1790622664.888122159] [rcl]: Calling timer\n[DEBUG] [1790622664.888197071] [heartbeat]: publish: ready\n[DEBUG] [1790622665.088102625] [rcl]: Calling timer\n[DEBUG] [1790622665.088177202] [heartbeat]: publish: ready\n[DEBUG] [1790622665.288072449] [rcl]: Calling timer\n[DEBUG] [1790622665.288153733] [heartbeat]: publish: ready\n[DEBUG] [1790622665.488123882] [rcl]: Calling timer\n[DEBUG] [1790622665.488197745] [heartbeat]: publish: ready\n[DEBUG] [1790622665.688102126] [rcl]: Calling timer\n[DEBUG] [1790622665.688176022] [heartbeat]: publish: ready\n[DEBUG] [1790622665.888122099] [rcl]: Calling timer\n[DEBUG] [1790622665.888202140] [heartbeat]: publish: ready\n[INFO] [1790622665.888219081] [heartbeat]: heartbeat alive\n[DEBUG] [1790622666.088192046] [rcl]: Calling timer\n[DEBUG] [1790622666.088270040] [heartbeat]: publish: ready\n[DEBUG] [1790622666.288082618] [rcl]: Calling timer\n[DEBUG] [1790622666.288158413] [heartbeat]: publish: ready\n[DEBUG] [1790622666.488075971] [rcl]: Calling timer\n[DEBUG] [1790622666.488152114] [heartbeat]: publish: ready\n[DEBUG] [1790622666.688363391] [rcl]: Calling timer\n[DEBUG] [1790622666.688456520] [heartbeat]: publish: ready\n[DEBUG] [1790622666.888129646] [rcl]: Calling timer\n[DEBUG] [1790622666.888541465] [heartbeat]: publish: ready\n[DEBUG] [1790622667.088283646] [rcl]: Calling timer\n[DEBUG] [1790622667.088361292] [heartbeat]: publish: ready\n[DEBUG] [1790622667.288128094] [rcl]: Calling timer\n[DEBUG] [1790622667.288201314] [heartbeat]: publish: ready\n[DEBUG] [1790622667.488134845] [rcl]: Calling timer\n[DEBUG] [1790622667.488211201] [heartbeat]: publish: ready\n[DEBUG] [1790622667.688133693] [rcl]: Calling timer\n[DEBUG] [1790622667.688211629] [heartbeat]: publish: ready\n[DEBUG] [1790622667.888143540] [rcl]: Calling timer\n[DEBUG] [1790622667.888220334] [heartbeat]: publish: ready\n[INFO] [1790622667.888237095] [heartbeat]: heartbeat alive\n[DEBUG] [1790622668.088159982] [rcl]: Calling timer\n[DEBUG] [1790622668.088234785] [heartbeat]: publish: ready\n[DEBUG] [1790622668.288101995] [rcl]: Calling timer\n[DEBUG] [1790622668.288183208] [heartbeat]: publish: ready\n[DEBUG] [1790622668.488103108] [rcl]: Calling timer\n[DEBUG] [1790622668.488175501] [heartbeat]: publish: ready\n[DEBUG] [1790622668.688114125] [rcl]: Calling timer\n[DEBUG] [1790622668.688186905] [heartbeat]: publish: ready\n[DEBUG] [1790622668.888193872] [rcl]: Calling timer\n[DEBUG] [1790622668.888268392] [heartbeat]: publish: ready\n[DEBUG] [1790622669.088073995] [rcl]: Calling timer\n[DEBUG] [1790622669.088149048] [heartbeat]: publish: ready\n[DEBUG] [1790622669.288081622] [rcl]: Calling timer\n[DEBUG] [1790622669.288133332] [heartbeat]: publish: ready\n[DEBUG] [1790622669.426619033] [rclcpp]: deferred_signal_handler(): woken up due to SIGINT/SIGTERM or uninstall\n[INFO] [1790622669.426642725] [rclcpp]: signal_handler(SIGINT/SIGTERM)\n[DEBUG] [1790622669.426645862] [rclcpp]: deferred_signal_handler(): shutting down\n[DEBUG] [1790622669.426699393] [rclcpp]: deferred_signal_handler(): shutting down rclcpp::Context @ 0x5607d6c5a9b0, because it had shutdown_on_signal == true\n[DEBUG] [1790622669.426722733] [rcl]: Shutting down ROS client library, for context at address: 0x5607d6bb5380\n[DEBUG] [1790622669.426747223] [rcl]: Finalizing publisher\n[DEBUG] [1790622669.426891048] [rcl]: Timer canceled\n[DEBUG] [1790622669.426903822] [rcl]: Timer canceled\n[DEBUG] [1790622669.426919800] [rcl]: Finalizing event\n[DEBUG] [1790622669.426924156] [rcl]: Event finalized\n[DEBUG] [1790622669.426925807] [rcl]: Finalizing event\n[DEBUG] [1790622669.426934033] [rcl]: Event finalized\n[DEBUG] [1790622669.426937357] [rcl]: Finalizing publisher\n[DEBUG] [1790622669.427257779] [rcl]: Publisher finalized\n[DEBUG] [1790622669.427305669] [rclcpp]: deferred_signal_handler(): waiting for SIGINT/SIGTERM or uninstall\n[DEBUG] [1790622669.427356237] [rcl]: Publisher finalized\n[DEBUG] [1790622669.427379026] [rcl]: Finalizing event\n[DEBUG] [1790622669.427381232] [rcl]: Event finalized\n[DEBUG] [1790622669.427382671] [rcl]: Finalizing event\n[DEBUG] [1790622669.427383636] [rcl]: Event finalized\n[DEBUG] [1790622669.427386634] [rcl]: Finalizing subscription\n[DEBUG] [1790622669.427605330] [rcl]: Subscription finalized\n[DEBUG] [1790622669.427620304] [rcl]: Finalizing service\n[DEBUG] [1790622669.427834151] [rcl]: Service finalized\n[DEBUG] [1790622669.427841428] [rcl]: Finalizing service\n[DEBUG] [1790622669.428031973] [rcl]: Service finalized\n[DEBUG] [1790622669.428037984] [rcl]: Finalizing service\n[DEBUG] [1790622669.428195291] [rcl]: Service finalized\n[DEBUG] [1790622669.428201611] [rcl]: Finalizing service\n[DEBUG] [1790622669.428345911] [rcl]: Service finalized\n[DEBUG] [1790622669.428351620] [rcl]: Finalizing service\n[DEBUG] [1790622669.428497127] [rcl]: Service finalized\n[DEBUG] [1790622669.428503408] [rcl]: Finalizing service\n[DEBUG] [1790622669.428653602] [rcl]: Service finalized\n[DEBUG] [1790622669.428663158] [rcl]: Finalizing event\n[DEBUG] [1790622669.428664823] [rcl]: Event finalized\n[DEBUG] [1790622669.428666423] [rcl]: Finalizing event\n[DEBUG] [1790622669.428667693] [rcl]: Event finalized\n[DEBUG] [1790622669.428669641] [rcl]: Finalizing publisher\n[DEBUG] [1790622669.428780855] [rcl]: Publisher finalized\n[DEBUG] [1790622669.428802940] [rcl]: Finalizing service\n[DEBUG] [1790622669.428948702] [rcl]: Service finalized\n[DEBUG] [1790622669.428967124] [rcl]: Finalizing node\n[DEBUG] [1790622669.430360698] [rcl]: Node finalized\n[DEBUG] [1790622669.430383878] [rclcpp]: SignalHandler::uninstall(): notifying deferred signal handler\n[DEBUG] [1790622669.430396731] [rclcpp]: deferred_signal_handler(): woken up due to SIGINT/SIGTERM or uninstall\n[DEBUG] [1790622669.430406044] [rclcpp]: deferred_signal_handler(): signal handling uninstalled\n[DEBUG] [1790622669.430470502] [rclcpp]: signal handler uninstalled\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "hz",
+        "/status",
+        "--window",
+        "10"
+      ],
+      "returncode": 124,
+      "expected": 124,
+      "output": "average rate: 4.999\n\tmin: 0.200s max: 0.200s std dev: 0.00006s window: 6\naverage rate: 5.000\n\tmin: 0.200s max: 0.200s std dev: 0.00007s window: 10\naverage rate: 5.000\n\tmin: 0.200s max: 0.200s std dev: 0.00008s window: 10\naverage rate: 5.000\n\tmin: 0.200s max: 0.200s std dev: 0.00010s window: 10\naverage rate: 5.000\n\tmin: 0.200s max: 0.200s std dev: 0.00011s window: 10\n"
+    },
+    {
+      "background": "log level warn",
+      "returncode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "colcon",
+        "build",
+        "--packages-select",
+        "training_tools"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "Starting >>> training_tools\nFinished <<< training_tools [3.00s]\n\nSummary: 1 package finished [3.10s]\n"
+    },
+    {
+      "command": [
+        "colcon",
+        "test",
+        "--packages-select",
+        "training_tools"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "Starting >>> training_tools\nFinished <<< training_tools [0.07s]\n\nSummary: 1 package finished [0.18s]\n"
+    },
+    {
+      "command": [
+        "colcon",
+        "test-result",
+        "--verbose"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "Summary: 3 tests, 0 errors, 0 failures, 0 skipped\n"
+    },
+    {
+      "background": "1000ms log throttle",
+      "returncode": 0,
+      "output": "[DEBUG] [rclcpp] signal handler installed\n[DEBUG] [rclcpp] deferred_signal_handler(): waiting for SIGINT/SIGTERM or uninstall\n[DEBUG] [rcl] Initializing node 'heartbeat' in namespace ''\n[DEBUG] [rcl] Using domain ID of '76'\n[DEBUG] [rcl] Node initialized\n[DEBUG] [rcl] Initializing publisher for topic name '/rosout'\n[DEBUG] [rcl] Expanded and remapped topic name '/rosout'\n[DEBUG] [rcl] Publisher initialized\n[DEBUG] [rcl] Initializing service for service name 'heartbeat/get_parameters'\n[DEBUG] [rcl] Expanded and remapped service name '/heartbeat/get_parameters'\n[DEBUG] [rmw_fastrtps_cpp] ************ Service Details *********\n[DEBUG] [rmw_fastrtps_cpp] Sub Topic rq/heartbeat/get_parametersRequest\n[DEBUG] [rmw_fastrtps_cpp] Pub Topic rr/heartbeat/get_parametersReply\n[DEBUG] [rmw_fastrtps_cpp] ***********\n[DEBUG] [rcl] Service initialized\n[DEBUG] [rcl] Initializing service for service name 'heartbeat/get_parameter_types'\n[DEBUG] [rcl] Expanded and remapped service name '/heartbeat/get_parameter_types'\n[DEBUG] [rmw_fastrtps_cpp] ************ Service Details *********\n[DEBUG] [rmw_fastrtps_cpp] Sub Topic rq/heartbeat/get_parameter_typesRequest\n[DEBUG] [rmw_fastrtps_cpp] Pub Topic rr/heartbeat/get_parameter_typesReply\n[DEBUG] [rmw_fastrtps_cpp] ***********\n[DEBUG] [rcl] Service initialized\n[DEBUG] [rcl] Initializing service for service name 'heartbeat/set_parameters'\n[DEBUG] [rcl] Expanded and remapped service name '/heartbeat/set_parameters'\n[DEBUG] [rmw_fastrtps_cpp] ************ Service Details *********\n[DEBUG] [rmw_fastrtps_cpp] Sub Topic rq/heartbeat/set_parametersRequest\n[DEBUG] [rmw_fastrtps_cpp] Pub Topic rr/heartbeat/set_parametersReply\n[DEBUG] [rmw_fastrtps_cpp] ***********\n[DEBUG] [rcl] Service initialized\n[DEBUG] [rcl] Initializing service for service name 'heartbeat/set_parameters_atomically'\n[DEBUG] [rcl] Expanded and remapped service name '/heartbeat/set_parameters_atomically'\n[DEBUG] [rmw_fastrtps_cpp] ************ Service Details *********\n[DEBUG] [rmw_fastrtps_cpp] Sub Topic rq/heartbeat/set_parameters_atomicallyRequest\n[DEBUG] [rmw_fastrtps_cpp] Pub Topic rr/heartbeat/set_parameters_atomicallyReply\n[DEBUG] [rmw_fastrtps_cpp] ***********\n[DEBUG] [rcl] Service initialized\n[DEBUG] [rcl] Initializing service for service name 'heartbeat/describe_parameters'\n[DEBUG] [rcl] Expanded and remapped service name '/heartbeat/describe_parameters'\n[DEBUG] [rmw_fastrtps_cpp] ************ Service Details *********\n[DEBUG] [rmw_fastrtps_cpp] Sub Topic rq/heartbeat/describe_parametersRequest\n[DEBUG] [rmw_fastrtps_cpp] Pub Topic rr/heartbeat/describe_parametersReply\n[DEBUG] [rmw_fastrtps_cpp] ***********\n[DEBUG] [rcl] Service initialized\n[DEBUG] [rcl] Initializing service for service name 'heartbeat/list_parameters'\n[DEBUG] [rcl] Expanded and remapped service name '/heartbeat/list_parameters'\n[DEBUG] [rmw_fastrtps_cpp] ************ Service Details *********\n[DEBUG] [rmw_fastrtps_cpp] Sub Topic rq/heartbeat/list_parametersRequest\n[DEBUG] [rmw_fastrtps_cpp] Pub Topic rr/heartbeat/list_parametersReply\n[DEBUG] [rmw_fastrtps_cpp] ***********\n[DEBUG] [rcl] Service initialized\n[DEBUG] [rcl] Initializing publisher for topic name '/parameter_events'\n[DEBUG] [rcl] Expanded and remapped topic name '/parameter_events'\n[DEBUG] [rcl] Publisher initialized\n[DEBUG] [rcl] Initializing subscription for topic name '/parameter_events'\n[DEBUG] [rcl] Expanded and remapped topic name '/parameter_events'\n[DEBUG] [rcl] Subscription initialized\n[DEBUG] [rcl] Initializing service for service name '/heartbeat/get_type_description'\n[DEBUG] [rcl] Expanded and remapped service name '/heartbeat/get_type_description'\n[DEBUG] [rmw_fastrtps_cpp] ************ Service Details *********\n[DEBUG] [rmw_fastrtps_cpp] Sub Topic rq/heartbeat/get_type_descriptionRequest\n[DEBUG] [rmw_fastrtps_cpp] Pub Topic rr/heartbeat/get_type_descriptionReply\n[DEBUG] [rmw_fastrtps_cpp] ***********\n[DEBUG] [rcl] Service initialized\n[DEBUG] [rcl] Initializing publisher for topic name 'status'\n[DEBUG] [rcl] Expanded and remapped topic name '/status'\n[DEBUG] [rcl] Publisher initialized\n[DEBUG] [rcl] Initializing timer with period: 200000000ns\n[DEBUG] [rcl] Initializing wait set with '0' subscriptions, '0' guard conditions, '0' timers, '0' clients, '0' services\n[DEBUG] [rcl] Subscription taking message\n[DEBUG] [rcl] Subscription take succeeded: true\n[DEBUG] [rcl] Subscription taking message\n[DEBUG] [rcl] Subscription take succeeded: true\n[DEBUG] [rcl] Subscription taking message\n[DEBUG] [rcl] Subscription take succeeded: true\n[DEBUG] [rcl] Subscription taking message\n[DEBUG] [rcl] Subscription take succeeded: true\n[DEBUG] [rcl] Subscription taking message\n[DEBUG] [rcl] Subscription take succeeded: true\n[DEBUG] [rcl] Subscription taking message\n[DEBUG] [rcl] Subscription take succeeded: true\n[DEBUG] [rcl] Calling timer\n[DEBUG] [heartbeat] publish: ready\n[INFO] [heartbeat] first heartbeat\n[INFO] [heartbeat] heartbeat alive\n[DEBUG] [rcl] Calling timer\n[DEBUG] [heartbeat] publish: ready\n[DEBUG] [rcl] Calling timer\n[DEBUG] [heartbeat] publish: ready\n[DEBUG] [rcl] Calling timer\n[DEBUG] [heartbeat] publish: ready\n[DEBUG] [rcl] Calling timer\n[DEBUG] [heartbeat] publish: ready\n[DEBUG] [rcl] Calling timer\n[DEBUG] [heartbeat] publish: ready\n[DEBUG] [rcl] Calling timer\n[DEBUG] [heartbeat] publish: ready\n[INFO] [heartbeat] heartbeat alive\n[DEBUG] [rcl] Calling timer\n[DEBUG] [heartbeat] publish: ready\n[DEBUG] [rcl] Calling timer\n[DEBUG] [heartbeat] publish: ready\n[DEBUG] [rcl] Calling timer\n[DEBUG] [heartbeat] publish: ready\n[DEBUG] [rcl] Calling timer\n[DEBUG] [heartbeat] publish: ready\n[DEBUG] [rcl] Calling timer\n[DEBUG] [heartbeat] publish: ready\n[DEBUG] [rcl] Calling timer\n[DEBUG] [heartbeat] publish: ready\n[INFO] [heartbeat] heartbeat alive\n[DEBUG] [rcl] Calling timer\n[DEBUG] [heartbeat] publish: ready\n[DEBUG] [rcl] Calling timer\n[DEBUG] [heartbeat] publish: ready\n[DEBUG] [rcl] Calling timer\n[DEBUG] [heartbeat] publish: ready\n[DEBUG] [rcl] Calling timer\n[DEBUG] [heartbeat] publish: ready\n[DEBUG] [rclcpp] deferred_signal_handler(): woken up due to SIGINT/SIGTERM or uninstall\n[INFO] [rclcpp] signal_handler(SIGINT/SIGTERM)\n[DEBUG] [rclcpp] deferred_signal_handler(): shutting down\n[DEBUG] [rclcpp] deferred_signal_handler(): shutting down rclcpp::Context @ 0x55a68e0609b0, because it had shutdown_on_signal == true\n[DEBUG] [rcl] Shutting down ROS client library, for context at address: 0x55a68dfbb380\n[DEBUG] [rcl] Finalizing publisher\n[DEBUG] [rcl] Timer canceled\n[DEBUG] [rcl] Timer canceled\n[DEBUG] [rcl] Finalizing event\n[DEBUG] [rcl] Event finalized\n[DEBUG] [rcl] Finalizing event\n[DEBUG] [rcl] Event finalized\n[DEBUG] [rcl] Finalizing publisher\n[DEBUG] [rcl] Publisher finalized\n[DEBUG] [rclcpp] deferred_signal_handler(): waiting for SIGINT/SIGTERM or uninstall\n[DEBUG] [rcl] Publisher finalized\n[DEBUG] [rcl] Finalizing event\n[DEBUG] [rcl] Event finalized\n[DEBUG] [rcl] Finalizing event\n[DEBUG] [rcl] Event finalized\n[DEBUG] [rcl] Finalizing subscription\n[DEBUG] [rcl] Subscription finalized\n[DEBUG] [rcl] Finalizing service\n[DEBUG] [rcl] Service finalized\n[DEBUG] [rcl] Finalizing service\n[DEBUG] [rcl] Service finalized\n[DEBUG] [rcl] Finalizing service\n[DEBUG] [rcl] Service finalized\n[DEBUG] [rcl] Finalizing service\n[DEBUG] [rcl] Service finalized\n[DEBUG] [rcl] Finalizing service\n[DEBUG] [rcl] Service finalized\n[DEBUG] [rcl] Finalizing service\n[DEBUG] [rcl] Service finalized\n[DEBUG] [rcl] Finalizing event\n[DEBUG] [rcl] Event finalized\n[DEBUG] [rcl] Finalizing event\n[DEBUG] [rcl] Event finalized\n[DEBUG] [rcl] Finalizing publisher\n[DEBUG] [rcl] Publisher finalized\n[DEBUG] [rcl] Finalizing service\n[DEBUG] [rcl] Service finalized\n[DEBUG] [rcl] Finalizing node\n[DEBUG] [rcl] Node finalized\n[DEBUG] [rclcpp] SignalHandler::uninstall(): notifying deferred signal handler\n[DEBUG] [rclcpp] deferred_signal_handler(): woken up due to SIGINT/SIGTERM or uninstall\n[DEBUG] [rclcpp] deferred_signal_handler(): signal handling uninstalled\n[DEBUG] [rclcpp] signal handler uninstalled\n"
+    },
+    {
+      "command": [
+        "cmake",
+        "-S",
+        "/tmp/ros-textbook-0sqt4nwp/src/training_tools",
+        "-B",
+        "/tmp/ros-textbook-0sqt4nwp/ide-build",
+        "-DCMAKE_BUILD_TYPE=Debug",
+        "-DBUILD_TESTING=OFF"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "-- The C compiler identification is GNU 13.3.0\n-- The CXX compiler identification is GNU 13.3.0\n-- Detecting C compiler ABI info\n-- Detecting C compiler ABI info - done\n-- Check for working C compiler: /usr/bin/cc - skipped\n-- Detecting C compile features\n-- Detecting C compile features - done\n-- Detecting CXX compiler ABI info\n-- Detecting CXX compiler ABI info - done\n-- Check for working CXX compiler: /usr/bin/c++ - skipped\n-- Detecting CXX compile features\n-- Detecting CXX compile features - done\n-- Found ament_cmake: 2.5.6 (/opt/ros/jazzy/share/ament_cmake/cmake)\n-- Found Python3: /usr/bin/python3 (found version \"3.12.3\") found components: Interpreter \n-- Found rclcpp: 28.1.22 (/opt/ros/jazzy/share/rclcpp/cmake)\n-- Found rosidl_generator_c: 4.6.9 (/opt/ros/jazzy/share/rosidl_generator_c/cmake)\n-- Found rosidl_generator_cpp: 4.6.9 (/opt/ros/jazzy/share/rosidl_generator_cpp/cmake)\n-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c\n-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp\n-- Found rmw_implementation_cmake: 7.3.3 (/opt/ros/jazzy/share/rmw_implementation_cmake/cmake)\n-- Found rmw_fastrtps_cpp: 8.4.4 (/opt/ros/jazzy/share/rmw_fastrtps_cpp/cmake)\n-- Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version \"3.0.13\")  \n-- Found FastRTPS: /opt/ros/jazzy/include (Required is at least version \"2.13\") \n-- Using RMW implementation 'rmw_fastrtps_cpp' as default\n-- Found std_msgs: 5.3.8 (/opt/ros/jazzy/share/std_msgs/cmake)\n-- Configuring done (0.8s)\n-- Generating done (0.0s)\n-- Build files have been written to: /tmp/ros-textbook-0sqt4nwp/ide-build\n"
+    },
+    {
+      "command": [
+        "cmake",
+        "--build",
+        "/tmp/ros-textbook-0sqt4nwp/ide-build"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "[ 50%] Building CXX object CMakeFiles/heartbeat.dir/src/heartbeat.cpp.o\n[100%] Linking CXX executable heartbeat\n[100%] Built target heartbeat\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "echo",
+        "/status",
+        "std_msgs/msg/String",
+        "--once"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "data: from_debug\n---\n"
+    },
+    {
+      "background": "build/install difference from_debug",
+      "returncode": 0,
+      "output": "[INFO] [1790622689.005736172] [heartbeat]: first heartbeat\n[INFO] [1790622689.005795904] [heartbeat]: heartbeat alive\n[INFO] [1790622689.738311386] [rclcpp]: signal_handler(SIGINT/SIGTERM)\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "echo",
+        "/status",
+        "std_msgs/msg/String",
+        "--once"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "data: ready\n---\n"
+    },
+    {
+      "background": "build/install difference ready",
+      "returncode": 0,
+      "output": "[INFO] [1790622690.072086833] [heartbeat]: first heartbeat\n[INFO] [1790622690.072141907] [heartbeat]: heartbeat alive\n[INFO] [1790622690.804172474] [rclcpp]: signal_handler(SIGINT/SIGTERM)\n"
+    },
+    {
+      "command": [
+        "gdb",
+        "-q",
+        "-batch",
+        "-ex",
+        "break heartbeat.cpp:20",
+        "-ex",
+        "run",
+        "-ex",
+        "bt",
+        "--args",
+        "/tmp/ros-textbook-0sqt4nwp/ide-build/heartbeat"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "Breakpoint 1 at 0x6d642: heartbeat.cpp:20. (2 locations)\n\nThis GDB supports auto-downloading debuginfo from the following URLs:\n  <https://debuginfod.archlinux.org>\nEnable debuginfod for this session? (y or [n]) [answered N; input not from terminal]\nDebuginfod has been disabled.\nTo make this setting permanent, add 'set debuginfod enabled off' to .gdbinit.\n[Thread debugging using libthread_db enabled]\nUsing host libthread_db library \"/lib/x86_64-linux-gnu/libthread_db.so.1\".\n[New Thread 0x7ffff73a46c0 (LWP 512087)]\n[New Thread 0x7ffff6ba36c0 (LWP 512088)]\n[New Thread 0x7ffff533a6c0 (LWP 512093)]\n[New Thread 0x7ffff4b396c0 (LWP 512094)]\n[New Thread 0x7ffff43386c0 (LWP 512095)]\n[New Thread 0x7ffff3ab06c0 (LWP 512096)]\n[New Thread 0x7ffff32af6c0 (LWP 512097)]\n[New Thread 0x7ffff2aae6c0 (LWP 512098)]\n[New Thread 0x7ffff22ad6c0 (LWP 512099)]\n[New Thread 0x7ffff1a0c6c0 (LWP 512100)]\n[New Thread 0x7ffff11f66c0 (LWP 512101)]\n[New Thread 0x7ffff09f56c0 (LWP 512102)]\n[New Thread 0x7fffebfff6c0 (LWP 512103)]\n\nThread 1 \"heartbeat\" hit Breakpoint 1.2, Heartbeat::Heartbeat (this=0x5555556ccf60) at /tmp/ros-textbook-0sqt4nwp/src/training_tools/src/heartbeat.cpp:21\n21\t      });\n#0  Heartbeat::Heartbeat (this=0x5555556ccf60) at /tmp/ros-textbook-0sqt4nwp/src/training_tools/src/heartbeat.cpp:21\n#1  0x00005555555d4187 in std::_Construct<Heartbeat> (__p=0x5555556ccf60) at /usr/include/c++/13/bits/stl_construct.h:119\n#2  0x00005555555cf1f1 in std::allocator_traits<std::allocator<void> >::construct<Heartbeat> (__p=0x5555556ccf60) at /usr/include/c++/13/bits/alloc_traits.h:661\n#3  std::_Sp_counted_ptr_inplace<Heartbeat, std::allocator<void>, (__gnu_cxx::_Lock_policy)2>::_Sp_counted_ptr_inplace<>(std::allocator<void>) (this=0x5555556ccf50, __a=...) at /usr/include/c++/13/bits/shared_ptr_base.h:604\n#4  0x00005555555cc13b in std::__shared_count<(__gnu_cxx::_Lock_policy)2>::__shared_count<Heartbeat, std::allocator<void>>(Heartbeat*&, std::_Sp_alloc_shared_tag<std::allocator<void> >) (this=0x7fffffffd6f8, __p=@0x7fffffffd6f0: 0x0, __a=...) at /usr/include/c++/13/bits/shared_ptr_base.h:971\n#5  0x00005555555c8e1e in std::__shared_ptr<Heartbeat, (__gnu_cxx::_Lock_policy)2>::__shared_ptr<std::allocator<void>>(std::_Sp_alloc_shared_tag<std::allocator<void> >) (this=0x7fffffffd6f0, __tag=...) at /usr/include/c++/13/bits/shared_ptr_base.h:1712\n#6  0x00005555555c6e13 in std::shared_ptr<Heartbeat>::shared_ptr<std::allocator<void>>(std::_Sp_alloc_shared_tag<std::allocator<void> >) (this=0x7fffffffd6f0, __tag=...) at /usr/include/c++/13/bits/shared_ptr.h:464\n#7  0x00005555555c4631 in std::make_shared<Heartbeat> () at /usr/include/c++/13/bits/shared_ptr.h:1010\n#8  0x00005555555bd77d in main (argc=1, argv=0x7fffffffd8c8) at /tmp/ros-textbook-0sqt4nwp/src/training_tools/src/heartbeat.cpp:30\n"
+    },
+    {
+      "command": [
+        "colcon",
+        "build",
+        "--packages-select",
+        "training_tools"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "Starting >>> training_tools\nFinished <<< training_tools [2.89s]\n\nSummary: 1 package finished [2.98s]\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "echo",
+        "/status",
+        "std_msgs/msg/String",
+        "--once"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "data: from_debug\n---\n"
+    },
+    {
+      "background": "updated install",
+      "returncode": 0,
+      "output": "[INFO] [1790622694.621364827] [heartbeat]: first heartbeat\n[INFO] [1790622694.621424076] [heartbeat]: heartbeat alive\n[INFO] [1790622695.554662281] [rclcpp]: signal_handler(SIGINT/SIGTERM)\n"
+    },
+    {
+      "command": [
+        "colcon",
+        "build",
+        "--packages-select",
+        "training_tools",
+        "--cmake-clean-cache",
+        "--cmake-args",
+        "-DBUILD_TESTING=ON"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "Starting >>> training_tools\nFinished <<< training_tools [3.61s]\n\nSummary: 1 package finished [3.70s]\n"
+    },
+    {
+      "command": [
+        "colcon",
+        "test",
+        "--packages-select",
+        "training_tools"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "Starting >>> training_tools\nFinished <<< training_tools [0.07s]\n\nSummary: 1 package finished [0.18s]\n"
+    },
+    {
+      "command": [
+        "colcon",
+        "test-result",
+        "--verbose"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "Summary: 3 tests, 0 errors, 0 failures, 0 skipped\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "echo",
+        "/red/health",
+        "std_msgs/msg/String",
+        "--once"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "data: auto_ready\n---\n"
+    },
+    {
+      "background": "auto ament installed resources",
+      "returncode": 0,
+      "output": "[INFO] [launch]: All log files can be found below /home/mijiao/.ros/log/2026-09-29-03-11-40-275448-mijiao-arch-512530\n[INFO] [launch]: Default logging verbosity is set to INFO\n[INFO] [heartbeat-1]: process started with pid [512542]\n[heartbeat-1] \u001b[0m[INFO] [1790622700.532482798] [red.heartbeat]: first heartbeat\u001b[0m\n[heartbeat-1] \u001b[0m[INFO] [1790622700.532541521] [red.heartbeat]: heartbeat alive\u001b[0m\n[WARNING] [launch]: user interrupted with ctrl-c (SIGINT)\n[INFO] [heartbeat-1]: sending signal 'SIGINT' to process[heartbeat-1]\n[heartbeat-1] \u001b[0m[INFO] [1790622701.065141073] [rclcpp]: signal_handler(SIGINT/SIGTERM)\u001b[0m\n[heartbeat-1] \u001b[0m[INFO] [1790622701.065966423] [rclcpp]: signal_handler(SIGINT/SIGTERM)\u001b[0m\n[INFO] [heartbeat-1]: process has finished cleanly [pid 512542]\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "daemon",
+        "stop"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "The daemon has been stopped\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "daemon",
+        "stop"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "output": "The daemon is not running\n"
+    }
+  ]
+}

@@ -71,7 +71,7 @@
 
 | 章 | 主题 | 正文 |
 |----|------|------|
-| ROS2 基础 | 节点、话题、自定义消息 | `chapters/A_ros2.tex` + 附录 |
+| ROS2 基础 | 节点、接口、完整工程、构建与排障 | `chapters/A_ros2.tex`、`A_ros2_project.tex`、`A_ros2_engineering.tex`、`A_ros2_review.tex` |
 | 多机通信方法 | TCP / 串口帧、latest-value、故障隔离 | `chapters/J_comm.tex` |
 | SDR 与电磁波解析 | IQ、分阶段状态机、解析流水线 | `chapters/K_sdr.tex` |
 | OpenCV | Mat、HSV、滤波、轮廓、cv_bridge | `chapters/B_opencv.tex` |

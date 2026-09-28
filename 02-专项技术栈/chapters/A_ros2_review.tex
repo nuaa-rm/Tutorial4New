@@ -1,17 +1,19 @@
 \section{本章小结}
 先用节点与话题划分职责，再用功能包管理代码和依赖。应熟练完成发布、订阅、定时器和自定义接口的最小闭环。工程运行按“声明依赖、构建安装、加载环境、Launch 启动、观察话题与日志”串联；发生问题时先检查实际使用的包和二进制路径，再检查域、发现范围、接口与 QoS。CLion 使用独立构建目录，运行环境应与终端一致。组件、安全通信和复杂 DDS 配置先会查对应发行版文档，再按项目需要展开。
 
+\Needspace{12\baselineskip}
 \begin{problemset}
-\item 基础：一个包里有两个可执行程序，每个程序创建一个节点。包、进程、节点分别有几个？同一进程能否有多个节点？
-\item 基础：colcon build 后出现 build、install、log。运行前应加载哪个目录中的环境脚本？
-\item 基础：create\_publisher 的整数参数 10 是否表示“每秒发送十次”？哪个机制决定周期发布？
-\item 基础：包名 my\_msgs 与消息文件 My.msg 编译后，C++ 消息类型如何书写？
-\item 提高：发布者和订阅者使用相同话题名，仍收不到数据，按什么顺序排查？
-\item 实践：启动 demo\_nodes\_cpp 的服务端，调用 AddTwoInts，请求 a=-4、b=9，记录响应。
-\item 基础：设置 \nolinkurl{ROS_LOCALHOST_ONLY} 后，为什么旧节点可能继续跨机器通信？它与 \nolinkurl{ROS_DOMAIN_ID} 是否能替代认证？
-\item 提高：Launch 中 namespace 为 blue、相对话题 status 重映射为 health，完整话题名是什么？源目录有 YAML，但启动时报文件不存在，应检查什么？
-\item 提高：定时器每 200 毫秒发布消息，INFO 日志按 2000 毫秒限流。两者频率分别是多少？FATAL 是否自动结束程序？
-\item 实践：同一包在 CLion 中运行的是新代码，ros2 run 却仍显示旧文本。说明构建、安装和环境三个环节的排查顺序，并给出修复命令。
+\renewcommand{\theenumi}{\arabic{enumi}}
+\item \label{prob:v2-ros-1}基础：一个包里有两个可执行程序，每个程序创建一个节点。包、进程、节点分别有几个？同一进程能否有多个节点？
+\item \label{prob:v2-ros-2}基础：colcon build 后出现 build、install、log。运行前应加载哪个目录中的环境脚本？
+\item \label{prob:v2-ros-3}基础：create\_publisher 的整数参数 10 是否表示“每秒发送十次”？哪个机制决定周期发布？
+\item \label{prob:v2-ros-4}基础：包名 my\_msgs 与消息文件 My.msg 编译后，C++ 消息类型如何书写？
+\item \label{prob:v2-ros-5}提高：发布者和订阅者使用相同话题名，仍收不到数据，按什么顺序排查？
+\item \label{prob:v2-ros-6}实践：启动 demo\_nodes\_cpp 的服务端，调用 AddTwoInts，请求 a=-4、b=9，记录响应。
+\item \label{prob:v2-ros-7}基础：修改所在发行版的本机发现范围设置后，为什么旧节点可能继续跨机器通信？它与 \nolinkurl{ROS_DOMAIN_ID} 是否能替代认证？
+\item \label{prob:v2-ros-8}提高：Launch 中 namespace 为 blue、相对话题 status 重映射为 health，完整话题名是什么？源目录有 YAML，但启动时报文件不存在，应检查什么？
+\item \label{prob:v2-ros-9}提高：定时器每 200 毫秒发布消息，INFO 日志按 2000 毫秒限流。两者频率分别是多少？FATAL 是否自动结束程序？
+\item \label{prob:v2-ros-10}实践：同一包在 CLion 中运行的是新代码，ros2 run 却仍显示旧文本。说明构建、安装和环境三个环节的排查顺序，并给出修复命令。
 \end{problemset}
 
 \section{本章验收}

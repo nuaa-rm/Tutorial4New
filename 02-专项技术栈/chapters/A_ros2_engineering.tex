@@ -1,8 +1,8 @@
-% 工程实践：依据 nuaa-rm/til 的 ROS 疑难杂症资料重新组织，适用 Humble。
+% 工程实践：在 Jazzy 中验证，保留 Humble 的对应配置。
 \subsubsection{先检查环境，再检查代码}
 \label{sec:ros2-environment}
 
-本节统一使用 Ubuntu 22.04、ROS2 Humble 和 Bash。终端能运行节点、IDE 却找不到包，通常应先检查两者继承的环境。系统安装是底层工作空间（underlay），自己的安装目录是覆盖工作空间（overlay）；先加载底层，再加载覆盖层。同名包可能被覆盖，因此不要在同一终端随意叠加多个项目。
+刚才节点已经跑起来了，不过你很快会遇到另一种问题：终端能运行，IDE 却说找不到包，或者明明改了源码，启动后还是昨天的输出。这时候先别急着改 C++，我们先看看程序到底用了哪套环境。系统安装称为底层工作空间（underlay），自己的安装目录称为覆盖工作空间（overlay）；先加载底层，再加载覆盖层，同名包就可能被后者覆盖。本节继续用 Bash 和 Jazzy；Humble 的脚本路径按章首说明替换。
 
 \begin{center}
 \begin{tabular}{p{0.40\textwidth}p{0.52\textwidth}}
@@ -14,7 +14,9 @@
 \texttt{CMAKE\_PREFIX\_PATH} & CMake 查找依赖的前缀。\\
 \nolinkurl{PYTHONPATH / LD_LIBRARY_PATH} & Python 模块与动态库搜索路径。\\
 \texttt{ROS\_DOMAIN\_ID} & 通信域编号；通信双方需要一致。\\
-\texttt{ROS\_LOCALHOST\_ONLY} & Humble 中设为 1，将 ROS 通信限制在本机。\\
+\texttt{ROS\_LOCALHOST\_ONLY} & Humble 的本机通信设置，值为 1。\\
+\nolinkurl{ROS_AUTOMATIC_DISCOVERY_RANGE} & Jazzy 的自动发现范围；本机实验使用 LOCALHOST。\\
+\texttt{ROS\_STATIC\_PEERS} & Jazzy 中额外指定的发现对端；本机实验要清除。\\
 \texttt{RMW\_IMPLEMENTATION} & 选择已经安装的中间件实现。\\
 \bottomrule[1.5pt]
 \end{tabular}
@@ -24,42 +26,51 @@
 
 \begin{example}[确认终端实际使用的包]
 完成前面的工作空间练习后，在新终端执行：
+\par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{tbash}
-source /opt/ros/humble/setup.bash
+source /opt/ros/jazzy/setup.bash
 source ~/ros2_ws/install/setup.bash
 printenv ROS_VERSION ROS_DISTRO AMENT_PREFIX_PATH
 ros2 pkg prefix my_package
 ros2 pkg executables my_package
 \end{tbash}
-应显示 ROS 版本 2、发行版 humble，以及自己工作空间中的包安装前缀。若路径指向别的工作空间，先修正加载顺序；若找不到包，检查构建是否成功、包名是否一致。
+\end{minipage}\par\smallskip
+应显示 ROS 版本 2、发行版 jazzy，以及自己工作空间中的包安装前缀。若路径指向别的工作空间，先修正加载顺序；若找不到包，检查构建是否成功、包名是否一致。
 \end{example}
 
 \paragraph*{在实验室中只与自己的节点通信}
 域编号用于把实验分组；它不是密码。同一个域也不保证必然通信，还要检查发现范围、接口类型、QoS 与网络。Linux 教学环境可从 0--101 中协调分配编号；实际可用范围还受操作系统端口范围和进程数量影响。
 
 \begin{example}[临时启用本机通信并恢复]
-在两个终端分别执行以下四行，然后分别运行最后两条命令中的一条：
+在两个终端分别执行下面的环境设置，然后分别运行 talker 与 listener。域 42 是这次练习的分组编号，实验室已有分配时换成你的编号：
+\par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{tbash}
-source /opt/ros/humble/setup.bash
+source /opt/ros/jazzy/setup.bash
 export ROS_DOMAIN_ID=42
-export ROS_LOCALHOST_ONLY=1
+unset ROS_LOCALHOST_ONLY ROS_STATIC_PEERS
+export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
 ros2 daemon stop
 # 终端 A
 ros2 run demo_nodes_cpp talker
 # 终端 B
 ros2 run demo_nodes_cpp listener
 \end{tbash}
+\end{minipage}\par\smallskip
 应看到本机 listener 收到消息。在另一台机器使用相同域和普通网络发现时，不应收到本次本机发布的数据。测试前关闭遗留示例节点，避免把别的发布者当成结果。
 
 按 Ctrl+C 停止两个节点。在两个终端分别执行下列命令，再重新启动节点，恢复默认域和普通发现范围：
+\par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{tbash}
-unset ROS_LOCALHOST_ONLY ROS_DOMAIN_ID
+unset ROS_LOCALHOST_ONLY ROS_AUTOMATIC_DISCOVERY_RANGE ROS_STATIC_PEERS ROS_DOMAIN_ID
 ros2 daemon stop
 \end{tbash}
-若启动脚本或上层服务也设置了这些变量，需要同步检查。已有进程不会因另一终端执行 unset 而改变配置。
+\end{minipage}\par\smallskip
+上面的恢复命令假定这几个变量原来没有设置。如果你原来使用别的域或显式对端，实验前记下它们的值，结束后恢复原值。启动脚本或上层服务也可能设置这些变量，仍需检查；已有进程不会因为另一终端执行 unset 就改变配置。
 \end{example}
 
-长期设置可先用 \nolinkurl{cp -p ~/.bashrc ~/.bashrc.ros-backup} 备份，再编辑 \nolinkurl{~/.bashrc}，保留唯一生效的 \texttt{export ROS\_LOCALHOST\_ONLY=1}。已有备份时另取名称，避免覆盖。恢复时删除该行，并在当前终端 unset 或启动新终端；重新加载一个不含该变量的文件，并不会清除当前进程已存在的变量。原资料的脚本用途是修改终端启动配置，执行脚本本身也不能改变父终端环境。
+如果你用 Humble，把本机实验中的两条发现范围设置换成 \texttt{export ROS\_LOCALHOST\_ONLY=1}，域编号和节点运行命令保持相同。Jazzy 中我们使用 \texttt{ROS\_AUTOMATIC\_DISCOVERY\_RANGE=LOCALHOST}，同时清除 \texttt{ROS\_STATIC\_PEERS}；显式对端可能让 LOCALHOST 设置下的节点仍连接到远端，不能只检查一个变量。这里讲的是 DDS 中间件的发现设置，其他中间件（例如 Zenoh）要按它自己的文档配置。
+
+你确认这套设置适合日常实验后，再考虑写入 \path{~/.bashrc}。修改前用 \texttt{cp -p ~/.bashrc ~/.bashrc.ros-backup} 备份，已有备份就另取名字。恢复时删除对应行，并在当前终端 unset 或打开新终端；重新加载一个“不再设置该变量”的文件，并不会主动清除终端里已经存在的值。
 
 \begin{note}
 ROS2 不使用 ROS1 的 Master、\texttt{roscore} 或 11311 端口来组织通信。限制本机发现不是防火墙，也不提供身份认证，不会禁止程序自行建立的其他网络连接。需要跨机器时，先恢复通信范围，再排查网络；容器的网络命名空间也要单独确认。
@@ -70,18 +81,20 @@ ROS2 不使用 ROS1 的 Master、\texttt{roscore} 或 11311 端口来组织通�
 
 \begin{example}[切换至 Cyclone DDS]
 在目标 Ubuntu 教学机安装软件后，在两个新终端中分别加载并设置：
+\par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{tbash}
-sudo apt install ros-humble-rmw-cyclonedds-cpp
-source /opt/ros/humble/setup.bash
+sudo apt install ros-jazzy-rmw-cyclonedds-cpp
+source /opt/ros/jazzy/setup.bash
 export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 ros2 daemon stop
 # 在一个终端运行 talker，另一个运行 listener
 ros2 run demo_nodes_cpp talker
 \end{tbash}
+\end{minipage}\par\smallskip
 另一个终端的最后一条改为 \nolinkurl{ros2 run demo_nodes_cpp listener}。完成后停止节点、unset 该变量并停止 daemon，可恢复环境的默认选择。
 \end{example}
 
-\texttt{CYCLONEDDS\_URI} 与 \nolinkurl{FASTRTPS_DEFAULT_PROFILES_FILE} 分别用于对应 DDS 实现的配置；不要把一家的 XML 给另一家。\texttt{ROS\_DISCOVERY\_SERVER} 用于支持它的 Fast DDS 发现服务器模式，必须先部署服务器，不能仅填写一个 IP 就实现跨网段通信。较新版本中的 \nolinkurl{ROS_AUTOMATIC_DISCOVERY_RANGE} 不作为本章 Humble 的配置步骤。安全部署涉及 SROS2 密钥库及 \texttt{ROS\_SECURITY\_ENABLE}、\texttt{ROS\_SECURITY\_STRATEGY}、\texttt{ROS\_SECURITY\_KEYSTORE}，需配套证书与策略，本章不展开部署。
+\texttt{CYCLONEDDS\_URI} 与 \nolinkurl{FASTRTPS_DEFAULT_PROFILES_FILE} 分别用于对应 DDS 实现的配置；不要把一家的 XML 给另一家。\texttt{ROS\_DISCOVERY\_SERVER} 用于支持它的 Fast DDS 发现服务器模式，必须先部署服务器，不能仅填写一个 IP 就实现跨网段通信。Jazzy 的发现范围及显式对端说明见 \url{https://docs.ros.org/en/jazzy/Tutorials/Advanced/Improved-Dynamic-Discovery.html}；跨机器前也要确认 Distrobox 是否使用共享宿主网络，不能仅凭容器名字推断。安全部署涉及 SROS2 密钥库及 \texttt{ROS\_SECURITY\_ENABLE}、\texttt{ROS\_SECURITY\_STRATEGY}、\texttt{ROS\_SECURITY\_KEYSTORE}，需配套证书与策略，本章不展开部署。
 
 \begin{conclusion}
 \begin{itemize}
@@ -93,97 +106,53 @@ ros2 run demo_nodes_cpp talker
 \end{conclusion}
 
 \begin{exercise}
+\label{ex:v2-ros-domain}
 让本机 talker 使用域 42、listener 使用域 43，观察现象；把两端统一为 42 后重新启动并验证。写出恢复环境需要处理的进程和变量。
 \end{exercise}
 
 \subsubsection{ament、colcon 与可复现的小工程}
 \label{sec:ros2-ament}
 
-CMake 描述单个 C++ 包怎样编译和安装；ament 提供 ROS2 的依赖、安装索引和导出约定；colcon 按依赖顺序构建工作空间中的多个包；rosdep 根据依赖键安装系统依赖。\texttt{find\_package} 和 \nolinkurl{ament_auto_find_build_dependencies} 都不会替你下载缺失的软件。
+到这里你已经接触了好几个名字：CMake、ament、colcon、rosdep。它们看起来都和“编译”有关，其实各自负责一段。我们先把分工理顺：CMake 描述单个 C++ 包怎样编译和安装，ament 提供 ROS2 的依赖、安装索引和导出约定，colcon 按依赖顺序构建工作空间中的多个包，rosdep 则根据依赖键安装系统依赖。\texttt{find\_package} 和 \nolinkurl{ament_auto_find_build_dependencies} 都不会替你下载缺失的软件。
 
 \texttt{package.xml} 是依赖清单，\texttt{CMakeLists.txt} 是构建规则。\texttt{buildtool\_depend} 声明 ament 等构建工具，\texttt{build\_depend} 声明构建依赖，\texttt{build\_export\_depend} 声明下游编译所需依赖，\texttt{exec\_depend} 声明运行依赖，\texttt{test\_depend} 声明测试依赖。\texttt{depend} 合并普通依赖的构建、导出与运行三种用途。只在 cpp 内使用的动态库也可能是运行依赖，不能因此省略运行声明。
 
 \begin{example}[建立共用教学包]
-以下文件全部放在 \nolinkurl{~/ros2_ws/src/training_tools}；该包与前面的 \texttt{my\_package} 相互独立。先创建目录：
+这次我们用一个小心跳节点把依赖、测试、参数和启动文件串起来。源码在本卷 \path{examples/ros2/training_tools}，与前面的 my\_package 相互独立；节点定时发布状态，Launch 负责决定它的名字、位置和文本。先看看需要哪些文件：
+\par\medskip\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[language={}]
+training_tools/
+  package.xml
+  CMakeLists.txt
+  src/heartbeat.cpp
+  test/test_interval.cpp
+  config/heartbeat.yaml
+  launch/heartbeat.launch.py
+  launch/team.launch.py
+  cmake/Auto.cmake       # 只在自动宏实验时替换构建规则
+\end{lstlisting}
+\end{minipage}\par\smallskip
+你可以把这个目录复制到 \path{~/ros2_ws/src}，已有同名包时另建工作空间。也可以按下面逐个保存文件，先建目录：
+\par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{tbash}
 mkdir -p ~/ros2_ws/src/training_tools/{src,launch,config,test}
 cd ~/ros2_ws/src/training_tools
 \end{tbash}
+\end{minipage}\par\smallskip
 保存 \texttt{package.xml}。维护者是教学占位信息，发布自己的包时替换。
-\begin{tcode}
-<?xml version="1.0"?>
-<package format="3">
-  <name>training_tools</name>
-  <version>0.0.1</version>
-  <description>ROS2 engineering exercises</description>
-  <maintainer email="student@example.com">Student</maintainer>
-  <license>Apache-2.0</license>
-  <buildtool_depend>ament_cmake</buildtool_depend>
-  <depend>rclcpp</depend>
-  <depend>std_msgs</depend>
-  <exec_depend>launch</exec_depend>
-  <exec_depend>launch_ros</exec_depend>
-  <exec_depend>ament_index_python</exec_depend>
-  <exec_depend>ros2cli</exec_depend>
-  <exec_depend>ros2topic</exec_depend>
-  <test_depend>ament_cmake_gtest</test_depend>
-  <export><build_type>ament_cmake</build_type></export>
-</package>
-\end{tcode}
-保存 \texttt{src/heartbeat.cpp}。参数在启动时读取一次；改变参数实验时重启节点。
-\begin{tcpp}
-#include <chrono>
-#include <memory>
-#include <string>
-#include <rclcpp/rclcpp.hpp>
-#include <std_msgs/msg/string.hpp>
-
-class Heartbeat : public rclcpp::Node {
-public:
-  Heartbeat() : Node("heartbeat") {
-    const auto text = declare_parameter<std::string>("text", "ready");
-    pub_ = create_publisher<std_msgs::msg::String>("status", 10);
-    timer_ = create_wall_timer(std::chrono::milliseconds(200),
-      [this, text]() {
-        std_msgs::msg::String msg;
-        msg.data = text;
-        pub_->publish(msg);
-        RCLCPP_DEBUG(get_logger(), "publish: %s", text.c_str());
-        RCLCPP_INFO_ONCE(get_logger(), "first heartbeat");
-        RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 2000,
-                            "heartbeat alive");
-      });
-  }
-private:
-  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub_;
-  rclcpp::TimerBase::SharedPtr timer_;
-};
-
-int main(int argc, char ** argv) {
-  rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<Heartbeat>());
-  rclcpp::shutdown();
-  return 0;
-}
-\end{tcpp}
-保存 \texttt{CMakeLists.txt}。测试文件在后文提供，准备好再开启测试构建。
-\begin{tcode}
-cmake_minimum_required(VERSION 3.8)
-project(training_tools)
-find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(std_msgs REQUIRED)
-add_executable(heartbeat src/heartbeat.cpp)
-target_compile_features(heartbeat PUBLIC cxx_std_17)
-ament_target_dependencies(heartbeat rclcpp std_msgs)
-install(TARGETS heartbeat DESTINATION lib/${PROJECT_NAME})
-install(DIRECTORY launch config DESTINATION share/${PROJECT_NAME})
-if(BUILD_TESTING)
-  find_package(ament_cmake_gtest REQUIRED)
-  ament_add_gtest(test_interval test/test_interval.cpp)
-endif()
-ament_package()
-\end{tcode}
+\Needspace{23\baselineskip}
+\par\medskip\noindent\begin{minipage}{\linewidth}
+\lstinputlisting[frame=single,language=XML,caption={training\_tools/package.xml}]{examples/ros2/training_tools/package.xml}
+\end{minipage}\par\smallskip
+接下来保存 \texttt{src/heartbeat.cpp}。构造函数读出 text 参数，创建发布者，再让定时器每 200 毫秒发一次消息。句柄保存在成员中；lambda 捕获 text 的值，所以参数只在启动时读取一次，改变文本实验时要重启节点。
+\Needspace{35\baselineskip}
+\par\medskip\noindent\begin{minipage}{\linewidth}
+\lstinputlisting[frame=single,basicstyle=\ttfamily\footnotesize,language=C++,caption={heartbeat 的完整节点实现}]{examples/ros2/training_tools/src/heartbeat.cpp}
+\end{minipage}\par\smallskip
+然后保存 \texttt{CMakeLists.txt}。它找到清单里声明的依赖，编译 heartbeat，再安装程序和 Launch、YAML 资源。测试文件在下面提供，手工建包时先关闭测试，文件齐了再开启。
+\par\medskip\noindent\begin{minipage}{\linewidth}
+\lstinputlisting[frame=single,language=cmake,caption={手动声明依赖与安装规则}]{examples/ros2/training_tools/CMakeLists.txt}
+\end{minipage}\par\smallskip
 通用构建形式为 \texttt{colcon build [包选择选项] [构建选项]}：
 \begin{center}
 \begin{tabular}{p{0.42\textwidth}p{0.50\textwidth}}
@@ -197,15 +166,17 @@ ament_package()
 \bottomrule[1.5pt]
 \end{tabular}
 \end{center}
-其余选项查询 \texttt{colcon build --help}。下面先关闭测试；rosdep 已按安装章完成初始化后执行依赖安装：
+其余选项查询 \texttt{colcon build --help}。下面先关闭测试，把节点跑通。rosdep 第一次使用时需初始化：系统尚无默认源列表时执行一次 \texttt{sudo rosdep init}，然后用普通用户执行 \texttt{rosdep update}；已经初始化就跳过 init。接下来让它从清单中安装缺少的依赖：
+\par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{tbash}
 cd ~/ros2_ws
-source /opt/ros/humble/setup.bash
+source /opt/ros/jazzy/setup.bash
 rosdep install --from-paths src --ignore-src -r -y
 colcon build --packages-select training_tools --cmake-args -DBUILD_TESTING=OFF
 source install/setup.bash
 ros2 run training_tools heartbeat
 \end{tbash}
+\end{minipage}\par\smallskip
 另一终端加载相同环境后运行 \nolinkurl{ros2 topic echo /status}，应持续收到 ready。消息发布约 5 Hz，日志有自己的输出节奏。
 \end{example}
 
@@ -213,21 +184,11 @@ ros2 run training_tools heartbeat
 包变大后可用 \texttt{ament\_cmake\_auto} 减少重复声明。它依据清单寻找依赖，因此清单遗漏不会被自动修复。第三方库的 rosdep 键与 CMake 名称也可能不同，例如通过 \nolinkurl{rosdep resolve opencv2} 查询依赖，而 CMake 通常使用 \nolinkurl{find_package(OpenCV REQUIRED)}。
 
 \begin{example}[同一个包改用 ament 自动宏]
-在 \texttt{package.xml} 中把构建工具依赖改为 \texttt{ament\_cmake\_auto}，保留 export 中的 \texttt{ament\_cmake} 构建类型。将整个 CMake 文件替换为：
-\begin{tcode}
-cmake_minimum_required(VERSION 3.8)
-project(training_tools)
-find_package(ament_cmake_auto REQUIRED)
-ament_auto_find_build_dependencies()
-ament_auto_add_executable(heartbeat src/heartbeat.cpp)
-target_compile_features(heartbeat PUBLIC cxx_std_17)
-if(BUILD_TESTING)
-  find_package(ament_cmake_gtest REQUIRED)
-  ament_add_gtest(test_interval test/test_interval.cpp)
-endif()
-ament_auto_package(INSTALL_TO_SHARE launch config)
-\end{tcode}
-重新执行 rosdep 安装和前例的构建、运行命令，行为应相同。手动版本和自动版本二选一，不把两套安装规则叠加。
+在 \texttt{package.xml} 中把构建工具依赖改为 \texttt{ament\_cmake\_auto}，保留 export 中的 \texttt{ament\_cmake} 构建类型。把本项目 \path{cmake/Auto.cmake} 的内容复制为包根目录的 CMakeLists.txt，完整规则如下：
+\par\medskip\noindent\begin{minipage}{\linewidth}
+\lstinputlisting[frame=single,language=cmake,caption={自动宏构建规则（用于替换包根目录的 CMakeLists.txt）}]{examples/ros2/training_tools/cmake/Auto.cmake}
+\end{minipage}\par\smallskip
+重新执行 rosdep 安装和前例的构建、运行命令，行为应相同。如果旧缓存仍保存手动依赖配置，可以给 colcon build 加 \texttt{--cmake-clean-cache} 后再构建。手动版本和自动版本二选一，不把两套安装规则叠加。
 \end{example}
 
 若包要供其他包链接，还需安装库和公开头文件。手动构建时，用 \nolinkurl{ament_export_targets} 导出目标，用 \nolinkurl{ament_export_dependencies} 导出依赖；自动宏可简化这些规则。
@@ -238,28 +199,18 @@ ament_auto_package(INSTALL_TO_SHARE launch config)
 
 \begin{example}[把参数边界变成自动检查]
 在 \nolinkurl{test/test_interval.cpp} 保存一个无硬件依赖的边界测试。这里的函数是独立教学逻辑，尚未接入 heartbeat；实际项目应测试生产代码中的同一函数。
-\begin{tcpp}
-#include <gtest/gtest.h>
-
-bool valid_interval(int milliseconds) {
-  return milliseconds >= 10 && milliseconds <= 1000;
-}
-
-TEST(Interval, IncludesBounds) {
-  EXPECT_TRUE(valid_interval(10));
-  EXPECT_TRUE(valid_interval(1000));
-}
-TEST(Interval, RejectsOutside) {
-  EXPECT_FALSE(valid_interval(9));
-  EXPECT_FALSE(valid_interval(1001));
-}
-\end{tcpp}
+\Needspace{20\baselineskip}
+\par\medskip\noindent\begin{minipage}{\linewidth}
+\lstinputlisting[frame=single,language=C++,caption={独立的间隔边界测试}]{examples/ros2/training_tools/test/test_interval.cpp}
+\end{minipage}\par\smallskip
 在工作空间根目录执行：
+\par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{tbash}
 colcon build --packages-select training_tools --cmake-args -DBUILD_TESTING=ON
 colcon test --packages-select training_tools
 colcon test-result --verbose
 \end{tbash}
+\end{minipage}\par\smallskip
 两组测试应通过。构建成功不代表测试成功，要查看最后的结果；规范检查可另外接入 ament lint，不应把跳过检查当成默认修复。
 \end{example}
 
@@ -272,58 +223,36 @@ colcon test-result --verbose
 \end{itemize}
 \end{conclusion}
 \begin{exercise}
+\label{ex:v2-ros-ament}
 说明为什么源目录已有 launch 文件，\texttt{ros2 launch} 仍可能找不到它。将上例合法间隔上限改为 500，同时修改边界测试并重新验证。
 \end{exercise}
 
 \subsubsection{用 Launch 保存一次完整启动}
 \label{sec:ros2-launch}
 
-启动文件（launch file）把节点、参数、命名空间和话题重映射记录下来，减少多人手工输入的差异。Python 文件提供 \nolinkurl{generate_launch_description()}，返回 \texttt{LaunchDescription}；其中的动作在启动系统中执行。\texttt{Node} 的 package 是包名，executable 是安装后的程序名，name 是节点名，namespace 是命名空间，remappings 改变接口名称，parameters 给节点传参。
+你现在已经能手动启动节点了。不过真正上车时，几个节点各有一串参数，靠大家在终端里手打很容易漏掉一个。启动文件（launch file）把节点、参数、命名空间和话题重映射一起记下来，下次就能用一条命令启动同样的配置。Python 文件提供 \nolinkurl{generate_launch_description()}，返回 \texttt{LaunchDescription}；其中的动作在启动系统中执行。\texttt{Node} 的 package 是包名，executable 是安装后的程序名，name 是节点名，namespace 是命名空间，remappings 改变接口名称，parameters 给节点传参。
 
 \begin{example}[保存并覆盖启动参数]
 继续使用 training\_tools。保存 \texttt{config/heartbeat.yaml}：
-\begin{tcode}
-/**:
-  ros__parameters:
-    text: "ready from yaml"
-\end{tcode}
+\par\medskip\noindent\begin{minipage}{\linewidth}
+\lstinputlisting[frame=single,language=,caption={参数文件}]{examples/ros2/training_tools/config/heartbeat.yaml}
+\end{minipage}\par\smallskip
 通配节点键使该参数文件在节点改名或加命名空间后仍适用。保存 \nolinkurl{launch/heartbeat.launch.py}：
-\begin{tpython}
-from pathlib import Path
-from ament_index_python.packages import get_package_share_directory
-from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
-from launch_ros.actions import Node
-from launch_ros.parameter_descriptions import ParameterValue
-
-
-def generate_launch_description():
-    share = Path(get_package_share_directory('training_tools'))
-    return LaunchDescription([
-        DeclareLaunchArgument('robot', default_value='robot1'),
-        DeclareLaunchArgument('text', default_value='ready from launch'),
-        Node(
-            package='training_tools', executable='heartbeat',
-            name='heartbeat', namespace=LaunchConfiguration('robot'),
-            output='screen',
-            parameters=[str(share / 'config' / 'heartbeat.yaml'),
-                        {'text': ParameterValue(
-                            LaunchConfiguration('text'), value_type=str)}],
-            remappings=[('status', 'health')],
-            additional_env={'RCUTILS_COLORIZED_OUTPUT': '1'},
-        ),
-    ])
-\end{tpython}
+\Needspace{32\baselineskip}
+\par\medskip\noindent\begin{minipage}{\linewidth}
+\lstinputlisting[frame=single,language=Python,caption={心跳节点的启动文件}]{examples/ros2/training_tools/launch/heartbeat.launch.py}
+\end{minipage}\par\smallskip
 后面的参数字典覆盖 YAML 中的同名项。\texttt{LaunchConfiguration} 是运行时求值的替换对象，不是普通 Python 字符串；\texttt{ParameterValue} 明确字符串类型，避免 true 等输入被当成布尔量。
 
 通用形式为 \texttt{ros2 launch 包名 文件名 [参数名:=值]}。安装规则已写在前节 CMake 中，新增资源后重新构建并加载环境：
+\par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{tbash}
 cd ~/ros2_ws
 colcon build --packages-select training_tools
 source install/setup.bash
 ros2 launch training_tools heartbeat.launch.py robot:=red text:=tracking
 \end{tbash}
+\end{minipage}\par\smallskip
 另一终端加载环境后执行 \nolinkurl{ros2 topic echo /red/health}，应收到 tracking；\nolinkurl{ros2 param get /red/heartbeat text} 应显示同一值。直接运行程序时，可用 \texttt{--ros-args -r \_\_node:=新名 -p text:=内容} 设置名字和参数。
 \end{example}
 
@@ -337,56 +266,17 @@ ros2 launch training_tools heartbeat.launch.py robot:=red text:=tracking
 \Needspace{8\baselineskip}
 \begin{example}[按需启动观测节点，并在它退出时给出提示]
 保存 \texttt{launch/team.launch.py}。本例观测进程来自 ROS2 CLI，启用前确认前文的 \texttt{ros2 topic echo} 可用。
-\begin{tpython}
-from pathlib import Path
-from ament_index_python.packages import get_package_share_directory
-from launch import LaunchDescription
-from launch.actions import (
-    DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription,
-    LogInfo, OpaqueFunction, RegisterEventHandler, SetEnvironmentVariable,
-)
-from launch.conditions import IfCondition
-from launch.event_handlers import OnProcessExit
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration
-
-
-def report_config(context):
-    robot = LaunchConfiguration('robot').perform(context)
-    return [LogInfo(msg=f'Observing /{robot}/health')]
-
-
-def generate_launch_description():
-    share = Path(get_package_share_directory('training_tools'))
-    observer = ExecuteProcess(
-        cmd=['ros2', 'topic', 'echo', '/red/health',
-             'std_msgs/msg/String', '--once'],
-        output='screen', condition=IfCondition(LaunchConfiguration('watch')),
-    )
-    return LaunchDescription([
-        DeclareLaunchArgument('robot', default_value='red'),
-        DeclareLaunchArgument('watch', default_value='true'),
-        SetEnvironmentVariable('RCUTILS_COLORIZED_OUTPUT', '1'),
-        OpaqueFunction(function=report_config),
-        RegisterEventHandler(OnProcessExit(
-            target_action=observer,
-            on_exit=[LogInfo(msg='Observer exited; heartbeat keeps running.')],
-        )),
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                str(share / 'launch' / 'heartbeat.launch.py')),
-            launch_arguments={
-                'robot': LaunchConfiguration('robot'), 'text': 'team ready',
-            }.items(),
-        ),
-        observer,
-    ])
-\end{tpython}
+\Needspace{42\baselineskip}
+\par\medskip\noindent\begin{minipage}{\linewidth}
+\lstinputlisting[frame=single,basicstyle=\ttfamily\footnotesize,language=Python,caption={组合启动、条件与退出事件}]{examples/ros2/training_tools/launch/team.launch.py}
+\end{minipage}\par\smallskip
 本例观测话题固定为 \texttt{/red/health}，所以先保留 robot 默认值；下一道练习将它也改成可配置。重新构建后执行：
+\par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{tbash}
 ros2 launch training_tools team.launch.py
 ros2 launch training_tools team.launch.py watch:=false
 \end{tbash}
+\end{minipage}\par\smallskip
 两条命令分别运行，之间按 Ctrl+C 结束。第一次观测到一条消息后观测进程退出，heartbeat 继续运行；第二次只启动 heartbeat。\texttt{OpaqueFunction} 在执行阶段取得上下文并返回动作，适合必须先把替换对象求值的逻辑；普通传参不必使用它。
 \end{example}
 
@@ -399,6 +289,7 @@ ros2 launch training_tools team.launch.py watch:=false
 \end{itemize}
 \end{conclusion}
 \begin{exercise}
+\label{ex:v2-ros-launch}
 将 team 启动文件的观测话题也与 robot 参数绑定，以 \texttt{robot:=blue} 启动，确认一次性观测能退出。再用 \texttt{watch:=false} 确认只有 heartbeat 运行。
 \end{exercise}
 
@@ -411,9 +302,11 @@ ros2 launch training_tools team.launch.py watch:=false
 
 \begin{example}[区分发布频率、日志级别与限流]
 运行前面的 heartbeat：
+\par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{tbash}
 ros2 run training_tools heartbeat --ros-args --log-level debug
 \end{tbash}
+\end{minipage}\par\smallskip
 应看到每次发布对应的 DEBUG、一次 first heartbeat，以及约每两秒一次 alive。另一终端运行 \texttt{ros2 topic hz /status}，仍约为 5 Hz。停止后改用 \texttt{--log-level warn} 重启，普通日志消失，但话题仍在发布。也可用 \texttt{--log-level heartbeat:=debug} 只设置指定 logger；节点改名后需核对 logger 名。
 \end{example}
 
@@ -437,6 +330,7 @@ ROS2 默认可把日志发到控制台、后端日志文件和 \texttt{/rosout}�
 
 \begin{example}[为一次实验单独保存日志]
 用子 shell 设置变量，退出后不污染当前终端：
+\par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{tbash}
 (
   export ROS_LOG_DIR="$HOME/ros_logs/heartbeat_test"
@@ -446,29 +340,33 @@ ROS2 默认可把日志发到控制台、后端日志文件和 \texttt{/rosout}�
 )
 find "$HOME/ros_logs/heartbeat_test" -type f
 \end{tbash}
+\end{minipage}\par\smallskip
 按 Ctrl+C 结束后再执行 find，检查实际生成的文件。重复实验会继续使用这个目录，需要按实验编号另取目录名。控制台格式还可使用 \texttt{\{time\}}、\texttt{\{file\_name\}}、\texttt{\{function\_name\}} 和 \texttt{\{line\_number\}}；不要直接照搬其他发行版新增的占位符。
 \end{example}
 
 \begin{note}
-日志不及时，应区分 ROS 控制台缓冲、Python 的 print 缓冲和 Launch 输出转发，不能统一靠设置“缓冲为 1”解决。Humble 教学流程使用启动时的 \texttt{--log-level}；不要假设所有安装都存在 \texttt{ros2 logger set} 命令或运行时 logger 服务。编译时已移除的 DEBUG 宏也无法靠运行参数恢复。
+日志不及时，应区分 ROS 控制台缓冲、Python 的 print 缓冲和 Launch 输出转发，不能统一靠设置“缓冲为 1”解决。本章使用启动时的 \texttt{--log-level}；不要假设所有安装都存在 \texttt{ros2 logger set} 命令或运行时 logger 服务。编译时已移除的 DEBUG 宏也无法靠运行参数恢复。
 \end{note}
 \begin{exercise}
+\label{ex:v2-ros-log}
 将 heartbeat 的 INFO 限流间隔改为 1000 毫秒，保留定时器 200 毫秒。分别预测并测量消息频率与 alive 日志频率；解释改为 WARN 阈值后消息是否停止。
 \end{exercise}
 
 \subsubsection{CLion：让编辑、构建和运行使用同一套环境}
 \label{sec:ros2-clion}
 
-IDE 找到头文件需要构建配置，运行程序还需要动态库和 ROS 环境。两者都要检查。关键不是“只能从终端打开”，而是 IDE 的 CMake、运行配置确实继承或加载了正确环境。可用已加载环境的终端启动，也可配置 IDE 环境脚本或启动包装脚本。
+前面的终端流程跑通以后，我们再把同一个包带进 IDE。你希望编辑器能补全头文件、程序能运行、断点能停下来，这三件事各有条件：索引需要正确的构建配置，运行需要动态库和 ROS 环境，断点还需要带调试信息的实际程序。关键不是“只能从终端打开”，而是 IDE 的 CMake、运行配置确实继承或加载了正确环境。可用已加载环境的终端启动，也可配置 IDE 环境脚本或启动包装脚本。
 
 \begin{example}[从可运行的终端进入 IDE]
 先用终端成功构建 training\_tools；关闭已运行的 CLion 实例，避免启动命令把项目交给旧环境中的实例。若安装时已创建 \texttt{clion} 命令，执行：
+\par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{tbash}
-source /opt/ros/humble/setup.bash
+source /opt/ros/jazzy/setup.bash
 source ~/ros2_ws/install/setup.bash
 clion ~/ros2_ws/src/training_tools
 \end{tbash}
-没有该命令时，使用安装目录内的实际启动脚本路径。打开包中的 CMakeLists.txt，在 CMake 配置中使用独立目录 \texttt{cmake-build-debug}、Debug 构建类型和 \texttt{-DBUILD\_TESTING=OFF}。选择 heartbeat 目标，运行参数填 \texttt{--ros-args -p text:=from\_ide}，在发布回调处加断点。继续执行后，用已加载相同环境的终端观察 \texttt{/status}。
+\end{minipage}\par\smallskip
+没有该命令时，使用安装目录内的实际启动脚本路径。如果 ROS2 安装在 Distrobox 中，也要让 IDE 的 CMake、编译器、调试器和程序运行使用容器内的工具链；仅给宿主 IDE 加一个 ROS 环境变量，不能让它自动获得容器中的库。CLion 的 Docker/Podman 工具链配置以你安装版本的界面为准，先确认容器内的终端命令能运行，再接入 IDE。打开包中的 CMakeLists.txt，在 CMake 配置中使用独立目录 \texttt{cmake-build-debug}、Debug 构建类型和 \texttt{-DBUILD\_TESTING=OFF}。选择 heartbeat 目标，运行参数填 \texttt{--ros-args -p text:=from\_ide}，在发布回调处加断点。继续执行后，用已加载相同环境的终端观察 \texttt{/status}。
 \end{example}
 
 CLion 的 Build 只负责所选构建目标。设置 \texttt{CMAKE\_INSTALL\_PREFIX} 仅改变安装目的地，不会自动执行安装。需要从 \texttt{ros2 run} 启动修改后的代码时，应由 colcon 重建并安装，或明确执行 IDE 的 install 目标；同时确认运行时加载的是该安装前缀。调试 IDE 构建目录中的目标时，则直接使用该目标。
@@ -477,11 +375,13 @@ CLion 的 Build 只负责所选构建目标。设置 \texttt{CMAKE\_INSTALL\_PRE
 编译数据库（compilation database）记录每个翻译单元实际使用的编译器、宏和头文件搜索路径，适合让 IDE 按 colcon 的真实参数索引代码。
 
 \begin{example}[生成并核对索引来源]
+\par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{tbash}
 cd ~/ros2_ws
 colcon build --packages-select training_tools --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 test -f build/training_tools/compile_commands.json
 \end{tbash}
+\end{minipage}\par\smallskip
 在 CLion 中以编译数据库项目打开这个 JSON，核对 heartbeat.cpp 的包含路径。它只涵盖该包；修改项目根目录不会自动合并其他包的编译数据库。接口包须先构建，生成的消息头文件才存在。需要整个工作空间索引时，应显式收集各包的数据库并按工具支持方式合并。
 \end{example}
 
@@ -494,6 +394,7 @@ test -f build/training_tools/compile_commands.json
 \end{itemize}
 \end{conclusion}
 \begin{exercise}
+\label{ex:v2-ros-ide}
 在 IDE 中把默认文本改为 \texttt{from\_debug} 并构建；分别从 IDE 和旧安装目录运行。解释为何可能看到不同文本，给出让 \texttt{ros2 run} 使用新代码的步骤。
 \end{exercise}
 

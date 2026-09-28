@@ -1,0 +1,58 @@
+-- The C compiler identification is GNU 13.3.0
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found ament_cmake: 2.5.6 (/opt/ros/jazzy/share/ament_cmake/cmake)
+-- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter
+-- Found rclcpp: 28.1.22 (/opt/ros/jazzy/share/rclcpp/cmake)
+-- Found rosidl_generator_c: 4.6.9 (/opt/ros/jazzy/share/rosidl_generator_c/cmake)
+-- Found rosidl_generator_cpp: 4.6.9 (/opt/ros/jazzy/share/rosidl_generator_cpp/cmake)
+-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+-- Found rmw_implementation_cmake: 7.3.3 (/opt/ros/jazzy/share/rmw_implementation_cmake/cmake)
+-- Found rmw_fastrtps_cpp: 8.4.4 (/opt/ros/jazzy/share/rmw_fastrtps_cpp/cmake)
+-- Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version "3.0.13")
+-- Found FastRTPS: /opt/ros/jazzy/include (Required is at least version "2.13")
+-- Using RMW implementation 'rmw_fastrtps_cpp' as default
+-- Found std_msgs: 5.3.8 (/opt/ros/jazzy/share/std_msgs/cmake)
+-- Configuring done (0.7s)
+-- Generating done (0.0s)
+-- Build files have been written to: /tmp/ros-gdb-XTd6fS/build
+[ 50%] Building CXX object CMakeFiles/heartbeat.dir/src/heartbeat.cpp.o
+[100%] Linking CXX executable heartbeat
+[100%] Built target heartbeat
+Breakpoint 1 at 0x6cf79: file /tmp/ros-gdb-XTd6fS/package/src/heartbeat.cpp, line 16.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7ffff73a46c0 (LWP 517137)]
+[New Thread 0x7ffff6ba36c0 (LWP 517138)]
+[New Thread 0x7ffff533a6c0 (LWP 517139)]
+[New Thread 0x7ffff4b396c0 (LWP 517140)]
+[New Thread 0x7ffff43386c0 (LWP 517141)]
+[New Thread 0x7ffff3ab06c0 (LWP 517142)]
+[New Thread 0x7ffff32af6c0 (LWP 517143)]
+[New Thread 0x7ffff2aae6c0 (LWP 517144)]
+[New Thread 0x7ffff22ad6c0 (LWP 517145)]
+[New Thread 0x7ffff1a0c6c0 (LWP 517146)]
+[New Thread 0x7ffff11f66c0 (LWP 517147)]
+[New Thread 0x7ffff09f56c0 (LWP 517148)]
+[New Thread 0x7fffebfff6c0 (LWP 517149)]
+
+Thread 1 "heartbeat" hit Breakpoint 1, Heartbeat::Heartbeat()::{lambda()#1}::operator()() const (__closure=0x5555559c3948) at /tmp/ros-gdb-XTd6fS/package/src/heartbeat.cpp:16
+16	        pub_->publish(msg);
+#0  Heartbeat::Heartbeat()::{lambda()#1}::operator()() const (__closure=0x5555559c3948) at /tmp/ros-gdb-XTd6fS/package/src/heartbeat.cpp:16
+#1  0x00005555555e309e in rclcpp::GenericTimer<Heartbeat::Heartbeat()::{lambda()#1}, (void*)0>::execute_callback_delegate<Heartbeat::Heartbeat()::{lambda()#1}, (void*)0>(rcl_timer_call_info_s const&) (this=0x5555559c38d0) at /opt/ros/jazzy/include/rclcpp/rclcpp/timer.hpp:310
+#2  0x00005555555e18cf in rclcpp::GenericTimer<Heartbeat::Heartbeat()::{lambda()#1}, (void*)0>::execute_callback(std::shared_ptr<void> const&) (this=0x5555559c38d0, data=std::shared_ptr<void> (use count 1, weak count 0) = {...}) at /opt/ros/jazzy/include/rclcpp/rclcpp/timer.hpp:296
+#3  0x00007ffff7e4b7a1 in rclcpp::Executor::execute_any_executable(rclcpp::AnyExecutable&) () from /opt/ros/jazzy/lib/librclcpp.so
+#4  0x00007ffff7e76344 in rclcpp::executors::SingleThreadedExecutor::spin() () from /opt/ros/jazzy/lib/librclcpp.so
+#5  0x00007ffff7e55349 in rclcpp::spin(std::shared_ptr<rclcpp::node_interfaces::NodeBaseInterface>) () from /opt/ros/jazzy/lib/librclcpp.so
+#6  0x00007ffff7e55493 in rclcpp::spin(std::shared_ptr<rclcpp::Node>) () from /opt/ros/jazzy/lib/librclcpp.so
+#7  0x00005555555bd7a5 in main (argc=1, argv=0x7fffffffdae8) at /tmp/ros-gdb-XTd6fS/package/src/heartbeat.cpp:30

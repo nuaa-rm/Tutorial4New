@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>my_package</name>
+  <version>0.0.1</version>
+  <description>字符串与自定义消息节点示例</description>
+  <maintainer email="student@example.com">student</maintainer>
+  <license>Apache-2.0</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+  <depend>my_msgs</depend>
+  <export><build_type>ament_cmake</build_type></export>
+</package>

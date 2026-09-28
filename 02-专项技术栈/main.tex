@@ -14,6 +14,7 @@
 \input{../templates/preamble.tex}
 % 卷二正文含较长的官方文档链接，允许 URL 在更多位置换行。
 \usepackage{xurl}
+\usepackage{needspace}
 \setlength{\emergencystretch}{2em}
 
 \title{长空御风视觉组培训教材}
@@ -56,16 +57,16 @@ Python 数值实验使用 Python 3，涉及 NumPy、OpenCV 或 PyTorch 的示例
 \begin{introduction}
   \item 学习目标：创建功能包并验证节点通信；编写 Launch；检查依赖、环境和日志；完成 IDE 调试。
   \item 建议学时：基础约 1 周，工程实践另用 2--3 天。
-  \item 本卷边界：先修卷一 Linux、C++ 与 CMake；示例使用 Ubuntu 22.04 与 ROS2 Humble；实车集成见卷三。
+  \item 本卷边界：先修卷一 Linux、C++ 与 CMake；命令以 Ubuntu 24.04 与 Jazzy 为主，同时说明 Humble 22.04 的差异；实车集成见卷三。
 \end{introduction}
 
 \section{节点、接口与工程实践}
 
 \input{chapters/A_ros2.tex}
+\input{chapters/A_ros2_project.tex}
 
 \section{构建、启动与排障}
 \input{chapters/A_ros2_engineering.tex}
-\input{chapters/appendix_ros2.tex}
 
 \input{chapters/A_ros2_review.tex}
 

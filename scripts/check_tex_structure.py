@@ -45,7 +45,11 @@ def main():
             return expand(path, stack + (file,))
         return re.sub(r'\\(?:input|include)\{([^}]+)\}', child, text)
     text = expand(root / 'main.tex')
-    counts = Counter(re.findall(r'\\label\{([^}]+)\}', text))
+    labels = re.findall(r'\\label\{([^}]+)\}', text)
+    # listings permits labels in the options rather than a standalone command.
+    for options in re.findall(r'\\lstinputlisting\[([^\]]*)\]', text):
+        labels += re.findall(r'\blabel\s*=\s*([^,\s]+)', options)
+    counts = Counter(labels)
     errors += [f'重复标签：{label}' for label, count in counts.items() if count > 1]
     refs = set(re.findall(r'\\(?:ref|pageref|eqref|autoref)\{([^}]+)\}', text))
     errors += [f'未定义引用：{label}' for label in sorted(refs - counts.keys())]

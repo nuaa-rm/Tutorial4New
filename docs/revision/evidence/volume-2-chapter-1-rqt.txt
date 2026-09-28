@@ -1,0 +1,9 @@
+Starting >>> my_msgs
+Finished <<< my_msgs [3.50s]
+Starting >>> my_package
+Finished <<< my_package [6.04s]
+
+Summary: 2 packages finished [9.63s]
+rqt Publisher -> receive -> my_node -> send -> rqt Monitor: I can hear:armor_found
+my_msg yaw: 0.25
+publisher count after stop: 0; after restart: 1; reply recovered
