@@ -314,78 +314,85 @@ A 最后一次输入在第 1 秒，第 4 秒年龄为 3。阈值 4 时不过期�
 \addcontentsline{toc}{section}{第三章题解：SDR 与电磁波解析}
 \subsubsection*{随堂练习}
 
-\paragraph*{随堂练习 3.1}
+\paragraph*{随堂练习 \ref{ex:v2-sdr-boundary}}
 \begin{solution}
-天线与 ADC 属于硬件采集环节，相关峰搜索与 CRC 校验属于数字处理。完整记录下来的 IQ 可用于重放滤波、同步、解调和帧校验；无法补回采样前已丢失的信号，也不能重现天线摆放、模拟饱和等硬件条件的全部影响。
+天线和 ADC 在硬件采集端；前导相关、CRC 在数字接收端；坐标换算在校验后的字段接口。IQ 录包可以重放数字补偿、相关、判决、组帧、校验及字段转换，不能补回模拟滤波损失，也不能单靠它验证天线位置、接地、模拟饱和、调谐稳定或实时丢样。
 \end{solution}
 
-\paragraph*{随堂练习 3.2}
+\paragraph*{随堂练习 \ref{ex:v2-sdr-iq}}
 \begin{solution}
-将 f 改为 -125000 后，相邻样本相位差为 $-\pi/4$，约 -0.785398 rad；原断言需相应改为比较负值。正、负频率在复平面上旋转方向相反，但理想样本幅值都为 1，所以只看幅值无法区分。
-\end{solution}
-
-\paragraph*{随堂练习 3.3}
-\begin{solution}
-在状态转移查询前处理 reset，使其不依赖当前状态：
+相邻相位差主值分别为 $\pi/8$、$-\pi/8$、$-7\pi/8$，约 0.392699、-0.392699、-2.748894 rad，幅值仍为 1。9000 Hz 在 16000 Hz 采样下等价于 -7000 Hz，与 1000 Hz 不再相同。将原断言改为比较负 7000 Hz：
 \begin{tpython}
-if event == "reset":
-    state = "level1"
-else:
-    state = transitions.get((state, event), state)
+assert np.allclose(iq, np.exp(2j * np.pi * (-7000) * n / fs))
 \end{tpython}
-可依次输入 ok1、reset、ok2，状态应为 level2、level1、level1。超时重试通常在当前阶段重新尝试；主动复位返回初始阶段，必要时还应清空阶段缓存。
 \end{solution}
 
-\paragraph*{随堂练习 3.4}
+\paragraph*{随堂练习 \ref{ex:v2-sdr-record}}
 \begin{solution}
-原比特 1010 变为 0101，因为乘以 -1 等价于相位旋转 $\pi$，实部符号全部相反。接收机需要建立符号定时、载波相位与帧起点，并用已知前导等方式消除歧义；仅按正负判决不足以组成可靠接收机。
+正常样本数 670，采样率 8000 Hz，每符号 8 个样本，本机 dtype 为 \texttt{<c8}，另有已知频偏 125 Hz 与文件 SHA-256。只改 \texttt{sample\_count} 不影响 IQ 文件哈希，因此先通过哈希检查，再在数量与元数据比较处拒绝。\texttt{.npy} 有文件头，不能从第一个字节开始按裸 float32 读；要用 \texttt{np.load(..., allow\_pickle=False)} 恢复复数数组，再分别取 real/imag。
 \end{solution}
 
-\paragraph*{随堂练习 3.5}
+\paragraph*{随堂练习 \ref{ex:v2-sdr-sync}}
 \begin{solution}
-两路数据年龄均为 $10.0-9.0=1.0$ s，超过 0.2 s 有效期，selected 应为 None。验证时应将原断言改为 \texttt{assert selected is None}。继续沿用最后坐标会把历史位置伪装成当前状态，应报告无有效源或进入明确的回退状态。
+前导相关的相角估计约为 $\pi$，补偿后符号回到正确实轴，起点仍为 19，坐标仍是 (1.25,2.5) 米。若保留频偏补偿但跳过恒定相位补偿，实部符号翻转，已知前导比较失败；若绕过前导检查继续解析，CRC 通常也失败。不能把“通常”当成认证保证，正确流程不允许绕过这些检查。
 \end{solution}
 
-\paragraph*{随堂练习 3.6}
+\paragraph*{随堂练习 \ref{ex:v2-sdr-crc}}
 \begin{solution}
-一个明确的保存约定可以是：采样率 8000 Hz，样本为交错 I/Q 的小端 float32 数对，复数样本数 32；若无文件头，数据区应为 $32\times2\times4=256$ 字节。缺采样率会误解时间与频率，缺数据类型会误解数值和步长，字节序错误会破坏数值，样本数错误可能把截断或尾部数据误当成有效采样。保存时还应写明 I/Q 顺序与是否含文件头。
+2000 mm 的正常录包交付 x=2.0 m、y=2.5 m、序号 7。生成器按新载荷重算 CRC 才能得到一致帧；加 \texttt{--corrupt} 后先算 CRC 再修改载荷，回放应报告 CRC 失败而不交付字段。若损坏实验也重算 CRC，就造出了一条新的有效帧，无法证明拒收路径。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-sdr-stages}}
+\begin{solution}
+序列对应 level2/1、level1/2、level1/2、level2/3、information/4（斜线后为代次）。reset 后来自旧代次的结果应拒绝，不因当前阶段名字恰好相同就接受。实机还需由唯一设备所有者更新配置、清空旧缓冲、等待稳定；模拟代码中的计数只验证状态关系。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-sdr-fresh}}
+\begin{solution}
+radio 年龄为 -0.1 s，被非负年龄条件拒绝；vision=9.9 s 时仍选择 vision。再将 vision 改为 9.0 s，应返回 None，将原第一个断言相应改为 \texttt{is None}。上层收到明确的“无有效源”状态并采用约定回退，不能把旧位置冒充当前测量。None 并不自动等于整车急停，具体行为由业务和实车安全策略决定。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-sdr-capture}}
+\begin{solution}
+无硬件时记录实际 pyadi-iio/libiio 版本、导入结果、帮助参数和设备未验证，不能把这几项写成 RX 成功。有设备时需实际展示 URI、批准的接收配置、4096 样本的形状与 dtype、采样率/本振读回、录包元数据及缓冲清理；异常应保留原因。真实波形不一定采用本例前导、BPSK、8 样本/符号或已知频偏，必须有实际协议与同步设计，不能凭“都是 IQ”就套用教学 decode。
 \end{solution}
 
 \subsubsection*{章末习题}
-
-\paragraph*{第三章章末第 1 题}
+\paragraph*{第三章章末第 \ref{prob:v2-sdr-1} 题}
 \begin{solution}
-不能。离线处理只能使用已采集的信息，软件不能恢复从未记录的频段。
+两者都不能凭软件保证恢复：滤掉的频段未被记录，ADC 饱和会将不同输入压成相同或受限的输出。先改前端带宽、增益或输入条件，再重新采集；回放只能处理已留下的信息。
 \end{solution}
-
-\paragraph*{第三章章末第 2 题}
+\paragraph*{第三章章末第 \ref{prob:v2-sdr-2} 题}
 \begin{solution}
-幅值为 5；会丢失相位信息，不能完整表示复数基带信号。
+幅值为 5。只保留幅值会丢失相位及其旋转方向，理想正、负频率单音都只剩相同常幅值，不能还原完整复数信号。
 \end{solution}
-
-\paragraph*{第三章章末第 3 题}
+\paragraph*{第三章章末第 \ref{prob:v2-sdr-3} 题}
 \begin{solution}
-不应。事件与当前阶段不匹配，应保持状态或按明确策略报错。
+符号率为 1000 符号/秒，BPSK 每符号 1 比特，故比特率为 1000 bit/s（此例没有编码开销）。一帧含 16 比特前导和 64 比特数据/CRC，共 80 符号，即 640 样本；录包额外有 30 个空样本，总数才是 670。
 \end{solution}
-
-\paragraph*{第三章章末第 4 题}
+\paragraph*{第三章章末第 \ref{prob:v2-sdr-4} 题}
 \begin{solution}
-同步确定符号或帧参考，解调把样本映射为比特或软信息，CRC 检查候选帧的数据一致性。
+哈希检查文件字节，不检查“这些字节每秒产生多少个”的真实性。完整约定至少记录采样率、类型与字节序/文件格式、数量、I/Q 顺序、调谐与增益、来源、采集时间及校验值；回放还应核对实际配置和波形的已知特征。裸文件与带头的 .npy 必须区分，哈希也不能当作来源认证。
 \end{solution}
-
-\paragraph*{第三章章末第 5 题}
+\paragraph*{第三章章末第 \ref{prob:v2-sdr-5} 题}
 \begin{solution}
-不可，样本年龄 0.4 s 超过有效期，应按约定回退或报告无有效源。
+同步确定样本起点与相位/频率参考；符号均值和判决得到比特；CRC 检查候选帧的载荷与校验值是否一致。CRC 不保证身份、坐标系、单位或新鲜度，上层仍需各自验证。
 \end{solution}
-
-\paragraph*{第三章章末第 6 题}
+\paragraph*{第三章章末第 \ref{prob:v2-sdr-6} 题}
 \begin{solution}
-判决比特翻转；幅值不变，需要载波相位参考、前导或其它消歧机制。
+恒定相位是固定角度，乘一个反向旋转即可抵消；频偏使相位随时间增长 $2\pi\Delta f t$，只抵消起点角度后，后续仍会继续转。本例按元数据的已知频偏逐样本补偿，真实接收机还需要估计与跟踪频偏。
 \end{solution}
-
-\paragraph*{第三章章末第 7 题}
+\paragraph*{第三章章末第 \ref{prob:v2-sdr-7} 题}
 \begin{solution}
-相位差为 π/4 rad，共 4 个周期；应记录复数类型、采样率、频率、样本数与保存格式。
+检查结果附带的 profile/代次与当前任务是否一致，旧代次不得更新新状态。状态名改变只是程序控制；硬件配置、旧缓冲清理、稳定等待、读取恢复和迟到结果隔离仍要实际执行并验证。
+\end{solution}
+\paragraph*{第三章章末第 \ref{prob:v2-sdr-8} 题}
+\begin{solution}
+radio 年龄 0.4 s 过期，vision 年龄 0.1 s 有效，选择 vision。两路都不满足 $0\leq now-stamp\leq ttl$ 时输出 None；未来时间戳也不能被当作新鲜数据。这个判断要求可比较的同一时钟，不能直接混用不同主机墙钟。
+\end{solution}
+\paragraph*{第三章章末第 \ref{prob:v2-sdr-9} 题}
+\begin{solution}
+同步起点仍应为 19，序号 7、x=3.0 m、y=2.5 m；保存的频偏为 -125 Hz，采样率 8000 Hz、8 样本/符号、670 个复数。再生成 --corrupt 输入，展示 CRC 拒收。它验证已知频偏、恒定相位、整数样本延迟、固定帧长与本例噪声下的离线流程，未验证真实射频、未知频偏/符号率、时钟漂移、多径或连续流恢复。
 \end{solution}
 
 \section*{第四章：OpenCV 与图像处理基础}

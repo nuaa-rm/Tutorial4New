@@ -1,169 +1,194 @@
+% 小代码块与前后段落分开；长文件按职责分段，保留全部行号。
+\newenvironment{sdrblock}{\par\medskip\noindent\begin{minipage}{\linewidth}}{\end{minipage}\par\smallskip}
 \subsubsection{软件无线电在做什么}
+上一章我们已经知道怎样把字节接起来。不过无线电设备交给你的，往往还不是坐标帧，而是一长串看起来没什么规律的复数。这时候先别急着接 TCP：我们得把这些样本还原成比特，再检查它们到底能不能作为一条消息使用。
 
-\textbf{软件定义无线电（SDR, Software Defined Radio）}把本应由模拟电路固定的混频、滤波、解调等步骤，尽可能放到数字域用软件完成。
-硬件负责射频前端与采样；主机或板载处理器对复数基带样本做同步、均衡、译码。
+\textbf{软件定义无线电（SDR，Software Defined Radio）}把混频、滤波、解调等处理尽可能放到数字域，用软件完成。天线、射频前端和模数转换器（ADC，Analog-to-Digital Converter）仍负责把真实信号采进来；软件再做同步、解调和组帧。你可以重放同一段录包、换算法比较结果，但采样前就被滤掉或因饱和而损坏的信息，并不会因为换了 Python 代码就自己长回来。
 
-在采用无线电信息链路的教学场景中，SDR 可用于接收赛场规定的干扰波 / 信息波等波形，解出坐标、密钥等字段，再交给地面视觉融合与裁判上报。
-\textbf{方向名「雷达」}指高台感知站；本章的射频硬件与导航章中的\textbf{激光雷达（LiDAR）}无关。
-
-\begin{example}
-假设一段基带录音已保存在文件中。改变软件滤波器可以重新处理同一段样本；但无法恢复采样前已被模拟滤波器丢掉的频段。这说明硬件带宽与软件处理能力是两个不同限制。
+雷达方向采用无线电信息链路时，会把解出的坐标等字段交给地面视觉，再按当年的接口上报。这里的“雷达方向”是高台感知站的方向名，不是说这块 SDR 就是导航用的激光雷达（LiDAR）。本章用合成波形把接收链跑通，真实赛场波形和频点继续查队内保存的当年文档，不能拿教学帧直接上场。
+\begin{example}[先确定你手里的数据到哪一步了]
+如果拿到的是 IQ 录包，就从数字处理开始；如果已经拿到通过校验的坐标字段，就从单位、时间和融合接口开始。图~\ref{fig:v2-sdr-chain} 把两者分开，后面的离线项目覆盖图中数字接收部分，Pluto 接收例子只覆盖前面的采样接口。
 \end{example}
-
-\begin{exercise}
-把“天线、ADC、相关峰搜索、CRC 校验”分到硬件采集或数字处理环节，并说明录包能复现哪些环节。
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.94\textwidth]{images/sdr_chain_revised.pdf}
+\caption{采样、数字接收与上层使用的边界；录包从 IQ 处进入}
+\label{fig:v2-sdr-chain}
+\end{figure}
+\begin{exercise}\label{ex:v2-sdr-boundary}
+把天线、ADC、前导相关、CRC、坐标单位换算分别放到接收链中。说明 IQ 录包能重放哪些步骤，不能验证哪些硬件问题。
 \end{exercise}
 
-\subsubsection{从天线到 IQ}
+\subsubsection{从 IQ 开始：复数并不是多余的一半}
+IQ 中的 I 是同相分量（In-phase），Q 是正交分量（Quadrature），我们把它们写成 $x[n]=I[n]+jQ[n]$。你可以把它想成复平面上的一个箭头：长度是幅值，方向是相位。只有长度的照片，分不清箭头是在顺时针还是逆时针转；保留 I 和 Q 才能观察这个区别。
 
-简化接收链：
-\begin{enumerate}
-    \item 天线感应射频；
-    \item 前端放大、滤波、下变频到中频或零中频；
-    \item ADC 采样得到同相（I）与正交（Q）两路，合称 \textbf{IQ} 样本；
-    \item 软件对 IQ 做数字滤波、相关、同步与帧解析。
-\end{enumerate}
-
-IQ 可看成复信号 $x = I + jQ$。采样率决定可观察的带宽量级；过高采样会受总线（如 USB）吞吐限制，需在带宽与丢样之间折中。
-
-常用教学 / 开发板基于 Analog Devices 的 AD936x 系列收发器（如 ADALM-PLUTO 一类平台）。
-主机侧常见软件栈：\textbf{libiio}（Industrial I/O）与 Python 封装 \textbf{pyadi-iio}，用于设置本振频率、采样率、增益，并读取 RX 缓冲。
-
-\begin{example}
-硬件接收示意：需要已安装 pyadi-iio 与 libiio 的 ADALM-PLUTO，设备可达后运行。只配置接收，不启动发射。
-\begin{tpython}
-import adi
-sdr = adi.Pluto(uri="ip:192.168.2.1")
-sdr.sample_rate = 1_000_000
-sdr.rx_lo = 2_400_000_000
-iq = sdr.rx()  # 复数样本数组
-print(iq.shape, iq.dtype)
-\end{tpython}
-输出应是接收缓冲长度与复数数据类型。此例只检查采样接口，不解调真实协议。
+对于频率 $f$、采样率 $f_s$ 的理想复数单音，样本是 $x[n]=e^{j2\pi fn/f_s}$。采样率说的是每秒几个\emph{复数样本}，不是把 I、Q 分别数一次后再翻倍。离散时间中的频率会按 $f_s$ 周期重复；常用的基带频率表示区间是 $[-f_s/2,f_s/2)$。因此提高采样率、调整模拟滤波与本振要一起考虑，不能只靠软件区分已混叠的两个信号。
+\begin{example}[转一个方向，再转回来]
+本章的完整工程位于本卷 \path{examples/sdr/iq-replay-demo}。离线部分只依赖 Python 3.10 以上与 NumPy；Ubuntu 24.04 可以先安装 \texttt{python3-numpy}。进入这个目录后运行下面的 tone\_demo.py。
+\begin{sdrblock}
+\lstinputlisting[language=Python,frame=single,numbers=left,caption={tone\_demo.py：相位、频率与混叠}]{examples/sdr/iq-replay-demo/tone_demo.py}
+\end{sdrblock}
+\texttt{np.arange(count)} 生成样本下标，复指数生成样本；后一个样本乘前一个的共轭，再取 angle，得到相邻相位差。运行 \texttt{python3 tone\_demo.py}，正负 1000 Hz 分别输出约 $\pm0.785398$ rad，幅值都是 1。9000 Hz 的样本与 1000 Hz 相同，因为两者正好差一个采样率。这里 angle 给主值，不能靠这一句恢复超出表示区间的原始频率。
 \end{example}
-
-实战中 URI、网段、天线与功率必须按队内部署文档配置；\textbf{任何发射}都须遵守当地频谱法规与比赛规则。
-
-\begin{example}
-无硬件时运行 Python 3 合成复数基带信号。1 MHz 采样下，125 kHz 信号每周期有 8 个样本，前两个样本的相位差为 π/4。
-\begin{tpython}
-import cmath, math
-fs, f = 1_000_000, 125_000
-iq = [cmath.exp(2j*math.pi*f*n/fs) for n in range(8)]
-phase_step = cmath.phase(iq[1] * iq[0].conjugate())
-assert abs(phase_step - math.pi/4) < 1e-12
-print(round(phase_step, 6))
-\end{tpython}
-\end{example}
-
-\begin{exercise}
-把频率改为负 125 kHz，检查相位差的符号；解释为什么只有幅值不足以区分两者。
+\begin{exercise}\label{ex:v2-sdr-iq}
+将采样率改为 16000 Hz，保持样本数与三个频率，先预测相位差，再运行核对。9000 Hz 是否还与 1000 Hz 相同？相应调整原来的断言，不要只删掉它。
 \end{exercise}
 
-\subsubsection{波形、信道与「分阶段切换」}
+\subsubsection{先把录包做成可以回放的小工程}
+接下来我们用二进制相移键控（BPSK，Binary Phase Shift Keying）：比特 0 映射到 $+1$，比特 1 映射到 $-1$。一个符号保持 8 个样本，采样率 8000 Hz，所以符号率为 1000 符号/秒。这里一个符号携带一个比特；换成别的调制方式，三种速率就不能这样直接等同了。
 
-以下是教学状态机示意，不代表通用赛制：多种 profile（中心频、带宽、调制）分阶段处理，例如：
-\begin{center}
-干扰波一级 $\rightarrow$ 干扰波二级 $\rightarrow$ 信息波
-\end{center}
-本章简化方案让同一块单通道 SDR 在任一时刻只处理一个 profile：确认上一级成功后再切换，避免「同时解两路」带来的复杂度与未验证风险。
+项目分成下面几个文件。先有字段，再有比特和波形；接收时走反方向，录包文件让两次运行真正分开。
+\begin{sdrblock}
+\begin{lstlisting}[language={}]
+iq-replay-demo/
+  README.md
+  frame.py          # 教学帧与比特、CRC、字段
+  synth.py          # BPSK、频偏、相位、噪声
+  record.py         # 保存与检查录包
+  decode.py         # 同步、符号判决、组帧
+  replay.py         # 生成/回放命令入口
+  tone_demo.py      # 刚才的复数单音
+  state_demo.py     # 阶段切换与新鲜度
+  capture_pluto.py  # 可选硬件接收
+\end{lstlisting}
+\end{sdrblock}
 
-工程上把每套射频参数做成 \textbf{radio profile}（本振、采样率、滤波系数等），由状态机驱动切换。
-状态机输入可来自地面程序下发的阵营、干扰等级等控制字节。
+\begin{example}[造一帧你能看懂的信号]
+frame.py 的前半部分约定 16 比特前导，以及 8 字节帧。帧的前 6 字节是命令 uint8、序号 uint8、x/y 毫米值各 uint16，后 2 字节是 CRC；多字节字段和 CRC 都用大端，字节内先发送高位。CRC 仍用上一章的 \texttt{crc\_hqx(body, 0)}，覆盖前 6 字节。下面先展示编码，字段解析放到校验处讲，两段合起来就是完整文件。
+\begin{sdrblock}
+\lstinputlisting[language=Python,frame=single,numbers=left,lastline=22,caption={frame.py：构造教学帧}]{examples/sdr/iq-replay-demo/frame.py}
+\end{sdrblock}
+\texttt{unpackbits} 把字节变成比特；先转成浮点数再计算 $1-2b$，避免 uint8 中的负数变成 255。synth.py 将前导和帧连起来，加 19 个前置空样本和 11 个尾部空样本，再加入恒定相位、已知频偏与固定种子的噪声。
+\begin{sdrblock}
+\lstinputlisting[language=Python,frame=single,numbers=left,caption={synth.py：合成复数采样}]{examples/sdr/iq-replay-demo/synth.py}
+\end{sdrblock}
+样本数应为 $(16+8\times8)\times8+19+11=670$。noise 是 I/Q 两路噪声各自的标准差，不是 dB 信噪比；seed 固定是为了比较代码变化，而不是保证接收机应付所有噪声。\texttt{--corrupt} 故意修改载荷却保留旧 CRC，后面用它检查拒收路径。
 
-\begin{example}
-用离线状态机检查阶段切换。错误事件不会跳级，只有当前阶段成功才推进。
-\begin{tpython}
-state = "level1"
-transitions = {("level1","ok1"):"level2",
-               ("level2","ok2"):"information"}
-for event in ["ok2", "ok1", "timeout", "ok2"]:
-    state = transitions.get((state,event),state)
-    print(state)
-assert state == "information"
-\end{tpython}
+然后由 record.py 保存 complex64 的一维数组与元数据。complex64 的每个复数占 8 字节，I、Q 各是 float32；本机 dtype 字符串 \texttt{<c8} 中的 $<$ 表示小端。\texttt{.npy} 自带类型、形状和字节序头，因此文件大小会大于纯数据区的 $670\times8$ 字节。
+\begin{sdrblock}
+\lstinputlisting[language=Python,frame=single,numbers=left,lastline=19,caption={record.py：保存 IQ 与元数据}]{examples/sdr/iq-replay-demo/record.py}
+\end{sdrblock}
+回放时先检查文件哈希，再检查实际数组与元数据是否一致。\texttt{allow\_pickle=False} 让加载器只读数值数组；这里不需要 Python 对象存档。哈希可以发现文件被意外改动，但若文件与哈希一起改了，它不能证明数据来源可信。
+\begin{sdrblock}
+\lstinputlisting[language=Python,frame=single,numbers=left,firstline=20,firstnumber=20,caption={record.py：回放前检查}]{examples/sdr/iq-replay-demo/record.py}
+\end{sdrblock}
+命令入口在 replay.py。\texttt{generate folder} 合成并保存，\texttt{decode folder} 则从文件载入，不能拿生成时还留在内存中的数组假装做了回放。
+\begin{sdrblock}
+\lstinputlisting[language=Python,frame=single,numbers=left,basicstyle=\footnotesize\ttfamily,caption={replay.py：生成与回放入口}]{examples/sdr/iq-replay-demo/replay.py}
+\end{sdrblock}
+先在项目目录执行 \texttt{python3 replay.py generate /tmp/sdr-good}，应显示已保存 670 个复数样本，目录里有 \texttt{iq.npy} 与 \texttt{metadata.json}。Distrobox 用户先进入 ubuntu2404；离线程序不用加载 ROS。通用形式为 \texttt{python3 replay.py generate folder [选项]}，folder 换成自己的录包目录；\texttt{--x-mm} 是毫米值，\texttt{--phase} 是弧度，\texttt{--offset-hz} 是已知频偏，\texttt{--noise} 控制噪声标准差。只有 generate 使用这些选项，decode 使用保存的元数据。
 \end{example}
-
-\begin{exercise}
-增加 reset 事件，让任意阶段回到 level1。写出超时重试与主动复位的区别。
+\begin{note}
+generate 会覆盖目标目录里的两个录包文件。比较参数时换一个新目录，别把唯一一份实测录包顺手覆盖了。元数据也不是万能体检：你若把采样率写成另一个正数，哈希仍可能通过，但时间与频率解释已经错了。
+\end{note}
+\begin{exercise}\label{ex:v2-sdr-record}
+运行生成命令，核对样本数、采样率、每符号采样数、dtype 和哈希字段。复制目录后只修改 sample\_count 为 669，再回放，观察哪一项检查拒绝它；解释为什么不能把 .npy 文件当作裸 float32 数组读。
 \end{exercise}
 
-\subsubsection{电磁波解析：从 IQ 到有效帧}
-
-「解析」指从 IQ 流中恢复出协议定义的比特与字段。常见阶段：
-
-\begin{enumerate}
-    \item \textbf{前端数字处理}：直流消除、低通 / 匹配滤波、必要时抽取降速；
-    \item \textbf{同步}：用已知前导或相关峰找到符号/帧起点（硬判决或软相关）；
-    \item \textbf{解调与解映射}：按调制方式得到比特或软信息；
-    \item \textbf{组帧与校验}：按长度切出候选帧，做 CRC；失败则滑动搜索下一候选；
-    \item \textbf{字段解释}：命令字、坐标、密钥等进入上层（TCP / 融合模块）。
-\end{enumerate}
-
-\textbf{软判决}保留幅度/相关度量，而不是过早变成 0/1，往往在低信噪比下更稳。
-对关键命令可做长度约束、字段边界搜索，减少盲目组合；CRC 失败的帧必须丢弃。
-
-无硬件时，可用录制的 IQ 短样做离线回放，验证解码器回归——这是射频模块可复现测试的重要手段。
-
-\begin{example}
-这是已完成载波与符号同步的 BPSK 理想样本，每符号一个样本：负实部映射为 1，正实部为 0。结果为 1010；不包含完整射频解码器。
-\begin{tpython}
-samples = [-1+0.1j, 1-0.1j, -0.8+0j, 0.9+0.2j]
-bits = [int(x.real < 0) for x in samples]
-assert bits == [1,0,1,0]
-print(bits)
-\end{tpython}
+\subsubsection{从 IQ 到有效帧：同步之后才轮到字段}
+终于可以开始“解码”了，不过先别把每个样本的实部直接变成 0/1。前面的频偏使整个星座随时间转，相位又让正负轴偏离你的判决方向；即使方向对了，还得找到帧从哪一个样本开始。图~\ref{fig:v2-sdr-replay} 用本项目的固定录包展示这几步，你可以边看曲线边对应代码。
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.94\textwidth]{images/sdr_replay_revised.pdf}
+\caption{同一合成录包的原始 IQ、相关峰和同步后符号均值；不是实机采集}
+\label{fig:v2-sdr-replay}
+\end{figure}
+\begin{example}[让前导带我们找到起点]
+decode.py 首先乘反向复指数，补偿\emph{已知}频偏；然后把已知前导展开成 128 个样本，计算相关。因为模板是实数，这里将其反转后做卷积，就得到每个候选起点的相关值；复数模板还要取共轭。搜索范围只包括后面能容纳完整帧的起点，避免把尾部半帧当作有效候选。
+\begin{sdrblock}
+\lstinputlisting[language=Python,frame=single,numbers=left,lastline=23,caption={decode.py：补偿频偏并搜索前导}]{examples/sdr/iq-replay-demo/decode.py}
+\end{sdrblock}
+取相关模最大的位置作为起点；相关值的相角给出恒定相位估计。接下来转回实轴，每 8 个样本求均值，按正负得到比特。均值保留了判决前的幅度信息，最后一步才变成硬判决；实际接收机还能保留软信息交给译码器，本章没有信道编码。
+\begin{sdrblock}
+\lstinputlisting[language=Python,frame=single,numbers=left,firstline=24,firstnumber=24,caption={decode.py：相位校正、符号判决与组帧}]{examples/sdr/iq-replay-demo/decode.py}
+\end{sdrblock}
+运行 \texttt{python3 replay.py decode /tmp/sdr-good}，同步起点应为 19，帧为 \texttt{010704e209c40584}，坐标为 $(1.25,2.5)$ 米，序号为 7。前导检查与 CRC 都成功后，才能把结果交给上层。图中的相关值除以模板长度，正常前导附近约为 1；0.5 阈值只适用于本例幅值约为 1 的信号，不是任意硬件增益下的通用阈值。
 \end{example}
-
-\begin{exercise}
-把全部样本乘以 -1，观察比特翻转。说明为何实际接收机需要同步与前导校验。
+\begin{exercise}\label{ex:v2-sdr-sync}
+用新目录生成 \texttt{--phase 3.141592653589793} 的录包并回放，核对坐标。先不改任何其他步骤，说明为什么相位旋转 $\pi$ 没有让本例输出翻转字段；若跳过相位补偿，会在哪些检查处被拒绝？
 \end{exercise}
 
+\begin{example}[有比特也不代表有可信坐标]
+frame.py 的剩余部分先检查长度，再验证 CRC，最后检查命令并换算单位。把校验放在字段交付之前，坏帧不能更新上一章的最新值槽。
+\begin{sdrblock}
+\lstinputlisting[language=Python,frame=single,numbers=left,firstline=23,firstnumber=23,caption={frame.py：校验后才交付字段}]{examples/sdr/iq-replay-demo/frame.py}
+\end{sdrblock}
+在项目目录运行下面两条命令，第二条应以 \texttt{ValueError: CRC 失败，不交付坐标} 退出。它故意失败，是我们安排的输入，不需要把异常吞掉才叫“修好”。
+\begin{sdrblock}
+\begin{tbash}
+python3 replay.py generate /tmp/sdr-bad --corrupt
+python3 replay.py decode /tmp/sdr-bad
+\end{tbash}
+\end{sdrblock}
+\end{example}
+\begin{exercise}\label{ex:v2-sdr-crc}
+另生成 \texttt{--x-mm 2000} 的正常录包，核对 x 为 2.0 米；再加 --corrupt，记录拒收原因。为什么正常改字段应重算 CRC，而“校验拒收实验”必须保留旧 CRC？
+\end{exercise}
 \begin{conclusion}
-\begin{itemize}
-\item IQ 是采样数据，符号不是协议字段。
-\item 同步确定时间和相位参考，解调恢复比特，组帧找到边界。
-\item CRC 拒绝坏帧，但不能证明发送者身份；上层还要验证字段与时效。
-\end{itemize}
+IQ 是样本，符号是调制单位，比特组合成帧，字段才有坐标等业务含义。同步解决起点与参考，解调和判决恢复比特，CRC 检查帧的一致性，三者不能互相替代。本例已知频偏和符号率，采用矩形脉冲、整样本偏移、单帧和轻噪声；实际波形还要处理频偏估计、采样时钟误差、多径、连续流与滤波，不能把本例的相关峰当作所有接收问题的答案。
 \end{conclusion}
 
-\subsubsection{与地面视觉的衔接}
-
-解码成功的坐标帧（示意命令字如坐标上报）经本机 TCP 送给视觉进程后，融合层通常按\textbf{新鲜度}取舍：
-本教学策略让通过校验的新鲜无线电数据优先；过期则回退视觉定位。实际优先级还需考虑置信度与时间同步。
-非坐标信息（血量、弹药、密钥等）可另槽转发，不阻塞坐标最新值。
-
-通信层细节见本卷「多机通信方法」章；场地图定位与检测流水线见雷达方向其它专项与卷三。
-
-\begin{example}
-统一时钟下设有效期 0.2 s。当前时间 10.0 s，无线电样本 9.7 s 已过期，视觉样本 9.9 s 有效，应选择 vision。
-\begin{tpython}
-now, ttl = 10.0, 0.2
-sources = [("radio",9.7),("vision",9.9)]
-selected = next((name for name,t in sources if 0 <= now-t <= ttl),None)
-assert selected == "vision"
-print(selected)
-\end{tpython}
+\subsubsection{分阶段切换：状态机不会替你重新调谐}
+接收流水线说的是“一帧怎样解出来”，阶段状态机说的是“现在该用哪套配置”。它们回答的不是同一个问题。教学中可以按一级、二级、信息阶段推进，同一块单通道设备一次使用一个 profile（配置组）。这些阶段名只是演示，是否有这样的赛制，要查当年的规则。
+\begin{example}[先检查阶段与事件是否对得上]
+state\_demo.py 前半部分给出模拟采样率和带宽。收到匹配事件才推进，timeout 留在原阶段；reset 即使已经在初始状态，也增加代次，表示旧任务与新任务已经分开。
+\begin{sdrblock}
+\lstinputlisting[language=Python,frame=single,numbers=left,lastline=24,caption={state\_demo.py：阶段与配置组}]{examples/sdr/iq-replay-demo/state_demo.py}
+\end{sdrblock}
+下面的源选择和入口一起覆盖两项能力：阶段切换、统一时钟下的新鲜度，后一个紧接着讲。运行 \texttt{python3 state\_demo.py}，前五行阶段依次是 level1、level2、level2、information、level1，代次依次为 0、1、1、2、3。
+\begin{sdrblock}
+\lstinputlisting[language=Python,frame=single,numbers=left,firstline=25,firstnumber=25,caption={state\_demo.py：源选择与命令入口}]{examples/sdr/iq-replay-demo/state_demo.py}
+\end{sdrblock}
+实机更换 profile 时，设备所有者还要依次停止旧读取、重新配置本振与滤波、清空旧缓冲、等待稳定，再接收新数据；旧代次的迟到结果应拒绝。这里只打印新配置，没有偷偷帮你改硬件。超时重试也要限制次数或期限，timeout 留在原状态不等于程序会自动重试。
 \end{example}
-
-\begin{exercise}
-令两路时间戳均为 9.0 s，验证输出 None，并说明为何不能继续沿用最后一个坐标。
+\begin{exercise}\label{ex:v2-sdr-stages}
+将事件序列改为 ok1、reset、ok2、ok1、ok2，先写出每一步状态与代次，再运行核对。说明 reset 后仍到达的旧阶段结果应该如何处理。
 \end{exercise}
 
-\subsubsection{安全与合规*}
-
-\begin{itemize}
-    \item 开源或实验配置中的发射功率可能极低，\textbf{不等于}可以随意发射；须遵守法规与赛场管理。
-    \item 不要在公开仓库提交真实比赛频点、大体积 IQ、含隐私的录包；用脱敏短样与哈希校验复现。
-    \item 射频线缆、供电与接地不良会导致锁失、误码，排障时先分「射频前端 / 解码软件 / 上层通信」。
-\end{itemize}
-
-\begin{example}
-离线实验目录只包含合成 IQ、采样率说明和解码结果，没有硬件发射调用。这样能验证数字处理逻辑；接入射频设备前仍要单独核对设备、频谱与场地要求。
+\subsubsection{与地面视觉衔接：校验通过还得看时间}
+坐标终于解出来了，接下来才到上一章的单位换算和转发。这里只用同一个逻辑时钟检查年龄：无线电数据足够新鲜就优先用，过期后再看视觉；两路都过期就返回 None，而不是让一个旧坐标永远占着位置。这个简化优先级用于演示，实战还需要置信度、坐标系和同步约定。
+\begin{example}[让旧无线电坐标先退场]
+刚才 state\_demo.py 中 radio 的时间是 9.7 s，vision 是 9.9 s；当前 10.0 s，有效期 0.2 s，程序应选择 vision。到 11.0 s，两者都过期，输出 None。select\_source 同时要求年龄大于等于 0，未来时间戳也不能直接当成“特别新鲜”。
 \end{example}
+\begin{note}
+这些坐标都是米；实机还要写清坐标原点、轴向、数据产生时间、序号和接收时间。录包回放发生在今天，不等于样本就是今天采的。不同机器的墙钟若没有同步，不能直接相减；可按接口约定用本机单调接收时钟检查\emph{接收后年龄}，但它不能替代采集时刻。
+\end{note}
+\begin{exercise}\label{ex:v2-sdr-fresh}
+将 radio 时间改为 10.1 s，确认当前 10.0 s 不会选择它；再让 vision 也过期，核对 None。解释两路数据同时消失时应该给上层什么状态，而不是继续沿用最后坐标。
+\end{exercise}
+\begin{conclusion}
+阶段状态机选择接收配置，解码流水线恢复有效字段，融合策略再看单位、坐标系和年龄。切换配置要隔离旧代次；切换数据源要确认备用源足够新鲜。收到一帧、通过 CRC、能用于当前融合，是三次不同的判断。
+\end{conclusion}
 
-\begin{exercise}
-为自己的离线样本写出采样率、数据类型、字节序、样本数四项元数据，解释缺少任意一项可能产生什么误读。
+\subsubsection{接上 Pluto：先只检查接收接口*}
+如果你暂时没有设备，离线部分可以先练熟。常见教学板 ADALM-PLUTO 基于 AD936x 射频收发器，主机侧用 libiio（Industrial I/O）和 Python 封装 pyadi-iio 配置并读取缓冲。ROS Jazzy 不是它们的前提；但在 Distrobox 中运行时，USB、设备网络和驱动必须在容器里也可达。
+\begin{note}
+先由实验负责人确认设备、天线、接线和接收频点，再操作设备。本例只调用接收，没有发射；若另做发射实验，必须先核对当地频谱法规、赛场规则与场地许可，不能因为网上例子的功率很小就直接照抄。
+\end{note}
+\begin{example}[把安装和设备可达分开检查]
+在 Ubuntu 24.04 容器的项目目录执行以下安装。虚拟环境沿用系统 NumPy，Python 包安装进 .venv；不要用 sudo pip 改系统 Python。这里的版本组合已检查导入，换版本时再查 ADI 文档。
+\begin{sdrblock}
+\begin{tbash}
+sudo apt install libiio0 libiio-utils libad9361-0 python3-venv
+python3 -m venv --system-site-packages .venv
+.venv/bin/python -m pip install pyadi-iio==0.0.21 pylibiio==0.25
+.venv/bin/python -c 'import adi, iio; print(adi.__version__, iio.version)'
+iio_info --help
+iio_info -S usb
+\end{tbash}
+\end{sdrblock}
+导入应显示 pyadi-iio 0.0.21 与 libiio 0.25。按本机帮助，-S usb 仅扫描 USB；旧文档里的 -s 写法要以实际版本为准。若显示 \texttt{No IIO context found}，只是当前没发现设备；先查容器是否看见 USB，再查驱动和设备地址。全部后端扫描若出现 Avahi/DNS-SD 错误，是网络发现条件不齐，别先去重装 Python。已有明确 IP 时可用 \texttt{iio\_info -u ip:设备地址} 定向检查。
+
+实际接收入口如下。\texttt{sample\_rate} 是复数采样率，\texttt{rx\_lo} 是接收本振，\texttt{rx\_rf\_bandwidth} 是射频接收滤波带宽；这三个参数不能当成一个“频率”随便换。gain 使用 slow\_attack 自动增益，buffer\_size 是本次缓冲样本数；最后销毁 RX 缓冲，避免把读取资源一直留着。
+\begin{sdrblock}
+\lstinputlisting[language=Python,frame=single,numbers=left,basicstyle=\footnotesize\ttfamily,caption={capture\_pluto.py：配置、接收、录存与清理}]{examples/sdr/iq-replay-demo/capture_pluto.py}
+\end{sdrblock}
+先执行 \texttt{.venv/bin/python capture\_pluto.py --help}。实机调用形式为 \texttt{capture\_pluto.py --uri URI --lo-hz HZ folder}，用自己的 URI、批准的接收中心频率和新目录替换；不要把未知频点当默认值。成功时应显示 4096 个样本、实际类型和本振读回，并产生两个录包文件。这里尚未接上实机核验，设备异常不能被空结果冒充成功。
+
+真实录包没有我们事先约定的前导和符号率，不能直接塞给教学 decode。接收端的调用也不保证持续无丢样；实际调谐稳定、USB 吞吐、增益、模拟饱和和断开恢复，都要在设备上单独检查。保存短样时附配置、设备与采集时间，不提交未经批准的真实频点、隐私信息或大体积录包。
+\end{example}
+\begin{exercise}\label{ex:v2-sdr-capture}
+没有硬件时，完成导入与 --help 检查并记录缺口；有获准设备时，在负责人指定的参数下录一个 RX 缓冲，核对形状、实际采样率/本振、保存元数据和清理。两种情况下都说明为什么不能直接用教学解码器解释真实录包。
 \end{exercise}
 
-延伸阅读：Analog Devices Pluto / AD936x 用户文档；GNU Radio 与 libiio 入门；队内雷达开源中的无线电架构与射频安全说明。
+卷积边界可以查 \href{https://numpy.org/doc/stable/reference/generated/numpy.convolve.html}{NumPy convolve 文档}，录包格式和安全加载查 \href{https://numpy.org/doc/stable/reference/generated/numpy.load.html}{NumPy load 文档}。硬件安装查 \href{https://analogdevicesinc.github.io/pyadi-iio/guides/quick.html}{ADI 的 pyadi-iio 快速入门}，设备属性查 \href{https://github.com/analogdevicesinc/pyadi-iio/blob/main/adi/ad936x.py}{Pluto/AD936x 接口}；比赛配置以队内当年资料为准。
