@@ -1,0 +1,256 @@
+{
+  "ROS_DISTRO": "jazzy",
+  "records": [
+    {
+      "command": [
+        "ros2",
+        "daemon",
+        "stop"
+      ],
+      "returncode": 0,
+      "output": "The daemon is not running\n"
+    },
+    {
+      "command": [
+        "python3",
+        "ping_demo.py"
+      ],
+      "returncode": 0,
+      "output": "ping\n"
+    },
+    {
+      "command": [
+        "python3",
+        "parser_demo.py"
+      ],
+      "returncode": 0,
+      "output": "完整载荷: [b'AB', b'XYZ']\n有效数据: [7] 坏 CRC: 1\n"
+    },
+    {
+      "command": [
+        "python3",
+        "latest_demo.py"
+      ],
+      "returncode": 0,
+      "output": "优先消费最新位置: 30；剩余槽数: 1\n忽略旧代次 1 ；新代次 2 仍能发送 ok 和位置 42\n"
+    },
+    {
+      "command": [
+        "python3",
+        "event_demo.py"
+      ],
+      "returncode": 0,
+      "output": "队列已满，第三个事件明确拒绝，交给上层处理\n实际执行事件 1 buy\n事件 1 发送次数 1 确认 None\n事件 1 发送次数 2 确认 1\n实际执行事件 2 buy\n事件 2 发送次数 1 确认 2\n两次购买各执行一次，状态覆盖槽不能代替事件队列\n"
+    },
+    {
+      "command": [
+        "python3",
+        "fault_demo.py"
+      ],
+      "returncode": 0,
+      "output": "模拟秒 0 B 消费 100 A 槽数 1\n模拟秒 1 B 消费 101 A 槽数 1\n模拟秒 2 B 消费 102 A 槽数 1\n模拟秒 3 B 消费 103 A 槽数 1\n模拟秒 4 B 消费 104 A 槽数 1\nA 过期丢弃: 1 ，此时采用 B 的新值\n模拟秒 5 B 消费 105 A 槽数 1\nA 恢复，消费 15；两条链路各自维护代次和槽位\n"
+    },
+    {
+      "command": [
+        "python3",
+        "serial_demo.py"
+      ],
+      "returncode": 0,
+      "output": "pySerial 伪终端有效数据: [7] 坏 CRC: 1\n伪终端对端关闭，捕获读取异常\n"
+    },
+    {
+      "command": [
+        "python3",
+        "bridge_demo.py"
+      ],
+      "returncode": 0,
+      "output": "seq、距离（米）: (8, 1.25)\n"
+    },
+    {
+      "command": [
+        "python3",
+        "ping_demo.py"
+      ],
+      "returncode": 0,
+      "output": "pong\n"
+    },
+    {
+      "command": [
+        "python3",
+        "ping_demo.py"
+      ],
+      "returncode": 1,
+      "output": "Traceback (most recent call last):\n  File \"/tmp/comm-textbook-lek_oh7w/demo/ping_demo.py\", line 16, in <module>\n    raise EOFError(\"连接提前关闭\")\nEOFError: 连接提前关闭\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-c",
+        "from framing import *\ndata = encode_length(b'AB') + encode_length(b'XYZ')\nfor step in range(1, len(data)+1):\n    parser, frames = LengthParser(), []\n    for start in range(0,len(data),step): frames += parser.feed(data[start:start+step])\n    assert frames == [b'AB',b'XYZ'] and not parser.buffer\nparser = LengthParser()\nassert parser.feed(b'\\x10'+b'A'*15) == [] and len(parser.buffer)==16\nassert parser.feed(b'A') == [b'A'*16]\nfor size in [0,17,255]:\n    try: LengthParser().feed(bytes([size]))\n    except ValueError: pass\n    else: raise AssertionError(size)\nparser, values = CRCParser(), []\nfor value in range(256):\n    for byte in encode_crc(value): values += parser.feed(bytes([byte]))\nassert values == list(range(256)) and not parser.buffer\ndamaged=bytearray(encode_crc(7)); damaged[1] ^= 1\nparser=CRCParser()\nassert parser.feed(damaged+encode_crc(9)) == [9] and parser.bad_crc==1\nprint('所有分片、长度边界、256载荷、坏数据与恢复通过')"
+      ],
+      "returncode": 0,
+      "output": "所有分片、长度边界、256载荷、坏数据与恢复通过\n"
+    },
+    {
+      "command": [
+        "python3",
+        "tcp_demo.py",
+        "client",
+        "--port",
+        "33433"
+      ],
+      "returncode": 0,
+      "output": "收到回显: [b'AB', b'XYZ']\n"
+    },
+    {
+      "command": [
+        "python3",
+        "tcp_demo.py",
+        "client",
+        "--port",
+        "33433"
+      ],
+      "returncode": 0,
+      "output": "收到回显: [b'AB', b'XYZ']\n"
+    },
+    {
+      "background": "TCP 两次连接与迟到清理",
+      "returncode": 0,
+      "output": "监听 ('127.0.0.1', 33433)\n代次 1 回显 b'AB'\n代次 1 回显 b'XYZ'\n断开，丢弃半帧字节: 0\n迟到清理 1 实际清理: False\n代次 2 回显 b'AB'\n代次 2 回显 b'XYZ'\n断开，丢弃半帧字节: 0\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-c",
+        "import socket; s=socket.create_connection(('127.0.0.1',39209)); s.sendall(b'\\x03A'); s.close()"
+      ],
+      "returncode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "python3",
+        "tcp_demo.py",
+        "client",
+        "--port",
+        "39209"
+      ],
+      "returncode": 0,
+      "output": "收到回显: [b'AB', b'XYZ']\n"
+    },
+    {
+      "background": "半帧/非法长度后新连接 b'\\x03A'",
+      "returncode": 0,
+      "output": "监听 ('127.0.0.1', 39209)\n断开，丢弃半帧字节: 2\n迟到清理 1 实际清理: False\n代次 2 回显 b'AB'\n代次 2 回显 b'XYZ'\n断开，丢弃半帧字节: 0\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-c",
+        "import socket; s=socket.create_connection(('127.0.0.1',34277)); s.sendall(b'\\x00'); s.close()"
+      ],
+      "returncode": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "python3",
+        "tcp_demo.py",
+        "client",
+        "--port",
+        "34277"
+      ],
+      "returncode": 0,
+      "output": "收到回显: [b'AB', b'XYZ']\n"
+    },
+    {
+      "background": "半帧/非法长度后新连接 b'\\x00'",
+      "returncode": 0,
+      "output": "监听 ('127.0.0.1', 34277)\n本连接失败: 非法长度：结束本次连接，不能猜测下一帧\n迟到清理 1 实际清理: False\n代次 2 回显 b'AB'\n代次 2 回显 b'XYZ'\n断开，丢弃半帧字节: 0\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-c",
+        "import socket, threading\nfrom state import Session\na,b=socket.socketpair();c,d=socket.socketpair()\nwith a,b,c,d:\n    session=Session();first=session.connect(a)\n    ready=threading.Event()\n    def late():\n        ready.wait();assert not session.disconnect(first)\n    thread=threading.Thread(target=late);thread.start()\n    second=session.connect(c);session.put(second,'position',42,at=0)\n    ready.set();thread.join(timeout=2);assert not thread.is_alive()\n    assert session.take(second,now=2,max_age=2)==('position',42)\n    session.put(second,'position',99,at=0)\n    assert session.take(second,now=3,max_age=2) is None and session.expired==1\n    session.put(second,'position',30,at=3);session.put(second,'status','ready',at=3)\n    session.priority=('status','position')\n    assert session.take(second,now=3,max_age=2)==('status','ready')\n    assert session.take(second,now=3,max_age=2)==('position',30)\n    assert not session.put(first,'position',100,at=3)\n    try: session.put(second,'unknown',100,at=3)\n    except ValueError: pass\n    else: raise AssertionError('无限槽位')\n    session.disconnect(second)\nprint('真实线程迟到清理、时效边界、优先级与拒绝旧写入通过')"
+      ],
+      "returncode": 0,
+      "output": "真实线程迟到清理、时效边界、优先级与拒绝旧写入通过\n"
+    },
+    {
+      "command": [
+        "python3",
+        "event_demo.py"
+      ],
+      "returncode": 1,
+      "output": "队列已满，第三个事件明确拒绝，交给上层处理\n实际执行事件 1 buy\n事件 1 发送次数 1 确认 None\n事件 1 发送次数 2 确认 None\n事件 1 发送次数 3 确认 None\nTraceback (most recent call last):\n  File \"/tmp/comm-textbook-lek_oh7w/demo/event_demo.py\", line 34, in <module>\n    raise RuntimeError(\"三次未确认，报告投递失败，不能假装已完成\")\nRuntimeError: 三次未确认，报告投递失败，不能假装已完成\n"
+    },
+    {
+      "command": [
+        "python3",
+        "parser_demo.py"
+      ],
+      "returncode": 0,
+      "output": "完整载荷: [b'AB', b'XYZ']\n有效数据: [9] 坏 CRC: 2\n"
+    },
+    {
+      "command": [
+        "python3",
+        "fault_demo.py"
+      ],
+      "returncode": 0,
+      "output": "模拟秒 0 B 消费 100 A 槽数 1\n模拟秒 1 B 消费 101 A 槽数 1\n模拟秒 2 B 消费 102 A 槽数 1\n模拟秒 3 B 消费 103 A 槽数 1\n模拟秒 4 B 消费 104 A 槽数 1\nA 未过期: 0 ，A 的旧值仍被允许\n模拟秒 5 B 消费 105 A 槽数 1\nA 恢复，消费 15；两条链路各自维护代次和槽位\n"
+    },
+    {
+      "command": [
+        "python3",
+        "bridge_demo.py"
+      ],
+      "returncode": 0,
+      "output": "seq、距离（米）: (8, 2.0)\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "echo",
+        "/range_m",
+        "std_msgs/msg/Float64",
+        "--once"
+      ],
+      "returncode": 0,
+      "output": "data: 1.25\n---\n"
+    },
+    {
+      "background": "Jazzy 实际桥接话题 1.25",
+      "returncode": 0,
+      "output": "[INFO] [1790625453.177743259] [distance_bridge_demo]: seq=8, range_m=1.25\n[INFO] [1790625453.671092190] [distance_bridge_demo]: seq=8, range_m=1.25\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "echo",
+        "/range_m",
+        "std_msgs/msg/Float64",
+        "--once"
+      ],
+      "returncode": 0,
+      "output": "data: 2.0\n---\n"
+    },
+    {
+      "background": "Jazzy 实际桥接话题 2.0",
+      "returncode": 0,
+      "output": "[INFO] [1790625454.710372868] [distance_bridge_demo]: seq=8, range_m=2.0\n[INFO] [1790625455.203780749] [distance_bridge_demo]: seq=8, range_m=2.0\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "daemon",
+        "stop"
+      ],
+      "returncode": 0,
+      "output": "The daemon has been stopped\n"
+    }
+  ]
+}

@@ -1,217 +1,239 @@
-\subsubsection{为何需要「多机通信」}
+% 短源码按逻辑边界整体排版；环境只在本章使用。
+\newenvironment{commcode}{\par\medskip\noindent\begin{minipage}{\linewidth}}{\end{minipage}\par\smallskip}
+\subsubsection{为何需要“多机通信”}
+上一章我们已经把节点和话题接起来了。如果两边都使用 ROS2，当然可以继续用它通信。不过你很快会遇到另一种情况：电控板只给你一个串口，或者记录程序是独立的 Python 进程，没有 ROS 接口。总不能要求对方为了传几个数，先把你的整个环境装一遍吧。这时候我们需要约定更底层的字节格式，再用桥接进程把外部数据接到自己的模块中。
 
-ROS2 话题适合同一机器人内多个节点协作。雷达站、反制机、电控裁判链路等场景里，进程往往分布在\textbf{不同机器或不同进程模型}上：
-有的用 Python 独立进程，有的只提供 TCP/串口，并不暴露完整 ROS 图。
-此时需要在话题之外掌握更底层的进程间 / 机间通信约定。
-
-本章讨论三类常见手段：\textbf{本机 TCP}、\textbf{串口帧协议}、\textbf{可靠投递与故障隔离}。
-赛场完整帧定义以当年裁判系统协议与队内仓库为准；此处讲模式与工程要点。
-
-\begin{example}
-已有一个只输出串口帧的电控板和一个 ROS2 视觉进程。可由桥接进程独占串口，将有效帧转换为 ROS2 消息；视觉模块只订阅消息。设备只有一个读取者，因此不必争抢字节流。
+本章先在自己的电脑上跑通 TCP（Transmission Control Protocol，传输控制协议），再处理串口字节流、最新值与断开重连。程序分布到两台机器后，组帧和资源归属的原则仍然适用，不过地址、访问控制和网络故障还要在真实环境中检查。赛场帧定义以当年裁判系统协议和队内接口文档为准；这里的教学帧只是为了让你看清机制。
+\begin{example}[先画出谁负责读取设备]
+假设电控板只输出串口帧，视觉程序使用 ROS2。我们可以让一个桥接进程独占串口：先收齐并校验一帧，换算单位，再发布 ROS 消息。视觉模块订阅完整消息，记录模块也订阅它，二者不用去争抢串口字节。这是后面解析与桥接示例共同使用的边界。
 \end{example}
-
-\begin{exercise}
-相机进程与非 ROS 的 Python 记录进程需要共享检测结果。画出两个进程和连接，并指定协议边界。
+\begin{exercise}\label{ex:v2-comm-boundary}
+相机处理进程和非 ROS 的 Python 记录进程需要共享检测结果。画出连接，选定服务端和客户端，写出至少四项协议约定；解释为什么不能让两个进程各读一半设备字节。
 \end{exercise}
 
 \subsubsection{通信拓扑与角色}
+首先分清服务端（Server）和客户端（Client）。服务端绑定本机地址并监听端口，客户端主动连接它；连接建立以后，双方都可以收发，并不是“服务端只能发、客户端只能收”。无线电进程、地面视觉进程谁来监听，应由部署约定决定，名字本身不能替你决定角色。
 
-先分清谁听、谁连、谁拥有资源：
-
-\begin{itemize}
-    \item \textbf{Server / Client}：一方监听端口，另一方主动连接。雷达无线电侧常做 TCP Server，地面视觉做 Client 并自动重连。
-    \item \textbf{唯一所有者}：同一物理设备（串口、SDR）同一时刻只应被一个进程打开；多进程抢占会导致错帧或设备占用失败。
-    \item \textbf{单向与双向}：坐标/密钥可单向推送；控制指令（阵营、干扰等级）需反向通道。
-\end{itemize}
-
-示意：
-\begin{tbash}
-[无线电进程] --TCP 127.0.0.1:port--> [地面视觉进程] --串口--> [裁判系统]
-[地面视觉] --另一串口--> [反制机进程]
-\end{tbash}
-本机环回地址避免把比赛数据接口裸露到局域网；跨机部署须另行考虑鉴权与防火墙。
-
-\begin{example}
-运行单进程环回实验：只监听 127.0.0.1，操作系统分配空闲端口，客户端连接后应打印 ping。
-\begin{tpython}
-import socket
-with socket.socket() as server:
-    server.bind(("127.0.0.1", 0))
-    server.listen(1)
-    with socket.create_connection(server.getsockname(), timeout=2) as client:
-        conn, addr = server.accept()
-        with conn:
-            conn.settimeout(2)
-            client.sendall(b"ping")
-            data = bytearray()
-            while len(data) < 4:
-                part = conn.recv(4 - len(data))
-                if not part: raise EOFError("连接提前关闭")
-                data.extend(part)
-            print(data.decode())
-\end{tpython}
+同一台机器上的两个进程可以用环回地址 \nolinkurl{127.0.0.1}。换成两台机器时，客户端要连接服务端在实验网络里的地址，服务端也要绑定自己的可达地址。别在第二台机器继续填 127.0.0.1，它只会回到第二台机器自己。跨机 ROS 的 DDS 发现则是上一章的另一套机制，不会因为这里建立了 TCP 连接就自动配置好。
+\begin{note}
+串口、SDR 等设备字节流由一个明确的所有者读取，再分发完整数据。两个互不协调的读取者可能各拿到部分字节，双方都解析失败。连接可按约定单向或双向使用；裁判、云台和计数等不同业务需要按队内接口隔离，不能随手合在一根线上。
+\end{note}
+\begin{example}[先用四个字节认识连接]
+下面只用 Python 标准库，在同一个进程里依次扮演两端。端口填 0，让操作系统选择空闲端口；客户端连接成功后，accept 取出已经建立的连接。服务端通过这个新对象收数据，不是通过监听对象收数据。
+\begin{commcode}
+\lstinputlisting[language=Python,frame=single,numbers=left,caption={ping\_demo.py：累计收到四字节}]{examples/communication/stream-link-demo/ping_demo.py}
+\end{commcode}
+进入本卷 \path{examples/communication/stream-link-demo}，运行 \texttt{python3 ping\_demo.py}，应得到 ping。recv(n) 的 n 是最多接收多少字节，不保证一次收满；sendall 负责发送完本次字节，仍不代表对方应用已经处理。这里累计到四字节，提前关闭就报告错误，不能拿半个结果继续用。
 \end{example}
-
-\begin{exercise}
-指出 bind、listen、connect、accept 各属于哪个角色；解释为何示例循环接收。
+\begin{exercise}\label{ex:v2-comm-roles}
+指出 bind、listen、connect、accept 各属于哪个角色。把发送内容改成 pong，核对结果；如果接收端仍等四字节，而发送端只发 po 后关闭发送方向，会发生什么？
 \end{exercise}
 
-\subsubsection{本机 TCP：粘包、拆包与最新值优先}
+\subsubsection{本机 TCP：先把字节恢复成帧}
+你可能会想：发送一次、接收一次，不就正好是一条消息吗？可惜 TCP 提供的是有序字节流，没有这个约定。两帧可能一起到达，也可能一帧分几次到达，通常称为粘包、拆包。我们需要保存没收完的部分，等字段齐了再交给后面的模块。
 
-TCP 是字节流，没有「一帧消息」边界。接收端必须自行组帧：缓存字节，按协议切出完整帧，处理粘包（多帧连在一起）与拆包（一帧分多次到达）。
+这次用一字节长度前缀：\texttt{length | payload}。length 只允许 1--16，表示后面载荷有几个字节，不包括它自己。例如 AB 编码为十六进制 \texttt{02 41 42}。这个协议没有帧头；遇到非法长度时无法可靠猜测下一帧在哪里，所以结束本次连接，新连接使用新的解析器。后面有帧头和循环冗余校验（CRC，Cyclic Redundancy Check）的协议才会演示重同步。
 
-对雷达类高频状态，队列策略比「无限 FIFO」更重要：
-\begin{itemize}
-    \item \textbf{Latest-value}：同类命令只保留最新一条（如最新坐标；需要确认的密钥切换应另用可靠事件通道），避免旧数据积压导致越发越旧。
-    \item \textbf{优先级}：密钥、坐标通常高于次要状态信息。
-    \item \textbf{连接代次（generation）}：每次新连接递增代数；旧连接线程禁止关闭或污染新 socket，防止重连竞态。
-\end{itemize}
+完整小工程就在刚才的 \path{examples/communication/stream-link-demo}。解析与状态分别维护，其他文件负责安排输入并展示结果；不需要你另找数据文件。
+\begin{commcode}
+\begin{lstlisting}[language={}]
+stream-link-demo/
+  README.md
+  framing.py       # 长度前缀与 CRC 解析器
+  state.py         # 连接归属、有界最新值槽
+  ping_demo.py      # 四字节回环
+  parser_demo.py    # 固定分片与坏帧
+  tcp_demo.py       # 两终端 TCP 回显
+  latest_demo.py    # 覆盖、优先级、迟到清理
+  event_demo.py     # 确认丢失与有限重试
+  serial_demo.py    # pySerial 与 Linux 伪终端
+  bridge_demo.py    # 单位换算与 ROS 发布
+  fault_demo.py     # 两条模拟链路各自推进
+\end{lstlisting}
+\end{commcode}
+\begin{example}[先把拆帧问题单独跑通]
+首先写 framing.py 的前半部分。feed 每次接收一个字节块，返回这次收齐的载荷列表；不够一帧时保留 buffer，下次接着拼。下面与后面的 CRC 部分合起来就是完整文件。
+\begin{commcode}
+\lstinputlisting[language=Python,frame=single,numbers=left,lastline=29,caption={framing.py：长度前缀解析}]{examples/communication/stream-link-demo/framing.py}
+\end{commcode}
+注意先检查长度，再判断缓存是否够用，不能按错误长度无限等待。实际读取也限制每次输入大小；本章正常小块调用后残留最多 16 字节，不是鼓励你一次塞进无限大的数据。
 
-示意性伪代码：
-\begin{tcode}
-// 按 cmd_id 覆盖写槽位，而不是 push 到无界队列
-void enqueue(uint16_t cmd, bytes payload) {
-    slots[cmd] = payload; // 覆盖
-}
-bytes take_highest_priority() {
-    for (cmd : priority_order)
-        if (slots[cmd]) return pop(slots[cmd]);
-    return {};
-}
-\end{tcode}
-
-发送与接收均应校验连接代次；断开时清空待发槽与缓存，避免把上局数据发给新客户端。
-
-\begin{example}
-教学协议使用一字节长度前缀。输入同时包含半包和粘包，应恢复 AB 与 XYZ 两帧；长度上限为 16。
-\begin{tpython}
-buffer = bytearray()
-frames = []
-for chunk in [b"\x02A", b"B\x03X", b"YZ"]:
-    buffer.extend(chunk)
-    while buffer:
-        n = buffer[0]
-        if not 1 <= n <= 16: raise ValueError("非法长度")
-        if len(buffer) < n + 1: break
-        frames.append(bytes(buffer[1:n+1]))
-        del buffer[:n+1]
-assert frames == [b"AB", b"XYZ"]
-slots = {}
-for value in [10, 20, 30]: slots["position"] = value
-assert slots.pop("position") == 30
-print(frames)
-\end{tpython}
+固定输入的入口是 \texttt{parser\_demo}.py。后半段会用到稍后讲的 CRCParser，项目文件已齐全时可以直接运行。
+\begin{commcode}
+\lstinputlisting[language=Python,frame=single,numbers=left,caption={parser\_demo.py：稳定复现指定分片}]{examples/communication/stream-link-demo/parser_demo.py}
+\end{commcode}
+执行 \texttt{python3 parser\_demo.py}，应得到 AB、XYZ 两个完整载荷，以及 CRC 实验的有效数据 7、坏 CRC 数 1。固定分片让这次实验可复现；真实 TCP 本次恰好怎样分片，还要看实际读取，不能用一次抓包替代协议规则。
 \end{example}
-
-\begin{exercise}
-把第一帧拆成三个输入片段，确认输出不变；再说明购买指令这类必须逐次执行的事件为何不适合覆盖槽。
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.86\textwidth]{images/comm_stream_revised.pdf}
+\caption{字节块与消息边界：第二次输入既补完 AB，又带来下一帧开头}
+\label{fig:comm-stream}
+\end{figure}
+图\ref{fig:comm-stream}中，第一次留下半帧，第二次才输出 AB，还留下下一帧开头；第三次继续拼出 XYZ。输出时机来自解析器检查，不来自 recv 调用次数。
+\begin{exercise}\label{ex:v2-comm-fragments}
+在项目副本中，把 \texttt{parser\_demo} 的长度流改成 \texttt{02}、\texttt{41}、\texttt{42}、\texttt{03 58}、\texttt{59 5A} 五次输入，确认载荷不变。再输入长度 0，记录结果，说明为何此协议不能靠跳过一个字节“继续试试看”。
 \end{exercise}
-
 \begin{conclusion}
-\begin{itemize}
-\item TCP 保证有序字节流，不承诺一次 recv 对应一次 send。
-\item 状态可用最新值覆盖，事件需要确认、序号与去重策略。
-\item 重连代次隔离旧回调；清理前先核对归属，不能关闭新连接。
-\end{itemize}
+TCP 保证的是字节有序到达，不是调用一一配对。解析器保存半帧，只交付完整载荷；EOF 时丢弃残留，下一连接另建解析器。长度错误怎样处理由协议决定，有帧头和校验的重同步规则不能直接套给纯长度前缀。
+\end{conclusion}
+
+\subsubsection{最新值、事件与连接代次}
+帧收齐了，我们还要决定它应该排多久的队。假设每秒收到很多位置，发送端一时忙不过来。如果全塞进无限队列，最后虽然每条都发了，却一直在发送几秒前的位置。对这种状态，我们通常用最新值（Latest-value）覆盖旧值；对于必须执行两次的购买指令，则不能覆盖成一次。
+
+每次换连接，我们再递增一个连接代次（Generation），把本轮连接、数据与编号对应起来。旧线程迟到的清理必须核对编号，不能顺手把“当前连接”关掉。你可以把它想成两次实验分别贴了标签：清理第一轮，只能处理第一轮留下的东西。
+\begin{example}[用完整状态类代替槽位伪代码]
+保存 state.py。这里只允许 position 与 status 两类状态，槽位总数最多两个；优先级来自 priority 的顺序。connect 和 put 如下：
+\begin{commcode}
+\lstinputlisting[language=Python,frame=single,numbers=left,lastline=34,caption={state.py：连接更换与最新值写入}]{examples/communication/stream-link-demo/state.py}
+\end{commcode}
+connect 在锁中替换归属、清空旧状态，再关闭刚才保存的旧对象。关闭时不能重新读取当前 connection，否则这段时间若又换过连接，就可能关闭新对象。put 同样在锁中检查并写入；只在前面检查一次编号，然后不加保护地修改槽位，仍然可能出错。
+
+后半部分按优先级消费，过期记录丢弃并计数。\texttt{max\_age} 与 at、now 必须使用相同时间单位。真实程序用单调时钟记录接收年龄，外部采集时间还需单独约定时钟。
+\begin{commcode}
+\lstinputlisting[language=Python,frame=single,numbers=left,firstline=35,firstnumber=35,caption={state.py：时效检查与按归属清理}]{examples/communication/stream-link-demo/state.py}
+\end{commcode}
+我们用 socketpair 创建互相连接的本机 socket 对，既能操作真实句柄，又不用分配端口。保存并运行下面的 \texttt{latest\_demo}.py：
+\begin{commcode}
+\lstinputlisting[language=Python,frame=single,numbers=left,caption={latest\_demo.py：覆盖、优先级与旧代次拒收}]{examples/communication/stream-link-demo/latest_demo.py}
+\end{commcode}
+应先消费最新位置 30，状态仍留在另一个槽里；更换连接后旧槽清空。迟到代次 1 无法写入 99，也无法清理代次 2，新连接仍发送 ok，并消费位置 42。这里按固定顺序安排迟到清理；真实多线程需要像 state.py 那样保护完整更新。
+\end{example}
+\begin{exercise}\label{ex:v2-comm-latest}
+把 priority 改为 status、position，调整演示中的期望，记录两次消费的顺序。给 disconnect 调用加日志，记录携带代次、当前代次与返回结果；确认旧清理不影响新位置 42。随后运行后面的两轮 TCP，核对迟到清理与回显。
+\end{exercise}
+
+\begin{example}[确认丢了，不能直接再买一次]
+如果购买指令已经执行，只是确认消息丢了，重试会不会再购买一次？这需要事件序号和接收端去重。下面只安排两个有限事件，有界队列满时明确拒绝第三个，失败交给上层处理；同号重试只回确认，不重复执行。
+\begin{commcode}
+\lstinputlisting[language=Python,frame=single,numbers=left,basicstyle=\ttfamily\footnotesize,caption={event\_demo.py：有限事件的确认与重试}]{examples/communication/stream-link-demo/event_demo.py}
+\end{commcode}
+运行 \texttt{python3 event\_demo.py}，第 1 个事件第一次确认被模拟丢弃，发送两次、实际执行一次；第 2 个事件也执行一次。三次都没确认时报告失败，不能在日志里写“发送成功”就当作对方完成了。
+\begin{note}
+这个去重记录只覆盖本次两个事件，不保证程序重启后的重复请求仍被识别。实际通道还要约定序号作用域、确认语义、记录保留期、持久化与失败处理；TCP 的可靠字节流本身不承诺业务动作“恰好执行一次”。本例不提供生产级可靠投递服务。
+\end{note}
+\end{example}
+\begin{exercise}\label{ex:v2-comm-events}
+在副本中把第 1 个事件每次确认都丢弃，检查三次重试后的结果。区分“实际执行一次”“发送端确认成功”与“发送端报告失败”，说明为什么不能无限重试或默默丢掉任务。
+\end{exercise}
+
+\paragraph*{把状态类接入真实 TCP}
+现在把长度解析器和归属类用在两个终端里。服务端每次连接创建新的解析器，再对完整载荷回显；第二次连接建立后，故意调用上一代清理，检查新连接是否继续工作。
+\begin{example}[断开以后，再连接一次]
+下面三段合起来就是 \texttt{tcp\_demo}.py。第一段是导入和服务端；每次最多读两个字节，促使示例经过多次组帧，但不假设每次恰好收到两个字节。
+\begin{commcode}
+\lstinputlisting[language=Python,frame=single,numbers=left,basicstyle=\ttfamily\footnotesize,lastline=39,caption={tcp\_demo.py：服务端}]{examples/communication/stream-link-demo/tcp_demo.py}
+\end{commcode}
+连接对象有三秒读取超时，监听最多等十五秒，不会永远挂在那里。这里按两轮手动连接演示，不含后台自动重连。实际服务通常继续监听；客户端自动重连要有停止条件与退避，例如从 0.2 秒逐步增加到 2 秒，不能断线后忙循环刷屏。
+
+客户端一次发出两帧，然后只关闭发送方向，继续接收回显。shutdown 不等于立即关闭整个连接；服务端读到 EOF 后退出本轮，客户端仍能读完先前回显。
+\begin{commcode}
+\lstinputlisting[language=Python,frame=single,numbers=left,firstline=40,firstnumber=40,lastline=53,caption={tcp\_demo.py：客户端}]{examples/communication/stream-link-demo/tcp_demo.py}
+\end{commcode}
+最后按参数选择角色。默认环回地址、端口 8765、两轮；改端口时两端一起改。
+\begin{commcode}
+\lstinputlisting[language=Python,frame=single,numbers=left,firstline=54,firstnumber=54,caption={tcp\_demo.py：命令入口}]{examples/communication/stream-link-demo/tcp_demo.py}
+\end{commcode}
+两个终端都进入项目目录。终端一先启动服务端；看见“监听”后，终端二在十五秒内依次运行两次客户端：
+\begin{commcode}
+\begin{tbash}
+# 终端一
+python3 tcp_demo.py server --port 8765 --rounds 2
+# 终端二，分别执行
+python3 tcp_demo.py client --port 8765
+python3 tcp_demo.py client --port 8765
+\end{tbash}
+\end{commcode}
+两次都应得到 AB、XYZ，服务端第二轮打印“迟到清理 1 实际清理: False”，然后仍回显代次 2 数据。两轮结束服务端也退出。地址占用就换空闲端口；超时先确认服务端是否还在等待，别让上一轮进程留在那里影响判断。
+
+通用形式是 \texttt{python3 tcp\_demo.py 角色 [--host 地址] [--port 端口] [--rounds 轮数]}。两台教学机上，两端都把 host 换成服务端在实验网络中的 IP：服务端绑定自己的地址，客户端连接这个地址。提前确认可达性、防火墙与访问范围，运行两次并核对结果。本例没有鉴权，不在公网部署；物理跨机连接要另行实测，不能用本机成功冒充。
+\end{example}
+\begin{conclusion}
+状态可以覆盖，事件要确认和去重；二者不能用同一条无限队列草草解决。每轮持有自己的 socket、解析器和代次，旧数据与回调不得进入新轮。实际异步 I/O 的结果和清理也要核对归属，给状态类加锁不等于所有外部操作都自动安全。
 \end{conclusion}
 
 \subsubsection{串口帧：定界、CRC 与重同步}
+TCP 跑通后，我们再看串口。它也给你一串字节，链路参数、设备路径和物理接线还要核对。实际裁判帧可能包含 \texttt{SOF | length | seq | CRC8 | cmd\_id | payload | CRC16}，长度、字节序与校验范围按协议文档来，不能拿这行示意直接写进实车。
 
-裁判系统、云台板、反制计数链路多用串口。典型二进制帧结构（示意，字段以官方协议为准）：
-\begin{center}
-\texttt{SOF | length | seq | CRC8 | cmd\_id | payload | CRC16}
-\end{center}
+这里仍用小教学帧：\texttt{AA | value | CRC16}，共四字节。value 为 0--255，CRC 仅覆盖它；采用 CRC-16/XMODEM，多项式 0x1021、初值 0、无反射、无最终异或，两字节结果按大端发送。CRC（Cyclic Redundancy Check，循环冗余校验）不通过时，从候选帧头下一字节重新搜索 AA，不把错误载荷交给后面的模块。
+\begin{example}[先拒收坏帧，再接上真实读取接口]
+framing.py 后半部分如下，导入在前半部分，两段合起来才能运行。
+\begin{commcode}
+\lstinputlisting[language=Python,frame=single,numbers=left,firstline=30,firstnumber=30,caption={framing.py：CRC 编码与重同步}]{examples/communication/stream-link-demo/framing.py}
+\end{commcode}
+\texttt{parser\_demo} 已演示噪声、坏 CRC 与有效帧，只有 7 被输出。单独找 AA 还不够，因为载荷里也可以有它；完整长度和校验才决定候选是否有效。CRCParser 正常小块输入后的残留最多三字节，噪声与坏校验分别计数。
 
-工程要点：
-\begin{itemize}
-    \item 用 \texttt{/dev/serial/by-id/...} 固定设备路径，避免插拔后 \texttt{ttyUSB} 编号漂移；
-    \item 波特率、校验位与对端严格一致；
-    \item 坏 CRC 时丢弃并在字节流中重新搜索 SOF，实现\textbf{重同步}；
-    \item 不同业务使用\textbf{独立物理串口}（裁判 / 云台 / 计数），避免一根线故障拖垮全站。
-\end{itemize}
-
-短控制包亦可更简，例如双字节定界 + 单字节命令（阵营、等级），同样需要粘包处理与非法字节跳过。
-
-\begin{example}
-以下是教学协议：AA 帧头、1 字节数据、2 字节大端 CRC。采用 CRC-16/XMODEM（多项式 0x1021，初值 0，无反射、无异或输出）。不是裁判帧定义。坏帧之后仍应解析出 7。
-\begin{tpython}
-import binascii
-def encode(v):
-    payload = bytes([v])
-    crc = binascii.crc_hqx(payload, 0)
-    return b"\xaa" + payload + crc.to_bytes(2, "big")
-assert binascii.crc_hqx(b"123456789",0) == 0x31c3
-bad = bytearray(encode(3)); bad[-1] ^= 1
-buf = bytearray(b"noise" + bad + encode(7))
-values = []
-while len(buf) >= 4:
-    if buf[0] != 0xaa:
-        del buf[0]; continue
-    crc = binascii.crc_hqx(bytes(buf[1:2]),0)
-    if crc != int.from_bytes(buf[2:4],"big"):
-        del buf[0]; continue
-    values.append(buf[1]); del buf[:4]
-assert values == [7]
-print(values)
-\end{tpython}
+接下来用 Linux 伪终端（Pseudo-terminal，PTY）代替硬件字节来源，用真实 pySerial 读取，让你暂时不用先找板子。Ubuntu 缺依赖时安装 \texttt{sudo apt install python3-serial}，再运行下面的完整 \texttt{serial\_demo}.py：
+\begin{commcode}
+\lstinputlisting[language=Python,frame=single,numbers=left,basicstyle=\ttfamily\footnotesize,caption={serial\_demo.py：伪终端与真实 pySerial}]{examples/communication/stream-link-demo/serial_demo.py}
+\end{commcode}
+执行 \texttt{python3 serial\_demo.py}，应输出有效数据 [7]、坏 CRC 数 1，并在关闭伪终端对端后捕获读取异常。read(3) 也可能因超时返回不足三字节，空结果在这里表示本次等待没有数据，不直接等于 TCP 的 EOF。
+\begin{note}
+PTY 不验证电平、物理波特率、USB 拔插或板端协议。接真实设备前按卷一核对稳定路径、权限、8N1 与双方电平，由明确的进程拥有设备；推荐 \path{/dev/serial/by-id/...}。不要把本章 AA 帧发到裁判系统或真实控制板。设备拔出异常和重试还要在硬件上验证。
+\end{note}
 \end{example}
-
-\begin{exercise}
-把有效帧的数据字节改坏，确认不会被输出。解释重同步为何从下一个字节重新搜索。
+\begin{exercise}\label{ex:v2-comm-crc}
+在 \texttt{parser\_demo} 副本中，只把 \texttt{encode\_crc}(7) 的载荷字节改坏，保留原 CRC，确认它不再输出；后面再加有效的 9，检查能否恢复。解释为什么不能改完载荷又重算 CRC 来模拟坏帧。
 \end{exercise}
 
-\subsubsection{与 ROS2 的关系}
-
-\begin{itemize}
-    \item 机内模块多、已有生态：优先 ROS2 话题 / 服务 / Action，配合 \texttt{qos}。
-    \item 对接非 ROS 进程或嵌入式板：TCP/串口桥（Bridge）把外部帧转为内部消息，或反之。
-    \item 调试：先单进程回环（模拟器发固定帧），再上实机；用 Wireshark / 串口抓包核对时序。
-\end{itemize}
-
-ROS2 的 DDS 发现与跨机组网是另一套问题（域标识、防火墙、\texttt{ROS\_DOMAIN\_ID}）；雷达站常见部署是「同机多进程 + 串口出站」，与全场 ROS 多机发现不同。
-
-\begin{example}
-外部帧为 (seq=8, yaw=250)，协议规定 yaw 的单位为毫弧度。桥接后 ROS 消息 yaw 应为 0.250 rad，并记录采集时间及坐标系；不能把整数 250 原样解释为弧度。
+\subsubsection{桥接到 ROS2：先统一字段含义}
+字节能够收到了，接下来别急着把数字原样转发。外部 1250 mm 与内部 1.25 m 表达的是同一件事，少做一次换算，后面的模块就会以为目标在一公里外。建议在桥接边界统一单位、字段类型与坐标系，别让每个订阅者各猜一遍。
+\begin{example}[把毫米数据发布为米]
+\texttt{bridge\_demo} 的外部载荷约定为两个大端 uint16：序号和距离毫米值。先收齐四字节载荷，再用 struct.unpack 的 \texttt{>HH} 拆出字段，除以 1000；普通模式打印结果，加 --ros 后用真实 rclpy 发布 Float64。
+\begin{commcode}
+\lstinputlisting[language=Python,frame=single,numbers=left,lastline=14,caption={bridge\_demo.py：字段解码与单位换算}]{examples/communication/stream-link-demo/bridge_demo.py}
+\end{commcode}
+ROS 分支在系统环境加载后才导入 rclpy，创建节点与发布者；定时器每次调用上面的转换函数，把结果发到 range\_m。句柄保持存活，退出时取消定时器并销毁节点。
+\begin{commcode}
+\lstinputlisting[language=Python,frame=single,numbers=left,firstline=15,firstnumber=15,lastline=36,caption={bridge\_demo.py：ROS 节点与收尾}]{examples/communication/stream-link-demo/bridge_demo.py}
+\end{commcode}
+最后由参数决定是打印转换结果，还是进入 ROS 执行器；三段合起来就是完整文件。
+\begin{commcode}
+\lstinputlisting[language=Python,frame=single,numbers=left,firstline=37,firstnumber=37,caption={bridge\_demo.py：命令入口}]{examples/communication/stream-link-demo/bridge_demo.py}
+\end{commcode}
+先执行 \texttt{python3 bridge\_demo.py}，应得到 (8, 1.25)。再在有 ROS2 的 Ubuntu 终端运行下面命令；Distrobox 先进入 ubuntu2404，两终端都加载同一发行版，Humble 将 jazzy 换成 humble。别用主机缺少 rclpy 的解释器运行容器中的 ROS 代码。
+\begin{commcode}
+\begin{tbash}
+# 终端一，进入项目目录后
+source /opt/ros/jazzy/setup.bash
+python3 bridge_demo.py --ros
+# 终端二，同域与相同发现范围
+source /opt/ros/jazzy/setup.bash
+ros2 topic echo /range_m std_msgs/msg/Float64 --once
+\end{tbash}
+\end{commcode}
+应收到 data: 1.25，最后 Ctrl+C 结束节点。这里每半秒重复固定输入，不是传感器正在测量。Float64 没有单位、源序号、时间戳和坐标系字段；真实接口按第一章方法补齐约定。外部没给采集时间时，接收时间只能叫接收时间，不能偷偷改名当作源时间。
 \end{example}
-
-\begin{exercise}
-外部距离字段为 1250 mm，而内部接口使用 m。写出转换结果，并指出应在哪个模块统一单位。
+\begin{exercise}\label{ex:v2-comm-units}
+把输入从 1250 mm 改为 2000 mm，先运行普通模式，再用 ROS 模式核对输出。说明单位换算放在哪里；若对端还有位置坐标，接口还应补充哪些约定？
 \end{exercise}
 
-\subsubsection{故障隔离清单}
-
+\subsubsection{故障隔离：一条断了，另一条继续}
+赛场上往往同时有 TCP、裁判串口、云台串口等链路。如果大家共用一个阻塞循环，一条迟迟没返回，其他链路可能一起停下。我们需要分别维护状态、等待上限与失败路径，再按时效决定用哪个源。
 \begin{center}
 \begin{tabular}{lp{0.65\textwidth}}
-\toprule[1.5pt]
-故障 & 期望行为 \\
-\midrule[1pt]
-对端未启动 & 采集继续，发送侧只保留最新状态 \\
-TCP 断开 & 清理旧代次，客户端退避重连 \\
-串口拔出 & 有限频率重试，其它链路继续运行 \\
-数据过期 & 丢弃陈旧源，按约定回退次优源 \\
-\bottomrule[1.5pt]
+\toprule
+故障 & 本章机制与实机处理方向 \\
+\midrule
+对端未启动 & 有限等待；状态覆盖旧值，不堆无限发送队列 \\
+TCP 断开 & 清理本代次和半帧；新连接另建解析器，自动重连需退避 \\
+串口失效 & 只处理该设备；有限频率重试，其他链路继续 \\
+数据过期 & 超过阈值丢弃并计数；备用源足够新鲜时才回退 \\
+\bottomrule
 \end{tabular}
 \end{center}
-
-\begin{example}
-用连接代次模拟旧线程迟到：旧代次不能清空新连接的最新值。
-\begin{tpython}
-current_generation = 2
-slots = {"position": 42}
-def disconnect(generation):
-    if generation != current_generation: return
-    slots.clear()
-disconnect(1)
-assert slots == {"position": 42}
-disconnect(2)
-assert not slots
-print("代次检查通过")
-\end{tpython}
+\begin{example}[暂停 A，看看 B 有没有跟着停]
+下面用两套 Session，按逻辑秒数安排输入，不依赖电脑这次调度快慢。A 在第 2--4 秒暂停，B 每秒继续消费；A 的旧位置只在第 4 秒尝试消费，超过两秒阈值而丢弃。第 5 秒 A 恢复，再消费新值。
+\begin{commcode}
+\lstinputlisting[language=Python,frame=single,numbers=left,caption={fault\_demo.py：独立状态与过期回退}]{examples/communication/stream-link-demo/fault_demo.py}
+\end{commcode}
+运行 \texttt{python3 fault\_demo.py}，B 应连续输出 100--105，A 槽数不超过 1；第 4 秒过期丢弃 1 次，第 5 秒得到 15。这里只演示状态，不是物理链路吞吐测试。实际系统还需要独立 I/O 调度或有限等待；如果读取永远不返回，两个字典也救不了其他链路。
 \end{example}
-
-\begin{exercise}
-给 disconnect 加调用记录，说明代次为 1 与 2 时应分别记录什么。真实多线程程序还需要什么同步措施？
+\begin{exercise}\label{ex:v2-comm-isolation}
+把 A 的 \texttt{max\_age} 从 2 改为 4，说明第 4 秒旧值是否还能消费，再运行验证。恢复阈值，保持 B 六次消费不变，记录 A 槽数与过期计数，说明判断边界用大于还是大于等于。
 \end{exercise}
+\begin{conclusion}
+故障隔离既包括数据结构，也包括调度：每条链路有自己的代次、缓存和状态，读取与重连要有有限等待。备用源也得新鲜，不能把更旧的数据当救命稻草。先用噪声、坏帧、半帧与暂停输入检查逻辑，再验证真实接口。
+\end{conclusion}
 
-延伸阅读：队内雷达开源架构说明（TCP / 裁判帧 / 多串口隔离），以及当年 RoboMaster 裁判系统通信协议文档。
+Python socket 文档说明连接、收发与超时：\url{https://docs.python.org/3/library/socket.html}；pySerial 文档说明 read、timeout 和设备异常：\url{https://pyserial.readthedocs.io/en/latest/pyserial_api.html}。赛场具体字段与频点按队内保存的当年官方文档核对，本章不代写未知版本的真实帧。

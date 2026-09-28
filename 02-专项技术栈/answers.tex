@@ -214,82 +214,100 @@ ros2 run training_tools heartbeat
 \addcontentsline{toc}{section}{第二章题解：多机通信方法}
 \subsubsection*{随堂练习}
 
-\paragraph*{随堂练习 2.1}
+\paragraph*{随堂练习 \ref{ex:v2-comm-boundary}}
 \begin{solution}
-可让相机处理进程作为 TCP Server，记录进程作为 Client，连接为“相机处理进程 → 本机 TCP → Python 记录进程”。同机使用环回地址；跨机器时使用明确的主机地址与访问控制。协议至少约定长度或定界方式、序号、采集时间、字段类型、单位与编码。检测结果可采用“长度前缀 + JSON 载荷”，接收方收齐载荷再解析，不能把一次 recv 当作一条记录。
+可让相机处理进程作为 Server、记录进程作为 Client，使用本机 TCP；协议约定长度、字段类型/编码、序号、时间、单位与坐标系。跨机器还约定地址与访问控制。设备由一个明确进程读取后分发完整帧，否则两个读取者可能分别拿走部分字节，双方都无法组帧。
 \end{solution}
 
-\paragraph*{随堂练习 2.2}
+\paragraph*{随堂练习 \ref{ex:v2-comm-roles}}
 \begin{solution}
-Server 执行 bind 绑定本地地址、listen 开始监听、accept 取出已建立的连接；Client 执行 connect 主动建立连接。双方随后都可以收发数据。TCP 是字节流，即使发送端一次发送 4 字节，接收端一次 recv 也可能只得到部分数据，所以示例循环累计到 4 字节，并检测提前关闭。
-\end{solution}
-
-\paragraph*{随堂练习 2.3}
-\begin{solution}
-将输入片段改为以下序列，其余解析逻辑不变：
+Server 执行 bind、listen、accept，Client 执行 connect；随后双方都能收发。把 ping 改成 pong 仍输出 pong。改为两字节后还要关闭发送方向，否则只是暂时没收满，会等待到超时：
+在 Python 源码中修改为下面两行：
 \begin{tpython}
-chunks = [b"\x02", b"A", b"B", b"\x03X", b"YZ"]
+client.sendall(b"po")
+client.shutdown(socket.SHUT_WR)
 \end{tpython}
-将正文循环的输入替换为 chunks，输出仍应为 \texttt{[b"AB", b"XYZ"]}。购买指令属于需要逐次处理的事件：连续三次购买不能覆盖成一次。应使用有界队列，明确确认、重试与序号去重，避免丢事件或重复执行。
+接收累计到两字节后，下一次 recv 得到空字节，抛出“连接提前关闭”；不能把 po 当完整四字节结果。
 \end{solution}
 
-\paragraph*{随堂练习 2.4}
+\paragraph*{随堂练习 \ref{ex:v2-comm-fragments}}
 \begin{solution}
-在原示例中生成 \texttt{encode(7)} 后，只修改其数据字节、不重新计算 CRC：
+把 \texttt{parser\_demo} 中的输入列表替换为：
 \begin{tpython}
-damaged = bytearray(encode(7))
+[b"\x02", b"A", b"B", b"\x03X", b"YZ"]
+\end{tpython}
+输出仍为 AB、XYZ。向 LengthParser.feed 输入零长度会抛出 ValueError 并清空缓存，TCP 服务端据此结束本连接。协议没有可靠帧头，后面某个载荷字节也可能像合法长度，跳过一个字节再猜会误组帧。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-comm-latest}}
+\begin{solution}
+priority 改为 status、position 后，第一次 take 得到 status/ready，第二次得到 position/30，槽数随后为零；调整原来只检查位置的断言和输出。代次 1 的迟到清理应记录当前代次 2、返回 False，位置 42 保留；代次 2 清理返回 True，清空自身状态。实际共享状态的检查与修改要在同一保护范围内，日志的状态读取也应同步。运行后面的两轮 TCP，第二轮同样拒绝代次 1 清理并继续回显。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-comm-events}}
+\begin{solution}
+把丢确认条件改为 \texttt{event[0] == 1}，不再限定 attempt 为 1。第 1 事件发送三次，实际只执行一次，每次确认都丢失；最终 RuntimeError 报告投递失败，程序不会继续处理第 2 事件。发送端失败并不证明接收端没执行，应通过约定的查询/确认处理不确定结果。原示例只丢第一次时，第 1 事件第二次得到确认，第 2 事件也完成。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-comm-crc}}
+\begin{solution}
+不要重算损坏帧的 CRC。在 \texttt{parser\_demo} 构建 stream 处改为：
+\begin{tpython}
+damaged = bytearray(encode_crc(7))
 damaged[1] ^= 1
-buf = bytearray(b"noise" + bad + damaged)
+stream = b"noise" + bad + damaged + encode_crc(9)
 \end{tpython}
-按原解析循环运行，values 应为空；原有的 \texttt{assert values == [7]} 应改成 \texttt{assert values == []}。CRC 不通过时，候选帧头也可能是假帧头；从下一字节重新查找，可以避免按错误长度跳过真正的帧头。
+值列表应为 [9]，坏 CRC 计数为 2，最后 buffer 为空；同步修改原本期待 [7] 与一次坏 CRC 的断言。改完数据又重新算 CRC，得到的是另一条有效帧，不能测试拒收损坏载荷。
 \end{solution}
 
-\paragraph*{随堂练习 2.5}
+\paragraph*{随堂练习 \ref{ex:v2-comm-units}}
 \begin{solution}
-结果为 $1250/1000=1.25$ m。应在外部协议与内部消息的桥接边界完成转换，内部模块统一使用约定单位。接口文档写明输入为 mm、输出为 m，避免不同消费模块重复换算。
+\texttt{bridge\_demo} 中 struct.pack 的输入改为 (8, 2000)。普通模式输出 (8, 2.0)，ROS 的 /\texttt{range\_m} 输出 data: 2.0；换程序前停止旧节点，避免两发布者混在一起。换算在协议边界做一次，内部统一使用米。位置接口还需明确坐标轴/坐标系、时间来源、单位、序号与无效值；Float64 的类型本身不会帮你约定这些内容。
 \end{solution}
 
-\paragraph*{随堂练习 2.6}
+\paragraph*{随堂练习 \ref{ex:v2-comm-isolation}}
 \begin{solution}
-代次 1 应记录“忽略旧连接清理”，并保留位置 42；代次 2 应记录“清理当前连接”，清空槽位。日志至少含回调携带的代次、当前代次与处理结果。真实多线程程序需用互斥量等机制保护“比较代次并清理”的完整操作，以及槽位和连接句柄的并发访问；只检查一次整数而不保护后续清理仍可能竞态。
+A 最后一次输入在第 1 秒，第 4 秒年龄为 3。阈值 4 时不过期，应得到 position/11，expired 保持 0；相应修改演示中原本期待 None 和计数 1 的断言，并把过期提示改为“旧值仍被允许”。恢复阈值 2 时丢弃一次。B 始终消费 100--105；A 槽数最多 1，第 5 秒消费新值 15。比较是大于阈值，所以年龄恰好等于阈值时仍允许消费。
 \end{solution}
 
 \subsubsection*{章末习题}
-
-\paragraph*{第二章章末第 1 题}
+\paragraph*{第二章章末第 \ref{prob:v2-comm-1} 题}
 \begin{solution}
-不应争抢读取；由唯一进程拥有设备，校验并组帧后向其它模块分发完整消息。
+不应争抢设备读取。由唯一所有者校验组帧，再向其他进程分发完整消息；发送控制命令也按同一接口约定协调。
+\end{solution}
+\paragraph*{第二章章末第 \ref{prob:v2-comm-2} 题}
+\begin{solution}
+客户端 connect，服务端 accept 得到新连接对象，通过它收发；监听对象继续负责接入连接。
+\end{solution}
+\paragraph*{第二章章末第 \ref{prob:v2-comm-3} 题}
+\begin{solution}
+不能。两条连接的数据没有组成同一帧的约定，拼起来可能混合不同轮次或不同客户端的数据。丢弃旧半帧，新连接另建解析器。
+\end{solution}
+\paragraph*{第二章章末第 \ref{prob:v2-comm-4} 题}
+\begin{solution}
+校验失败说明候选帧不满足协议，拒收并按规则重同步；CRC 不验证身份，也不能替代鉴权。
+\end{solution}
+\paragraph*{第二章章末第 \ref{prob:v2-comm-5} 题}
+\begin{solution}
+填 3.0 m/s，还需约定速度向量的坐标系、采集时间与时钟来源。不能把接收时间冒充源采集时间，也不能重复换算。
+\end{solution}
+\paragraph*{第二章章末第 \ref{prob:v2-comm-6} 题}
+\begin{solution}
+检查之后、关闭之前可能已换连接；在锁外重新读取当前 socket，就会关掉新对象。比较代次和摘下本轮归属要一起受保护，关闭保存的旧对象，不再读取当前对象。槽位写入和清理也遵守同样规则。
+\end{solution}
+\paragraph*{第二章章末第 \ref{prob:v2-comm-7} 题}
+\begin{solution}
+只消费最新值 300；三次购买需有界事件队列，约定确认、重试、序号去重及满队列/失败处理，不能覆盖成一次。
+\end{solution}
+\paragraph*{第二章章末第 \ref{prob:v2-comm-8} 题}
+\begin{solution}
+原示例第 1 事件发送 2 次、执行 1 次、确认成功；第 2 事件发送/执行各 1 次。所有确认都丢时，第 1 事件发送 3 次、执行 1 次，发送端失败并停止，第二事件尚未执行。检查日志中实际执行与发送次数，失败不能推出对方未执行；需要查回结果或按协议处理不确定状态。
+\end{solution}
+\paragraph*{第二章章末第 \ref{prob:v2-comm-9} 题}
+\begin{solution}
+年龄为 3 秒，超过 2 秒阈值，应丢弃、计数并按约定使用新鲜备用源。不同时间原点和未同步时钟不能直接相减；接收年龄使用本机同一单调时钟，跨机采集时间另行约定同步与误差范围。
 \end{solution}
 
-\paragraph*{第二章章末第 2 题}
-\begin{solution}
-客户端执行 connect；服务端用 accept 接收连接，后续通过连接 socket 收发。
-\end{solution}
-
-\paragraph*{第二章章末第 3 题}
-\begin{solution}
-收齐三字节后输出一帧，载荷字节 41 42 即 ASCII 文本 AB。
-\end{solution}
-
-\paragraph*{第二章章末第 4 题}
-\begin{solution}
-载荷可能损坏，应丢弃并重同步；CRC 不是身份认证机制。
-\end{solution}
-
-\paragraph*{第二章章末第 5 题}
-\begin{solution}
-填 3.0，并保证时间戳和坐标系约定一致。
-\end{solution}
-
-\paragraph*{第二章章末第 6 题}
-\begin{solution}
-比较连接代次，在受同步保护的状态更新中只清理自己的资源，不能关闭或清空新连接。
-\end{solution}
-
-\paragraph*{第二章章末第 7 题}
-\begin{solution}
-最新值槽只返回 300；必须逐次执行的事件需有界队列及确认、重试、去重约定。
-\end{solution}
 
 \section*{第三章：SDR 与电磁波解析}
 \phantomsection
