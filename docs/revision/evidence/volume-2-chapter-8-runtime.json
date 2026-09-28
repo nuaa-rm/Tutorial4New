@@ -1,0 +1,1010 @@
+{
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "numpy": "1.26.4",
+  "source_sha256": {
+    "data.py": "9e644bdaed7c4ef72ce40c0b8fde9a943c3344944613d5a6da08c7c049c351e8",
+    "fusion.py": "e062b594787f6a48c0e8ec6446a0fe2effbb3ff92062fb62ff7cf97c7069fd5f",
+    "linear.py": "ab4d19b4b4c10dbd6988a388837b7882bf6fb798450d964615054944c987acf9",
+    "moments_demo.py": "fde2eebd565b3adb6cb56e5d0f42cff28062f0d749808a607c7c473d1ab777db",
+    "plot.py": "69a153a24615e17da61c012774c3b29d5386305eed41a41b464edd7fd0355ed5",
+    "run.py": "3587ba8e3fdabeb1d7818e3774fb7438475d09e328c43f6a84199caebc6d4b4e",
+    "scalar.py": "33899e5978a8f895e7acaeeeaa16fe3126acd6a0716478a24203b35ed9f1d39a",
+    "sigma.py": "358bcea079ee0cf9154835fe8c5e013af4deeb7bf8fea6e4fc239d3401f10d6d",
+    "smooth.py": "b498e25e279c3817a71627468197fc2929afef46ba167a0cac298b34fcdbf38c",
+    "ukf.py": "b138dc8ae1f3a6a82985e9352116395b2462e48edbeed79e1e74272edfb69397"
+  },
+  "synthetic": true,
+  "records": [
+    {
+      "name": "随机游走 R=0.9",
+      "status": "PASS",
+      "details": {
+        "K": 0.55,
+        "x": 1.1,
+        "P": 0.495
+      }
+    },
+    {
+      "name": "随机游走 R=9",
+      "status": "PASS",
+      "details": {
+        "K": 0.10891089108910892,
+        "x": 0.21782178217821785,
+        "P": 0.9801980198019804
+      }
+    },
+    {
+      "name": "无效 R 0",
+      "status": "PASS",
+      "details": {
+        "exit": 2,
+        "stderr": "usage: scalar.py [-h] [--r R]\nscalar.py: error: R 必须是正有限方差\n"
+      }
+    },
+    {
+      "name": "无效 R -1",
+      "status": "PASS",
+      "details": {
+        "exit": 2,
+        "stderr": "usage: scalar.py [-h] [--r R]\nscalar.py: error: R 必须是正有限方差\n"
+      }
+    },
+    {
+      "name": "无效 R nan",
+      "status": "PASS",
+      "details": {
+        "exit": 2,
+        "stderr": "usage: scalar.py [-h] [--r R]\nscalar.py: error: R 必须是正有限方差\n"
+      }
+    },
+    {
+      "name": "融合方差/相关系数 (3, 0)",
+      "status": "PASS",
+      "details": {
+        "weight1": 0.75,
+        "mean": 2.5,
+        "variance": 0.75,
+        "cross_covariance": 0.0
+      }
+    },
+    {
+      "name": "融合方差/相关系数 (1, 0)",
+      "status": "PASS",
+      "details": {
+        "weight1": 0.5,
+        "mean": 3.0,
+        "variance": 0.5,
+        "cross_covariance": 0.0
+      }
+    },
+    {
+      "name": "融合方差/相关系数 (1, 1)",
+      "status": "PASS",
+      "details": {
+        "weight1": 0.5,
+        "mean": 3.0,
+        "variance": 1.0,
+        "cross_covariance": 1.0
+      }
+    },
+    {
+      "name": "融合方差/相关系数 (1, -0.5)",
+      "status": "PASS",
+      "details": {
+        "weight1": 0.5,
+        "mean": 3.0,
+        "variance": 0.25,
+        "cross_covariance": -0.5
+      }
+    },
+    {
+      "name": "无效相关系数",
+      "status": "PASS",
+      "details": {
+        "exit": 2,
+        "stderr": "usage: fusion.py [-h] [--v1 V1] [--v2 V2] [--rho RHO]\nfusion.py: error: 方差为正有限数，相关系数在 [-1,1]\n"
+      }
+    },
+    {
+      "name": "因果平滑 0.2",
+      "status": "PASS",
+      "details": {
+        "alpha": 0.2,
+        "window": 10,
+        "step90_samples": 11,
+        "rmse": {
+          "raw": 0.17088022175790565,
+          "low": 0.11954275552542942,
+          "average": 0.14029992547830308
+        }
+      }
+    },
+    {
+      "name": "因果平滑 0.5",
+      "status": "PASS",
+      "details": {
+        "alpha": 0.5,
+        "window": 10,
+        "step90_samples": 4,
+        "rmse": {
+          "raw": 0.17088022175790565,
+          "low": 0.11233322841326628,
+          "average": 0.14029992547830308
+        }
+      }
+    },
+    {
+      "name": "因果平滑 1",
+      "status": "PASS",
+      "details": {
+        "alpha": 1.0,
+        "window": 10,
+        "step90_samples": 1,
+        "rmse": {
+          "raw": 0.17088022175790565,
+          "low": 0.17088022175790565,
+          "average": 0.14029992547830308
+        }
+      }
+    },
+    {
+      "name": "无效平滑系数",
+      "status": "PASS",
+      "details": {
+        "exit": 1,
+        "stderr": "Traceback (most recent call last):\n  File \"/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/filter/state-estimation-demo/smooth.py\", line 33, in <module>\n    low = low_pass(observed, args.alpha)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/filter/state-estimation-demo/smooth.py\", line 10, in low_pass\n    raise ValueError(\"alpha 在 (0,1]\")\nValueError: alpha 在 (0,1]\n"
+      }
+    },
+    {
+      "name": "无效窗口",
+      "status": "PASS",
+      "details": {
+        "exit": 1,
+        "stderr": "Traceback (most recent call last):\n  File \"/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/filter/state-estimation-demo/smooth.py\", line 34, in <module>\n    average = moving_average(observed, args.window)\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/filter/state-estimation-demo/smooth.py\", line 20, in moving_average\n    raise ValueError(\"窗口长度必须为正整数\")\nValueError: 窗口长度必须为正整数\n"
+      }
+    },
+    {
+      "name": "无迹重建与非线性边界",
+      "status": "PASS",
+      "details": {
+        "reconstructed_mean": [
+          1.0,
+          2.0
+        ],
+        "reconstructed_P": [
+          [
+            1.0,
+            0.30000000000000004
+          ],
+          [
+            0.30000000000000004,
+            0.5000000000000001
+          ]
+        ],
+        "affine_mean": [
+          5.0,
+          -1.9999999999999998
+        ],
+        "affine_P": [
+          [
+            5.700000000000001,
+            -1.7500000000000002
+          ],
+          [
+            -1.7500000000000002,
+            0.825
+          ]
+        ],
+        "uniform_true_mean": 0.3333333333333333,
+        "uniform_true_variance": 0.4222222222222222,
+        "linearized_mean": 0.0,
+        "linearized_variance": 0.3333333333333333,
+        "UT_mean": 0.33333333333333326,
+        "UT_variance": 0.5555555555555555,
+        "sample_mean": 0.3332674901441452,
+        "sample_variance": 0.42272059143215834
+      }
+    },
+    {
+      "name": "linear default",
+      "status": "PASS",
+      "details": {
+        "synthetic": true,
+        "mode": "linear",
+        "steps": 150,
+        "dropped": 0,
+        "dt_s": 0.1,
+        "q_acceleration_variance": 0.5,
+        "r_measurement_variance": 0.04,
+        "assumed_height_m": 2.0,
+        "rmse_position_m": {
+          "kf": 0.13849796812310805,
+          "ukf": 0.13849796812310827
+        },
+        "max_state_difference": 9.769962616701378e-15,
+        "mean_nis": 1.0114276719565058,
+        "minimum_covariance_eigenvalue": 0.004360209353451863,
+        "last_state": [
+          31.747271487168018,
+          3.814035902978312
+        ],
+        "Q": [
+          [
+            1.2500000000000006e-05,
+            0.00025000000000000006
+          ],
+          [
+            0.00025000000000000006,
+            0.005000000000000001
+          ]
+        ]
+      }
+    },
+    {
+      "name": "linear q0",
+      "status": "PASS",
+      "details": {
+        "synthetic": true,
+        "mode": "linear",
+        "steps": 150,
+        "dropped": 0,
+        "dt_s": 0.1,
+        "q_acceleration_variance": 0.0,
+        "r_measurement_variance": 0.04,
+        "assumed_height_m": 2.0,
+        "rmse_position_m": {
+          "kf": 3.4311561774321278,
+          "ukf": 3.431156177432232
+        },
+        "max_state_difference": 4.050093593832571e-13,
+        "mean_nis": 302.30450583908265,
+        "minimum_covariance_eigenvalue": 3.5440849983091743e-06,
+        "last_state": [
+          25.514985214704083,
+          2.061746907543263
+        ],
+        "Q": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ]
+      }
+    },
+    {
+      "name": "linear r10",
+      "status": "PASS",
+      "details": {
+        "synthetic": true,
+        "mode": "linear",
+        "steps": 150,
+        "dropped": 0,
+        "dt_s": 0.1,
+        "q_acceleration_variance": 0.5,
+        "r_measurement_variance": 0.4,
+        "assumed_height_m": 2.0,
+        "rmse_position_m": {
+          "kf": 0.34225690289491434,
+          "ukf": 0.3422569028949136
+        },
+        "max_state_difference": 1.4210854715202004e-14,
+        "mean_nis": 0.358434985418983,
+        "minimum_covariance_eigenvalue": 0.018245746021556708,
+        "last_state": [
+          31.769763953990566,
+          3.8195766706711742
+        ],
+        "Q": [
+          [
+            1.2500000000000006e-05,
+            0.00025000000000000006
+          ],
+          [
+            0.00025000000000000006,
+            0.005000000000000001
+          ]
+        ]
+      }
+    },
+    {
+      "name": "linear drops",
+      "status": "PASS",
+      "details": {
+        "synthetic": true,
+        "mode": "linear",
+        "steps": 150,
+        "dropped": 30,
+        "dt_s": 0.1,
+        "q_acceleration_variance": 0.5,
+        "r_measurement_variance": 0.04,
+        "assumed_height_m": 2.0,
+        "rmse_position_m": {
+          "kf": 0.14194036793774784,
+          "ukf": 0.14194036793774745
+        },
+        "max_state_difference": 9.325873406851315e-15,
+        "mean_nis": 1.0378965554289983,
+        "minimum_covariance_eigenvalue": 0.004864740893854091,
+        "last_state": [
+          31.73604434890166,
+          3.8233617665202946
+        ],
+        "Q": [
+          [
+            1.2500000000000006e-05,
+            0.00025000000000000006
+          ],
+          [
+            0.00025000000000000006,
+            0.005000000000000001
+          ]
+        ]
+      }
+    },
+    {
+      "name": "linear bias",
+      "status": "PASS",
+      "details": {
+        "synthetic": true,
+        "mode": "linear",
+        "steps": 150,
+        "dropped": 0,
+        "dt_s": 0.1,
+        "q_acceleration_variance": 0.5,
+        "r_measurement_variance": 0.04,
+        "assumed_height_m": 2.0,
+        "rmse_position_m": {
+          "kf": 0.44854827099746564,
+          "ukf": 0.44854827099746536
+        },
+        "max_state_difference": 1.0658141036401503e-14,
+        "mean_nis": 1.0164214809401952,
+        "minimum_covariance_eigenvalue": 0.004360209353451863,
+        "last_state": [
+          32.24727148720478,
+          3.8140359032079245
+        ],
+        "Q": [
+          [
+            1.2500000000000006e-05,
+            0.00025000000000000006
+          ],
+          [
+            0.00025000000000000006,
+            0.005000000000000001
+          ]
+        ]
+      }
+    },
+    {
+      "name": "linear alpha",
+      "status": "PASS",
+      "details": {
+        "synthetic": true,
+        "mode": "linear",
+        "steps": 150,
+        "dropped": 0,
+        "dt_s": 0.1,
+        "q_acceleration_variance": 0.5,
+        "r_measurement_variance": 0.04,
+        "assumed_height_m": 2.0,
+        "rmse_position_m": {
+          "kf": 0.13849796812310805,
+          "ukf": 0.13849796812310552
+        },
+        "max_state_difference": 8.08242361927114e-14,
+        "mean_nis": 1.0114276719565058,
+        "minimum_covariance_eigenvalue": 0.004360209353451164,
+        "last_state": [
+          31.747271487168018,
+          3.814035902978312
+        ],
+        "Q": [
+          [
+            1.2500000000000006e-05,
+            0.00025000000000000006
+          ],
+          [
+            0.00025000000000000006,
+            0.005000000000000001
+          ]
+        ]
+      }
+    },
+    {
+      "name": "linear dt",
+      "status": "PASS",
+      "details": {
+        "synthetic": true,
+        "mode": "linear",
+        "steps": 150,
+        "dropped": 0,
+        "dt_s": 0.05,
+        "q_acceleration_variance": 0.5,
+        "r_measurement_variance": 0.04,
+        "assumed_height_m": 2.0,
+        "rmse_position_m": {
+          "kf": 0.13448542794856633,
+          "ukf": 0.1344854279485664
+        },
+        "max_state_difference": 5.329070518200751e-15,
+        "mean_nis": 1.0022902036908603,
+        "minimum_covariance_eigenvalue": 0.0022350371926362017,
+        "last_state": [
+          9.823063644029402,
+          2.0765022281541823
+        ],
+        "Q": [
+          [
+            7.812500000000004e-07,
+            3.125000000000001e-05
+          ],
+          [
+            3.125000000000001e-05,
+            0.0012500000000000002
+          ]
+        ]
+      }
+    },
+    {
+      "name": "linear seed",
+      "status": "PASS",
+      "details": {
+        "synthetic": true,
+        "mode": "linear",
+        "steps": 150,
+        "dropped": 0,
+        "dt_s": 0.1,
+        "q_acceleration_variance": 0.5,
+        "r_measurement_variance": 0.04,
+        "assumed_height_m": 2.0,
+        "rmse_position_m": {
+          "kf": 0.15517295336428746,
+          "ukf": 0.15517295336428796
+        },
+        "max_state_difference": 1.2434497875801753e-14,
+        "mean_nis": 1.3558592114027739,
+        "minimum_covariance_eigenvalue": 0.004360209353451863,
+        "last_state": [
+          31.8328331479431,
+          3.883383316215156
+        ],
+        "Q": [
+          [
+            1.2500000000000006e-05,
+            0.00025000000000000006
+          ],
+          [
+            0.00025000000000000006,
+            0.005000000000000001
+          ]
+        ]
+      }
+    },
+    {
+      "name": "range default",
+      "status": "PASS",
+      "details": {
+        "synthetic": true,
+        "mode": "range",
+        "steps": 150,
+        "dropped": 0,
+        "dt_s": 0.1,
+        "q_acceleration_variance": 0.5,
+        "r_measurement_variance": 0.04,
+        "assumed_height_m": 2.0,
+        "rmse_position_m": {
+          "ekf": 0.15347454483055142,
+          "ukf": 0.1568391311388773
+        },
+        "max_state_difference": 0.0633756973456614,
+        "mean_nis": 1.0109287475543116,
+        "minimum_covariance_eigenvalue": 0.004373460167471754,
+        "last_state": [
+          31.747252189078203,
+          3.8139836762926795
+        ],
+        "Q": [
+          [
+            1.2500000000000006e-05,
+            0.00025000000000000006
+          ],
+          [
+            0.00025000000000000006,
+            0.005000000000000001
+          ]
+        ]
+      }
+    },
+    {
+      "name": "range q0",
+      "status": "PASS",
+      "details": {
+        "synthetic": true,
+        "mode": "range",
+        "steps": 150,
+        "dropped": 0,
+        "dt_s": 0.1,
+        "q_acceleration_variance": 0.0,
+        "r_measurement_variance": 0.04,
+        "assumed_height_m": 2.0,
+        "rmse_position_m": {
+          "ekf": 2.7357769513696195,
+          "ukf": 2.7058997593239598
+        },
+        "max_state_difference": 0.06336581649981932,
+        "mean_nis": 189.7841000401595,
+        "minimum_covariance_eigenvalue": 6.8160035517723716e-06,
+        "last_state": [
+          26.999384619210094,
+          2.3562587879319126
+        ],
+        "Q": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ]
+      }
+    },
+    {
+      "name": "range r10",
+      "status": "PASS",
+      "details": {
+        "synthetic": true,
+        "mode": "range",
+        "steps": 150,
+        "dropped": 0,
+        "dt_s": 0.1,
+        "q_acceleration_variance": 0.5,
+        "r_measurement_variance": 0.4,
+        "assumed_height_m": 2.0,
+        "rmse_position_m": {
+          "ekf": 0.3540935313611692,
+          "ukf": 0.356691605396644
+        },
+        "max_state_difference": 0.15465581520344207,
+        "mean_nis": 0.35504100667553234,
+        "minimum_covariance_eigenvalue": 0.01829468888669162,
+        "last_state": [
+          31.77022742752579,
+          3.8202310913830555
+        ],
+        "Q": [
+          [
+            1.2500000000000006e-05,
+            0.00025000000000000006
+          ],
+          [
+            0.00025000000000000006,
+            0.005000000000000001
+          ]
+        ]
+      }
+    },
+    {
+      "name": "range drops",
+      "status": "PASS",
+      "details": {
+        "synthetic": true,
+        "mode": "range",
+        "steps": 150,
+        "dropped": 30,
+        "dt_s": 0.1,
+        "q_acceleration_variance": 0.5,
+        "r_measurement_variance": 0.04,
+        "assumed_height_m": 2.0,
+        "rmse_position_m": {
+          "ekf": 0.15439096276504793,
+          "ukf": 0.155110204439028
+        },
+        "max_state_difference": 0.0633756973456614,
+        "mean_nis": 1.0369921721125948,
+        "minimum_covariance_eigenvalue": 0.004880137718109851,
+        "last_state": [
+          31.73597267434498,
+          3.823265320138719
+        ],
+        "Q": [
+          [
+            1.2500000000000006e-05,
+            0.00025000000000000006
+          ],
+          [
+            0.00025000000000000006,
+            0.005000000000000001
+          ]
+        ]
+      }
+    },
+    {
+      "name": "range bias",
+      "status": "PASS",
+      "details": {
+        "synthetic": true,
+        "mode": "range",
+        "steps": 150,
+        "dropped": 0,
+        "dt_s": 0.1,
+        "q_acceleration_variance": 0.5,
+        "r_measurement_variance": 0.04,
+        "assumed_height_m": 2.0,
+        "rmse_position_m": {
+          "ekf": 0.5464104894393396,
+          "ukf": 0.5449040841804045
+        },
+        "max_state_difference": 0.09634591229201694,
+        "mean_nis": 1.035373772102387,
+        "minimum_covariance_eigenvalue": 0.00437303008124411,
+        "last_state": [
+          32.24819977993533,
+          3.813688756094246
+        ],
+        "Q": [
+          [
+            1.2500000000000006e-05,
+            0.00025000000000000006
+          ],
+          [
+            0.00025000000000000006,
+            0.005000000000000001
+          ]
+        ]
+      }
+    },
+    {
+      "name": "range alpha",
+      "status": "PASS",
+      "details": {
+        "synthetic": true,
+        "mode": "range",
+        "steps": 150,
+        "dropped": 0,
+        "dt_s": 0.1,
+        "q_acceleration_variance": 0.5,
+        "r_measurement_variance": 0.04,
+        "assumed_height_m": 2.0,
+        "rmse_position_m": {
+          "ekf": 0.15347454483055142,
+          "ukf": 0.15650461711718172
+        },
+        "max_state_difference": 0.05838355649102622,
+        "mean_nis": 1.0109287475543116,
+        "minimum_covariance_eigenvalue": 0.004373460167471754,
+        "last_state": [
+          31.747252189078203,
+          3.8139836762926795
+        ],
+        "Q": [
+          [
+            1.2500000000000006e-05,
+            0.00025000000000000006
+          ],
+          [
+            0.00025000000000000006,
+            0.005000000000000001
+          ]
+        ]
+      }
+    },
+    {
+      "name": "range dt",
+      "status": "PASS",
+      "details": {
+        "synthetic": true,
+        "mode": "range",
+        "steps": 150,
+        "dropped": 0,
+        "dt_s": 0.05,
+        "q_acceleration_variance": 0.5,
+        "r_measurement_variance": 0.04,
+        "assumed_height_m": 2.0,
+        "rmse_position_m": {
+          "ekf": 0.15827826009411072,
+          "ukf": 0.16069909357240247
+        },
+        "max_state_difference": 0.06038104840737801,
+        "mean_nis": 0.9972109906223394,
+        "minimum_covariance_eigenvalue": 0.0023115767558253265,
+        "last_state": [
+          9.823977460578849,
+          2.080200515232542
+        ],
+        "Q": [
+          [
+            7.812500000000004e-07,
+            3.125000000000001e-05
+          ],
+          [
+            3.125000000000001e-05,
+            0.0012500000000000002
+          ]
+        ]
+      }
+    },
+    {
+      "name": "range seed",
+      "status": "PASS",
+      "details": {
+        "synthetic": true,
+        "mode": "range",
+        "steps": 150,
+        "dropped": 0,
+        "dt_s": 0.1,
+        "q_acceleration_variance": 0.5,
+        "r_measurement_variance": 0.04,
+        "assumed_height_m": 2.0,
+        "rmse_position_m": {
+          "ekf": 0.17160434174561712,
+          "ukf": 0.17338892142663245
+        },
+        "max_state_difference": 0.07049763719514479,
+        "mean_nis": 1.367259959081289,
+        "minimum_covariance_eigenvalue": 0.004373433585805971,
+        "last_state": [
+          31.83292290092831,
+          3.883414242894627
+        ],
+        "Q": [
+          [
+            1.2500000000000006e-05,
+            0.00025000000000000006
+          ],
+          [
+            0.00025000000000000006,
+            0.005000000000000001
+          ]
+        ]
+      }
+    },
+    {
+      "name": "dt=0 被拒绝",
+      "status": "PASS",
+      "details": {
+        "exit": 2,
+        "stderr": "usage: run.py [-h] [--mode {linear,range}] [--steps STEPS] [--dt DT] [--q Q]\n              [--r R] [--bias BIAS] [--seed SEED] [--drop-every DROP_EVERY]\n              [--alpha ALPHA] [--output OUTPUT]\nrun.py: error: 长度至少3，dt/R为正、Q方差非负，参数为有限数\n"
+      }
+    },
+    {
+      "name": "负 Q 被拒绝",
+      "status": "PASS",
+      "details": {
+        "exit": 2,
+        "stderr": "usage: run.py [-h] [--mode {linear,range}] [--steps STEPS] [--dt DT] [--q Q]\n              [--r R] [--bias BIAS] [--seed SEED] [--drop-every DROP_EVERY]\n              [--alpha ALPHA] [--output OUTPUT]\nrun.py: error: 长度至少3，dt/R为正、Q方差非负，参数为有限数\n"
+      }
+    },
+    {
+      "name": "无效 sigma 缩放",
+      "status": "PASS",
+      "details": {
+        "exit": 1,
+        "stderr": "Traceback (most recent call last):\n  File \"/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/filter/state-estimation-demo/run.py\", line 43, in <module>\n    u, U, _, _ = step(u, U, F, Q, None if missing else measurement, args.r, observe, args.alpha)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/filter/state-estimation-demo/ukf.py\", line 8, in step\n    points, wm, wc = sigma_points(x, P, alpha=alpha)\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/filter/state-estimation-demo/sigma.py\", line 9, in sigma_points\n    raise ValueError(\"无迹变换参数无效\")\nValueError: 无迹变换参数无效\n"
+      }
+    },
+    {
+      "name": "二维相关矩阵更新独立核对",
+      "status": "PASS",
+      "details": {
+        "state": [
+          6.1414440481798,
+          1.5861785882511272
+        ],
+        "P": [
+          [
+            1.2199044478837227,
+            0.22570486508310345
+          ],
+          [
+            0.22570486508310345,
+            0.6568602382073885
+          ]
+        ],
+        "K": [
+          [
+            0.4017899199246349,
+            0.07267344054908825
+          ],
+          [
+            0.053697597739048517,
+            0.32306035932978944
+          ]
+        ]
+      }
+    },
+    {
+      "name": "非对角协方差 sigma 重建 1.0",
+      "status": "PASS",
+      "details": {
+        "mean": [
+          4.0,
+          1.0
+        ],
+        "P": [
+          [
+            2.0,
+            0.39999999999999997
+          ],
+          [
+            0.39999999999999997,
+            1.0
+          ]
+        ],
+        "weights_mean_sum": 1.0
+      }
+    },
+    {
+      "name": "非对角协方差 sigma 重建 0.3",
+      "status": "PASS",
+      "details": {
+        "mean": [
+          3.9999999999999982,
+          1.0000000000000002
+        ],
+        "P": [
+          [
+            1.9999999999999982,
+            0.4
+          ],
+          [
+            0.4,
+            1.0000000000000004
+          ]
+        ],
+        "weights_mean_sum": 1.0
+      }
+    },
+    {
+      "name": "非对角协方差 sigma 重建 0.01",
+      "status": "PASS",
+      "details": {
+        "mean": [
+          4.000000000001819,
+          1.0000000000004547
+        ],
+        "P": [
+          [
+            1.9999999999999574,
+            0.39999999999999586
+          ],
+          [
+            0.39999999999999586,
+            0.9999999999999988
+          ]
+        ],
+        "weights_mean_sum": 0.9999999999990905
+      }
+    },
+    {
+      "name": "非半正定 P 被拒绝",
+      "status": "PASS",
+      "details": "协方差须对称半正定"
+    },
+    {
+      "name": "奇异 P 不静默修补",
+      "status": "PASS",
+      "details": "Matrix is not positive definite"
+    },
+    {
+      "name": "n+lambda 非正被拒绝",
+      "status": "PASS",
+      "details": "n+lambda 必须为正"
+    },
+    {
+      "name": "观测雅可比独立差分 0.0",
+      "status": "PASS",
+      "details": {
+        "analytic": 0.0,
+        "difference": 0.0
+      }
+    },
+    {
+      "name": "观测雅可比独立差分 1.0",
+      "status": "PASS",
+      "details": {
+        "analytic": 0.4472135954999579,
+        "difference": 0.4472135954891598
+      }
+    },
+    {
+      "name": "观测雅可比独立差分 5.0",
+      "status": "PASS",
+      "details": {
+        "analytic": 0.9284766908852594,
+        "difference": 0.928476690864599
+      }
+    },
+    {
+      "name": "原教材窗口/阶跃数值",
+      "status": "PASS",
+      "details": {
+        "moving_last": 11.0,
+        "low_pass": [
+          0.5,
+          0.75,
+          0.875
+        ]
+      }
+    },
+    {
+      "name": "独立融合与重复同一信息的 Monte Carlo",
+      "status": "PASS",
+      "details": {
+        "independent_variance": 0.49940035043956976,
+        "same_variance": 0.9971993478156587
+      }
+    },
+    {
+      "name": "实际数组绘图 smooth",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/filter/state-estimation-demo/plot.py",
+          "--input",
+          "/tmp/textbook-filter-verify/smooth-0.2/series.npz",
+          "--output",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/images/filter_smooth_candidate.pdf",
+          "--font",
+          "/run/host/usr/share/texmf-dist/fonts/opentype/public/fandol/FandolSong-Regular.otf"
+        ],
+        "stdout": "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/images/filter_smooth_candidate.pdf\n",
+        "stderr": "",
+        "input_sha256": "3571772f8fd480dbdc3f9c15c611745e2781b7b673eb5ba3d69966d2e29288e1",
+        "output_sha256": "1c1b79b0d2ac53219b74aea2caf8cf4c2c35dd621497e99b2ce440f0778b5e3b",
+        "publication_note": "运行时使用 candidate 路径；独立及正文检查后原字节改名 revised，输出散列未变。",
+        "published_output": "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/images/filter_smooth_revised.pdf"
+      }
+    },
+    {
+      "name": "实际数组绘图 track",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/filter/state-estimation-demo/plot.py",
+          "--input",
+          "/tmp/textbook-filter-verify/linear-default/series.npz",
+          "--output",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/images/filter_track_candidate.pdf",
+          "--font",
+          "/run/host/usr/share/texmf-dist/fonts/opentype/public/fandol/FandolSong-Regular.otf"
+        ],
+        "stdout": "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/images/filter_track_candidate.pdf\n",
+        "stderr": "",
+        "input_sha256": "db3ebee4c58455fe2c6d3eb3ec8837cd961ae849be4c161acc64453821cafd46",
+        "output_sha256": "b9345c2cd6b25d7b9d744d487ea32a46a568431a3d2bef132bdd2167850ecae8",
+        "publication_note": "运行时使用 candidate 路径；独立及正文检查后原字节改名 revised，输出散列未变。",
+        "published_output": "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/images/filter_track_revised.pdf"
+      }
+    },
+    {
+      "name": "实际数组绘图 range",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/filter/state-estimation-demo/plot.py",
+          "--input",
+          "/tmp/textbook-filter-verify/range-default/series.npz",
+          "--output",
+          "/tmp/textbook-filter-range.pdf"
+        ],
+        "stdout": "/tmp/textbook-filter-range.pdf\n",
+        "stderr": "",
+        "input_sha256": "49fbb7020f1696208b860c050735d8094bd39c3d3cb1d2a0b32d684f8d6467ce",
+        "output_sha256": "64afc334b851115ada1cf82b510c2431e4aa2516b88b3c95a4f78fef9fe05173",
+        "publication_note": "运行时使用 candidate 路径；独立及正文检查后原字节改名 revised，输出散列未变。",
+        "published_output": "/tmp/textbook-filter-range.pdf"
+      }
+    }
+  ],
+  "matplotlib": "3.6.3"
+}
