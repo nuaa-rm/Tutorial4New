@@ -1,0 +1,109 @@
+{
+  "samples": 40,
+  "coverage": [
+    [
+      "X",
+      0.18545882782058098,
+      0.8710448235634691,
+      0.9794085653469832
+    ],
+    [
+      "Y",
+      0.21854032249431316,
+      0.8785432631373351,
+      0.9428613437757456
+    ],
+    [
+      "Size",
+      0.0,
+      0.2989034533664801,
+      0.7472586334162002
+    ],
+    [
+      "Skew",
+      0.0,
+      1.0,
+      1.0
+    ]
+  ],
+  "archive": [
+    "left-0000.png",
+    "left-0001.png",
+    "left-0002.png",
+    "left-0003.png",
+    "left-0004.png",
+    "left-0005.png",
+    "left-0006.png",
+    "left-0007.png",
+    "left-0008.png",
+    "left-0009.png",
+    "left-0010.png",
+    "left-0011.png",
+    "left-0012.png",
+    "left-0013.png",
+    "left-0014.png",
+    "left-0015.png",
+    "left-0016.png",
+    "left-0017.png",
+    "left-0018.png",
+    "left-0019.png",
+    "left-0020.png",
+    "left-0021.png",
+    "left-0022.png",
+    "left-0023.png",
+    "left-0024.png",
+    "left-0025.png",
+    "left-0026.png",
+    "left-0027.png",
+    "left-0028.png",
+    "left-0029.png",
+    "left-0030.png",
+    "left-0031.png",
+    "left-0032.png",
+    "left-0033.png",
+    "left-0034.png",
+    "left-0035.png",
+    "left-0036.png",
+    "left-0037.png",
+    "left-0038.png",
+    "left-0039.png",
+    "ost.yaml",
+    "ost.txt"
+  ],
+  "K": [
+    560.2900118027668,
+    0.0,
+    320.317216504941,
+    0.0,
+    565.2831459988594,
+    240.30514973144122,
+    0.0,
+    0.0,
+    1.0
+  ],
+  "D": [
+    -0.1822072672685275,
+    0.03997586665088488,
+    0.0008412570072600787,
+    -0.000979870962898901,
+    0.0
+  ],
+  "commit_shutdown": true,
+  "persisted_K_D_match": true,
+  "persisted_P": [
+    524.6920166015625,
+    0.0,
+    319.1668545083303,
+    0.0,
+    0.0,
+    545.100830078125,
+    240.12071223415114,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0
+  ],
+  "package": "camera_calibration 5.0.13",
+  "source_entry": "installed OpenCVCalibrationNode, actual GUI buttons; CLI startup checked separately"
+}

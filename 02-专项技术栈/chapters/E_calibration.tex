@@ -1,229 +1,208 @@
 \subsubsection{读懂标定结果：模型、采集与误差}
 \label{sec:camera-calibration-detail}
 
-相机标定（camera calibration）建立三维点与像素坐标之间的关系。先分清三类量：内参描述相机怎样成像；畸变系数描述镜头偏离理想模型的程度；外参描述两个坐标系的相对位姿。单目标定输出的每张棋盘格位姿，是该次拍摄中“标定板到相机”的变换，不能直接当成“相机到机器人底盘”的固定安装外参。后者需要另做外参或手眼标定。
+现在你已经拿到了 $K$ 和 $D$，不过它们究竟描述什么？我们先沿着一个空间点走到图像上，再回头看程序怎样检查这些数。相机内参（intrinsics）描述成像关系，畸变（distortion）描述镜头偏离理想模型的程度，外参（extrinsics）描述坐标系之间的位姿。单目标定输出的每张棋盘格位姿，是那次拍摄中“板到相机”的变换；换个姿态它就变了，自然不能直接拿来当相机相对底盘的固定安装外参。
 
 \paragraph*{从空间点到像素}
-令相机坐标系中的点为 $(X_c,Y_c,Z_c)$，且 $Z_c>0$。归一化坐标为 $x=X_c/Z_c$、$y=Y_c/Z_c$。忽略像素轴倾斜时，内参矩阵为
+在相机光学坐标系中，$x$ 向右、$y$ 向下、$z$ 向前。对于 $Z_c>0$ 的点 $(X_c,Y_c,Z_c)$，先用 $x=X_c/Z_c$、$y=Y_c/Z_c$ 得到归一化坐标，再通过内参变成像素：
 \[
 K=\begin{bmatrix}f_x&0&c_x\\0&f_y&c_y\\0&0&1\end{bmatrix},
 \qquad u=f_xx+c_x,\quad v=f_yy+c_y.
 \]
-$f_x,f_y$ 的单位是像素，不是镜头标称的毫米；$c_x,c_y$ 是主点位置，通常接近图像中心，但不应强行当成中心。ROS 光学坐标系通常约定 $x$ 向右、$y$ 向下、$z$ 向前，不能与机器人机体坐标轴混用。
+这里忽略像素轴倾斜。$f_x,f_y$ 的单位是像素，不是镜头上写的毫米；$(c_x,c_y)$ 是主点，通常接近图像中心，但我们不会强行把它设成中心。机器人机体坐标轴的约定也可能不同，后面接 TF 时还要确认一次。
 
-普通针孔模型常使用五个畸变系数 $D=(k_1,k_2,p_1,p_2,k_3)$。令 $r^2=x^2+y^2$，则
+本项目使用五参数针孔模型 $D=(k_1,k_2,p_1,p_2,k_3)$。令 $r^2=x^2+y^2$，有
 \begin{align*}
 L&=1+k_1r^2+k_2r^4+k_3r^6,\\
 x_d&=xL+2p_1xy+p_2(r^2+2x^2),\\
 y_d&=yL+p_1(r^2+2y^2)+2p_2xy.
 \end{align*}
-再将 $x_d,y_d$ 代入像素公式。三个 $k$ 描述径向变化，两个 $p$ 描述切向变化。其他模型可能使用更多参数；鱼眼模型的四个系数不是上述五参数模型的前四项，不能靠截取数组转换。
+然后用 $x_d,y_d$ 代替 $x,y$ 计算像素坐标。三个 $k$ 控制径向变化，两个 $p$ 控制切向变化；本章固定 $k_3=0$，让离线程序和 ROS 标定器优化同一组量。鱼眼模型还有另一套公式，不能截取这个数组的前四项就宣布转换成功。
 
-\begin{example}[裁剪、缩放后怎样改内参]
-假设原图为 $1280\times960$，$f_x=f_y=800$、$(c_x,c_y)=(640,480)$。从左上角 $(100,50)$ 裁取区域，再把裁出的图像按坐标比例缩小到一半。在使用 $u'=s_x(u-u_0)$、$v'=s_y(v-v_0)$ 的坐标约定下：
-\begin{tpython}
-fx, fy, cx, cy = 800., 800., 640., 480.
-u0, v0, sx, sy = 100., 50., 0.5, 0.5
-new_K = [[sx*fx, 0., sx*(cx-u0)],
-         [0., sy*fy, sy*(cy-v0)], [0., 0., 1.]]
-assert new_K == [[400., 0., 270.], [0., 400., 215.], [0., 0., 1.]]
-print(new_K)
-\end{tpython}
-纯图像坐标变换不改变原镜头的归一化畸变模型；但要同步更新尺寸、ROI 和相应投影矩阵。具体缩放实现若采用半像素中心约定，还要按该实现修正主点。切换传感器模式、对焦、变焦或更换镜头并非简单缩放，应重新确认或重新标定。
-\end{example}
-
-\paragraph*{怎样采到有效的数据}
-平面棋盘格的张正友标定法先利用多视角平面映射约束内参，再联合优化畸变和每张图的位姿。多拍几百张几乎相同的正面图，不等于获得了足够的几何约束。
-\begin{enumerate}
-\item 将标定板牢固贴在平整硬板上，实测横纵方格边长，检查打印是否被拉伸。9×6 个内角点对应 10×7 个方格；25 mm 在以米为单位的程序中写 0.025。
-\item 固定实际工作分辨率、镜头、焦距和对焦位置。关闭会改变几何成像的自动对焦，曝光以角点清晰、黑白区域不过曝为准。
-\item 让完整棋盘格出现在中心、四角和边缘，改变距离与俯仰、偏航角；近景覆盖较大面积，远景保留足够清晰的方格。倾斜要有差异，但不能倾斜到角点难以定位。
-\item 每个姿态停稳后采集，尤其避免卷帘快门下晃动标定板。先采集约 20--30 个有差异的姿态作为教学起点，再按覆盖和误差补采；张数不是合格证。
-\item 另外保留数张清晰、不同位置与倾角的照片作验证，不让它们参与参数拟合。记录相机编号、镜头、分辨率、标定板尺寸和采集日期。
-\end{enumerate}
-
-\paragraph*{重投影误差怎样算、怎样看}
-把标定板角点用估计的位姿、内参和畸变重新投影到图像，与检测到的角点相减，得到残差。对于总计 $N$ 个二维角点，本章使用
+\begin{example}[图像变了，内参也要跟着变]
+假设原图为 $1280\times960$，$f_x=f_y=800$、$(c_x,c_y)=(640,480)$。从 $(100,50)$ 开始裁剪，再把裁出的图按坐标比例缩小一半。在 $u'=s_x(u-u_0)$、$v'=s_y(v-v_0)$ 的约定下，\path{optics.py} 输出
 \[
-\mathrm{RMS}=\sqrt{\frac{1}{N}\sum_{i=1}^{N}\left\|\hat{\boldsymbol p}_i-\boldsymbol p_i\right\|_2^2}.
+K'=\begin{bmatrix}400&0&270\\0&400&215\\0&0&1\end{bmatrix}.
 \]
-单位是像素。不要将所有二维坐标分量的平均误差与这个定义混用，也不要只比较不同分辨率下的数值大小。应同时查看逐图误差、边缘残差、参数合理性、重复标定的稳定性和未参与拟合的图像。某张照片误差很大时先检查模糊、错检或板面弯曲；不能为了降低平均数盲目删除全部边缘照片。
-
-\begin{example}[检查独立照片并生成去畸变图]
-先运行前节程序生成 calibration.npz，再保存一张未参与标定的同分辨率照片为 validation.png。以下程序估计该照片中标定板的位姿，保持原 $K,D$ 不变，计算残差并输出 undistorted.png：
-\begin{tpython}
-import cv2
-import numpy as np
-
-data = np.load("calibration.npz")
-K, D = data["K"], data["dist"]
-img = cv2.imread("validation.png")
-if img is None:
-    raise ValueError("找不到 validation.png")
-size = (img.shape[1], img.shape[0])
-if tuple(data["size"]) != size:
-    raise ValueError("验证图与标定图分辨率不一致")
-gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-ok, corners = cv2.findChessboardCorners(gray, (9, 6))
-if not ok:
-    raise ValueError("未找到完整的 9x6 内角点")
-criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
-corners = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
-obj = np.zeros((54, 3), np.float32)
-obj[:, :2] = np.mgrid[0:9, 0:6].T.reshape(-1, 2) * 0.025
-ok, rvec, tvec = cv2.solvePnP(obj, corners, K, D)
-if not ok:
-    raise ValueError("位姿求解失败")
-pred, _ = cv2.projectPoints(obj, rvec, tvec, K, D)
-err = np.linalg.norm(pred.reshape(-1, 2) - corners.reshape(-1, 2), axis=1)
-print("验证 RMS / pixel:", np.sqrt(np.mean(err**2)))
-print("最大角点残差 / pixel:", err.max())
-new_K, roi = cv2.getOptimalNewCameraMatrix(K, D, size, 1.0, size)
-out = cv2.undistort(img, K, D, None, new_K)
-if not cv2.imwrite("undistorted.png", out):
-    raise IOError("无法保存图像")
-np.savez("rectified_model.npz", K=new_K, size=size, roi=roi)
-\end{tpython}
-验证图的位姿仍由该图估计，所以这是固定内参后的泛化检查，并非独立真值精度。检查校正图中直线是否变直、边缘是否过度拉伸；保留全视场时出现黑边可能是正常现象。程序没有裁掉 ROI。后续在该校正图上做 PnP，应使用 new\_K 和零畸变；在原图上做 PnP，则使用原 $K,D$，不要重复去畸变。
+你可以回到它的 crop\_K 计算处核对：裁剪先移动原点，缩放再改变像素尺度，所以焦距和主点都要改。纯坐标变换不会改变镜头的归一化畸变系数，但尺寸、ROI、投影矩阵必须同步更新。具体缩放库若采用半像素中心约定，应按它的实际坐标映射修正主点；换传感器模式、重新对焦或变焦则要重新检查成像关系。
 \end{example}
-
-\begin{exercise}
-原图的 $f_x=1000,c_x=640$，先从左侧裁去 80 pixel，再按本节坐标约定缩小到一半，新的 $f_x,c_x$ 是多少？为什么不能只修改图像宽高？
+\begin{exercise}\label{ex:v2-camera-crop}
+原图 $f_x=1000,c_x=640$，先从左边裁去 80 pixel，再按本节约定缩小一半。计算新 $f_x,c_x$，解释为什么只改宽高会让 PnP 用错模型。
 \end{exercise}
+
+\paragraph*{把采集和误差连起来看}
+棋盘格标定利用不同视角的平面映射约束内参，再联合优化畸变与每张图的位姿。如果你拍了一百张几乎一样的正面照，增加的是文件数量，缺少的倾斜约束并没有凭空出现。前节两个模拟数据集正好可以把这个问题跑出来。
+
+真实采集时，首先把标定板贴在平整硬板上，实测横纵方格边长，避免打印缩放或板面弯曲。然后固定工作分辨率、镜头、焦距和对焦位置，让完整棋盘格走过中心、四角和边缘，改变距离、俯仰与偏航；近处覆盖大一些，远处仍要看清角点。每次停稳再拍，曝光以黑白区域不过曝、角点清楚为准，卷帘相机尤其不要一边晃板一边采。可以先拍 20--30 个不同姿态，再根据覆盖与误差补采；这些张数只是起点。最后另外留几张不同位置和倾角的照片作验证，不让它们参加拟合，并记录相机编号、镜头、模式、板尺寸和日期。
+
+重投影误差是“检测到的角点”与“模型重新投出的角点”的距离。总共有 $N$ 个二维角点时，本章使用
+\[
+\mathrm{RMS}=\sqrt{\frac1N\sum_{i=1}^{N}
+ \left\|\hat{\boldsymbol p}_i-\boldsymbol p_i\right\|_2^2}.
+\]
+单位是 pixel；它与把全部二维坐标分量分别平均的定义不同。你还要看逐图残差、边缘覆盖、参数是否合理以及重复求解是否稳定，不能把一个小数当成毕业证。某张误差很大时，先查模糊、错检、板面弯曲，不要为了刷低平均数把边缘照片全删掉。
+
+\begin{example}[留一张照片检查模型]
+\path{validate.py} 固定已求出的 $K,D$，只为验证图求解板的位姿，再计算残差。它还输出角点图和校正图，方便我们把数字与实际现象对起来：
+\lstinputlisting[numbers=left,language=Python,basicstyle=\footnotesize\ttfamily]{examples/camera/calibration-lab-demo/validate.py}
+先在项目目录执行下面两次验证，输入照片都没有参加前面的拟合：
+\begin{tbash}
+python3 validate.py --image data/validation/000.png \
+  --model out/model.npz --output out/validation
+python3 validate.py --image data/validation/000.png \
+  --model out/front/model.npz --output out/front-validation
+\end{tbash}
+本次多姿态模型的验证 RMS 约为 0.337 pixel，最大角点残差约为 0.552 pixel；正面模型在同一张图上分别约为 1.208、2.962 pixel，你可以连同焦距一起比较。验证图的位姿仍由这张图估计，所以这检查的是固定内参后的泛化情况，并不是另有一台高精度设备给了真值。
+
+去畸变时，\texttt{getOptimalNewCameraMatrix} 生成新内参，alpha=0 尽量减少黑边，可能损失部分视场；alpha=1 则倾向保留视场、容许黑边。本程序没有裁掉返回的 ROI。此后若在校正图上做 PnP，应使用保存的新 $K'$ 和零畸变；原图则继续用原 $K,D$。图像和模型要成对使用，别把同一畸变补偿两遍。
+\end{example}
 
 \subsubsection{ROS2 的 camera\_calibration 标定流程}
 \label{sec:ros2-camera-calibration}
 
-本节使用 Ubuntu 22.04 / ROS2 Humble。\texttt{camera\_calibration} 属于 image\_pipeline，负责从图像求参数；\texttt{camera\_info\_manager} 是供驱动使用的参数管理库；\texttt{image\_proc} 根据图像和参数生成校正图。安装管理库不会让任意驱动自动具备参数加载服务。
+离线程序已经能求参数了，接下来我们把它接回 ROS。这里实际使用 Ubuntu 24.04 / ROS2 Jazzy；如果你正在用前面的 Humble 环境，先查看本机帮助和驱动接口，再把包名与环境路径换成对应发行版。本节的服务和消息思路共用，但下面记录的运行结果来自 Jazzy。
 
-\begin{center}
-\begin{tabular}{p{0.31\textwidth}p{0.60\textwidth}}
-\toprule[1.5pt]
-消息或字段 & 作用 \\
-\midrule[1pt]
-\nolinkurl{sensor_msgs/msg/Image} & 原始图像及其时间戳、光学坐标系名称。\\
-\nolinkurl{sensor_msgs/msg/CameraInfo} & 与该图像模式对应的几何参数。\\
-\texttt{k / d} & 原始图像的 $3\times3$ 内参及畸变数组；同时检查 distortion\_model。\\
-\texttt{r / p} & 校正旋转与 $3\times4$ 投影矩阵；R 不是机器人安装外参。\\
-\texttt{width / height} & 参数对应的标定图像尺寸；ROI、binning 也需一致。\\
-\nolinkurl{set_camera_info} & 驱动提供的写入服务，类型为 SetCameraInfo。\\
-\bottomrule[1.5pt]
-\end{tabular}
-\end{center}
-消息字段使用小写 k、d、r、p，文档常记作 $K,D,R,P$。未标定时 $K_{00}=0$ 是约定的识别信号；不能把全零参数交给校正程序。原始和校正图要使用各自对应的几何模型。
+\texttt{camera\_calibration} 从图像求参数，\texttt{camera\_info\_manager} 是供驱动管理参数的库，\texttt{image\_proc} 根据图像和参数输出校正图。安装一个管理库不会自动给任意厂商驱动增加服务。为了让你还没借到相机时也能走完整条链路，我们给回放程序实现了加载、保存和发布；它不模拟硬件曝光，换真实相机时仍要按厂商文档启动驱动。
 
-\begin{example}[安装、核对话题并启动单目标定]
-先按相机厂商或驱动文档启动真实相机，使其发布未去畸变的 \texttt{/camera/image\_raw}。驱动与设备相关，本节不假定某一厂商的启动命令。需要能显示 OpenCV 窗口的图形会话；无桌面的 SSH 会话不能直接显示此界面。
+\begin{example}[先准备一台能保存参数的教学相机]
+在 ubuntu2404 中加载环境并安装本节依赖：
 \begin{tbash}
 sudo apt update
-sudo apt install ros-humble-camera-calibration ros-humble-image-proc \
-  ros-humble-camera-info-manager ros-humble-rqt-image-view
-source /opt/ros/humble/setup.bash
+sudo apt install ros-jazzy-camera-calibration ros-jazzy-image-proc \
+  ros-jazzy-camera-info-manager ros-jazzy-camera-info-manager-py \
+  ros-jazzy-rqt-image-view
+source /opt/ros/jazzy/setup.bash
 ros2 run camera_calibration cameracalibrator --help
+\end{tbash}
+YAML 是相机标定文件，不是带 \texttt{ros\_\_parameters} 的节点参数文件。我们用下面的 \path{model_io.py} 写出 $K,D,R,P$ 及尺寸，并在重新加载时检查模型、焦距和有限数。写入先落到同目录临时文件，再替换目标文件，避免只写半份就被读走：
+\lstinputlisting[numbers=left,language=Python,basicstyle=\footnotesize\ttfamily]{examples/camera/calibration-lab-demo/model_io.py}
+\texttt{save\_yaml} 给单目生成单位旋转和新投影内参；\texttt{save\_matrices} 则保留服务提交或双目求解的完整矩阵，不会把它们偷偷改回单目配置。
+
+接下来是 \path{replay_ros.py}。先读图与参数、建立话题和服务，再由定时器发布同时间戳的 Image 与 CameraInfo：
+\lstinputlisting[numbers=left,language=Python,basicstyle=\footnotesize\ttfamily,firstline=1,lastline=25]{examples/camera/calibration-lab-demo/replay_ros.py}
+\lstinputlisting[numbers=left,language=Python,basicstyle=\footnotesize\ttfamily,firstnumber=26,firstline=26,lastline=60]{examples/camera/calibration-lab-demo/replay_ros.py}
+没有文件时，CameraInfo 的 $K_{00}=0$，明确表示未标定。服务收到新参数后先检查尺寸、模型和数值，成功保存才更新内存；失败会返回原因：
+\lstinputlisting[numbers=left,language=Python,basicstyle=\footnotesize\ttfamily,firstnumber=61,firstline=61,lastline=78]{examples/camera/calibration-lab-demo/replay_ros.py}
+每一帧的参数沿用图像头，双目也使用同一时间戳。否则原图和参数各自都在发布，\texttt{image\_proc} 却未必能配成一对：
+\lstinputlisting[numbers=left,language=Python,basicstyle=\footnotesize\ttfamily,firstnumber=79,firstline=79]{examples/camera/calibration-lab-demo/replay_ros.py}
+在项目目录启动回放，保持这个终端运行。下面指定的 YAML 会在 COMMIT 后写入；已有文件会在启动时加载，想从未标定状态再做一次时换一个新的文件名即可。
+\begin{tbash}
+python3 replay_ros.py --images data/train --yaml out/ros-front.yaml
+\end{tbash}
+在另一个同样加载 Jazzy 的终端，查看原图类型、频率和实际服务名：
+\begin{tbash}
 ros2 topic info /camera/image_raw --verbose
 ros2 topic hz /camera/image_raw
 ros2 service list -t
 \end{tbash}
-结束频率观测后继续。确认输入类型是 Image 而非 CompressedImage，并记录实际的设置服务名。通用形式为 \texttt{ros2 run camera\_calibration cameracalibrator [标定选项] --ros-args [重映射]}。
-\begin{center}
-\begin{tabular}{p{0.34\textwidth}p{0.57\textwidth}}
-\toprule[1.5pt]
-参数 & 作用 \\
-\midrule[1pt]
-\texttt{--size 9x6} & 棋盘格内角点的列数和行数。\\
-\texttt{--square 0.025} & 单个方格边长，单位米。\\
-\texttt{--camera\_name front} & 保存到标定文件中的相机名，应与驱动配置匹配。\\
-\texttt{--no-service-check} & 跳过启动时的写入服务检查，不会创建服务。\\
-\texttt{--approximate 0.01} & 双目配对允许的时间差，单位秒。\\
-\bottomrule[1.5pt]
-\end{tabular}
-\end{center}
-其余选项查看本机 --help。Humble 标定器默认只优化两个径向系数；与前节 OpenCV 默认配置比较时，要先统一模型和固定参数选项，不能只比较 RMS。对 9×6 内角点、25 mm 方格的棋盘格执行：
+频率观测用 Ctrl+C 结束，不会关掉另一终端的回放。这里原图是 640×480 mono8，定时器每 0.1 s 发布，照片默认每 0.5 s 换一张。真实驱动可能使用其他编码或 QoS，先核对端点，不要只看话题名。
+\end{example}
+
+消息中的小写 k、d、r、p 对应文档里的 $K,D,R,P$。k/d 描述原图，r 是校正旋转，p 是校正投影；r 并不是相机安装到底盘的外参。width/height、ROI、binning 也必须与当前图像模式相符。header 中记录采集时间和光学坐标系，原图与校正图要保留这种对应关系。
+
+\begin{example}[从采样界面走到重启后的校正图]
+通用调用写成下面的形式，标定选项在前，ROS 重映射在后。在图形会话中执行具体命令：
+\begin{tbash}
+ros2 run camera_calibration cameracalibrator [标定选项] \
+  --ros-args [重映射]
+\end{tbash}
 \begin{tbash}
 ros2 run camera_calibration cameracalibrator \
-  --size 9x6 --square 0.025 --camera_name front \
+  --size 9x6 --square 0.025 --camera_name front --k-coefficients 2 \
   --ros-args -r image:=/camera/image_raw \
   -r camera/set_camera_info:=/camera/set_camera_info
 \end{tbash}
-若驱动没有写入服务，在 --ros-args 之前添加 \texttt{--no-service-check}，先走保存文件的路径；不要点击 COMMIT 并期待驱动自动支持它。
-\end{example}
+\texttt{--size} 数内角点，不是方格；\texttt{--square} 单位为米；camera\_name 记录相机名称；k-coefficients=2 保持 $k_3=0$，与离线程序一致。最后两行把默认订阅和服务映射到我们的回放节点，真实驱动时改成它实际提供的名字。
 
-\paragraph*{采集、求解、保存和部署}
-\begin{enumerate}
-\item 按前节采集方法移动标定板。界面的 X、Y、Size、Skew 表示位置、尺寸与倾斜覆盖；停稳后确认角点被识别，不要一直快速晃动。
-\item CALIBRATE 可用后开始求解，等待完成，再检查校正预览和输出参数。界面允许点击只表示满足采样条件，仍需质量验证。
-\item SAVE 将结果和采样图像保存到归档文件；Humble 实现默认写入 \nolinkurl{/tmp/calibrationdata.tar.gz}。每次保存后及时复制，避免下次实验覆盖或临时目录清理。
-\item COMMIT 尝试调用驱动的 SetCameraInfo 服务。检查返回的 success 和 status\_message 以及驱动日志；调用成功后仍需重启驱动验证是否真正持久保存。
-\item 无写入服务时，从归档中取得 YAML，再使用驱动支持的标定文件配置加载。常见参数名是 camera\_info\_url，但名称、相机名要求和是否支持运行时更新以实际驱动为准。
-\end{enumerate}
+界面的 X、Y、Size、Skew 分别提示位置、尺寸和倾斜覆盖。回放会自动换姿态，真实采集则需要你移动标定板并停稳。CALIBRATE 可用后点击求解，再检查参数与校正预览。Jazzy 这个版本采到至少 40 个不同样本也可能开放按钮，即使覆盖条尚未全部完成，所以按钮亮了并不等于照片已经合格。
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.47\textwidth]{images/camera_sampling_revised.png}
+\hfill
+\includegraphics[width=.47\textwidth]{images/camera_calibrated_revised.png}
+\caption{在独立图形会话中实测的 Jazzy 标定器：左侧采样，右侧完成求解。输入为生成的棋盘格；界面和数值保持实际截图。}
+\label{fig:camera-ros-calibration}
+\end{figure}
+本次实际采到 40 个样本，GUI 求得 $f_x\approx560.29$、$f_y\approx565.28$ pixel，接近生成条件。不过这只能说明模拟回放链路跑通，真实镜头、板面平整度与曝光质量还要重新检验。
 
-\begin{example}[保存归档并验证重新加载]
-点击 SAVE 后在终端执行，独立目录由 mktemp 创建：
+接下来点击 SAVE，把采样图与结果存进归档。当前 Jazzy 实现写到 \path{/tmp/calibrationdata.tar.gz}，再次保存会覆盖，因此先用独立目录留一份：
 \begin{tbash}
 mkdir -p "$HOME/calibrations"
 calib_dir=$(mktemp -d "$HOME/calibrations/front.XXXXXX")
 cp /tmp/calibrationdata.tar.gz "$calib_dir/"
 tar -tzf "$calib_dir/calibrationdata.tar.gz"
 tar -xzf "$calib_dir/calibrationdata.tar.gz" -C "$calib_dir"
-find "$calib_dir" -name '*.yaml'
 echo "$calib_dir"
 \end{tbash}
-以归档实际内容为准选取单目 YAML（常见为 ost.yaml），不要误拿双目的另一侧文件。文件通常包含 image\_width、image\_height、camera\_name、camera\_matrix、distortion\_model、distortion\_coefficients、rectification\_matrix 和 projection\_matrix；它不是 ROS 节点的 ros\_\_parameters 配置，不能直接假定可用 --params-file 载入。
+单目归档中可以找到 \path{ost.yaml}，但仍以实际目录内容为准。SAVE 是“把实验存档”，COMMIT 则调用驱动的 SetCameraInfo 服务，二者不是同一个按钮。点击 COMMIT 后检查服务返回与节点日志；我们的回放将参数写入启动时指定的 \path{out/ros-front.yaml}，然后继续用新参数发布。
 
-对提供 camera\_info\_url 参数的驱动，把该参数设为实际文件的绝对 URL，例如 \nolinkurl{file:///home/student/calibrations/front.yaml}；这是格式示例，必须换成上面生成的真实路径。重启驱动后执行：
+现在用 Ctrl+C 停止回放，再按原命令启动一次，查看它是否真的读回存档。另开终端运行：
 \begin{tbash}
 ros2 topic echo /camera/camera_info --once
 ros2 launch image_proc image_proc.launch.py namespace:=camera
 \end{tbash}
-确认 CameraInfo 尺寸与输入模式匹配，k 中焦距非零，d 和模型与保存文件一致。另一个加载环境的终端运行：
+先核对宽高、模型、非零焦距及 d 与文件一致，再去看校正图。你可以打开 \texttt{rqt\_image\_view}，选择 \path{/camera/image_rect}；彩色驱动还可以查看 \path{/camera/image_rect_color}。下面的 \path{check_ros.py} 则订阅实际输出，按时间戳收齐原图、参数、校正图，用相同模型再算一次 remap：
+\lstinputlisting[numbers=left,language=Python,basicstyle=\footnotesize\ttfamily,firstline=1,lastline=32]{examples/camera/calibration-lab-demo/check_ros.py}
+\lstinputlisting[numbers=left,language=Python,basicstyle=\footnotesize\ttfamily,firstnumber=33,firstline=33]{examples/camera/calibration-lab-demo/check_ros.py}
 \begin{tbash}
-ros2 run rqt_image_view rqt_image_view
+python3 check_ros.py --output out/ros-check
 \end{tbash}
-选择 \texttt{/camera/image\_rect}；彩色链路可查看 \texttt{/camera/image\_rect\_color}。比较原图和校正图中的直线及边缘，记录时间戳与 frame\_id。驱动必须以匹配时间戳发布图像和 CameraInfo；仅在终端看见过一次参数，不代表校正节点能同步到它。
+它要求编码、尺寸、frame\_id 与时间戳对应，逐像素最大差不超过 1。该比较确认校正节点使用了预期模型；要判断模型本身好不好，还得回到独立照片与真实成像检查。没有同步数据时程序会超时报错，不会用上一帧的参数凑一个成功结果。
 \end{example}
 
+如果驱动没有写入服务，在 \texttt{--ros-args} 之前加入 \texttt{--no-service-check}，先完成求解与 SAVE。这个选项只跳过启动检查，不会创建服务，COMMIT 也不会突然拥有超能力。我们的回放可以用 \texttt{--no-service} 复现此情形，再将解出的 YAML 通过 \texttt{--yaml} 显式加载。真实驱动若支持 camera\_info\_url，按它的文档设置实际文件 URL（如 \nolinkurl{file:///home/student/calibrations/front.yaml}）；不要假定每个驱动都认同同一个参数名或相机名。
+
 \begin{note}
-黑屏或无角点时按顺序检查：原图是否在发布、重映射是否正确、域和 QoS 是否兼容、图形会话是否可用、内角点数是否正确、图像是否清晰。没有校正图时再检查 CameraInfo、时间戳和参数尺寸。先启动驱动再启动标定工具；不同 Humble 补丁版本的 QoS 处理可能不同，使用 topic info --verbose 查看实际端点，不能只看话题名。
+黑屏或没角点时，先看原图是否发布，再查重映射、域、QoS、图形会话、内角点规格与清晰度。没有校正图时继续查 CameraInfo 的模型、尺寸和时间戳。无桌面的 SSH 会话不能直接显示窗口；Distrobox 中运行也要具备显示连接。本节的自动验证使用独立 Xvfb，不代表已经测试了你的实际相机。
 \end{note}
-\begin{exercise}
-驱动只有原图话题，没有 SetCameraInfo 服务。写出完成标定并保存结果的步骤；为什么加入 --no-service-check 后，仍不能保证重启驱动就有正确的 CameraInfo？
+\begin{exercise}\label{ex:v2-camera-ros}
+用新的输出目录，以 \texttt{--no-service} 启动回放。写出完成求解、SAVE、取得 YAML、显式加载并重启检查的步骤，解释为什么 \texttt{--no-service-check} 无法代替最后几步。提交实际 CameraInfo 与校正检查输出。
 \end{exercise}
 
 \subsubsection{双目标定与交付检查}
-双目标定不仅求两侧内参，还要求相机之间的固定旋转和平移。两台相机必须固定相对位置，并同时看到同一块标定板。分别完成两次单目标定，不能得到它们之间的基线。相机、镜头或安装支架移动后要重新检查外参。
+两台相机各自有了内参，还缺一件事：它们相隔多远、朝向有什么差异？分别做两次单目标定并不会得到这组固定外参。我们需要两侧同时看到同一块板，并保持相机与支架之间的相对位置不变；拆装、换镜头或移动支架后还要重新检查。
 
-\begin{example}[启动双目交互标定]
-先让两侧驱动发布同分辨率原始图像及各自的参数服务，再运行：
+\begin{example}[先在模拟图中找回 12 cm 基线]
+\path{stereo.py} 读取对应照片，固定已经求出的两侧内参，再求两相机的旋转 $R$ 与平移 $T$。生成器的两侧内参相同，因此这个项目复用同一份单目模型；真实双目要分别提供各自的 $K,D$，不能照抄这个前提。
+\lstinputlisting[numbers=left,language=Python,basicstyle=\footnotesize\ttfamily]{examples/camera/calibration-lab-demo/stereo.py}
+\begin{tbash}
+python3 stereo.py --data data --model out/front.yaml --output out/stereo
+\end{tbash}
+本次有 93 对有效角点，求出的水平基线约为 0.11995 m，校正后纵坐标差的 RMS 约为 0.091 pixel。这些残差来自参与双目拟合的图像，不能称为独立验证；实机还要另拍同步验证图，并核对实际安装距离。
+
+标准水平双目模型中，右侧 $P_{03}=-f_xB$，所以 $B=-P_{03}/P_{00}$，单位由板边长决定。这个关系属于校正后的水平模型，不是从任意投影矩阵里都能抽出相机间距离。输出的 $R_1,R_2$ 是两侧校正旋转，相机到云台、底盘或 IMU 的外参仍要另做标定并交给 TF。
+\end{example}
+
+\begin{example}[双目话题和服务怎样对应]
+先用回放检查命名与同步，它会为两侧发布相同时间戳，并分别保存左、右参数：
+\begin{tbash}
+python3 replay_ros.py --images data/left --right data/right \
+  --namespace left --yaml out/stereo-ros.yaml
+\end{tbash}
+左侧文件就是指定的 YAML，右侧在文件名末尾加 \texttt{\_right}。在另一个图形终端执行：
 \begin{tbash}
 ros2 run camera_calibration cameracalibrator \
-  --size 9x6 --square 0.025 \
+  --size 9x6 --square 0.025 --k-coefficients 2 \
   --ros-args -r left:=/left/image_raw -r right:=/right/image_raw \
   -r left_camera/set_camera_info:=/left/set_camera_info \
   -r right_camera/set_camera_info:=/right/set_camera_info
 \end{tbash}
-默认按相同时间戳配对。无硬件同步的静态教学实验，可在 --ros-args 之前增加 \texttt{--approximate 0.01}，允许最多约 10 ms 的时间配对容差；它不会校正曝光时差，也不能代替硬件同步。采集时保持板面与相机静止再取样，且两侧都要有清晰角点。保存两侧结果，检查校正后对应角点的纵坐标是否接近，并检查基线与实测安装距离是否相符。
+两侧都识别到角点后，按单目方法采样、求解与保存，检查两份 YAML、纵向残差和基线。默认以相同时间戳配对；静态、无硬件同步的教学采集可在 \texttt{--ros-args} 前加 \texttt{--approximate 0.01}，容许约 10 ms 的时间差，但它既不会让曝光同时发生，也不会补偿运动目标。当前已实测离线双目求解和回放的同时间戳发布，真实双目装置及这一双目 GUI 操作仍需现场验证。
 \end{example}
-
-标准水平双目约定下，右侧投影矩阵包含 $P_{03}=-f_xB$，可据此核对基线 $B=-P_{03}/P_{00}$，单位由标定板尺寸决定。该关系针对校正后的标准水平双目模型；不是任意矩阵中都能直接抽出相机间距离。相机到云台、底盘或 IMU 的外参仍需另外标定并通过 TF 管理。
-
-\begin{conclusion}
-\begin{itemize}
-\item 标定资料要同时交付原始样本、板参数、相机模式、结果文件、误差记录和独立验证图。
-\item SAVE 保存文件，COMMIT 请求驱动写入，驱动重启后正确发布 CameraInfo 才能证明部署链路成立。
-\item 原图使用原 $K,D$，校正图使用校正后的投影模型；ROI 与缩放也要计入。
-\item 单目位姿、双目相对外参、机器人安装外参是不同任务；时间同步误差不能靠内参标定消除。
-\end{itemize}
-\end{conclusion}
-\begin{exercise}
-标准水平双目的右侧 $P_{00}=800$ pixel、$P_{03}=-96$ pixel\,m，基线是多少？若两帧曝光相差 10 ms，--approximate 能否消除运动目标的几何偏差？
+\begin{exercise}\label{ex:v2-camera-stereo}
+标准水平双目右侧 $P_{00}=800$ pixel、$P_{03}=-96$ pixel\,m，计算基线。若曝光相差 10 ms，解释 \texttt{--approximate} 能做什么、不能做什么，并指出双目固定外参与机器人安装外参的区别。
 \end{exercise}
 
+\begin{conclusion}
+先把照片与成像模式固定下来，再拟合、独立检查、保存、部署，最后通过重启和校正输出验证整条链路。SAVE 保存文件，COMMIT 请求驱动接收参数，重启后仍正确发布才证明存档能读回来。原图配原 $K,D$，校正图配新投影模型与零畸变；板到相机、两相机之间、相机到机器人是三种不同的变换，时间同步也不能靠内参标定解决。
+\end{conclusion}
+
 \begin{note}
-接口及命令按 ROS2 Humble 的官方源码核对：
-\url{https://github.com/ros-perception/image_pipeline/tree/humble/camera_calibration}；
-\url{https://github.com/ros-perception/image_pipeline/blob/humble/image_proc/launch/image_proc.launch.py}。
-CameraInfo 的字段定义见
-\url{https://docs.ros.org/en/humble/p/sensor_msgs/msg/CameraInfo.html}。
-OpenCV 针孔模型与标定接口见
-\url{https://docs.opencv.org/4.x/d9/d0c/group__calib3d.html}。
+本节命令与按钮行为按 Jazzy 的实际安装包和官方源码核对：
+\url{https://github.com/ros-perception/image_pipeline/tree/jazzy/camera_calibration}。
+CameraInfo 字段定义见
+\url{https://github.com/ros2/common_interfaces/blob/jazzy/sensor_msgs/msg/CameraInfo.msg}；
+针孔模型及标定接口见
+\url{https://docs.opencv.org/4.6.0/d9/d0c/group__calib3d.html}。
+遇到发行版差异时，先用本机帮助与对应分支确认接口。
 \end{note}

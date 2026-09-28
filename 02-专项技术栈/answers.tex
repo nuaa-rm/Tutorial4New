@@ -702,27 +702,27 @@ cudaDeviceSynchronize等同步检查发现设备断言，启动检查不足。me
 \addcontentsline{toc}{section}{第七章题解：相机与成像原理}
 \subsubsection*{随堂练习}
 
-\paragraph*{随堂练习 7.1}
+\paragraph*{练习 \ref{ex:v2-camera-sensor}}
 \begin{solution}
 记录设备完整型号、数据表版本或来源，以及最大分辨率、像元尺寸（通常为微米）、快门类型；例如记录格式可以是“型号：实际型号；分辨率：数据表值；像元尺寸：数据表值；快门：global/rolling/未知”。分辨率不等于物理感光面尺寸，同属 CMOS 也不能推断快门类型。缺失字段如实标未知。
 \end{solution}
 
-\paragraph*{随堂练习 7.2}
+\paragraph*{练习 \ref{ex:v2-camera-exposure}}
 \begin{solution}
 从 f/4 收到 f/5.6，进光量约减半。保持亮度和增益不变，曝光应从 1 ms 延长到约 2 ms；若按标称比值精算，为 $(5.6/4)^2\approx1.96$ ms。相同图像运动速度下，曝光内位移也近似加倍，运动模糊风险增加。
 \end{solution}
 
-\paragraph*{随堂练习 7.3}
+\paragraph*{练习 \ref{ex:v2-camera-noise}}
 \begin{solution}
 泊松模型下标准差为 $\sqrt{900}=30$，相对噪声为 $30/900\approx3.33\%$。补光可以增加收到的光子数，改善此模型下的相对散粒噪声；数字增益只是同时放大已有信号与噪声，不能提供额外光子信息。
 \end{solution}
 
-\paragraph*{随堂练习 7.4}
+\paragraph*{练习 \ref{ex:v2-camera-format}}
 \begin{solution}
 像素数为 $1280\times720=921600$。Bayer8 为 921600 字节，BGR8 为 2764800 字节。文件还可能包含头部、元数据、行填充，或使用压缩编码，因此文件长度不一定等于原始像素区长度。
 \end{solution}
 
-\paragraph*{随堂练习 7.5}
+\paragraph*{练习 \ref{ex:v2-camera-gamma}}
 \begin{solution}
 当 $\gamma=1$，映射成为 $y=x$。对整数范围 0 到 255，使用本章构表公式并 round 后应逐项等于输入，可直接检查：
 \begin{tpython}
@@ -730,96 +730,97 @@ gamma = 1.0
 lut = [round(255*(i/255)**(1/gamma)) for i in range(256)]
 assert lut == list(range(256))
 \end{tpython}
+也可运行 format\_gamma.py --gamma 1，预期 identity=true；改为0.5时 LUT[128]=64，暗部压暗。饱和像素的纹理已经丢掉，提亮不能恢复。
 \end{solution}
 
-\paragraph*{随堂练习 7.6}
+\paragraph*{练习 \ref{ex:v2-camera-dof}}
 \begin{solution}
-代入焦距 16 mm、光圈数 8、弥散圆 0.01 mm，得 $H=16^2/(8\times0.01)+16=3216$ mm。与光圈数 4 时的 6416 mm 比较，收小光圈使超焦距减小；在同焦距、同对焦距离与清晰度判据下，通常使景深增加。实际极小光圈还需考虑衍射。
+代入焦距 16 mm、光圈数 8、弥散圆 0.01 mm，得 $H=16^2/(8\times0.01)+16=3216$ mm。与光圈数 4 时的 6416 mm 比较，收小光圈使超焦距减小；在同焦距、同对焦距离与清晰度判据下，通常使景深增加。N=8、s=2000时近界约1234.57、远界约5263.16 mm；s=7000时远界分母不为正，far=null表示无穷。实际极小光圈还需考虑衍射，并且收光圈减少进光，可能迫使曝光变长。
 \end{solution}
 
-\paragraph*{随堂练习 7.7}
+\paragraph*{练习 \ref{ex:v2-camera-motion}}
 \begin{solution}
-图像速度为 800 pixel/s，要求位移不超过 1 pixel，则曝光时间满足 $t\le1/800=0.00125$ s，即 1.25 ms。保持曝光时间和运动速度不变，仅提高增益不会减少位移；增益只可能在亮度允许时帮助选择更短的曝光。
+图像速度为 800 pixel/s，要求位移不超过 1 pixel，则曝光时间满足 $t\le1/800=0.00125$ s，即 1.25 ms。保持曝光时间和运动速度不变，仅提高增益不会减少位移；增益只可能在亮度允许时帮助选择更短的曝光。首末行差6 ms对应4.8 pixel跨行位置差；曝光积分造成模糊，读出时差造成形变，缩短前者不保证后者随之减少。
 \end{solution}
 
-\paragraph*{随堂练习 7.8}
+\paragraph*{练习 \ref{ex:v2-camera-lens}}
 \begin{solution}
-小角度与相同成像比例近似下，宽度为 $20\times12/8=30$ pixel。条件包括目标尺寸与姿态、距离、传感器像元尺寸、输出分辨率和裁剪缩放方式均不变；离轴畸变或较近拍摄时，简单比例可能不够准确。
+小角度与相同成像比例近似下，宽度为 $20\times12/8=30$ pixel。条件包括目标尺寸与姿态、距离、传感器像元尺寸、输出分辨率和裁剪缩放方式均不变；离轴畸变或较近拍摄时，简单比例可能不够准确。裁剪再放大只是重采样已有信息，不能增加传感器收到的真实目标细节。
 \end{solution}
 
-\paragraph*{随堂练习 7.9}
+\paragraph*{练习 \ref{ex:v2-camera-calibrate}}
 \begin{solution}
-分别建立“主要正对”和“加入不同倾角、位置、边缘覆盖”的照片集合，保持分辨率、棋盘格内角点数和方格尺寸相同，分别运行标定并记录有效照片数、RMS、K 与畸变参数。正对照片约束不足可能得到不稳定参数，即使拟合这些照片的 RMS 很低。还应检查未参与标定的照片、参数合理性及重复标定的一致性，不能编造固定 RMS 数值。
+分别建立“主要正对”和“加入不同倾角、位置、边缘覆盖”的照片集合，保持分辨率、棋盘格内角点数和方格尺寸相同，分别运行标定并记录有效照片数、RMS、K 与畸变参数。正对照片约束不足可能得到不稳定参数，即使拟合这些照片的 RMS 很低。还应检查未参与标定的照片、参数合理性及重复标定的一致性，本项目模拟结果分别约为0.255/0.263 pixel，焦距约559.70/2493.39 pixel，后者远离生成的560；这组数仅对应固定种子和声明模型，不能拿去代替实拍记录。运行两个 validate 命令，记录固定内参验证残差、角点和校正图；验证位姿仍用该图估计，不能宣称有外部真值。
 \end{solution}
 
-\paragraph*{随堂练习 7.10}
+\paragraph*{练习 \ref{ex:v2-camera-crop}}
 \begin{solution}
 按题设坐标约定，新焦距为 $1000\times0.5=500$ pixel，主点为 $(640-80)\times0.5=280$ pixel。裁剪改变坐标原点，缩放改变像素尺度，所以只改 width/height 会导致投影位置错误。还需同步更新对应内参、投影矩阵和 ROI；若具体缩放库采用半像素中心约定，按其实际坐标映射处理。
 \end{solution}
 
-\paragraph*{随堂练习 7.11}
+\paragraph*{练习 \ref{ex:v2-camera-ros}}
 \begin{solution}
 先确认原图发布和棋盘格规格，在标定命令的 --ros-args 之前加入 --no-service-check，采集多位置、多倾角数据，完成 CALIBRATE 后检查结果并点击 SAVE。复制归档、取得 YAML，按驱动文档配置标定文件路径，重启后检查 CameraInfo 与校正图。该选项只跳过服务检查，不会给驱动增加服务，也不会自动加载文件；若驱动不支持加载和发布参数，需要补充驱动实现或选用支持该功能的图像发布方案。未部署前不能把保存成功视为完整验收。
 \end{solution}
 
-\paragraph*{随堂练习 7.12}
+\paragraph*{练习 \ref{ex:v2-camera-stereo}}
 \begin{solution}
 $B=-(-96)/800=0.12$ m，即 12 cm。--approximate 只允许时间戳在指定容差内的图像组成一对，不会让曝光同时发生，也不补偿目标运动。动态实验应采用可靠的同步采集，或明确建模并验证时间补偿；不能靠放宽容差掩盖问题。
 \end{solution}
 
-\paragraph*{随堂练习 7.13}
+\paragraph*{练习 \ref{ex:v2-camera-hdr}}
 \begin{solution}
-错位为 $1000\times0.010=10$ pixel。重影来自多次曝光之间目标移动，融合时不同位置叠加；过曝是像素达到饱和而丢失亮部细节。缩短帧间隔或改善运动对齐可针对重影，降低曝光等措施针对过曝，不能混为同一问题。
+错位为 $1000\times0.010=10$ pixel。重影来自多次曝光之间目标移动，融合时不同位置叠加；过曝是像素达到饱和而丢失亮部细节。缩短帧间隔或改善运动对齐可针对重影，降低曝光等措施针对过曝，不能混为同一问题。实机还需记录设备/主机时钟来源、触发到曝光的实际延迟、曝光中点及主机接收时刻，确认是否有传输/排队误差。
 \end{solution}
 
 \subsubsection*{章末习题}
 
-\paragraph*{第七章章末第 1 题}
+\paragraph*{章末题 \ref{prob:v2-camera-aperture}}
 \begin{solution}
-光圈数为 4，即 f/4；分母使用入瞳直径。
+光圈数为 4，即 f/4；分母使用入瞳直径。同距离与像元/输出模式下，8 mm 约把目标像素宽度减半，视场更宽。景深依赖对焦距离、焦距、光圈与容许弥散圆，只有说明条件才能比较。
 \end{solution}
 
-\paragraph*{第七章章末第 2 题}
+\paragraph*{章末题 \ref{prob:v2-camera-motion}}
 \begin{solution}
 约 3 pixel；在相同运动条件下缩短曝光可减少模糊。
 \end{solution}
 
-\paragraph*{第七章章末第 3 题}
+\paragraph*{章末题 \ref{prob:v2-camera-shutter}}
 \begin{solution}
-都不能。全局快门统一曝光时序，增益改变信号放大，不改变入射光子数量。
+都不能。全局快门统一曝光时序，增益改变信号放大，不改变入射光子数量。CMOS 名称不足以判断快门，应查具体规格；400 光子下相对标准差为1/20=5\%。高斯描述幅值分布，白噪声描述相关性或频谱条件，不能互换。
 \end{solution}
 
-\paragraph*{第七章章末第 4 题}
+\paragraph*{章末题 \ref{prob:v2-camera-bytes}}
 \begin{solution}
 分别为 10000 与 30000 字节；Bayer 每像素一个颜色采样，RGB 每像素三个通道。
 \end{solution}
 
-\paragraph*{第七章章末第 5 题}
+\paragraph*{章末题 \ref{prob:v2-camera-gamma}}
 \begin{solution}
 不能。已经饱和而丢失的信息无法仅靠亮度映射恢复。
 \end{solution}
 
-\paragraph*{第七章章末第 6 题}
+\paragraph*{章末题 \ref{prob:v2-camera-scale}}
 \begin{solution}
 理想情况下像素内参基本不变，平移尺度变大 1000 倍；尺度由标定物尺寸决定。
 \end{solution}
 
-\paragraph*{第七章章末第 7 题}
+\paragraph*{章末题 \ref{prob:v2-camera-sync}}
 \begin{solution}
 0.012 m；同步误差会变成几何不一致。
 \end{solution}
 
-\paragraph*{第七章章末第 8 题}
+\paragraph*{章末题 \ref{prob:v2-camera-budget}}
 \begin{solution}
 0.0005 s，即 0.5 ms；真实相机需核对设置单位及是否受帧周期约束。
 \end{solution}
 
-\paragraph*{第七章章末第 9 题}
+\paragraph*{章末题 \ref{prob:v2-camera-ros}}
 \begin{solution}
 CALIBRATE 求解参数，SAVE 保存采样与参数文件，COMMIT 请求驱动通过 SetCameraInfo 接收结果。只有保存文件或服务调用成功还不够；重启驱动后应核对 CameraInfo 的尺寸、模型、焦距和畸变与保存结果一致，再观察匹配图像的校正效果。无服务时走手动文件加载路径。CameraInfo 的校正旋转 R 不能当作相机相对底盘的 TF 外参。
 \end{solution}
 
-\paragraph*{第七章章末第 10 题}
+\paragraph*{章末题 \ref{prob:v2-camera-validation}}
 \begin{solution}
 检查照片是否仅为相似正面姿态、是否漏掉边缘、角点是否模糊、标定板是否平整以及打印尺寸是否准确。保留不同姿态验证图，在固定内参和畸变的前提下估计该图位姿，再查看残差与校正直线；同时比较重复标定的参数稳定性。低训练 RMS 不保证视场覆盖和模型正确。校正后的图像应使用新内参或 P 中对应的内参部分及零畸变；若仍使用原图的 K、D，会把模型与图像混用，可能重复补偿畸变。
 \end{solution}
