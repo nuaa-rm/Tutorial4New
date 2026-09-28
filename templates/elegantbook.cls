@@ -426,7 +426,7 @@
   \newcommand{\institutename}{\citshape 组织：}
   \newcommand{\datename}{\citshape 时间：}
   \newcommand{\versionname}{\citshape 版本：}
-  \newcommand{\notename}{笔记}
+  \newcommand{\notename}{注意}
   \renewcommand*{\proofname}{证明}
   \newcommand{\definitionname}{定义}
   \newcommand{\theoremname}{定理}
