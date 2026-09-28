@@ -1,231 +1,176 @@
-\subsubsection{shell简介}
+\subsubsection{终端、Shell 与程序}
+\label{sec:shell-basics}
+前面我们已经在终端里敲过不少命令了，那这些文字是谁接过去处理的呢？先分清两个名字：终端（Terminal）负责显示文字和接收按键，Shell 则是解释命令的程序。比如我们输入带引号、变量或管道的命令时，Bash 会先解释这些写法，再调用内建命令，或者启动对应的外部程序。
 
-在windows系统中，我们使用电脑主要是通过图形化界面点击某个图标来启动某个程序；在linux系统中我们更频繁的使用终端和命令行。然而这些都只是我们控制计算机的表象，真正能够控制计算机硬件（CPU、内存、显示器等）的只有操作系统内核（Kernel），图形界面和命令行只是架设在用户和内核之间的一座桥梁。
-
-考虑到安全等原因，用户不能直接接触内核，因此需要另外再开发一个程序，让用户通过使用这个程序来间接地与内核进行交互。该程序的作用就是接收用户的操作（点击图标、输入命令），并进行简单的处理，然后再传递给内核。用户界面和命令行就是这个另外开发的程序，在 Linux下，这个命令行程序叫做 shell 。
-
+外部程序需要读文件、使用设备时，会通过系统调用使用内核（Kernel）提供的服务。你可以顺着下面的箭头看看这几层怎样配合，不过别把 Shell 想成自然语言翻译器：它不会把每句话都编译成机器码，再把结果翻译回人话。
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{shell.png}
-    \caption{shell工作流程示意图} % 图片标题
-    \label{fig:shell} % 图片标签，用于引用
+\centering
+\includegraphics[width=0.85\textwidth]{shell_revised.pdf}
+\caption{Shell 与普通应用都在用户空间，通过系统调用使用内核；箭头表示交互路径}
+\label{fig:shell}
 \end{figure}
+Ubuntu 默认交互 Shell 通常是 Bash，其他系统也可能使用 zsh 或 fish。环境变量 \texttt{SHELL} 通常记录登录 Shell，不保证等于当前正在运行的 Shell。本节所有脚本明确用 Bash，先在终端输入 \texttt{bash} 即可进入；结束后用 \texttt{exit} 返回。
 
-shell的一大特性就是它是一个应用程序，它连接了用户和 Linux 内核，让用户能够更加高效、安全、低成本地使用 Linux 内核。另一大特性是它是一个命令语言解释器，shell把我们在计算机上的操作或我们的命令，翻译为计算机可识别的二进制命令，传递给内核，以便调用计算机硬件执行相关的操作；计算机执行完命令后，再通过Shell翻译成自然语言，呈现在我们面前。同时，Shell 程序设计语言支持在高级语言里所能见到的绝大多数程序控制结构，比如循环，函数，变量和数组等等。
+\subsubsection{简单的 Shell 脚本}
+\Needspace{8\baselineskip}
+\begin{example}[把三个操作保存为脚本]
+如果每次准备一个目录，都要重复输入 mkdir、touch、ls，我们就可以把这些操作写进脚本，下次一次运行。首先在独立的练习目录里创建 \texttt{test.sh}，把下面的完整内容保存进去：
 
-常见的shell有Bourne shell (sh), C shell (csh), Korn shell (ksh), Bourne Again shell(bash, sh 的扩展), Z shell (zsh), friendly interactive shell (fish) 等等。
 
-启动shell的方法有两种，一是进入linux控制台，二是使用终端（快捷键为ctrl+alt+t）
-
-\subsubsection{简单的shell脚本}
-
-\textbf{新建一个shell脚本}
-
-打开文本编辑器，新建一个文件 test.sh
-
+\Needspace{9\baselineskip}
 \begin{tbash}
-	vim test.sh
+#!/usr/bin/env bash
+set -e
+mkdir -p mydir
+touch mydir/a.txt
+ls mydir
 \end{tbash}
 
-然后在shell脚本的第一行输入
 
+第一行叫 shebang，直接执行脚本时，它告诉系统使用 Bash。\texttt{set -e} 则让这里的简单命令失败时停下来，免得前面的目录没建好，后面还继续操作；复杂条件里的行为需要另查手册。脚本里的相对路径以启动时的工作目录为准，所以我们先在保存脚本的目录执行：
+
+
+\Needspace{7\baselineskip}
 \begin{tbash}
-	#!/bin/bash
+chmod u+x test.sh
+./test.sh
+bash test.sh
 \end{tbash}
 
-\#! 是一个约定的标记，它告诉系统这个脚本需要什么解释器来执行，即使用哪一种 shell。在第一行下面就可以用shell编程语言输入脚本内容了。
 
-\begin{example}
-一个最简单的 shell 脚本，运行后打印一行文字：
-\begin{tbash}
-#!/bin/bash
-echo "Hello World !"
-\end{tbash}
+两次都应该列出 \texttt{a.txt}，不过它们进入脚本的方式不一样。第一种直接执行文件，所以需要执行权限，并由 shebang 选择解释器；第二种是我们明确请 Bash 读取这个文件，只需要可读，不需要执行位。这里也别顺手换成 \texttt{sh test.sh}，Ubuntu 的 sh 通常是 dash，并不能接受所有 Bash 语法。看着都叫 Shell，写法却不一定通用。
 \end{example}
-
-shell脚本可用于ROS程序自启，即编写一系列命令行操作，启动程序时无需打开终端敲命令行，只需启动一个shell脚本即可。
-
-\textbf{运行shell脚本}
-
-运行shell脚本也有两种方式：
-
-\begin{enumerate}
-\item 作为可执行程序
-
-先使脚本具有执行权限
-
-\begin{tbash}
-	chmod +x ./test.sh
-\end{tbash}
-
-再执行脚本
-
-\begin{tbash}
-	./test.sh
-\end{tbash}
-
-\item 作为解释器参数
-
-直接运行解释器，其参数就是 shell 脚本的文件名。eg:
-
-\begin{tbash}
-	/bin/sh test.sh
-	/bin/php test.php
-\end{tbash}
-
-这种方式运行的脚本，不需要在第一行指定解释器信息，写了也没用
-\end{enumerate}
-
-\begin{exercise}
-编写脚本 \texttt{prepare.sh}，依次执行：创建目录 \texttt{mydir}、在其中创建空文件 \texttt{a.txt}、列出 \texttt{mydir} 的内容。分别以"可执行程序"和"解释器参数"两种方式运行该脚本，并观察结果。
+\begin{exercise}\label{ex:v1-shell-script}
+另写 \texttt{prepare.sh} 完成创建 mydir、创建 a.txt、列出文件。分别直接执行和作为 Bash 参数运行，检查执行权限和结果；再从另一个目录启动，记录文件建在哪里并解释原因。
 \end{exercise}
 
-\subsubsection{linux中的bash}
+\subsubsection{Bash 配置与别名}
+\label{sec:bash-config}
+用过 Windows 命令行的同学可能习惯输入 cls 清屏，到了 Bash 却发现它不认识。我们可以给 clear 起一个别名（Alias），这样仍然输入 cls，就能执行原来的命令。通用形式是 \texttt{alias 名称='命令'}，注意等号两侧不加空格。
 
-根据刚刚对shell的介绍可以知道bash也是一种shell，事实上在大多数的linux系统中，bash是默认的缺省shell。当然如果你不想用bash也可以换成其他的shell（比如zsh也很好用）。
-
-bash和shell一样有许多强大的功能，经常用到的有命令补全，通配符，命令历史记录，重定向，管道等等。bash的配置文件分为全局配置文件和个人配置文件：
-
+如果只在终端里定义，关掉这个 Shell 后就没有了；想让以后打开的 Shell 也能用，就要把它写进配置文件。不过配置文件不是放进去就会被所有程序读取，具体要看 Bash 怎样启动。常见的几个文件可以先按下表区分：
 \begin{center}
-\textbf{bash主要文件}
-	\begin{tabular}{cc}
-		\toprule[1.5pt]
-		文件 & 作用\\
-		\midrule[1pt]
-		$  /etc/profile    $		&系统的主配置文件，用于设置系统范围内的环境变量和其他系统的设置\\
-		\texttt{\textasciitilde/.bashrc}		&用于定义用户的命令别名和本地变量\\
-		\texttt{\textasciitilde/.bash\_profile}		&用于定义用户的环境变量，运行命令或脚本\\
-		\bottomrule[1.5pt]
-	\end{tabular}
-\end{center}
-
-其中我们会经常对.bashrc文件进行操作。
-
-.bashrc是终端里面指令运行的配置脚本，是系统的隐藏文件，存放在\textasciitilde{} 目录下。.bashrc的功能主要有两个：
-
-\begin{enumerate}
-\item 个性化指令alias：alias [指令别名]='原指令'
-
-注意alias和=之间不能有空格
-
-\item 设定环境路径：export PATH=\$PATH:路径
-\end{enumerate}
-
-对.bashrc中的内容进行修改后，在下一次打开新终端时修改内容才会生效，或执行source \textasciitilde/.bashrc立刻生效。
-
-\begin{example}
-在 \texttt{.bashrc} 中添加一条别名和一个环境路径，让 \texttt{ll} 等价于 \texttt{ls -l}：
-\begin{tbash}
-alias ll='ls -l'
-export PATH=$PATH:/opt/myapp/bin
-\end{tbash}
-保存后执行 \texttt{source \textasciitilde/.bashrc}，修改立即在当前终端生效。
-\end{example}
-
-\begin{exercise}
-在你的 \texttt{.bashrc} 中添加别名 \texttt{cls}（等价于 \texttt{clear}），用 \texttt{source} 使其生效并验证；确认无误后将其删除，恢复原状。
-\end{exercise}
-
-\subsubsection{linux系统环境变量简介}
-
-linux系统中有非常多的环境变量在控制系统的运行，常用的有：
-
-\begin{enumerate}
-\item PATH：决定了shell将到哪些目录中寻找命令或程序
-
-\item HOME：当前用户主目录
-
-\item SHELL：当前用户Shell类型
-\end{enumerate}
-
-这里我们主要介绍PATH环境变量
-
-PATH说简单点就是一个字符串变量，当输入命令的时候linux会去查找PATH里面记录的路径，path 配置的路径下的文件可以在任何位置执行，并且可以通过which 可执行文件命令来找到该文件的位置。注意PATH是大写，linux中区分大小写。
-
-我们先来查看一下PATH：
-
-\begin{example}
-查看当前的 PATH 环境变量：
-\begin{tbash}
-echo $PATH
-\end{tbash}
-\end{example}
-
-终端中会输出
-
-/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:
-
-/usr/local/games:/usr/lib/wsl/lib:/snap/bin
-
-
-每个路径中间用:隔开，输入命令时系统根据这些路径来寻找对应的可执行文件，先找到谁就用谁
-
-设置环境变量的方法有两种：
-
-\begin{enumerate}
-\item export PATH=/bin:/sbin:/usr/bin:/usr/sbin
-
-\item PATH="/bin:/sbin:/usr/bin:/usr/sbin"
-\end{enumerate}
-
-这两种方法给 PATH 赋的值完全相同，区别在于：不用 export 设置的环境变量仅对当前 shell 起作用，不会传导到子进程；export 设置的环境变量在子进程也有效，因此我们常用 export 命令来设置 PATH 环境变量。
-
-\begin{note}
-修改 PATH 时千万不要写成 \texttt{export PATH=/usr/local/mongodb/bin} 这种不带 \texttt{\$PATH} 的形式——新路径会覆盖掉所有原有路径，\texttt{ls}、\texttt{sudo} 等系统命令会集体罢工，终端里打出什么都是"找不到命令"，场面一度十分尴尬。万一写错了：终端内直接修改的，重开一个终端即可恢复；写进配置文件的，把写错的行注释掉再重开终端。
-\end{note}
-
-修改环境变量的方法有三种：
-
-\begin{enumerate}
-\item 直接在终端输入
-
-\begin{tbash}
-	export PATH=/usr/local/mongodb/bin:$PATH
-\end{tbash}
-
-\$PATH表示在原有PATH的基础上继续在前面或后面添加相应路径，这样可以避免修改原有路径。由于是在终端中输入命令，因此这种修改方式仅对当前用户当前终端有效。
-
-\item 修改.bashrc文件：在.bashrc文件中添加export PATH=/usr/local/mongodb/bin:\$PATH一行，保存退出后source或打开新终端即可生效。该方法对当前用户永久有效。
-
-\item 修改/etc/profile文件：找到设置PATH的行，添加export PATH=/usr/local/mongodb/bin:\$PATH，系统重启或运行source /etc/profile后生效。由于是修改了整个系统的配置文件，因此该方法对所有用户永久有效。
-\end{enumerate}
-
-\begin{conclusion}
-三种修改环境变量方式的对比：
-
-\begin{center}
-\begin{tabular}{ccc}
-\toprule[1.5pt]
-方式 & 生效范围 & 持久性\\
-\midrule[1pt]
-终端中直接输入 export & 当前终端 & 关闭终端即失效\\
-写入 \textasciitilde/.bashrc & 当前用户的所有终端 & 永久\\
-写入 /etc/profile & 所有用户 & 永久\\
-\bottomrule[1.5pt]
+\begin{tabular}{p{0.30\textwidth}p{0.61\textwidth}}
+\toprule
+文件 & Bash 的读取条件\\
+\midrule
+\texttt{\textasciitilde/.bashrc} & 通常由交互式非登录 Bash 读取；Ubuntu 的登录配置也可能显式加载它。\\
+\texttt{/etc/profile} & 登录 Bash 读取的系统配置，不是每个终端都读取。\\
+\texttt{\textasciitilde/.bash\_profile} 等 & 登录 Bash 从 .bash\_profile、.bash\_login、.profile 中读取首个存在且可读的文件。\\
+\bottomrule
 \end{tabular}
 \end{center}
+\Needspace{8\baselineskip}
+\begin{example}[设置别名，再清理当前会话]
+先保存自己的 \texttt{.bashrc} 备份，只新增 \texttt{alias cls='clear'}，在 Bash 终端执行：
 
-日常配置环境优先改 \textasciitilde/.bashrc：影响面小，改错了也好修。
-\end{conclusion}
 
-\begin{exercise}
-在终端中直接用 export 把一个自定义目录（如 \texttt{\textasciitilde/mybin}）追加到 PATH 末尾，用 \texttt{echo \$PATH} 验证；再新开一个终端，确认该修改已失效，并说明原因。
+\Needspace{7\baselineskip}
+\begin{tbash}
+source ~/.bashrc
+type cls
+cls
+\end{tbash}
+
+
+这时候 \texttt{type} 应该告诉你 cls 是一个别名，输入 cls 就会清屏，历史和文件都不会被删除。这里的 \texttt{source 文件} 是在当前 Shell 中执行文件里的命令，所以不用重开终端，也能加载刚加进去的配置。
+
+练完想撤回时，先删掉 .bashrc 中新增的那一行，再运行 \texttt{unalias cls}，把当前会话里的别名也清掉。只删配置行再 source，还不会自动撤销已经定义的别名——加载配置是在执行命令，不是把当前状态整体换成文件里的样子。
+\end{example}
+\begin{exercise}\label{ex:v1-shell-alias}
+按示例添加、验证、删除 cls 别名。新开一个从桌面启动的 Bash 终端再次检查，确认配置文件和当前会话都已恢复。
 \end{exercise}
 
-环境变量这里介绍的很浅，主要目的是让读者先对环境变量这个概念有所了解，在后续自己配环境的过程中逐步加深对环境变量的理解，避免对系统环境变量的误操作。
+\subsubsection{环境变量与父子进程}
+\label{sec:shell-environment}
+你可能已经发现，输入 ls 就能运行它，但自己刚编译的程序通常要写成 \texttt{./程序}。这是因为 PATH 保存着一组用冒号分隔的命令搜索目录：输入不带斜杠的外部命令名时，Shell 会到这些目录里找。想看看实际找到了谁，可以用 \texttt{command -v 命令名}；\texttt{./程序} 则明确指定当前目录里的文件，不依靠 PATH 搜索。HOME 记录当前用户的家目录，这些系统变量都各有用途，我们不要为了做实验随便改写。
 
-\subsubsection{zsh 与终端美化*}
+接下来看看一个容易配错的地方：在当前 Shell 里定义了变量，为什么另一个程序却看不到？普通赋值 \texttt{名称=值} 定义的是 Shell 变量，加上 \texttt{export 名称=值}，才把它标为环境的一部分，让随后启动的子进程继承。\textbf{已经导出的变量再次赋值，仍然保持导出状态}，所以拿平时已经导出的 PATH 做“有没有 export”的对比，很容易得出错误结论。下面我们换两个新的教学变量，亲眼看看它们怎样传递。
+\Needspace{8\baselineskip}
+\begin{example}[父进程的环境怎样传给子进程]
+本卷项目位于 \texttt{examples/shell-environment-demo/}，结构如下：
+\begin{lstlisting}[language={},frame=single]
+shell-environment-demo/
+  parent.sh
+  child.sh
+  README.md
+\end{lstlisting}
+父脚本的完整内容：
+
+\lstinputlisting[language=bash,frame=single,numbers=left]{examples/shell-environment-demo/parent.sh}
+
+子脚本的完整内容：
+
+\lstinputlisting[language=bash,frame=single,numbers=left]{examples/shell-environment-demo/child.sh}
+
+我们按执行顺序看一下：父脚本先切到自己的目录，定义一个普通变量和一个导出变量，然后启动子 Bash。子脚本读取这两个变量，没有定义的就打印 unset，这样我们不会把“没传进来”和“值是空字符串”弄混。接着它把自己的 RM\_EXPORTED 改成 radar，再退出。猜一猜，父脚本最后看到的是 camera 还是 radar？
+从本卷目录运行：
+
+
+\Needspace{6\baselineskip}
+\begin{tbash}
+cd examples/shell-environment-demo
+bash parent.sh
+\end{tbash}
+
+
+预期输出为：
+\begin{lstlisting}[language={},frame=single]
+parent: local=armor exported=camera
+child: local=unset exported=camera
+child changed: exported=radar
+parent after child: exported=camera
+\end{lstlisting}
+最后一行仍然是 camera。子进程拿到的是启动时继承的环境，后来在自己这里改了，并不会反过来改掉父进程。于是你就能解释了：为什么在脚本里 export 了一个变量，脚本结束以后，原来的终端却没有跟着变。
+\end{example}
+\begin{exercise}\label{ex:v1-shell-inheritance}
+先给 RM\_LOCAL 加 export，运行并解释子进程输出。恢复后再把 \texttt{bash child.sh} 改成 \texttt{source child.sh}，预测最后一行并验证；每次只改一项，最后恢复源码。
+\end{exercise}
+
+\Needspace{8\baselineskip}
+\begin{example}[临时追加命令搜索路径]
+在 Bash 中保存 PATH 后追加，不覆盖原来的搜索路径：
+
+
+\Needspace{9\baselineskip}
+\begin{tbash}
+original_path=$PATH
+export PATH="$PATH:$HOME/mybin"
+printf '%s\n' "$PATH"
+command -v bash
+export PATH="$original_path"
+\end{tbash}
+
+
+这里的 mybin 可以暂时不存在，我们先看原来的目录是不是都还在，\texttt{command -v bash} 还能不能找到 Bash。最后一行会恢复原值，所以这次实验不会留下永久配置。如果以后真要长期使用，再把追加行写进对应的用户配置中。不过别反复 source 一条不带去重的追加命令，不然 PATH 会越接越长。桌面应用也不一定读取 .bashrc，配置能传给谁，还要看它由哪个进程启动。
+\end{example}
+\begin{note}
+\texttt{export PATH=/opt/app/bin} 会覆盖原搜索路径，使很多外部命令找不到。当前会话可用保存值恢复；若写进配置，先用绝对路径启动编辑器修正新增行，再从正常入口重开终端。仍可用 Bash 内建的 \texttt{printf}、\texttt{export} 检查与修复，不为这个错误重装系统。
+\end{note}
+\begin{exercise}\label{ex:v1-shell-path}
+保存并临时追加自己的 mybin 目录。从当前终端启动子 Bash，再从桌面启动器打开独立终端，分别查看 PATH，解释差别，最后恢复原值。不要改 HOME、SHELL 等系统变量。
+\end{exercise}
+\begin{conclusion}
+脚本直接运行与 \texttt{bash 文件} 都启动子进程；\texttt{source 文件} 在当前 Shell 执行。export 让新子进程继承变量，但子进程不能反向改变父进程。配置文件提供持久命令，实际读取条件与父进程决定哪些程序能看见它，不能概括成“所有新终端都生效”。
+\end{conclusion}
+\subsubsection{zsh 与终端美化*}\label{sec:zsh-customize}
 
 bash 够用，但用久了难免嫌弃：命令没有建议、语法没有高亮、提示符万年一张脸。zsh（Z shell）配合 Oh My Zsh 框架和 Powerlevel10k 主题，可以把终端武装到牙齿——命令自动建议、语法高亮、git 状态提示全都有，属于从功能机换到智能机的体验。本节为选修内容，不影响后续学习，但装完大概率就回不去了。
 
 \textbf{安装 zsh}
 
+\Needspace{8\baselineskip}
 \begin{example}
 安装 zsh 并将它设为默认 shell：
+
+
+\Needspace{6\baselineskip}
 \begin{tbash}
 sudo apt install zsh
 chsh -s $(which zsh)
 \end{tbash}
+
+
 \end{example}
 
 \texttt{chsh} 修改的是登录 shell，需要\textbf{注销并重新登录}（或重启）后才会生效。重新登录后打开终端，会看到 zsh 的首次配置提示，按 q 跳过即可——反正接下来的配置都交给 Oh My Zsh 统一管理。
@@ -234,14 +179,23 @@ chsh -s $(which zsh)
 
 Oh My Zsh 是 zsh 的配置管理框架，主题和插件都通过它安装。
 
+\Needspace{8\baselineskip}
 \begin{example}
 安装 Oh My Zsh：
+
+
+\Needspace{8\baselineskip}
 \begin{tbash}
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+curl -fLo install-ohmyzsh.sh \
+    https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
+less install-ohmyzsh.sh
+sh install-ohmyzsh.sh
 \end{tbash}
+
+
 \end{example}
 
-安装脚本做的事情很简单：把框架克隆到 \textasciitilde/.oh-my-zsh 目录，并生成一份默认的 \textasciitilde/.zshrc 配置文件。
+先查看来源与脚本内容，确认会写入哪些目录、是否更改登录 Shell；已有 .zshrc 时先备份。安装脚本主要做这些事：把框架克隆到 \textasciitilde/.oh-my-zsh 目录，并生成一份默认的 \textasciitilde/.zshrc 配置文件。
 
 \begin{note}
 如果访问 GitHub 缓慢，可以先配置代理，或使用国内镜像源安装。
@@ -249,26 +203,34 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/too
 
 \textbf{安装 Powerlevel10k 主题}
 
-Powerlevel10k（简称 p10k）是目前最流行的 zsh 主题，能在提示符中直接显示目录、git 分支与提交状态、命令执行耗时等信息。
+Powerlevel10k（简称 p10k）是一种 zsh 主题，能在提示符中直接显示目录、git 分支与提交状态、命令执行耗时等信息。
 
+\Needspace{8\baselineskip}
 \begin{example}
 安装 p10k 主题：
+
+
+\Needspace{6\baselineskip}
 \begin{tbash}
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/.oh-my-zsh/custom/themes/powerlevel10k
 \end{tbash}
+
+
 然后打开 \textasciitilde/.zshrc，把主题行改为：
+
+
+\Needspace{5\baselineskip}
 \begin{tbash}
 ZSH_THEME="powerlevel10k/powerlevel10k"
 \end{tbash}
+
+
 重开终端后会自动进入 p10k 的配置向导（也可以随时用 \texttt{p10k configure} 手动启动），按提示逐项选择喜欢的样式即可。
 \end{example}
 
-% TODO(占位图)：p10k 配置向导界面截图，保存为 images/zsh_p10k_configure.png
 \begin{figure}[H]
     \centering
-    \IfFileExists{images/zsh_p10k_configure.png}{%
-        \includegraphics[width=0.8\textwidth]{zsh_p10k_configure.png}}{%
-        \fbox{\parbox[c][6em][c]{0.8\textwidth}{\centering 占位图：p10k 配置向导界面（待补充截图）}}}
+    \includegraphics[width=0.8\textwidth]{zsh_p10k_configure.png}
     \caption{p10k 配置向导}
     \label{fig:p10k_configure}
 \end{figure}
@@ -286,24 +248,32 @@ zsh 的插件生态是它相比 bash 的一大优势，最常用的两个：
 \item zsh-syntax-highlighting：命令输入时实时高亮，命令拼错时显示为红色。
 \end{itemize}
 
+\Needspace{8\baselineskip}
 \begin{example}
 安装这两个插件并在 \textasciitilde/.zshrc 中启用：
+
+
+\Needspace{8\baselineskip}
 \begin{tbash}
 git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
 git clone https://github.com/zsh-users/zsh-syntax-highlighting ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
 \end{tbash}
+
+
 然后修改 \textasciitilde/.zshrc 中的插件行：
+
+
+\Needspace{5\baselineskip}
 \begin{tbash}
 plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
 \end{tbash}
+
+
 \end{example}
 
-% TODO(占位图)：配置完成的终端效果图（含 p10k 提示符、自动建议、语法高亮），保存为 images/zsh_p10k_effect.png
 \begin{figure}[H]
     \centering
-    \IfFileExists{images/zsh_p10k_effect.png}{%
-        \includegraphics[width=0.8\textwidth]{zsh_p10k_effect.png}}{%
-        \fbox{\parbox[c][6em][c]{0.8\textwidth}{\centering 占位图：美化后的终端效果（待补充截图）}}}
+    \includegraphics[width=0.8\textwidth]{zsh_p10k_effect.png}
     \caption{配置完成后的终端效果}
     \label{fig:zsh_effect}
 \end{figure}
@@ -328,14 +298,13 @@ Tab 补全 & 基础补全 & 支持命令参数、选项的智能补全\\
 \end{tabular}
 \end{center}
 
-两者脚本语法大部分兼容；带 \texttt{\#!/bin/bash} 行首的脚本仍由 bash 执行，更换交互式 shell 不影响已有脚本的运行。
+两者有语法与默认行为差异，不把一份 Bash 配置整体当作 zsh 脚本使用；带 \texttt{\#!/bin/bash} 行首的脚本仍由 bash 执行，更换交互式 shell 不影响已有脚本的运行。
 \end{conclusion}
 
 \begin{note}
-\textasciitilde/.bashrc 中的内容不会自动迁移到 \textasciitilde/.zshrc——尤其是 source 类的环境配置行（后续卷二安装 ROS2 时会向 \textasciitilde/.bashrc 写入 source 命令）。换用 zsh 后记得手动把这些行加到 \textasciitilde/.zshrc 里，否则会出现"昨天还能编译，今天找不到命令"的灵异事件。
+\textasciitilde/.bashrc 中的内容不会自动迁移到 \textasciitilde/.zshrc——尤其是 source 类的环境配置行（后续卷二安装 ROS2 时会向 \textasciitilde/.bashrc 写入 source 命令）。换用 zsh 后迁移自己的兼容配置；ROS 2 在 Bash 中加载 setup.bash，在 zsh 中应加载同一路径下的 setup.zsh，不能把 setup.bash 原样复制过去。每次换环境用命令查询验证，不靠提示符判断。
 \end{note}
 
-\begin{exercise}
+\begin{exercise}\label{ex:v1-zsh-config}
 完成 zsh、Oh My Zsh、p10k 的安装与主题配置，启用 autosuggestions 插件，并把原来 \textasciitilde/.bashrc 中自己添加的别名迁移到 \textasciitilde/.zshrc。
 \end{exercise}
-

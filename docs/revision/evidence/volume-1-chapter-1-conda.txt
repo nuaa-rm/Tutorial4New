@@ -1,0 +1,225 @@
+conda 26.7.2
+==> /tmp/tutorial-conda/.condarc <==
+channels:
+  - conda-forge
+
+==> envvars <==
+register_envs: False
+envs_path:
+  - /tmp/tutorial-conda/envs
+pkgs_dirs:
+  - /tmp/tutorial-conda/pkgs
+
+channels:
+  - conda-forge
+auto_activate: True
+
+# conda environments:
+#
+# * -> active
+# + -> frozen
+base                     /tmp/tutorial-conda
+
+WARNING conda.cli.condarc:set_key(521): Key auto_activate_base is an alias of auto_activate; setting value with latter
+auto_activate: False
+Retrieving notices: ...working... done
+Channels:
+ - conda-forge
+Platform: linux-64
+Collecting package metadata (repodata.json): ...working... done
+Solving environment: ...working... done
+
+## Package Plan ##
+
+  environment location: /tmp/tutorial-conda/envs/rm-training-py310
+
+  added / updated specs:
+    - python=3.10
+
+
+The following packages will be downloaded:
+
+    package                    |            build
+    ---------------------------|-----------------
+    libexpat-2.8.5             |       hd2095e1_0          76 KB  conda-forge
+    libgcc-16.2.0              |       ha9f2e26_7         1.0 MB  conda-forge
+    libgomp-16.2.0             |       he0feb66_7         626 KB  conda-forge
+    libnsl-2.0.1               |       hb9d3cd8_1          33 KB  conda-forge
+    libstdcxx-16.2.0           |       h934c35e_7         6.3 MB  conda-forge
+    libuuid-2.42.4             |       hcfc3c73_0          34 KB  conda-forge
+    libxcrypt-4.4.38           |       h280c20c_0         100 KB  conda-forge
+    pip-26.2.1                 |     pyh8b19718_0         1.1 MB  conda-forge
+    python-3.10.21             |h267e890_0_cpython        24.2 MB  conda-forge
+    wheel-0.48.0               |     pyhd8ed1ab_0          34 KB  conda-forge
+    ------------------------------------------------------------
+                                           Total:        33.5 MB
+
+The following NEW packages will be INSTALLED:
+
+  _openmp_mutex      conda-forge/linux-64::_openmp_mutex-4.5-20_gnu
+  bzip2              conda-forge/linux-64::bzip2-1.0.8-hda65f42_10
+  ca-certificates    conda-forge/noarch::ca-certificates-2026.7.22-hbd8a1cb_0
+  icu                conda-forge/linux-64::icu-78.3-py310h44b86e0_2
+  ld_impl_linux-64   conda-forge/linux-64::ld_impl_linux-64-2.46.1-default_hbd61a6d_102
+  libexpat           conda-forge/linux-64::libexpat-2.8.5-hd2095e1_0
+  libffi             conda-forge/linux-64::libffi-3.7.0-h81df57d_1
+  libgcc             conda-forge/linux-64::libgcc-16.2.0-ha9f2e26_7
+  libgomp            conda-forge/linux-64::libgomp-16.2.0-he0feb66_7
+  liblzma            conda-forge/linux-64::liblzma-5.8.3-hb03c661_1
+  libnsl             conda-forge/linux-64::libnsl-2.0.1-hb9d3cd8_1
+  libsqlite          conda-forge/linux-64::libsqlite-3.53.4-h13e7031_1
+  libstdcxx          conda-forge/linux-64::libstdcxx-16.2.0-h934c35e_7
+  libuuid            conda-forge/linux-64::libuuid-2.42.4-hcfc3c73_0
+  libxcrypt          conda-forge/linux-64::libxcrypt-4.4.38-h280c20c_0
+  libzlib            conda-forge/linux-64::libzlib-1.3.2-h25fd6f3_3
+  ncurses            conda-forge/linux-64::ncurses-6.6-hdb14827_1
+  openssl            conda-forge/linux-64::openssl-3.6.4-h781a0a9_0
+  packaging          conda-forge/noarch::packaging-26.3-pyhc364b38_0
+  pip                conda-forge/noarch::pip-26.2.1-pyh8b19718_0
+  python             conda-forge/linux-64::python-3.10.21-h267e890_0_cpython
+  readline           conda-forge/linux-64::readline-8.3-hd6e31c0_1
+  setuptools         conda-forge/noarch::setuptools-84.0.0-pyh332efcf_0
+  tk                 conda-forge/linux-64::tk-8.6.13-noxft_h1df4ec4_4
+  tzdata             conda-forge/noarch::tzdata-2026c-h151e31d_0
+  wheel              conda-forge/noarch::wheel-0.48.0-pyhd8ed1ab_0
+  zstd               conda-forge/linux-64::zstd-1.5.7-hb78ec9c_7
+
+
+
+Downloading and Extracting Packages: ...working... done
+Preparing transaction: ...working... done
+Verifying transaction: ...working... done
+Executing transaction: ...working... done
+WARNING conda.conda_pypi.main:notify_externally_managed_future(156):
+  Did you know? You can install many PyPI packages with conda
+  using the conda-pypi beta. Get started:
+    https://docs.conda.io/projects/conda/en/stable/new-features.html
+
+#
+# To activate this environment, use
+#
+#     $ conda activate rm-training-py310
+#
+# To deactivate an active environment, use
+#
+#     $ conda deactivate
+
+Channels:
+ - conda-forge
+Platform: linux-64
+Collecting package metadata (repodata.json): ...working... done
+Solving environment: ...working... done
+
+## Package Plan ##
+
+  environment location: /tmp/tutorial-conda/envs/rm-training-py310
+
+  added / updated specs:
+    - numpy
+
+
+The following packages will be downloaded:
+
+    package                    |            build
+    ---------------------------|-----------------
+    libblas-3.11.0             |11_h4a7cf45_openblas          18 KB  conda-forge
+    libcblas-3.11.0            |11_h0358290_openblas          18 KB  conda-forge
+    libgfortran-16.2.0         |       h69a702a_7          28 KB  conda-forge
+    libgfortran5-16.2.0        |       h6b99dfc_7         2.4 MB  conda-forge
+    liblapack-3.11.0           |11_h47877c9_openblas          18 KB  conda-forge
+    libopenblas-0.3.34         |pthreads_hf13c14d_2         6.5 MB  conda-forge
+    numpy-2.2.6                |  py310hefbff90_0         7.5 MB  conda-forge
+    python_abi-3.10            |          9_cp310           7 KB  conda-forge
+    ------------------------------------------------------------
+                                           Total:        16.6 MB
+
+The following NEW packages will be INSTALLED:
+
+  libblas            conda-forge/linux-64::libblas-3.11.0-11_h4a7cf45_openblas
+  libcblas           conda-forge/linux-64::libcblas-3.11.0-11_h0358290_openblas
+  libgfortran        conda-forge/linux-64::libgfortran-16.2.0-h69a702a_7
+  libgfortran5       conda-forge/linux-64::libgfortran5-16.2.0-h6b99dfc_7
+  liblapack          conda-forge/linux-64::liblapack-3.11.0-11_h47877c9_openblas
+  libopenblas        conda-forge/linux-64::libopenblas-0.3.34-pthreads_hf13c14d_2
+  numpy              conda-forge/linux-64::numpy-2.2.6-py310hefbff90_0
+  python_abi         conda-forge/noarch::python_abi-3.10-9_cp310
+
+
+
+Downloading and Extracting Packages: ...working... done
+Preparing transaction: ...working... done
+Verifying transaction: ...working... done
+Executing transaction: ...working... done
+WARNING conda.conda_pypi.main:notify_externally_managed_future(156):
+  Did you know? You can install many PyPI packages with conda
+  using the conda-pypi beta. Get started:
+    https://docs.conda.io/projects/conda/en/stable/new-features.html
+
+Python 3.10.21
+/tmp/tutorial-conda/envs/rm-training-py310/bin/python
+2.2.6
+# packages in environment at /tmp/tutorial-conda/envs/rm-training-py310:
+#
+# Name                     Version          Build            Channel
+numpy                      2.2.6            py310hefbff90_0  conda-forge
+
+Remove all packages in environment /tmp/tutorial-conda/envs/rm-training-py310:
+
+
+## Package Plan ##
+
+  environment location: /tmp/tutorial-conda/envs/rm-training-py310
+
+
+The following packages will be REMOVED:
+
+  _openmp_mutex-4.5-20_gnu
+  bzip2-1.0.8-hda65f42_10
+  ca-certificates-2026.7.22-hbd8a1cb_0
+  icu-78.3-py310h44b86e0_2
+  ld_impl_linux-64-2.46.1-default_hbd61a6d_102
+  libblas-3.11.0-11_h4a7cf45_openblas
+  libcblas-3.11.0-11_h0358290_openblas
+  libexpat-2.8.5-hd2095e1_0
+  libffi-3.7.0-h81df57d_1
+  libgcc-16.2.0-ha9f2e26_7
+  libgfortran-16.2.0-h69a702a_7
+  libgfortran5-16.2.0-h6b99dfc_7
+  libgomp-16.2.0-he0feb66_7
+  liblapack-3.11.0-11_h47877c9_openblas
+  liblzma-5.8.3-hb03c661_1
+  libnsl-2.0.1-hb9d3cd8_1
+  libopenblas-0.3.34-pthreads_hf13c14d_2
+  libsqlite-3.53.4-h13e7031_1
+  libstdcxx-16.2.0-h934c35e_7
+  libuuid-2.42.4-hcfc3c73_0
+  libxcrypt-4.4.38-h280c20c_0
+  libzlib-1.3.2-h25fd6f3_3
+  ncurses-6.6-hdb14827_1
+  numpy-2.2.6-py310hefbff90_0
+  openssl-3.6.4-h781a0a9_0
+  packaging-26.3-pyhc364b38_0
+  pip-26.2.1-pyh8b19718_0
+  python-3.10.21-h267e890_0_cpython
+  python_abi-3.10-9_cp310
+  readline-8.3-hd6e31c0_1
+  setuptools-84.0.0-pyh332efcf_0
+  tk-8.6.13-noxft_h1df4ec4_4
+  tzdata-2026c-h151e31d_0
+  wheel-0.48.0-pyhd8ed1ab_0
+  zstd-1.5.7-hb78ec9c_7
+
+
+
+Downloading and Extracting Packages: ...working... done
+Preparing transaction: ...working... done
+Verifying transaction: ...working... done
+Executing transaction: ...working... done
+
+# conda environments:
+#
+# * -> active
+# + -> frozen
+base                     /tmp/tutorial-conda
+
+PASS: Conda 配置、创建、激活、NumPy 导入、退出与删除；配置和环境位于 /tmp

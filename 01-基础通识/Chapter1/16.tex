@@ -1,94 +1,70 @@
-\subsubsection{conda简介}
+\subsubsection{先判断是否需要 Conda}
+一个 Python 项目要求这个版本的包，另一个项目又要求那个版本，如果都装进同一套环境里，很容易互相打架。这时候我们可以用环境管理器（Environment Manager），给每个项目准备一套相对独立的解释器和依赖，用哪个项目就切到哪套环境，不必每次都拆东墙补西墙。
 
+Conda 就是同时管理解释器、包和环境的工具。如果你接触的 Python 项目不多，只需要系统 Python 和几个包，也可以跳过 Conda，用标准库自带的 venv，更轻量一些。本节属于选修内容，下面的操作都在独立练习环境里做，不改系统 Python。
 \begin{note}
-如果你接触的py项目不多，你也可以跳过conda，用python自带的venv管理环境，更轻量化。
+环境隔离不是安全沙箱，也不保证所有依赖冲突都消失。安装器与下载渠道按当前官方说明核对：\url{https://docs.conda.io/projects/conda/en/stable/user-guide/install/}。已装好就不重复安装；\texttt{conda --version} 应能显示版本，\texttt{conda info --base} 能找到安装位置。
 \end{note}
 
-conda是一个包，依赖和环境管理工具，可以用于在同一个机器上安装不同Python版本的软件包及其依赖，并能够在不同的Python环境之间切换。一个conda环境就是一个目录包含所有的安装包和依赖，不同环境之间独立且不相互影响，跟python的虚拟环境virtualenv一样。通过conda的创建的虚拟环境，我们可以管理不同的python版本及其安装包而无需担心因不同版本导致的冲突；同时，在配置一个新环境时我们还可以利用虚拟环境来试错而不用担心对电脑原生环境造成无法挽回的伤害。想给每个项目都配一套独立环境？和conda签订契约，成为虚拟环境管理大师吧。
+\subsubsection{先读配置，再决定是否更改}
+安装好以后，我们先看看它现在怎样工作，不急着把网上的配置整段复制进去。Conda 可以从用户的 \texttt{\textasciitilde/.condarc} 等位置读取配置，\path|conda config --show-sources| 告诉你配置来自哪里，\texttt{--show 键名} 显示实际值，\texttt{--set 键名 值} 则用来设置单值。
 
-conda适用于多种语言，如: Python,R,Scala, Java,Javascript, C/ C++, FORTRAN等。conda默认随miniconda或anaconda发行。
+本节不为省一次确认就全局开启 always\_yes，也不加入旧的 pkgs/free 渠道。下载慢时可以按当前渠道文档选择镜像，不过混用渠道可能影响依赖解算和许可适用条件，要按项目需要核对，不能把“加得越多就越容易装好”当成经验。
+\Needspace{8\baselineskip}
+\begin{example}[检查自动激活与下载渠道]
 
-安装anacoda后，在用户HOME目录下，会有一个anaconda目录，其中bin,include,lib,share里面是conda默认环境的文件，envs存放conda管理的环境信息，pkgs里面是解压的软件安装包。
 
-\subsubsection{conda配置}
-
-conda默认的配置文件为\textasciitilde/.condarc，通过修改配置文件我们可以配置如下内容：
-
-\begin{enumerate}
-\item conda从哪里获取安装包
-
-\item conda是否使用代理服务器
-
-\item conda从哪里获取环境信息
-
-\item 当conda环境激活的时候是否更新bash提示
-\end{enumerate}
-
-\textbf{查看所有配置信息}
-
+\Needspace{8\baselineskip}
 \begin{tbash}
-conda config --show --json
+conda config --show-sources
+conda config --show channels
+conda config --show auto_activate_base
+conda env list
 \end{tbash}
 
-\textbf{配置使用清华的源}
 
-\begin{example}
-将 conda 的软件源切换为清华镜像，并显示下载渠道：
-\begin{tbash}
-conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free
-conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main
-conda config --set show_channel_urls yes
-\end{tbash}
-\end{example}
+先记下实际的渠道和环境列表。如果每次打开终端都会自动进入 base，而你并不总要用它，可以关闭基础环境的自动激活。已有 .condarc 时先备份自己的文件，然后执行：
 
-\textbf{配置安装软件时不要提示输入yes}
 
-\begin{tbash}
-conda config --set always_yes true
-\end{tbash}
-
-\textbf{取消每次启动自动激活conda的基础环境}
-
+\Needspace{5\baselineskip}
 \begin{tbash}
 conda config --set auto_activate_base false
 \end{tbash}
 
-建议安装后关闭自动激活。后续学习 ROS2 时，conda 基环境自动激活易与 ROS2 工作空间冲突，导致功能包无法正常编译。通识阶段应养成按需激活环境的习惯，细则见卷二 ROS2 章。
 
-\subsubsection{conda基础操作}
-
-这里介绍一些conda命令行的基础操作：
-
-\begin{center}
-\textbf{conda基础操作}
-	\begin{tabular}{cc}
-		\toprule[1.5pt]
-		命令 & 作用\\
-		\midrule[1pt]
-		$  conda\enspace --version    $		&查看当前版本\\
-		$  conda\enspace activate\enspace [env]    $		&激活环境\\
-		$  conda\enspace deactivate   $		&退出环境\\
-		$  conda\enspace update\enspace conda   $		&更新conda\\
-		$  conda\enspace create\enspace --name\enspace [env]\enspace python=3.9\enspace [packages...]   $		&创建python 3.9的环境并安装包\\
-		$  conda\enspace info\enspace --envs   $		&查看所有的环境\\
-		$  conda\enspace list   $		&查看当前环境下的包\\
-		$  conda\enspace install\enspace --name\enspace [env]\enspace [package]   $		&安装包到指定环境中\\
-		$  conda\enspace remove\enspace --name\enspace [env]\enspace [package]   $		&删除指定环境里的包\\
-		\bottomrule[1.5pt]
-	\end{tabular}
-\end{center}
-
-\begin{example}
-创建一个名为 \texttt{py39} 的 Python 3.9 环境，激活后查看其中已安装的包，最后退出环境：
-\begin{tbash}
-conda create --name py39 python=3.9
-conda activate py39
-conda list
-conda deactivate
-\end{tbash}
+接着从平时的入口新开一个终端，看看是不是不再自动进入 base。后面学习 ROS 2 时，Conda 的 PATH 或库路径可能干扰系统工具链，所以养成按需激活的习惯会更省心。如果你的版本提示键名或别名有变化，就用 \texttt{conda config --describe} 查当前支持项，不用猜一个名字反复改。
 \end{example}
-
-\begin{exercise}
-创建一个 Python 3.10 的环境并激活，在其中安装 \texttt{numpy}，用 \texttt{conda list} 确认安装成功后退出环境，并删除该环境（提示：\texttt{conda remove --name 环境名 --all}）。
+\begin{exercise}\label{ex:v1-conda-config}
+只读记录配置来源、下载渠道与基础环境自动激活状态。说明哪些值来自用户配置、哪些来自默认值，以及为什么后续 ROS 2 编译前要确认没有继承 Conda 的 PATH/库路径。没有 Conda 时先使用 venv 的独立环境路线，Conda 命令检查留待安装后验证。
 \end{exercise}
 
+\subsubsection{创建、使用与删除练习环境}
+配置看过了，我们来给一个小项目准备环境。创建时使用 \texttt{conda create --name 名称 python=版本 [包名]}，其中名称和版本按你的项目需要填写；创建好后，用 \texttt{conda activate 名称} 进入，\texttt{conda install 包名} 安装依赖，不用了再用 \texttt{conda deactivate} 退出。激活改变的是当前 Shell 使用的命令与依赖，旁边已经打开的其他终端不会自动跟着切换。
+\Needspace{8\baselineskip}
+\begin{example}[只给一个练习环境装 NumPy]
+先在 \texttt{conda env list} 确认没有同名资料，再执行：
+
+
+\Needspace{11\baselineskip}
+\begin{tbash}
+conda create --name rm-training-py310 python=3.10
+conda activate rm-training-py310
+conda install numpy
+python --version
+python -c "import sys, numpy; print(sys.executable); print(numpy.__version__)"
+conda list numpy
+conda deactivate
+\end{tbash}
+
+
+这时候应该显示 Python 3.10，解释器路径也应当落在刚创建的环境里，并且能够成功导入 NumPy。别只看提示符前面多了一个环境名，就认定切换完成了；我们再看一次实际路径、试一次导入，才能确认这条 python 命令真的用上了它。
+\end{example}
+\begin{note}
+\texttt{conda remove --name 名称 --all} 会删除指定环境的全部包。先退出并核对名称；不要把平时使用的环境拿来练删除。环境解决软件依赖，ROS 2 的 Bash/zsh 加载脚本另按卷二说明，不把它们写入所有 Shell 的通用启动流程。
+\end{note}
+\begin{exercise}\label{ex:v1-conda-env}
+独立完成 Python 3.10 与 NumPy 环境的创建、激活、导入验证和退出，记录解释器路径。确认环境只用于练习后删除，再检查环境列表与当前 Python 路径。保留日志，失败时记录下载或解算错误，不宣称“提示符变了就是成功”。
+\end{exercise}
+\begin{conclusion}
+配置决定渠道与激活行为，环境决定这次项目用哪套解释器和包。先读实际值，再改用户范围；先验证路径与导入，再清理练习环境。ROS 2 工作空间使用其支持的系统环境，深度学习项目的 Conda 环境按需单独激活。
+\end{conclusion}

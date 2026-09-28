@@ -1,370 +1,253 @@
-本部分以windows11系统为例进行安装说明，如有使用特殊体质mac系统还请寻找其他方法（也许后续会补充进来）。
-安装双系统主要分为以下四个流程：系统分区，制作启动盘，从U盘进行安装，系统设置相关。下面将进行一一说明。
+本部分以 Windows 11 系统为例进行安装说明，使用的是常见的 x86\_64 电脑、UEFI 启动和 GPT 分区表。如果你使用的是特殊体质的 Mac，尤其是 Apple Silicon 机型，还请寻找对应的安装方法，不要直接照着下面的分区步骤操作。旧式 Legacy/MBR 安装和磁盘加密迁移也需要另外处理。
+
+安装双系统主要分为以下四个流程：系统分区、制作启动盘、从 U 盘进行安装、系统设置相关。下面我们就来一一说明。本节沿用 Ubuntu 22.04 LTS 的安装路线；如果队内已经统一使用 Ubuntu 24.04 与 ROS 2 Jazzy，就换用对应的镜像，界面和包版本也以你实际使用的环境为准。
+
+\begin{note}
+\textbf{动磁盘之前先准备恢复办法。}把个人文件备份到另一块介质，实际打开几个备份文件；保存 Windows 的 BitLocker/设备加密恢复密钥，记录磁盘编号、容量与现有 EFI 分区。启动 U 盘中的镜像写入会清空 U 盘；安装器里的格式化会清空选中的分区。看不清是哪块盘时先停下来核对，不按容量猜一个就点确认。
+\end{note}
+
+下面四部分连起来，就是一次完整的双系统安装示例。我们先把备份做好，再跟着步骤操作；每一步也会说明做完后应该看到什么，免得点完按钮却不知道到底成功了没有。随堂练习可以先做记录和判断，确认自己的方案后再真正写盘。
+
 \subsubsection{系统分区}
+\label{sec:ubuntu-partition}
+制作双系统的第一步，是给 Ubuntu 腾出一块空闲的磁盘空间，这一步我们一般在 Windows 下完成。如果你本来就有未分配空间，可以跳过压缩卷的操作；如果想把原来的整个 D 盘拿来装 Ubuntu，则需要先把里面的文件备份好，因为后面的格式化会清空它。还有一点要注意：Ubuntu 安装器里不会写着“D 盘”，我们要靠磁盘型号、容量和分区布局一起确认，不能只看容量差不多就认领了。
 
-\begin{note}
-制作双系统的第一步是需要获得一个空闲的系统盘分区，这一步我们一般需要在Windows系统下完成，但是如果你本来就有一个空闲的分区，假如你D盘里面没有什么数据，想直接把整个D盘都作为下面的Ubuntu系统盘，你也可以跳过这一步，直接在Ubuntu安装时选择整个D盘（不过Ubuntu里面看不到具体的"D盘"字样，你得按照容量选择）作为对应分区即可。
-\end{note}
-
-
-右键桌面上的"此电脑"图标，点击"管理"选项，进入"磁盘管理"界面，在这里你一般会看到电脑上存在若干个磁盘分区如下图所示。
-
-\begin{note}
-你也可以换用一些比较高级的分区工具，例如DiskGenius来完成这一步。
-\end{note}
-
-\begin{note}
-分区操作直接作用于磁盘，动手前你最好备份你的重要文件。目前的"压缩卷"只是划出一块空闲区域，不会删除数据，但后续安装环节的格式化操作会。
-\end{note}
-
+首先右键桌面上的“此电脑”图标，点击“管理”，进入“磁盘管理”界面。在这里你一般会看到电脑上的若干个磁盘分区，如下图所示。对照磁盘编号与容量，找到准备腾空间的普通数据卷，EFI、恢复和厂商保留分区先不要动。
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{linux1.png}
-    \caption{磁盘分区} % 图片标题
-    \label{fig:linux1} % 图片标签，用于引用
+\centering
+\includegraphics[width=0.75\textwidth]{linux1.png}
+\caption{Windows 磁盘管理旧版界面示例：先核对磁盘与卷，布局以你的机器为准}
+\label{fig:linux1}
 \end{figure}
-
-选择一个剩余空间较大的磁盘，右击，点击"压缩卷"，等待计算完成后会显示当前磁盘中可用的压缩空间大小。输入你要留给ubuntu系统的空间量（注意是以MB为单位的），推荐是预留200G，后续内存不够虽然可以扩容但操作起来有点麻烦。
-
+接下来选择一个剩余空间较大的普通数据卷，右击，点击“压缩卷”，等待计算完成后，界面会显示当前可用的压缩空间大小。输入你要留给 Ubuntu 的空间量，注意这里的单位标为 MB，规划时可以按约 $1024$ MB 对应 $1$ GiB 换算。图中的 $102400$ 约为 $100$ GiB，只是这台电脑的选择，不用照抄。课程代码本身占用不大，但后面的图像数据集会很快长大，有条件可以预留约 $200$ GiB，后续空间不够虽然可以扩容，操作起来却有点麻烦。当然，也别为了凑这个数把 Windows 挤得没地方用了。
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{linux2.jpg}
-    \caption{分配linux空间} % 图片标题
-    \label{fig:linux2} % 图片标签，用于引用
+\centering
+\includegraphics[width=0.75\textwidth]{linux2.jpg}
+\caption{压缩卷：读取可压缩空间，再填入自己的容量}
+\label{fig:linux2}
 \end{figure}
-
-输入好后点击"压缩"，压缩完成后出现一个"未分配"的区域则说明分区完成。
-
-\begin{exercise}
-打开 Windows 的磁盘管理，记录你电脑各分区的容量与剩余空间，规划留给 Ubuntu 的空间大小，并写出你打算采用的分区方案（各挂载点及容量）。
+输入好后点击“压缩”，压缩完成后出现一个“未分配”的区域，就说明这一步完成了。\textbf{把它留在未分配状态，不要在 Windows 中新建卷或格式化}，我们等会儿交给 Ubuntu 安装器来处理。如果压缩不到预期大小，先记录界面的限制和现有布局，不要随手删除旁边的分区来凑空间。
+\begin{exercise}\label{ex:v1-partition-plan}
+记录本机启动模式、分区表类型、各分区容量及剩余空间，规划 Ubuntu 的挂载点与容量。指出已有 ESP 和绝不能格式化的 Windows 分区。本题只作规划，不写盘。
 \end{exercise}
 
 \subsubsection{制作启动盘}
-首先需要一个内存大于16GB的U盘，请先对其中的文件进行备份，后续操作需要格式化这个U盘。
+首先需要一只容量至少 16 GB 的 U 盘，请先对其中的文件进行备份，后续写入镜像会清空这个 U 盘。
 
-然后进入ubuntu官网下载ubuntu22.04版本的镜像，下载链接为
+然后进入 Ubuntu 官网下载镜像，下载链接为 \url{https://releases.ubuntu.com/22.04/}。本节截图对应 22.04.5，注意选择 Desktop amd64 的 ISO 文件，不要误下成服务器版。下载好后，我们再按同页的 SHA256SUMS 核对一下文件，具体方法可以看\href{https://ubuntu.com/tutorials/how-to-verify-ubuntu}{Ubuntu 官方镜像校验教程}。ISO 是\textbf{镜像文件}，不是解压后把里面的文件复制到 U 盘就能启动的普通压缩包。
 
-\url{https://releases.ubuntu.com/22.04/}
+镜像下载好后，还需要一个启动盘制作器把它写入 U 盘。这里介绍操作比较直观的 balenaEtcher，你也可以按对应说明使用 Rufus 等其他工具。balenaEtcher 的下载链接为 \url{https://etcher.balena.io/}。
 
-注意是下载22.04.5 Desktop！
-
-下载好后还需要下载一个启动盘制作器来将刚刚的ISO写入U盘中，这里介绍UI最简单的balenaEtcher，你也可以自行下载其他烧录器，比如软碟通（UltraISO）或是Rufus，balenaEtcher的下载链接
-
-\url{https://etcher.balena.io/} 
-
-安装后点击"Select image"选择刚刚下载的ubuntu镜像，随后在"Select target"中选择你的启动盘，最后点击"Flash!"即可。
-
+安装后点击“Select image”（新版可能叫“Flash from file”）选择刚刚下载的 Ubuntu 镜像，随后在“Select target”中选择你的 U 盘。\textbf{这时候再核对一次设备名和容量，确认没有选到移动硬盘或其他资料盘}，最后点击“Flash!”。等待写入和校验都完成，再安全弹出 U 盘，这样启动盘就做好了。
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{linux3.png}
-    \caption{制作启动盘} % 图片标题
-    \label{fig:linux3} % 图片标签，用于引用
+\centering
+\includegraphics[width=0.8\textwidth]{linux3.png}
+\caption{Etcher 旧版界面：镜像、目标盘与写入三个入口}
+\label{fig:linux3}
 \end{figure}
+启动盘做好后，再插到 Windows 中，可能会弹出“需要格式化”的提示。这一般是因为 Windows 不能识别其中所有分区，\textbf{取消提示就好，不要为了消除弹窗把启动盘格式化}。这种镜像写入方式也不保证剩余空间还能继续存普通文件，所以资料另找地方放。启动盘被称为“数字生命”，请好好保存；不过我们还要确认它真能进入试用环境，不能只凭 Etcher 显示完成就宣布成功。
+\begin{exercise}\label{ex:v1-usb-image}
+核对下载的 ISO 校验值，记录 Etcher 中的镜像名称、目标容量及写入校验结果；在电脑一次性启动菜单中确认 U 盘可进入“Try Ubuntu”，不启动正式安装。若暂时没有空 U 盘，先提交目标选择与校验记录，启动验证标为待补。
+\end{exercise}
+
+\subsubsection{从 U 盘进行安装}
+插入之前做好的启动盘，接下来我们要让电脑从它启动。在 Windows 中可以按住 Shift 点击“重启”，然后进入“疑难解答”→“高级选项”→“UEFI 固件设置”；也可以重启时按电脑手册里写的快捷键，进入一次性启动菜单。各个主板的按键不太一样，先查清楚再按，这次就不用“脸滚键盘”了。
+
+进入启动选项界面后，选择这只 U 盘对应的 \textbf{UEFI} 启动项，回车。它可能显示为 Linpus lite，也可能是 Kingston、SanDisk 等品牌名，认准自己的 U 盘即可，不必纠结名字是否和截图一致。接着选择 Try or Install Ubuntu，先进入 Try Ubuntu 试用环境。到这里，我们已经能从 U 盘启动了，先别急着安装，再核对一下启动模式和磁盘。
+\Needspace{8\baselineskip}
+\begin{example}[先在试用环境核对启动模式]
+进入 Try Ubuntu，在终端执行：
 
 
-U盘被制作成启动盘后仍可以存放其它的文件，插到windows中会提示该U盘有问题建议修复之类的，U盘没坏的话这时候不用管它就好。启动盘被称为"数字生命"，所以请好好保存。
-\subsubsection{从U盘进行安装}
-插入之前做好的启动盘，重启电脑，重启时快速重复按下启动选项快捷键，各个主板的启动选项快捷键有所不同，可以参考下表进行操作，如果没有的话可以观察启动时BIOS页面上的信息，或者是直接启动时脸滚键盘。
+\Needspace{10\baselineskip}
+\begin{tbash}
+if [ -d /sys/firmware/efi ]; then
+    echo 'UEFI'
+else
+    echo 'Legacy: stop and choose the UEFI USB entry'
+fi
+lsblk -o NAME,SIZE,FSTYPE,MOUNTPOINTS,MODEL
+\end{tbash}
 
+
+应显示 UEFI，并能按设备型号、容量和分区布局找到原来的 Windows 磁盘及未分配空间。输出为 Legacy 时先退出并重选启动项，不继续套用本节 UEFI 方案。
+\end{example}
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{install1.png}
-    \caption{启动选项快捷键一览} % 图片标题
-    \label{fig:install1} % 图片标签，用于引用
+\centering
+\includegraphics[width=0.75\textwidth]{install2.jpg}
+\caption{先试用并核对环境，再选择安装 Ubuntu；照片中的界面仅作入口示例}
+\label{fig:install2}
 \end{figure}
-
-进入启动选项界面后通过上下键选择Linpus lite选项，回车，进入系统安装程序，选择Try or Install Ubuntu，再回车，现在你离成功安装ubuntu双系统只有一步之遥啦。
-
-\begin{note}
-"Linpus lite"只是启动盘在某些主板上的显示名称，不同机器上可能显示为 U 盘的品牌名（如 Kingston、SanDisk）或其他字样。认准你的 U 盘对应的那个选项即可，不必纠结名字是否一致。
-\end{note}
-
+核对完成后，点击桌面上的“安装 Ubuntu”，开始正式安装。首先选择语言为简体中文，“键盘布局”按你实际使用的键盘选择，无线连接和更新可以按当前网络条件决定。然后在“更新和其他软件”页面选择“正常安装”，按硬件需要勾选第三方驱动。
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{install2.jpg}
-    \caption{开始安装ubuntu} % 图片标题
-    \label{fig:install2} % 图片标签，用于引用
+\centering
+\includegraphics[width=0.75\textwidth]{install3.jpg}
+\caption{第三方驱动与 Secure Boot 设置示例：此处的密钥注册密码不是后面建立账户的登录密码}
+\label{fig:install3}
 \end{figure}
+如果启用了 Secure Boot，安装第三方驱动时可能要求你设置 MOK（Machine Owner Key，机器所有者密钥）注册密码。这个密码是给重启后的密钥注册用的，记下来，到时候按提示确认即可。它不是 Ubuntu 账户的登录密码，后面我们还要另外建立账户，别看到这里填过密码就把后面的步骤跳过去了。
 
-进入安装环节，首先选择语言为简体中文，点击"安装Ubuntu"，"键盘布局"确认是中文就好，下一步无线连接现在可以不用连。"更新和其他软件"界面选择"正常安装"，勾选"为图形或无线硬件，以及其它媒体格式安装第三方软件"并设置自己用户的密码，注意这个密码后面会经常用到，所以不建议设的过长。
-
+接下来来到“安装类型”，本教程选择\textbf{“其它选项”}，这样我们可以按照刚才的规划手动分区，也能看清究竟要格式化哪些地方。有的安装器会提供“与 Windows 共存”的自动方案，你可以按实际情况选择，但最后的写盘摘要一样要核对。这里最需要注意的是：\textbf{不能选择抹掉整个磁盘}，否则留下来的就不是双系统了。
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{install3.jpg}
-    \caption{设置密码} % 图片标题
-    \label{fig:install3} % 图片标签，用于引用
+\centering
+\includegraphics[width=0.8\textwidth]{install4.jpg}
+\caption{手动分区：找到之前腾出的空闲空间，图中的设备编号不能照抄}
+\label{fig:install4}
 \end{figure}
+首先找到电脑已有的 EFI 系统分区（EFI System Partition，ESP），它通常是 FAT32，里面有 Windows Boot Manager。我们复用它作为 \texttt{/boot/efi}，\textbf{不要勾选格式化}，Windows 也要靠它启动。这里的 ESP 和存放 Linux 内核的 \texttt{/boot} 不是同一个东西，名字看起来相近，却不能互相替代。
 
-在下一步"安装类型"中一定一定要选择"其它选项"！！！
+然后找到之前压缩出来的空闲区域，点击加号，在这里创建 Ubuntu 的 ext4 分区。你可以按下面两种思路来安排：
+\begin{itemize}
+\item \textbf{全部放在根分区里。}只创建一个挂载到 \texttt{/} 的分区，用户文件也就放在这个分区里的 \texttt{/home} 目录。这种方式最简洁，适合先把系统用起来；不过日后格式化根分区时，个人文件也会一起被清空。
+\item \textbf{把根分区与个人文件分开。}可以给 \texttt{/} 约 80 GiB，再把剩余空间给独立的 \texttt{/home}。这个容量只是例子，你可以按需求调整。以后重装时可以选择保留 /home，不过仍然要先备份，并在安装器里\textbf{明确取消它的格式化}，不是“分开了就自动安全”。
+\end{itemize}
+普通入门安装一般不需要另建 \texttt{/boot}。交换空间（Swap）则可以用安装器建立的交换文件；如果你选择单独建立交换分区，类型选“交换空间”即可，\textbf{它没有 /swap 挂载点}。休眠等需求还需要另外核对容量和配置，不是简单地分出 16 GB 就都解决了。
 
-然后来到"安装类型"，在这里我们需要创建ubuntu的分区（注意内存大小依然是以MB为单位）并挂载到相应的挂载点上。这里有两种方法：
-\begin{enumerate}
-	\item \textbf{全部挂载到根目录下}
-
-找到之前压缩出来的空闲区域，双击选项，在弹出窗口的挂载点一栏输入"/"即可。这种方式最简洁明了，适合啥也不明白的新手操作，相当于一个只有C盘的Windows系统，所以在备份系统镜像的时候无法按照不同分区分开备份，重装系统会导致所有数据丢失，因此建议还是按照第二种方法进行分区。
-
-\item \textbf{挂载到不同目录下}
-
-先分逻辑分区，再分主分区。
-	\begin{enumerate}
-		\item "/boot"启动分区:逻辑分区，一般选择200M-2G，放置Ubuntu的启动引导文件。
-		\item "/swap"交换分区（虚拟内存）:逻辑分区，一般分16GB就够了，也可以设置为物理内存大小，或是其倍数关系。如果你觉得你的物理内存够大（32G，64G等），也可以不设置。
-		\item "/" 根分区（root分区）:逻辑分区，80GB左右差不多。
-		\item "/home"分区:主分区，剩下的容量一起分给/home就好，平时文件也都放这边，要的空间最大，不过也可以不设置，和根分区合并。
-	\end{enumerate}
-
-点击压缩的空闲区域，点击左下角的加号：
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{install4.jpg}
-    \caption{选择分区} % 图片标题
-    \label{fig:install4} % 图片标签，用于引用
-\end{figure}
-
-在弹出的窗口选择大小，新分区类型，新分区位置，文件系统类型，挂载点，依次对"/boot"，"/swap"，"/"，"/home"进行分区
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{install5.jpg}
-    \caption{分区} % 图片标题
-    \label{fig:install5} % 图片标签，用于引用
-\end{figure}
-
-再次确定安装启动引导盘的设备选择"/boot"分区那个路径
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{install6.jpg}
-    \caption{安装启动引导盘设备路径} % 图片标题
-    \label{fig:install6} % 图片标签，用于引用
-\end{figure}
-
-\end{enumerate}
+如果你看过一些旧教程，可能还记得“先分逻辑分区，再分主分区”的说法。不过本节使用的是 GPT，并不按 MBR 的主分区、逻辑分区来安排，也没有这个先后规则。UEFI 的引导文件写入 ESP，\textbf{不要把某个 /boot 分区当作通用的引导安装目标}。如果电脑有多块硬盘，还要看清安装器究竟选中了哪个 ESP；不确定时请学长一起检查，这里多花几分钟，总比装完再抢救省事。相关说明见 \url{https://help.ubuntu.com/community/UEFI}。
 
 \begin{conclusion}
-两种分区方案对比：
-
-\begin{center}
-\begin{tabular}{ccc}
-\toprule[1.5pt]
-方案 & 优点 & 缺点\\
-\midrule[1pt]
-全部挂载到 / & 操作简单，不易出错 & 重装系统会清空所有数据\\
-/boot、/swap、/、/home 分开 & 重装时可保留 /home 中的数据 & 步骤较多，需提前规划容量\\
-\bottomrule[1.5pt]
-\end{tabular}
-\end{center}
-
-建议按第二种方案分区：日后重装系统时能保留 /home 下的工作数据——不然就只能抱着移动硬盘含泪抢救数据了。
+启动模式、分区表、文件系统、挂载点分别管不同的事：UEFI 是怎样启动，GPT 是怎样记录分区，ext4 是怎样存文件，\texttt{/} 与 \texttt{/home} 是从哪里访问文件。已有 ESP 要保留，swap 不挂载为目录；是否拆分 /home 只影响管理方式，不能代替备份。
 \end{conclusion}
-分区完成后点击"现在安装"，选择时区"Asia/Shanghai"就行了。然后填写用户名和计算机密码，如果在上一步中填过了就不需要再填了。
+\begin{exercise}\label{ex:v1-installer-review}
+在纸面方案中给每个分区标记“保留/格式化”及挂载点，并解释 ESP、/boot、swap 的区别。指出旧教程若要求“GPT 先建逻辑分区、把交换空间挂到 /swap”，应怎样修正。练习不要求点“现在安装”。
+\end{exercise}
 
-点击"继续"，系统就会对ubuntu系统开始安装了，出现安装完成的提示后点击现在重启"，等待一会，出现提示"Please remove the installation medium,then press ENTER"后拔掉启动盘并按下ENTER键，进入ubuntu系统的启动引导。在启动页面选择Ubuntu，电脑正常启动后就会进入Ubuntu系统，至此安装就全部完成啦。
+分区安排好后，先别急着点“现在安装”，我们再看一遍写盘摘要：Windows 数据分区和 ESP 都不应该出现在格式化清单里，要格式化的是这次新建的 Ubuntu 分区。确认没有问题后再继续，选择时区、账户名和登录密码，等待系统安装完成。
 
-ubuntu系统初始是一个什么都没有的状态，但是大家配好了也是可以和windows一样的，接下来各位就按照自己的习惯和喜好进行配置吧。
-
+出现安装完成的提示后点击“现在重启”，等到屏幕提示“Please remove the installation medium, then press ENTER”时，拔掉启动盘并按回车。先试着进入 Ubuntu，再重启一次确认 Windows 也能进入；在 Ubuntu 中运行 \texttt{findmnt /} 与 \texttt{findmnt /boot/efi}，看看实际的来源分区和挂载点是否符合规划。两套系统都能正常启动，至此安装就全部完成啦。接下来你可以慢慢按自己的习惯配置，不必第一天就把桌面折腾成最终形态。
 \begin{note}
-安装完毕后，可能会出现电脑直接黑屏的情况，这也不用担心。这多半是由于缺少显卡驱动导致的。如果你的电脑中有独立显卡，那在使用ubuntu之前请在BIOS中将显卡选择为"混合模式"而非"独显直连"，你需要先通过"混合模式"进入系统，然后安装完毕显卡驱动后，再切回"独显直连"。
+安装完毕后，如果电脑直接黑屏，先别急着判定系统装坏了，也不能一概认为只是缺显卡驱动。我们先看它在哪一步黑屏：固件画面、引导菜单，还是登录以后？再确认能否进入 TTY，记下报错和硬件型号。接着按机型手册或 Ubuntu 恢复选项检查显卡模式与驱动，必要时请学长协助。不要未经核对就改 Secure Boot、磁盘模式或删除分区来试错。
 \end{note}
 
 \subsubsection{系统设置相关}
-ubuntu系统安装完成后你的默认启动系统会变成ubuntu，而有的电脑无法通过ubuntu的启动引导进入windows系统，这里我们有一种简单的办法，默认启动Windows选项，只在你需要ubuntu时主动去选择启动ubuntu。
+\label{sec:ubuntu-boot-order}
+Ubuntu 安装完成后，有些电脑会默认先进入 Ubuntu 的引导菜单。如果你平时用 Windows 更多，不想每次开机都手动选，我们有一种比较简单的办法：让电脑默认启动 Windows，只在需要 Ubuntu 时主动选择它。
 
-\begin{note}
-如果你觉得每次都需要手动调整这些比较繁琐，我们也有稍微复杂一些的方法。但是配置完毕后可以轻松切换系统，而且再也不会有丑丑的黑框框，详见下面的grub美化章节。
-\end{note}
+首先再次进入 UEFI 固件设置，找到 Boot 相关页面，把 Windows Boot Manager 移到 ubuntu 上方，保存退出即可。保存前记得拍下原来的顺序，改完后再分别测试两套系统能否启动。要用 Ubuntu 时，从一次性启动菜单中选择 ubuntu 就好。
 
-首先再次进入BIOS，具体方法在图~\ref{fig:install1}已经写明。
-
-进入BIOS后找到Boot相关设置，根据电脑提示将Windows Boot Manager移到ubuntu的启动引导上方，保存退出即可。
-
-\begin{exercise}
-重启电脑进入 BIOS，找到 Boot 启动顺序设置并记录当前的启动顺序（不需要修改），确认自己知道如何将 Windows Boot Manager 调整到首位。
+这里顺便区分一下：固件的启动顺序决定先启动哪个引导程序，GRUB 菜单的默认项则决定进入 GRUB 后选哪个系统，它们是两层设置。如果你觉得每次打开一次性启动菜单还是繁琐，也可以在 GRUB 中设置默认项，下面的美化小节会接着说明。
+\begin{exercise}\label{ex:v1-boot-order}
+进入固件设置，只记录当前启动顺序与调整入口，不保存修改。说明一次性选择 Ubuntu 与永久调整默认顺序分别适合什么情况。
 \end{exercise}
 
 \subsubsection{系统扩容*}
+\label{sec:ubuntu-resize}
+如果系统里的文件已经多到空间不足了，我们可能就要给 Ubuntu 扩容。不过先别急着动分区，用 \texttt{df -hT /} 看看是不是根分区真的满了，再用 \texttt{du -h --max-depth=1 路径} 找出空间花在哪里。如果只是数据集越来越大，把它迁移到另一个位置，往往比移动系统分区省事。
 
-如果系统中的文件已经多到空间不足了，那么此时我们就需要给ubuntu系统进行扩容。
+确实需要扩容时，我们可以用 GParted 分区管理工具。上面介绍过 Windows 下的磁盘管理，这里就换换口味，看看 Ubuntu 下怎样操作。\textbf{动手前先备份，并确认供电可靠}，移动分区可能要等很久，中途断电或强制退出都有损坏数据的风险。
+\Needspace{12\baselineskip}
+\begin{example}[先观察，不在运行中的系统移动根分区]
+Ubuntu 中安装 GParted 后打开，只查看布局：
 
-扩容可以使用ubuntu自带的gparted分区管理工具，也可以类似第一步中使用Windows下的分区工具进行。不过上面既然介绍过了Windows下的工具，这里我们就换换口味，使用ubuntu下的gparted分区管理工具吧。
 
-安装并启动 gparted 分区工具：
+\Needspace{7\baselineskip}
 \begin{tbash}
-sudo apt-get install gparted
+sudo apt update
+sudo apt install gparted
 sudo gparted
 \end{tbash}
 
-进入gparted图形化界面，可以看到这里显示了电脑中的ubuntu和windows的所有分区，选中你要扩容的ubuntu分区，可以看到上方有一个箭头形状的图标亮起
 
+按磁盘型号选择设备，记录根分区和相邻未分配空间，暂不点击应用。图~\ref{fig:linux10} 是旧机器的布局，不能把图中的设备名当成自己的。
+\end{example}
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{linux10.png}
-    \caption{gparted图形化界面} % 图片标题
-    \label{fig:linux10} % 图片标签，用于引用
+\centering
+\includegraphics[width=0.85\textwidth]{linux10.png}
+\caption{GParted：同时看设备名、挂载状态和相邻空间}
+\label{fig:linux10}
 \end{figure}
-
-但是我们如果直接点击箭头图标却会发现以下报错：
-
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{linux9.png}
-    \caption{gparted扩容失败} % 图片标题
-    \label{fig:linux9} % 图片标签，用于引用
+\centering
+\includegraphics[width=0.85\textwidth]{linux9.png}
+\caption{实际提示是“只读文件系统无法调整大小”，不能仅凭此图断言是普通的已挂载锁定}
+\label{fig:linux9}
 \end{figure}
+为什么有时看到分区，却不能直接调整大小呢？因为当前 Ubuntu 的系统分区正在使用，通常要到另一个环境里才能移动；图~\ref{fig:linux9} 的具体提示则是“只读文件系统无法调整大小”，遇到自己的报错时还是要读清文字，不能把所有情况都归成一把锁。
 
-这是因为当你处于ubuntu系统时，自己系统的分区是被使用而被上锁的，所以此时你无法对分区进行修改。但是其实解决方法也很简单，我们可以在启动盘中的ubuntu系统中对自己的ubuntu分区进行修改。
+这时候我们可以拿出安装时做好的启动盘，按之前的方法进入 Try Ubuntu。选择试用后，打开终端和 GParted，确认目标分区没有挂载，再按计划操作。扩容还需要合适位置的相邻未分配空间；如果中间隔着其他分区，就可能要移动它们，风险和耗时也会增加。\textbf{不要先在正在运行的系统里调节 swap 或其他分区位置}，先把完整计划交给学长核对，再到 Live 环境执行。
 
-在切换之前还有一件事要做：调节linux-swap和extend分区位置（如果存在的话），这是因为使用gparted扩容时只能对相邻的分区进行操作，如果swap和extend分区挡在ubuntu分区和windows分区之间，那么就不能从这个windows分区中分出空间给ubuntu分区了。
+等待操作完成后重启，用 \texttt{lsblk} 和 \texttt{df -hT /} 分别核对分区容量与文件系统容量。它们看的不是同一层，只看一个数字变大还不够。具体限制可以查 \url{https://gparted.org/display-doc.php?name=help-manual}。
+\begin{exercise}\label{ex:v1-resize-plan}
+画出“根分区—其他分区—未分配空间”的布局，说明为何不能直接扩大根分区。写出备份、离线环境和结果核验计划，不实际移动分区。
+\end{exercise}
 
-调节完毕之后插上安装ubuntu系统时制作的启动盘，重启电脑，重启时快速重复按下启动选项快捷键。进入启动选项界面后通过上下键选择Linpus lite选项，回车，进入系统安装程序，选择Try or Install Ubuntu，再回车，这些步骤和安装ubuntu时是一样的，只是进入安装页面后，这次我们要选择试用Ubuntu
+\subsubsection{GRUB 美化*}
+\label{sec:grub-theme}
+也许你已经看腻了启动时那个黑框框，想把它换得好看一点。那我们接下来就给 GRUB 换个主题，不过先把两个系统都能启动这件事确认好，再来折腾外观。主题负责“长什么样”，默认进入哪个系统则要另外设置，装好主题不会顺手替你把这件事也做了。
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{install2.jpg}
-    \caption{进入试用ubuntu界面} % 图片标题
-\end{figure}
+下面展示的是 Tela 主题，对应项目在 \url{https://github.com/vinceliuice/grub2-themes}。在介绍 Git 之前，你可以先点击网页上的 Code → Download ZIP 下载。然后打开 README，按当前版本的说明选择主题名和分辨率参数；安装脚本也先读一遍，看看要改哪些文件，再决定是否执行。别把来历不明的脚本直接交给 sudo，桌面颜值还没上去，启动先出问题就不划算了。
+\Needspace{8\baselineskip}
+\begin{example}[保存配置后检查默认项]
+在 Ubuntu 中先保存原配置，再只读查看实际菜单标题：
 
-选择试用后我们会进入到ubuntu的主页面，打开终端，再次打开gparted
 
+\Needspace{7\baselineskip}
 \begin{tbash}
-sudo apt-get install gparted
-sudo gparted
+sudo cp -a /etc/default/grub /etc/default/grub.before-training
+grep '^GRUB_' /etc/default/grub
+grep "^[[:space:]]*menuentry " /boot/grub/grub.cfg
 \end{tbash}
 
-此时就可以对原来ubuntu系统的分区进行修改了，修改完点击确认等待扩容操作完成即可。
 
-\subsubsection{grub美化*}
+如果你还希望没有操作时自动进入 Windows，我们就小小地配置一下引导。打开 \path|/etc/default/grub|，找到 \texttt{GRUB\_DEFAULT}，把它设为\textbf{本机实际菜单标题或稳定的菜单项 ID}。不要照着“Windows 一般是第三项”填数字，系统更新以后，菜单顺序也可能变化。改完后运行 \texttt{sudo update-grub} 生成配置，确认没有报错；\texttt{grub.cfg} 是它生成出来的文件，不直接编辑。
+\end{example}
+\begin{note}
+主题安装和引导配置均需管理员权限，改错可能妨碍选择启动项。保留可启动 U 盘和原配置；配置有误但 Ubuntu 仍能启动时，按对应备份恢复并重新生成：
 
-也许你对那个系统启动时进入ubuntu的黑框框觉得厌烦了，而且每次启动系统都得手动点一下对应选项，或是觉得每次启动ubuntu都需要BIOS特意去设置一下真是太繁琐了，其实这只是因为你默认的这个grub没有美化而已，我们下面来解决这个问题。
 
-在这个网页中
-
-\url{https://www.gnome-look.org/browse?cat=109&ord=latest}
-
-我们可以找到很多grub的主题。挑一个你喜欢的。笔者自己使用的是
-
-\url{https://www.gnome-look.org/p/1307852}
-
-这款主题。具体的安装教程在这个主题的git仓库中
-
-\url{https://github.com/vinceliuice/grub2-themes}
-
-如果你选择其他主题的话，教程位置可能变化，你需要自己找找。
-
-你可以下载这个仓库到你的ubuntu系统中（github的很多功能都和git有关，但是在介绍git之前，你可以通过点击网页中的code按钮点击download zip下载）。然后按照这个主题中的README.md文件的教程安装。
-
+\Needspace{6\baselineskip}
 \begin{tbash}
-sudo ./install.sh -t tela -s 2k
+sudo cp -a /etc/default/grub.before-training /etc/default/grub
+sudo update-grub
 \end{tbash}
 
-完成了这一步后，如果你用的是笔者的这个主题，启动时就可以看到这样的界面了。而且10s没有操作可以自动进入ubuntu系统。
-
+只有确认备份对应本次改动才恢复，别覆盖后来有意修改的配置。
+\end{note}
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{grub.png}
-    \caption{Tera主题} % 图片标题
+\centering
+\includegraphics[width=0.8\textwidth]{grub.png}
+\caption{Tela 主题效果示例：这是展示图，系统名称与超时不是你的实际配置}
 \end{figure}
-
-不过也许你还需要在没有操作的情况下进入Windows。那么我们需要小小的配置一下grub的配置文件。我们需要修改 \verb|/etc/default/grub| 这个文件，找到\verb|GRUB_DEFAULT=0|这一行，看一下你的windows系统在启动时在哪一行（一般是第3行），我们将这个0修改为行数减一（一般是2）即可。
+\begin{exercise}\label{ex:v1-grub-plan}
+只读记录本机 GRUB 的一个实际菜单标题或 ID，并解释为什么主题安装成功不等于默认启动项已改好。给出配置备份、生成和回滚步骤，不要求实际修改引导。
+\end{exercise}
 
 \subsubsection{桌面美化*}
+\label{sec:gnome-customize}
+GRUB 好看了，桌面也可以按自己的喜好收拾一下。Ubuntu 22.04 默认使用 GNOME，换个主题、装几个顺手的插件，就能让桌面更合你的习惯。本节为选修内容，不要求大家复刻同一张桌面。
 
-grub 好看了，桌面也不能输。Ubuntu 22.04 默认的 GNOME 桌面虽然朴素，但换个主题、装几个插件之后，颜值完全可以反超 Windows。本节为选修内容。
+我们先分清要装的东西：主题主要改窗口外观，图标包改应用图标，Shell 扩展则增加桌面功能。它们各管一层，所以装了图标包，窗口颜色没变是正常的。先记下原来的外观，每次改一项，出了问题也更容易撤回。
+\Needspace{8\baselineskip}
+\begin{example}[换一项外观，再验证一项功能]
+先从可信来源下载主题或图标包，检查归档内容后解压到用户目录。下面的归档名要换成自己下载的文件名：
 
-\textbf{主题与图标}
 
-GNOME 的主题和图标可以在 \url{https://www.gnome-look.org/} 上挑选：左侧分类里 GTK3/GTK4 Themes 是窗口主题，Full Icon Themes 是图标包。下载得到的一般是压缩包，解压到对应目录即可被系统识别：
-
-\begin{example}
-把下载好的主题和图标解压到用户主题目录（目录不存在就先创建）：
+\Needspace{8\baselineskip}
 \begin{tbash}
 mkdir -p ~/.themes ~/.icons
-tar -xf 主题包.tar.gz -C ~/.themes
-tar -xf 图标包.tar.gz -C ~/.icons
-\end{tbash}
-\end{example}
-
-装好后需要 GNOME Tweaks（GNOME 优化）来切换主题和图标，顺便装上后面要用的插件管理器：
-
-\begin{example}
-安装 GNOME Tweaks 与 Extension Manager（插件管理器）：
-\begin{tbash}
+tar -tf theme.tar.gz
+tar -xf theme.tar.gz -C ~/.themes
 sudo apt install gnome-tweaks gnome-shell-extension-manager
 \end{tbash}
+
+
+装好后打开 Tweaks（优化），在“外观”一栏选择刚装好的兼容主题或图标，再试着切回原来的选项，确认能恢复。有些 GTK4/libadwaita 应用不一定跟着 GTK3 主题改变，不用因为一个窗口没变色就把主题重装一遍。
+
+接下来轮到 Extension Manager（扩展管理器）了。打开“浏览”页，搜索 Caffeine，确认它兼容你当前的 GNOME 版本，再安装并启用。它的作用是让屏幕保持唤醒，我们可以等到超过原来的自动熄屏时间，看看功能是否生效；然后关闭扩展，再确认原来的行为恢复。这样才算用过一个插件，而不只是往列表里多添了个名字。
 \end{example}
-
-打开 Tweaks，在"外观"一栏即可选择刚装好的主题和图标。Extension Manager 则是本节的主角：它能直接在桌面上浏览、安装、开关各种 GNOME 插件，不用再去网页上折腾。
-
-% TODO(占位图)：Extension Manager 浏览/管理插件的界面截图，保存为 images/gnome_extension_manager.png
 \begin{figure}[H]
-    \centering
-    \IfFileExists{images/gnome_extension_manager.png}{%
-        \includegraphics[width=0.8\textwidth]{gnome_extension_manager.png}}{%
-        \fbox{\parbox[c][6em][c]{0.8\textwidth}{\centering 占位图：Extension Manager 插件管理界面（待补充截图）}}}
-    \caption{Extension Manager 插件管理界面}
-    \label{fig:extension_manager}
+\centering
+\includegraphics[width=0.8\textwidth]{gnome_extension_manager.png}
+\caption{扩展管理器的已安装页示例：开关控制启用状态，齿轮打开该扩展设置}
+\label{fig:extension_manager}
 \end{figure}
-
-\textbf{常用插件}
-
-打开 Extension Manager，在"浏览"页搜索插件名，点安装即可。以下是视觉组往届同学常用的几款：
-
-\begin{center}
-\begin{tabular}{cc}
-\toprule[1.5pt]
-插件名 & 作用\\
-\midrule[1pt]
-Caffeine & 保持屏幕常亮，编译、跑数据集时防止自动锁屏\\
-TopHat / Vitals & 在顶栏实时显示 CPU、内存、温度等信息\\
-Dark Mode Toggle / Night Theme Switcher & 一键或按计划自动切换深色/浅色模式\\
-Dash to Dock & 把左侧 Dock 栏变成可自定义的程序坞\\
-Dash to Panel + ArcMenu & 合成类似 Windows 的底部任务栏与"开始菜单"\\
-Rounded Window Corners Reborn & 给窗口加上圆角\\
-Blur my Shell & 给顶栏、Dock 等加上毛玻璃半透明效果\\
-Sound Input \& Output Device Chooser & 在右上角菜单直接切换声音输出/输入设备\\
-Clipboard Indicator & 剪贴板历史记录，复制过的内容随时找回来\\
-\bottomrule[1.5pt]
-\end{tabular}
-\end{center}
-
-建议先挑两三个顺手的装上，别一次全装——插件之间偶尔互相打架，装多了排查起来很痛苦。
-
-\begin{note}
-所有插件的官方来源是 GNOME 扩展商店 \url{https://extensions.gnome.org/}，Extension Manager 的"浏览"页就是它的目录。上表插件的主页链接：
-
-\begin{itemize}
-\item Caffeine：\url{https://extensions.gnome.org/extension/517/caffeine/}
-\item TopHat：\par
-\url{https://extensions.gnome.org/extension/5219/tophat/}
-\item Vitals：\url{https://extensions.gnome.org/extension/1460/vitals/}
-\item Night Theme Switcher：\par
-\url{https://extensions.gnome.org/extension/2236/night-theme-switcher/}
-\item Dash to Dock：\url{https://extensions.gnome.org/extension/307/dash-to-dock/}
-\item Dash to Panel：\url{https://extensions.gnome.org/extension/1160/dash-to-panel/}；ArcMenu：\url{https://extensions.gnome.org/extension/3628/arcmenu/}
-\item Rounded Window Corners Reborn：\par
-\url{https://extensions.gnome.org/extension/7048/rounded-window-corners-reborn/}
-\item Blur my Shell：\url{https://extensions.gnome.org/extension/3193/blur-my-shell/}
-\item Sound Input \& Output Device Chooser：\par
-\url{https://extensions.gnome.org/extension/906/sound-output-device-chooser/}
-\item Clipboard Indicator：\url{https://extensions.gnome.org/extension/779/clipboard-indicator/}
-\end{itemize}
-\end{note}
-
-\begin{note}
-插件由社区维护，系统大版本升级（尤其是 GNOME 版本升级）后部分插件可能失效，届时在 Extension Manager 中更新或暂时禁用即可。Blur my Shell 这类特效插件会占用一定的显卡资源，笔记本续航会略有下降。
-\end{note}
-
-% TODO(占位图)：美化完成后的桌面整体效果截图，保存为 images/gnome_desktop_after.png
+更多扩展可以在 \url{https://extensions.gnome.org/} 按版本查找。比如 Vitals 可以显示资源占用，Dash to Dock 可以调整程序坞，Clipboard Indicator 可以帮你找回刚刚复制过的文字。建议先挑两三个顺手的，别一次全装——插件之间偶尔也会互相打架，尤其是 Dock 和 Panel 类扩展，装多了排查起来很痛苦。试剪贴板历史时用普通文字就好，不要用密码，因为历史记录可能把它留下来。
 \begin{figure}[H]
-    \centering
-    \IfFileExists{images/gnome_desktop_after.png}{%
-        \includegraphics[width=0.8\textwidth]{gnome_desktop_after.png}}{%
-        \fbox{\parbox[c][6em][c]{0.8\textwidth}{\centering 占位图：美化后的桌面整体效果（待补充截图）}}}
-    \caption{笔者美化后的桌面效果}
-    \label{fig:desktop_after}
+\centering
+\includegraphics[width=0.85\textwidth]{gnome_desktop_after.png}
+\caption{GNOME 外观效果示例：主题、图标与扩展各管一层，不要求复刻相同桌面}
+\label{fig:desktop_after}
 \end{figure}
-
-\begin{exercise}
-安装 Extension Manager，启用 Caffeine 和 Clipboard Indicator 两个插件，并验证：点亮 Caffeine 后屏幕不再自动熄灭；复制几段文字后能从剪贴板历史中找回。
+\begin{exercise}\label{ex:v1-desktop-plugins}
+记录 GNOME 版本，在扩展管理器中安装兼容的 Caffeine 与 Clipboard Indicator，分别验证保持唤醒和找回一段普通复制文字；最后关闭插件并恢复原外观。缺少兼容版本时记录提示与替代方案，不把“搜到”当作“启用成功”。
 \end{exercise}

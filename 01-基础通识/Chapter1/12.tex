@@ -1,167 +1,105 @@
-恭喜你已经成功安装了ubuntu双系统，作为新手的你想来在刚刚的安装过程中一定是非常小心谨慎的，毕竟你也不想系统出现什么差错。在后续的工作中我们经常需要安装各种各样的安装包并对系统的环境进行配置，如果不小心配错了东西，重则系统可能无法正常工作（简称寄了）。这时候你就需要在启动页面进入“Ubuntu高级选项”对系统进行修复，或者最惨的情况是需要直接重装系统。当然我们肯定不愿看到这一点，因此我们很有必要学习对系统的环境进行备份，这样即使环境配崩了也能恢复到配环境之前的状态，保留之前的工作。当然如果你比较自信这一章不看也不是不行，只是到时候别后悔。
+恭喜你已经成功安装了 Ubuntu 双系统。作为新手，想来你在刚刚的安装过程中一定很小心，毕竟谁也不想刚装好就出什么差错。不过在后续的工作中，我们还会安装各种各样的软件包、配置各种各样的环境，如果不小心配错了东西，轻则程序找不到，重则系统无法正常工作（简称寄了）。这时候就需要根据问题进入恢复选项、修正配置，实在处理不了才考虑重装。
 
-\subsubsection{timeshift系统快照}
+当然，我们肯定不愿意每次都从头再来，所以很有必要学会备份（Backup）：在大改环境之前存个档，出问题时才有机会回到改动之前。不过系统配置和你写的代码不一定保存在同一份备份里，下面我们先把这个范围分清楚，再试一次恢复。存档到底能不能读，也要试过才知道。
+\label{sec:system-backup}
 
-timeshift是linux上一款用于数据备份和恢复的软件，使用时会像相机一样给系统照个相。它的使用流程三分钟就能学会，比事后后悔便宜得多。
+\subsubsection{Timeshift 系统快照}
+Timeshift 可以给系统文件和设置制作快照（Snapshot），你可以把它想成给系统照一张相，后来配环境出了问题，再按这张相恢复。操作并不复杂，比事后重新配一遍省事得多；不过相机拍到了什么，还是要看你设置的范围，不是按一下就把整台电脑都保存了。
+\begin{note}
+\textbf{Timeshift 默认排除个人文件。}源码、照片、数据集要另做备份；快照放在同一块物理盘上，也无法抵御这块盘损坏。恢复会把所选系统文件还原到快照状态，期间的新配置可能被覆盖。先备份个人数据和当前配置，确认目标系统与快照，再恢复。官方说明见 \url{https://github.com/linuxmint/timeshift}。
+\end{note}
+\Needspace{8\baselineskip}
+\begin{example}[创建并核对系统快照]
+首先在 Ubuntu 中安装 Timeshift，然后从应用菜单点击它的图标，或者在终端里输入最后一条命令，进入配置向导：
 
-\textbf{安装timeshift}
 
-\begin{example}
-使用 apt 安装 timeshift：
+\Needspace{7\baselineskip}
 \begin{tbash}
 sudo apt update
 sudo apt install timeshift
-\end{tbash}
-\end{example}
-
-ubuntu也可以在软件中心直接搜索下载。
-
-\textbf{制作快照}
-
-首先最好准备一个U盘，然后点击timeshift的图标启动，或者在终端输入
-
-\begin{tbash}
 sudo timeshift-launcher
 \end{tbash}
 
-进入timeshift图形化操作界面，首先选择快照类型。RSYNC 是一种常见的文件同步协议，在 Timeshift 中用于增量式系统备份。备份时仅复制有改动的部分，因此通常比完整备份要小，创建速度更快。Btrfs 是一种支持快照等高级特性的文件系统。Timeshift 利用 Btrfs 的快照功能，可以创建系统的只读快照。这种类型的快照创建速度比 RSYNC 更快，占用的存储空间更小。但前提是，你的系统必须使用 Btrfs 文件系统。一般来说我们选择“RSYNC”。
 
-备份位置最好选择在非系统硬盘或移动U盘，但要保证磁盘类型是ext4等linux类型。否则暂时选系统盘也行。选好盘后备份数据默认会保存在该硬盘下根目录下的 /timeshift 目录下。
+进入向导后，首先选择快照类型。我们前面安装的是一般的 ext4 系统，选 RSYNC 即可；它借助 rsync 与硬链接保存文件，未变化的内容可以共享。BTRFS 则利用文件系统本身的快照，但要求受支持的子卷布局，不是看到磁盘格式叫 Btrfs 就一定能用。
 
-备份时间有每月备份一次，每周备份一次、每日备份一次、每小时备份一次、每次开机备份一次，数字表示最多存几个快照，多了的话会删除最旧的那次快照。
+然后选择保存快照的位置，按磁盘型号和容量认清目标，并确认它有足够空间、支持 Linux 权限和硬链接。有条件的话，我们可以用另一块盘来保存，这样原来的盘坏了，备份才不至于跟着一起消失。自动备份页面可以选择每月、每周、每天等计划，旁边的数量表示保留多少份；旧快照会按保留策略清理，所以先想好自己要留多久，不必把所有选项都勾上。
 
-“用户主目录”那栏根据自己需要的备份情况来选择，“筛选”那栏也是，可以选择添加所需目录或将其过滤。
+接下来读清“用户主目录”和“筛选”页：哪些文件包含在内，哪些排除在外。确认范围后完成向导，点击“创建”，等快照制作完成。我们再用下面的命令查看列表：
 
-\textbf{快照恢复}
 
-如果系统损坏不大还可以正常使用，那么可以进入timeshift图形化界面，找到先前已经制作好的快照
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{restore1.png}
-    \caption{timeshift图形化界面} % 图片标题
-    \label{fig:restore1} % 图片标签，用于引用
-\end{figure}
-
-点击“恢复”，确认要恢复的目录后点击“下一步”即可进行恢复操作
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{restore2.png}
-    \caption{timeshift快照恢复} % 图片标题
-    \label{fig:restore2} % 图片标签，用于引用
-\end{figure}
-
-当然这个过程还可以通过命令行来完成：
-
-\begin{example}
-使用命令行制作一个快照（磁盘名可以通过 \texttt{fdisk -l} 或 \texttt{df -TH} 查看）：
-\begin{tbash}
-sudo timeshift --create --comments "快照名" --backup-device /dev/磁盘名
-\end{tbash}
-\end{example}
-
-\begin{example}
-查看已存在的快照，并选择其中一个进行恢复（如快照 \texttt{'2024-07-01\_18-00-00'}）：
+\Needspace{5\baselineskip}
 \begin{tbash}
 sudo timeshift --list
-sudo timeshift --restore --snapshot '2024-07-01_18-00-00' --skip-grub
 \end{tbash}
-\end{example}
 
-如果已经无法加载图形化桌面，可以在开机时按“ctrl+alt+F1”（一般F1到F6都可以）进入tty终端，可以输入命令进行恢复。
 
-如果连命令终端都进不去，只能通过启动盘再次进入安装ubuntu的页面，选择试用ubuntu，然后安装timeshift再进行恢复。
+列表里应该能找到这次的时间、标签和注释，创建过程也不应该有失败提示。到这里就有了一份系统快照，不过个人代码和数据仍要按照前面的提醒另做备份。完成初始配置后，你也可以直接在命令行创建手动快照，通用形式为 \texttt{timeshift --create [选项]}，比如：
 
-\begin{exercise}
-使用 timeshift 图形界面或命令行为当前系统创建一个快照，并用 \texttt{sudo timeshift --list} 确认快照已生成。
-\end{exercise}
 
-\subsubsection{系统镜像备份}
-
-linux秉承着一切皆文件的思想，系统备份就相当于把整个根目录所有文件打包压缩保存。
-
-\textbf{镜像制作}
-
-备份前先切换到root用户，避免权限问题，然后切换到根目录。
-
-\begin{example}
-将整个根目录打包压缩，备份到挂载在 \texttt{/media} 下的移动硬盘中：
+\Needspace{6\baselineskip}
 \begin{tbash}
-tar -cvpzf /media/Disk/myDisk/ubuntu_backup@$(date +%Y-%m-%d).tar.gz --exclude=/proc --exclude=/tmp --exclude=/boot --exclude=/home --exclude=/lost+found --exclude=/media --exclude=/mnt --exclude=/run /
+sudo timeshift --create --comments "before-training" --tags O
+sudo timeshift --list
 \end{tbash}
+
+
+这里的 \texttt{--comments} 用来写说明，\texttt{--tags O} 表示按需创建。设备选择沿用你刚刚核对过的配置，我们不用照抄别人的磁盘名。
 \end{example}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{restore1.png}
+\caption{Timeshift 列表：核对时间、系统版本与快照数量；截图不是本次创建结果}
+\label{fig:restore1}
+\end{figure}
 
-下面解释一下上面这条命令：tar就是一个打包命令，各参数的含义见第1.4节的 tar 参数表。
+\textbf{接下来我们看看怎样恢复。}如果系统还能正常打开桌面，就启动 Timeshift，选择刚刚核对过的快照，点击“恢复”。这里要特别留意目标设备页：根分区、EFI 分区等映射指的是要恢复到哪里，不只是备份存在哪里。先确认当前文件已经另做备份、目标系统也选对了，再读一遍最终变更摘要，确认后继续。恢复结束后重启，看看被恢复的配置是否回到原来的内容，个人文件是否仍在。
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{restore2.png}
+\caption{恢复目标选择页：确认的是目标分区，不只是备份保存位置}
+\label{fig:restore2}
+\end{figure}
+如果图形化桌面已经打不开，但还能进入 TTY，可以先运行 \texttt{timeshift --help} 看当前版本的用法，再通过 \texttt{timeshift --restore} 进入交互恢复。如果连系统都进不去了，这时候之前保存的“数字生命”就派上用场了：从 Live U 盘进入 Try Ubuntu，安装 Timeshift，再选择备份所在的设备和要恢复的目标系统。不要为了让命令少问几句，就照抄不明理由的 \texttt{--skip-grub} 跳过引导处理。
 
-\path{/media/Disk/myDisk/} 是备份文件的存放路径。这里，\texttt{myDisk} 表示你的移动硬盘名字；移动硬盘挂载在 \path{/media/Disk} 目录下。文件名中的 \texttt{\$(date +\%Y-\%m-\%d)} 是一条 shell 命令，会把执行时的日期写进文件名，方便日后辨认不同时间的备份。接下来看看 --exclude 参数中的内容。
-
-假设现在ubuntu中有四个分区：/、/home、/boot、swap，其中/home、/boot两个分区出问题的概率很小，而且变动也不会太频繁，因此在定期备份时可以减小对这两个分区的备份频率。一般系统坏了都是/分区的问题，/home没什么关系。再来看看其他排除的目录：
-
-/proc：一个虚拟文件系统，系统运行的每一个进程都会自动在这个目录下面创建一个进程目录。既然是系统自动创建，也就没必要备份的必要了。
-
-/tmp：一个临时文件夹，系统的一些临时文件会放在这里。
-
-/lost+found：系统发生错误时（比如非法关机），可以在这里找回一些丢失文件。
-
-/media：多媒体挂载点，像u盘、移动硬盘、windons分区等都会自动挂载到这个目录下。
-
-/mnt：临时挂载点，你可以自己挂载一些文件系统到这里。
-
-/run：系统从启动以来产生的一些信息文件。
-
-另外，有可能备份到最后系统会提示"tar: 由于前次错误,将以上次的错误状态退出"，这个警告可以忽略，没什么影响的。
-
-\textbf{镜像恢复}
-
-这里有两种还原方式：
-
-\begin{enumerate}
-    \item 直接操作
-
-    如果你系统出问题了，但是还可以进入终端，那就可以直接解压备份文件进行还原。切换到root，并且换到/根目录，打开终端，输入
-
-    \begin{tbash}
-tar -xvpzf /media/Disk/myDisk/ubuntu_backup@2016-6-6.tar.gz -C /
-    \end{tbash}
-
-    \item 使用启动盘还原
-
-    如果你连系统都不能登录了，就要使用U盘启动盘进行还原了。依旧是先进入试用ubuntu界面，切换到root，打开终端，输入
-
-    \begin{tbash}
-mkdir /mnt/sys
-mount /dev/sdaX /mnt/sys
-tar -xvpzf /media/Disk/myDisk/ubuntu_backup@2016-6-6.tar.gz -C /mnt/sys
-    \end{tbash}
-
-    注意先创建一个临时目录用于挂载你的/根目录分区，sdaX代表你的/根目录分区，如果不知道就用fdisk -l查看一下，另外如果你的移动硬盘没有被自动挂载，你也需要手动创建一个临时目录进行挂载。
-
-    因为 tar还原是只会覆盖相同的文件，但是这种方法只是恢复备份时的文件，就是说如果某些文件丢失或损坏了，这样可以恢复修复这些文件，但不能删除自备份到恢复前这期间所生成的其它文件，说白了就是假如你备份系统时有1234这四个文件，如果三天后，由于某些原因变成了1234'5（4改变了），你恢复后，就会变成12345，其中4'恢复成备份时的文件，5保留。
-\end{enumerate}
-
-\begin{note}
-\texttt{tar} 恢复是直接向目标目录解压覆盖，\texttt{-C} 后面的路径写错会把系统文件释放到错误的位置。恢复前请确认解压路径和备份文件都没有选错。
-\end{note}
-
-\begin{conclusion}
-两种备份方式对比：
-
-\begin{center}
-\begin{tabular}{ccc}
-\toprule[1.5pt]
-方式 & 适用场景 & 特点\\
-\midrule[1pt]
-timeshift 快照 & 日常配置环境之前 & 增量备份，速度快，可一键恢复\\
-tar 系统镜像 & 系统迁移或长期归档 & 完整打包，体积较大，恢复需手动解压\\
-\bottomrule[1.5pt]
-\end{tabular}
-\end{center}
-
-日常防护用 timeshift 就够了：配环境前拍一张，环境炸了就回档。tar 镜像则相当于通关前的手动存档位，适合在系统大改之前留一份完整存档。
-\end{conclusion}
-
-\begin{exercise}
-说出镜像制作命令中 \texttt{tar} 的 \texttt{-c}、\texttt{-v}、\texttt{-p}、\texttt{-z}、\texttt{-f} 五个参数各自的含义（可查阅 man 手册或第1.4节的参数表）。
+我们练习恢复时，优先用虚拟机或可以重建的练习系统：快照前保存一份练习配置，然后改动它，再恢复，看看内容是不是真的变回来了。不用为了交练习把自己正在使用的系统盲目回档；如果暂时没有练习系统，就先记下创建结果和恢复计划，把\textbf{实际系统恢复留作待验证}，等有合适环境再补上。
+\begin{exercise}\label{ex:v1-snapshot}
+创建一个带注释的快照，记录列表、保存设备和排除范围。说明哪些个人文件仍需另备份；在可重建系统中完成一次配置恢复并记录前后内容，没有该环境时明确待验证项。
 \end{exercise}
 
+\subsubsection{文件归档与恢复：先在小目录里练}
+\label{sec:archive-backup}
+Timeshift 帮我们保存系统状态，那自己写的代码和配置又怎样备份呢？接下来介绍 \texttt{tar}，它可以把多个文件打成归档（Archive），配合 gzip 压缩后，常见的扩展名就是 \texttt{.tar.gz}。这样我们就能把一个目录里的内容打包带走，再解到另一个地方。
+
+不过 tar 归档不是整块磁盘的扇区镜像，它没有自动保存 GPT、EFI 引导状态，也不能保证正在写入的文件前后一致。直接“把 / 打包，再解压到 /”还可能覆盖真实系统，对新手来说既难验证又难补救。所以这里我们先在一个小目录里练清楚备份和恢复的过程；如果以后需要迁移整个系统，再单独准备完整的恢复方案。
+
+通用形式为 \texttt{tar -czf 归档文件 -C 起始目录 要保存的相对路径}；恢复用 \texttt{tar -xzf 归档文件 -C 目标目录}。\texttt{-c} 创建、\texttt{-x} 解包、\texttt{-z} 使用 gzip、\texttt{-f} 指定归档文件，\texttt{-C} 先切换基准目录，\texttt{-t} 列内容，\texttt{-v} 显示详细过程；\texttt{-p} 在解包时尽量恢复权限，不是提高压缩完整性。
+\Needspace{8\baselineskip}
+\begin{example}[备份、损坏、恢复与额外文件]
+我们先造一个只有配置文件的小环境，备份它，再故意把恢复目录里的配置改坏，最后试着读档。在 Bash 终端一次执行下列命令即可，\texttt{mktemp -d} 会创建独立的临时目录，下面的覆盖都发生在这个实验目录里，不需要 sudo。
+
+\begin{tbash}
+lab=$(mktemp -d)
+mkdir -p "$lab/source" "$lab/restored"
+printf 'camera=ready\n' > "$lab/source/config.txt"
+tar -czf "$lab/backup.tar.gz" -C "$lab/source" .
+tar -tzf "$lab/backup.tar.gz"
+printf 'camera=broken\n' > "$lab/restored/config.txt"
+printf 'keep me\n' > "$lab/restored/extra.txt"
+tar -xzf "$lab/backup.tar.gz" -C "$lab/restored"
+cmp "$lab/source/config.txt" "$lab/restored/config.txt"
+cat "$lab/restored/config.txt" "$lab/restored/extra.txt"
+printf 'lab=%s\n' "$lab"
+\end{tbash}
+
+运行后，归档列表里应该能看到 \texttt{./config.txt}。\texttt{cmp} 是比较文件内容的命令，成功时没有输出，退出码为 0；最后两行文件内容应该是 \texttt{camera=ready} 和 \texttt{keep me}。配置从 broken 变回 ready，说明同名文件确实恢复了，不过后来添加的 extra.txt 还在。也就是说，\textbf{解包不等于让整个目标目录精确回到旧状态}，这个“读档”不会自动把后来多出来的文件删掉。
+\end{example}
+\begin{note}
+\texttt{tar -x} 会覆盖目标中的同名文件。真实备份先解到新的空目录，检查内容和权限，再决定怎样合并。不要对不可信归档用 root 解包；不要把 \texttt{-C /} 当作通用恢复命令。tar 的非零退出码也不能一律忽略：读失败、文件变化或空间不足时，检查 stderr 并重新验证归档。
+\end{note}
+\begin{exercise}\label{ex:v1-tar-options}
+解释 \texttt{-c/-x/-z/-f/-C/-t/-p} 的作用，实际运行目录恢复实验。修改一个源文件后重新备份到\textbf{另一个归档名}，解到新的空目录并用 \texttt{cmp} 验证，说明为何额外文件不会自动消失。
+\end{exercise}
+\begin{conclusion}
+Timeshift 主要保护系统配置，tar 适合文件归档；两者的有效性都依赖恢复验证。备份范围、保存介质和恢复目标要一起记。系统快照不代替个人数据备份；文件归档不等于完整磁盘镜像，解包也不会删除后来新增的文件。
+\end{conclusion}

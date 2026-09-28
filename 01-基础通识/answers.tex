@@ -3,7 +3,7 @@
 \setlength{\emergencystretch}{3em}
 
 先自己试一遍，再来核对。答案写法不止一种：能解释思路、跑出正确结果、处理题目里的边界情况，就算做到了。
-下面按原题号整理；“随堂练习 1.1”和“第一章章末第 1 题”是两套编号，别串台。
+下面按原题号整理；“随堂练习 1.1”和“第一章章末第~\ref{prob:v1-linux-1}~题”是两套编号，别串台。
 操作题以你的实际记录为准，不用把参考容量、用户名或设备名照抄到自己电脑上。
 
 \section*{第一章：Linux 工作环境}
@@ -11,7 +11,7 @@
 \addcontentsline{toc}{section}{第一章题解：Linux 工作环境}
 \subsubsection*{随堂练习}
 
-\paragraph*{随堂练习 1.1：规划分区}
+\paragraph*{随堂练习~\ref{ex:v1-partition-plan}：规划分区}
 \begin{solution}
 先记录磁盘编号、各分区容量、剩余空间和准备压缩出的空间。
 例如，已有 Windows 的 UEFI/GPT 电脑，可以预留约 200 GiB：给 \texttt{/} 分配约 80 GiB，其余给 \texttt{/home}。这只是便于讨论的方案，容量要按你的磁盘和项目需求调整。
@@ -23,76 +23,99 @@ UEFI 安装还要确认 EFI 系统分区（ESP），通常复用已有分区并�
 \end{note}
 \end{solution}
 
-\paragraph*{随堂练习 1.2：记录启动顺序}
+\paragraph*{随堂练习~\ref{ex:v1-usb-image}：镜像与启动盘}
+\begin{solution}
+校验值应与同一下载版本的 SHA256SUMS 中对应 ISO 条目一致，目标应为已备份的 U 盘，Etcher 写入和校验均成功。启动菜单选择这只盘的 UEFI 项，进入 Try Ubuntu；不把看到安装器首页当作正式系统已装好。没有 U 盘只完成校验时，实际启动仍待验证。
+\end{solution}
+\paragraph*{随堂练习~\ref{ex:v1-installer-review}：分区核对}
+\begin{solution}
+ESP 保留、不格式化，UEFI 引导文件位于其中；/boot 保存内核等文件，可在根分区内；swap 是交换空间，没有 /swap 挂载点。GPT 不分旧式主/逻辑分区。格式化只针对计划新建或替换的 Ubuntu 分区，Windows 数据与恢复分区保留。独立 /home 要保留也须取消格式化并先备份。
+\end{solution}
+\paragraph*{随堂练习~\ref{ex:v1-boot-order}：记录启动顺序}
 \begin{solution}
 进入 BIOS/UEFI 设置，找到 Boot 页面，记录 \texttt{Windows Boot Manager}、\texttt{ubuntu}、USB 启动项等的先后顺序。
 再记录调整顺序的按键或菜单位置，最后选择不保存退出。
 不同机器菜单不同，检查标准是：你能找到启动项，能指出如何把 Windows 的启动项放到首位，并且这次没有误改设置。
 \end{solution}
 
-\paragraph*{随堂练习 1.3：桌面插件（选修）}
+\paragraph*{随堂练习~\ref{ex:v1-resize-plan}：扩容规划}
+\begin{solution}
+隔着其他分区时，未分配空间不与根分区相邻，不能直接把那块空间加进去。先验证备份与恢复介质，核对是否能迁移大文件；确需移动分区时制定完整离线方案，在 Live 环境卸载目标并确认电源可靠。完成后用 lsblk 查分区大小、df -hT / 查文件系统容量，并测试系统启动。只作规划不算实际扩容验证。
+\end{solution}
+\paragraph*{随堂练习~\ref{ex:v1-grub-plan}：引导配置}
+\begin{solution}
+菜单标题或 ID 来自本机 grub.cfg，不能从其他机器截图抄序号。主题控制显示，GRUB\_DEFAULT 控制菜单默认项，固件 Boot 顺序控制先启动哪个引导程序。备份 /etc/default/grub 后修改该源配置，update-grub 生成，再验证；必要时恢复对应备份并重新生成。实际写入与重启留到有恢复介质和明确方案时执行。
+\end{solution}
+\paragraph*{随堂练习~\ref{ex:v1-desktop-plugins}：桌面插件（选修）}
 \begin{solution}
 按正文步骤安装 Extension Manager，在其中查找并启用与当前 GNOME 版本兼容的 Caffeine 和 Clipboard Indicator。
 验证时分两步：先记下自动熄屏时间，启用 Caffeine，等待超过该时间；再复制三段普通文字，从剪贴板历史中重新选择第一段并粘贴。
 分别记录插件状态和验证结果。没有兼容版本时，记录版本及提示，不把“能搜到插件”当作“已经启用”。剪贴板测试用普通文字就好，不要用密码。
 \end{solution}
 
-\paragraph*{随堂练习 1.4：创建快照（选修）}
+\paragraph*{随堂练习~\ref{ex:v1-snapshot}：创建与恢复快照（选修）}
 \begin{solution}
-先在 Timeshift 中选好快照类型和保存位置，再创建快照；也可在完成初始配置后执行：
-\begin{tbash}
-sudo timeshift --create --comments "before-training" --tags O
-sudo timeshift --list
-\end{tbash}
-列表中应出现这次快照的时间、名称及注释。记录保存位置，并确认创建过程没有报错。
-这道题不要求执行恢复；系统快照也不能代替个人文件备份。
+使用正文命令创建并列出快照，记录注释、保存设备和排除范围。个人源码与数据若没有明确纳入，仍要另备份。在虚拟机中，可先把练习系统配置写成 before，创建快照后改成 after，再按目标映射恢复；重启后应回到 before。只完成创建时，实际恢复仍标为待验证，不能把快照列表当作恢复成功证据。
 \end{solution}
 
-\paragraph*{随堂练习 1.5：tar 参数（选修）}
+\paragraph*{随堂练习~\ref{ex:v1-tar-options}：归档与目录恢复（选修）}
 \begin{solution}
-\texttt{-c} 创建归档；\texttt{-v} 显示处理的文件；\texttt{-p} 在解包时尽量恢复记录的权限；\texttt{-z} 使用 gzip 压缩或解压；\texttt{-f} 指定归档文件。
-注意，\texttt{-p} 不是“压缩得更完整”：归档本身会记录常规权限信息，能否完整恢复还受当前用户权限和文件系统限制。
-\texttt{-f} 后面要跟归档文件名，别把要备份的目录误放在这个位置。
+-c 创建，-x 解包，-z 使用 gzip，-f 指定归档，-C 设置基准目录，-t 列内容，-p 在解包时尽量恢复权限。正文实验应得到 camera=ready 与 keep me；cmp 无输出且退出码为 0。另改 source/config.txt 为 camera=updated，打包为 backup2.tar.gz，解到新建的 restored2，再用 cmp 比较。归档只覆盖记录中的路径，不会删除目标中额外的文件；完整镜像还需考虑引导和分区表。
 \end{solution}
 
-\paragraph*{随堂练习 1.6：根目录和设备文件}
+\paragraph*{随堂练习~\ref{ex:v1-reinstall-plan}：重装清单}
 \begin{solution}
+先从 Live 环境读取并验证个人资料备份，记录根分区、/home 与 ESP 的设备身份。仅替换根分区；独立 /home 保留且不格式化，ESP 复用且不格式化，Windows 分区保留。安装后核对两系统启动、实际挂载点和恢复资料，再构建小工程。/home 与根同分区时必须先完整备份其资料，根分区格式化后再恢复到新系统。
+\end{solution}
+\paragraph*{随堂练习~\ref{ex:v1-fs-layout}：根目录和设备文件}
+\begin{solution}
+
 \begin{tbash}
 ls /
 ls /dev
 ls -l /dev/null /dev/zero
 \end{tbash}
+
 \texttt{/etc} 保存许多系统级配置；\texttt{/home} 通常保存普通用户的家目录；\texttt{/dev} 提供设备文件。
 上面两项是字符设备，权限字符串的第一位为 \texttt{c}；磁盘等块设备通常以 \texttt{b} 开头。
 设备名要看本机输出，不是每台电脑都有 \texttt{/dev/sda}。
 \end{solution}
 
-\paragraph*{随堂练习 1.7：查看根分区}
+\paragraph*{随堂练习~\ref{ex:v1-user-info}：用户身份}
 \begin{solution}
+whoami 给当前命令的用户名，id 给 UID、GID 与组。具体值按实际输出记录。sudo 让指定进程按授权使用目标身份，不能据此推断已登录桌面及其他进程的身份都改变了。只查看不需要改账户或开启 root 密码。
+\end{solution}
+\paragraph*{随堂练习~\ref{ex:v1-disk-space}：查看根分区}
+\begin{solution}
+
 \begin{tbash}
 df -hT
 df -hT /
 \end{tbash}
+
 第二条直接查看根目录所在的文件系统。按列记录文件系统、类型、总容量、已用空间、可用空间和挂载点。
-例如类型可能是 \texttt{ext4}，挂载点为 \texttt{/}；具体数值以你的输出为准。\texttt{tmpfs}、其他分区的容量不要抄进根分区这一行。
+例如类型可能是 \texttt{ext4}，挂载点为 \texttt{/}；free -h 的 available 是可用内存估计，uname -r 是内核版本，两者不描述磁盘。具体数值以你的输出为准。\texttt{tmpfs}、其他分区的容量不要抄进根分区这一行。
 \end{solution}
 
-\paragraph*{随堂练习 1.8：安装和卸载软件}
+\paragraph*{随堂练习~\ref{ex:v1-apt-package}：安装和卸载软件}
 \begin{solution}
 以 \texttt{cowsay} 为例：
+
 \begin{tbash}
 apt search cowsay
 sudo apt install cowsay
 /usr/games/cowsay "Hello, RoboMaster!"
 sudo apt remove cowsay
 \end{tbash}
+
 应先看到字符画输出，再看到卸载成功的提示。使用完整路径可以避开 \texttt{/usr/games} 未加入 PATH 的情况。
 \texttt{remove} 一般保留配置文件，本题不要求进一步清理所有依赖或配置。
 \end{solution}
 
-\paragraph*{随堂练习 1.9：文件操作}
+\paragraph*{随堂练习~\ref{ex:v1-file-ops}：文件操作}
 \begin{solution}
 确认家目录里没有需要保留的同名 \texttt{practice} 目录，再执行：
+
 \begin{tbash}
 mkdir -p "$HOME/practice/sub"
 touch "$HOME/practice/hello.txt"
@@ -101,39 +124,52 @@ mv "$HOME/practice/hello.txt" "$HOME/practice/sub/"
 ls -R "$HOME/practice"
 rm -ri -- "$HOME/practice"
 \end{tbash}
-删除前应看到根目录里的备份文件，以及 \texttt{sub} 中的原文件。删除后用 \texttt{test ! -e "\$HOME/practice"} 检查，退出码应为 \texttt{0}。
+
+删除前应看到根目录里的备份文件，以及 \texttt{sub} 中的原文件。删除后再检查路径是否已不存在：
+\begin{tbash}
+test ! -e "$HOME/practice"
+\end{tbash}
+退出码应为 \texttt{0}。
 \begin{note}
 最后一条会递归删除练习目录，\texttt{-i} 会逐项确认。先核对路径和内容，再回答确认提示。若同名目录原来就有资料，请换一个练习目录名。
 \end{note}
 \end{solution}
 
-\paragraph*{随堂练习 1.10：查找最近修改的 Python 文件}
+\paragraph*{随堂练习~\ref{ex:v1-links-permissions-archive}：链接、权限与归档}
 \begin{solution}
+按正文建样本，原文件与 hard.txt 应共享 inode 和新内容；soft.txt 保存原路径；copy.txt 保留初始内容。755 对应所有者 rwx、组与其他用户 r-x。tar -czf 备份路径 -C 练习目录 . 后，先 -tzf 查列表，再 -xzf 解到新空目录；用 cmp 比较普通文件内容，ls -l 检查链接类型与脚本权限。归档保存结构，复制产生独立内容，链接描述访问关系，chmod 改访问权限。软链接保留路径关系，若移到不同布局仍需核对目标是否存在。
+\end{solution}
+\paragraph*{随堂练习~\ref{ex:v1-find-python}：查找最近修改的 Python 文件}
+\begin{solution}
+
 \begin{tbash}
 find "$HOME" -type f -name '*.py' -mtime -7
 \end{tbash}
+
 \texttt{-type f} 限定普通文件，单引号让 \texttt{*.py} 交给 find 匹配，\texttt{-mtime -7} 选择修改时间距今不足七个 24 小时的文件。
 没有输出也可能是没有匹配项。可以先在练习目录里建一个 \texttt{check.py}，再运行命令验证。
 \end{solution}
 
-\paragraph*{随堂练习 1.11：管道筛选和计数}
+\paragraph*{随堂练习~\ref{ex:v1-pipe-count}：管道筛选和计数}
 \begin{solution}
+
 \begin{tbash}
 apt list --installed | grep '^[^/]*python[^/]*/'
 apt list --installed | grep '^[^/]*python[^/]*/' | wc -l
 \end{tbash}
+
 软件包名在第一个斜杠前，这个匹配方式只检查包名是否含有 \texttt{python}。
-第一条列结果，第二条统计结果行数。apt 可能在标准错误输出提示命令行接口并不稳定；这条提示不会作为软件包行传给管道。脚本中做严格包查询时，可改用 \texttt{dpkg-query}。
+第一条列结果，第二条统计结果行数；加 > python-packages.txt 保存结果，再运行 wc -l < python-packages.txt，行数应相同。apt 可能在标准错误输出提示命令行接口并不稳定；这条提示不会作为软件包行传给管道。脚本中做严格包查询时，可改用 \texttt{dpkg-query}。
 \end{solution}
 
-\paragraph*{随堂练习 1.12：Vim 保存与放弃修改}
+\paragraph*{随堂练习~\ref{ex:v1-vim-edit}：Vim 保存与放弃修改}
 \begin{solution}
 运行 \texttt{vim note.txt}，按 \texttt{i} 进入插入模式，输入三行内容。按 Esc，输入 \texttt{:wq} 并回车，再用 \texttt{cat note.txt} 检查。
 第二次打开后，在普通模式输入 \texttt{2Gdd} 删除第二行，再输入 \texttt{:q!} 放弃修改并退出。
 再次用 cat 查看，文件仍应有原来的三行。\texttt{:q!} 放弃的是本次未保存的编辑，不会撤销上次已经保存的内容。
 \end{solution}
 
-\paragraph*{随堂练习 1.13：AstroNvim 搜索（选修）}
+\paragraph*{随堂练习~\ref{ex:v1-astronvim}：AstroNvim 搜索（选修）}
 \begin{solution}
 按正文步骤安装，在项目根目录启动 \texttt{nvim}，等待插件初始化完成。
 先按空格、\texttt{f}、\texttt{f}，输入文件名的一部分，选中文件并打开；再按空格、\texttt{f}、\texttt{w}，搜索文件中确实存在的一段文字，并跳到结果行。
@@ -141,10 +177,11 @@ apt list --installed | grep '^[^/]*python[^/]*/' | wc -l
 外观不是检查重点，能找到文件、找到内容才算跑通。
 \end{solution}
 
-\paragraph*{随堂练习 1.14：运行脚本}
+\paragraph*{随堂练习~\ref{ex:v1-shell-script}：运行脚本}
 \begin{solution}
 在独立练习目录保存下面的 \texttt{prepare.sh}：
 % answer-code: prepare.sh
+
 \begin{tbash}
 #!/usr/bin/env bash
 set -e
@@ -152,43 +189,54 @@ mkdir -p mydir
 touch mydir/a.txt
 ls mydir
 \end{tbash}
+
 在同一目录分别运行：
+
 \begin{tbash}
 chmod +x prepare.sh
 ./prepare.sh
 bash prepare.sh
 \end{tbash}
+
 两次都应列出 \texttt{a.txt}。第一种需要执行权限，由首行指定解释器；第二种由你显式调用 Bash，脚本需要可读，但不要求执行权限。
-脚本中的相对路径以运行时的工作目录为准。
+脚本中的相对路径以运行时的工作目录为准；从另一目录执行原路径的脚本，会在那里创建 mydir，除非脚本自己先 cd。
 \end{solution}
 
-\paragraph*{随堂练习 1.15：别名的生效和清理}
+\paragraph*{随堂练习~\ref{ex:v1-shell-alias}：别名的生效和清理}
 \begin{solution}
 在 \texttt{\textasciitilde/.bashrc} 加入 \texttt{alias cls='clear'}，然后运行：
+
 \begin{tbash}
 source ~/.bashrc
 type cls
 cls
 \end{tbash}
+
 \texttt{type cls} 应显示该别名。练完删掉配置文件里新增的行，再在当前终端执行 \texttt{unalias cls}。
 仅删除文件中的那一行再 source，并不会自动删除当前 Shell 已有的别名。新开一个正常读取该配置的终端，确认它也不再定义 \texttt{cls}。
 \end{solution}
 
-\paragraph*{随堂练习 1.16：PATH 的作用范围}
+\paragraph*{随堂练习~\ref{ex:v1-shell-inheritance}：export 与 source}
+\begin{solution}
+给 RM\_LOCAL 加 export 后，child 的 local=armor，父进程最后仍为 camera。恢复后将 bash child.sh 改为 source child.sh，文件在当前 Shell 执行，能看到 RM\_LOCAL=armor，且最后父脚本输出 exported=radar。每个对照实验只改一项，结束恢复源码；不要据此改写 HOME 或 PATH 来制造同样现象。
+\end{solution}
+\paragraph*{随堂练习~\ref{ex:v1-shell-path}：PATH 的作用范围}
 \begin{solution}
 在 Bash 中记录旧值，再追加目录：
+
 \begin{tbash}
 old_path=$PATH
 mkdir -p "$HOME/mybin"
 export PATH="$PATH:$HOME/mybin"
 printf '%s\n' "$PATH"
 \end{tbash}
+
 从桌面终端启动器新开一个独立终端，通常不会有这次追加的目录，因为原终端的修改没有写入启动配置。
 但如果你从已修改的终端启动子 Shell，例如直接运行 \texttt{bash}，子进程会继承 PATH，修改仍然可见。
 所以“新开终端一定失效”要看它由谁启动。最后在原终端执行 \texttt{export PATH="\$old\_path"} 恢复旧值。
 \end{solution}
 
-\paragraph*{随堂练习 1.17：迁移 zsh 配置（选修）}
+\paragraph*{随堂练习~\ref{ex:v1-zsh-config}：迁移 zsh 配置（选修）}
 \begin{solution}
 按正文完成安装，确认 \texttt{\textasciitilde/.zshrc} 中的主题是 p10k，插件列表包含 \texttt{zsh-autosuggestions}。
 只迁移自己添加的、兼容 zsh 的配置，例如 \texttt{alias cls='clear'}，不要整份复制 \texttt{.bashrc}。
@@ -196,30 +244,20 @@ printf '%s\n' "$PATH"
 提示符图标应能正常显示。若仍是方框，检查终端字体；不要为了一个图标把整个 Shell 重装一遍。
 \end{solution}
 
-\paragraph*{随堂练习 1.18：提交和比较差异}
+\paragraph*{随堂练习~\ref{ex:v1-git-config}：本地配置与两种差异}
 \begin{solution}
-为了不打扰真实项目，建一个独立仓库：
-\begin{tbash}
-mkdir git-answer-lab
-cd git-answer-lab
-git init
-git config user.name "Training Student"
-git config user.email "student@example.invalid"
-printf 'first\n' > note.txt
-git add note.txt
-git commit -m "Add first line"
-printf 'second\n' >> note.txt
-git add note.txt
-git commit -m "Add second line"
-git log --oneline -2
-printf 'third\n' >> note.txt
-git diff
-\end{tbash}
-日志应有两次提交，差异中应出现新增的 \texttt{third}。
-仓库配置只用于这个练习目录。\texttt{git diff} 默认比较工作区与暂存区；若再次 add，这部分差异会转到 \texttt{git diff --cached} 中。
+用 git config --local --get 读回作者身份。先建文件写 A 并 add，再追加 B：git diff --cached 显示已暂存的 A，git diff 显示之后新增的 B，status 同时列出两种变化。暂存的是 add 时的版本，不是对文件开启自动跟踪全部编辑。作者信息是提交元数据，不是远程凭据。
+\end{solution}
+\paragraph*{随堂练习~\ref{ex:v1-git-commits}：本地提交与交换}
+\begin{solution}
+把 lab 替换为脚本打印的真实临时路径，在 student 中追加第三行后 add、commit。用 git rev-list --count HEAD 查看 student，应为 3；用 git --git-dir=远程路径 rev-list --count main 查看 remote，应仍为 2。push 后远程变 3，teammate 中 pull --ff-only 后可读到第三行且本地计数为 3。本地历史、远程历史和另一份工作副本分别在相应步骤更新，不能把 commit 与推送混称。
 \end{solution}
 
-\paragraph*{随堂练习 1.19：忽略规则与例外}
+\paragraph*{随堂练习~\ref{ex:v1-git-branch}：分支与合并}
+\begin{solution}
+在干净练习仓库中 switch -c 新分支，新增文件并 add、commit；switch main 后文件通常暂时不在该版本中。merge --ff-only 新分支后，main 指向新提交且文件出现。图形日志可同时显示两个分支名指向同一提交，说明分支是名字而不是永久复制出来的文件夹。
+\end{solution}
+\paragraph*{随堂练习~\ref{ex:v1-git-ignore}：忽略规则与例外}
 \begin{solution}
 \texttt{.gitignore} 写为：
 \begin{lstlisting}[language={},frame=single]
@@ -230,6 +268,7 @@ git diff
 \texttt{/build/*} 忽略根目录 build 内的内容，随后取消对 keep.txt 的忽略。
 不要先写 \texttt{/build/} 把整个父目录排除，否则 Git 不会继续遍历它来找这个例外。
 在练习仓库验证：
+
 \begin{tbash}
 mkdir -p build
 touch run.log build/cache.tmp build/keep.txt
@@ -237,13 +276,19 @@ git status --short --untracked-files=all
 git check-ignore -v run.log build/cache.tmp
 git check-ignore -v --no-index build/keep.txt
 \end{tbash}
+
 status 应显示 \texttt{build/keep.txt}，不显示另外两项。最后一条可能打印以 \texttt{!} 开头的例外规则，这表示取消忽略；不要只凭“有输出”就判断被忽略。
 已经被 Git 跟踪的文件，不会因为新增规则自动停止跟踪。
 \end{solution}
 
-\paragraph*{随堂练习 1.20：Conda 环境（选修）}
+\paragraph*{随堂练习~\ref{ex:v1-conda-config}：配置来源}
+\begin{solution}
+show-sources 列显式配置位置，show channels 与 show auto\_activate\_base 给有效值；没有显式条目的值可能来自默认配置。ROS 2 编译器、Python 和库路径要来自支持的系统环境，Conda 的路径可能改变查找结果，所以检查实际入口与环境，不能只看提示符。venv 的隔离实验不代替这些 Conda 配置命令的验证。
+\end{solution}
+\paragraph*{随堂练习~\ref{ex:v1-conda-env}：Conda 环境（选修）}
 \begin{solution}
 确认没有需要保留的同名环境，再执行：
+
 \begin{tbash}
 conda create --name rm-answer-py310 python=3.10
 conda activate rm-answer-py310
@@ -255,19 +300,24 @@ conda deactivate
 conda remove --name rm-answer-py310 --all
 conda env list
 \end{tbash}
+
 应看到 Python 3.10、numpy 的版本信息；删除完成后，环境列表中不再有该环境。
 \begin{note}
 \texttt{--all} 会删除指定环境的全部包，确认环境名无误再执行，不要把平时用的环境拿来交作业。
 \end{note}
 \end{solution}
 
-\paragraph*{新增随堂练习题解（第\ref{sec:ide-tools}节）}
+\paragraph*{随堂练习~\ref{ex:ide-clion}、\ref{ex:ide-vscode}：修改与调试}
 \begin{solution}
 CLion 练习：将 bonus 改为 20 后，输出应为 \texttt{total = 80}。在加法行暂停时 current 为 60、bonus 为 20，result 尚未完成初始化；执行该行后 result 为 80。恢复 bonus 为 15 后重新构建，输出恢复为 75。
 
 VS Code 练习：把光标放在 main 中 bonus 的声明或引用上，执行 Rename Symbol（默认 F2），输入 reward。该局部变量的声明与调用处引用一起变化；函数形参 bonus 是另一个作用域的符号，不应被同步改名。程序仍输出 75。撤销后保存，再检查构建和输出。
 \end{solution}
 
+\paragraph*{随堂练习~\ref{ex:ide-setup}：工具链与界面}
+\begin{solution}
+记录实际编译器入口和版本、两套独立的 Debug 构建目录、运行 total = 75 与退出码 0。CLion 的 Terminal、Build、Run、Debug 分别用于命令、构建日志、运行输出和调试；VS Code 的 Terminal、Output 中 CMake 通道及 Run and Debug 的变量区分别承担对应职责。配置成功只生成构建规则，不证明程序编译或调试通过。
+\end{solution}
 \paragraph*{随堂练习 \ref{ex:serial-device}：识别串口设备}
 \begin{solution}
 实际设备名、所属组与链接以插拔日志及 \texttt{ls -l} 输出为准。队内 USB CDC ACM 设备通常呈现为 \texttt{ttyACM0} 等节点，编号可能因设备发现顺序改变；有唯一标识时可优先使用对应的 \texttt{/dev/serial/by-id/} 链接，或按下一题配置 udev 别名。设备不存在先查连接、驱动、虚拟机 USB 直通及路径；权限不足先对比设备权限、所属组与当前会话的组。Ubuntu 中常见的处理是加入 \texttt{dialout} 后完整注销并重新登录，而不是放宽为所有用户可写。
@@ -275,14 +325,23 @@ VS Code 练习：把光标放在 main 中 bonus 的声明或引用上，执行 R
 
 \paragraph*{随堂练习 \ref{ex:serial-udev}：绑定 ACM 固定名称}
 \begin{solution}
-先运行 \texttt{udevadm info --name=/dev/ttyACM0 --attribute-walk}，从目标板的同一个 USB 父设备块中记录 VID、PID 和唯一序列号。规则模板如下，三个大写占位值必须用实测值替换：
+先查看目标板属性：
+
+\begin{tbash}
+udevadm info --name=/dev/ttyACM0 --attribute-walk
+\end{tbash}
+
+从目标板的同一个 USB 父设备块中记录 VID、PID 和唯一序列号。规则模板如下，三个大写占位值必须用实测值替换：
+
 \begin{tbash}
 SUBSYSTEM=="tty", KERNEL=="ttyACM*", \
   ATTRS{idVendor}=="YOUR_VID", ATTRS{idProduct}=="YOUR_PID", \
   ATTRS{serial}=="YOUR_SERIAL", \
   SYMLINK+="rm_control", GROUP="dialout", MODE="0660"
 \end{tbash}
-前两个条件限定 tty 子系统与 ACM 节点；VID/PID 匹配型号，序列号区分同型号的板。\texttt{SYMLINK+=} 创建别名，\texttt{GROUP} 与 \texttt{MODE} 设置目标节点所属组及读写权限。规则保存到 \texttt{/etc/udev/rules.d/99-rm-control.rules} 后，重载规则并重新插拔设备：
+
+前两个条件限定 tty 子系统与 ACM 节点；VID/PID 匹配型号，序列号区分同型号的板。\texttt{SYMLINK+=} 创建别名，\texttt{GROUP} 与 \texttt{MODE} 设置目标节点所属组及读写权限。规则保存到 \path{/etc/udev/rules.d/99-rm-control.rules} 后，重载规则并重新插拔设备：
+
 \begin{tbash}
 sudo udevadm control --reload-rules
 # 先停止串口程序，再拔插目标设备
@@ -291,6 +350,7 @@ readlink -f /dev/rm_control
 ls -lL /dev/rm_control
 udevadm info --name=/dev/rm_control --query=property
 \end{tbash}
+
 换插口后应仍通过该别名查到同一序列号；底层 ACM 编号允许变化。VID/PID 相同的两块板若不匹配唯一序列号，会争用别名。没有唯一序列号时需完善固件标识，或按实际条件使用绑定端口位置的路径，并说明换插口会影响该路径。仅完成规则草稿不能替代硬件验证。
 \end{solution}
 
@@ -299,93 +359,109 @@ udevadm info --name=/dev/rm_control --query=property
 十六进制输出应为 \texttt{00 41 ff 0a}。其中 \texttt{00} 是空字符，\texttt{41} 对应 ASCII 字母 A，\texttt{ff} 不是合法的单字节 UTF-8 字符，\texttt{0a} 为换行，因此不能期待四个可见字符。串口是字节流，数据分批到达或读取超时都可能导致短读，应累计字节并按约定边界解析，不能仅凭一次短读判定丢包。软件回环成功不检验真实设备权限、接线或波特率匹配。
 \end{solution}
 
+\paragraph*{随堂练习~\ref{ex:serial-diagnosis}：分层排错}
+\begin{solution}
+设备未出现先查插拔日志、数据线与驱动；权限不足对比设备组和当前会话组；不可读字节先按十六进制核对协议是否二进制，再检查 UART 参数或 ACM 固件约定。USB 的 D+/D- 不能短接做回环。stty 检查主机请求的线路设置，不证明 USB 总线吞吐；多个读取者会各自消费字节，造成单个程序看到残缺消息。用 fuser 核对占用者，再正常退出确认过的工具。
+\end{solution}
+
 \subsubsection*{章末习题}
 
-\paragraph*{章末第 1 题：双系统安装流程}
+\paragraph*{章末第~\ref{prob:v1-linux-1}~题：双系统安装流程}
 \begin{solution}
 四步是：准备空闲分区、制作启动盘、从 U 盘安装、完成系统设置。
 正文采用“其它选项”手动核对分区和挂载点，这样才能清楚指定 Ubuntu 装在哪里，并保留 Windows 的分区。
-题目中的“必须”针对本书这套手动流程；其他受支持的安装流程也可能使用“与 Windows 共存”等选项。
-无论走哪条流程，都要核对安装目标，不能误选“清除整个磁盘”。分区细节见随堂练习 1.1 的说明。
+本题针对本书这套手动流程；其他受支持的安装流程也可能使用“与 Windows 共存”等选项。
+无论走哪条流程，都要核对安装目标，不能误选“清除整个磁盘”。ESP 保留且不格式化，根分区只在确认的安装或重装方案中格式化；swap 没有 /swap 挂载点。分区细节见随堂练习~\ref{ex:v1-partition-plan}~的说明。
 \end{solution}
 
-\paragraph*{章末第 2 题：挂载}
+\paragraph*{章末第~\ref{prob:v1-linux-2}~题：挂载}
 \begin{solution}
 挂载就是把一个文件系统接到现有目录树的某个目录上。之后访问这个目录，就能访问该文件系统的内容。
 Ubuntu 桌面自动挂载 U 盘时，常见路径是 \texttt{/media/用户名/卷标}；没有卷标时，最后一段可能是其他标识。
 实际位置可用 \texttt{lsblk -f} 或 \texttt{findmnt} 查看。
 \end{solution}
 
-\paragraph*{章末第 3 题：统计一层磁盘占用}
+\paragraph*{章末第~\ref{prob:v1-linux-3}~题：统计一层磁盘占用}
 \begin{solution}
+
 \begin{tbash}
 du -h --max-depth=1 .
 \end{tbash}
+
 \texttt{-h} 使用易读单位，\texttt{--max-depth=1} 限制显示层级。输出通常包含各子目录和当前目录总计；统计时仍会递归计算子目录里的内容。
 \end{solution}
 
-\paragraph*{章末第 4 题：文件权限与串口访问权限}
+\paragraph*{章末第~\ref{prob:v1-linux-4}~题：文件权限与串口访问权限}
 \begin{solution}
 三位依次对应所有者、所属组、其他用户。\texttt{7=4+2+1} 表示读写执行，\texttt{5=4+1} 表示读和执行。
 普通脚本可写成：
+
 \begin{tbash}
 chmod u=rwx,go=rx run.sh
 \end{tbash}
+
 这里用 \texttt{=} 明确设置权限，比在未知原权限上用 \texttt{+} 更准确。若文件原先带有特殊权限位，要精确清除它们可再执行 \texttt{chmod u-s,g-s,o-t run.sh}。
 
 对于题设串口，在普通用户终端运行 \texttt{sudo usermod -aG dialout "\$USER"}，完整注销并重新登录，再用 \texttt{id -nG} 检查当前会话的组。\texttt{-aG} 表示追加附加组；不要用 \texttt{chmod 777} 或长期以 root 运行程序来代替正确的组权限配置。
 \end{solution}
 
-\paragraph*{章末第 5 题：查找配置文件并保存}
+\paragraph*{章末第~\ref{prob:v1-linux-5}~题：查找配置文件并保存}
 \begin{solution}
+
 \begin{tbash}
 find /etc -type f -name '*.conf' > "$HOME/conf_list.txt"
 \end{tbash}
+
 \texttt{>} 保存标准输出，权限不足等错误仍显示在终端。若确实需要读取受限目录，可在确认权限范围后给 find 加 sudo。
 本写法查找普通文件；若题意也包括同名符号链接，可去掉 \texttt{-type f}。
 \end{solution}
 
-\paragraph*{章末第 6 题：两种脚本运行方式}
+\paragraph*{章末第~\ref{prob:v1-linux-6}~题：两种脚本运行方式}
 \begin{solution}
 \texttt{./test.sh} 请求系统执行这个文件，需要执行权限；对带有有效首行解释器声明的脚本，系统按该声明启动解释器。
 \texttt{bash test.sh} 是先执行 Bash，再让它读取脚本，因此脚本需要可读，不必有执行权限；此时由 Bash 执行，首行写的其他解释器不会替代它。
 \texttt{chmod +x} 的作用就是补上执行权限。
 \end{solution}
 
-\paragraph*{章末第 7 题：Git 三个区域}
+\paragraph*{章末第~\ref{prob:v1-linux-7}~题：Git 三个区域}
 \begin{solution}
 工作区是你正在编辑的文件；暂存区记录准备放进下一次提交的内容；本地版本库保存已经提交的历史。
 \texttt{git add} 把当时的文件内容放进暂存区；之后继续编辑，不会自动更新暂存区。
 \texttt{git commit} 把暂存区里的内容保存为一次本地提交，并不会自动推送到远程。
 \end{solution}
 
-\paragraph*{章末第 8 题：开发工具界面与编译器}
+\paragraph*{章末第~\ref{prob:v1-linux-8}~题：开发工具界面与编译器}
 \begin{solution}
 CLion 的锤子构建目标，绿色三角启动普通运行，小虫带调试器启动；普通运行不会因为设置了断点而暂停。
 VS Code 的 Explorer 管理文件树，Extensions 管理扩展，Terminal 提供可输入命令的 shell，Output 显示扩展日志。
 C/C++ 扩展提供代码分析和调试接入，本身不包含编译器；必须另外安装并选中 GCC、MSVC 等工具链。本例还需要 CMake 和相应构建工具。
 \end{solution}
 
-\paragraph*{章末第 9 题：修复 PATH}
+\paragraph*{章末第~\ref{prob:v1-linux-9}~题：修复 PATH}
 \begin{solution}
 PATH 被覆盖后，Shell 找不到原搜索目录中的外部命令，常见现象是 \texttt{ls} 等报“找不到命令”。Shell 内建命令和使用完整路径调用的程序仍可用。
 如果只是当前终端改错，优先恢复事先保存的值。没保存时，可以先临时恢复一组常见系统路径：
+
 \begin{tbash}
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 \end{tbash}
+
 这不是你的原始 PATH 全量备份，Conda、用户工具等路径可能仍需补回。
 如果错误写进了 \texttt{\textasciitilde/.bashrc}，用完整路径打开编辑器，例如 \texttt{/usr/bin/nano ~/.bashrc}，删掉错误行或改为：
+
 \begin{tbash}
 export PATH="$PATH:/opt/app/bin"
 \end{tbash}
+
 修正文件后，先恢复当前终端的 PATH，再 source，或者从未受影响的桌面会话打开新终端。反复 source 一份仍有错误的配置，只会把错误再执行一遍。
 \end{solution}
 
-\paragraph*{章末第 10 题：备份脚本与解压验证}
+\paragraph*{章末第~\ref{prob:v1-linux-10}~题：备份脚本与解压验证}
 \begin{solution}
 下面把要备份的目录作为参数。只接受家目录内的子目录，并拒绝把备份输出目录一起打包，避免归档不断包含自身。
 保存为 \texttt{backup.sh}：
 % answer-code: backup.sh
+
 \begin{tbash}
 #!/usr/bin/env bash
 set -euo pipefail
@@ -414,35 +490,45 @@ tar -xzf "$archive" -C "$verify"
 diff -r -- "$src" "$verify/$base"
 printf 'Verified archive: %s\nExtracted copy: %s\n' "$archive" "$verify"
 \end{tbash}
+
 验证方法：
+
 \begin{tbash}
 mkdir -p "$HOME/backup-answer-source"
 printf 'armor=3\n' > "$HOME/backup-answer-source/config.txt"
 bash backup.sh "$HOME/backup-answer-source"
 \end{tbash}
+
 成功时会打印备份路径和解压目录，文件名包含当天日期，同一天重复运行也不会覆盖上次归档。
 \texttt{diff -r} 无输出且退出码为 0，表示本例的目录内容一致；它不验证所有扩展属性和权限。备份期间不要修改源目录，需要一致的在线系统备份时应采用适合的快照方案。
 验证目录保留下来供你查看，确认无误后再自行清理。
 \end{solution}
 
 \clearpage
-\paragraph*{章末第 11 题：USB CDC ACM 与固定别名}
+\paragraph*{章末第~\ref{prob:v1-linux-11}~题：USB CDC ACM 与固定别名}
 \begin{solution}
 ACM 是 USB 通信设备类中的抽象控制模型，队内板端直接通过 USB 与电脑通信，Linux 提供 \texttt{ttyACM} 串口接口。USB 转 UART 则在转换芯片另一侧通过 TX/RX 传输 UART 信号。115200、8N1 表示波特率、8 数据位、无校验、1 停止位；UART 每字节再加一个起始位，才得到每字节 10 位的估算。原生 USB ACM 的线路编码配置是否影响行为由固件决定，它不是 USB 总线速率，所以不能直接套用该吞吐上限。
 
 将 A 板绑定为指定别名的规则为：
+
 \begin{tbash}
 SUBSYSTEM=="tty", KERNEL=="ttyACM*", \
   ATTRS{idVendor}=="YOUR_VID", ATTRS{idProduct}=="YOUR_PID", \
   ATTRS{serial}=="CTRL-A", \
   SYMLINK+="rm_control", GROUP="dialout", MODE="0660"
 \end{tbash}
+
 VID/PID 按题意留为占位值，部署时必须替换为目标板的真实值；\texttt{CTRL-A} 是本题给定序列号，不是队内设备的默认值。重载及核验命令见随堂练习~\ref{ex:serial-udev}~的答案。先只接 A，再接 B，并交换插入顺序，核对别名始终对应 A 的序列号和正确权限；仅看 \texttt{readlink} 指向哪个编号还不能证明身份正确。程序配置必须改为该别名。
 
 udev 在设备重新出现时重建链接，但旧的已打开句柄不会恢复，程序需处理断线并重新打开。ACM 提供的仍是字节流接口，一次读取可能只得到半条消息或同时读到多条消息，应累计字节并按协议定界。USB 底层的数据包边界不能当作应用层消息边界。
 \end{solution}
 
 \clearpage
+\paragraph*{第一章章末第~\ref{prob:v1-linux-12}~题：结果与证据}
+\begin{solution}
+三者都不能推出题中的结论。Timeshift 默认排除个人文件，需核对范围并恢复验证个人备份；Conda 环境不证明 ROS 2 使用了系统 Python 与库，应核对实际命令入口、加载脚本及构建日志；桌面主题不决定固件顺序或 GRUB 默认项，需读实际配置并测试启动。外观、存在与功能成功是不同证据。
+\end{solution}
+
 \section*{第二章：现代 C++ 基础}
 \phantomsection
 \addcontentsline{toc}{section}{第二章题解：现代 C++ 基础}

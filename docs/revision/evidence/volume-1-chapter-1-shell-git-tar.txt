@@ -1,0 +1,6 @@
+Bash: GNU bash, version 5.3.20(1)-release (x86_64-pc-linux-gnu)
+Git: git version 2.55.0
+PASS: 普通变量、export、source 三组对照，项目原文件未修改
+PASS: 本地/远程提交计数、第三次交换、快进分支合并与忽略规则
+PASS: 正文 tar 命令恢复同名文件，并保留额外文件
+PASS: 硬/软链接与复制、755 权限、grep 行号与重定向计数

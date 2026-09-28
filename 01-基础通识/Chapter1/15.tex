@@ -1,263 +1,135 @@
-\subsubsection{git简介}
+\subsubsection{Git 管什么，GitHub 又是什么}
+代码昨天还能跑，今天改了几处却坏了，这时候如果只有一个“最终版.cpp”，就不太容易找回昨天的状态了。我们需要版本控制（Version Control），把每次有意义的改动记录下来，之后既能查看改过什么，也能找回已经提交的内容。Git 就是这样的工具，它在本地保存提交（Commit）和历史，也能帮助多人协作。
 
-git 是一个开源的分布式版本控制系统，用于敏捷高效地处理任何或小或大的项目，它可以在任何时间点，将文档的状态作为更新记录保存起来，也可以在任何时间点，将更新记录恢复回来。Git可以帮我们做到很多事情，比如代码的版本控制，分支管理，也提供了便于多人合作的平台。
-
-\begin{example}
-在 Ubuntu 上安装 git 并验证安装成功：
-\begin{tbash}
-sudo apt install git
-git --version
-\end{tbash}
+这里先分清 Git 和 GitHub：Git 是我们使用的版本控制工具，GitHub 是可以托管 Git 仓库的网站之一，装了 Git 并不等于注册了 GitHub。Git 也可以完全离线使用，所以我们先在练习目录里学操作，把流程走通，再去处理比赛工程。
+\Needspace{8\baselineskip}
+\begin{example}[检查工具]
+Ubuntu 可先运行 \texttt{git --version}；命令不存在时用 \texttt{sudo apt install git} 安装。成功应打印版本，装工具不等于创建仓库。后面的本地实验需要 Git 2.28 或以上。
 \end{example}
 
-\subsubsection{git基本概念}
-
-git的基本概念比较多，这一屏密度有点高，先混个脸熟就行——不用背，后面的工作流程里会全部用到：
-
-\textbf{本地仓库}：对本地代码进行管理的仓库，会包含代码的所有历史版本。
-
-\textbf{远程仓库}：在开发者可以访问的网络内的某个服务器上有一个包含所有版本的仓库。
-
-开发者可以把本地的新版本推送到远程仓库上，也可以把远程仓库上的新版本拉取到本地仓库上。由此可见，远程仓库为不同开发者之间的协作提供了一个渠道。
-
-\textbf{工作区}：在本地计算机上的项目目录，你在这里进行文件的创建、修改和删除操作。工作区包含了当前项目的所有文件和子目录。
-
-\textbf{暂存区}：临时存储区域，它包含了即将被提交到版本库中的文件快照。
-
-\textbf{版本库}：包含项目的所有版本历史记录，每次提交都会在版本库中创建一个新的快照，这些快照是不可变的，确保了项目的完整历史记录。
-
-\textbf{分支}：简单来说就是同一棵树上的两个分叉，实际上是指向更改快照的指针。
-
-\textbf{暂存}：添加文件到暂存区准备提交。
-
-\textbf{提交}：提交暂存区中的内容到本地仓库。
-
-\textbf{推送}：推送本地仓库中的内容到远程仓库。
-
-\textbf{克隆}：从远程仓库下载代码到本地的过程。
-
-\textbf{合并}：假设分支A和分支B是从节点P分叉出来的，合并之后分支A和分支B会在一个新的节点后汇合。分支 A 和分支 B 表示：我们联合！
-
-\textbf{变基}：从节点P开始，把分支A中各个节点按提交的顺序加在分支B的上面，因为一个节点对应一次内容改变，所以分支A中不想要的改变可以在变基的过程中跳过相应的节点。变基其实也可以理解成是另一种合并，只不过他的合并会让提交历史更为干净清晰。
-
-\textbf{子模块}：将一个 git 仓库作为另一个 git 仓库的子目录。它能让你将另一个仓库克隆到自己的项目中，同时还保持提交的独立。
-
-\subsubsection{git基本配置}
-
-git 提供了一个叫做 git config 的命令，用来配置或读取相应的工作环境变量。这些环境变量，决定了 Git 在各个环节的具体工作方式和行为。这些变量可以存放在以下三个不同的地方：
-
-\begin{enumerate}
-\item /etc/gitconfig 文件：系统中对所有用户都普遍适用的配置。若使用 git config 时用 --system 选项，读写的就是这个文件。
-
-\item \textasciitilde/.gitconfig 文件：用户目录下的配置文件只适用于该用户。若使用 git config 时用 --global 选项，读写的就是这个文件。
-
-\item 当前项目的 Git 目录中的配置文件（也就是工作目录中的 .git/config 文件）：这里的配置仅仅针对当前项目有效。每一个级别的配置都会覆盖上层的相同配置，所以 .git/config 里的配置会覆盖 /etc/gitconfig 中的同名变量。
-\end{enumerate}
-
-\textbf{配置提交者信息}
-
-每次提交时 git 都会记录提交者的名字和邮箱，首次使用前先配置好（只需配置一次）：
-
-\begin{tbash}
-git config --global user.name "你的名字"
-git config --global user.email "你的邮箱"
-\end{tbash}
-
-\textbf{配置个人访问令牌（https 方式）}
-
-github已经弃用了原先直接用账号密码验证身份的方案，改用个人访问令牌。配置个人访问令牌的方法如下：
-
-\begin{enumerate}
-\item 在github设置界面点击进入“Developer settings”，访问 Personal Access Tokens中的Tokens(classic)页面
-\item 点击 “Generate new token”，选择“Generate new token(classic)”
-\item 为令牌选择一个描述性名称，选择 repo 权限，点击 “Generate token” 生成令牌，复制生成的令牌
-\item 在提交代码时，当提示输入用户名和密码时，输入你的 GitHub 用户名和新生成的个人访问令牌即可
-\end{enumerate}
-
-\textbf{配置ssh密钥}
-
-克隆github上的私人仓库时，https 和 SSH 两种协议都可以：https 方式需要把个人访问令牌当作密码使用，而 SSH 配好密钥后就再也不用输令牌，一劳永逸，因此组内推荐配置 SSH 密钥，具体方法如下：
-
-\begin{enumerate}
-\item 生成SSH密钥
-
-\begin{tbash}
-ssh-keygen
-\end{tbash}
-
-生成后可在\textasciitilde{} 目录下找到.ssh文件夹
-\item 进入.ssh文件夹，复制其中id\_rsa.pub文件中的内容
-\item 在github中进入个人设置界面，选择“SSH and GPG keys”，点击“New SSH key”
-\item 给新的SSH起个标题，并将刚刚复制的内容粘贴到下方的文本框中，点击“Add SSH key”
-\end{enumerate}
-
-配置好后就可以克隆私人仓库中的代码了。
-
-\subsubsection{git基本操作}
-
-git的学问很多，各种操作也是五花八门，这里只列举出git工具的基本操作供读者参考。
-
-\begin{center}  % 表格整体居中
-\textbf{git基本操作}
-
-	\begin{tabular}{cc}  % 内容左对齐
-		\toprule[1.5pt]
-		命令 & 作用\\
-		\midrule[1pt]
-		$  git\enspace config\enspace --list    $		&检查已有的配置信息\\
-		$  git\enspace --version    $		&查看git版本（验证安装）\\
-		$  git\enspace clone\enspace \textless url\textgreater  $		&将远程仓库克隆到本地\\
-		$  git\enspace remote\enspace add\enspace origin\enspace \textless url\textgreater    $		&本地仓库链接远程仓库\\
-		$  git\enspace add   $		&添加文件到暂存区\\
-		$  git\enspace status   $		&查看仓库当前状态，显示变更\\
-		$  git\enspace commit\enspace -m\enspace "description"   $		&提交到本地仓库并添加描述\\
-		$  git\enspace reset\enspace [--soft | --mixed | --hard]\enspace [HEAD]   $		&回退某一次提交的版本\\
-		$  git\enspace rm   $		&将文件从暂存区和工作区中删除\\
-		$  git\enspace checkout\enspace \textless branchname\textgreater   $		&分支切换\\
-		$  git\enspace log   $		&查看提交历史\\
-		$  git\enspace diff   $		&查看工作区和暂存区之间的差异\\
-		$  git\enspace diff\enspace --cached   $		&查看暂存区和最后一次提交的差异\\
-		$  git\enspace remote   $		&列出当前仓库中已配置的远程仓库\\
-		$  git\enspace remote\enspace rename\enspace \textless old\textgreater\enspace \textless new\textgreater   $		&将已配置的远程仓库重命名\\
-		$  git\enspace remote\enspace show\enspace \textless remote\textgreater   $		&显示指定远程仓库的详细信息\\
-		$  git\enspace fetch\enspace [remote]   $		&提取远程仓库中更新的数据\\
-		$  git\enspace merge\enspace [remote]/[branch]  $		&将远程仓库的更新合并到当前分支\\
-		$  git\enspace pull\enspace [remote]\enspace [branch]   $		&从远程获取代码并合并本地的版本\\
-		$  git\enspace push\enspace [remote]\enspace [branch]   $		&将本地版本上传到远程并合并\\
-		$  git\enspace submodule\enspace init   $		&初始化子模块\\
-		$  git\enspace submodule\enspace update   $		&更新子模块\\
-		$  git\enspace submodule\enspace update\enspace --recursive\enspace --remote   $		&递归更新子模块并拉取最新更改\\
-		$  git\enspace submodule\enspace add\enspace \textless url\textgreater\enspace [<path>]   $		&将Git仓库作为子模块加到当前仓库中\\
-		\bottomrule[1.5pt]
-	\end{tabular}
-\end{center}
-\begin{center}
-	\textbf{git基本操作}
-	
-		\begin{tabular}{cc}
-			\toprule[1.5pt]
-			内容 & 作用\\
-			\midrule[1pt]
-			$  git\enspace submodule\enspace deinit\enspace [<path>]   $		&.git/config中移除子模块并删除文件\\
-			$  git\enspace rm\enspace [<path>]   $		&从仓库中删除子模块引用（需再 commit 生效）\\
-			$  git\enspace submodule   $		&列出当前仓库中的所有子模块\\
-			$  git\enspace branch   $		&查看所有分支\\
-			$  git\enspace branch\enspace -r   $		&查看远程分支\\
-			$  git\enspace branch\enspace -a   $		&查看所有本地和远程分支\\
-			$  git\enspace merge\enspace \textless branch\textgreater   $		&将其他分支合并到当前分支\\
-			$  git\enspace add\enspace \textless conflict-file\textgreater   $		&标记合并冲突解决完成\\
-			$  git\enspace checkout\enspace -b\enspace \textless branch\textgreater   $		&创建分支并切换到该分支\\
-			$  git\enspace branch\enspace -d\enspace \textless branch\textgreater   $		&删除本地分支\\
-			$  git\enspace branch\enspace -D\enspace \textless branch\textgreater $  		&强制删除未合并的分支\\
-			$  git\enspace push\enspace origin\enspace --delete\enspace \textless branch\textgreater   $		&删除远程分支\\
-			\bottomrule[1.5pt]
-		\end{tabular}
-	\end{center}
-
-\begin{note}
-\texttt{git reset --hard} 会把工作区和暂存区强制回退到指定提交，未提交的修改全部丢失且无法恢复——git 不拦你，但时间也不倒流。执行前请确认这些修改真的不要了。
-\end{note}
-
-除了这些命令操作外，git中还有一个非常重要的工具\enspace——\enspace .gitignore忽略文件。尽管远程仓库在云端服务器上不会受到内存的限制，但是如果随便将大文件上传到远程仓库的话在下拉代码的时候会耗时非常久甚至拉代码失败。因此，上传至远程仓库中的内容一定是最核心的部分。
-
-但是，在本地工作区往往会需要那些不需要被上传的“无用文件”，为了能在不上传“无用文件”的同时保证本地工作区的正常工作，我们就需要在本地工作区新建一个.gitignore文件，里面记录着不需要被版本库跟踪的文件，这样就能拥有一个干净简洁的版本库了。
-
-需要注意的是，.gitignore只能忽略尚未提交到仓库的未被追踪的文件。如果一个文件已经被提交过了，此时再在.gitignore文件中添加忽略此文件时会发现这个文件依旧存在于版本库中。要想清除这个文件首先要将其从索引中删除：
-
-\begin{tbash}
-git rm --cached .env
-\end{tbash}
-
-这条命令会从版本库中删除文件，但不删除实际的文件。这意味着该文件仍然在你的本地系统和工作目录中作为一个被忽略的文件存在。此时可以重新提交修改过的.gitignore文件来使新的忽略生效。
-
-所以最好的方法还是在创建一个新的仓库的时候就把.gitignore文件写好，在首次提交前忽略不需要上传的文件。
-
-.gitignore文件也有自己的语法，这里同样也列举一些用法：
-
-\begin{center}
-\textbf{.gitignore语法}
-
-	\begin{tabular}{cc}
-		\toprule[1.5pt]
-		内容 & 作用\\
-		\midrule[1pt]
-		$  /text.txt    $		&忽略位于项目根目录下的 text.txt 文件\\
-		$  /test/text.txt    $		&忽略位于项目根目录下test目录中的text.txt文件\\
-		$  text.txt   $		&忽略任何 text.txt 文件\\
-		$  test/   $		&忽略整个目录及其所有内容\\
-		$  text   $		&忽略任何名字带有 test 的文件和目录\\
-		$  img*   $		&忽略所有名称以 img 开头的文件和目录\\
-		$  *.md   $		&忽略所有以 .md 文件扩展名结尾的文件\\
-		$  !README.md   $		&不忽略 README.md 文件\\
-		\bottomrule[1.5pt]
-	\end{tabular}
-\end{center}
-
-\subsubsection{git工作流程}
-
-git的基本工作流程就是从创建新仓库（或克隆别人的仓库），链接本地仓库和远程仓库或者建立新的分支（可选），修改完成后添加到暂存区，然后提交到本地，最后再推送回远程仓库的过程，可以参考下面这幅图。
-
+\subsubsection{四个区域与提交身份}
+\label{sec:git-regions}
+Git 的名字一下子有点多，我们先让四个区域混个脸熟，不用急着背，后面的实验都会用到。工作区（Working tree）就是你正在编辑的文件；暂存区（Index）保存这次准备提交的版本；本地仓库记录已经提交的历史；远程仓库则是另一份用来交换提交的仓库，通常在服务器上，也可以像下面的实验一样放在本机。
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{git.png}
-    \caption{git工作流程示意图} % 图片标题
-    \label{fig:git} % 图片标签，用于引用
+\centering
+\includegraphics[width=0.9\textwidth]{git-workflow_revised.pdf}
+\caption{Git 四个区域：箭头上的命令说明内容在哪两处之间流转}
+\label{fig:git}
 \end{figure}
+顺着图里的箭头看，我们编辑好文件后，用 \texttt{git add 路径} 把当前版本放到暂存区。这里保存的是 add 时的版本，如果随后又改了同一个文件，还要重新 add。接下来用 \texttt{git commit -m '说明'} 把暂存内容记成一次本地提交，再用 \texttt{git push 远程 分支} 发给远程仓库，队友才能从那里获取。
 
-\begin{conclusion}
-git 的四个工作区域与流转命令：
+如果不知道自己走到了哪一步，可以先看 \texttt{git status}。想看具体改动，\texttt{git diff} 比较工作区和暂存区，\texttt{git diff --cached} 比较暂存区和当前提交。这两个 diff 看的是不同位置，后面我们会用同一个文件对比一次。
 
-\begin{itemize}
-\item 工作区：你实际编辑文件的目录；
-\item 暂存区：\texttt{git add} 后，变更先进入这里等待提交；
-\item 本地版本库：\texttt{git commit} 把暂存区固化为一次版本记录；
-\item 远程仓库：\texttt{git push} 把本地版本推送上去，\texttt{git pull} / \texttt{git fetch} 把远程更新取回来。
-\end{itemize}
+\Needspace{8\baselineskip}
+\begin{example}[只配置练习仓库的作者]
+在新目录操作，名称可换成自己的：
 
-这套流程一开始总要忘两步，很正常。忘了文件进行到哪个阶段了，就 \texttt{git status} 看一眼——它相当于游戏里的任务日志，随时告诉你现在该干嘛。
-\end{conclusion}
 
-\begin{example}
-一次完整的日常提交流程（以克隆好的仓库为例）——add、commit、push 这套连招以后每天要搓十几遍，出招表如下，建议早日练成肌肉记忆：
+\Needspace{11\baselineskip}
 \begin{tbash}
-git status
-git add main.cpp
-git commit -m "fix armor detection offset"
-git push origin main
+mkdir git-config-lab
+cd git-config-lab
+git init --initial-branch=main
+git config user.name 'Training Student'
+git config user.email 'student@example.invalid'
+git config --local --get user.name
+git config --local --get user.email
 \end{tbash}
+
+
+执行后应该能读回刚设置的名字和邮箱。\texttt{git config [作用域] 键 值} 用来设置配置，\texttt{--get} 则读取它；这里不加全局作用域，只改当前练习仓库。如果以后想让自己的仓库通常都使用同一份身份，可以加 \texttt{--global} 设置当前用户的通用配置。还有一点别弄混：名字和邮箱是提交里的作者信息，不是 GitHub 登录认证，填了邮箱也不会自动获得推送权限。
 \end{example}
-
-\begin{exercise}
-在任意 git 仓库中连续做两次提交，用 \texttt{git log} 查看提交历史；再修改一个文件，用 \texttt{git diff} 查看工作区与暂存区的差异。
+\begin{exercise}\label{ex:v1-git-config}
+新建独立仓库，设置并读回本地作者身份。解释 add 后再改文件为何可以同时出现“已暂存”和“未暂存”状态；通过一次实际修改核对。
 \end{exercise}
 
-\begin{exercise}
-在仓库中新建 \texttt{.gitignore}，实现：忽略所有 \texttt{.log} 文件；忽略 \texttt{build/} 目录下的所有内容，但保留其中的 \texttt{keep.txt}（提示：先写 \texttt{build/*}，再用 \texttt{!} 取消对单个文件的忽略）。
+\subsubsection{从修改到远程：不联网的完整实验}
+\label{sec:git-local-demo}
+概念看过了，我们来完整走一遍。项目放在本卷 \texttt{examples/git-workflow-demo/}，只有 \texttt{demo.sh} 和 \texttt{README.md}。这一次把“远程”也放在本地临时目录里，你不用先处理网站账号和网络认证，就能看清文件是怎样从自己的工作区走到队友那里去的。
+\Needspace{8\baselineskip}
+\begin{example}[两次提交与另一份克隆]
+目录中唯一的核心脚本完整如下：
+
+\lstinputlisting[language=bash,frame=single,numbers=left,breaklines=true]{examples/git-workflow-demo/demo.sh}
+
+从本卷目录运行：
+
+
+\Needspace{6\baselineskip}
+\begin{tbash}
+cd examples/git-workflow-demo
+bash demo.sh
+\end{tbash}
+
+
+\texttt{git init --bare} 建立不含普通工作区的“远程”；\texttt{git clone 仓库 目录} 获取一份本地工作副本。脚本第一次写 camera 后 add、commit、push；第二次写 radar，先看工作区差异，再 add 看暂存差异，最后提交并推送。\texttt{-u} 记录上游，此后在同一分支可直接 push。
+
+运行时先看看 WORKTREE DIFF，再看看 STAGED DIFF：里面都有新增的 radar，但它们出现在 add 前后两个阶段。最后 TEAMMATE CONTENT 应该是 camera、radar 两行，COMMIT COUNT 为 2。我们在 teammate 这份克隆里看到了两次提交，就说明它们确实已经进入远程，不只是留在 student 的本地仓库里。第一次克隆时提示空仓库，是因为我们刚刚创建的“远程”还没有内容；后面如果还有失败提示，就要按具体错误处理，不能都当成这条警告忽略掉。
+\end{example}
+\begin{exercise}\label{ex:v1-git-commits}
+在脚本打印的 student 仓库中增加第三行并提交，先\textbf{不推送}。记录 student 和 remote 的提交数，再 push，最后在 teammate 中执行 \texttt{git pull --ff-only} 并检查第三行。解释为什么本地 commit 成功不代表队友已经收到。
 \end{exercise}
 
-对自己的仓库进行版本管理主要用到以下这些命令：
+\subsubsection{分支、合并与实际远程}
+如果你正在写新功能，又不想把没写完的东西直接混进主线，我们就可以开一个分支（Branch）。它是指向某次提交的可移动名字，不是把整个项目永久复制一遍。等功能写完、差异也检查过了，再合并（Merge）回主线。分支 A 和分支 B 表示：我们联合！不过联合之前，还是先看清各自改了什么。
+\Needspace{8\baselineskip}
+\begin{example}[没有冲突的最小分支实验]
+在刚才的 student 仓库中执行；开始前 \texttt{git status --short} 应为空，不能把未完成修改顺手混入实验：
 
-\begin{center}
-\textbf{git工作流程基本命令}
 
-	\begin{tabular}{c}
-		\toprule[1.5pt]
-		  git\enspace init       \\
-		  git\enspace clone\enspace [url]    \\
-		  git\enspace checkout\enspace -b\enspace \textless branch\textgreater       \\
-		  git\enspace remote\enspace add\enspace origin\enspace [url]       \\
-		  git\enspace add       \\
-		  git\enspace status       \\
-		  git\enspace commit\enspace -m\enspace "description"       \\
-		  git\enspace push\enspace [remote]\enspace [branch]       \\
-		  git\enspace pull\enspace [remote]\enspace [branch]       \\
-		\bottomrule[1.5pt]
-	\end{tabular}
-\end{center}
+\Needspace{11\baselineskip}
+\begin{tbash}
+git switch -c feature-note
+printf 'check timestamps\n' > review.txt
+git add review.txt
+git commit -m 'Add review note'
+git switch main
+git merge --ff-only feature-note
+git log --oneline --graph -4
+\end{tbash}
 
+
+执行完再看 main，应该已经出现了新文件，日志里也能找到刚刚的提交。因为 main 没有另外前进，它可以直接沿着这条历史走到新位置，这就叫快进。\texttt{--ff-only} 只允许这种情况；如果两条分支各自有了新提交，它会拒绝，而不是自动帮我们解决冲突。你在旧教程里看到的 \texttt{checkout -b 名称} 也能创建并切换分支，这里我们使用职责更明确的 switch。
+\end{example}
+\begin{exercise}\label{ex:v1-git-branch}
+在自己的练习仓库创建另一个分支，增加一个小文件并提交，切回 main，合并并查看图形日志。指出分支名、提交与工作文件的关系，最后保留记录，不操作真实远程。
+\end{exercise}
+
+换成服务器仓库时，\texttt{git remote -v} 查看地址，\texttt{git fetch 远程} 取回提交但不合并工作区，\texttt{git pull} 包含取回及整合步骤，\texttt{git push} 把本地分支的提交发出去。HTTPS 的访问令牌与 SSH 密钥是认证方式，按托管服务说明设置，不在教材、脚本或提交中写凭据。已有上游时使用简短命令；无上游时先核对远程名和当前分支，不假设都叫 origin/main。
 \begin{note}
-对于git的学习，这里也推荐一个网站\url{https://learngitbranching.js.org/?locale=zh_CN}，从图形化角度直白展示了整个git树，并且可以互动。
+\texttt{git reset --hard} 会丢弃所覆盖路径的未提交修改；强制推送会改写远程历史，影响队友。本章不需要这些操作。合并冲突时先读 status 和冲突块，确认两边意图，编辑后 add、commit；想取消未完成合并，可先保存新增工作，再按实际状态使用 \texttt{git merge --abort}。未提交内容没有可靠的 Git 恢复保证。
 \end{note}
 
-使用git时我们可以选择直接在终端中通过命令行的方式提交代码，这种方式有时不够直观，因此除了命令行我们还可以使用一些git的图形化工具，比如GitKraken等等，当然也可以直接在clion或vscode中使用git相关插件，这些插件也提供了直观的版本库界面来辅助我们管理代码。
+\subsubsection{忽略构建产物}
+工程编译几次后，目录里通常会多出构建产物和日志，我们不必把它们每次都交给队友。可以用 \texttt{.gitignore} 告诉 Git，哪些未跟踪文件可以忽略。不过已经跟踪过的文件，不会因为写进了这份名单就自动退出历史。
 
+常用的模式有 \texttt{*.log}（匹配日志）、\texttt{/build/}（仓库根目录下的 build）和 \texttt{!路径}（取消忽略）。如果想忽略 build 里的大部分文件，又保留一个例外，就要留意：把父目录整个忽略以后，Git 不会再进去寻找例外。下面我们实际试一下。
+\Needspace{8\baselineskip}
+\begin{example}[保留 build 中的一个文件]
+在练习仓库创建 \texttt{.gitignore}：
+\begin{lstlisting}[language={},frame=single]
+*.log
+/build/*
+!/build/keep.txt
+\end{lstlisting}
+然后验证：
+
+
+\Needspace{8\baselineskip}
+\begin{tbash}
+mkdir -p build
+touch run.log build/cache.tmp build/keep.txt
+git status --short --untracked-files=all
+git check-ignore -v run.log build/cache.tmp
+\end{tbash}
+
+
+status 应列出 .gitignore 与 build/keep.txt，不显示另两项。已跟踪文件若确实要停止跟踪，可用 \texttt{git rm --cached 路径} 后提交；这保留工作文件，\textbf{不会抹去旧提交里的内容或泄露过的凭据}。
+\end{example}
+\begin{exercise}\label{ex:v1-git-ignore}
+为自己新建的日志与构建目录设置上述忽略与例外规则，实际核对 status。解释先写 /build/ 再取消忽略 keep.txt 为何通常不能达到目标。
+\end{exercise}
+\begin{conclusion}
+Git 操作先问“我正在改哪个区域”：编辑改工作区，add 更新暂存快照，commit 建本地历史，push 交换提交。分支组织历史，忽略规则控制未跟踪文件。每次提交前看 status、diff 和 diff --cached，避免把旧产物或无关文件一起交给队友。
+\end{conclusion}
+官方命令与忽略规则可在 \url{https://git-scm.com/docs} 查；想观察分支关系可用 \href{https://learngitbranching.js.org/?locale=zh_CN}{Learn Git Branching 中文版}，网页动画辅助理解，不能代替本地文件验证。

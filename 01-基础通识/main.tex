@@ -14,6 +14,7 @@
 
 \input{../templates/preamble.tex}
 \usepackage{longtable}
+\usepackage{needspace}
 
 \title{长空御风视觉组培训教材}
 \subtitle{卷一 · 基础通识}
@@ -46,16 +47,15 @@
 \chapter{Linux 工作环境}
 
 \begin{introduction}
-  \item 学习目标：独立完成 Ubuntu 22.04 双系统的分区与安装；使用 timeshift 制作并恢复系统快照；运用常用命令完成文件管理、查找与权限修改；编写并运行简单的 shell 脚本，正确配置环境变量；使用 git 完成克隆、修改、提交与推送；安装 CLion 与 VS Code，识别界面按钮并完成 C++ 工程的构建、运行和断点调试；识别队内 USB CDC ACM 设备、配置权限与固定别名、完成收发实验，记录收发字节并定位常见连接故障。
-  \item 建议学时：约 1 周，另留半天完成 CLion 与 VS Code 安装、运行和调试练习，另用 2--3 小时完成串口识别、权限配置与回环实验。
-  \item 本卷边界：不涉及 ROS2 工作空间细节，相关内容见卷二；串口只讲 Linux 设备访问与基础收发，帧协议、CRC 和 ROS2 桥接见卷二“多机通信方法”；标 $*$ 的小节（备份、重装、美化、conda 等）为选修，不计入考核。
+  \item 学习目标：完成双系统安装核对；管理文件、权限与归档；编写 Bash 脚本并验证环境继承；用 Git 完成提交与交换；构建、运行和调试 C++ 工程；识别串口并验证字节收发。
+  \item 建议学时：约 1 周；IDE 操作另留半天，串口实验约 2--3 小时。选修维护与美化按需安排。
+  \item 本卷边界：环境与标准 C++ 工具链是通识重点；备份、重装、Conda 与美化为选修。ROS 2、帧协议和 CRC 见卷二；真实写盘与板端测试须在对应环境按清单验证。
 \end{introduction}
 
 \section{安装 Ubuntu 22.04 双系统}
 \input{Chapter1/11.tex}
 
 \section{系统数据备份*}
-配置环境前须完成本节。系统异常时，快照恢复通常优于重装。
 \input{Chapter1/12.tex}
 
 \section{卸载重装 Ubuntu 系统*}
@@ -83,9 +83,9 @@
 本章围绕"装好系统 → 用好系统 → 护好系统"这条主线展开：
 
 \begin{itemize}
-\item \textbf{安装与维护}：双系统安装的四个流程（分区、制作启动盘、安装、设置）需要亲手走一遍；timeshift 快照相当于配环境前的存档位，每次大改环境前都应先存档，环境炸了随时回档。系统扩容、grub 美化、卸载重装属于选修内容，用到时再回来查即可。
+\item \textbf{安装与维护}：双系统安装的四个流程（分区、制作启动盘、安装、设置）需要亲手走一遍；Timeshift 保护系统文件与设置，个人资料另备份；恢复前检查快照范围、目标与新数据，不能把快照当成整盘无损回档。系统扩容、grub 美化、卸载重装属于选修内容，用到时再回来查即可。
 \item \textbf{命令行基础}：目录结构、"一切皆文件"与挂载是必须理解的概念；文件管理（ls/cp/mv/rm）、查找（find/grep）、重定向与管道、vim 基本操作是每天都要用的基本功，要求熟练；各命令的参数不必死记，会用参数表和 man 手册查即可。
-\item \textbf{shell 与环境变量}：会编写并运行简单的 shell 脚本；理解 PATH 的作用，掌握修改环境变量的三种方式及其生效范围，日常配置优先写入 \textasciitilde/.bashrc。
+\item \textbf{shell 与环境变量}：会编写并运行简单的 shell 脚本；理解 PATH 的作用，区分普通变量、export 与 source，按 Shell 启动方式核对配置读取；日常交互 Bash 配置优先放在 \textasciitilde/.bashrc。
 \item \textbf{git}：理解工作区、暂存区、本地版本库、远程仓库四个区域的流转关系，熟练掌握 add/commit/push/pull 的日常闭环，会写基本的 .gitignore。
 \item \textbf{conda}（选修）：会创建、激活、退出和删除虚拟环境，配环境时先在虚拟环境中试错。
 \item \textbf{图形开发工具}：安装 CLion 与 VS Code，识别菜单、项目树、工具栏、输出面板和状态栏；用同一份 CMake 工程完成配置、构建、运行和断点调试，能区分编辑器与编译工具链。
@@ -94,18 +94,20 @@
 
 完成本章验收后，就可以揣着新装好的系统进入第 2 章了。配置环境的道路还会不断延伸——不要停下来啊，第 2 章现代 C++ 见。
 
+本章核心能力跨度较大，章末安排 12 题，含选修自测；随堂练习练局部步骤，章末题检查概念判断与组合能力，现场验收检查独立演示。
 \begin{problemset}
-\item 说出双系统安装的四个主要流程，并解释安装类型为什么必须选择"其它选项"。
-\item 解释"挂载"的含义，并说明 U 盘插入 Ubuntu 后一般被自动挂载到哪个目录下。
-\item 写出命令：以易读单位统计当前目录下各子目录的磁盘占用（只统计一层）。
-\item （基础）解释 \texttt{chmod 755 run.sh} 中三个数字各自的含义，并写出等价的符号写法。串口设备属于 \texttt{dialout} 组但当前用户不在该组时，应如何取得访问权限？
-\item 写出命令：在 \texttt{/etc} 目录下查找所有以 \texttt{.conf} 结尾的文件，并把结果保存到家目录下的 \texttt{conf\_list.txt} 中。
-\item 说明 \texttt{./test.sh} 与 \texttt{bash test.sh} 两种脚本运行方式的区别，以及前者为什么需要先执行 \texttt{chmod +x}。
-\item 说明 git 中工作区、暂存区、本地版本库三者的区别，以及 \texttt{git add} 与 \texttt{git commit} 各自的作用。
-\item （基础）分别说明 CLion 的锤子、绿色三角、小虫按钮的作用，以及 VS Code 的 Explorer、Extensions、Terminal、Output 各负责什么。为什么装好 VS Code 的 C/C++ 扩展后仍可能无法编译？
-\item （提高）若把 PATH 误写为 \texttt{export PATH=/opt/app/bin}（未包含原来的 \texttt{\$PATH}），会出现什么现象？分别就"终端内直接修改"和"写入 .bashrc"两种情况说明恢复方法。
-\item （实践）编写脚本 \texttt{backup.sh}：将家目录下指定的某个目录打包为以当天日期命名的 \texttt{tar.gz} 文件，保存到 \texttt{\textasciitilde/backups} 目录中，并解压验证内容完整。
-\item （串口综合）队内两块 USB CDC ACM 板的 VID/PID 相同，序列号分别为 \texttt{CTRL-A} 和 \texttt{CTRL-B}。解释 ACM 与 USB 转 UART 的区别，说明为什么设置 115200、8N1 不能直接推出原生 USB 的吞吐上限。以 VID/PID 占位值写出将 A 板绑定为 \texttt{/dev/rm\_control} 的 udev 规则，给出重载和核验步骤，并解释为什么绑定后仍需处理断线重连、一次读取仍不一定得到一条完整消息。
+\item \label{prob:v1-linux-1} 说出双系统安装的四个主要流程，并说明本教程为什么选择“其它选项”。指出 UEFI/GPT 安装中 ESP、根分区与交换空间的职责，重装时分别怎样处理。
+\item \label{prob:v1-linux-2} 解释"挂载"的含义，并说明 U 盘插入 Ubuntu 后一般被自动挂载到哪个目录下。
+\item \label{prob:v1-linux-3} 写出命令：以易读单位统计当前目录下各子目录的磁盘占用（只统计一层）。
+\item \label{prob:v1-linux-4} （基础）解释 \texttt{chmod 755 run.sh} 中三个数字各自的含义，并写出等价的符号写法。串口设备属于 \texttt{dialout} 组但当前用户不在该组时，应如何取得访问权限？
+\item \label{prob:v1-linux-5} 写出命令：在 \texttt{/etc} 目录下查找所有以 \texttt{.conf} 结尾的文件，并把结果保存到家目录下的 \texttt{conf\_list.txt} 中。
+\item \label{prob:v1-linux-6} 说明 \texttt{./test.sh} 与 \texttt{bash test.sh} 两种脚本运行方式的区别，以及前者为什么需要先执行 \texttt{chmod +x}。
+\item \label{prob:v1-linux-7} 说明 git 中工作区、暂存区、本地版本库三者的区别，以及 \texttt{git add} 与 \texttt{git commit} 各自的作用。
+\item \label{prob:v1-linux-8} （基础）分别说明 CLion 的锤子、绿色三角、小虫按钮的作用，以及 VS Code 的 Explorer、Extensions、Terminal、Output 各负责什么。为什么装好 VS Code 的 C/C++ 扩展后仍可能无法编译？
+\item \label{prob:v1-linux-9} （提高）若把 PATH 误写为 \texttt{export PATH=/opt/app/bin}（未包含原来的 \texttt{\$PATH}），会出现什么现象？分别就"终端内直接修改"和"写入 .bashrc"两种情况说明恢复方法。
+\item \label{prob:v1-linux-10} （实践）编写脚本 \texttt{backup.sh}：将家目录下指定的某个目录打包为以当天日期命名的 \texttt{tar.gz} 文件，保存到 \texttt{\textasciitilde/backups} 目录中，并解压验证内容完整。
+\item \label{prob:v1-linux-11} （串口综合）队内两块 USB CDC ACM 板的 VID/PID 相同，序列号分别为 \texttt{CTRL-A} 和 \texttt{CTRL-B}。解释 ACM 与 USB 转 UART 的区别，说明为什么设置 115200、8N1 不能直接推出原生 USB 的吞吐上限。以 VID/PID 占位值写出将 A 板绑定为 \texttt{/dev/rm\_control} 的 udev 规则，给出重载和核验步骤，并解释为什么绑定后仍需处理断线重连、一次读取仍不一定得到一条完整消息。
+\item \label{prob:v1-linux-12}（选修自测）“做过 Timeshift 快照”“创建了 Conda 环境”“装了桌面主题”能分别证明个人文件已备份、ROS 2 编译环境正确和默认启动项正确吗？分别给出应核对的证据。
 \end{problemset}
 
 \section{本章验收}

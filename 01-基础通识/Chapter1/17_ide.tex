@@ -1,5 +1,5 @@
 \label{sec:ide-tools}
-\begingroup
+\begin{center}
 \setlength{\emergencystretch}{3em}
 \subsubsection{先分清编辑器、工具链和工程}
 
@@ -11,18 +11,18 @@ CLion 面向 C/C++ 工程，集成了 CMake 和调试入口；Visual Studio Code
 工具链（Toolchain）包括编译器、构建工具和调试器等。CMake 读取工程描述，生成构建规则；编译器把源码编译成程序。
 本节只要求把现成的小工程跑起来，C++ 语法见第 2 章，CMake 原理见第 3 章。
 
-\begingroup
-\begin{longtable}{p{0.19\textwidth}p{0.34\textwidth}p{0.34\textwidth}}
+\begin{center}
+\begin{tabular}{p{0.19\textwidth}p{0.34\textwidth}p{0.34\textwidth}}
 \toprule[1.5pt]
 项目 & CLion & VS Code\\
-\midrule[1pt]\endhead
+\midrule[1pt]
 C++ 支持 & 内置代码分析、CMake 与调试界面 & 安装 C/C++、CMake Tools 扩展\\
 Windows 工具链 & 可使用随安装包提供的 MinGW & 另装工具链，本节采用 MSYS2 UCRT64\\
 Ubuntu 工具链 & 使用系统 GCC、GDB 等 & 使用系统 GCC、GDB 等\\
 打开工程 & 打开含 CMakeLists.txt 的文件夹 & File（文件）→ Open Folder（打开文件夹）\\
 \bottomrule[1.5pt]
-\end{longtable}
-\endgroup
+\end{tabular}
+\end{center}
 
 两套软件都要会认界面，日常使用可以任选一套。\textbf{先完成所用系统的一条安装路线}，不要把 Windows、Ubuntu、WSL 的路径混着填。
 Windows 截图用于认按钮；在 Ubuntu 中，同名工具窗口和工作流程基本相同。
@@ -42,8 +42,12 @@ Windows 截图用于认按钮；在 Ubuntu 中，同名工具窗口和工作流�
 \paragraph*{Ubuntu 安装步骤}
 先准备本机编译工具，然后从 JetBrains 官网下载 Linux 版 CLion，或通过 JetBrains Toolbox 安装。
 以下命令在 \textbf{Ubuntu 终端}执行，不能粘贴到 Windows PowerShell。
+\Needspace{8\baselineskip}
 \begin{example}
 安装并检查 Ubuntu 工具链：
+
+
+\Needspace{9\baselineskip}
 \begin{tbash}
 sudo apt update
 sudo apt install build-essential gdb cmake ninja-build
@@ -51,6 +55,8 @@ g++ --version
 gdb --version
 cmake --version
 \end{tbash}
+
+
 三个版本命令都应打印版本信息。若下载的是压缩包，在文件管理器中解压到自己的软件目录，进入解压目录的 \texttt{bin}，在终端执行 \texttt{./clion.sh} 启动。
 然后在 Toolchains 中选择 System（系统），检查编译器和 GDB 路径；CMake 可用捆绑版本或已安装的系统版本。
 \end{example}
@@ -68,13 +74,35 @@ Windows 的 MinGW 不能直接构建依赖 Ubuntu/ROS2 的工程；本节的跨�
 Windows 可放在 \texttt{C:/dev/ide-demo}，Ubuntu 可放在 \texttt{\textasciitilde/dev/ide-demo}。
 也可以手动建立文件夹并创建下面两个文件。打开时选这一层目录，文件树顶层应直接出现 \texttt{CMakeLists.txt} 和 \texttt{main.cpp}。
 
+\Needspace{23\baselineskip}
 \begin{example}[计分器：预期输出 total = 75]
 \texttt{main.cpp} 的完整内容如下：
+
+
+\Needspace{19\baselineskip}
 \lstinputlisting[language=C++,frame=single,numbers=left,showstringspaces=false]{examples/ide-demo/main.cpp}
+
+
 \texttt{CMakeLists.txt} 的完整内容如下：
+
+
+\Needspace{8\baselineskip}
 \lstinputlisting[language=cmake,frame=single,numbers=left]{examples/ide-demo/CMakeLists.txt}
-先记住：\texttt{ide\_demo} 是可执行目标名；\texttt{main.cpp} 是它的源文件；工程使用 C++17。
-两套软件操作同一份源码时，分别使用自己的构建目录，避免不同编译器共用 CMake 缓存。
+
+
+main 中先准备 score 与 bonus，调用 \texttt{add\_score}；函数把两个参数相加后返回，main 打印 total。CMakeLists.txt 指定工程语言、C++17 和源文件，\texttt{add\_executable} 建立运行目标。先记住：\texttt{ide\_demo} 是可执行目标名；\texttt{main.cpp} 是它的源文件；工程使用 C++17。
+两套软件操作同一份源码时，分别使用自己的构建目录，避免不同编译器共用 CMake 缓存。若先用终端核对工程本身，可从本卷目录执行：
+
+
+\Needspace{7\baselineskip}
+\begin{tbash}
+cmake -S examples/ide-demo -B /tmp/ide-demo-build -DCMAKE_BUILD_TYPE=Debug
+cmake --build /tmp/ide-demo-build
+/tmp/ide-demo-build/ide_demo
+\end{tbash}
+
+
+应输出 total = 75；这只验证构建与程序，后面的图形操作仍要分别验证。已有同名构建目录且用过别的工具链时换一个新目录。
 \end{example}
 
 \subsubsection{CLion 主界面：每一块负责什么}
@@ -137,6 +165,7 @@ Git／Commit 工具窗口 & 查看差异、选择提交文件、写提交说明�
 \caption{CLion 打开项目向导：构建类型、工具链、生成器与构建目录}
 \label{fig:clion-cmake}
 \end{figure}
+\Needspace{8\baselineskip}
 \begin{example}
 \begin{enumerate}
 \item 用 Open 打开练习目录。若出现 CMake 向导，选 Debug、已检测成功的工具链和默认构建目录；等待配置完成。
@@ -163,10 +192,15 @@ Git／Commit 工具窗口 & 查看差异、选择提交文件、写提交说明�
 \item 如需中文，安装 Microsoft 的 Chinese (Simplified) Language Pack，在命令面板中执行 Configure Display Language，选简体中文并重启。主题和语言不会改变工程的编译方式。
 \item 安装 C++ 编译工具。Windows 本节采用 MSYS2：从其官网安装到默认 \texttt{C:/msys64}，打开 \textbf{MSYS2 UCRT64} 终端执行下面命令；遇到包组选择可回车使用默认项，再按提示确认安装。
 \end{enumerate}
+
+
+\Needspace{6\baselineskip}
 \begin{tbash}
 pacman -S --needed mingw-w64-ucrt-x86_64-toolchain
 pacman -S --needed mingw-w64-ucrt-x86_64-cmake mingw-w64-ucrt-x86_64-ninja
 \end{tbash}
+
+
 在 Windows“编辑账户的环境变量”中编辑用户 Path，新增 \texttt{C:\textbackslash msys64\textbackslash ucrt64\textbackslash bin}（自定义安装则换成实际路径）。完全退出并重新打开 VS Code，在新 PowerShell 终端运行 \texttt{g++ --version}、\texttt{gdb --version}、\texttt{cmake --version}、\texttt{ninja --version}，应分别得到版本号。
 若有多套工具链，用 \texttt{where.exe g++} 检查搜索结果，随后在 CMake Tools 中选择同一套 UCRT64 编译器和调试器。
 
@@ -232,6 +266,7 @@ Terminal（终端） & 运行 shell 命令或与程序交互；加号新建终�
 
 \Needspace{10\baselineskip}
 \subsubsection{在 VS Code 中运行同一个 CMake 工程}
+\Needspace{8\baselineskip}
 \begin{example}
 \begin{enumerate}
 \item File → Open Folder 打开练习目录。检查文件树顶层的两个文件。自己创建或已检查的教材工程可按提示信任；未知工程先在受限模式下检查内容。
@@ -258,6 +293,9 @@ CMake Tools 的按钮可能在侧栏 Project Status，也可能在底部；\text
 用 VS Code 打开同一练习工程，搜索 \texttt{bonus}，跳转到定义，再将它重命名为 \texttt{reward}（使用 Rename Symbol／重命名符号，而非无差别全文替换）。保存、构建并运行，确认输出仍为 75；最后撤销并保存。
 \end{exercise}
 
+\begin{exercise}\label{ex:ide-setup}
+两个完整操作示例共同覆盖安装、工具链、工程打开、界面入口、构建运行与调试；练习~\ref{ex:ide-clion}、\ref{ex:ide-vscode}检查改动与导航。再为两套工具各记录：当前系统与编译器路径、Debug 构建目录、一次实际运行的退出码；在界面中指出终端、构建日志、运行输出和变量窗口，不把配置完成当成构建成功。
+\end{exercise}
 \subsubsection{调试工具栏：不要只记小虫和三角}
 \begin{figure}[H]
 \centering
