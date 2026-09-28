@@ -1,355 +1,297 @@
-\subsubsection{CUDA 简介}
+\newenvironment{cudablock}{\par\noindent\begin{minipage}{\linewidth}}{\end{minipage}\par}
 
-2006 年，NVIDIA 发布 \textbf{CUDA}（Compute Unified Device Architecture）：
-一套在 NVIDIA GPU 上做通用并行计算的平台与编程模型。
-与必须把计算映射到图形 API 不同，CUDA 把 GPU 当作数据并行计算设备，
-用接近 C/C++ 的语法编写在设备端执行的函数（\textbf{kernel}）。
+\subsubsection{CUDA 能做什么：先看数据能不能分工}
+上一章我们已经让 PyTorch 使用 GPU，不过调用 \texttt{to('cuda')} 并没有告诉我们它怎样分配工作。接下来，我们自己写一个小算子，看看数据怎样送进去、线程怎样找到自己的位置，以及结果什么时候才真正算完。你以后不一定天天手写 CUDA，但如果只会看“显卡利用率”，遇到速度问题就容易把所有锅都甩给显卡。
 
-视觉组相关用途主要包括：
-\begin{itemize}
-    \item 图像预处理、滤波、几何变换等可高度并行的算子；
-    \item 深度学习训练与推理的底层加速（PyTorch、TensorRT 等均依赖 CUDA）；
-    \item 自定义高性能算子（当库函数无法满足延迟要求时）。
-\end{itemize}
-
-配套库常见有：运行时 API、\textbf{cuBLAS}（线性代数）、\textbf{cuFFT}（FFT）、
-\textbf{cuDNN}（深度网络原语）等。
-\begin{note}
-官方编程指南：\url{https://docs.nvidia.com/cuda/cuda-programming-guide/}。
-\end{note}
-
-
-\begin{example}
-一幅 640×480 图像有 307200 个像素，逐像素加亮可独立处理每个像素，适合并行。若每个像素依赖前一个像素的新结果，则不能直接照搬这种分工。
+CUDA（Compute Unified Device Architecture）是 NVIDIA 在 2006 年推出的通用并行计算平台与编程模型。我们用接近 C++ 的语法写设备函数（kernel），让许多线程分别处理数据。图像阈值、滤波和网络中的大批量数值计算常能这样分工，不过“有很多数据”不等于“每项都独立”。例如前缀和 $s_i=\sum_{j=0}^{i}x_j$ 就有跨元素关系，不能让每个线程随便读前一项还没完成的结果。
+\begin{example}[在 CPU 上先看清依赖]
+本章工程位于本卷 \path{examples/cuda/vector-lab-demo}。下面的小程序不需要 GPU；在工程目录用 \texttt{g++ -std=c++17 cpu\_demo.cpp -o /tmp/cpu\_demo} 编译，然后运行 \texttt{/tmp/cpu\_demo}。阈值为 0/255/0/255，前缀和为 1/8/10/18。观察哪一列只看本行输入、哪一列保留之前的状态。
 \end{example}
-
-\begin{exercise}
-对“逐像素阈值”和“累计前缀和”分别说明是否存在跨元素依赖。
+\begin{cudablock}
+\lstinputlisting[numbers=left,language=C++,caption={cpu\_demo.cpp}]{examples/cuda/vector-lab-demo/cpu_demo.cpp}
+\end{cudablock}
+\begin{exercise}\label{ex:v2-cuda-dependency}
+将输入改为 2/4/6/8，手算两列并运行；说明阈值可怎样分给独立线程，前缀和为什么不能照搬。并行扫描是可行的后续算法，不要求此处实现。
 \end{exercise}
 
-\subsubsection{配置 CUDA 环境}
-
-版本需与显卡驱动、Ubuntu 发行版匹配。安装前先确认驱动：
+\subsubsection{准备环境：把驱动、编译工具和运行库分开}
+首先进入你实际工作的 Ubuntu 环境。Distrobox 的 Ubuntu 与宿主共用 GPU 访问，但它有自己的包环境；宿主能用 \texttt{nvidia-smi}，不代表容器已有编译器。反过来，容器装了编译器，也不代表设备一定能传进去。我们先查询现状，再补缺少的部分，不用为了一个报错把能工作的环境全部重装一遍。
+\begin{example}[先记录，再安装]
+在 Ubuntu 终端运行以下命令。前两条查看系统与驱动，第三条找编译器，最后查看主机 C++ 编译器。找不到 nvcc 时记录实际现象，再继续安装；这些查询不需要先装完整 Toolkit。
 \begin{tbash}
+cat /etc/os-release
 nvidia-smi
+command -v nvcc
+g++ --version
 \end{tbash}
-能显示 GPU 型号与 Driver Version 再继续；无输出则先装专有驱动。
+\end{example}
+\texttt{nvidia-smi} 显示的 CUDA Version 是驱动支持信息，\texttt{nvcc --version} 才是编译工具版本；上一章 PyTorch 的 \texttt{torch.version.cuda} 又是框架构建使用的版本。它们不是一张成绩单，数字不同本身不能判错，要按所用版本的支持条件核对。
 
-\paragraph*{安装 CUDA Toolkit}
-
-下面以 Ubuntu 22.04 + CUDA 11.8 的 \texttt{.run} 安装为例（仅适用于已确认与 11.8 兼容的旧环境；新环境按官方安装指南选版本）。
-
-\begin{tbash}
-base=https://developer.download.nvidia.com/compute/cuda
-file=cuda_11.8.0_520.61.05_linux.run
-wget "$base/11.8.0/local_installers/$file"
-sudo sh "$file"
-\end{tbash}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{CUDA_install.png}
-    \caption{CUDA 安装向导}
-    \label{fig:cuda_install1}
-\end{figure}
-
-选择 Continue，接受许可后进入组件选择：
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{CUDA_accept.png}
-    \caption{接受许可}
-    \label{fig:cuda_install2}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{CUDA_warning.png}
-    \caption{组件选择：务必取消 Driver}
-    \label{fig:cuda_install3}
-\end{figure}
-
-
+\paragraph*{Ubuntu 24.04 的实际安装路线}
+本次在 Ubuntu 24.04.5 / x86\_64 / GCC 13.3 中使用 CUDA 12.6.3。以下是固定版本的教学组合，不声称它是最新版本。其他发行版、架构或 Jetson 应从 \href{https://docs.nvidia.com/cuda/archive/12.6.3/cuda-installation-guide-linux/index.html}{对应版本安装指南}核对系统、编译器和驱动；Jetson 的 JetPack/L4T 配套环境尤其不能直接套 x86\_64 仓库。
 \begin{note}
-若系统已有可用 NVIDIA 驱动，使用本节 runfile 安装时应取消勾选 Driver，只安装 Toolkit。覆盖现有驱动可能破坏图形环境；不要混用未核对兼容性的安装方式。
+驱动已经可用时，这里只安装容器内的开发工具。先看 apt 模拟结果，确认没有安装、升级或删除驱动组件，再执行安装。不要在容器里照抄宿主驱动安装命令；仓库密钥包会增加包源，只在确认属于你的 Ubuntu 环境后操作。
 \end{note}
-
-
-按提示配置环境变量，例如：
+\begin{example}[安装本章需要的开发文件]
+先在临时目录下载 NVIDIA 官方仓库密钥包，安装后刷新索引。通用形式是 \texttt{apt-get install [选项] 包名}，\texttt{-s} 只模拟，\texttt{--no-install-recommends} 不额外装推荐项；后面的包名固定 12.6 分支。
 \begin{tbash}
-export PATH=/usr/local/cuda/bin:$PATH
-export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+cd /tmp
+cuda_repo=https://developer.download.nvidia.com/compute/cuda/repos
+wget "$cuda_repo/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb"
+sudo dpkg -i cuda-keyring_1.1-1_all.deb
+sudo apt-get update
+sudo apt-get -s install --no-install-recommends \
+  cuda-compiler-12-6 cuda-cudart-dev-12-6 cuda-sanitizer-12-6
+sudo apt-get install --no-install-recommends \
+  cuda-compiler-12-6 cuda-cudart-dev-12-6 cuda-sanitizer-12-6
 \end{tbash}
-写入 \texttt{\textasciitilde/.bashrc} 后 \texttt{source}。验证：
+compiler 提供编译工具，cudart-dev 提供运行时开发文件，sanitizer 用来检查 GPU 访问与同步。依赖中的 driver-dev 是开发头文件/链接桩，不是替换宿主的驱动。此安装不是包含全部数学库与图形工具的完整 Toolkit。
+\end{example}
+然后在当前终端设置工具路径并查询：
 \begin{tbash}
+export PATH=/usr/local/cuda-12.6/bin:$PATH
 nvcc --version
+compute-sanitizer --version
 \end{tbash}
+这里的路径是安装位置，换版本要跟着改。本例 CMake 会定位运行库，不需要先把一长串目录塞进全局 \texttt{LD\_LIBRARY\_PATH}。Distrobox 共享 home，修改 shell 配置也可能影响宿主；先让当前终端能用，确认需要再考虑持久设置。
 
+\paragraph*{原教材的 11.8 安装界面怎么读*}
+原来的 runfile 截图保留在这里，供你辨认旧环境和 Driver 选项，当前实验走上面的 apt 路线。这三幅是真实旧界面，不是当前容器的安装记录。第一幅提示已有包管理器驱动；不能把 Continue 理解为可以随便覆盖驱动。第二幅是许可确认，第三幅才是组件选择，旧教程里取消了 Driver、保留了 Toolkit 11.8。需要维护旧环境时应先核对对应版本安装方式，不能混用 apt 与 runfile。
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{CUDA_check.png}
-    \caption{nvcc 版本输出示例}
-    \label{fig:cuda_check}
+\centering
+\includegraphics[width=0.92\textwidth]{images/CUDA_install_revised.png}
+\caption{旧 runfile 的驱动冲突提示：先确认已有安装方式}\label{fig:cuda_install1}
 \end{figure}
-
-亦可用发行版包管理或 NVIDIA 官方 apt 源安装，原理相同：驱动与 toolkit 版本兼容即可。
-
-\paragraph*{安装 cuDNN*}
-
-cuDNN 是面向深度网络的加速库。需要显式调用其 API 时，按所选版本的官方支持矩阵安装开发包，不能只比较 CUDA 主版本。
-旧版压缩包中的目录结构并不通用，不要把通配符拷贝命令直接用于新版本。
-训练框架（如带 GPU 的 PyTorch）通常自带或通过 pip/conda 拉取匹配的运行时；
-手写调用 cuDNN API 时才必须显式安装开发文件。
-
-\begin{example}
-安装前后分别记录版本。nvidia-smi 中的 CUDA Version 表示驱动支持的 CUDA 版本信息，nvcc 显示本机编译工具版本，两者不必相同。
-\begin{tbash}
-nvidia-smi
-nvcc --version
-\end{tbash}
-\end{example}
-
-\begin{exercise}
-说明“nvidia-smi 正常但 nvcc 找不到”能证明什么、不能证明什么。
-\end{exercise}
-
-\subsubsection{异构计算：Host 与 Device}
-
-GPU 一般不独立运行完整操作系统任务，而是作为 CPU 的协处理器。
-CPU 端称为 \textbf{host}，GPU 端称为 \textbf{device}，二者经 PCIe 等总线连接。
-典型流程：
-\begin{enumerate}
-    \item Host 分配设备内存（\texttt{cudaMalloc}）；
-    \item 将数据从 Host 拷到 Device（\texttt{cudaMemcpy}）；
-    \item 启动 kernel 在 GPU 上计算；
-    \item 将结果拷回 Host（\texttt{cudaMemcpy}）；
-    \item 释放设备内存（\texttt{cudaFree}）。
-\end{enumerate}
-
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.85\textwidth]{Host-Device.png}
-    \caption{CPU--GPU 异构架构示意}
-    \label{fig:host_device}
+\centering
+\includegraphics[width=0.92\textwidth]{images/CUDA_accept_revised.png}
+\caption{旧界面的许可确认，不是当前 12.6 apt 操作}\label{fig:cuda_install2}
 \end{figure}
-
-数据搬运开销不可忽视：若计算量很小而拷贝很重，整体可能比纯 CPU 更慢。
-工程上应尽量减少往返拷贝，或把多步处理串在 Device 侧完成。
-
-\begin{example}
-三个长度为 1024 的 float 数组共需 12288 字节设备内存。上传两个输入、下载一个输出，总搬运量也是 12288 字节；如果连续执行多个算子，中间结果留在设备端可减少往返。
-\end{example}
-
-\begin{exercise}
-长度改为 4096，元素类型仍为 float，分别计算设备内存和一次完整流程的拷贝字节数。
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{images/CUDA_warning_revised.png}
+\caption{旧组件选择保留 Toolkit、取消 Driver}\label{fig:cuda_install3}
+\end{figure}
+原图的版本输出如下，release 11.8 是那台机器的编译工具，而不是所有机器应有的数字。本次 nvcc 输出 release 12.6 / V12.6.85；后面的程序还会查询实际加载的运行时。
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{images/CUDA_check_revised.png}
+\caption{原教材 nvcc 11.8 输出，作为版本字段的对照}\label{fig:cuda_check}
+\end{figure}
+\textbf{cuDNN 需要现在装吗？} 本章向量算子只使用 cudart，不需要 cuDNN。cuBLAS 是线性代数库，cuFFT 处理傅里叶变换，cuDNN 提供深度网络原语；要直接调用时再按对应支持矩阵安装开发包。框架带来的运行库也不等于这些开发包，更不能看到名字里都有 CUDA 就把旧压缩包随意复制到系统目录。
+\begin{exercise}\label{ex:v2-cuda-env}
+记录系统、驱动、nvcc 的实际输出，说明“nvidia-smi 正常但 nvcc 找不到”说明了什么。再看三幅旧界面，指出 Driver 与 Toolkit 的处理区别，不在当前机器执行旧安装器。
 \end{exercise}
-
-\subsubsection{CUDA 编程基础}
-
-以下内容依据 NVIDIA \emph{CUDA Programming Guide} 中 Intro / Writing Kernels 章节整理。
-
-\paragraph*{线程层次：Thread、Block、Grid}
-
-Kernel 启动时创建大量线程，组织为：
-\begin{itemize}
-    \item \textbf{Thread}：执行同一段 kernel 代码的基本单位，通过内置变量区分各自数据；
-    \item \textbf{Block}：一组可协作的线程，共享一块 \textbf{shared memory}，可用 \texttt{\_\_syncthreads()} 同步；
-    \item \textbf{Grid}：若干 Block 的集合，分布在多个 SM（Streaming Multiprocessor）上执行。
-\end{itemize}
-
-核内常用内置变量：\texttt{threadIdx}、\texttt{blockIdx}、\texttt{blockDim}、\texttt{gridDim}（可达三维）。
-一维全局下标常写为：
-\begin{tcode}
-int i = blockIdx.x * blockDim.x + threadIdx.x;
-\end{tcode}
-
-启动语法（triple chevron）：
-\begin{tcode}
-kernel<<<gridDim, blockDim>>>(args...);
-// 或 dim3 grid(gx, gy); dim3 block(bx, by);
-// kernel<<<grid, block>>>(...);
-\end{tcode}
-第一参数为 Grid 维度，第二参数为每个 Block 的线程数。
-Block 大小常取 128、256 等，需结合占用率与问题规模调试。
-
-编译器将 CUDA 源文件构建为程序，通用形式为 $nvcc\enspace [OPTIONS]\enspace INPUT$。
-\begin{center}
-\begin{tabular}{lp{0.58\textwidth}}
-\toprule[1.5pt]
-参数 & 作用 \\
-\midrule[1pt]
-\texttt{-o FILE} & 指定输出文件 \\
-\texttt{-O2} & 启用常用优化级别 \\
-\texttt{-std=c++17} & 选择 C++ 语言标准 \\
-\texttt{-arch=ARCH} & 指定目标 GPU 架构，按设备填写 \\
-\texttt{--version} & 查看编译工具版本 \\
-\bottomrule[1.5pt]
-\end{tabular}
-\end{center}
-其余参数请查阅 nvcc 帮助或对应版本手册。
-
-\paragraph*{第一个例子：向量加法}
-
-\begin{example}
-将完整程序保存为 vec\_add.cu，检查全部元素而不只看首元素。
-\begin{tcode}
-#include <cuda_runtime.h>
-#include <cstdio>
-#include <cstdlib>
-
-#define CUDA_CHECK(call) do { \
-    cudaError_t e = (call); \
-    if (e != cudaSuccess) { \
-        fprintf(stderr, "%s\n", cudaGetErrorString(e)); \
-        std::exit(1); \
-    } \
-} while (0)
-
-__global__ void vecAdd(const float* A, const float* B, float* C, int n) {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i < n) C[i] = A[i] + B[i];
-}
-
-int main() {
-    const int n = (1 << 20) + 3;
-    size_t bytes = n * sizeof(float);
-    float *hA = new float[n], *hB = new float[n], *hC = new float[n];
-    for (int i = 0; i < n; ++i) { hA[i] = 1.f; hB[i] = 2.f; }
-
-    float *dA, *dB, *dC;
-    CUDA_CHECK(cudaMalloc(&dA, bytes)); CUDA_CHECK(cudaMalloc(&dB, bytes)); CUDA_CHECK(cudaMalloc(&dC, bytes));
-    CUDA_CHECK(cudaMemcpy(dA, hA, bytes, cudaMemcpyHostToDevice));
-    CUDA_CHECK(cudaMemcpy(dB, hB, bytes, cudaMemcpyHostToDevice));
-
-    int threads = 256;
-    int blocks = (n + threads - 1) / threads;
-    vecAdd<<<blocks, threads>>>(dA, dB, dC, n);
-    CUDA_CHECK(cudaGetLastError());
-    CUDA_CHECK(cudaDeviceSynchronize());
-
-    CUDA_CHECK(cudaMemcpy(hC, dC, bytes, cudaMemcpyDeviceToHost));
-    for (int i=0; i<n; ++i) if (hC[i] != 3.f) return 2;
-    printf("C[0]=%f, all %d checked\n", hC[0], n); // 应全部为 3
-
-    CUDA_CHECK(cudaFree(dA)); CUDA_CHECK(cudaFree(dB)); CUDA_CHECK(cudaFree(dC));
-    delete[] hA; delete[] hB; delete[] hC;
-    return 0;
-}
-\end{tcode}
-
-要点：
-\begin{itemize}
-    \item 设备端函数用 \texttt{\_\_global\_\_} 修饰，由 Host 启动；
-    \item 必须用 \texttt{if (i < n)} 防止越界（末尾 Block 可能超出）；
-    \item \texttt{cudaMemcpy} 最后一参指明方向：\texttt{HostToDevice} / \texttt{DeviceToHost} / \texttt{DeviceToDevice}。
-\end{itemize}
-
-编译示例：
-\begin{tbash}
-nvcc -O2 vec_add.cu -o vec_add
-./vec_add
-\end{tbash}
-
-\end{example}
-
-\begin{exercise}
-将 n 改为 257、线程数保持 256，计算块数和多余线程数，再运行程序确认没有越界。
-\end{exercise}
-\paragraph*{内存层次（入门）}
-
-\begin{itemize}
-    \item \textbf{Global memory}：容量大、延迟高，\texttt{cudaMalloc} 得到的指针通常指向此处；
-    \item \textbf{Shared memory}：Block 内共享的片上暂存，延迟低、容量小，适合复用数据；
-    \item \textbf{Registers / Local}：每线程私有；寄存器溢出时可能落到 local memory。
-\end{itemize}
-
-Shared memory 示例骨架：
-\begin{tcode}
-__global__ void demo(float* out, const float* in, int n) {
-    __shared__ float tile[256];
-    int tid = threadIdx.x;
-    int i = blockIdx.x * blockDim.x + tid;
-    tile[tid] = (i < n) ? in[i] : 0.f;
-    __syncthreads(); // 等待块内全部写完再读
-    if (i < n) out[i] = tile[tid]; // 示意：实际可做归约、卷积滑窗等
-}
-\end{tcode}
-上述骨架要求每块恰好 256 个线程，不能让部分线程提前返回后再执行块内屏障。块内协作读写前务必 \texttt{\_\_syncthreads()}，否则存在数据竞争。
-
-\paragraph*{错误检查习惯}
-
-生产代码应对每次 CUDA API 检查返回值，例如：
-\begin{tcode}
-#define CUDA_CHECK(call) do { \
-  cudaError_t e = (call); \
-  if (e != cudaSuccess) { \
-    fprintf(stderr, "CUDA error %s:%d: %s\n", __FILE__, __LINE__, \
-            cudaGetErrorString(e)); \
-    exit(1); \
-  } \
-} while(0)
-\end{tcode}
-Kernel 启动为异步，常用 \texttt{cudaGetLastError()} 与 \texttt{cudaDeviceSynchronize()} 捕获启动/执行错误。
-
-\paragraph*{与 CMake 集成}
-
-现代 CMake（3.18+）推荐启用 CUDA 语言并链接 Toolkit 目标：
-\begin{tcode}
-cmake_minimum_required(VERSION 3.18)
-project(cuda_demo LANGUAGES CXX CUDA)
-find_package(CUDAToolkit REQUIRED)
-add_executable(vec_add vec_add.cu)
-target_link_libraries(vec_add PRIVATE CUDA::cudart)
-\end{tcode}
-
 \begin{conclusion}
-\begin{itemize}
-\item Thread 执行代码，Block 内线程协作，Grid 包含所有 Block。
-\item 索引必须检查边界；网格向上取整后，多余线程不应访问数组。
-\item 共享内存只在块内共享；屏障要求块内线程正确参与。
-\item 先检查启动错误，再检查同步错误；性能计时也必须考虑异步执行。
-\end{itemize}
+驱动让程序访问设备，编译工具把源码变成可执行程序，运行库参与执行；框架构建又有自己的依赖组合。版本要分开记，缺哪一层补哪一层。截图是操作背景，不能代替你自己的查询结果。
 \end{conclusion}
 
-\subsubsection{从算子到推理部署*}
-
-手写 kernel 适合学习与关键热点优化；多数视觉推理优先走成熟栈：
-\begin{enumerate}
-    \item 训练框架导出 \textbf{ONNX}（跨框架中间表示）；
-    \item 用 \textbf{TensorRT}（或 OpenVINO 等）构建优化引擎（融合算子、精度校准等）；
-    \item 在线加载 \texttt{.engine} 做低延迟推理。
-\end{enumerate}
-TensorRT 依赖 CUDA；引擎往往与具体 GPU 架构相关，换卡常需重建。
-深度学习章中的部署小节与此衔接：本卷强调 CUDA 是 GPU 路径的底座，
-具体 TensorRT API 可在项目仓库与 NVIDIA 文档中深入。
-
-\begin{example}
-某流水线上传 2 ms、计算 1 ms、下载 2 ms，总延迟为 5 ms。把 kernel 优化为 0.5 ms 后总延迟为 4.5 ms，只减少 10\%；仅报告算子“快一倍”会掩盖整体瓶颈。
+\subsubsection{先构建完整工程，再逐个看源码}
+接下来回到教材中的工程目录，别还留在刚才下载包的 /tmp。这个工程只有几个小程序，分别观察依赖、设备、向量加法、共享求和、错误和传输；两个头文件共用错误检查与 kernel，后面的每节会展示对应的完整内容。
+\begin{tbash}
+vector-lab-demo/
+  CMakeLists.txt README.md common.cuh kernels.cuh
+  cpu_demo.cpp device_info.cu vec_add.cu shared_sum.cu
+  error_demo.cu pipeline.cu
+\end{tbash}
+\begin{cudablock}
+\lstinputlisting[numbers=left,caption={CMakeLists.txt}]{examples/cuda/vector-lab-demo/CMakeLists.txt}
+\end{cudablock}
+\texttt{LANGUAGES CXX CUDA} 启用两种语言。\texttt{find\_package} 查找 \texttt{CUDAToolkit} 开发文件，\texttt{REQUIRED} 表示找不到即失败，\texttt{CUDA::cudart} 提供运行时链接信息。foreach 给五个 .cu 入口各建一个目标；\texttt{-lineinfo} 保留工具定位所需的设备源码行号。我们仍沿用卷一的 \texttt{cmake -S 源目录 -B 构建目录}，不用为了 CUDA 换一套构建习惯。
+\begin{example}[按自己的设备选择架构]
+本机计算能力是 8.6，CMake 的架构值写 86，nvcc 则写 \texttt{sm\_86}。在项目目录执行：
+\begin{tbash}
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_CUDA_COMPILER=/usr/local/cuda-12.6/bin/nvcc \
+  -DCMAKE_CUDA_ARCHITECTURES=86
+cmake --build build -j2
+./build/device_info
+\end{tbash}
+应生成六个目标，最后查询设备并试分配内存。本机为设备数 1、compute=8.6、runtime=12060；你的型号和驱动字段按实际记录。换卡前查询以下字段或设备资料，不盲目照抄 86：
+\begin{tbash}
+nvidia-smi --query-gpu=compute_cap --format=csv,noheader
+\end{tbash}
 \end{example}
-
-\begin{exercise}
-若连续三个算子共需 3 ms，比较每个算子各自上传下载与统一上传下载一次的总用时。假定每次传输仍为 2 ms。
+\begin{exercise}\label{ex:v2-cuda-build}
+构建工程，记录编译器路径与实际架构值；用 nvcc 单独编译后面的 vec\_add，说明 \texttt{-O2}、\texttt{-std=c++17}、\texttt{-arch} 与 \texttt{-o} 的作用。换构建配置时使用新 build 目录，避免旧缓存混进判断。
 \end{exercise}
 
-\subsubsection{常见问题与边界}
+\subsubsection{Host 与 Device：数据先过去，结果再回来}
+CPU 侧叫主机（host），GPU 侧叫设备（device）。普通主机数组的地址不能直接当作设备数组使用；在本例独立显卡路径里，我们先分配设备内存，上传输入，执行核，再下载输出。图 \ref{fig:host_device} 保留原图的 CPU/GPU 核与缓存对比，同时把这次的数据流补齐；它没有规定每一代显卡的缓存大小。
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.96\textwidth]{images/cuda_host_revised.pdf}
+\caption{Host/Device 的简化关系与向量加法数据搬运}\label{fig:host_device}
+\end{figure}
+\texttt{cudaMalloc} 接收指针地址与字节数；\texttt{cudaMemcpy(目标, 来源, 字节数, 方向)} 的最后一项区分 H2D、D2H 和 D2D；\texttt{cudaFree} 释放设备内存。下面的 Buffer 把分配与释放放进构造/析构，禁止复制避免两个对象释放同一指针。这是卷一资源管理的一个小应用，\texttt{p} 仍然是设备指针。
+\begin{cudablock}
+\lstinputlisting[numbers=left,language=C++,basicstyle=\footnotesize\ttfamily,caption={common.cuh}]{examples/cuda/vector-lab-demo/common.cuh}
+\end{cudablock}
+\texttt{CUDA\_CHECK} 为每个 API 检查返回值，失败时打印源码位置、调用与原因并退出；string 转整数还会验证全部字符与范围，避免把 \texttt{257abc} 当成合法长度。我们的演示遇到错误直接结束本进程，正式项目还应按自己的资源/异常策略处理。
+\begin{example}[查询设备并试分配]
+刚才运行的 device\_info 完整源码如下。它把 runtime 与 driver API 的版本整数分开打印，再查询设备 0，Buffer(1) 实际申请一个 float，离开 main 时释放。本机 driver-api=13040 与 runtime=12060 不同，但分配与后面 kernel 实际运行成功。
+\end{example}
+\begin{cudablock}
+\lstinputlisting[numbers=left,language=C++,caption={device\_info.cu}]{examples/cuda/vector-lab-demo/device_info.cu}
+\end{cudablock}
+\begin{exercise}\label{ex:v2-cuda-memory}
+运行 vec\_add 的长度 4096 变体，先算三个 float 设备数组、两次上传与一次下载的字节数，再对照输出。说明程序额外的主机数组为什么不能算成设备数组内存。
+\end{exercise}
 
-\begin{itemize}
-    \item 笔记本双显卡：确认进程跑在 NVIDIA 独显上（\texttt{nvidia-smi} 看进程）。
-    \item WSL / 容器：需额外配置 GPU 透传，与裸机步骤不同。
-    \item 无 GPU 环境：可学概念与写可在 CPU 回退的代码路径；本章验收中的运行项需有可用设备。
-\end{itemize}
+\subsubsection{Thread、Block、Grid：每个线程处理哪一项}
+CUDA 线程（thread）执行 kernel，通过内置索引区分工作；线程块（block）内可以共享数据和同步，网格（grid）包含这次启动的所有块。块分布到流多处理器（Streaming Multiprocessor，SM）执行，但一个 CUDA 线程不是一个物理核心，块的先后顺序也没有固定承诺。别用“第 0 块应该先算完”来设计块间通信。
 
+一维索引为
+\[
+i=\texttt{blockIdx.x}\cdot\texttt{blockDim.x}+\texttt{threadIdx.x}.
+\]
+\texttt{threadIdx}、\texttt{blockIdx}、\texttt{blockDim}、\texttt{gridDim} 均可表示三维。启动通用形式是 \texttt{kernel<<<网格大小, 块大小>>>(参数)}，也可用 dim3 组织二维网格。图 \ref{fig:v2-cuda-grid} 用小数目画出索引，不让你从百万线程里找一根针。
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.96\textwidth]{images/cuda_grid_revised.pdf}
+\caption{三块中的全局索引，$t_0$ 等表示块内线程编号}\label{fig:v2-cuda-grid}
+\end{figure}
+\begin{example}[同一份输入，检查所有输出]
+kernels.cuh 的第一段定义向量加法，\texttt{\_\_global\_\_} 表示主机可启动的设备 kernel。向上取整后的尾块会有多余线程，所以先检查 $i<n$。
+\end{example}
+\begin{cudablock}
+\lstinputlisting[numbers=left,language=C++,firstline=1,lastline=7,caption={kernels.cuh：向量加法}]{examples/cuda/vector-lab-demo/kernels.cuh}
+\end{cudablock}
+vec\_add 生成两组含变化的小整数作为 float 输入，避免只用全 1/全 2 掩盖索引错误。上传后启动，先检查提交，再同步检查执行，最后下载，逐个与 CPU 的 a[i]+b[i] 比较。这里只用可精确表示的小整数，因此能要求相等；一般浮点计算应根据数值范围用合理容差。
+\begin{cudablock}
+\lstinputlisting[numbers=left,language=C++,basicstyle=\footnotesize\ttfamily,caption={vec\_add.cu}]{examples/cuda/vector-lab-demo/vec_add.cu}
+\end{cudablock}
+从项目目录运行 \texttt{./build/vec\_add [长度] [块线程数]}，默认 1048579 / 256，打印 4097 块、253 个跳过线程与全部结果通过。再看 257 / 256：两块、255 个线程跳过，C[0]=-8、C[n-1]=2。改变长度还会改变输入最后一项，不用要求尾值永远为 3。
+\begin{tbash}
+./build/vec_add
+./build/vec_add 257 256
+nvcc -O2 -std=c++17 -arch=sm_86 -lineinfo vec_add.cu -o /tmp/textbook-vec-add
+/tmp/textbook-vec-add 257 256
+\end{tbash}
+\begin{exercise}\label{ex:v2-cuda-index}
+手算 n=257、块大小 128 和 256 时的块数及跳过线程，再运行两个变体。然后运行 10/4，对照索引图；指出边界检查位置，解释只打印第一项为什么不够。
+\end{exercise}
 
+\subsubsection{共享内存与同步：让线程真正合作}
+刚才每项都独立，共享内存还没派上用场。全局内存（global memory）容量大，设备数组通常放在这里；共享内存（shared memory）是块内的片上暂存，适合复用/合作；寄存器由线程私有使用，溢出等情况可能用到位于设备内存的 local memory。“local”说的是线程私有的访问范围，不等于一定很快。
+
+现在求数组总和。每块先把本块数据放进 tile，超出长度的位置补 0，再两两合并；步长每轮减半，因此本实现限制块大小为二次幂。每轮写入结束都全块同步，下一轮才能读刚更新的值。块间没有这道屏障，所以各块先写一个 partial，下载后由 CPU 做最后汇总。
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.94\textwidth]{images/cuda_reduction_revised.pdf}
+\caption{尾块补零后也参与同步，不能提前返回}\label{fig:v2-cuda-reduction}
+\end{figure}
+\begin{example}[从共享骨架改成真实求和]
+下面接着展示 kernels.cuh 第 8–20 行。\texttt{extern \_\_shared\_\_} 的大小由启动语法第三项给字节数，本次为线程数乘 sizeof(float)；\texttt{\_\_syncthreads()} 是块内屏障，也让相关共享读写在同步点正确可见。条件判断控制哪些线程做加法，屏障放在条件外，不能改成只有前半线程执行。
+\end{example}
+\begin{cudablock}
+\lstinputlisting[numbers=left,language=C++,firstline=8,lastline=20,firstnumber=8,basicstyle=\footnotesize\ttfamily,caption={kernels.cuh：分块归约}]{examples/cuda/vector-lab-demo/kernels.cuh}
+\end{cudablock}
+\begin{cudablock}
+\lstinputlisting[numbers=left,language=C++,basicstyle=\footnotesize\ttfamily,caption={shared\_sum.cu}]{examples/cuda/vector-lab-demo/shared_sum.cu}
+\end{cudablock}
+运行 \texttt{./build/shared\_sum 513 256}，得到三块 partial=896/896/0，总和 1792，CPU 对照相同。最后一块只有一个有效输入，而且此输入恰好为 0，但其余线程仍要写 0 并参与屏障。这里是教学归约，实际高性能求和可优先考虑成熟库；换普通小数后，加法顺序变化还会带来舍入差异。
+\begin{exercise}\label{ex:v2-cuda-shared}
+将长度与块大小改为 257/128，手算块数、每块 shared 字节及总和后运行。解释无效线程为什么补 0、不直接 return；说明块大小 255 为什么会被本实现拒绝。
+\end{exercise}
+\begin{conclusion}
+Grid 组织所有块，索引决定工作，尾部条件防止访问越界。Shared 只在块内合作，屏障不是全网格的“暂停键”；本归约还需要二次幂与逐轮同步。可以返回的独立核和必须全块参与的归约核，不能共用一套提前退出写法。
+\end{conclusion}
+
+\subsubsection{错误检查：启动了，不代表算成了}
+kernel 启动是异步提交，CPU 能继续向后执行。启动参数错误通常由 \texttt{cudaGetLastError()} 检查，执行期间的问题要在同步等操作处检查；它还可能报告此前的异步错误，所以需要保持每步检查，不能只在程序最后看一次。输出碰巧对了，也不能证明没有越界访问。
 \begin{note}
-入门阅读：\url{https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-cpp.html}。
+以下是故意报错的教学程序，每条用独立进程。设备断言后结束该进程，后续检查另开程序，不在出错上下文里继续工作。memory 模式只在 memcheck 下运行；不要把故意越界复制进正式算子。
 \end{note}
-
-
-\begin{example}
-程序报告 no CUDA-capable device，而 nvcc 能输出版本：编译工具存在不代表运行环境能访问 GPU。排查顺序是设备与驱动、容器或 WSL 透传、再到程序选择的设备号。
+\begin{cudablock}
+\lstinputlisting[numbers=left,language=C++,caption={error\_demo.cu}]{examples/cuda/vector-lab-demo/error_demo.cu}
+\end{cudablock}
+\begin{example}[区分两处错误]
+先运行 launch：1025 超过本设备每块最多 1024，启动检查报告 invalid configuration argument，退出 1。再独立运行 execute：启动检查通过，设备断言在同步时报告 device-side assert triggered，退出 1。\texttt{\#undef NDEBUG} 只用于错误示例，防止 Release 配置把演示断言去掉。
+\begin{tbash}
+./build/error_demo launch
+./build/error_demo execute
+./build/vec_add 257 256
+\end{tbash}
+第三条在新进程正常通过。它说明这些演示错误没有被当成成功，也没有用继续操作坏上下文来“恢复”。
 \end{example}
-
-\begin{exercise}
-列出你所在机器能完成的检查，并把需要 GPU 才能验证的项目单独标出。
+\begin{example}[工具检查实际访问]
+Compute Sanitizer 的 memcheck 查访问问题，racecheck 查共享内存冲突，synccheck 查同步错误；一种工具通过不能代替另外一种。以下三条正常检查应报告 0 errors，最后一条故意越界应有 Invalid global write 报告及非零退出。通用形式为 \texttt{compute-sanitizer --tool 工具 [选项] 程序 [参数]}，\texttt{--error-exitcode 9} 让工具检测到错误时返回失败。
+\begin{tbash}
+compute-sanitizer --tool memcheck --error-exitcode 9 ./build/vec_add 257 256
+compute-sanitizer --tool racecheck --error-exitcode 9 ./build/shared_sum 513 256
+compute-sanitizer --tool synccheck --error-exitcode 9 ./build/shared_sum 513 256
+compute-sanitizer --tool memcheck --error-exitcode 9 ./build/error_demo memory
+\end{tbash}
+本次越界报告同时包含非法写入与同步失败，返回 9；不能按“工具运行完了”算通过。具体工具范围见 \href{https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html}{官方检查工具文档}。
+\end{example}
+\begin{exercise}\label{ex:v2-cuda-error}
+记录两个错误模式分别在哪个 API 被发现，并运行正常向量的 memcheck 与共享求和的 memcheck/racecheck/synccheck。保存退出状态和报告；说明零输出差异、启动检查和工具检查各自覆盖什么。
 \end{exercise}
 
+\subsubsection{测量流水线：少搬数据，比只盯 kernel 更有用}
+前面的三步图像处理，可以让数据每步都回 CPU，也可以留在设备上。先不改变算子算法，我们只比较传输组织。图 \ref{fig:v2-cuda-timing} 中，逐步往返需六次传输，留存只需一次上传/下载；后者仍有三次 kernel 启动，不是假装把启动成本也消掉了。
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.96\textwidth]{images/cuda_timing_revised.pdf}
+\caption{完整处理与 GPU 事件区间分开计时}\label{fig:v2-cuda-timing}
+\end{figure}
+先接着展示 kernels.cuh 最后一段。独立元素按阶段乘 2、加 1、限幅到 0–255，这里没有屏障，所以越界线程可以 return。
+\begin{cudablock}
+\lstinputlisting[numbers=left,language=C++,firstline=21,firstnumber=21,caption={kernels.cuh：三个处理阶段}]{examples/cuda/vector-lab-demo/kernels.cuh}
+\end{cudablock}
+pipeline 使用相同输入，CPU 也执行相同三步。先准备数组、设备缓冲区与计时事件，再写 CPU 对照；下面按这两步连续展示源码。
+\begin{cudablock}
+\lstinputlisting[numbers=left,language=C++,firstline=1,lastline=25,basicstyle=\footnotesize\ttfamily,caption={pipeline.cu：准备输入与资源}]{examples/cuda/vector-lab-demo/pipeline.cu}
+\end{cudablock}
+CPU 路径先复制初始输入，再开始计时；三遍实际处理在区间内，复制与比较所用的数据准备在区间外。
+\begin{cudablock}
+\lstinputlisting[numbers=left,language=C++,firstline=26,lastline=33,firstnumber=26,basicstyle=\footnotesize\ttfamily,caption={pipeline.cu：CPU 路径}]{examples/cuda/vector-lab-demo/pipeline.cu}
+\end{cudablock}
+gpuRun 的 resident 参数决定中间数据留下还是往返。主机稳态时钟（steady clock）测本次完整处理区间，包含上传、启动、等待及下载；CUDA 事件（event）在同一默认流中包住三个核，等待 end 后再读时间，不含外侧传输。事件区间也可能含调度和提交间隙，不能把它当成纯算术指令成本。
+\begin{cudablock}
+\lstinputlisting[numbers=left,language=C++,firstline=34,lastline=61,firstnumber=34,basicstyle=\footnotesize\ttfamily,caption={pipeline.cu：两种 GPU 路径}]{examples/cuda/vector-lab-demo/pipeline.cu}
+\end{cudablock}
+最后先预热，再重复，报告各自中位数。所有输出逐元素核验在计时外，事件也释放；内存分配、上下文初始化和输入生成没有混进当前区间。
+\begin{cudablock}
+\lstinputlisting[numbers=left,language=C++,firstline=62,firstnumber=62,basicstyle=\footnotesize\ttfamily,caption={pipeline.cu：重复、校验与报告}]{examples/cuda/vector-lab-demo/pipeline.cu}
+\end{cudablock}
+\begin{example}[比较同一程序的规模与传输]
+在工程目录运行 \texttt{./build/pipeline [长度] [奇数重复次数]}：
+\begin{tbash}
+./build/pipeline
+./build/pipeline 257 3
+\end{tbash}
+JSON 应有 all\_checked=true，resident\_bytes=$8n$、roundtrip\_bytes=$24n$；四个时间字段分别是 CPU、GPU 三核事件、留存完整处理和逐步往返。257 变体本次 CPU 约 0.00016 ms，留存约 0.017 ms，GPU 没有因为线程多就自动胜出。成绩随设备、负载、频率和测量波动变化，主要核对区间与结果，不要求复现同一个小数。
+\end{example}
+\begin{exercise}\label{ex:v2-cuda-timing}
+对 513 个元素、重复 5 次运行流水线，先算两条 GPU 路径的搬运字节，再记录全部时间。指出这里包括和排除的动作，解释只用 kernel\_ms 向别人报告“单帧延迟”会漏掉什么。
+\end{exercise}
+\begin{conclusion}
+先保证同一输入与正确结果，再比较同一计时口径。预热与重复减少启动和偶然波动，事件需要等完成；主机时钟若不等待，只量到提交过程。减少传输可能比优化某个核更有效，实际工程还要计入采集、预处理、队列和后处理。
+\end{conclusion}
+
+\subsubsection{从算子接到推理部署*}
+手写 kernel 适合学习机制和处理明确热点，常见视觉推理仍可先用成熟工具。上一章已经把真实 LeNet 导出 ONNX，再比较完整输出；ONNX 是交换计算图的形式，TensorRT 可在 NVIDIA 路径构建优化引擎，OpenVINO 则有自己的目标设备与运行栈。引擎的可移植范围取决于版本、构建选项和硬件，换平台要重新核对，不能只换后缀就叫部署完成。
+\begin{example}[用完整开销判断优化价值]
+假设上传 2 ms、三个算子合计 3 ms、下载 2 ms。每步各上传下载一次共 15 ms；统一上传下载一次为 7 ms。这是明确假设下的算术模型，实际程序用上一节 pipeline 观察。同样，一个 1 ms 算子减到 0.5 ms，在原来 5 ms 的完整路径里只减少 10\%，不能把局部“快一倍”说成整机快一倍。
+\end{example}
+\begin{exercise}\label{ex:v2-cuda-deploy}
+按上述 2/3/2 ms 假设验证 15/7 ms 的构成，再用自己的 pipeline 记录指出实际路径还有哪些启动/同步成本。说明前章导出比较和本章计时分别提供了哪部分部署依据。
+\end{exercise}
+具体 TensorRT API 与引擎兼容性可查 \href{https://docs.nvidia.com/deeplearning/tensorrt/}{官方文档}，本章没有构建 TensorRT 引擎，不把文件能打开或 GPU 能访问写成加速部署完成。
+
+\subsubsection{容器与无设备边界：缺哪一步就记哪一步}
+最后回到你自己的机器。笔记本应先确认程序访问的是 NVIDIA 设备，容器/WSL 还需要对应透传；有 nvcc 但查询不到设备时先检查这些条件，别急着把正确的源码改坏。无 GPU 可独立构建 cpu\_demo、计算索引与字节数；CUDA 编译有时也能完成，但 GPU 执行、共享内存检查和计时仍需设备。
+\begin{example}[模拟应用看不到设备]
+以下环境变量只作用于这次 CUDA 进程，不移除物理显卡，也不证明容器真的没配好。device\_info 应报告没有可用 CUDA 设备并返回非零，本次由 cudaGetDeviceCount 报 no CUDA-capable device is detected、返回 1；CPU 小程序仍可运行，之后正常查询恢复原样。
+\begin{tbash}
+CUDA_VISIBLE_DEVICES='' ./build/device_info
+CUDA_VISIBLE_DEVICES='' ./build/cpu_demo
+./build/device_info
+\end{tbash}
+\end{example}
+\begin{exercise}\label{ex:v2-cuda-boundary}
+运行两种可见性下的查询，记录结果与退出状态；无设备时如实标记缺口。说明隐藏环境下 nvidia-smi 仍能查询管理信息，为什么不能用它替代应用级运行验证。
+\end{exercise}
+继续深入线程模型、内存和性能时，可看 \href{https://docs.nvidia.com/cuda/archive/12.6.3/cuda-c-programming-guide/index.html}{本版本 CUDA C++ 编程指南}。到这里我们已经从“显卡能被看到”走到了“代码能编译、结果能核对、时间能解释”，接下来再优化才有依据。

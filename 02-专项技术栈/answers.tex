@@ -601,71 +601,100 @@ eval改变Dropout/BatchNorm等行为，\texttt{no\_grad}关闭图记录。本章
 \addcontentsline{toc}{section}{第六章题解：CUDA 与 GPU 加速}
 \subsubsection*{随堂练习}
 
-\paragraph*{随堂练习 6.1}
+\paragraph*{随堂练习 \ref{ex:v2-cuda-dependency}}
 \begin{solution}
-逐像素阈值的输出只依赖对应输入，容易分配给独立线程。累计前缀和的第 i 项依赖前面多个输入，朴素递推有跨元素依赖；可通过并行扫描算法加速，但不能简单让每个线程读取尚未计算完成的前一结果。
+输入2/4/6/8时，阈值0/0/255/255，前缀和2/6/12/20。阈值每项只依赖本项输入，可分给独立线程；朴素前缀和保留此前累积状态，不能让线程读取尚未完成的前一结果。可用并行扫描重新组织，不能据此断言任何前缀和都无法并行。
 \end{solution}
 
-\paragraph*{随堂练习 6.2}
+\paragraph*{随堂练习 \ref{ex:v2-cuda-env}}
 \begin{solution}
-能说明当前命令环境可查询 NVIDIA 驱动和设备，但不能说明 Toolkit 的编译工具已安装或在 PATH 中。应检查 Toolkit 安装位置与 nvcc 路径。也不能仅凭 nvidia-smi 正常断定应用的全部运行库、容器透传或 GPU 架构配置都正确。
+nvidia-smi能查询驱动与管理信息，找不到nvcc说明当前命令环境没有可定位的编译器，不说明驱动没装；检查容器包及PATH。驱动支持信息、编译器和框架运行依赖分开记录。旧截图中的Driver被取消，Toolkit11.8保留；是已有可用驱动的旧runfile背景，不是当前Ubuntu24.04要重复执行的命令。当前按开发包范围与apt模拟判断。
 \end{solution}
 
-\paragraph*{随堂练习 6.3}
+\paragraph*{随堂练习 \ref{ex:v2-cuda-build}}
 \begin{solution}
-三个长度 4096 的 float 数组，共需 $3\times4096\times4=49152$ 字节设备内存，即 48 KiB。上传两个输入为 32768 字节，下载一个输出为 16384 字节，一次完整流程同样拷贝 49152 字节；不含运行时其它开销。
+实际nvcc路径、版本和设备计算能力应与构建输出对应；本次12.6.85、compute8.6，CMake架构86、nvcc目标\texttt{sm\_86}。-O2优化、-std=c++17选择标准、-arch选择架构、-o指定输出。单独编译相同vec\_add源码后对257/256运行应通过全部校验。新构建目录用于隔离缓存，不能用另一台设备的86硬套。
 \end{solution}
 
-\paragraph*{随堂练习 6.4}
+\paragraph*{随堂练习 \ref{ex:v2-cuda-memory}}
 \begin{solution}
-块数为 $\lceil257/256\rceil=2$，共启动 512 个线程，其中 255 个线程的索引超出数据范围。保留 \texttt{if (i < n)}，运行带错误检查的完整示例，全部 257 个结果应为 3。只检查首元素不能发现尾部越界。
+float为4字节，三个4096数组共49152字节（48KiB）；H2D32768、D2H16384，总搬运49152字节。主机a/b/c另在主机内存，不改变三个设备数组的字节数，也没有计入运行时上下文等其他GPU内存。程序实际输出应逐项对应。
 \end{solution}
 
-\paragraph*{随堂练习 6.5}
+\paragraph*{随堂练习 \ref{ex:v2-cuda-index}}
 \begin{solution}
-每个算子各上传和下载一次，共六次传输，合计 $3+6\times2=15$ ms。中间结果留在设备端，仅统一上传与下载一次，总用时为 $3+2\times2=7$ ms。这里忽略重叠传输、启动与调度开销，节省来自减少数据搬运。
+257/128为3块、384线程、127个跳过；257/256为2块、512线程、255个跳过。10/4为3块、12线程，索引10/11跳过。vecAdd里的if(i<n)防止尾部访问，检查全部c[i]验证索引与数值，首元素不能证明尾部正确；访问合法性再用memcheck等工具确认。
 \end{solution}
 
-\paragraph*{随堂练习 6.6}
+\paragraph*{随堂练习 \ref{ex:v2-cuda-shared}}
 \begin{solution}
-无 GPU 时可以阅读源码、计算索引与字节数；若安装了 Toolkit，还可能完成编译，但这不代表程序能运行。GPU 枚举、kernel 执行、设备结果校验、同步错误检查和性能计时需要可访问的兼容 GPU 及驱动。检查记录应分“已执行”“缺设备”“缺工具”，不要把跳过写成通过。
+257/128为3块，每块128×4=512字节shared；输入i\%8，总和896，partial448/448/0。无效线程写0作为加法中性值，再参与全块同步；return会破坏协作。255不是二次幂，本实现步长不断减半会漏掉项，因此入口拒绝；这不是所有CUDA块大小都必须二次幂。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-cuda-error}}
+\begin{solution}
+launch由cudaGetLastError发现非法配置，execute先启动成功、再由cudaDeviceSynchronize发现断言，两者分别退出1。正常访问/共享/同步检查应零错误；工具模式要对应，memcheck不代替共享冲突检查，racecheck也不证明全部访问合法。故意memory模式由工具发现非法写入，本次还报告同步失败、返回9，属于被正确发现的负例；新进程vec\_add恢复正常，不继续坏上下文。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-cuda-timing}}
+\begin{solution}
+513个float一次上传/下载共2×513×4=4104字节，逐步往返6×513×4=12312字节。结果JSON应all\_checked=true，repeats5，四个时间为各自预热后的中位数。主机完整区间含指定传输、启动与等待，事件只包三个核；分配、初始化、输入生成、校验在外，更没有相机采集、排队或真实前后处理。kernel\_ms不能当相机单帧响应。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-cuda-deploy}}
+\begin{solution}
+三个算子合计3ms，各步上传下载共六次、每次2ms，因此15ms；统一两次传输为7ms。假设没有传输重叠，也忽略启动调度；真实pipeline仍有三次启动和同步等成本。前章比较数值/输入限制，本章比较同输入的处理开销，都只是部署的一部分；还要核对目标运行栈、模型版本、预处理/后处理与真实端到端响应。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-cuda-boundary}}
+\begin{solution}
+本次正常查询一个设备并实际分配；隐藏CUDA设备时cudaGetDeviceCount报告无可用设备、退出1，CPU小程序仍运行，恢复默认可见性后查询成功。变量只限制当前应用，管理工具可能仍看到物理GPU，不能替代应用内访问。缺硬件或透传时，阅读/CPU/静态编译与GPU执行/工具/计时分开记录，未运行项不能写通过。
 \end{solution}
 
 \subsubsection*{章末习题}
-
-\paragraph*{第六章章末第 1 题}
+\paragraph*{第六章章末习题 \ref{prob:v2-cuda-dependency}}
 \begin{solution}
-逐像素阈值化更直接；递推存在数据依赖，需要重新设计并行算法。
+阈值仅依赖对应输入，朴素前缀和依赖先前累积/多个输入。CUDA线程是执行模型，不与物理核心一一固定对应；块调度顺序不保证，不能假定低编号先完成。
 \end{solution}
 
-\paragraph*{第六章章末第 2 题}
+\paragraph*{第六章章末习题 \ref{prob:v2-cuda-env}}
 \begin{solution}
-不能。驱动可用与本机是否安装、配置 Toolkit 是两个问题。
+分别是驱动管理、编译工具、框架构建依赖和应用实际加载的运行时。版本不同可正常工作，也可能不兼容，应核对具体支持条件并运行，而非只比较数字。本次runtime12060、driver API13040实际通过。
 \end{solution}
 
-\paragraph*{第六章章末第 3 题}
+\paragraph*{第六章章末习题 \ref{prob:v2-cuda-memory}}
 \begin{solution}
-上传 2×512×4，下载 512×4，总计 6144 字节。
+设备三个数组6144字节，上传4096、下载2048；主机数组另占主机内存，不能把设备数组翻倍。不包含其他分配和运行时开销。
 \end{solution}
 
-\paragraph*{第六章章末第 4 题}
+\paragraph*{第六章章末习题 \ref{prob:v2-cuda-index}}
 \begin{solution}
-需要 3 块，共 768 线程，多出 255 个线程。
+3块、768线程，尾块1个有效线程，255个跳过。首项正确只证明首项，需全部输出校验和访问检查；越界有时不立刻崩溃。
 \end{solution}
 
-\paragraph*{第六章章末第 5 题}
+\paragraph*{第六章章末习题 \ref{prob:v2-cuda-shared}}
 \begin{solution}
-同一 Block 内共享；部分线程不参与屏障可能违反同步要求，不能照此编写协作代码。
+Shared由同一块线程共享，local是线程私有访问范围、通常位于设备内存。补零不改变加法结果且让无效线程继续同步；二次幂保证本算法每轮整齐配对。加法条件可只让一部分线程写，屏障仍应全块按要求参与；块间不能用它同步。
 \end{solution}
 
-\paragraph*{第六章章末第 6 题}
+\paragraph*{第六章章末习题 \ref{prob:v2-cuda-error}}
 \begin{solution}
-不一定，启动和执行错误不同；检查 cudaGetLastError，并通过同步等操作检查执行阶段错误。
+cudaDeviceSynchronize等同步检查发现设备断言，启动检查不足。memcheck查访问，racecheck查共享读写冲突，synccheck查同步，覆盖范围不同。工具发现的故意负例与正常零错误记录要分开。
 \end{solution}
 
-\paragraph*{第六章章末第 7 题}
+\paragraph*{第六章章末习题 \ref{prob:v2-cuda-timing}}
 \begin{solution}
-前者说明驱动和设备状态及支持版本信息，后者说明编译工具版本；两者不同本身不等于错误，需核对兼容性。
+不能，0.01ms不含传输，0.8ms也可能没有采集和前后处理。CUDA提交异步，主机时钟只量提交可能严重低估；计时前排除前序未完成工作，终点必须等待所测工作完成。注明设备、规模、预热、重复、结果与排除项。
+\end{solution}
+
+\paragraph*{第六章章末习题 \ref{prob:v2-cuda-reduction}}
+\begin{solution}
+不必然。浮点加法不满足精确结合律，树形与串行顺序可能不同。先用工具检查访问/同步，用相同数据的高精度参考与适当绝对/相对容差检查误差；误差大小要结合数据范围、算法与用途，不能拿舍入解释任意错误。
+\end{solution}
+
+\paragraph*{第六章章末习题 \ref{prob:v2-cuda-practice}}
+\begin{solution}
+提交现场长度/块大小、向上取整与字节手算、全部输出校验；共享归约提交partial及CPU总和，块大小满足本算法约束。记录正常工具零错误与独立负例报告；pipeline四个时间和搬运量须用相同输入及正确结果解释。保存系统/编译器/架构/运行库和实际命令；无设备只完成CPU或静态检查时，明确剩余运行项，不能靠样例日志代替本机验证。
 \end{solution}
 
 \section*{第七章：相机与成像原理}

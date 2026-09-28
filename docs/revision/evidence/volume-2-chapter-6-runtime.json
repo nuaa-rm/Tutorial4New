@@ -1,0 +1,577 @@
+{
+  "scope": "actual Ubuntu CUDA CPU/GPU/negative cases",
+  "records": [
+    {
+      "step": "source",
+      "sha256": {
+        "common.cuh": "2b9e82c45860be7c2a9b2246d49049cd3b67a67fd9cdb37ea2081a430c555a28",
+        "kernels.cuh": "e5f7512e0809a1b4956d6b8d4b2f9c2ed83a3f33b0cc75f881c799a4f35c9ab2",
+        "cpu_demo.cpp": "2a3e4448accf2244c165107ad4def41faabb2567dc5b592a3853b546704a86e5",
+        "device_info.cu": "ffdb8a2421fd02b71e653eb6c424b84c96c7ceec5d22ffd9373b975c6cd439e9",
+        "vec_add.cu": "551fcc255412960e78a5cef4ef78a4efb89153194d06839af93ea65a24320ba3",
+        "shared_sum.cu": "6f4ed975da6dd24e6d46b6da7974da350bb5fb344c525c009de4683df115ce77",
+        "error_demo.cu": "cafe3b2e7d8e0a63b5af734bf3f48bba58b38b461504395598f5a6bab7b5ee1d",
+        "CMakeLists.txt": "67e1368872833b95b1a4338a13c747354464242a992699d996c86747bb5386e7",
+        ".gitignore": "21a5fcfef76f67d88bb9ad647f52e2d4fd901709078d884f3063270c790756a4",
+        "pipeline.cu": "41636ac4345577a755ebaffff9d15c34a1dbe7861f8c31b48afb98efc259f19c",
+        "README.md": "0917f8234ed5e4bda2304c68d43b8f98484bebd61c1096c412183b47a6d0ffb4"
+      }
+    },
+    {
+      "step": "environment",
+      "command": [
+        "bash",
+        "-lc",
+        "cat /etc/os-release; g++ --version; cmake --version; nvidia-smi"
+      ],
+      "returncode": 0,
+      "output": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\ng++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\ncmake version 3.28.3\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).\nTue Sep 29 06:01:13 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 615.71.09              KMD Version: 615.71.09     CUDA UMD Version: 13.4     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA GeForce RTX 3070 ...    Off |   00000000:01:00.0  On |                  N/A |\n| N/A   56C    P3             31W /  150W |    2690MiB /   8192MiB |      5%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|    0   N/A  N/A           17395      G   niri                                    392MiB |\n|    0   N/A  N/A           17428      G   /usr/lib/flclash/FlClash                 78MiB |\n|    0   N/A  N/A           17549    C+G   .../lib/xdg-desktop-portal-gnome          7MiB |\n|    0   N/A  N/A           17559      G   Xwayland                                 28MiB |\n|    0   N/A  N/A           62579    C+G   ...rack-uuid=3190708988185955192        246MiB |\n|    0   N/A  N/A          199826    C+G   ...rack-uuid=3190708988185955192        869MiB |\n|    0   N/A  N/A          255169      G   kitty                                    45MiB |\n|    0   N/A  N/A          273733    C+G   ...rack-uuid=3190708988185955192        158MiB |\n|    0   N/A  N/A          276863      G   qs                                      268MiB |\n|    0   N/A  N/A          335439      G   kitty                                    53MiB |\n+-----------------------------------------------------------------------------------------+\n"
+    },
+    {
+      "step": "packages",
+      "command": [
+        "dpkg-query",
+        "-W",
+        "cuda-keyring",
+        "cuda-compiler-12-6",
+        "cuda-cudart-dev-12-6",
+        "cuda-sanitizer-12-6"
+      ],
+      "returncode": 0,
+      "output": "cuda-compiler-12-6\t12.6.3-1\ncuda-cudart-dev-12-6\t12.6.77-1\ncuda-keyring\t1.1-1\ncuda-sanitizer-12-6\t12.6.77-1\n"
+    },
+    {
+      "step": "nvcc",
+      "command": [
+        "/usr/local/cuda-12.6/bin/nvcc",
+        "--version"
+      ],
+      "returncode": 0,
+      "output": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2024 NVIDIA Corporation\nBuilt on Tue_Oct_29_23:50:19_PDT_2024\nCuda compilation tools, release 12.6, V12.6.85\nBuild cuda_12.6.r12.6/compiler.35059454_0\n"
+    },
+    {
+      "step": "configure",
+      "command": [
+        "cmake",
+        "-S",
+        "/tmp/textbook-cuda-verify-xv3txqpk/src",
+        "-B",
+        "/tmp/textbook-cuda-verify-xv3txqpk/build",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DCMAKE_CUDA_COMPILER=/usr/local/cuda-12.6/bin/nvcc",
+        "-DCMAKE_CUDA_ARCHITECTURES=86"
+      ],
+      "returncode": 0,
+      "output": "-- The CXX compiler identification is GNU 13.3.0\n-- The CUDA compiler identification is NVIDIA 12.6.85\n-- Detecting CXX compiler ABI info\n-- Detecting CXX compiler ABI info - done\n-- Check for working CXX compiler: /usr/bin/c++ - skipped\n-- Detecting CXX compile features\n-- Detecting CXX compile features - done\n-- Detecting CUDA compiler ABI info\n-- Detecting CUDA compiler ABI info - done\n-- Check for working CUDA compiler: /usr/local/cuda-12.6/bin/nvcc - skipped\n-- Detecting CUDA compile features\n-- Detecting CUDA compile features - done\n-- Found CUDAToolkit: /usr/local/cuda-12.6/targets/x86_64-linux/include (found version \"12.6.85\") \n-- Performing Test CMAKE_HAVE_LIBC_PTHREAD\n-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success\n-- Found Threads: TRUE  \n-- Configuring done (1.5s)\n-- Generating done (0.0s)\n-- Build files have been written to: /tmp/textbook-cuda-verify-xv3txqpk/build\n"
+    },
+    {
+      "step": "build",
+      "command": [
+        "cmake",
+        "--build",
+        "/tmp/textbook-cuda-verify-xv3txqpk/build",
+        "-j2"
+      ],
+      "returncode": 0,
+      "output": "[  8%] Building CXX object CMakeFiles/cpu_demo.dir/cpu_demo.cpp.o\n[ 16%] Building CUDA object CMakeFiles/device_info.dir/device_info.cu.o\n[ 25%] Linking CXX executable cpu_demo\n[ 25%] Built target cpu_demo\n[ 33%] Building CUDA object CMakeFiles/vec_add.dir/vec_add.cu.o\n[ 41%] Linking CUDA executable device_info\n[ 41%] Built target device_info\n[ 50%] Building CUDA object CMakeFiles/shared_sum.dir/shared_sum.cu.o\n[ 58%] Linking CUDA executable vec_add\n[ 58%] Built target vec_add\n[ 66%] Building CUDA object CMakeFiles/error_demo.dir/error_demo.cu.o\n[ 75%] Linking CUDA executable shared_sum\n[ 75%] Built target shared_sum\n[ 83%] Building CUDA object CMakeFiles/pipeline.dir/pipeline.cu.o\n[ 91%] Linking CUDA executable error_demo\n[ 91%] Built target error_demo\n[100%] Linking CUDA executable pipeline\n[100%] Built target pipeline\n<jemalloc>: No THP support: thp:never\n<jemalloc>: No THP support: thp:never\n<jemalloc>: No THP support: thp:never\n<jemalloc>: No THP support: thp:never\n<jemalloc>: No THP support: thp:never\n"
+    },
+    {
+      "step": "cpu",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/cpu_demo"
+      ],
+      "returncode": 0,
+      "output": "输入=1 阈值=0 前缀和=1\n输入=7 阈值=255 前缀和=8\n输入=2 阈值=0 前缀和=10\n输入=8 阈值=255 前缀和=18\n"
+    },
+    {
+      "step": "direct-cpu-build",
+      "command": [
+        "g++",
+        "-std=c++17",
+        "/tmp/textbook-cuda-verify-xv3txqpk/src/cpu_demo.cpp",
+        "-o",
+        "/tmp/textbook-cuda-verify-xv3txqpk/cpu-direct"
+      ],
+      "returncode": 0,
+      "output": ""
+    },
+    {
+      "step": "direct-cpu-run",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/cpu-direct"
+      ],
+      "returncode": 0,
+      "output": "输入=1 阈值=0 前缀和=1\n输入=7 阈值=255 前缀和=8\n输入=2 阈值=0 前缀和=10\n输入=8 阈值=255 前缀和=18\n"
+    },
+    {
+      "step": "cpu-variant-build",
+      "command": [
+        "g++",
+        "-std=c++17",
+        "/tmp/textbook-cuda-verify-xv3txqpk/cpu-variant.cpp",
+        "-o",
+        "/tmp/textbook-cuda-verify-xv3txqpk/cpu-variant"
+      ],
+      "returncode": 0,
+      "output": ""
+    },
+    {
+      "step": "cpu-variant",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/cpu-variant"
+      ],
+      "returncode": 0,
+      "output": "输入=2 阈值=0 前缀和=2\n输入=4 阈值=0 前缀和=6\n输入=6 阈值=255 前缀和=12\n输入=8 阈值=255 前缀和=20\n"
+    },
+    {
+      "step": "device",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/device_info"
+      ],
+      "returncode": 0,
+      "output": "设备数=1 runtime=12060 driver-api=13040\n设备0=NVIDIA GeForce RTX 3070 Ti Laptop GPU compute=8.6 最大块线程=1024 设备内存=8251047936\n"
+    },
+    {
+      "step": "direct-nvcc",
+      "command": [
+        "/usr/local/cuda-12.6/bin/nvcc",
+        "-O2",
+        "-std=c++17",
+        "-arch=sm_86",
+        "-lineinfo",
+        "/tmp/textbook-cuda-verify-xv3txqpk/src/vec_add.cu",
+        "-o",
+        "/tmp/textbook-cuda-verify-xv3txqpk/direct"
+      ],
+      "returncode": 0,
+      "output": "<jemalloc>: No THP support: thp:never\n"
+    },
+    {
+      "step": "direct-run",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/direct",
+        "257",
+        "256"
+      ],
+      "returncode": 0,
+      "output": "n=257 threads=256 blocks=2 跳过线程=255 全部结果通过\n设备数组字节=3084 H2D=2056 D2H=1028 C[0]=-8.0 C[n-1]=2.0\n"
+    },
+    {
+      "step": "vec-default",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/vec_add"
+      ],
+      "returncode": 0,
+      "output": "n=1048579 threads=256 blocks=4097 跳过线程=253 全部结果通过\n设备数组字节=12582948 H2D=8388632 D2H=4194316 C[0]=-8.0 C[n-1]=4.0\n"
+    },
+    {
+      "step": "vec-1-1",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/vec_add",
+        "1",
+        "1"
+      ],
+      "returncode": 0,
+      "output": "n=1 threads=1 blocks=1 跳过线程=0 全部结果通过\n设备数组字节=12 H2D=8 D2H=4 C[0]=-8.0 C[n-1]=-8.0\n"
+    },
+    {
+      "step": "vec-10-4",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/vec_add",
+        "10",
+        "4"
+      ],
+      "returncode": 0,
+      "output": "n=10 threads=4 blocks=3 跳过线程=2 全部结果通过\n设备数组字节=120 H2D=80 D2H=40 C[0]=-8.0 C[n-1]=10.0\n"
+    },
+    {
+      "step": "vec-257-128",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/vec_add",
+        "257",
+        "128"
+      ],
+      "returncode": 0,
+      "output": "n=257 threads=128 blocks=3 跳过线程=127 全部结果通过\n设备数组字节=3084 H2D=2056 D2H=1028 C[0]=-8.0 C[n-1]=2.0\n"
+    },
+    {
+      "step": "vec-257-256",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/vec_add",
+        "257",
+        "256"
+      ],
+      "returncode": 0,
+      "output": "n=257 threads=256 blocks=2 跳过线程=255 全部结果通过\n设备数组字节=3084 H2D=2056 D2H=1028 C[0]=-8.0 C[n-1]=2.0\n"
+    },
+    {
+      "step": "vec-513-256",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/vec_add",
+        "513",
+        "256"
+      ],
+      "returncode": 0,
+      "output": "n=513 threads=256 blocks=3 跳过线程=255 全部结果通过\n设备数组字节=6156 H2D=4104 D2H=2052 C[0]=-8.0 C[n-1]=-1.0\n"
+    },
+    {
+      "step": "vec-4096-256",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/vec_add",
+        "4096",
+        "256"
+      ],
+      "returncode": 0,
+      "output": "n=4096 threads=256 blocks=16 跳过线程=0 全部结果通过\n设备数组字节=49152 H2D=32768 D2H=16384 C[0]=-8.0 C[n-1]=7.0\n"
+    },
+    {
+      "step": "vec-1048579-512",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/vec_add",
+        "1048579",
+        "512"
+      ],
+      "returncode": 0,
+      "output": "n=1048579 threads=512 blocks=2049 跳过线程=509 全部结果通过\n设备数组字节=12582948 H2D=8388632 D2H=4194316 C[0]=-8.0 C[n-1]=4.0\n"
+    },
+    {
+      "step": "sum-1-32",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/shared_sum",
+        "1",
+        "32"
+      ],
+      "returncode": 0,
+      "output": "n=1 threads=32 blocks=1 每块shared字节=128 sum=0 CPU=0\npartial[0]=0\n"
+    },
+    {
+      "step": "sum-257-128",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/shared_sum",
+        "257",
+        "128"
+      ],
+      "returncode": 0,
+      "output": "n=257 threads=128 blocks=3 每块shared字节=512 sum=896 CPU=896\npartial[0]=448\npartial[1]=448\npartial[2]=0\n"
+    },
+    {
+      "step": "sum-513-256",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/shared_sum",
+        "513",
+        "256"
+      ],
+      "returncode": 0,
+      "output": "n=513 threads=256 blocks=3 每块shared字节=1024 sum=1792 CPU=1792\npartial[0]=896\npartial[1]=896\npartial[2]=0\n"
+    },
+    {
+      "step": "sum-4096-256",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/shared_sum",
+        "4096",
+        "256"
+      ],
+      "returncode": 0,
+      "output": "n=4096 threads=256 blocks=16 每块shared字节=1024 sum=14336 CPU=14336\npartial[0]=896\npartial[1]=896\npartial[2]=896\npartial[3]=896\n"
+    },
+    {
+      "step": "sum-1048579-512",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/shared_sum",
+        "1048579",
+        "512"
+      ],
+      "returncode": 0,
+      "output": "n=1048579 threads=512 blocks=2049 每块shared字节=2048 sum=3670019 CPU=3670019\npartial[0]=1792\npartial[1]=1792\npartial[2]=1792\npartial[3]=1792\n"
+    },
+    {
+      "step": "invalid-args",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/vec_add",
+        "0"
+      ],
+      "returncode": 2,
+      "output": "参数须为 1..16777216 的整数\n"
+    },
+    {
+      "step": "invalid-args",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/vec_add",
+        "257",
+        "1025"
+      ],
+      "returncode": 2,
+      "output": "参数须为 1..1024 的整数\n"
+    },
+    {
+      "step": "invalid-args",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/vec_add",
+        "abc"
+      ],
+      "returncode": 2,
+      "output": "参数须为 1..16777216 的整数\n"
+    },
+    {
+      "step": "invalid-args",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/shared_sum",
+        "513",
+        "255"
+      ],
+      "returncode": 2,
+      "output": "归约块大小须为 32..512 的二次幂\n"
+    },
+    {
+      "step": "invalid-args",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/pipeline",
+        "257",
+        "2"
+      ],
+      "returncode": 2,
+      "output": ""
+    },
+    {
+      "step": "invalid-args",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/pipeline",
+        "257",
+        "0"
+      ],
+      "returncode": 2,
+      "output": "参数须为 1..31 的整数\n"
+    },
+    {
+      "step": "memcheck",
+      "command": [
+        "/usr/local/cuda-12.6/bin/compute-sanitizer",
+        "--tool",
+        "memcheck",
+        "--error-exitcode",
+        "9",
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/vec_add",
+        "257",
+        "256"
+      ],
+      "returncode": 0,
+      "output": "========= COMPUTE-SANITIZER\nn=257 threads=256 blocks=2 跳过线程=255 全部结果通过\n设备数组字节=3084 H2D=2056 D2H=1028 C[0]=-8.0 C[n-1]=2.0\n========= ERROR SUMMARY: 0 errors\n"
+    },
+    {
+      "step": "memcheck",
+      "command": [
+        "/usr/local/cuda-12.6/bin/compute-sanitizer",
+        "--tool",
+        "memcheck",
+        "--error-exitcode",
+        "9",
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/shared_sum",
+        "513",
+        "256"
+      ],
+      "returncode": 0,
+      "output": "========= COMPUTE-SANITIZER\nn=513 threads=256 blocks=3 每块shared字节=1024 sum=1792 CPU=1792\npartial[0]=896\npartial[1]=896\npartial[2]=0\n========= ERROR SUMMARY: 0 errors\n"
+    },
+    {
+      "step": "racecheck",
+      "command": [
+        "/usr/local/cuda-12.6/bin/compute-sanitizer",
+        "--tool",
+        "racecheck",
+        "--error-exitcode",
+        "9",
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/shared_sum",
+        "513",
+        "256"
+      ],
+      "returncode": 0,
+      "output": "========= COMPUTE-SANITIZER\nn=513 threads=256 blocks=3 每块shared字节=1024 sum=1792 CPU=1792\npartial[0]=896\npartial[1]=896\npartial[2]=0\n========= RACECHECK SUMMARY: 0 hazards displayed (0 errors, 0 warnings)\n"
+    },
+    {
+      "step": "synccheck",
+      "command": [
+        "/usr/local/cuda-12.6/bin/compute-sanitizer",
+        "--tool",
+        "synccheck",
+        "--error-exitcode",
+        "9",
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/shared_sum",
+        "513",
+        "256"
+      ],
+      "returncode": 0,
+      "output": "========= COMPUTE-SANITIZER\nn=513 threads=256 blocks=3 每块shared字节=1024 sum=1792 CPU=1792\npartial[0]=896\npartial[1]=896\npartial[2]=0\n========= ERROR SUMMARY: 0 errors\n"
+    },
+    {
+      "step": "launch-error",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/error_demo",
+        "launch"
+      ],
+      "returncode": 1,
+      "output": "/tmp/textbook-cuda-verify-xv3txqpk/src/error_demo.cu:16 cudaGetLastError(): invalid configuration argument\n"
+    },
+    {
+      "step": "execution-error",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/error_demo",
+        "execute"
+      ],
+      "returncode": 1,
+      "output": "启动检查通过，继续检查执行\n/tmp/textbook-cuda-verify-xv3txqpk/src/error_demo.cu:6: void executionError(): block: [0,0,0], thread: [0,0,0] Assertion `false` failed.\n/tmp/textbook-cuda-verify-xv3txqpk/src/error_demo.cu:18 cudaDeviceSynchronize(): device-side assert triggered\n"
+    },
+    {
+      "step": "memory-error",
+      "command": [
+        "/usr/local/cuda-12.6/bin/compute-sanitizer",
+        "--tool",
+        "memcheck",
+        "--error-exitcode",
+        "9",
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/error_demo",
+        "memory"
+      ],
+      "returncode": 9,
+      "output": "========= COMPUTE-SANITIZER\n========= Invalid __global__ write of size 4 bytes\n=========     at memoryError(float *)+0x50 in /tmp/textbook-cuda-verify-xv3txqpk/src/error_demo.cu:7\n=========     by thread (0,0,0) in block (0,0,0)\n=========     Address 0x1000fe00004 is out of bounds\n=========     and is 1 bytes after the nearest allocation at 0x1000fe00000 of size 4 bytes\n=========     Saved host backtrace up to driver entry point at kernel launch time\n=========     Host Frame:cuLaunchKernel [0x3f268a]\n=========                in /lib/x86_64-linux-gnu/libcuda.so.1\n=========     Host Frame: [0x15aa7]\n=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.12\n=========     Host Frame:cudaLaunchKernel [0x759f0]\n=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.12\n=========     Host Frame:__device_stub__Z11memoryErrorPf(float*) [0x1c90]\n=========                in /tmp/textbook-cuda-verify-xv3txqpk/build/error_demo\n=========     Host Frame:main [0x167b]\n=========                in /tmp/textbook-cuda-verify-xv3txqpk/build/error_demo\n=========     Host Frame:__libc_start_call_main in ../sysdeps/nptl/libc_start_call_main.h:58 [0x2a1c9]\n=========                in /lib/x86_64-linux-gnu/libc.so.6\n=========     Host Frame:__libc_start_main in ../csu/libc-start.c:360 [0x2a28a]\n=========                in /lib/x86_64-linux-gnu/libc.so.6\n=========     Host Frame:_start [0x17f4]\n=========                in /tmp/textbook-cuda-verify-xv3txqpk/build/error_demo\n========= \n========= Program hit cudaErrorLaunchFailure (error 719) due to \"unspecified launch failure\" on CUDA API call to cudaDeviceSynchronize.\n=========     Saved host backtrace up to driver entry point at error\n=========     Host Frame: [0x50021f]\n=========                in /lib/x86_64-linux-gnu/libcuda.so.1\n=========     Host Frame:cudaDeviceSynchronize [0x4af09]\n=========                in /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.12\n=========     Host Frame:main [0x15c8]\n=========                in /tmp/textbook-cuda-verify-xv3txqpk/build/error_demo\n=========     Host Frame:__libc_start_call_main in ../sysdeps/nptl/libc_start_call_main.h:58 [0x2a1c9]\n=========                in /lib/x86_64-linux-gnu/libc.so.6\n=========     Host Frame:__libc_start_main in ../csu/libc-start.c:360 [0x2a28a]\n=========                in /lib/x86_64-linux-gnu/libc.so.6\n=========     Host Frame:_start [0x17f4]\n=========                in /tmp/textbook-cuda-verify-xv3txqpk/build/error_demo\n========= \n启动检查通过，继续检查执行\n========= Target application returned an error\n========= ERROR SUMMARY: 2 errors\n/tmp/textbook-cuda-verify-xv3txqpk/src/error_demo.cu:18 cudaDeviceSynchronize(): unspecified launch failure\n"
+    },
+    {
+      "step": "recovery-new-process",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/vec_add",
+        "257",
+        "256"
+      ],
+      "returncode": 0,
+      "output": "n=257 threads=256 blocks=2 跳过线程=255 全部结果通过\n设备数组字节=3084 H2D=2056 D2H=1028 C[0]=-8.0 C[n-1]=2.0\n"
+    },
+    {
+      "step": "hidden-device",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/device_info"
+      ],
+      "returncode": 1,
+      "output": "/tmp/textbook-cuda-verify-xv3txqpk/src/device_info.cu:5 cudaGetDeviceCount(&count): no CUDA-capable device is detected\n"
+    },
+    {
+      "step": "hidden-manager",
+      "command": [
+        "env",
+        "CUDA_VISIBLE_DEVICES=",
+        "nvidia-smi",
+        "--query-gpu=name",
+        "--format=csv,noheader"
+      ],
+      "returncode": 0,
+      "output": "NVIDIA GeForce RTX 3070 Ti Laptop GPU\n",
+      "supplement": "正常全套完成后，单独实际补查管理工具；未重复其他已通过实验。"
+    },
+    {
+      "step": "hidden-cpu",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/cpu_demo"
+      ],
+      "returncode": 0,
+      "output": "输入=1 阈值=0 前缀和=1\n输入=7 阈值=255 前缀和=8\n输入=2 阈值=0 前缀和=10\n输入=8 阈值=255 前缀和=18\n"
+    },
+    {
+      "step": "restored-device",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/device_info"
+      ],
+      "returncode": 0,
+      "output": "设备数=1 runtime=12060 driver-api=13040\n设备0=NVIDIA GeForce RTX 3070 Ti Laptop GPU compute=8.6 最大块线程=1024 设备内存=8251047936\n"
+    },
+    {
+      "step": "pipeline-257",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/pipeline",
+        "257",
+        "3"
+      ],
+      "returncode": 0,
+      "output": "{\"n\":257,\"repeats\":3,\"resident_bytes\":2056,\"roundtrip_bytes\":6168,\"cpu_ms\":0.000163,\"kernel_ms\":0.006144,\"resident_ms\":0.016952,\"roundtrip_ms\":0.033666,\"all_checked\":true}\n"
+    },
+    {
+      "step": "timing",
+      "data": {
+        "n": 257,
+        "repeats": 3,
+        "resident_bytes": 2056,
+        "roundtrip_bytes": 6168,
+        "cpu_ms": 0.000163,
+        "kernel_ms": 0.006144,
+        "resident_ms": 0.016952,
+        "roundtrip_ms": 0.033666,
+        "all_checked": true
+      }
+    },
+    {
+      "step": "pipeline-1048579",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/pipeline",
+        "1048579",
+        "7"
+      ],
+      "returncode": 0,
+      "output": "{\"n\":1048579,\"repeats\":7,\"resident_bytes\":8388632,\"roundtrip_bytes\":25165896,\"cpu_ms\":0.447794,\"kernel_ms\":0.044032,\"resident_ms\":0.918289,\"roundtrip_ms\":2.936667,\"all_checked\":true}\n"
+    },
+    {
+      "step": "timing",
+      "data": {
+        "n": 1048579,
+        "repeats": 7,
+        "resident_bytes": 8388632,
+        "roundtrip_bytes": 25165896,
+        "cpu_ms": 0.447794,
+        "kernel_ms": 0.044032,
+        "resident_ms": 0.918289,
+        "roundtrip_ms": 2.936667,
+        "all_checked": true
+      }
+    },
+    {
+      "step": "pipeline-513",
+      "command": [
+        "/tmp/textbook-cuda-verify-xv3txqpk/build/pipeline",
+        "513",
+        "5"
+      ],
+      "returncode": 0,
+      "output": "{\"n\":513,\"repeats\":5,\"resident_bytes\":4104,\"roundtrip_bytes\":12312,\"cpu_ms\":0.000212,\"kernel_ms\":0.006144,\"resident_ms\":0.017392,\"roundtrip_ms\":0.034898,\"all_checked\":true}\n"
+    },
+    {
+      "step": "timing",
+      "data": {
+        "n": 513,
+        "repeats": 5,
+        "resident_bytes": 4104,
+        "roundtrip_bytes": 12312,
+        "cpu_ms": 0.000212,
+        "kernel_ms": 0.006144,
+        "resident_ms": 0.017392,
+        "roundtrip_ms": 0.034898,
+        "all_checked": true
+      }
+    },
+    {
+      "step": "broken-shared-build",
+      "command": [
+        "/usr/local/cuda-12.6/bin/nvcc",
+        "-O2",
+        "-std=c++17",
+        "-arch=sm_86",
+        "-lineinfo",
+        "/tmp/textbook-cuda-verify-xv3txqpk/broken/shared_sum.cu",
+        "-o",
+        "/tmp/textbook-cuda-verify-xv3txqpk/broken-sum"
+      ],
+      "returncode": 0,
+      "output": "<jemalloc>: No THP support: thp:never\n"
+    },
+    {
+      "step": "missing-barrier-racecheck",
+      "returncode": 9,
+      "output": "========= COMPUTE-SANITIZER\n========= Error: Race reported between Read access at blockSum(const float *, float *, int)+0x150 in /tmp/textbook-cuda-verify-xv3txqpk/broken/kernels.cuh:15\n=========     and Write access at blockSum(const float *, float *, int)+0xe0 in /tmp/textbook-cuda-verify-xv3txqpk/broken/kernels.cuh:13 [1664 hazards]\n=========     and Write access at blockSum(const float *, float *, int)+0x170 in /tmp/textbook-cuda-verify-xv3txqpk/broken/kernels.cuh:15 [1524 hazards]\n========= \n========= Target application returned an error\n========= RACECHECK SUMMARY: 1 hazard displayed (1 error, 0 warnings)\n"
+    }
+  ]
+}
