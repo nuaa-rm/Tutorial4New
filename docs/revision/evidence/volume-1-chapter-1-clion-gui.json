@@ -1,0 +1,931 @@
+{
+  "recorded_at": "2026-09-29T05:17:27.798457+00:00",
+  "volume": 1,
+  "chapter": 1,
+  "purpose": "actual CLion GUI examples and ex:ide-clion / ex:ide-setup, not a replacement for physical system or Windows acceptance",
+  "package": {
+    "version": "2026.2.3",
+    "build": "262.10968.117",
+    "bytes": 1883839065,
+    "sha256": "dbb7d298392bbe471153af98f6f3393173da897eaff1c1c79f2eade6e26d3860",
+    "official_checksum_matches": true
+  },
+  "toolchain": {
+    "time": "2026-09-29T05:17:27.609171+00:00",
+    "os_release": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n",
+    "product_info": {
+      "name": "CLion",
+      "version": "2026.2.3",
+      "buildNumber": "262.10968.117",
+      "productCode": "CL",
+      "dataDirectoryName": "CLion2026.2",
+      "source_file": "/tmp/textbook-clion-app/clion-2026.2.3/product-info.json"
+    },
+    "commands": {
+      "font": {
+        "argv": [
+          "fc-match",
+          "Maple Mono NF CN"
+        ],
+        "returncode": 0,
+        "stdout": "MapleMono-NF-CN-Regular.ttf: \"Maple Mono NF CN\" \"Regular\"\n",
+        "stderr": ""
+      },
+      "gcc": {
+        "argv": [
+          "/usr/bin/c++",
+          "--version"
+        ],
+        "returncode": 0,
+        "stdout": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+        "stderr": ""
+      },
+      "gdb": {
+        "argv": [
+          "/tmp/textbook-clion-app/clion-2026.2.3/bin/gdb/linux/x64/bin/gdb",
+          "--version"
+        ],
+        "returncode": 0,
+        "stdout": "GNU gdb (GDB; JetBrains IDE bundle; build 243) 17.1\nCopyright (C) 2025 Free Software Foundation, Inc.\nLicense GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\nThis is free software: you are free to change and redistribute it.\nThere is NO WARRANTY, to the extent permitted by law.\n",
+        "stderr": ""
+      },
+      "cmake": {
+        "argv": [
+          "/tmp/textbook-clion-app/clion-2026.2.3/bin/cmake/linux/x64/bin/cmake",
+          "--version"
+        ],
+        "returncode": 0,
+        "stdout": "cmake version 4.3.1\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).\n",
+        "stderr": ""
+      },
+      "ninja": {
+        "argv": [
+          "/tmp/textbook-clion-app/clion-2026.2.3/bin/ninja/linux/x64/ninja",
+          "--version"
+        ],
+        "returncode": 0,
+        "stdout": "1.13.2\n",
+        "stderr": ""
+      }
+    },
+    "test_source_restored_sha256": "379f34aa12d5bea66c95c8e8de22753d324d655c10504b6b5152174a99749c17"
+  },
+  "environment": {
+    "container": "ubuntu2404",
+    "display": ":1 own Xvfb 1600x1000",
+    "config": "temporary explicit idea config/system/plugins/log paths and XDG dirs",
+    "trial": "actual anonymous 30-day trial started on first launch; no account, purchase or license reset",
+    "agreement": "startup User Agreement 2.0 accepted; optional data sharing declined; previous settings import skipped; only this project trusted",
+    "scope": "IDE GUI remains open for volume2 followup; ide_demo normal run/debug processes finished; no claim of Windows setup or desktop integration",
+    "runtime_note": "bundled JBR created .java/.userPrefs; not claiming absolutely every runtime write stayed in tmp",
+    "ROS_DOMAIN_ID": 191,
+    "ROS_AUTOMATIC_DISCOVERY_RANGE": "LOCALHOST"
+  },
+  "official_sources": [
+    "https://www.jetbrains.com/help/clion/register.html",
+    "https://www.jetbrains.com/help/clion/installation-guide.html",
+    "https://www.jetbrains.com/help/clion/configuring-debugger-options.html"
+  ],
+  "controller_source": "from pathlib import Path\nimport os,json,subprocess,signal,time,sys,select\nroot=Path('/tmp/textbook-clion-gui')\napp=Path('/tmp/textbook-clion-app/clion-2026.2.3')\nprops=root/'isolated.properties'\nprops.write_text('\\n'.join(f'idea.{k}.path={root/k}' for k in ['config','system','plugins','log'])+'\\n')\nvm=root/'clion64.vmoptions'\nvm.write_text((app/'bin/clion64.vmoptions').read_text().replace('-Dawt.toolkit.name=auto','-Dawt.toolkit.name=XToolkit'))\nfd_read,fd_write=os.pipe()\nxvfb=subprocess.Popen(['Xvfb','-displayfd',str(fd_write),'-screen','0','1600x1000x24'],pass_fds=(fd_write,),start_new_session=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)\nos.close(fd_write)\nif not select.select([fd_read],[],[],10)[0]:raise TimeoutError('Xvfb startup')\ndisplay=os.read(fd_read,100).decode().strip();os.close(fd_read)\nenv=dict(os.environ,DISPLAY=':'+display,QT_QPA_PLATFORM='xcb',XDG_CONFIG_HOME=str(root/'xdg-config'),XDG_CACHE_HOME=str(root/'xdg-cache'),XDG_DATA_HOME=str(root/'xdg-data'),XDG_STATE_HOME=str(root/'xdg-state'),CLION_PROPERTIES=str(props),CLION_VM_OPTIONS=str(vm),XDG_SESSION_TYPE='x11',ROS_DOMAIN_ID='191',ROS_AUTOMATIC_DISCOVERY_RANGE='LOCALHOST',ROS_LOG_DIR=str(root/'ros-logs'))\nenv.pop('WAYLAND_DISPLAY',None)\nlog=(root/'clion-stdout.txt').open('w')\nactions=(root/'actions.jsonl').open('a')\nide=subprocess.Popen(['dbus-run-session','--',str(app/'bin/clion.sh'),str(root/'ide-demo')],env=env,start_new_session=True,stdout=log,stderr=subprocess.STDOUT)\ndef run(argv):return subprocess.run(argv,env=env,check=True,capture_output=True,text=True).stdout\ndef shot(name):\n run(['xwd','-root','-silent','-out',str(root/(name+'.xwd'))]);print(json.dumps({'snapshot':name,'path':str(root/(name+'.xwd'))}),flush=True)\ntry:\n time.sleep(12);print(json.dumps({'ready':True,'display':display,'folder':str(root),'launcher_status':ide.poll()}),flush=True);shot('startup')\n for line in sys.stdin:\n  item=json.loads(line);actions.write(json.dumps(item)+'\\n');actions.flush()\n  if item.get('quit'):break\n  if 'keys' in item:run(['xdotool','key',*item['keys'].split()])\n  if 'text' in item:run(['xdotool','type','--clearmodifiers',item['text']])\n  if 'click' in item:\n   x,y=item['click'];run(['xdotool','mousemove',str(x),str(y),'click',str(item.get('button',1))])\n  time.sleep(item.get('wait',1));shot(item['name'])\nfinally:\n for proc in [ide,xvfb]:\n  if proc.poll() is None:\n   os.killpg(proc.pid,signal.SIGTERM)\n   try:proc.wait(timeout=8)\n   except subprocess.TimeoutExpired:os.killpg(proc.pid,signal.SIGKILL);proc.wait()\n actions.close();log.close()\n",
+  "raw_actions": [
+    {
+      "click": [
+        542,
+        662
+      ],
+      "name": "agreement-checked",
+      "wait": 0.5
+    },
+    {
+      "click": [
+        1040,
+        701
+      ],
+      "name": "agreement-continue",
+      "wait": 3
+    },
+    {
+      "click": [
+        824,
+        701
+      ],
+      "name": "dont-send",
+      "wait": 6
+    },
+    {
+      "click": [
+        800,
+        529
+      ],
+      "name": "skip-import",
+      "wait": 6
+    },
+    {
+      "click": [
+        757,
+        567
+      ],
+      "name": "project-trusted",
+      "wait": 8
+    },
+    {
+      "click": [
+        1373,
+        909
+      ],
+      "name": "trial-close",
+      "wait": 0.5
+    },
+    {
+      "keys": "ctrl+alt+s",
+      "name": "settings-open",
+      "wait": 1
+    },
+    {
+      "click": [
+        423,
+        174
+      ],
+      "name": "settings-search-click"
+    },
+    {
+      "text": "console font",
+      "name": "settings-console-font-search",
+      "wait": 2
+    },
+    {
+      "click": [
+        577,
+        266
+      ],
+      "name": "console-font-enable"
+    },
+    {
+      "click": [
+        754,
+        313
+      ],
+      "name": "console-font-field"
+    },
+    {
+      "keys": "ctrl+a",
+      "name": "console-font-select"
+    },
+    {
+      "text": "Maple Mono NF CN",
+      "name": "console-font-type",
+      "wait": 1
+    },
+    {
+      "keys": "Return",
+      "name": "console-font-confirm"
+    },
+    {
+      "click": [
+        1239,
+        825
+      ],
+      "name": "console-font-apply"
+    },
+    {
+      "click": [
+        421,
+        174
+      ],
+      "name": "editor-font-search-field"
+    },
+    {
+      "keys": "ctrl+a",
+      "name": "editor-font-search-select"
+    },
+    {
+      "text": "editor font",
+      "name": "editor-font-search",
+      "wait": 2
+    },
+    {
+      "click": [
+        421,
+        174
+      ],
+      "name": "font-search-field"
+    },
+    {
+      "keys": "ctrl+a",
+      "name": "font-search-select"
+    },
+    {
+      "text": "font",
+      "name": "font-search",
+      "wait": 2
+    },
+    {
+      "click": [
+        375,
+        409
+      ],
+      "name": "editor-font-settings",
+      "wait": 1
+    },
+    {
+      "click": [
+        721,
+        219
+      ],
+      "name": "editor-font-dropdown"
+    },
+    {
+      "text": "Maple Mono NF CN",
+      "name": "editor-font-query"
+    },
+    {
+      "keys": "Return",
+      "name": "editor-font-chosen"
+    },
+    {
+      "click": [
+        609,
+        258
+      ],
+      "name": "editor-font-size"
+    },
+    {
+      "keys": "ctrl+a",
+      "name": "editor-font-size-select"
+    },
+    {
+      "text": "16",
+      "name": "editor-font-size-type"
+    },
+    {
+      "click": [
+        1239,
+        825
+      ],
+      "name": "editor-font-apply"
+    },
+    {
+      "click": [
+        389,
+        734
+      ],
+      "name": "terminal-settings",
+      "wait": 1
+    },
+    {
+      "click": [
+        635,
+        570
+      ],
+      "name": "terminal-font-size"
+    },
+    {
+      "keys": "ctrl+a",
+      "name": "terminal-font-size-select"
+    },
+    {
+      "text": "16",
+      "name": "terminal-font-size-type"
+    },
+    {
+      "click": [
+        1239,
+        825
+      ],
+      "name": "terminal-font-apply"
+    },
+    {
+      "click": [
+        421,
+        174
+      ],
+      "name": "toolchain-search-field"
+    },
+    {
+      "keys": "ctrl+a",
+      "name": "toolchain-search-select"
+    },
+    {
+      "text": "toolchains",
+      "name": "toolchain-search",
+      "wait": 2
+    },
+    {
+      "click": [
+        421,
+        174
+      ],
+      "name": "cmake-search-field"
+    },
+    {
+      "keys": "ctrl+a",
+      "name": "cmake-search-select"
+    },
+    {
+      "text": "cmake",
+      "name": "cmake-search",
+      "wait": 2
+    },
+    {
+      "click": [
+        383,
+        634
+      ],
+      "name": "cmake-profile-settings",
+      "wait": 1
+    },
+    {
+      "click": [
+        1072,
+        825
+      ],
+      "name": "settings-confirm"
+    },
+    {
+      "click": [
+        914,
+        83
+      ],
+      "name": "whatsnew-close"
+    },
+    {
+      "click": [
+        1290,
+        907
+      ],
+      "name": "launcher-hint-dismiss"
+    },
+    {
+      "click": [
+        243,
+        216
+      ],
+      "name": "main-file-selected"
+    },
+    {
+      "keys": "Return",
+      "name": "main-file-open"
+    },
+    {
+      "click": [
+        1211,
+        40
+      ],
+      "name": "ide-build",
+      "wait": 4
+    },
+    {
+      "click": [
+        1245,
+        40
+      ],
+      "name": "ide-run-75",
+      "wait": 2
+    },
+    {
+      "click": [
+        648,
+        388
+      ],
+      "name": "ide-breakpoint-line-11"
+    },
+    {
+      "click": [
+        1279,
+        40
+      ],
+      "name": "ide-debug-line-11",
+      "wait": 4
+    },
+    {
+      "keys": "F7",
+      "name": "ide-step-into",
+      "wait": 1
+    },
+    {
+      "keys": "F8",
+      "name": "ide-step-over-add",
+      "wait": 1
+    },
+    {
+      "keys": "shift+F8",
+      "name": "ide-step-out",
+      "wait": 1
+    },
+    {
+      "keys": "F8",
+      "name": "ide-total-assigned",
+      "wait": 1
+    },
+    {
+      "click": [
+        1279,
+        40
+      ],
+      "name": "ide-restart",
+      "wait": 3
+    },
+    {
+      "click": [
+        1313,
+        40
+      ],
+      "name": "ide-stop",
+      "wait": 2
+    },
+    {
+      "click": [
+        1279,
+        40
+      ],
+      "name": "ide-debug-restarted",
+      "wait": 3
+    },
+    {
+      "keys": "F9",
+      "name": "ide-continue",
+      "wait": 2
+    },
+    {
+      "click": [
+        625,
+        693
+      ],
+      "name": "ide-debug-console",
+      "wait": 1
+    },
+    {
+      "click": [
+        800,
+        559
+      ],
+      "name": "ide-stop-and-rerun-confirm",
+      "wait": 4
+    },
+    {
+      "click": [
+        190,
+        693
+      ],
+      "name": "ide-stop-confirmed",
+      "wait": 2
+    },
+    {
+      "click": [
+        1279,
+        40
+      ],
+      "name": "ide-debug-after-stop",
+      "wait": 3
+    },
+    {
+      "keys": "F9",
+      "name": "ide-continue-confirmed",
+      "wait": 2
+    },
+    {
+      "click": [
+        625,
+        693
+      ],
+      "name": "ide-console-finished",
+      "wait": 1
+    },
+    {
+      "click": [
+        989,
+        361
+      ],
+      "name": "exercise-bonus-line"
+    },
+    {
+      "keys": "Home Home shift+End",
+      "name": "exercise-bonus-select"
+    },
+    {
+      "text": "    int bonus = 20;",
+      "name": "exercise-bonus-edit"
+    },
+    {
+      "keys": "ctrl+s",
+      "name": "exercise-bonus-save"
+    },
+    {
+      "click": [
+        1245,
+        40
+      ],
+      "name": "exercise-run-80",
+      "wait": 3
+    },
+    {
+      "click": [
+        645,
+        387
+      ],
+      "name": "exercise-remove-caller-breakpoint"
+    },
+    {
+      "click": [
+        645,
+        199
+      ],
+      "name": "exercise-function-breakpoint"
+    },
+    {
+      "click": [
+        1279,
+        40
+      ],
+      "name": "exercise-before-add-80",
+      "wait": 3
+    },
+    {
+      "keys": "F8",
+      "name": "exercise-after-add-80",
+      "wait": 1
+    },
+    {
+      "keys": "F9",
+      "name": "exercise-debug-finish-80",
+      "wait": 2
+    },
+    {
+      "click": [
+        645,
+        199
+      ],
+      "name": "exercise-remove-function-breakpoint"
+    },
+    {
+      "click": [
+        990,
+        361
+      ],
+      "name": "exercise-restore-line"
+    },
+    {
+      "keys": "Home Home shift+End",
+      "name": "exercise-restore-select"
+    },
+    {
+      "text": "    int bonus = 15;",
+      "name": "exercise-restore-edit"
+    },
+    {
+      "keys": "ctrl+s",
+      "name": "exercise-restore-save"
+    },
+    {
+      "click": [
+        1245,
+        40
+      ],
+      "name": "exercise-restored-run-75",
+      "wait": 3
+    },
+    {
+      "click": [
+        119,
+        848
+      ],
+      "name": "ide-terminal-open",
+      "wait": 2
+    },
+    {
+      "text": "printf '%s\\n' 'Maple Mono NF CN:     '; fc-match 'Maple Mono NF CN'; sed -n '1,4p' /etc/os-release",
+      "name": "ide-terminal-font-command"
+    },
+    {
+      "keys": "Return",
+      "name": "ide-terminal-font-result",
+      "wait": 2
+    },
+    {
+      "name": "ide-resized",
+      "wait": 1
+    },
+    {
+      "click": [
+        946,
+        40
+      ],
+      "name": "ide-run-compact",
+      "wait": 2
+    },
+    {
+      "keys": "ctrl+alt+s",
+      "name": "ide-settings-compact",
+      "wait": 1
+    },
+    {
+      "click": [
+        425,
+        174
+      ],
+      "name": "console-size-search-field"
+    },
+    {
+      "text": "console font",
+      "name": "console-size-search",
+      "wait": 1
+    },
+    {
+      "click": [
+        680,
+        386
+      ],
+      "name": "console-size-field"
+    },
+    {
+      "keys": "ctrl+a",
+      "name": "console-size-select"
+    },
+    {
+      "text": "16",
+      "name": "console-size-16"
+    },
+    {
+      "click": [
+        1072,
+        825
+      ],
+      "name": "console-size-confirm"
+    },
+    {
+      "click": [
+        946,
+        40
+      ],
+      "name": "ide-run-final",
+      "wait": 2
+    },
+    {
+      "click": [
+        396,
+        387
+      ],
+      "name": "ide-final-breakpoint"
+    },
+    {
+      "click": [
+        979,
+        40
+      ],
+      "name": "ide-debug-final",
+      "wait": 3
+    },
+    {
+      "keys": "F8",
+      "name": "ide-total-final",
+      "wait": 1
+    },
+    {
+      "keys": "F9",
+      "name": "ide-final-continue",
+      "wait": 2
+    },
+    {
+      "click": [
+        744,
+        40
+      ],
+      "name": "ide-profile-switcher",
+      "wait": 1
+    },
+    {
+      "keys": "Escape",
+      "name": "ide-profile-switcher-close"
+    }
+  ],
+  "observations": [
+    {
+      "action": "Toolchains / CMake profiles",
+      "observed": "Default toolchain detects /usr/bin/c++, bundled CMake 4.3.1 / Ninja 1.13.2; CMakeCache CMAKE_BUILD_TYPE=Debug, CMAKE_GENERATOR=Ninja. GDB profile uses bundled GDB 17.1."
+    },
+    {
+      "action": "Build hammer then Run",
+      "observed": "Build finished; Run total = 75; Process finished with exit code 0."
+    },
+    {
+      "action": "breakpoint main.cpp:11",
+      "observed": {
+        "score": 60,
+        "bonus": 15,
+        "total": "not yet initialized; CLion omits it"
+      }
+    },
+    {
+      "action": "F7 Step Into",
+      "observed": {
+        "frame": "add_score main.cpp:4",
+        "current": 60,
+        "bonus": 15,
+        "result": "not yet initialized"
+      }
+    },
+    {
+      "action": "F8 Step Over",
+      "observed": {
+        "frame": "add_score main.cpp:5",
+        "result": 75
+      }
+    },
+    {
+      "action": "Shift+F8 Step Out",
+      "observed": {
+        "frame": "main main.cpp:11",
+        "Return Value": 75,
+        "total": "assignment not yet complete"
+      }
+    },
+    {
+      "action": "F8",
+      "observed": {
+        "frame": "main main.cpp:12",
+        "score": 60,
+        "bonus": 15,
+        "total": 75
+      }
+    },
+    {
+      "action": "rerun button",
+      "observed": "Stop and Rerun confirmation dialog. Initial queued Stop/Debug/Continue clicks stayed behind this dialog and did not constitute completed operations."
+    },
+    {
+      "action": "confirm Stop and Rerun",
+      "observed": "new process stops at main.cpp:11; old PID 1179919 -> new PID 1181714"
+    },
+    {
+      "action": "actual Debug toolbar Stop",
+      "observed": "process terminated; Console exit code -1, intentionally stopped, not a normal-exit assertion"
+    },
+    {
+      "action": "Debug again then F9 Continue",
+      "observed": "new process stops main.cpp:11; then total = 75; exit code 0"
+    },
+    {
+      "action": "exercise ex:ide-clion GUI edit/save/Run",
+      "observed": "only main local bonus value 15 -> 20 changed, byte comparison true; total = 80; exit code 0",
+      "modified_source_sha256": "353dfefa2a2f0c1fe7eafd6cf60d57c3c927734ae3b003601bf5e41b2d6645b2"
+    },
+    {
+      "action": "breakpoint inside function before/after F8",
+      "observed": "main.cpp:4 current=60 bonus=20; result not initialized; main.cpp:5 result=80"
+    },
+    {
+      "action": "GUI restore bonus15/save/Run",
+      "observed": "source byte-equal to repository original; total = 75; exit code 0"
+    },
+    {
+      "action": "GUI font setup and own Terminal",
+      "observed": "Editor, Console Font and Terminal font explicitly Maple Mono NF CN; editor/terminal and final console size16. fc-match MapleMono-NF-CN-Regular.ttf. Actual terminal displays Linux, folder and right-arrow Nerd glyphs, no white squares."
+    },
+    {
+      "action": "final screenshot layout",
+      "observed": "own CLion window changed via xdotool windowsize 2097338 1100 900; project divider dragged x599 -> x350. Ran original program again and paused main.cpp:12 total75. Only actual UI layout changed; pixel contents not edited."
+    },
+    {
+      "action": "actual combined profile switcher",
+      "observed": "CMake Profiles: Debug; Debug Profiles: GDB. Both selected; distinct edit entries confirmed."
+    }
+  ],
+  "font_settings": {
+    "config/options/terminal-font.xml": "<application>\n  <component name=\"TerminalFontOptions\">\n    <option name=\"VERSION\" value=\"1\" />\n    <option name=\"FONT_SIZE\" value=\"16\" />\n    <option name=\"FONT_SIZE_2D\" value=\"16.0\" />\n    <option name=\"FONT_FAMILY\" value=\"Maple Mono NF CN\" />\n  </component>\n</application>",
+    "config/options/editor-font.xml": "<application>\n  <component name=\"DefaultFont\">\n    <option name=\"VERSION\" value=\"1\" />\n    <option name=\"FONT_SIZE\" value=\"16\" />\n    <option name=\"FONT_SIZE_2D\" value=\"16.0\" />\n    <option name=\"FONT_FAMILY\" value=\"Maple Mono NF CN\" />\n  </component>\n</application>",
+    "config/colors/_@user_Islands Dark.icls": "<scheme name=\"_@user_Islands Dark\" version=\"142\" parent_scheme=\"Darcula\">\n  <option name=\"FONT_SCALE\" value=\"1.0\" />\n  <metaInfo>\n    <property name=\"ide\">CLion</property>\n    <property name=\"ideVersion\">2026.2.3.0.0</property>\n    <property name=\"originalScheme\">Islands Dark</property>\n    <property name=\"partialSave\">true</property>\n    <property name=\"pluginId\">com.intellij</property>\n  </metaInfo>\n  <option name=\"CONSOLE_FONT_NAME\" value=\"Maple Mono NF CN\" />\n  <option name=\"CONSOLE_LINE_SPACING\" value=\"1.2\" />\n</scheme>"
+  },
+  "cmake_cache": "# This is the CMakeCache file.\n# For build in directory: /tmp/textbook-clion-gui/ide-demo/cmake-build-debug\n# It was generated by CMake: /tmp/textbook-clion-app/clion-2026.2.3/bin/cmake/linux/x64/bin/cmake\n# You can edit this file to change values found and used by cmake.\n# If you do not want to change any of the values, simply exit the editor.\n# If you do want to change a value, simply edit, save, and exit the editor.\n# The syntax for the file is as follows:\n# KEY:TYPE=VALUE\n# KEY is the name of a variable in the cache.\n# TYPE is a hint to GUIs for the type of VALUE, DO NOT EDIT TYPE!.\n# VALUE is the current value for the KEY.\n\n########################\n# EXTERNAL cache entries\n########################\n\n//Path to a program.\nCMAKE_ADDR2LINE:FILEPATH=/usr/bin/addr2line\n\n//Path to a program.\nCMAKE_AR:FILEPATH=/usr/bin/ar\n\n//Choose the type of build, options are: None Debug Release RelWithDebInfo\n// MinSizeRel ...\nCMAKE_BUILD_TYPE:STRING=Debug\n\n//Enable colored diagnostics throughout.\nCMAKE_COLOR_DIAGNOSTICS:BOOL=ON\n\n//CXX compiler\nCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++\n\n//A wrapper around 'ar' adding the appropriate '--plugin' option\n// for the GCC compiler\nCMAKE_CXX_COMPILER_AR:FILEPATH=/usr/bin/gcc-ar-13\n\n//A wrapper around 'ranlib' adding the appropriate '--plugin' option\n// for the GCC compiler\nCMAKE_CXX_COMPILER_RANLIB:FILEPATH=/usr/bin/gcc-ranlib-13\n\n//Flags used by the CXX compiler during all build types.\nCMAKE_CXX_FLAGS:STRING=\n\n//Flags used by the CXX compiler during DEBUG builds.\nCMAKE_CXX_FLAGS_DEBUG:STRING=-g\n\n//Flags used by the CXX compiler during MINSIZEREL builds.\nCMAKE_CXX_FLAGS_MINSIZEREL:STRING=-Os -DNDEBUG\n\n//Flags used by the CXX compiler during RELEASE builds.\nCMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG\n\n//Flags used by the CXX compiler during RELWITHDEBINFO builds.\nCMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG\n\n//Path to a program.\nCMAKE_DLLTOOL:FILEPATH=CMAKE_DLLTOOL-NOTFOUND\n\n//Flags used by the linker during all build types.\nCMAKE_EXE_LINKER_FLAGS:STRING=\n\n//Flags used by the linker during DEBUG builds.\nCMAKE_EXE_LINKER_FLAGS_DEBUG:STRING=\n\n//Flags used by the linker during MINSIZEREL builds.\nCMAKE_EXE_LINKER_FLAGS_MINSIZEREL:STRING=\n\n//Flags used by the linker during RELEASE builds.\nCMAKE_EXE_LINKER_FLAGS_RELEASE:STRING=\n\n//Flags used by the linker during RELWITHDEBINFO builds.\nCMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO:STRING=\n\n//Enable/Disable output of build database during the build.\nCMAKE_EXPORT_BUILD_DATABASE:BOOL=\n\n//Enable/Disable output of compile commands during generation.\nCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=1\n\n//Value Computed by CMake.\nCMAKE_FIND_PACKAGE_REDIRECTS_DIR:STATIC=/tmp/textbook-clion-gui/ide-demo/cmake-build-debug/CMakeFiles/pkgRedirects\n\n//Install path prefix, prepended onto install directories.\nCMAKE_INSTALL_PREFIX:PATH=/usr/local\n\n//Path to a program.\nCMAKE_LINKER:FILEPATH=/usr/bin/ld\n\n//No help, variable specified on the command line.\nCMAKE_MAKE_PROGRAM:UNINITIALIZED=/tmp/textbook-clion-app/clion-2026.2.3/bin/ninja/linux/x64/ninja\n\n//Flags used by the linker during the creation of modules during\n// all build types.\nCMAKE_MODULE_LINKER_FLAGS:STRING=\n\n//Flags used by the linker during the creation of modules during\n// DEBUG builds.\nCMAKE_MODULE_LINKER_FLAGS_DEBUG:STRING=\n\n//Flags used by the linker during the creation of modules during\n// MINSIZEREL builds.\nCMAKE_MODULE_LINKER_FLAGS_MINSIZEREL:STRING=\n\n//Flags used by the linker during the creation of modules during\n// RELEASE builds.\nCMAKE_MODULE_LINKER_FLAGS_RELEASE:STRING=\n\n//Flags used by the linker during the creation of modules during\n// RELWITHDEBINFO builds.\nCMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO:STRING=\n\n//Path to a program.\nCMAKE_NM:FILEPATH=/usr/bin/nm\n\n//Path to a program.\nCMAKE_OBJCOPY:FILEPATH=/usr/bin/objcopy\n\n//Path to a program.\nCMAKE_OBJDUMP:FILEPATH=/usr/bin/objdump\n\n//Value Computed by CMake\nCMAKE_PROJECT_COMPAT_VERSION:STATIC=\n\n//Value Computed by CMake\nCMAKE_PROJECT_DESCRIPTION:STATIC=\n\n//Value Computed by CMake\nCMAKE_PROJECT_HOMEPAGE_URL:STATIC=\n\n//Value Computed by CMake\nCMAKE_PROJECT_NAME:STATIC=ide_demo\n\n//Value Computed by CMake\nCMAKE_PROJECT_SPDX_LICENSE:STATIC=\n\n//Path to a program.\nCMAKE_RANLIB:FILEPATH=/usr/bin/ranlib\n\n//Path to a program.\nCMAKE_READELF:FILEPATH=/usr/bin/readelf\n\n//Flags used by the linker during the creation of shared libraries\n// during all build types.\nCMAKE_SHARED_LINKER_FLAGS:STRING=\n\n//Flags used by the linker during the creation of shared libraries\n// during DEBUG builds.\nCMAKE_SHARED_LINKER_FLAGS_DEBUG:STRING=\n\n//Flags used by the linker during the creation of shared libraries\n// during MINSIZEREL builds.\nCMAKE_SHARED_LINKER_FLAGS_MINSIZEREL:STRING=\n\n//Flags used by the linker during the creation of shared libraries\n// during RELEASE builds.\nCMAKE_SHARED_LINKER_FLAGS_RELEASE:STRING=\n\n//Flags used by the linker during the creation of shared libraries\n// during RELWITHDEBINFO builds.\nCMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO:STRING=\n\n//If set, runtime paths are not added when installing shared libraries,\n// but are added when building.\nCMAKE_SKIP_INSTALL_RPATH:BOOL=NO\n\n//If set, runtime paths are not added when using shared libraries.\nCMAKE_SKIP_RPATH:BOOL=NO\n\n//Flags used by the archiver during the creation of static libraries\n// during all build types.\nCMAKE_STATIC_LINKER_FLAGS:STRING=\n\n//Flags used by the archiver during the creation of static libraries\n// during DEBUG builds.\nCMAKE_STATIC_LINKER_FLAGS_DEBUG:STRING=\n\n//Flags used by the archiver during the creation of static libraries\n// during MINSIZEREL builds.\nCMAKE_STATIC_LINKER_FLAGS_MINSIZEREL:STRING=\n\n//Flags used by the archiver during the creation of static libraries\n// during RELEASE builds.\nCMAKE_STATIC_LINKER_FLAGS_RELEASE:STRING=\n\n//Flags used by the archiver during the creation of static libraries\n// during RELWITHDEBINFO builds.\nCMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO:STRING=\n\n//Path to a program.\nCMAKE_STRIP:FILEPATH=/usr/bin/strip\n\n//Path to a program.\nCMAKE_TAPI:FILEPATH=CMAKE_TAPI-NOTFOUND\n\n//If this value is on, makefiles will be generated without the\n// .SILENT directive, and all commands will be echoed to the console\n// during the make.  This is useful for debugging only. With Visual\n// Studio IDE projects all commands are done without /nologo.\nCMAKE_VERBOSE_MAKEFILE:BOOL=FALSE\n\n//Value Computed by CMake\nide_demo_BINARY_DIR:STATIC=/tmp/textbook-clion-gui/ide-demo/cmake-build-debug\n\n//Value Computed by CMake\nide_demo_IS_TOP_LEVEL:STATIC=ON\n\n//Value Computed by CMake\nide_demo_SOURCE_DIR:STATIC=/tmp/textbook-clion-gui/ide-demo\n\n\n########################\n# INTERNAL cache entries\n########################\n\n//ADVANCED property for variable: CMAKE_ADDR2LINE\nCMAKE_ADDR2LINE-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_AR\nCMAKE_AR-ADVANCED:INTERNAL=1\n//This is the directory where this CMakeCache.txt was created\nCMAKE_CACHEFILE_DIR:INTERNAL=/tmp/textbook-clion-gui/ide-demo/cmake-build-debug\n//Major version of cmake used to create the current loaded cache\nCMAKE_CACHE_MAJOR_VERSION:INTERNAL=4\n//Minor version of cmake used to create the current loaded cache\nCMAKE_CACHE_MINOR_VERSION:INTERNAL=3\n//Patch version of cmake used to create the current loaded cache\nCMAKE_CACHE_PATCH_VERSION:INTERNAL=1\n//Path to CMake executable.\nCMAKE_COMMAND:INTERNAL=/tmp/textbook-clion-app/clion-2026.2.3/bin/cmake/linux/x64/bin/cmake\n//Path to cpack program executable.\nCMAKE_CPACK_COMMAND:INTERNAL=/tmp/textbook-clion-app/clion-2026.2.3/bin/cmake/linux/x64/bin/cpack\n//Path to ctest program executable.\nCMAKE_CTEST_COMMAND:INTERNAL=/tmp/textbook-clion-app/clion-2026.2.3/bin/cmake/linux/x64/bin/ctest\n//ADVANCED property for variable: CMAKE_CXX_COMPILER\nCMAKE_CXX_COMPILER-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_CXX_COMPILER_AR\nCMAKE_CXX_COMPILER_AR-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_CXX_COMPILER_RANLIB\nCMAKE_CXX_COMPILER_RANLIB-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_CXX_FLAGS\nCMAKE_CXX_FLAGS-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_CXX_FLAGS_DEBUG\nCMAKE_CXX_FLAGS_DEBUG-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_CXX_FLAGS_MINSIZEREL\nCMAKE_CXX_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_CXX_FLAGS_RELEASE\nCMAKE_CXX_FLAGS_RELEASE-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_CXX_FLAGS_RELWITHDEBINFO\nCMAKE_CXX_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_DLLTOOL\nCMAKE_DLLTOOL-ADVANCED:INTERNAL=1\n//Executable file format\nCMAKE_EXECUTABLE_FORMAT:INTERNAL=ELF\n//ADVANCED property for variable: CMAKE_EXE_LINKER_FLAGS\nCMAKE_EXE_LINKER_FLAGS-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_EXE_LINKER_FLAGS_DEBUG\nCMAKE_EXE_LINKER_FLAGS_DEBUG-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_EXE_LINKER_FLAGS_MINSIZEREL\nCMAKE_EXE_LINKER_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_EXE_LINKER_FLAGS_RELEASE\nCMAKE_EXE_LINKER_FLAGS_RELEASE-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO\nCMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_EXPORT_BUILD_DATABASE\nCMAKE_EXPORT_BUILD_DATABASE-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_EXPORT_COMPILE_COMMANDS\nCMAKE_EXPORT_COMPILE_COMMANDS-ADVANCED:INTERNAL=1\n//Name of external makefile project generator.\nCMAKE_EXTRA_GENERATOR:INTERNAL=\n//Name of generator.\nCMAKE_GENERATOR:INTERNAL=Ninja\n//Generator instance identifier.\nCMAKE_GENERATOR_INSTANCE:INTERNAL=\n//Name of generator platform.\nCMAKE_GENERATOR_PLATFORM:INTERNAL=\n//Name of generator toolset.\nCMAKE_GENERATOR_TOOLSET:INTERNAL=\n//Source directory with the top level CMakeLists.txt file for this\n// project\nCMAKE_HOME_DIRECTORY:INTERNAL=/tmp/textbook-clion-gui/ide-demo\n//Install .so files without execute permission.\nCMAKE_INSTALL_SO_NO_EXE:INTERNAL=1\n//ADVANCED property for variable: CMAKE_LINKER\nCMAKE_LINKER-ADVANCED:INTERNAL=1\n//Name of CMakeLists files to read\nCMAKE_LIST_FILE_NAME:INTERNAL=CMakeLists.txt\n//ADVANCED property for variable: CMAKE_MODULE_LINKER_FLAGS\nCMAKE_MODULE_LINKER_FLAGS-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_MODULE_LINKER_FLAGS_DEBUG\nCMAKE_MODULE_LINKER_FLAGS_DEBUG-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_MODULE_LINKER_FLAGS_MINSIZEREL\nCMAKE_MODULE_LINKER_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_MODULE_LINKER_FLAGS_RELEASE\nCMAKE_MODULE_LINKER_FLAGS_RELEASE-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO\nCMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_NM\nCMAKE_NM-ADVANCED:INTERNAL=1\n//number of local generators\nCMAKE_NUMBER_OF_MAKEFILES:INTERNAL=1\n//ADVANCED property for variable: CMAKE_OBJCOPY\nCMAKE_OBJCOPY-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_OBJDUMP\nCMAKE_OBJDUMP-ADVANCED:INTERNAL=1\n//Platform information initialized\nCMAKE_PLATFORM_INFO_INITIALIZED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_RANLIB\nCMAKE_RANLIB-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_READELF\nCMAKE_READELF-ADVANCED:INTERNAL=1\n//Path to CMake installation.\nCMAKE_ROOT:INTERNAL=/tmp/textbook-clion-app/clion-2026.2.3/bin/cmake/linux/x64/share/cmake-4.3\n//ADVANCED property for variable: CMAKE_SHARED_LINKER_FLAGS\nCMAKE_SHARED_LINKER_FLAGS-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_SHARED_LINKER_FLAGS_DEBUG\nCMAKE_SHARED_LINKER_FLAGS_DEBUG-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_SHARED_LINKER_FLAGS_MINSIZEREL\nCMAKE_SHARED_LINKER_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_SHARED_LINKER_FLAGS_RELEASE\nCMAKE_SHARED_LINKER_FLAGS_RELEASE-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO\nCMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_SKIP_INSTALL_RPATH\nCMAKE_SKIP_INSTALL_RPATH-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_SKIP_RPATH\nCMAKE_SKIP_RPATH-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_STATIC_LINKER_FLAGS\nCMAKE_STATIC_LINKER_FLAGS-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_STATIC_LINKER_FLAGS_DEBUG\nCMAKE_STATIC_LINKER_FLAGS_DEBUG-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_STATIC_LINKER_FLAGS_MINSIZEREL\nCMAKE_STATIC_LINKER_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_STATIC_LINKER_FLAGS_RELEASE\nCMAKE_STATIC_LINKER_FLAGS_RELEASE-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO\nCMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_STRIP\nCMAKE_STRIP-ADVANCED:INTERNAL=1\n//ADVANCED property for variable: CMAKE_TAPI\nCMAKE_TAPI-ADVANCED:INTERNAL=1\n//uname command\nCMAKE_UNAME:INTERNAL=/usr/bin/uname\n//ADVANCED property for variable: CMAKE_VERBOSE_MAKEFILE\nCMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1\n\n",
+  "restored_source": "#include <iostream>\n\nint add_score(int current, int bonus) {\n    int result = current + bonus;\n    return result;\n}\n\nint main() {\n    int score = 60;\n    int bonus = 15;\n    int total = add_score(score, bonus);\n    std::cout << \"total = \" << total << '\\n';\n    return 0;\n}\n",
+  "restored_byte_equal": true,
+  "assets": [
+    {
+      "path": "docs/revision/evidence/volume-1-chapter-1-clion-assets/ide-build.png",
+      "sha256": "0679ebe49d013ce942131d6ba4203693114f3d7d4e75b95729d13dd0672ba7b2",
+      "format": "unaltered Xvfb screenshot, xwd to png only"
+    },
+    {
+      "path": "docs/revision/evidence/volume-1-chapter-1-clion-assets/ide-debug-line-11.png",
+      "sha256": "c0fbc2aa4fc18b847e73d06a42835e15e096f1c9808fc119d50bddca3af6833d",
+      "format": "unaltered Xvfb screenshot, xwd to png only"
+    },
+    {
+      "path": "docs/revision/evidence/volume-1-chapter-1-clion-assets/ide-step-into.png",
+      "sha256": "8fd6cea0de32d9a1c09aa3f39044ad8ffe72bd12e4056fe213c3d5eed0305a22",
+      "format": "unaltered Xvfb screenshot, xwd to png only"
+    },
+    {
+      "path": "docs/revision/evidence/volume-1-chapter-1-clion-assets/ide-step-over-add.png",
+      "sha256": "40e77c108d05ba029f6c8f140259cc814cfbfcc055322134fda8858b4d85b234",
+      "format": "unaltered Xvfb screenshot, xwd to png only"
+    },
+    {
+      "path": "docs/revision/evidence/volume-1-chapter-1-clion-assets/ide-step-out.png",
+      "sha256": "48b222384b4332d9af2bdf56905620671f66c581a9e94c6803268be1f9654e0d",
+      "format": "unaltered Xvfb screenshot, xwd to png only"
+    },
+    {
+      "path": "docs/revision/evidence/volume-1-chapter-1-clion-assets/ide-stop-and-rerun-confirm.png",
+      "sha256": "8c7de64834ac054df7ab05bd656d26b6d03285ecd5b8ae664c571979055d8ec1",
+      "format": "unaltered Xvfb screenshot, xwd to png only"
+    },
+    {
+      "path": "docs/revision/evidence/volume-1-chapter-1-clion-assets/ide-stop-confirmed.png",
+      "sha256": "f13b6899b32089ff282ee7bb2665721632b1b6254f6e127e49d0b2f380ab948d",
+      "format": "unaltered Xvfb screenshot, xwd to png only"
+    },
+    {
+      "path": "docs/revision/evidence/volume-1-chapter-1-clion-assets/exercise-run-80.png",
+      "sha256": "dbdc7c58cd2ff3732b4ca7731e2f51f6c4b543cfcb9587cae23e7ecb83e7c1f6",
+      "format": "unaltered Xvfb screenshot, xwd to png only"
+    },
+    {
+      "path": "docs/revision/evidence/volume-1-chapter-1-clion-assets/exercise-before-add-80.png",
+      "sha256": "3253054b50fd8dcb75e6cb4ea1662a2b732bfc91a08b44f23e94ac9661280f56",
+      "format": "unaltered Xvfb screenshot, xwd to png only"
+    },
+    {
+      "path": "docs/revision/evidence/volume-1-chapter-1-clion-assets/exercise-after-add-80.png",
+      "sha256": "1a0980e820088c216dd10b74d8dc93930afa654dcf95eb0cf2c717f6b7c78daa",
+      "format": "unaltered Xvfb screenshot, xwd to png only"
+    },
+    {
+      "path": "docs/revision/evidence/volume-1-chapter-1-clion-assets/ide-terminal-font-result.png",
+      "sha256": "83f7642539a853b841cab71770bc182acd76aa5cdb49d86845412f94e5b582b3",
+      "format": "unaltered Xvfb screenshot, xwd to png only"
+    },
+    {
+      "path": "docs/revision/evidence/volume-1-chapter-1-clion-assets/ide-profile-switcher.png",
+      "sha256": "3b196f1bace2db2e7f2d407e3de2dd3e0b7d49a2f1d2162f0fa3b57dc2ea6d90",
+      "format": "unaltered Xvfb screenshot, xwd to png only"
+    }
+  ],
+  "limits": [
+    "real Windows installation/toolchain, UEFI disk installation/recovery, GNOME/GRUB/login shell and physical USB serial still unverified",
+    "GUI observations read from actual screenshots; structured observations are manual transcription, not raw text logs or fabricated automation pass status"
+  ],
+  "body_screenshots": [
+    {
+      "path": "01-基础通识/images/ide/clion_run_revised.png",
+      "sha256": "797dc9b70d8fa5cdf5bbe87715ed315931fb532aaee988565d35881f427a3096",
+      "pixel_change": "none, xwd to png and LaTeX trim only",
+      "qa": "actual standalone image and candidate2 PDF physical 58,60,65 checked"
+    },
+    {
+      "path": "01-基础通识/images/ide/clion_cmake_revised.png",
+      "sha256": "beb027e61d102e37c9a9e1695fe84910cecd1e769bd40f4f9c03b26776e99fed",
+      "pixel_change": "none, xwd to png and LaTeX trim only",
+      "qa": "actual standalone image and candidate2 PDF physical 58,60,65 checked"
+    },
+    {
+      "path": "01-基础通识/images/ide/clion_debug_revised.png",
+      "sha256": "bdbbd65b0111e03299852d7c5889b2cde3b451b436a987f19cfc77c46140f83f",
+      "pixel_change": "none, xwd to png and LaTeX trim only",
+      "qa": "actual standalone image and candidate2 PDF physical 58,60,65 checked"
+    }
+  ],
+  "qa": {
+    "final_pdf_pages": 206,
+    "final_pdf_sha256": "9c765e0e6df552eab1172ff39f22fad1e30ef5aad20ff3481d1d3ce7bb4c5bea",
+    "xelatex_passes": 2,
+    "bad_log_lines": [],
+    "font_shape_substitutions": 2,
+    "actual_visual_pages": [
+      7,
+      8,
+      56,
+      58,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      172
+    ],
+    "candidate_visual_pages": [
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      65,
+      66
+    ],
+    "candidate2_visual_pages": [
+      58,
+      60,
+      65,
+      66
+    ],
+    "qa_folder": "/tmp/textbook-v1-clion-final-qa",
+    "structure_stdout": "第 1 章：38 道随堂练习，12 道章末习题，1 个习题集\n入口包含 23 个文件；175 个标签，121 个被引用标签\n包含路径、资源存在性、标签唯一性、引用与题解定位检查通过。内容覆盖与运行/PDF 检查须另行记录。\n",
+    "runtime_paths_in_actual_log": [
+      "2026-09-29 12:53:33,486 [     18]   INFO - #c.i.p.i.b.AppStarter - JRE: 25.0.4+1-b508.27, amd64 (JetBrains s.r.o.)",
+      "2026-09-29 12:53:33,486 [     18]   INFO - #c.i.p.i.b.AppStarter - JVM: 25.0.4+1-b508.27 (OpenJDK 64-Bit Server VM)"
+    ]
+  }
+}

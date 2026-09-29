@@ -25,7 +25,7 @@ Ubuntu 工具链 & 使用系统 GCC、GDB 等 & 使用系统 GCC、GDB 等\\
 \end{center}
 
 两套软件都要会认界面，日常使用可以任选一套。\textbf{先完成所用系统的一条安装路线}，不要把 Windows、Ubuntu、WSL 的路径混着填。
-Windows 截图用于认按钮；在 Ubuntu 中，同名工具窗口和工作流程基本相同。
+下面的 IDE 截图来自 Ubuntu 中的实际操作；在 Windows 中，同名工具窗口和工作流程基本相同。
 图标位置会随版本、语言包、窗口宽度和扩展变化，找不到时先悬停看提示，再用菜单或动作搜索按名称查找。
 
 \subsubsection{安装 CLion：从安装包到工具链检查}
@@ -58,7 +58,8 @@ cmake --version
 
 
 三个版本命令都应打印版本信息。若下载的是压缩包，在文件管理器中解压到自己的软件目录，进入解压目录的 \texttt{bin}，在终端执行 \texttt{./clion.sh} 启动。
-然后在 Toolchains 中选择 System（系统），检查编译器和 GDB 路径；CMake 可用捆绑版本或已安装的系统版本。
+然后在 Toolchains 中检查本机编译器路径；工具链可能叫 System（系统），也可能沿用默认名字 Default。CMake 可用捆绑版本或已安装的系统版本。
+旧版的 GDB 路径也在这里设置；如果你用的是 CLion 2026.2 或更新版本，则到 Debugger → Debug Profiles（调试器→调试配置）选择 GDB，再核对顶部的 \texttt{Debug | GDB}。看到工具链里的 Debugger 项提示 deprecated，说明设置入口迁移了，不是编译器坏了。
 \end{example}
 
 \Needspace{7\baselineskip}
@@ -108,8 +109,8 @@ cmake --build /tmp/ide-demo-build
 \subsubsection{CLion 主界面：每一块负责什么}
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.9\textwidth]{ide/clion-overview.jpg}
-\caption{CLion 2025.1.3 Windows 中文界面：教学工程与运行结果（本机截图）}
+\includegraphics[trim=100bp 220bp 400bp 20bp,clip,width=0.9\textwidth]{ide/clion_run_revised.png}
+\caption{CLion 2026.2.3 在 Ubuntu 中的实测界面：左侧工程目录、中央源码、顶部运行控件，底部输出 \texttt{total = 75} 并正常退出}
 \label{fig:clion-overview}
 \end{figure}
 
@@ -122,7 +123,7 @@ cmake --build /tmp/ide-demo-build
 左上角三横线主菜单 & 展开 File、Edit、View、Navigate、Code、Refactor、Build、Run、Tools、Git、Window、Help；打开项目、设置与退出从这里找。\\
 顶部项目名下拉 & 切换或打开项目；先看名称，避免在别的工程中运行。\\
 顶部 Git 分支名 & 查看、切换和新建分支；提交前核对分支。未启用 Git 时可能不显示。\\
-顶部 Debug／Release 下拉 & 选择 CMake 配置；初学调试选 Debug。配置决定构建参数和构建目录。\\
+顶部 Debug／Release 下拉 & 选择 CMake 配置；初学调试选 Debug。新版显示为 Debug | GDB，同时指出所选调试配置。构建参数和构建目录仍在 CMake 设置中检查。\\
 顶部目标名下拉 & 选择运行目标；Edit Configurations（编辑配置）设置参数、环境变量、工作目录。\\
 锤子 Build（构建） & 编译并链接所选目标，成功后生成程序；只构建不会执行程序。\\
 三角 Run（运行） & 通常先构建再运行当前目标，在 Run 窗口看输出；普通运行不在断点暂停。\\
@@ -161,8 +162,8 @@ Git／Commit 工具窗口 & 查看差异、选择提交文件、写提交说明�
 \subsubsection{在 CLion 中构建、运行和调试}
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.7\textwidth]{ide/clion-cmake.jpg}
-\caption{CLion 打开项目向导：构建类型、工具链、生成器与构建目录}
+\includegraphics[trim=309bp 150bp 309bp 150bp,clip,width=0.9\textwidth]{ide/clion_cmake_revised.png}
+\caption{Ubuntu 中的实际 CMake 设置：Debug 构建类型、默认本机工具链、Ninja 生成器，以及独立的 \texttt{cmake-build-debug} 目录}
 \label{fig:clion-cmake}
 \end{figure}
 \Needspace{8\baselineskip}
@@ -175,6 +176,8 @@ Git／Commit 工具窗口 & 查看差异、选择提交文件、写提交说明�
 \item 点 Step Out（步出）返回调用者，必要时再单步到下一条语句，确认 \texttt{total=75}；点 Resume（继续）直到输出并正常结束。
 \end{enumerate}
 \end{example}
+
+如果打开工程后直接进入主界面，没有出现向导，我们就从 Settings → Build, Execution, Deployment → CMake 检查图中的配置。名字为 Debug 的配置还要核对 Build type 也确实是 Debug，然后等 CMake 配置完成，再点锤子构建。新版本可能把重新调试做成带回转箭头的小虫；程序还在运行时会先询问是否 Stop and Rerun（停止并重新运行），确认后才会启动新的进程。
 
 运行参数位于目标下拉→Edit Configurations。本例不用参数，工作目录设为工程目录即可；以后程序使用相对路径读图片时，这个目录决定从哪里找文件。
 设置里的 Toolchains 选择“用哪些工具”，CMake 配置选择“怎样构建”，运行配置选择“启动哪个程序、传什么参数”。三个入口各管一层。
@@ -266,7 +269,7 @@ Terminal（终端） & 运行 shell 命令或与程序交互；加号新建终�
 
 如果你在终端里启用了 p10k，却看到文件夹、系统图标变成白色方框，先检查这里的字体设置。
 系统里安装了 Nerd Font，还要让 VS Code 的集成终端选用它；在设置里搜索 \path{terminal.integrated.fontFamily}，填写已经安装的字体名称即可。
-本机截图使用 \texttt{Maple Mono NF CN}，你也可以使用前面 Shell 一节介绍的字体。改完后看一眼提示符，确认图标能正常显示，再接着操作。
+本机截图使用 \texttt{Maple Mono NF CN}，你也可以使用前面 Shell 一节介绍的字体。改完后看一眼提示符，确认图标能正常显示，再接着操作。CLion 的对应入口在 Settings → Tools → Terminal（设置→工具→终端）；编辑区与运行控制台的字体则分别在 Editor → Font 和 Color Scheme → Console Font 中设置。
 
 \Needspace{10\baselineskip}
 \subsubsection{在 VS Code 中运行同一个 CMake 工程}
@@ -305,8 +308,8 @@ CMake Tools 的按钮可能在侧栏 Project Status，也可能在底部；\text
 \subsubsection{调试工具栏：不要只记小虫和三角}
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.9\textwidth]{ide/clion-debug.jpg}
-\caption{CLion 在调用前暂停：高亮执行行、底部单步按钮、调用栈与局部变量}
+\includegraphics[trim=100bp 220bp 400bp 20bp,clip,width=0.9\textwidth]{ide/clion_debug_revised.png}
+\caption{CLion 实际单步后停在第 12 行：第 11 行赋值已完成，变量区显示 \texttt{score=60}、\texttt{bonus=15}、\texttt{total=75}；左侧为调用栈，底部为单步按钮}
 \label{fig:clion-debug}
 \end{figure}
 调试（Debugging）的目标是观察程序如何执行。断点让程序在某行执行前暂停，单步决定下一次停在哪里。
@@ -368,6 +371,7 @@ Windows 能跑，Ubuntu 找不到文件 & 检查路径大小写、斜杠、工�
 \par\footnotesize
 \url{https://www.jetbrains.com/help/clion/guided-tour-around-the-user-interface.html}\par
 \url{https://www.jetbrains.com/help/clion/debugging-code.html}\par
+\url{https://www.jetbrains.com/help/clion/configuring-debugger-options.html}\par
 \url{https://code.visualstudio.com/docs/getstarted/userinterface}\par
 \url{https://code.visualstudio.com/docs/cpp/cmake-linux}\par
 \url{https://code.visualstudio.com/docs/debugtest/debugging}
