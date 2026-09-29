@@ -218,8 +218,8 @@ MSYS2 下载：\url{https://www.msys2.org/}。
 \subsubsection{VS Code 主界面：活动栏、编辑器和底部面板}
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.9\textwidth]{ide/vscode-overview.jpg}
-\caption{VS Code 1.137.0 Windows 中文界面：文件树、编辑区和面板入口（本机截图）}
+\includegraphics[trim=76bp 46bp 379bp 50bp,clip,width=0.9\textwidth]{ide/vscode_run_revised.png}
+\caption{VS Code 1.139.1 在 Ubuntu 中的实测界面：搜索区、编辑区和集成终端；图中已经完成后面的重命名练习，\texttt{main} 中的变量改名为 \texttt{reward}，运行输出仍为 75}
 \label{fig:vscode-overview}
 \end{figure}
 
@@ -264,6 +264,10 @@ Terminal（终端） & 运行 shell 命令或与程序交互；加号新建终�
 \bottomrule[1.5pt]
 \end{longtable}\endgroup
 
+如果你在终端里启用了 p10k，却看到文件夹、系统图标变成白色方框，先检查这里的字体设置。
+系统里安装了 Nerd Font，还要让 VS Code 的集成终端选用它；在设置里搜索 \texttt{terminal.integrated.fontFamily}，填写已经安装的字体名称即可。
+本机截图使用 \texttt{Maple Mono NF CN}，你也可以使用前面 Shell 一节介绍的字体。改完后看一眼提示符，确认图标能正常显示，再接着操作。
+
 \Needspace{10\baselineskip}
 \subsubsection{在 VS Code 中运行同一个 CMake 工程}
 \Needspace{8\baselineskip}
@@ -281,6 +285,8 @@ Terminal（终端） & 运行 shell 命令或与程序交互；加号新建终�
 如果工作区启用了 Presets，命令可能变成 Select Configure Preset；先在工作区设置中将 \texttt{cmake.useCMakePresets} 设为 \texttt{never} 再做本例。
 以后接手带 \texttt{CMakePresets.json} 的队内工程时，应使用工程提供的预设。
 CMake Tools 的按钮可能在侧栏 Project Status，也可能在底部；\textbf{上述命令面板是布局变化时的备用入口}。
+不过，输入动作名后先核对列表里的完整名字，再按回车：最近使用过的动作和相似名字可能排在前面。
+例如 \texttt{CMake: Build} 是构建，\texttt{Append Build Directory to Current Workspace} 则是把构建目录加入工作区；名字里都有 Build，做的事情却不同。
 若需要显式指定构建目录，可在工作区设置搜索 \texttt{cmake.buildDirectory}，使用 \texttt{\$\{workspaceFolder\}/build-vscode}。
 
 \begin{note}
@@ -323,8 +329,8 @@ Toggle Breakpoint 切换断点 & Ctrl+F8 & F9 & 在当前行添加或取消断�
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{ide/vscode-debug.jpg}
-\caption{VS Code 单步执行调用后暂停：顶部调试工具栏与左侧变量 total = 75}
+\includegraphics[trim=76bp 375bp 379bp 50bp,clip,width=0.9\textwidth]{ide/vscode_debug_revised.png}
+\caption{Ubuntu 中的实际单步结果：执行第 11 行后停在第 12 行，左侧 \texttt{total = 75}；顶部是调试工具栏}
 \label{fig:vscode-debug}
 \end{figure}
 \textbf{变量（Variables）}显示当前栈帧的局部变量；\textbf{监视（Watches/Watch）}可以添加 \texttt{score + bonus} 等表达式；

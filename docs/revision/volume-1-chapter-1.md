@@ -31,13 +31,13 @@
 | 11 本章验收 | 通过 | `main.tex` “本章验收”检查独立演示；无硬件时注明板端待补，不把软件回环当板端通过。 |
 | 12 答案定位 | 通过 | `answers.tex` 每道题使用 ref 指向题目；结构脚本核验 38+12 对应。开放题给可行流程和判断标准。 |
 | 13 作者语言习惯 | 通过 | 对照原 11/12/13 的连贯段落、自然过渡与条件选择修订，不沿用错误单位和技术结论。 |
-| 14 图片实际检查 | 通过 | 本轮查看原图及段落，现正文使用 25 张图；四张机制图重绘，真实 UI 截图保留；旧安装器照片注明示例边界。 |
-| 15 图片标记与引用 | 通过 | 四张重绘图经过独立图和正文尺寸检查，使用 `_revised.pdf`；引用与 `scripts/render_ch1_diagrams.py` 输出一致。 |
+| 14 图片实际检查 | 通过 | 本轮查看原图及段落，现正文使用 25 张图；四张机制图重绘；2026-09-29 两张 VS Code 图换为 Ubuntu 实测，原始截图与正文尺寸实际检查；旧安装器照片注明示例边界。 |
+| 15 图片标记与引用 | 通过 | 四张重绘图与两张新 VS Code 截图经独立图和正文尺寸检查后使用 `_revised`；正文路径和生成脚本/IDE 图片说明一致。 |
 | 16 文件组织 | 通过 | 保留 11/12/13 等编号文件，主文件清楚列出各节主题；新项目用概念名目录，避免打断作者指定的文件参照。 |
-| 17 包含与引用 | 通过 | 从卷入口展开 22 个文件、115 个标签、62 个引用标签；无失效资源、循环包含、重复标签或未定义引用，题解引用可定位。 |
+| 17 包含与引用 | 通过 | 全卷后续章节整理后的入口展开 23 个文件、175 个标签、121 个被引用标签；本章 38+12 题定位通过，无失效资源、循环包含、重复标签或未定义引用。 |
 | 18 源码和格式 | 通过 | 命令不再滥用数学模式；表格列宽/三线表、图注、标题、代码协调，短源码与参数表连续排版。较早 CRLF 文件统一为 LF。短代码前保留分页空间，文件系统参数表标题与表体一起排版；IDE 初始短比较表改为普通 tabular，避免四行表跨页。 |
-| 19 示例实际运行 | **未完成** | 已跑通 Bash/Git/tar/链接/权限/筛选/Conda/CMake/GDB/pySerial；真实写盘、恢复、美化、两套 IDE 的当前 GUI 点击流程和真实串口尚未运行，见下文。 |
-| 20 编译和 PDF | 通过 | 卷入口 XeLaTeX 两次成功生成 179 页 PDF，引用稳定；实际查看目录物理页 7–8、第一章正文 9–75、题解 148–159，检查图文、代码与表格；第一章无越界警告。未修改共享模板。 |
+| 19 示例实际运行 | **未完成** | Bash/Git/tar/链接/权限/筛选/Conda/CMake/GDB/pySerial、apt/zsh/AstroNvim 临时配置及 Ubuntu VS Code GUI 已实际完成；真实写盘/系统恢复、原生桌面与登录设置、CLion 当前 GUI、Windows 安装/工具链和物理串口未验证。详见下文及两份补跑证据。 |
+| 20 编译和 PDF | 通过 | 原首次整理 179 页；全卷后续整理及本次 VS Code 换图后，XeLaTeX 两次生成 206 页，引用稳定。原目录、正文、题解检查保留，本次实际查看物理页 7–8、62–67 与 IDE 题解 172，无缺字/越界/未定义引用；共享模板未改。 |
 
 ## 核心能力覆盖
 
@@ -56,7 +56,7 @@
 | `17_ide.tex` 安装、工程、界面、构建、调试与排错 | 两套 GUI 连续教程和同一 CMake 工程；ide-clion/ide-vscode 分别练修改调试，ide-setup 明确覆盖安装、工程协作、界面、构建入口、工具栏与错误判断。 |
 | `18_serial.tex` 接线、设备权限、命名、设置、收发、排错 | 接线核对、插拔识别、udev、stty、板端约定/TTL 回环、软件回环、fuser；serial-device、serial-udev、serial-bytes、serial-diagnosis。diagnosis 分项覆盖连接类型、参数意义和故障层次。 |
 
-## 实际运行与边界
+## 首次修订的实际运行与边界
 
 - Arch 主机 Bash 5.3.20、Git 2.55.0：父子变量三组对照、本地/远程两次及第三次提交、快进分支、忽略例外、正文 tar 恢复、硬软链接复制、755、grep 与重定向成功。日志：`evidence/volume-1-chapter-1-shell-git-tar.txt`。
 - Miniforge3/Conda 26.7.2 临时安装：官方 SHA256 校验通过，Python 3.10.21、NumPy 2.2.6；配置读取、关闭自动激活、创建/激活/导入/退出/删除成功。此版本提示 auto_activate_base 是 auto_activate 的别名，正文已有版本差异提示。测试写配置使用 `--file /tmp/tutorial-conda/.condarc`，没有改用户登录配置。日志：`evidence/volume-1-chapter-1-conda.txt`。
@@ -86,4 +86,18 @@
 
 临时XDG配置、数据、状态和缓存中按官方模板安装AstroNvim6系列与插件，9种语法解析器实际编译/安装。用Neovim输入接口执行Space-ff，真实选择器找到hello.txt；退出输入模式后确认并打开其实际缓冲区，读到hello textbook；Space-fw输入textbook找到hello.txt第1行第7列。初次自动确认尚在insert模式，缓冲区未打开；保存失败诊断，增加Esc和状态等待后实际成功，没有改搜索实现。执行LspInstall clangd，Mason安装后实际运行clangd23.1.0，退出0。遵循官方0.11+需求及搜索/LSP入口：[AstroNvim](https://docs.astronvim.com/)，向导与临时配置参考[Powerlevel10k](https://github.com/romkatv/powerlevel10k)。
 
-移除原未完成清单中的apt tree/cowsay、AstroNvim模板/插件/搜索/LSP、zsh框架/主题/插件及别名配置软件缺口；第19项仍未完成：登录shell切换与本机终端字体/主题设置、实际GNOME/GRUB、双系统写盘/备份恢复、CLion/VS Code原生GUI和物理串口不能由这些临时软件流程替代。文本与图片未改，无新增PDF布局变更。
+这次包管理/Shell 补跑移除了 apt tree/cowsay、AstroNvim 模板/插件/搜索/LSP、zsh 框架/主题/插件及别名配置的软件缺口，未改正文和图片。登录 shell、原生桌面、双系统写盘/备份恢复、IDE GUI 和物理串口当时仍待验证；后续 VS Code 补跑见下文。
+
+## 全书收尾补跑：VS Code GUI 与终端字体
+
+证据见 `evidence/volume-1-chapter-1-vscode-gui.json`。Ubuntu 24.04.5 中复用主机 VS Code 1.139.1、现有 CMake Tools 1.24.42 与 C/C++ 1.34.4；在独立 Xvfb、临时 user-data/shared-data/XDG 目录中打开 ide-demo 的副本。真实选择 GCC 13.3 与 Debug，配置和构建退出 0，Run Without Debugging 的真实终端输出 total = 75。系统没装 Ninja，本次扩展选择 Unix Makefiles，未把无 Ninja 的探测日志当作构建失败。
+
+真实断点停在第 11 行，score=60、bonus=15；total 尚未赋值，显示的旧内存值没有教学意义。步入后执行加法，result=75；步出仍可能停在赋值前的调用行，继续一步到第 12 行才确认 total=75。Continue 正常退出；Restart 重新停在断点，Stop 结束会话。容器中 GDB 报 controlling terminal 权限警告，这个不读取 stdin 的示例仍正常执行；保留原始提示，不推断所有终端交互程序都能忽略它。
+
+搜索 bonus，真实跳转定义并执行 Rename Symbol。第一次过早保存使改名取消，源码仍未变化，保留失败诊断。重试后查看 Refactor Preview 并点击 Apply，只有 main 中局部声明和使用两处改为 reward，函数形参及函数内部的 bonus 两处保留；保存、构建退出 0、运行输出 75。随后实际 Undo/保存并构建，磁盘源码与随书原文件字节相等，SHA256 为 379f34aa12d5bea66c95c8e8de22753d324d655c10504b6b5152174a99749c17。
+
+根据用户指出的白色方框问题，在本次临时 VS Code 配置中设置 terminal.integrated.fontFamily=Maple Mono NF CN；容器 fc-match 实际返回 MapleMono-NF-CN-Regular.ttf，查看终端截图确认系统/文件夹/箭头图标显示正常。正文增加单独选择集成终端字体的说明，以及命令面板核对完整动作名的提醒；最近使用项曾误选 Append Build Directory，不能把它算作 Build，纠正后才取得真正构建成功的记录。
+
+两张历史 VS Code JPEG 的正文引用换为 vscode_run_revised.png、vscode_debug_revised.png，原图保留。真实 1600×1000 截图仅格式转换和正文 trim 裁边；先看原图、候选 PDF 物理页 62–67 和目录 7–8，再字节不变地加 revised 标记并编译复查。IDE 图片 README 同步，.tex 文件没有改名或移动。新增截图工具另行实测启动、字体和退出，完整语义操作使用临时控制器，证据区分两次运行。
+
+第19项仍未完成：本次没有重跑 Windows 软件安装/工具链、CLion 当前 GUI、UEFI 双系统写盘/系统恢复、GNOME/GRUB/登录 shell 或物理串口。临时 Ubuntu GUI 验证也不代替用户桌面集成验证。所有本次启动进程已经退出，检查两组明确临时配置路径没有残留 VS Code 进程。

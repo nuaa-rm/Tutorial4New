@@ -1,0 +1,375 @@
+{
+  "recorded_at": "2026-09-29T04:31:59.323274+00:00",
+  "environment": {
+    "container": "ubuntu2404",
+    "ubuntu": "24.04.5",
+    "vscode_cli_version": {
+      "returncode": 0,
+      "stdout": "1.139.1\n04c0d99f4fb0d8afe6ce4f0c58e31e183ac3e4b1\nx64\n"
+    },
+    "CMakeTools": "1.24.42",
+    "cpp_extension": "1.34.4",
+    "gcc": "13.3.0",
+    "gdb": "15.1",
+    "actual_generator": "Unix Makefiles"
+  },
+  "project": "01-基础通识/examples/ide-demo",
+  "launch_command": "distrobox enter ubuntu2404 -- bash -c 'python3 /tmp/textbook-vscode-gui.py'",
+  "controller": {
+    "executed_path": "/tmp/textbook-vscode-gui.py",
+    "sha256": "912806401eaa2d00b9095ba7382f26332204ede8c412c9eedcd3161933118214",
+    "source": "from pathlib import Path\nimport os,json,subprocess,signal,time,shutil\nroot=Path('/tmp/textbook-vscode-gui');root.mkdir(exist_ok=True)\nproject=root/'project';project.mkdir(exist_ok=True)\nsource=Path('/home/mijiao/Apps/Tutorial4New/01-基础通识/examples/ide-demo')\nfor name in ['main.cpp','CMakeLists.txt']:shutil.copy2(source/name,project/name)\nuser=root/'user-data';(user/'User').mkdir(parents=True,exist_ok=True)\nsettings={'workbench.startupEditor':'none','workbench.colorTheme':'Default Light Modern','update.mode':'none','extensions.autoUpdate':False,'extensions.autoCheckUpdates':False,'telemetry.telemetryLevel':'off','cmake.useCMakePresets':'never','cmake.configureOnOpen':False,'cmake.buildDirectory':'${workspaceFolder}/build-vscode'}\n(user/'User/settings.json').write_text(json.dumps(settings,indent=2))\nfd_read,fd_write=os.pipe()\nxvfb=subprocess.Popen(['Xvfb','-displayfd',str(fd_write),'-screen','0','1600x1000x24'],pass_fds=(fd_write,),start_new_session=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)\nos.close(fd_write);display=os.read(fd_read,100).decode().strip();os.close(fd_read)\nenv=dict(os.environ,DISPLAY=':'+display,QT_QPA_PLATFORM='xcb',XDG_CONFIG_HOME=str(root/'xdg-config'),XDG_CACHE_HOME=str(root/'xdg-cache'),XDG_STATE_HOME=str(root/'xdg-state'))\nenv.pop('WAYLAND_DISPLAY',None);env['XDG_SESSION_TYPE']='x11'\nlog=(root/'code.txt').open('w')\ncode=subprocess.Popen(['dbus-run-session','--','/run/host/usr/share/code/code','--user-data-dir',str(user),'--shared-data-dir',str(root/'shared-data'),'--extensions-dir','/home/mijiao/.vscode/extensions','--locale','en','--disable-gpu','--ozone-platform=x11','--new-window','--goto',str(project/'main.cpp')+':11',str(project)],env=env,start_new_session=True,stdout=log,stderr=subprocess.STDOUT)\ndef run(args):return subprocess.run(args,env=env,check=True,capture_output=True,text=True).stdout\ndef shot(name):\n run(['xwd','-root','-silent','-out',str(root/(name+'.xwd'))]);print(json.dumps({'snapshot':name,'path':str(root/(name+'.xwd'))}),flush=True)\ntry:\n time.sleep(8);print(json.dumps({'ready':True,'display':display,'folder':str(root)}),flush=True);shot('startup')\n for line in __import__('sys').stdin:\n  item=json.loads(line)\n  if item.get('quit'):break\n  if 'command' in item:\n   run(['xdotool','key','ctrl+shift+p']);time.sleep(.3);run(['xdotool','type','--clearmodifiers',item['command']]);time.sleep(.7);run(['xdotool','key','Return'])\n  if 'keys' in item:run(['xdotool','key',*item['keys'].split()])\n  if 'text' in item:run(['xdotool','type','--clearmodifiers',item['text']])\n  time.sleep(item.get('wait',1));shot(item['name'])\nfinally:\n for proc in [code,xvfb]:\n  if proc.poll() is None:\n   os.killpg(proc.pid,signal.SIGTERM)\n   try:proc.wait(timeout=8)\n   except subprocess.TimeoutExpired:os.killpg(proc.pid,signal.SIGKILL);proc.wait()\n log.close()\n",
+    "limits": "此临时控制器用于完整语义流程；下列仓库工具是整理后的控制器，其单独实测范围仅为启动、终端与清理。"
+  },
+  "settings": {
+    "workbench.startupEditor": "none",
+    "workbench.colorTheme": "Light Modern",
+    "update.mode": "none",
+    "extensions.autoUpdate": "off",
+    "extensions.autoCheckUpdates": false,
+    "telemetry.telemetryLevel": "off",
+    "cmake.useCMakePresets": "never",
+    "cmake.configureOnOpen": false,
+    "cmake.buildDirectory": "${workspaceFolder}/build-vscode",
+    "terminal.integrated.fontFamily": "Maple Mono NF CN"
+  },
+  "font_match": {
+    "command": "distrobox enter ubuntu2404 -- fc-match 'Maple Mono NF CN'",
+    "returncode": 0,
+    "stdout": "MapleMono-NF-CN-Regular.ttf: \"Maple Mono NF CN\" \"Regular\"\n",
+    "visual_check": "已实际查看 rename-run-font-fixed、font-terminal 截图，终端图标正常。只改测试临时配置，不宣称修改个人设置。"
+  },
+  "actual_CMake_cache_excerpt": [
+    "CMAKE_BUILD_TYPE:STRING=Debug",
+    "CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++",
+    "CMAKE_GENERATOR:INTERNAL=Unix Makefiles"
+  ],
+  "observations": [
+    {
+      "snapshot": "trusted",
+      "action": "Workspace Trust",
+      "observed": "已检查的教学副本实际设为受信任；未信任未知目录",
+      "raw_path": "/tmp/textbook-vscode-gui/trusted.xwd",
+      "raw_sha256": "d817192647e14a11412bac6977664b7b1f8563e0927fd83a28366d1ee1dc38e2",
+      "png_sha256": "fecdf1368f45253156ce1a0f3a67036d14393fcbb27164a6e120a4e436e7cf35"
+    },
+    {
+      "snapshot": "kit-list",
+      "action": "CMake: Select a Kit",
+      "observed": "查看候选工具链，选择 Ubuntu /usr/bin GCC 13.3",
+      "raw_path": "/tmp/textbook-vscode-gui/kit-list.xwd",
+      "raw_sha256": "bd4c56846f8ed299f2684006ac08b2074e1ae8acc827d9ea245b7d5e008c070a",
+      "png_sha256": "996d530e966e0245aa0bcf818dafd62c47ba22f234c82e937426d1e0468c9d64"
+    },
+    {
+      "snapshot": "debug-variant",
+      "action": "CMake: Select Variant",
+      "observed": "实际选择 Debug",
+      "raw_path": "/tmp/textbook-vscode-gui/debug-variant.xwd",
+      "raw_sha256": "630028457cca66af9016fb967b441e37b85f104e9843a0e59a23914b392e21c7",
+      "png_sha256": null
+    },
+    {
+      "snapshot": "configured",
+      "action": "CMake: Configure",
+      "observed": "配置与生成成功，实际 CMakeCache 使用 Debug、/usr/bin/g++",
+      "raw_path": "/tmp/textbook-vscode-gui/configured.xwd",
+      "raw_sha256": "a61c5864002b85a5388f64ed05cb60c6cb3f6ffa8733c2b50384a1fde8a74c8e",
+      "png_sha256": "b4f95b9e68cf90045c592cde4f52ff593eb1585b39b17962794d8d18c3b24591"
+    },
+    {
+      "snapshot": "build-menu-retry",
+      "action": "命令面板纠正",
+      "observed": "最近项 Append Build Directory 不是 Build；核对完整动作后选 Build",
+      "raw_path": "/tmp/textbook-vscode-gui/build-menu-retry.xwd",
+      "raw_sha256": "6a1b85d8841cb874820b7bba0e142746d7d485861b0ae5fef8979e6d75a88e2d",
+      "png_sha256": "c31d4fa575658f90781bf5a2129897b9a1841d08bda26846d430dbca53435812"
+    },
+    {
+      "snapshot": "build-complete",
+      "action": "CMake: Build",
+      "observed": "真实构建完成，exit code 0",
+      "raw_path": "/tmp/textbook-vscode-gui/build-complete.xwd",
+      "raw_sha256": "c41dff04424bed127a1f3eaab24930c98795b9f2d7e0f1a24ccccdc31cdc5a04",
+      "png_sha256": "7ba59ac75622226e555e088cfa00f0404ce37c8d8d97eab44c58e3ef21a37244"
+    },
+    {
+      "snapshot": "run-selected",
+      "action": "CMake: Run Without Debugging",
+      "observed": "终端观察到 total = 75",
+      "raw_path": "/tmp/textbook-vscode-gui/run-selected.xwd",
+      "raw_sha256": "e689b966f920e6130d1f33faa580dd701affa9624e9cf9c0fb13f5eba9af237c",
+      "png_sha256": "bc4723c959517ccdd06f0f193cdf723ff6ae88d918a09c4666836c05ce41618b"
+    },
+    {
+      "snapshot": "debug-locals",
+      "action": "断点第11行",
+      "observed": "score=60、bonus=15；total 未初始化，其旧内存值不解释为计算结果",
+      "raw_path": "/tmp/textbook-vscode-gui/debug-locals.xwd",
+      "raw_sha256": "1856edfc6c24ce77a5a0af7333444cc502786e4cf58f864a2c4822f8f89a6cda",
+      "png_sha256": "2b0bf0519d3b413500b2e73100ecc9423e2af13f5221fe5f1734b85bfb2a34a7"
+    },
+    {
+      "snapshot": "step-into",
+      "action": "F11 步入",
+      "observed": "进入 add_score，current=60、bonus=15；result 未初始化",
+      "raw_path": "/tmp/textbook-vscode-gui/step-into.xwd",
+      "raw_sha256": "f7f53529dab62f01b9b951f8d3b4680338ef5b2a366fbb641b09365daa5a5bd4",
+      "png_sha256": "8eab946078cac5d566b6ac3416f90c483522431927ee2e9c1687535d0d21e803"
+    },
+    {
+      "snapshot": "step-over",
+      "action": "F10 步过",
+      "observed": "加法执行后 result=75",
+      "raw_path": "/tmp/textbook-vscode-gui/step-over.xwd",
+      "raw_sha256": "863673dda82652a3c3a7ccbc20f1d8f9e138bddbb3abfc5d6716f3a943d411d9",
+      "png_sha256": "e7c75bd1b0de33c09c72b879f3e7f36360ff731cd513a43f9f1fc33adc4c1d6e"
+    },
+    {
+      "snapshot": "step-out",
+      "action": "Shift+F11 步出",
+      "observed": "返回调用行；$ReturnValue=75，total 仍未完成赋值",
+      "raw_path": "/tmp/textbook-vscode-gui/step-out.xwd",
+      "raw_sha256": "c82a819e4c63aef85d448cf31b719060ae24f19fa48e4d3cd8590eb62174c19e",
+      "png_sha256": "622d18d9516d8d857601ee6c113526338f56fb17320bf721af0f122950c745ad"
+    },
+    {
+      "snapshot": "assigned",
+      "action": "F10 完成调用行",
+      "observed": "停在第12行，total=75",
+      "raw_path": "/tmp/textbook-vscode-gui/assigned.xwd",
+      "raw_sha256": "55f5d7540ce5d455300a9b674bf890d6d946e53feb4e87131b98e34d86a71c2b",
+      "png_sha256": "b56b682a85159ae21d7122233e877bcbe41cdfa52d0968597b8a13b4909d49cd"
+    },
+    {
+      "snapshot": "debug-exited",
+      "action": "F5 继续",
+      "observed": "Debug Console：Inferior exited normally；program exited with code 0",
+      "raw_path": "/tmp/textbook-vscode-gui/debug-exited.xwd",
+      "raw_sha256": "b6886566e84e33cdb507e8d88f15d88d210b92762755a01279a04676bcb5c480",
+      "png_sha256": "b8336286405fadba41e85b94194d643f7f207263a871dcea43fecb8f37b0f28a"
+    },
+    {
+      "snapshot": "debug-restarted",
+      "action": "Ctrl+Shift+F5 Restart",
+      "observed": "新进程重新停在第11行断点",
+      "raw_path": "/tmp/textbook-vscode-gui/debug-restarted.xwd",
+      "raw_sha256": "f27c478383dbe9b8a37e409bf6230c9551d3b63ffe1ea74a769d8d6702bc9b6b",
+      "png_sha256": "7ee7e4d8f956a2abf208acda833246da7c9e8fa7182aa7341a384927e5393878"
+    },
+    {
+      "snapshot": "debug-stopped-by-user",
+      "action": "Shift+F5 Stop",
+      "observed": "结束实际活动调试会话",
+      "raw_path": "/tmp/textbook-vscode-gui/debug-stopped-by-user.xwd",
+      "raw_sha256": "aa061040c007dd58a29a6195998c617d47773ae197dfec503b0f73bf3fee6e94",
+      "png_sha256": "249b4aeefa7cc3aa956d8b27a77caa439b10aea72b7eb8063999f0f6f2e233ed"
+    },
+    {
+      "snapshot": "search-bonus",
+      "action": "Ctrl+Shift+F 搜索",
+      "observed": "bonus 四处命中，尚未重命名",
+      "raw_path": "/tmp/textbook-vscode-gui/search-bonus.xwd",
+      "raw_sha256": "a75a9d728eda1e61b24c2d6cbb2efd346ae88c5e4a0c31c661be7bbda0e2862a",
+      "png_sha256": "d739e0ebe7429432f4265ffb6ba955e822915581060b1b6b2b301fdedfc87b35"
+    },
+    {
+      "snapshot": "goto-definition-focused",
+      "action": "F12 转到定义",
+      "observed": "焦点移回编辑区后跳至 main 第10行局部声明",
+      "raw_path": "/tmp/textbook-vscode-gui/goto-definition-focused.xwd",
+      "raw_sha256": "9e15ab0c1c64be31a6a494efac0bad5acadabdc058edf246d5e3ea59814a766f",
+      "png_sha256": "f89f38bf2aa4c69c1e07090600eb7623f1f7ad660993a791fb96184df6494fb4"
+    },
+    {
+      "snapshot": "rename-new-name",
+      "action": "首次 F2 输入 reward",
+      "observed": "随后过早 Ctrl+S 导致取消；不把这次未改变源码的运行当作重命名通过",
+      "raw_path": "/tmp/textbook-vscode-gui/rename-new-name.xwd",
+      "raw_sha256": "8ecf7b6b4a0fce0cbe0e85507da169b2ab886d0bd534a670e16a3f562ac7800d",
+      "png_sha256": "f49520e1a25df94d8b1a4b0450be6677604331498904b223cc223433430185db"
+    },
+    {
+      "snapshot": "renamed",
+      "action": "首次取消结果",
+      "observed": "bonus 仍四处，源文件没有 reward",
+      "raw_path": "/tmp/textbook-vscode-gui/renamed.xwd",
+      "raw_sha256": "6e6917bbdc94a999774fa80f12b44eff206748963e9d1607943a6135267b48bd",
+      "png_sha256": "6b8f24028725281fee66d9c513f5e59ca5d0e25e32613a348591db87151da91f"
+    },
+    {
+      "snapshot": "rename-retry-name",
+      "action": "重新 F2 输入 reward",
+      "observed": "真正的符号重命名对话框",
+      "raw_path": "/tmp/textbook-vscode-gui/rename-retry-name.xwd",
+      "raw_sha256": "a6afc7f169a1b0e519e40022ac021994ccf56762c7955b3ea3b492cf773640c8",
+      "png_sha256": null
+    },
+    {
+      "snapshot": "rename-preview-applied",
+      "action": "查看预览并 Apply",
+      "observed": "只选 main 的局部变量声明及其调用引用两处；形参及函数内部保留 bonus",
+      "raw_path": "/tmp/textbook-vscode-gui/rename-preview-applied.xwd",
+      "raw_sha256": "e0604e2520e5b7734966e90cea3a64349d34fc036311492569b4e85b66a08ef6",
+      "png_sha256": null
+    },
+    {
+      "snapshot": "rename-build-success",
+      "action": "保存并构建",
+      "observed": "真实源码含两处 reward 和两处 bonus，编译链接完成且 exit code 0",
+      "raw_path": "/tmp/textbook-vscode-gui/rename-build-success.xwd",
+      "raw_sha256": "90e11d003214f51f1181e4cc0f479126f07465cf85183b28aa67f99a64a88d26",
+      "png_sha256": "914777ab33af47adc584c9ee69c682b368a6bc3da4a98367ebf584e908795f56"
+    },
+    {
+      "snapshot": "rename-run-font-fixed",
+      "action": "重命名后运行及字体",
+      "observed": "真实输出 total = 75；使用 Maple Mono NF CN 后 Ubuntu/文件夹/箭头图标正常",
+      "raw_path": "/tmp/textbook-vscode-gui/rename-run-font-fixed.xwd",
+      "raw_sha256": "f36622836d7a19badadac7ccd39dee7c943a269924a59faf4f72885dc19811de",
+      "png_sha256": "fb0a87a29f30dabb23dd715aa447dc366f1340df4f8e95b33d7d538541d9e8bb"
+    },
+    {
+      "snapshot": "undo-rename",
+      "action": "实际 Undo",
+      "observed": "编辑器恢复原变量声明与使用；标签显示未保存状态",
+      "raw_path": "/tmp/textbook-vscode-gui/undo-rename.xwd",
+      "raw_sha256": "5cf2014fa0b6d68229a21e2db7ea5e5867a15b19b6349b5fed2f191918bfdea0",
+      "png_sha256": "d36973bd276f91d18936edf199885f06d366aa22f25ee28b24dbe40bb685d884"
+    },
+    {
+      "snapshot": "undo-saved-built",
+      "action": "Ctrl+S 保存并构建",
+      "observed": "磁盘源码恢复为随书原文件且真实构建退出0",
+      "raw_path": "/tmp/textbook-vscode-gui/undo-saved-built.xwd",
+      "raw_sha256": "8d1a82be5a669cc2626075769ab4e485671b05e8fd524476a6b9713f35136f93",
+      "png_sha256": null
+    },
+    {
+      "snapshot": "final-debug-assigned-maple",
+      "action": "再次实际暂停",
+      "observed": "第12行、total=75，保存作正文调试截图",
+      "raw_path": "/tmp/textbook-vscode-gui/final-debug-assigned-maple.xwd",
+      "raw_sha256": "bd16007cdeb97c222a4c4c042c30599603a84fe8dd15eeb7a4d9be2b101811c1",
+      "png_sha256": "0236df38cc86771e507ce814020be125c74e4b30a9295abb5044e273e677df8b"
+    },
+    {
+      "snapshot": "final-debug-exited-maple",
+      "action": "F5 继续退出",
+      "observed": "真实终端 total = 75 与 Done，未删除 controlling terminal 警告",
+      "raw_path": "/tmp/textbook-vscode-gui/final-debug-exited-maple.xwd",
+      "raw_sha256": "49dd6052d16b442f52cae97bd826bcd927b09cd4cfd4d0381162eed2f9338235",
+      "png_sha256": "bb9ecb2cdcdaa468630ba30b0bd8ac43bca73a2b6159c6f31f05527c41f79c4e"
+    }
+  ],
+  "CMake_raw_logs": [
+    {
+      "path": "/tmp/textbook-vscode-gui/user-data/logs/20260929T120218/window1/exthost/output_logging_20260929T120219/2-CMakeBuild.log",
+      "sha256": "222a4a5bd9bc184ae03ee28e391ebd3005f44b6341a36665577c55d56ac02ad8",
+      "raw_text": "[bookmarks] Loaded 0 bookmarks\n[proc] Executing command: /usr/bin/cmake --version\n[proc] Executing command: /usr/bin/cmake -E capabilities\n[kit] Successfully loaded 3 kits from /home/mijiao/.local/share/CMakeTools/cmake-tools-kits.json\n[variant] Loaded new set of variants\n[kit] Detected kits definition version change from undefined to 2. Silently scanning for kits.\n[proc] Executing command: /usr/bin/c89-gcc -v\n[proc] Executing command: /usr/bin/c99-gcc -v\n[proc] Executing command: /usr/bin/gcc -v\n[proc] Executing command: /usr/bin/gcc-13 -v\n[proc] Executing command: /usr/bin/x86_64-linux-gnu-gcc -v\n[proc] Executing command: /usr/bin/x86_64-linux-gnu-gcc-13 -v\n[proc] Executing command: /bin/c89-gcc -v\n[proc] Executing command: /bin/c99-gcc -v\n[proc] Executing command: /bin/gcc -v\n[proc] Executing command: /bin/gcc-13 -v\n[proc] Executing command: /bin/x86_64-linux-gnu-gcc -v\n[proc] Executing command: /bin/x86_64-linux-gnu-gcc-13 -v\n[proc] Executing command: /bin/c99-gcc -v\n[proc] Executing command: /bin/c89-gcc -v\n[proc] Executing command: /usr/bin/c99-gcc -v\n[proc] Executing command: /usr/bin/c89-gcc -v\n[kit] Found Kit (trusted): GCC 13.3.0 x86_64-linux-gnu\n[kit] Found Kit (trusted): GCC 13.3.0 x86_64-linux-gnu\n[kit] Found Kit (trusted): GCC 13.3.0 x86_64-linux-gnu\n[kit] Found Kit (trusted): GCC 13.3.0 x86_64-linux-gnu\n[kit] Found Kit (trusted): GCC 13.3.0 x86_64-linux-gnu\n[kit] Found Kit (trusted): GCC 13.3.0 x86_64-linux-gnu\n[kit] Found Kit (trusted): GCC 13.3.0 x86_64-linux-gnu\n[kit] Found Kit (trusted): GCC 13.3.0 x86_64-linux-gnu\n[kit] Found Kit (trusted): GCC 13.3.0 x86_64-linux-gnu\n[kit] Found Kit (trusted): GCC 13.3.0 x86_64-linux-gnu\n[kit] Found Kit (trusted): GCC 13.3.0 x86_64-linux-gnu\n[kit] Found Kit (trusted): GCC 13.3.0 x86_64-linux-gnu\n[kit] Successfully loaded 4 kits from /home/mijiao/.local/share/CMakeTools/cmake-tools-kits.json\n[proc] Executing command: /usr/bin/gcc -v\n[proc] The command: ninja --version failed with error: Error: spawn ninja ENOENT\n[proc] The command: ninja-build --version failed with error: Error: spawn ninja-build ENOENT\n[main] Configuring project: project \n[proc] Executing command: /usr/bin/cmake -DCMAKE_BUILD_TYPE:STRING=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ --no-warn-unused-cli -S /tmp/textbook-vscode-gui/project -B /tmp/textbook-vscode-gui/project/build-vscode -G \"Unix Makefiles\"\n[cmake] Not searching for unused variables given on the command line.\n[cmake] -- Configuring done (0.1s)\n[cmake] -- Generating done (0.0s)\n[cmake] -- Build files have been written to: /tmp/textbook-vscode-gui/project/build-vscode\n[main] Configuring project: project \n[proc] Executing command: /usr/bin/cmake -DCMAKE_BUILD_TYPE:STRING=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ --no-warn-unused-cli -S /tmp/textbook-vscode-gui/project -B /tmp/textbook-vscode-gui/project/build-vscode -G \"Unix Makefiles\"\n[cmake] Not searching for unused variables given on the command line.\n[cmake] -- Configuring done (0.0s)\n[cmake] -- Generating done (0.0s)\n[cmake] -- Build files have been written to: /tmp/textbook-vscode-gui/project/build-vscode\n[main] Configuring project: project \n[proc] Executing command: /usr/bin/cmake -DCMAKE_BUILD_TYPE:STRING=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ --no-warn-unused-cli -S /tmp/textbook-vscode-gui/project -B /tmp/textbook-vscode-gui/project/build-vscode -G \"Unix Makefiles\"\n[cmake] Not searching for unused variables given on the command line.\n[cmake] -- Configuring done (0.0s)\n[cmake] -- Generating done (0.0s)\n[cmake] -- Build files have been written to: /tmp/textbook-vscode-gui/project/build-vscode\n[rollbar] Unhandled exception: Unhandled Promise rejection: Post-folder-open Canceled: Canceled [object Object]\n[rollbar] Unhandled exception: Unhandled Promise rejection: Pruning kit Canceled: Canceled {}\n"
+    },
+    {
+      "path": "/tmp/textbook-vscode-gui/user-data/logs/20260929T120218/window1/exthost/output_logging_20260929T120453/2-CMakeBuild.log",
+      "sha256": "abb6a9635555107a640902061b613cb55daf6ab37f18d587b1974c54022e37ae",
+      "raw_text": "[bookmarks] Loaded 0 bookmarks\n[proc] Executing command: /usr/bin/cmake --version\n[proc] Executing command: /usr/bin/cmake -E capabilities\n[kit] Successfully loaded 4 kits from /home/mijiao/.local/share/CMakeTools/cmake-tools-kits.json\n[variant] Loaded new set of variants\n[variant] Loaded new set of variants\n[proc] Executing command: /usr/bin/gcc -v\n[proc] The command: ninja --version failed with error: Error: spawn ninja ENOENT\n[proc] The command: ninja-build --version failed with error: Error: spawn ninja-build ENOENT\n"
+    },
+    {
+      "path": "/tmp/textbook-vscode-gui/user-data/logs/20260929T120602/window1/exthost/output_logging_20260929T120604/2-CMakeBuild.log",
+      "sha256": "1c9f5548ada8a947cf49375e92f4bdcc8b8023313d327642fff1091b90142eeb",
+      "raw_text": "[bookmarks] Loaded 0 bookmarks\n[proc] Executing command: /usr/bin/cmake --version\n[proc] Executing command: /usr/bin/cmake -E capabilities\n[kit] Successfully loaded 4 kits from /home/mijiao/.local/share/CMakeTools/cmake-tools-kits.json\n[variant] Loaded new set of variants\n[variant] Loaded new set of variants\n[proc] Executing command: /usr/bin/gcc -v\n[proc] The command: ninja --version failed with error: Error: spawn ninja ENOENT\n[proc] The command: ninja-build --version failed with error: Error: spawn ninja-build ENOENT\n[main] Building folder: /tmp/textbook-vscode-gui/project/build-vscode \n[main] Configuring project: project \n[proc] Executing command: /usr/bin/cmake -DCMAKE_BUILD_TYPE:STRING=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++ --no-warn-unused-cli -S /tmp/textbook-vscode-gui/project -B /tmp/textbook-vscode-gui/project/build-vscode -G \"Unix Makefiles\"\n[cmake] Not searching for unused variables given on the command line.\n[cmake] -- Configuring done (0.0s)\n[cmake] -- Generating done (0.0s)\n[cmake] -- Build files have been written to: /tmp/textbook-vscode-gui/project/build-vscode\n[build] Starting build\n[proc] Executing command: /usr/bin/cmake --build /tmp/textbook-vscode-gui/project/build-vscode --config Debug --target all -j 20 --\n[build] [ 50%] Building CXX object CMakeFiles/ide_demo.dir/main.cpp.o\n[build] [100%] Linking CXX executable ide_demo\n[build] [100%] Built target ide_demo\n[driver] Build completed: 00:00:00.264\n[build] Build finished with exit code 0\n[main] Building folder: /tmp/textbook-vscode-gui/project/build-vscode all\n[build] Starting build\n[proc] Executing command: /usr/bin/cmake --build /tmp/textbook-vscode-gui/project/build-vscode --config Debug --target all -j 20 --\n[build] [100%] Built target ide_demo\n[driver] Build completed: 00:00:00.059\n[build] Build finished with exit code 0\n[main] Building folder: /tmp/textbook-vscode-gui/project/build-vscode all\n[build] Starting build\n[proc] Executing command: /usr/bin/cmake --build /tmp/textbook-vscode-gui/project/build-vscode --config Debug --target all -j 20 --\n[build] [100%] Built target ide_demo\n[driver] Build completed: 00:00:00.065\n[build] Build finished with exit code 0\n[proc] Executing command: /usr/bin/gdb --version\n[main] Building folder: /tmp/textbook-vscode-gui/project/build-vscode all\n[build] Starting build\n[proc] Executing command: /usr/bin/cmake --build /tmp/textbook-vscode-gui/project/build-vscode --config Debug --target all -j 20 --\n[build] [100%] Built target ide_demo\n[driver] Build completed: 00:00:00.061\n[build] Build finished with exit code 0\n[proc] Executing command: /usr/bin/gdb --version\n[main] Building folder: /tmp/textbook-vscode-gui/project/build-vscode \n[build] Starting build\n[proc] Executing command: /usr/bin/cmake --build /tmp/textbook-vscode-gui/project/build-vscode --config Debug --target all -j 20 --\n[build] [ 50%] Building CXX object CMakeFiles/ide_demo.dir/main.cpp.o\n[build] [100%] Linking CXX executable ide_demo\n[build] [100%] Built target ide_demo\n[driver] Build completed: 00:00:00.267\n[build] Build finished with exit code 0\n[main] Building folder: /tmp/textbook-vscode-gui/project/build-vscode all\n[build] Starting build\n[proc] Executing command: /usr/bin/cmake --build /tmp/textbook-vscode-gui/project/build-vscode --config Debug --target all -j 20 --\n[build] [100%] Built target ide_demo\n[driver] Build completed: 00:00:00.062\n[build] Build finished with exit code 0\n[main] Building folder: /tmp/textbook-vscode-gui/project/build-vscode \n[build] Starting build\n[proc] Executing command: /usr/bin/cmake --build /tmp/textbook-vscode-gui/project/build-vscode --config Debug --target all -j 20 --\n[build] [ 50%] Building CXX object CMakeFiles/ide_demo.dir/main.cpp.o\n[build] [100%] Linking CXX executable ide_demo\n[build] [100%] Built target ide_demo\n[driver] Build completed: 00:00:00.282\n[build] Build finished with exit code 0\n[main] Building folder: /tmp/textbook-vscode-gui/project/build-vscode all\n[build] Starting build\n[proc] Executing command: /usr/bin/cmake --build /tmp/textbook-vscode-gui/project/build-vscode --config Debug --target all -j 20 --\n[build] [100%] Built target ide_demo\n[driver] Build completed: 00:00:00.060\n[build] Build finished with exit code 0\n[main] Building folder: /tmp/textbook-vscode-gui/project/build-vscode \n[build] Starting build\n[proc] Executing command: /usr/bin/cmake --build /tmp/textbook-vscode-gui/project/build-vscode --config Debug --target all -j 20 --\n[build] [ 50%] Building CXX object CMakeFiles/ide_demo.dir/main.cpp.o\n[build] [100%] Linking CXX executable ide_demo\n[build] [100%] Built target ide_demo\n[driver] Build completed: 00:00:00.266\n[build] Build finished with exit code 0\n[main] Building folder: /tmp/textbook-vscode-gui/project/build-vscode all\n[build] Starting build\n[proc] Executing command: /usr/bin/cmake --build /tmp/textbook-vscode-gui/project/build-vscode --config Debug --target all -j 20 --\n[build] [100%] Built target ide_demo\n[driver] Build completed: 00:00:00.060\n[build] Build finished with exit code 0\n[proc] Executing command: /usr/bin/gdb --version\n"
+    },
+    {
+      "path": "/tmp/textbook-vscode-gui/user-data/logs/20260929T120602/window2/exthost/output_logging_20260929T120604/2-CMakeBuild.log",
+      "sha256": "5af5d1b5dfce0d10bbbd3715eec942c5e49eefda3d51e4fb85f98adef78213f2",
+      "raw_text": "[bookmarks] Loaded 0 bookmarks\n[proc] Executing command: /usr/bin/cmake --version\n[proc] Executing command: /usr/bin/cmake -E capabilities\n[kit] Successfully loaded 4 kits from /home/mijiao/.local/share/CMakeTools/cmake-tools-kits.json\n[variant] Loaded new set of variants\n[proc] Executing command: /usr/bin/gcc -v\n[proc] The command: ninja --version failed with error: Error: spawn ninja ENOENT\n[proc] The command: ninja-build --version failed with error: Error: spawn ninja-build ENOENT\n"
+    }
+  ],
+  "source_comparison": {
+    "original_sha256": "379f34aa12d5bea66c95c8e8de22753d324d655c10504b6b5152174a99749c17",
+    "renamed_sha256": "bf657e08cc09dee578cd60ad4ade3f183c445910d95539ec70b6148148b4ed77",
+    "restored_sha256": "379f34aa12d5bea66c95c8e8de22753d324d655c10504b6b5152174a99749c17",
+    "renamed_core_source": "#include <iostream>\n\nint add_score(int current, int bonus) {\n    int result = current + bonus;\n    return result;\n}\n\nint main() {\n    int score = 60;\n    int reward = 15;\n    int total = add_score(score, reward);\n    std::cout << \"total = \" << total << '\\n';\n    return 0;\n}\n",
+    "exactly_two_scoped_occurrences_changed": true,
+    "restored_byte_equal": true
+  },
+  "body_images": [
+    {
+      "old_reference": "vscode-overview.jpg",
+      "new_path": "01-基础通识/images/ide/vscode_run_revised.png",
+      "sha256": "fb0a87a29f30dabb23dd715aa447dc366f1340df4f8e95b33d7d538541d9e8bb",
+      "unmodified_real_snapshot": "/tmp/textbook-vscode-gui/rename-run-font-fixed.png",
+      "pdf_checked_physical_page": 62
+    },
+    {
+      "old_reference": "vscode-debug.jpg",
+      "new_path": "01-基础通识/images/ide/vscode_debug_revised.png",
+      "sha256": "0236df38cc86771e507ce814020be125c74e4b30a9295abb5044e273e677df8b",
+      "unmodified_real_snapshot": "/tmp/textbook-vscode-gui/final-debug-assigned-maple.png",
+      "pdf_checked_physical_page": 66
+    }
+  ],
+  "tool_smoke": {
+    "command": "distrobox enter ubuntu2404 -- python3 scripts/capture_vscode_gui.py --extensions /home/mijiao/.vscode/extensions --output /tmp/textbook-vscode-harness-smoke",
+    "returncode": 0,
+    "script_sha256": "9582dc498f62a665e5c0febfd3f96a01b1fa0a9e7d50ad05febfded4d7a7b50e",
+    "actions": "{\"keys\": \"ctrl+shift+`\", \"name\": \"terminal\", \"wait\": 2}\n{\"click\": [1150, 750], \"name\": \"welcome-dismissed\", \"wait\": 1}\n{\"click\": [1250, 245], \"name\": \"welcome-closed\", \"wait\": 1}\n{\"keys\": \"ctrl+grave\", \"name\": \"terminal-opened\", \"wait\": 2}\n{\"click\": [940, 590], \"name\": \"font-terminal\", \"wait\": 2}\n{\"quit\": true}\n",
+    "font_terminal_xwd_sha256": "9569f445ebd86d0e64f084fd5b23551ba34b57f366c43cea6e159f7271cf687d",
+    "font_terminal_png_sha256": "de507f3efbba62e1c49500f5ee93b1d83a61f415afc2336efcc73cff584e6f4d",
+    "cleanup": {
+      "profile": "/tmp/textbook-vscode-harness-smoke/user-data",
+      "terminated_pids": [],
+      "remaining_pids": []
+    },
+    "limits": "未重跑完整构建/调试/重命名流程，不能将此工具散列声称为完整流程所执行的控制器散列。"
+  },
+  "original_cleanup": {
+    "terminated_exact_temporary_profile_pids": [],
+    "remaining_after_term": [],
+    "profile_paths": [
+      "/tmp/textbook-vscode-gui/user-data",
+      "/tmp/textbook-vscode-probe"
+    ],
+    "other_profiles_targeted": false
+  },
+  "bounded_CLion_inventory": {
+    "matches": [],
+    "searched_roots": [
+      "/opt",
+      "/home/mijiao/Apps",
+      "/home/mijiao/.local/share/JetBrains/Toolbox/apps",
+      "/home/mijiao/.local/share/applications",
+      "/usr/share/applications"
+    ]
+  },
+  "failures_and_limits": [
+    "初次直接启动 GUI 二进制做 --version 打开了窗口，随即结束；后来改用 bin/code 包装器。未强制 X11 的首次截图为空，停止后在独立 Xvfb 中强制 X11，后续实际截图可见。",
+    "临时控制器重启曾出现两扇本次测试窗口；正文裁去背景窗口，无用户桌面内容。",
+    "命令面板相似项误选、搜索焦点下 F12/F2 无效、第一次重命名取消均不记作完成，纠正后以实际状态验证。",
+    "controlling terminal 权限警告保留；本例没有 stdin，正常退出不代表交互程序均可忽略此警告。",
+    "复用主机程序和既有扩展，未重新验证 Ubuntu deb/Windows 安装、MSYS2 或 CLion GUI；有界 CLion 搜索无结果不证明全机不存在。",
+    "仍缺真实 UEFI 写盘/恢复、桌面登录切换和物理串口，不降低本章第19项标准。"
+  ],
+  "pdf_qa": {
+    "path": "01-基础通识/main.pdf",
+    "pages": 206,
+    "sha256": "b6e7a30e5877ca2288006de75a9c0e530d4b7ae9d5946120bca04ed0b24b9793",
+    "candidate_viewed_physical_pages": [
+      7,
+      8,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67
+    ],
+    "revised_viewed_physical_pages": [
+      62,
+      63,
+      64,
+      66,
+      172
+    ],
+    "bad_log_lines": []
+  }
+}
