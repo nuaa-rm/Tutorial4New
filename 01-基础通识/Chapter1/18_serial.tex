@@ -3,7 +3,7 @@
 \subsubsection{串口连接了什么}
 \label{sec:linux-serial}
 
-视觉程序算出了目标角度，还需要把结果发给电控板。串口通信（Serial Communication）是常见的传输方式：发送端把数据逐位送出，接收端按约定还原成字节。本节先学会在 Ubuntu 中找到设备、取得权限并验证收发；帧头、校验和重同步等工程协议见卷二“多机通信方法”。
+视觉程序算出了目标角度，还需要把结果发给电控板。串口通信（Serial Communication）是常见的传输方式：发送端把数据逐位送出，接收端按约定还原成字节。本节先教会大家在 Ubuntu 中找到设备、取得权限并验证收发；帧头、校验和重同步等工程协议见卷二“多机通信方法”。
 
 \textbf{我们队使用的是 USB CDC ACM 设备。}CDC 是通信设备类（Communication Device Class），ACM 是抽象控制模型（Abstract Control Model）。电控板通过 USB 数据线连接电脑，Linux 通常由 \texttt{cdc\_acm} 驱动将其呈现为 \texttt{/dev/ttyACM0} 等串口设备，程序仍可按串口接口读写字节。
 
@@ -33,18 +33,9 @@ UART 的全称是 Universal Asynchronous Receiver/Transmitter，中文为通用�
 \textbf{不要把 UART 的波特率公式套到原生 USB CDC ACM 上。}电脑设置的波特率、数据位等会作为线路编码配置交给设备，固件可能使用，也可能忽略；它们不是 USB 总线速率。队内工程应采用电控固件约定的配置，不能推断“设置 115200 就把 USB 限速为 11520 字节每秒”，也不能断言所有 CDC 设备都不关心这些配置。
 \end{note}
 
-\Needspace{8\baselineskip}
-\begin{example}[先核对接线，再打开软件]
-连接两个兼容电平的 UART 接口时，将电脑侧模块的 TX（发送）接到板端 RX（接收），模块 RX 接板端 TX，GND 接 GND。记录板端要求的电平、波特率和 8N1 等参数，再进入后面的设备识别步骤。
-\end{example}
-
-\begin{note}
-TTL/CMOS 电平 UART、RS-232 和 RS-485 的电气接口不同，不能直接互接。先按硬件说明确认 3.3 V/5 V 电平兼容性，并在断电时接线；开发板已有供电时，不要随手再接模块的 VCC。以下物理回环实验只对\textbf{脱离电控板的 USB 转 TTL 串口模块}进行，不向连接电机的控制板发送测试字符。
-\end{note}
-
 \subsubsection{找到设备并取得访问权限}
 
-Linux 把串口暴露为 \texttt{/dev} 下的字符设备。USB 转串口模块常见名称为 \texttt{/dev/ttyUSB0}，USB CDC ACM 设备常见名称为 \texttt{/dev/ttyACM0}，板载串口也可能叫 \texttt{/dev/ttyS0}。名称取决于设备与驱动，不能仅凭名字判断它连接了哪块板。
+Linux 把串口暴露为 \texttt{/dev} 下的字符设备。USB 转串口模块常见名称为 \texttt{/dev/ttyUSB0}，USB CDC ACM 设备常见名称为 \texttt{/dev/ttyACM0}，板载串口也可能叫 \texttt{/dev/ttyS0}。
 
 \Needspace{8\baselineskip}
 \begin{example}[通过插拔确认设备]
@@ -67,7 +58,7 @@ ls -l /dev/serial/by-id/
 \end{tbash}
 
 
-未匹配的类型或不存在的目录可能提示“没有那个文件或目录”，不代表所有串口都不可用。\texttt{ttyACM0} 和 \texttt{ttyUSB0} 的编号都可能随插拔顺序变化；若设备提供可用的唯一标识，优先使用实际列出的 \texttt{/dev/serial/by-id/} 链接。下一小节将为队内 ACM 设备配置更易读的固定别名。
+\texttt{ttyACM0} 和 \texttt{ttyUSB0} 的编号都可能随插拔顺序变化；若设备提供可用的唯一标识，优先使用实际列出的 \texttt{/dev/serial/by-id/} 链接。下一小节将为队内 ACM 设备配置更易读的固定别名。
 \end{example}
 
 访问串口需要读写权限。先用 \texttt{ls -l} 查看设备所属组，用 \texttt{id -nG} 查看当前会话的组。Ubuntu 中串口设备通常属于 \texttt{dialout} 组。\texttt{usermod -aG 组名 用户名} 可以把用户追加到组中；\texttt{-a} 必须保留，避免替换用户已有的附加组。
@@ -100,7 +91,7 @@ sudo usermod -aG dialout "$USER"
 \subsubsection{用 udev 绑定固定名称}
 \label{sec:serial-udev}
 
-udev 是 Linux 用户空间的设备管理机制，设备出现时会根据规则设置权限、创建符号链接。我们的目标是让程序始终打开 \texttt{/dev/rm\_control}，由 udev 将它指向当前的 \texttt{ttyACM0} 或 \texttt{ttyACM1}。\textbf{固定的是程序使用的别名，不是内核分配的编号。}这里的别名是教学示例，队内工程已有命名约定时应使用工程约定。
+udev 是 Linux 用户空间的设备管理机制，设备出现时会根据规则设置权限、创建符号链接。我们的目标是让程序始终打开 \texttt{/dev/rm\_control}，由 udev 将它指向当前的 \texttt{ttyACM0} 或 \texttt{ttyACM1}。\textbf{固定的是程序使用的别名，不是内核分配的编号。}
 
 \texttt{udevadm info --name=设备 --attribute-walk} 查看设备及其父设备属性；\texttt{--query=property} 查看设备属性记录。厂商编号 VID（Vendor ID）、产品编号 PID（Product ID）通常只能识别型号；还应匹配设备的唯一序列号。
 
@@ -127,7 +118,7 @@ sudo nano /etc/udev/rules.d/99-rm-control.rules
 \end{tbash}
 
 
-文件内容如下。\textbf{先将三个大写占位值替换为刚才查到的真实值}，VID/PID 按输出填写四位十六进制数字，不加 \texttt{0x}；它们不是队内板子的已知编号。
+文件内容如下。\textbf{先将三个大写占位值替换为刚才查到的真实值}，VID/PID 按输出填写四位十六进制数字，不加 \texttt{0x}。
 
 
 \Needspace{8\baselineskip}
@@ -234,7 +225,7 @@ PORT=/dev/rm_control
 \end{tbash}
 
 
-参数按测试固件约定调整。在文本回显固件下，输入约定的测试文字并回车，应收到相同内容；此处未开启本地回显，文字来自板端返回。按 Ctrl+] 退出。没有文本回显固件时，先做下一节软件回环，保留实板协议测试为待完成项。ACM 收发不需要短接板上 UART 引脚。
+参数按测试固件约定调整。在文本回显固件下，输入约定的测试文字并回车，应收到相同内容；此处未开启本地回显，文字来自板端返回。按 Ctrl+] 退出。没有文本回显固件时，可以暂时做下一节软件回环替代。ACM 收发不需要短接板上 UART 引脚。
 \end{example}
 
 \Needspace{8\baselineskip}
@@ -254,12 +245,12 @@ PORT=/dev/ttyUSB0
 
 miniterm 默认使用 8 个数据位、1 个停止位，未指定流控选项时关闭流控；这里也未开启本地回显。输入 \texttt{hello} 并回车，应看到从 RX 返回的文字。按 \textbf{Ctrl+]} 退出；Ctrl+T 后按 Ctrl+H 可查看快捷键帮助。
 
-退出并拔下模块，移除短接线，再插入并重开 miniterm。此时输入同样内容应没有返回，用以区分真正收到数据与本地回显。回环通过只能说明该模块及电脑侧收发基本正常，不能证明开发板协议或双方波特率配置正确。
+退出并拔下模块，移除短接线，再插入并重开 miniterm。此时输入同样内容应没有返回，用以区分真正收到数据与本地回显。
 \end{example}
 
 \subsubsection{没有硬件时：用软件回环练习字节收发}
 
-pySerial 提供 \texttt{loop://} 软件回环：写入的数据会回到同一个程序的接收端。它不创建真实设备，也不检验 Linux 设备权限、驱动或接线。下面的代码只是收发实验工具，不要求先掌握 Python 编程。
+pySerial 提供 \texttt{loop://} 软件回环：写入的数据会回到同一个程序的接收端。它不创建真实设备，也不检验 Linux 设备权限、驱动或接线。
 
 \Needspace{8\baselineskip}
 \begin{example}[验证原始字节与读取超时]
@@ -281,7 +272,7 @@ cd examples/serial-loop-demo
 预期依次输出 \texttt{RX: b'hello\textbackslash n'}、\texttt{HEX: 68 65 6c 6c 6f 0a}，最后等待约 1 秒输出 \texttt{EMPTY: b''}。这里读取设置了超时；默认无限等待可能让程序看起来“卡住”。最后一次空读取表示超时期间没有读到字节，并不自动等于设备断开。
 \end{example}
 
-\textbf{串口传输的是字节流，不自带消息边界。}发送一次 20 字节，接收端可能分几次读到；连续发送两条消息，也可能被一次读到。真实设备上，带超时的 \texttt{read(n)} 可能返回少于 $n$ 个字节，必须累计并按协议解析。文本协议可以约定换行结束，二进制协议则需要明确的帧结构；不要把任意二进制数据直接当 UTF-8 文本解码。
+\textbf{串口传输的是字节流，不自带消息边界。}发送一次 20 字节，接收端可能分几次读到；连续发送两条消息，也可能被一次读到。真实设备上，带超时的 \texttt{read(n)} 可能返回少于 $n$ 个字节，必须累计并按协议解析。文本协议可以约定换行结束，二进制协议则需要明确的帧结构。
 
 \begin{exercise}\label{ex:serial-bytes}
 将软件回环的发送内容改为 \texttt{bytes([0x00, 0x41, 0xFF, 0x0A])}，记录十六进制输出。解释为什么终端未显示四个可见字符，以及为什么真实串口上一次读取不足四字节不能直接判定丢包。
