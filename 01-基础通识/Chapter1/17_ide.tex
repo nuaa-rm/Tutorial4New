@@ -28,48 +28,6 @@ Ubuntu 工具链 & 使用系统 GCC、GDB 等 & 使用系统 GCC、GDB 等\\
 下面的 IDE 截图来自 Ubuntu 中的实际操作；在 Windows 中，同名工具窗口和工作流程基本相同。
 图标位置会随版本、语言包、窗口宽度和扩展变化，找不到时先悬停看提示，再用菜单或动作搜索按名称查找。
 
-\subsubsection{安装 CLion：从安装包到工具链检查}
-
-\paragraph*{Windows 安装步骤}
-\begin{enumerate}
-\item 从 JetBrains 官网下载与系统架构匹配的 CLion 安装包，运行安装程序，选择安装位置。
-\item 在 Installation Options（安装选项）中按需勾选桌面快捷方式；Add launchers dir to the PATH 让终端能找到启动器，\textbf{不等于安装了编译器}；Open Folder as Project 增加资源管理器右键入口；文件关联决定双击 \texttt{.cpp} 等文件时用什么打开。这些选项不影响本节核心流程。
-\item 完成安装后启动 CLion。首次启动可跳过导入旧设置，选择主题；若出现许可证页面，按实际用途选择适用的授权或试用方式，具体条件以官网为准。
-\item 欢迎页的 New Project（新建项目）用于生成工程；Open（打开）用于打开已有工程；Get from VCS（从版本控制获取）用于克隆仓库；Customize（自定义）调整外观；Plugins（插件）管理扩展。中文界面可在插件页搜索 Chinese Language Pack，安装后按提示重启。
-\item 打开工程后进入 File → Settings → Build, Execution, Deployment → Toolchains（文件→设置→构建、执行、部署→工具链）。选择 MinGW，Toolset 选 Bundled（捆绑），等待 C/C++ Compiler、Debugger 和 Build Tool 检测完成。若安装版本未附带工具链，先按官方 Windows 工具链教程安装，不能把编辑器目录当作编译器目录。
-\end{enumerate}
-
-\paragraph*{Ubuntu 安装步骤}
-先准备本机编译工具，然后从 JetBrains 官网下载 Linux 版 CLion，或通过 JetBrains Toolbox 安装。
-以下命令在 \textbf{Ubuntu 终端}执行，不能粘贴到 Windows PowerShell。
-\Needspace{8\baselineskip}
-\begin{example}
-安装并检查 Ubuntu 工具链：
-
-
-\Needspace{9\baselineskip}
-\begin{tbash}
-sudo apt update
-sudo apt install build-essential gdb cmake ninja-build
-g++ --version
-gdb --version
-cmake --version
-\end{tbash}
-
-
-三个版本命令都应打印版本信息。若下载的是压缩包，在文件管理器中解压到自己的软件目录，进入解压目录的 \texttt{bin}，在终端执行 \texttt{./clion.sh} 启动。
-然后在 Toolchains 中检查本机编译器路径；工具链可能叫 System（系统），也可能沿用默认名字 Default。CMake 可用捆绑版本或已安装的系统版本。
-旧版的 GDB 路径也在这里设置；如果你用的是 CLion 2026.2 或更新版本，则到 Debugger → Debug Profiles（调试器→调试配置）选择 GDB，再核对顶部的 \texttt{Debug | GDB}。看到工具链里的 Debugger 项提示 deprecated，说明设置入口迁移了，不是编译器坏了。
-\end{example}
-
-\Needspace{7\baselineskip}
-\begin{note}
-安装与工具链参考：
-\par{\footnotesize\url{https://www.jetbrains.com/help/clion/installation-guide.html}\par}
-{\footnotesize\url{https://www.jetbrains.com/help/clion/quick-tutorial-on-configuring-clion-on-windows.html}\par}
-Windows 的 MinGW 不能直接构建依赖 Ubuntu/ROS2 的工程；本节的跨平台小程序可以，后续 ROS2 实验应使用相应 Linux 环境。
-\end{note}
-
 \subsubsection{准备两套软件共用的练习工程}
 教材附带 \texttt{examples/ide-demo} 目录。先复制一份作为自己的练习工程。
 Windows 可放在 \texttt{C:/dev/ide-demo}，Ubuntu 可放在 \texttt{\textasciitilde/dev/ide-demo}。
@@ -103,14 +61,55 @@ cmake --build /tmp/ide-demo-build
 \end{tbash}
 
 
-应输出 total = 75；这只验证构建与程序，后面的图形操作仍要分别验证。已有同名构建目录且用过别的工具链时换一个新目录。
+应输出 total = 75。已有同名构建目录且用过别的工具链时换一个新目录。
 \end{example}
+
+\subsubsection{安装 CLion：从安装包到工具链检查}
+
+\paragraph*{Windows 安装步骤}
+\begin{enumerate}
+\item 从 JetBrains 官网下载与系统架构匹配的 CLion 安装包，运行安装程序，选择安装位置。
+\item 在 Installation Options（安装选项）中按需勾选桌面快捷方式；Add launchers dir to the PATH 让终端能找到启动器，\textbf{不等于安装了编译器}；Open Folder as Project 增加资源管理器右键入口；文件关联决定双击 \texttt{.cpp} 等文件时用什么打开。这些选项不影响本节核心流程。
+\item 完成安装后启动 CLion。首次启动可跳过导入旧设置，选择主题；若出现许可证页面，按实际用途选择适用的授权或试用方式，具体条件以官网为准。
+\item 欢迎页的 New Project（新建项目）用于生成工程；Open（打开）用于打开已有工程；Get from VCS（从版本控制获取）用于克隆仓库；Customize（自定义）调整外观；Plugins（插件）管理扩展。中文界面可在插件页搜索 Chinese Language Pack，安装后按提示重启。
+\item 打开工程后进入 File → Settings → Build, Execution, Deployment → Toolchains（文件→设置→构建、执行、部署→工具链）。选择 MinGW，Toolset 选 Bundled（捆绑），等待 C/C++ Compiler、Debugger 和 Build Tool 检测完成。若安装版本未附带工具链，先按官方 Windows 工具链教程安装，不能把编辑器目录当作编译器目录。
+\end{enumerate}
+
+\paragraph*{Ubuntu 安装步骤}
+先准备本机编译工具，然后从 JetBrains 官网下载 Linux 版 CLion，或通过 JetBrains Toolbox 安装，或使用 Snap 安装。
+\Needspace{8\baselineskip}
+\begin{example}
+安装并检查 Ubuntu 工具链：
+
+
+\Needspace{9\baselineskip}
+\begin{tbash}
+sudo apt update
+sudo apt install build-essential gdb cmake ninja-build
+g++ --version
+gdb --version
+cmake --version
+\end{tbash}
+
+
+三个版本命令都应打印版本信息。若下载的是压缩包，在文件管理器中解压到自己的软件目录，进入解压目录的 \texttt{bin}，在终端执行 \texttt{./clion.sh} 启动。
+然后在 Toolchains 中检查本机编译器路径；工具链可能叫 System（系统），也可能沿用默认名字 Default。CMake 可用捆绑版本或已安装的系统版本。
+旧版的 GDB 路径也在这里设置；如果你用的是 CLion 2026.2 或更新版本，则到 Debugger → Debug Profiles（调试器→调试配置）选择 GDB，再核对顶部的 \texttt{Debug | GDB}。看到工具链里的 Debugger 项提示 deprecated，说明设置入口迁移了，不是编译器坏了。
+\end{example}
+
+\Needspace{7\baselineskip}
+\begin{note}
+安装与工具链参考：
+\par{\footnotesize\url{https://www.jetbrains.com/help/clion/installation-guide.html}\par}
+{\footnotesize\url{https://www.jetbrains.com/help/clion/quick-tutorial-on-configuring-clion-on-windows.html}\par}
+Windows 的 MinGW 不能直接构建依赖 Ubuntu/ROS2 的工程；本节的跨平台小程序可以，后续 ROS2 实验应使用相应 Linux 环境。
+\end{note}
 
 \subsubsection{CLion 主界面：每一块负责什么}
 \begin{figure}[H]
 \centering
 \includegraphics[trim=100bp 220bp 400bp 20bp,clip,width=0.9\textwidth]{ide/clion_run_revised.png}
-\caption{CLion 2026.2.3 在 Ubuntu 中的实测界面：左侧工程目录、中央源码、顶部运行控件，底部输出 \texttt{total = 75} 并正常退出}
+\caption{CLion 2026.2.3 的界面：左侧工程目录、中央源码、顶部运行控件，底部输出 \texttt{total = 75} 并正常退出}
 \label{fig:clion-overview}
 \end{figure}
 
@@ -163,7 +162,7 @@ Git／Commit 工具窗口 & 查看差异、选择提交文件、写提交说明�
 \begin{figure}[H]
 \centering
 \includegraphics[trim=309bp 150bp 309bp 150bp,clip,width=0.9\textwidth]{ide/clion_cmake_revised.png}
-\caption{Ubuntu 中的实际 CMake 设置：Debug 构建类型、默认本机工具链、Ninja 生成器，以及独立的 \texttt{cmake-build-debug} 目录}
+\caption{CMake 设置：Debug 构建类型、默认本机工具链、Ninja 生成器，以及独立的 \texttt{cmake-build-debug} 目录}
 \label{fig:clion-cmake}
 \end{figure}
 \Needspace{8\baselineskip}
@@ -192,8 +191,8 @@ Git／Commit 工具窗口 & 查看差异、选择提交文件、写提交说明�
 \begin{enumerate}
 \item 从 VS Code 官网下载对应架构的 Windows User Installer。运行后选择安装目录，按需勾选桌面快捷方式、右键“通过 Code 打开”与“添加到 PATH”。安装结束后重新打开终端，PATH 才会在新终端中生效。
 \item 启动 VS Code，左侧点四个方块的 Extensions（扩展），搜索并核对发布者 Microsoft，安装 \textbf{C/C++}（\texttt{ms-vscode.cpptools}）和 \textbf{CMake Tools}（\texttt{ms-vscode.cmake-tools}）。二者分别提供 C++ 语言／调试支持和 CMake 工程操作。
-\item 如需中文，安装 Microsoft 的 Chinese (Simplified) Language Pack，在命令面板中执行 Configure Display Language，选简体中文并重启。主题和语言不会改变工程的编译方式。
-\item 安装 C++ 编译工具。Windows 本节采用 MSYS2：从其官网安装到默认 \texttt{C:/msys64}，打开 \textbf{MSYS2 UCRT64} 终端执行下面命令；遇到包组选择可回车使用默认项，再按提示确认安装。
+\item 如需中文，安装 Microsoft 的 Chinese (Simplified) Language Pack，在命令面板中执行 Configure Display Language，选简体中文并重启。
+\item 安装 C++ 编译工具。Windows 本节采用 MSYS2：从其官网安装到默认 \texttt{C:/msys64}，打开 \textbf{MSYS2 UCRT64} 终端，先执行 \texttt{pacman -Suy} 完整更新。若更新提示关闭终端，按提示退出所有 MSYS2 终端，重新打开 UCRT64 后再执行同一命令，直到没有待更新的软件包。然后运行下面的安装命令；遇到包组选择可回车使用默认项，再按提示确认安装。
 \end{enumerate}
 
 
@@ -205,7 +204,7 @@ pacman -S --needed mingw-w64-ucrt-x86_64-cmake mingw-w64-ucrt-x86_64-ninja
 
 
 在 Windows“编辑账户的环境变量”中编辑用户 Path，新增 \texttt{C:\textbackslash msys64\textbackslash ucrt64\textbackslash bin}（自定义安装则换成实际路径）。完全退出并重新打开 VS Code，在新 PowerShell 终端运行 \texttt{g++ --version}、\texttt{gdb --version}、\texttt{cmake --version}、\texttt{ninja --version}，应分别得到版本号。
-若有多套工具链，用 \texttt{where.exe g++} 检查搜索结果，随后在 CMake Tools 中选择同一套 UCRT64 编译器和调试器。
+若有多套工具链，用 \texttt{where.exe g++} 和 \texttt{where.exe gdb} 检查搜索顺序，随后在 CMake Tools 中选择 UCRT64 编译器作为 Kit。CMake Tools 会自动检测直接调试所用的调试器；若调试失败，再检查 GDB 是否来自同一套 UCRT64。
 
 \paragraph*{Ubuntu 安装步骤}
 从官网选择 Linux 的 \texttt{.deb} 安装包，架构与机器一致。在下载目录执行 \texttt{sudo apt install ./实际下载的文件名.deb}；这里要替换为真实文件名，不要原样照抄。
@@ -222,7 +221,7 @@ MSYS2 下载：\url{https://www.msys2.org/}。
 \begin{figure}[H]
 \centering
 \includegraphics[trim=76bp 46bp 379bp 50bp,clip,width=0.9\textwidth]{ide/vscode_run_revised.png}
-\caption{VS Code 1.139.1 在 Ubuntu 中的实测界面：搜索区、编辑区和集成终端；图中已经完成后面的重命名练习，\texttt{main} 中的变量改名为 \texttt{reward}，运行输出仍为 75}
+\caption{VS Code 1.139.1 的界面：搜索区、编辑区和集成终端；图中已经完成后面的重命名练习，\texttt{main} 中的变量改名为 \texttt{reward}，运行输出为 75}
 \label{fig:vscode-overview}
 \end{figure}
 
@@ -244,14 +243,6 @@ MSYS2 下载：\url{https://www.msys2.org/}。
 左下角头像／齿轮 Manage & 头像用于账户相关功能；齿轮打开设置、快捷键、主题等。设置里区分 User（用户）和 Workspace（工作区）作用范围。\\
 标题栏布局按钮 & 显示或隐藏主侧栏、底部面板、辅助侧栏等；隐藏侧栏不会关闭工程。\\
 额外的活动栏图标 & Python、远程开发、AI 等扩展会增加入口；悬停看名称，用活动栏右键菜单管理显示项。\\
-\bottomrule[1.5pt]
-\end{longtable}\endgroup
-
-\begingroup\small
-\begin{longtable}{p{0.30\textwidth}p{0.60\textwidth}}
-\toprule[1.5pt]
-位置／按钮 & 点击后的功能与使用时机\\
-\midrule[1pt]\endhead
 编辑标签、圆点和叉号 & 标签切换文件；圆点表示有未保存修改，Ctrl+S 保存；叉号关闭标签，不删除文件。\\
 编辑区右上分栏／省略号 & 分栏可并排查看两个文件；省略号包含当前编辑器的更多动作。\\
 编辑区右上三角及下拉 & 含义由语言与扩展决定，可能是运行当前文件；CMake 工程按后文的 CMake 命令运行整个目标。\\
@@ -269,7 +260,7 @@ Terminal（终端） & 运行 shell 命令或与程序交互；加号新建终�
 
 如果你在终端里启用了 p10k，却看到文件夹、系统图标变成白色方框，先检查这里的字体设置。
 系统里安装了 Nerd Font，还要让 VS Code 的集成终端选用它；在设置里搜索 \path{terminal.integrated.fontFamily}，填写已经安装的字体名称即可。
-本机截图使用 \texttt{Maple Mono NF CN}，你也可以使用前面 Shell 一节介绍的字体。改完后看一眼提示符，确认图标能正常显示，再接着操作。CLion 的对应入口在 Settings → Tools → Terminal（设置→工具→终端）；编辑区与运行控制台的字体则分别在 Editor → Font 和 Color Scheme → Console Font 中设置。
+我这里的截图使用的是 \texttt{Maple Mono NF CN}，你也可以使用前面 Shell 一节介绍的字体。改完后看一眼提示符，确认图标能正常显示，再接着操作。CLion 的对应入口在 Settings → Tools → Terminal（设置→工具→终端）；编辑区与运行控制台的字体则分别在 Editor → Font 和 Color Scheme → Console Font 中设置。
 
 \Needspace{10\baselineskip}
 \subsubsection{在 VS Code 中运行同一个 CMake 工程}
@@ -333,7 +324,7 @@ Toggle Breakpoint 切换断点 & Ctrl+F8 & F9 & 在当前行添加或取消断�
 \begin{figure}[H]
 \centering
 \includegraphics[trim=76bp 375bp 379bp 50bp,clip,width=0.9\textwidth]{ide/vscode_debug_revised.png}
-\caption{Ubuntu 中的实际单步结果：执行第 11 行后停在第 12 行，左侧 \texttt{total = 75}；顶部是调试工具栏}
+\caption{VsCode 中的实际单步结果：执行第 11 行后停在第 12 行，左侧 \texttt{total = 75}；顶部是调试工具栏}
 \label{fig:vscode-debug}
 \end{figure}
 \textbf{变量（Variables）}显示当前栈帧的局部变量；\textbf{监视（Watches/Watch）}可以添加 \texttt{score + bonus} 等表达式；
