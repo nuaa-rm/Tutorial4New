@@ -1,209 +1,307 @@
+前两章里，我们把抖动的观测变成了状态估计，又把图像点和空间位姿联系起来。不过，算出一个角度，并不等于云台已经转到那里：你发出指令后，电机还要加速、减速，通信和计算也要花时间。如果目标已经走了，云台还在追上一帧的位置，几何算得再漂亮也帮不上忙。
 
-在完成了对目标状态的估计（Kalman 滤波）和空间位置的精确解算（BA）之后，自瞄系统的最后一步，是将“期望的射击角度”转化为云台的实际运动。云台是一个存在惯性、延迟和饱和的非理想执行器，如何规划其运动轨迹以最大化命中率，就是本章要讨论的模型预测控制（MPC）及相关信号与系统知识。
+这时候，我们需要把“接下来想去哪里”和“执行器来不来得及”一起考虑。模型预测控制（Model Predictive Control，MPC）会先预测一段运动，找出满足约束的输入，再根据新状态继续规划。本章沿用原来能手算的一步例子，然后搭一个真正求解有限时域二次规划（Quadratic Programming，QP）的小项目。全部实验只在离线模型里运行，真实云台参数、弹道和开火判定留到卷三。
 
-\subsubsection{信号与系统——指令是如何变成云台运动的}
-\paragraph*{为什么视觉要学习一些控制理论}
-自瞄不仅仅是“看到目标——>开火”。相机检测到装甲板，计算出云台需要偏转的角度，这个角度作为指令发送给云台电机。然而，真实云台并不会瞬间到达指令位置，它的运动是一个动态过程：加速、超调、震荡、滞后。若不了解这个过程，仅仅依靠“看到目标就拉过去”的简单逻辑，在面对高速旋转的“小陀螺”目标时，命中率会急剧下降。
-学习控制理论，本质上是理解\emph{指令信号是如何被系统“扭曲”的}。只有理解了扭曲的规律，我们才能设计出前瞻性的规划器，提前补偿这种扭曲，使云台的实际指向尽可能贴合弹道所需的理想指向。这正是信号与系统视角的用武之地。
+\subsubsection{信号与系统：指令是怎么变成运动的}
 
-\paragraph*{傅里叶变换和频域分析}
-满足相应变换条件的信号，例如目标运动导致的期望云台角度 $r(t)$，都可以通过傅里叶变换分解为不同频率的正弦波叠加。频域分析的核心思想是：我们不直接观察系统对复杂信号的响应，而是考察系统对每个单一频率正弦信号的响应，然后综合起来。
-对于一个线性时不变系统，输入为 $\sin(\omega t)$，在稳定且稳态存在的条件下，稳态输出是 $A(\omega)\sin(\omega t + \phi(\omega))$。其中 $A(\omega)$ 称为幅频特性，$\phi(\omega)$ 称为相频特性。它们构成了系统的频率响应，完整描述了系统对任意信号的“处理方式”。
+\paragraph*{先分清你发给了谁}
+如果输入是电机力矩$\tau$，单轴惯量和黏性阻尼的简化模型为
+\[
+J\ddot\theta+B\dot\theta=\tau.
+\]
+J是转动惯量，B是阻尼系数；这里忽略摩擦、间隙等效应。零初始条件下，拉普拉斯变换给出$\Theta(s)/\mathcal{T}(s)=1/[s(Js+B)]$。如果驱动器已经有速度环，而你发的是角速度指令，那么可以在适用的频段内用
+\[
+\frac{\Theta(s)}{U(s)}=\frac{K}{s(Ts+1)}
+\]
+近似“速度环的一阶滞后，再积分成角度”。这两个输入的含义不同，不能因为都叫u，就把系数直接互换。
 
-\paragraph*{系统传递函数}
-云台的单轴动力学可以简化为一个带有惯量和阻尼的二阶系统，微分方程为：
-\begin{equation}
-    J\ddot{\theta}(t) + B\dot{\theta}(t) = \tau(t)
-\end{equation}
-其中 $J$ 为转动惯量，$B$ 为阻尼系数，$\tau$ 为电机力矩。
-由于我们通常以期望角速度或角度作为控制指令，实际的云台电机驱动器内部往往已包含电流环和速度环，因此从指令 $u$（如设定角速度）到实际角度 $\theta$ 的传递函数可近似为：
-\begin{equation}
-    G(s) = \frac{\Theta(s)}{U(s)} = \frac{K}{s(T s + 1)} \quad \text{或更精确的二阶形式。}
-\end{equation}
-通过拉普拉斯变换，微分方程变成了代数方程，使我们能方便地分析系统的极点、带宽和稳定性。在数字控制中，我们还要进行离散化，得到脉冲传递函数 $G(z)$，这是 MPC 预测模型的基础。
+传递函数（transfer function）方便我们在零状态条件下描述输入输出关系；状态空间还可以把当前角度、角速度等初始状态带进去。先别急着找一套特别复杂的电机模型，我们从能看出滞后的离散系统开始：
+\[
+y[k+1]=a y[k]+(1-a)u[k],\qquad 0\le a<1.
+\]
+它是归一化的一阶响应例子，不能替代上面的力矩模型。取$y[0]=0,u[k]=1$，有$y[k]=1-a^k$。a越接近1，旧状态占的比重越大，接近目标也越慢。
 
-\begin{example}
-一阶离散模型 y[k+1]=0.8y[k]+0.2u[k]，初值 0，单位阶跃输入。前三步输出为 0.2、0.36、0.488。
-\begin{tpython}
-y=0.0
-values=[]
-for _ in range(3):
-    y=0.8*y+0.2
-    values.append(y)
-assert abs(values[-1]-0.488)<1e-12
-print(values)
-\end{tpython}
+\begin{example}[先把原来的三步响应跑出来]
+取a=0.8，前三步是0.2、0.36、0.488。接下来我们还要观察纯延时、两频率叠加和控制限幅，所以把这些实验放在\path{examples/mpc/horizon-control-demo}里，后面的小节继续使用同一个项目。
+
+在Ubuntu24.04里先准备数值库，再建立虚拟环境；别把pip安装直接塞进系统Python：
+\begin{tbash}
+sudo apt install python3-venv python3-numpy python3-scipy python3-matplotlib
+cd /你的教材目录/02-专项技术栈/examples/mpc/horizon-control-demo
+python3 -m venv --system-site-packages .venv
+. .venv/bin/activate
+python -m pip install -r requirements.txt
+\end{tbash}
+教材路径换成自己的。这里使用OSQP1.0.4，当前实测Python3.12；\texttt{requirements.txt}的完整内容是：
+\lstinputlisting[language=bash,basicstyle=\footnotesize\ttfamily]{examples/mpc/horizon-control-demo/requirements.txt}
+项目不依赖ROS节点，在你的Jazzy环境里也可以直接运行：
+\par\smallskip\noindent\begin{minipage}{\linewidth}
+\begin{tbash}
+horizon-control-demo/
+  response.py    # 一阶响应、纯延时、几何半角
+  scalar.py      # 一步优化与旧序列对比
+  model.py       # 保持加速度的离线模型
+  prediction.py  # 堆叠未来状态
+  qp.py          # 实际有限时域约束求解
+  controller.py  # 时效、状态与约束检查
+  run.py         # 闭环、扰动、错误模型与回退
+  plot.py        # 读取实际数组绘图
+  requirements.txt
+  README.md
+\end{tbash}
+\end{minipage}\par
+\path{response.py}一次生成三类互相独立的观察值。首先看阶跃的k/y；频响和半角的部分在后面接着解释，不能把一个归一化y当作真实角度：
+\needspace{8\baselineskip}
+\lstinputlisting[language=Python,numbers=left,basicstyle=\footnotesize\ttfamily]{examples/mpc/horizon-control-demo/response.py}
+\needspace{5\baselineskip}
+\begin{tbash}
+python response.py --output out/response
+python response.py --a 0.5 --output out/fast
+\end{tbash}
+通用形式是\texttt{python response.py [选项]}。a控制离散响应，delay以秒给纯延时，distance以米给几何距离，output保存实际数组。默认a0.8首次达到0.9/0.98需要11/18步；a0.5为4/6步。这里数的是采样步，指定采样间隔后才能换算秒。
 \end{example}
-
-\begin{exercise}
-将系数改为 0.5 和 0.5，比较达到 0.9 所需步数，解释响应速度的变化。
+\begin{exercise}\label{ex:v2-mpc-step}
+手算a=0.5达到0.9所需步数，再运行两种a核对。若采样间隔同为10ms，各需要多少秒？为什么仅报步数还不能比较两台不同采样周期的设备？
 \end{exercise}
 
-\subsubsection{幅频失真和相频失真}
-\paragraph*{静态响应特性和动态响应特性}
-系统的响应可以分为两个阶段：动态过程（过渡过程）和静态（稳态）过程。我们通常用阶跃响应来刻画：
-\begin{itemize}
-    \item 动态特性指标：上升时间 $t_r$、峰值时间 $t_p$、超调量 $\sigma\%$、调节时间 $t_s$。
-    \item 静态特性指标：稳态误差 $e_{ss}$。
-\end{itemize}
-一个理想的云台要求动态响应快、无超调、稳态误差小。但由于物理限制，这些指标往往相互矛盾。
+\subsubsection{幅度、相位与延时：慢在哪里}
 
-\paragraph*{失真}
-当输入信号含有多个频率分量时，如果系统在各个频率上的 $A(\omega)$ 不是常数，或者 $\phi(\omega)$ 与 $\omega$ 不成正比，输出波形就会与输入形状不同，这就是失真。
-\begin{itemize}
-    \item 幅频失真：不同频率分量被放大了不同的倍数，改变了信号的能量分布。在自瞄中，表现为云台对快速摆动幅度跟不上，但慢速摆动正常。
-    \item 相频失真：不同频率分量产生不同的时间延迟，导致各分量“错位”叠加，波形发生严重畸变。纯延时对应线性相位，保持波形但使跟踪滞后；它与相频失真应分开讨论。
-\end{itemize}
+\paragraph*{从一根正弦波开始}
+对于线性时不变（Linear Time-Invariant，LTI）系统，我们可以先考察不同频率的正弦输入。稳定且存在相应稳态时，输入$\sin(\omega t)$的稳态输出写成$A(\omega)\sin[\omega t+\phi(\omega)]$。A是幅频特性，$\phi$是相频特性。满足变换条件的信号可以分解成频率分量，再利用线性叠加；初始过渡、饱和和时变系统不能随手装进这个结论。
 
-\paragraph*{产生失真的原因}
-失真的根本原因在于系统的惯性。从传递函数上看，就是极点不为零且时间常数不可忽略。此外，机械间隙、摩擦、传感器采样延迟和通讯延迟都会加剧相位滞后。在控制层面，过高的增益可能激发结构谐振，导致高频抖振，这也是一种非线性失真。
+项目里按$u[k]$对$y[k]$定义频响，令$z=e^{\mathrm j\Omega}$，$\Omega=2\pi f\Delta t$，则
+\[
+G(z)=\frac{1-a}{z-a}.
+\]
+代码\texttt{H=(1-a)/(exp(2j*pi*f*dt)-a)}保留了从k到k+1的时间约定。把它错写成别的索引关系，幅值可能仍像那么回事，相位却会差一拍。
 
-\begin{example}
-纯延时 0.02 s 在 1 Hz 下相位滞后约 0.126 rad，在 10 Hz 下约 1.257 rad。虽然相位不同，时间延迟仍相同。
-\begin{tpython}
-import math
-delay=0.02
-for f in [1,10]:
-    phase=-2*math.pi*f*delay
-    print(f,round(phase,3))
-\end{tpython}
+\begin{example}[同样的滞后，未必是同一种改变]
+纯延时$T_d$的频响是$e^{-\mathrm j\omega T_d}$，幅值1、相位$-\omega T_d$。取20ms，1/10Hz相位约为$-0.126/-1.257$rad；相位角不同，时间延迟却相同。response的delayed按这条公式生成，表示已经存在的连续稳态信号整体后移，并没有给它加启动过渡。
+
+而一阶模型a0.8、采样10ms在1/10Hz的幅值约0.963/0.340，相位约$-0.307/-1.555$rad。它让两频率的比例改变，因此叠加波形也变了。图\ref{fig:v2-mpc-response}左边看接近目标的快慢，右边看“整体后移”和“形状改变”的区别；实际逐步递推后的稳态拟合也独立核对了这些增益与相位。
 \end{example}
-
-\begin{exercise}
-若两频率的幅度增益分别为 1 和 0.2，说明叠加波形还会发生哪种改变。
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.94\textwidth]{images/mpc_response_revised.pdf}
+\caption{实际保存的一阶阶跃与两频率稳态数组；右图分别显示输入、纯延时和一阶输出，不能把稳态图当作启动过程。}
+\label{fig:v2-mpc-response}
+\end{figure}
+\begin{exercise}\label{ex:v2-mpc-frequency}
+两个频率分量分别乘1和0.2后，叠加形状会怎样改变？再将delay改为0.01，计算5Hz的相位，说明纯延时是否改变两分量的相对幅度。
 \end{exercise}
 
-\subsubsection{可响应信号与误差容限}
-\paragraph*{命中条件}
-弹丸从枪口射出到命中装甲板需要飞行时间。在这段时间内，目标可能发生位移。由于弹丸有一定直径，且装甲板有尺寸，允许云台指向存在一个角度偏差 $\epsilon$。简单估计，在距离 $d$ 处，可命中区域对应的角度容限约为：
-\begin{equation}
-    \epsilon \approx \arctan\left(\frac{L}{2d}\right) \approx \frac{L}{2d}
-\end{equation}
-其中 $L$ 为简化模型中允许的有效宽度；本章仅讨论点目标的几何容限，不据此直接判定实车开火。这就是云台跟踪的最大允许误差。
+\paragraph*{阶跃指标与物理限制}
+阶跃常用上升时间、超调量、调节时间和稳态误差来描述。比较时要声明标准，例如进入并保持在最终值的2\%范围内；本项目的一阶单调响应可直接数首次达到0.98的步数，存在振荡的响应则不能只找第一次穿线。
 
-\paragraph*{云台响应误差容限}
-发射前的跟踪评估中，可比较云台的实际指向 $\theta_{real}$ 与解算出的理想射击角度 $\theta_{des}$ 之间的偏差 $e(t) = \theta_{des}(t) - \theta_{real}(t)$ 在计划发射时刻满足 $|e(t)| \leq \epsilon$。但考虑到系统存在动态滞后，$e(t)$ 不会恒为零，必须分析在最坏目标运动下，系统的误差能否被限制在 $\epsilon$ 以内。
-
-\paragraph*{可响应信号的定义}
-受限于电机最大力矩（加速度）和最大转速，云台能够跟踪的信号在频率和幅度上是有范围的。定义输入信号为正弦摆动 $r(t) = A \sin(\omega t)$，若要求跟踪误差小于 $\epsilon$，则系统必须在误差容限内响应。通过频域分析，可绘制出系统对于不同 $\omega$ 所能跟踪的最大幅度 $A_{\max}$，这称为\emph{可响应信号包络}。超出此包络的信号，无论如何设计控制器，云台都无法物理跟随。MPC 中的约束（最大速度、最大加速度）正是对这个包络的显式描述。
-
-\begin{example}
-简化有效宽度 0.1 m、距离 5 m 时，半角约为 0.01 rad，即 0.573°。先统一单位再比较跟踪误差。
-\begin{tpython}
-import math
-width,distance=0.1,5.0
-epsilon=math.atan(width/(2*distance))
-print(round(epsilon,5),round(math.degrees(epsilon),3))
-\end{tpython}
-\end{example}
-
-\begin{exercise}
-距离变为 10 m，计算新容限；说明为什么同一角度误差在远距离更难接受。
-\end{exercise}
-
-\subsubsection{控制器设计——规划问题建立}
-\paragraph*{最大化命中率}
-命中率的最大化，可以转化为一个优化问题：在云台物理能力的严格约束下，使跟踪误差的某种范数最小。这就是典型的最小二乘思想：
-\begin{center}
-    \textbf{找一个控制指令序列，让未来一段时间内的预测输出与期望轨迹之间的差距最小，同时输入能量不能太大。}
-\end{center}
-形式上与 Kalman 滤波（最小化估计误差方差）和 BA（最小化重投影误差平方和）完全一致，只是这里的优化变量是控制量。
-
-\paragraph*{基于云台模型的规划器设计}
-我们采用线性离散状态空间模型描述云台的动态。设状态 $\mathbf{x} = [\theta, \dot{\theta}]^T$，控制输入 $u$（例如加速度或速度指令），离散化后得到：
-\begin{equation}
-    \mathbf{x}_{k+1} = \mathbf{A} \mathbf{x}_k + \mathbf{B} u_k,\qquad y_k = \mathbf{C} \mathbf{x}_k
-\end{equation}
-其中 $\mathbf{C} = [1, 0]$。
-
-在时刻 $k$，已知当前状态 $\mathbf{x}_k$，我们需要规划未来 $N$ 个周期的控制序列 $\mathbf{U} = [u_k, u_{k+1}, \dots, u_{k+N-1}]^T$，使输出 $y_{k+i}$ 跟踪由目标预测与弹道解算给出的参考角度 $r_{k+i}$。
-
-定义代价函数：
-\begin{equation}
-    F(\mathbf{U}) = \sum_{i=1}^{N} \| r_{k+i} - y_{k+i}\|_{\mathbf{Q}}^2 + \sum_{i=0}^{N-1} \| u_{k+i}\|_{\mathbf{R}}^2
-\end{equation}
-第一项惩罚跟踪误差，第二项抑制过大的控制量，避免震荡。同时，必须满足物理约束：
-\begin{align}
-    |u_{k+i}| &\leq u_{\max} \quad (\text{加速度/力矩限制}) \\
-    |\dot{\theta}_{k+i}| &\leq \dot{\theta}_{\max} \quad (\text{速度限制})
-\end{align}
-由此，云台控制问题被建立为一个带约束的二次优化问题。这种在模型预测框架下直接考虑约束的方法，正是 MPC 区别于 PID 的核心优势。
-
-\begin{example}
-一步模型 y\_next=y+u，目标 1，当前 y=0，代价 (1-y\_next)²+u²，约束 |u|≤0.2。无约束最优 u=0.5，约束解为 0.2，代价为 0.68。
-\begin{tpython}
-target,y=1.0,0.0
-u_free=(target-y)/2
-u=max(-0.2,min(0.2,u_free))
-cost=(target-y-u)**2+u*u
-assert abs(cost-0.68)<1e-12
-print(u,cost)
-\end{tpython}
-\end{example}
-
-\begin{exercise}
-将控制惩罚权重从 1 改为 9，推导无约束解，再判断是否触及限幅。
-\end{exercise}
-
-\subsubsection{最优控制轨迹求解}
-为求解，需要将上述优化问题化为标准二次规划（QP）形式。首先，利用状态方程递推，将预测的输出序列表示为当前状态 $\mathbf{x}_k$ 与控制序列 $\mathbf{U}$ 的线性组合：
-\begin{equation}
-    \mathbf{Y} = \begin{bmatrix} y_{k+1} \\ y_{k+2} \\ \vdots \\ y_{k+N} \end{bmatrix} = \Phi \mathbf{x}_k + \Theta \mathbf{U}
-\end{equation}
-其中 $\Phi$ 和 $\Theta$ 由 $\mathbf{A}, \mathbf{B}, \mathbf{C}$ 构成。然后，将代价函数改写为：
-\begin{align}
-    F(\mathbf{U}) &= (\mathbf{R} - \mathbf{Y})^T \bar{\mathbf{Q}} (\mathbf{R} - \mathbf{Y}) + \mathbf{U}^T \bar{\mathbf{R}} \mathbf{U} \\
-    &= \frac{1}{2} \mathbf{U}^T \mathbf{H} \mathbf{U} + \mathbf{g}^T \mathbf{U} + \text{常数}
-\end{align}
-其中 $\mathbf{H} = 2(\Theta^T \bar{\mathbf{Q}} \Theta + \bar{\mathbf{R}})$，$\mathbf{g} = -2\Theta^T \bar{\mathbf{Q}} (\mathbf{R} - \Phi \mathbf{x}_k)$。约束同样整理为 $\mathbf{A}_{ineq} \mathbf{U} \leq \mathbf{b}_{ineq}$ 的形式。
-最终，每个控制周期求解：
-\begin{equation}
-    \mathbf{U}^* = \arg\min_{\mathbf{U}} \frac{1}{2}\mathbf{U}^T \mathbf{H} \mathbf{U} + \mathbf{g}^T \mathbf{U} \quad \text{s.t.} \quad \mathbf{A}_{ineq} \mathbf{U} \leq \mathbf{b}_{ineq}
-\end{equation}
-此 QP 问题可使用高效求解器（如 qpOASES、OSQP）在线求解。$MPC$ 的“滚动时域”思想在于：只执行 $\mathbf{U}^*$ 的第一个元素 $u_k^*$，下一周期根据新的状态重新规划。这赋予系统对模型误差和外部扰动的反馈能力。
-
-\begin{example}
-把上一节的一步约束优化按滚动时域连续执行。每轮重新读状态，只执行当前最优控制；前两步为 0.2、0.2。
-\begin{tpython}
-y=0.0
-controls=[]
-for k in range(6):
-    u=max(-0.2,min(0.2,(1-y)/2))
-    controls.append(u)
-    y+=u
-    print(k,u,y)
-assert controls[:2]==[0.2,0.2]
-assert abs(y-0.95)<1e-12
-\end{tpython}
-\end{example}
-
-\begin{exercise}
-第三步后给状态减去 0.1 模拟扰动，对比重新规划与照抄旧控制序列的结果。
-\end{exercise}
-
-\subsubsection{关于云台控制信号的一些细节}
-\begin{itemize}
-    \item \textbf{前馈与反馈结合}：MPC 给出的控制量是规划好的最优轨迹，但实际模型存在误差。通常将 MPC 的输出作为前馈力矩，再叠加一个轻度的 PID 或 PD 进行误差补偿，可以进一步提升鲁棒性。
-    \item \textbf{预测时域}：时域 $N$ 的选择是权衡。过短则缺乏前瞻，过长则计算量大且模型不准。对于自瞄，例如周期为 10 ms 时，$N=10\sim20$ 对应 $0.1\sim0.2$ s；实际时域应根据模型、延迟与求解预算选择。
-    \item \textbf{与 Kalman 的衔接}：MPC 的参考轨迹 $r_{k+i}$ 来自 Kalman 滤波器的多步预测和弹道补偿。Kalman 输出的预测协方差也可以用来动态调整 MPC 的权重 $\mathbf{Q}$，在预测不确定性高时降低跟踪精度要求，避免激烈抖动。
-    \item \textbf{低通滤波}：指令 $u_k$ 在发送给电机前，通常经过一个截止频率略高于系统带宽的低通滤波器，以滤除规划器输出的高频毛刺，防止激发机械共振。
-\end{itemize}
-整个 MPC 控制框图可以理解为：视觉前馈的参考轨迹 $\rightarrow$ 基于模型的优化规划器 $\rightarrow$ 补偿与滤波 $\rightarrow$ 物理云台。它与前两章讲述的 Kalman 滤波和 BA 一道，构成了从“看见”到“击中”的完整自瞄计算链条。
-
-\begin{example}
-控制周期为 10 ms，输入采集 2 ms、求解 5 ms、发送 1 ms，共 8 ms，余量 2 ms。若某次求解耗时 15 ms，结果可能已过期；需记录超时并触发事先设计的受限回退控制。
-\end{example}
-
-\begin{exercise}
-把求解器返回状态、耗时、输入时间戳列成一次控制日志，写出判定结果可用的条件。
-\end{exercise}
-
+幅频失真来自不同频率的增益不同，相频失真来自不能归为统一延时的相位关系。惯性、带宽和采样都会影响响应，摩擦/间隙等非线性又有自己的条件；结构共振也可能出现在仍然线性的模型里，不能一律归成非线性失真。你调高增益时看到抖动，先看测量、模型和频段，再决定从哪里改，别给PID旋钮加上“越大越强”的游戏属性。
 \begin{conclusion}
-\begin{itemize}
-\item Kalman 提供状态估计，参考轨迹还要统一时间与坐标。
-\item MPC 预测执行器运动，在目标和输入限制之间优化。
-\item 只执行首个控制量，下一周期重规划。
-\item 额外低通滤波会改变闭环动态，须纳入模型或验证其延迟。
-\end{itemize}
+幅值告诉你跟到了多大，相位告诉你各分量落后多少。纯延时保留形状但让整个信号迟到；一阶滞后同时改变增益和相位。频响描述有条件的LTI响应，阶跃看过渡，饱和与间隙需要另外分析。
 \end{conclusion}
 
+\subsubsection{误差容限与执行器来不来得及}
+取简化点目标模型，有效宽度L、距离d对应几何半角
+\[
+\epsilon=\arctan\frac{L}{2d}\approx\frac{L}{2d}.
+\]
+小角度近似用rad；这个几何量只帮助比较尺度，没有把目标运动、弹丸飞行、标定误差和判定规则一起算进去，不能直接当实车开火条件。
+\begin{example}[还是原来的0.1m与5m]
+\begin{tbash}
+python response.py --distance 5 --output out/near
+python response.py --distance 10 --output out/far
+\end{tbash}
+前者约0.0099997rad，即0.573°，后者约0.005rad。你把距离加倍，同样宽度在画面里就更窄，同样角度误差也更容易落到外面。
+\end{example}
+\begin{exercise}\label{ex:v2-mpc-tolerance}
+核对10m时的半角和角度值。对于固定角度误差0.008rad，分别换算5/10m处的横向偏移，解释它与几何宽度的关系。
+\end{exercise}
+
+对参考$r(t)=A\sin\omega t$，精确跟随需要最大速度$A\omega$和最大加速度$A\omega^2$，因此至少满足
+\[
+A\omega\le\omega_{\max},\qquad A\omega^2\le a_{\max}.
+\]
+这里$\omega_{\max}$是执行器角速度上限，$\omega$是信号角频率，两个符号长得像，单位和含义却要分开。对于已经辨识的稳定LTI闭环，稳态误差幅度还可写为$A|1-G(\mathrm j\omega)|$，再与$\epsilon$比较。这是特定模型和稳态条件下的响应包络，不能宣称仅凭两个物理上限就证明任意控制器的误差。
+\begin{example}[先排除根本跟不上的参考]
+取$\omega_{\max}=0.8$rad/s、$a_{\max}=2$rad/s$^2$、A=0.1rad、f=2Hz，精确跟随要求约1.257rad/s和15.79rad/s$^2$，两项都超限。换成f=0.5Hz，需要约0.314/0.987，满足这两项必要条件，但还没有证明实际跟踪误差合格。
+\end{example}
+\begin{exercise}\label{ex:v2-mpc-envelope}
+保持上述上限，在1Hz时分别求速度、加速度允许的最大A，并取更小者。这个数是否已经证明稳态误差不超过0.01rad？还缺什么信息？
+\end{exercise}
+
+\subsubsection{把规划问题写清楚}
+MPC的目标是让未来预测误差小，同时不过度使用输入，并把约束写进求解。它和最小二乘共享一些数学形式，但优化变量是控制序列；Kalman在估计状态，BA在拟合几何，不能把三者说成同一个任务。跟踪误差小也不能直接等同于命中率最优，真实链路还要考虑那些没有写进当前模型的因素。
+
+\paragraph*{明确这次u的单位}
+项目状态为$x=[\theta,\omega]^T$，单位rad、rad/s，u是一个采样周期内保持的角加速度，单位rad/s$^2$。采样$\Delta t=0.05$s，从连续关系$\dot\theta=\omega,\dot\omega=u$得到
+\[
+x_{k+1}=Ax_k+Bu_k,\quad
+A=\begin{bmatrix}1&\Delta t\\0&1\end{bmatrix},\quad
+B=\begin{bmatrix}\Delta t^2/2\\\Delta t\end{bmatrix},\quad y_k=[1\ 0]x_k.
+\]
+这是保持输入条件下的精确离散模型，不是已测量的云台动力学。若你的驱动器接收速度、位置或力矩，需要先确定对应模型和接口，再决定控制量怎样发送。
+\begin{example}[先让模拟执行器走一步]
+\path{model.py}统一这一层，\texttt{gain}只在模拟真实对象时改变加速度，用来制造“控制器相信的模型与实际对象不一致”：
+\needspace{8\baselineskip}
+\lstinputlisting[language=Python,numbers=left,basicstyle=\footnotesize\ttfamily]{examples/mpc/horizon-control-demo/model.py}
+从静止状态施加u=2持续0.05s，下一状态为$[0.0025,0.1]^T$。先核对这个量级，再往上叠规划器，否则漏掉一个$\Delta t$，曲线也许很热闹，单位已经离家出走了。
+\end{example}
+\begin{exercise}\label{ex:v2-mpc-model}
+从$[0.1,-0.2]^T$施加u=1持续0.05s，计算下一状态。若把保持加速度误当作速度指令，为什么原B不能继续使用？
+\end{exercise}
+
+\paragraph*{保留能手算的一步问题}
+先用抽象标量$y^+=y+u$。当前y=0、参考1，最小化$(1-y-u)^2+Ru^2$，无约束解为$u=(1-y)/(1+R)$。在标量区间约束下可将这个解截到区间里；多变量耦合约束不能直接照搬逐元素截断。
+\begin{example}[限幅前后，以及旧序列遇到扰动]
+\path{scalar.py}保留原来的一步计算和六轮实验；这不是下面N15模型的替代，而是帮助你先看清“只执行第一步，下次重新读状态”：
+\needspace{8\baselineskip}
+\lstinputlisting[language=Python,numbers=left,basicstyle=\footnotesize\ttfamily]{examples/mpc/horizon-control-demo/scalar.py}
+\begin{tbash}
+python scalar.py
+\end{tbash}
+R=1、上限0.2时，无约束0.5被截到0.2，实际代价0.68。六轮无扰动到0.95；第三轮后减0.1，再规划到0.925，而照旧控制到0.85。打印的controls和states可逐步与手算对应。
+\end{example}
+\begin{exercise}\label{ex:v2-mpc-scalar}
+把R改为9，推导输入和代价，判断是否限幅。再解释为什么重新规划的后三步是0.2/0.15/0.075，而旧序列是0.2/0.1/0.05。
+\end{exercise}
+
+\subsubsection{真正求一段未来轨迹}
+在时刻k，我们规划$U=[u_k,\ldots,u_{k+N-1}]^T$，堆叠未来状态$X=[x_{k+1}^T,\ldots,x_{k+N}^T]^T$，有
+\[
+X=\Phi x_k+\Theta U,\qquad
+\Phi_i=A^{i+1},\quad
+\Theta_{ij}=\begin{cases}A^{i-j}B,&j\le i,\\0,&j>i,\end{cases}
+\]
+这里i/j从0开始，每块两行。想只看角度输出，就选每个状态的第一行；项目同时用角速度建立代价和约束，因此保留完整X。
+\begin{example}[堆叠矩阵不是凭名字生成的]
+\path{prediction.py}按照上式逐块放入；第一个输入会影响整个后续预测，最后一个只影响最后状态：
+\needspace{8\baselineskip}
+\lstinputlisting[language=Python,numbers=left,basicstyle=\footnotesize\ttfamily]{examples/mpc/horizon-control-demo/prediction.py}
+N=2时$\Theta$为
+\[
+\begin{bmatrix}.00125&0\\.05&0\\.00375&.00125\\.05&.05\end{bmatrix}.
+\]
+本次用N1/2/15与独立逐步递推核对，最大差接近机器精度。做完这一层，才知道求解器收到的“未来”与模拟器是不是同一个未来。
+\end{example}
+\begin{exercise}\label{ex:v2-mpc-prediction}
+写出N2的$\Phi$，用$x_k=[0.1,-0.2]^T,U=[1,-1]^T$分别逐步计算与矩阵计算四个状态分量。
+\end{exercise}
+
+\paragraph*{从平方代价到二次规划}
+每步参考状态为$[r,0]^T$，角度跟r、角速度希望回到0。项目把角度权重取20，角速度取0.5，输入取0.1，再按N步重复，得到
+\[
+\bar Q=\operatorname{diag}(20,0.5,\ldots),\qquad \bar R=0.1I.
+\]
+将参考堆叠称为$X_{ref}$，避免与输入权重R混淆。于是
+\begin{align*}
+F(U)&=(X-X_{ref})^T\bar Q(X-X_{ref})+U^T\bar R U\\
+&=\tfrac12U^THU+g^TU+c,\\
+H&=2(\Theta^T\bar Q\Theta+\bar R),\quad
+ g=2\Theta^T\bar Q(\Phi x_k-X_{ref}).
+\end{align*}
+c与U无关，所以求最优输入时可以略去；报告完整代价时要加回。不同单位的状态需要相应权重，20和0.5只是当前模型的设计选择，不是通用调参答案。正输入权重让本例H正定，不能用“求解器没报错”代替凸性判断。
+
+OSQP使用$\min\frac12U^THU+g^TU$、$l\le DU\le h$的接口。加速度用I U约束，角速度用$\Theta$的奇数行和$\Phi x_k$的偏移约束；若加硬终点角度，就再加一行等式。\href{https://osqp.org/docs/interfaces/python.html}{官方Python接口}说明CSC稀疏矩阵及返回值，\href{https://osqp.org/docs/interfaces/status_values.html}{状态表}帮你区别solved、infeasible和迭代上限。本项目按实际1.0.4接口核对，不假定不同版本参数名完全一样。
+\begin{example}[真正把约束交给求解器]
+\path{qp.py}给出全部构造和求解。\texttt{result.x}只在约定成功且有限时使用，再用原始约束计算最大违反量；不从“函数返回了”推断所有条件都满足：
+\needspace{8\baselineskip}
+\lstinputlisting[language=Python,numbers=left,basicstyle=\footnotesize\ttfamily]{examples/mpc/horizon-control-demo/qp.py}
+当前N15有15个控制变量，预测30个状态分量，默认30行区间约束；角速度软代价与硬上限同时存在，但作用不同。完整代价/梯度与独立SLSQP求解也实际核对。
+\end{example}
+\begin{exercise}\label{ex:v2-mpc-constraints}
+解释\texttt{Theta[1::2]}为什么选出角速度，以及上下界中为何减offset。再算从静止状态、N2、u上限2时最多能转多少角度，硬要求终点0.4rad是否可行？
+\end{exercise}
+\begin{conclusion}
+模型决定输入作用，预测矩阵把各步影响叠起来，代价表达偏好，约束表达范围。求解前保证单位、索引和凸性；求解后检查原始约束与时效。N1手算的限幅有助于入门，耦合QP需要实际求解，不能用逐元素截断冒充最优解。
+\end{conclusion}
+
+\subsubsection{滚动执行、失败与时效}
+求出N个输入后，我们只执行第一个。下一轮拿新状态重做预测，这样扰动才有机会进入反馈。不过，如果这一轮迟到了，状态已经变了，旧的“最优”也可能不适合现在。
+
+\begin{example}[别只看solved这一行]
+\path{controller.py}按单调时钟记录采集/开始时间、整轮耗时和输入年龄，另记求解器自身run\_time。只有约定成功、有限、违反量不超过$10^{-5}$、整轮不超过预算且输入年龄合格，才接受第一输入：
+\needspace{8\baselineskip}
+\lstinputlisting[language=Python,numbers=left,basicstyle=\footnotesize\ttfamily]{examples/mpc/horizon-control-demo/controller.py}
+预算默认10ms，输入年龄上限100ms；这些是教学实验的约定。计时包含QP构造、setup、solve及检查，Python启动和导入在循环前。\texttt{work\_ms}会真的等待以制造超时，没有伪造返回状态或时钟；它不是最坏执行时间证明。OSQP自身\href{https://osqp.org/docs/interfaces/solver_settings.html}{time\_limit设置}也不能代替整个处理链截止时间。
+
+本例回退为$\operatorname{clip}(-\omega/\Delta t,-a_{max},a_{max})$，在声明模型里尽量减速并保持输入限幅。已超速状态不会因为一句“安全回退”立即恢复，真实设备还需确定制动/保持/失联行为。例如初始1.2rad/s、上限2时下一步仍为1.1rad/s，不能声称已满足0.8上限。
+\end{example}
+\begin{exercise}\label{ex:v2-mpc-gate}
+列出这次日志中判断可用所需的量。输入已200ms、求解返回solved而整轮1ms时能否接受？从0.4rad/s执行上述回退，下一速度是多少？
+\end{exercise}
+
+\begin{example}[把模拟对象与控制循环接起来]
+\path{run.py}每轮用新状态调用choose，step更新模拟对象；第20轮更新后可加角度扰动。模拟时间是k乘0.05s，日志计时是实际计算墙钟，两者不假装相同：
+\needspace{8\baselineskip}
+\lstinputlisting[language=Python,numbers=left,basicstyle=\footnotesize\ttfamily,firstline=1,lastline=34]{examples/mpc/horizon-control-demo/run.py}
+接下来初始化并进入闭环。\texttt{command\_alpha}用于后面“额外低通”的反例，默认1表示直接执行；回退命令不再经过这层滤波拖延：
+\needspace{8\baselineskip}
+\lstinputlisting[language=Python,numbers=left,basicstyle=\footnotesize\ttfamily,firstnumber=35,firstline=35]{examples/mpc/horizon-control-demo/run.py}
+\needspace{6\baselineskip}
+\begin{tbash}
+python run.py --output out/default
+python run.py --horizon 1 --output out/short
+python run.py --horizon 30 --output out/long
+python run.py --disturb -0.1 --output out/disturb
+\end{tbash}
+通用形式是\texttt{python run.py [选项]}：horizon是步数；q/r改代价，amax/vmax改上限，reference是rad；gain只改模拟对象，disturb在固定时刻改实际角度；steps改模拟长度，output保存NPZ与逐轮log.json。输出目录已有同名文件时会覆盖，比较实验要换目录。
+
+本次80轮、4s模拟中，N15最终约0.400007rad，最大速度0.6200rad/s，输入不超过2，角度RMSE0.1171rad；N1约0.4244rad且仍有0.1161rad/s速度，RMSE0.2611。N30的RMSE约0.1170，与N15很接近，当前最慢一轮却由约1.61变为6.90ms；多看一些未来有帮助，但不是N越大越好。图\ref{fig:v2-mpc-horizon}用保存数组比较，不重算一套更好看的轨迹。
+\end{example}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.92\textwidth]{images/mpc_horizon_revised.pdf}
+\caption{实际N15与N1闭环：角度、角速度、输入和误差；灰横线标当前上限，曲线来自同样参考和模拟时长。}
+\label{fig:v2-mpc-horizon}
+\end{figure}
+\begin{exercise}\label{ex:v2-mpc-loop}
+分别运行vmax0.3、r1、reference0.7及disturb负0.1变体。比较速度上限、输入幅度与误差，解释每轮为什么要重新读状态，并保留日志而不只截最终值。
+\end{exercise}
+
+\begin{example}[确实发生失败，再检查实际输出]
+\begin{tbash}
+python run.py --horizon 2 --terminal --steps 3 --output out/infeasible
+python run.py --max-iter 1 --steps 3 --output out/maxiter
+python run.py --work-ms 20 --steps 3 --output out/late
+python run.py --age-ms 200 --steps 3 --output out/stale
+\end{tbash}
+terminal加硬终点，max-iter限制实际求解迭代，work-ms为额外真实等待，age-ms让采集时间确实比当前单调时钟早。本次分别得到primal infeasible、maximum iterations reached、deadline、stale\_input。后两者仍可能solved，控制输出却全部回退；这次初始静止，回退为0。最慢超时轮约21.63ms，不能拿求解器较短的内部时间说它赶上了10ms预算。
+
+默认一轮本次最大约1.61ms，只能证明当前机器的这次离线运行；采集2ms、求解5ms、发送1ms共8ms的原算例仍成立，但真实发送、系统调度和更坏输入没有在此测量。在线控制需按整个链路测试截止时间，不能把这组桌面数字当作实时保证。
+\end{example}
+
+\subsubsection{接到实际控制链时还要注意什么}
+首先统一参考轨迹的坐标、时间和单位。Kalman给的是状态与不确定性，参考还需要预测时刻和弹道处理；不确定性大时如何调整跟踪权重是设计选择，降低Q并不会自动证明稳定或改善任务效果。
+
+然后看清接口。这里u是加速度，不能直接称为前馈力矩；若要叠加反馈、摩擦补偿或内环，需要说明由哪个模块换算、限幅在哪里做，并把合成输入的效果纳入模型或验证。反馈带来修正机会，并不保证任意模型误差都能被消掉。
+\begin{example}[改实际增益，以及在规划后偷偷加一层低通]
+\begin{tbash}
+python run.py --gain 0.6 --output out/mismatch
+python run.py --command-alpha 0.1 --output out/filtered
+\end{tbash}
+gain0.6时，本次最终角度约0.400379rad、RMSE0.1323，比默认慢一些。这里只改一个增益，没有证明对所有摩擦、间隙和延迟都鲁棒。
+
+alpha0.1则让实际输入$u^{act}_k=0.1u_k+0.9u^{act}_{k-1}$，预测仍假定直接执行u。虽然实际输入不超过2，最大速度却约0.8203rad/s，越过0.8，4s时角度约0.6098rad。图\ref{fig:v2-mpc-filter}能看到来不及刹住的过程：规划满足的是原模型，滤波后对象走的却是另一条轨迹。若需要这层滤波，应把滤波器状态纳入预测模型并重新验证约束与闭环，而不是只说“曲线平滑所以更安全”。
+\end{example}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.92\textwidth]{images/mpc_filter_revised.pdf}
+\caption{同一默认规划器后置alpha0.1低通的实际反例；角速度出现超限，输入限幅本身没有保证状态约束。}
+\label{fig:v2-mpc-filter}
+\end{figure}
+\begin{exercise}\label{ex:v2-mpc-filter}
+保存低通变体的最大速度与逐轮applied/u日志。若要在预测中加入该低通，应该增加哪个状态？为什么只给旧模型调小R不能代替建模？
+\end{exercise}
+
+\begin{example}[用同一批输出画图]
+\path{plot.py}仅读取数组；参数input/compare是NPZ路径，compare-label解释比较对象，kind选择响应或控制，output是图片。默认随书中文字体，也可用font指定本机字体：
+\needspace{8\baselineskip}
+\lstinputlisting[language=Python,numbers=left,basicstyle=\footnotesize\ttfamily]{examples/mpc/horizon-control-demo/plot.py}
+\begin{tbash}
+python plot.py --kind response --input out/response/result.npz --compare out/fast/result.npz --output out/response.pdf
+python plot.py --kind control --input out/default/result.npz --compare out/short/result.npz --output out/horizon.pdf
+python plot.py --kind control --input out/default/result.npz --compare out/filtered/result.npz --compare-label '后置低通alpha0.1' --output out/filter.pdf
+\end{tbash}
+图中上限、模拟时间和曲线均取实际保存值；比较不同约束或不同参考时，需重新说明横线与图例的含义。本章配图固定比较相同默认上限，没有把两种上限混在一条灰线里。
+\end{example}
+\begin{conclusion}
+MPC会看未来，也要接受现实：预测模型、输入接口和真实执行链须一致；这一轮只执行首个输入，下一轮以新状态重新规划。额外滤波、补偿、调度和时戳都会改变实际结果。先保存并核对模型、输入、约束与失败日志，再讨论上车；求解器的solved没有替你完成这一整条链。
+\end{conclusion}

@@ -1083,71 +1083,91 @@ ICP增加反复最近邻匹配。以立方体八顶点为例，绕z轴90°仍与
 \addcontentsline{toc}{section}{第十章题解：模型预测控制}
 \subsubsection*{随堂练习}
 
-\paragraph*{随堂练习 10.1}
+\paragraph*{练习\ref{ex:v2-mpc-step}}
 \begin{solution}
-改后响应为 $y_k=1-0.5^k$，第 3 步为 0.875，第 4 步为 0.9375，首次达到 0.9 需 4 步。原模型为 $y_k=1-0.8^k$，第 10 步约 0.8926、第 11 步约 0.9141，需 11 步。新模型更快接近目标，但这只是给定离散模型的比较。
+a0.5时$y_k=1-0.5^k$，第3步0.875、第4步0.9375，需4步；a0.8需11步。10ms间隔时对应0.04/0.11s。步数须乘采样间隔，不同周期不能仅按步数排名；本例稳定、单调且单位阶跃，振荡模型需另检查保持在容差带内。
 \end{solution}
-
-\paragraph*{随堂练习 10.2}
+\paragraph*{练习\ref{ex:v2-mpc-frequency}}
 \begin{solution}
-两频率分量的相对幅度被改变，高频分量仅保留原幅度的五分之一，叠加后的波形形状随之变化，属于幅频失真。如果还存在纯延时，整体会滞后，但纯延时本身不改变各频率分量之间的幅度比。
+相对幅度改变，高频只保留五分之一，叠加形状随之变化，属于幅频失真。delay0.01、f5的相位为$-2\pi\times5\times.01=-0.1\pi$rad，约-0.31416；理想纯延时不改幅值比例，整体后移。直接递推确认频响时须舍弃初始过渡，并采用与G(z)一致的k索引。
 \end{solution}
-
-\paragraph*{随堂练习 10.3}
+\paragraph*{练习\ref{ex:v2-mpc-tolerance}}
 \begin{solution}
-宽度仍为 0.1 m，$\epsilon=\arctan(0.1/(2\times10))\approx0.005$ rad，约 $0.2865^\circ$，约为原来的一半。同样角度误差在更远处对应更大的横向偏移，所以更容易超出固定宽度目标的容限。
+10m半角$\arctan(.005)\approx.00499996$rad，即0.2865°。角误差0.008时横向偏移为$d\tan(.008)$，5/10m约0.04000/0.08000m，前者小于简化半宽0.05，后者超过；这是几何比较，未包含真实弹道、装甲运动和判定条件。
 \end{solution}
-
-\paragraph*{随堂练习 10.4}
+\paragraph*{练习\ref{ex:v2-mpc-envelope}}
 \begin{solution}
-代价为 $J(u)=(1-u)^2+9u^2$，求导得 $J'(u)=-2+20u$，无约束最优解为 0.1。它在 [-0.2,0.2] 范围内，因此约束解仍为 0.1，不触及限幅；控制惩罚增大使输入更温和。
+f1时$\omega=2\pi$，速度允许$A\le.8/(2\pi)\approx.12732$rad，加速度允许$A\le2/(2\pi)^2\approx.05066$rad，取后者。这只检查精确正弦轨迹的物理必要条件；还需实际闭环模型/延时及幅相误差，适用LTI稳态时核对$A|1-G|\le\epsilon$，并另测过渡与非线性条件。
 \end{solution}
-
-\paragraph*{随堂练习 10.5}
+\paragraph*{练习\ref{ex:v2-mpc-model}}
 \begin{solution}
-前三步控制均为 0.2，状态达到 0.6，再施加 -0.1 扰动后变为 0.5。重新规划的后三步控制为 0.2、0.15、0.075，状态依次为 0.7、0.85、0.925；若继续照抄无扰动时的后三步 0.2、0.1、0.05，状态为 0.7、0.8、0.85。闭环利用新状态修正未来输入，比盲目沿用旧序列更接近目标。
+$\theta^+=.1-.2\times.05+\tfrac12\times1\times.05^2=.09125$rad，$\omega^+=-.2+.05=-.15$rad/s。加速度经过一个周期积分改变速度，又贡献二次时间项；速度指令的执行器模型及单位不同，不能复用这个B。
 \end{solution}
-
-\paragraph*{随堂练习 10.6}
+\paragraph*{练习\ref{ex:v2-mpc-scalar}}
 \begin{solution}
-日志至少包含当前周期编号、采集时间、开始/结束求解时间、返回状态、最大约束违反量与首个控制量。结果可用需满足求解器返回约定的成功状态、数值有限、约束容差满足要求、输入未过期且结果在控制截止时间内到达。任何一项失败都应进入已设计并验证的回退路径，不能只检查“函数正常返回”。
+$J=(1-u)^2+9u^2$，$J'=-2+20u$，u0.1在限幅内，代价0.9。原R1第三轮后扰动使y0.5；重新规划得到0.2、0.15、0.075，y依次0.7、0.85、0.925；无扰动旧后三步0.2、0.1、0.05只到0.85。实际代码与浮点输出在容差内一致。
+\end{solution}
+\paragraph*{练习\ref{ex:v2-mpc-prediction}}
+\begin{solution}
+$\Phi=[(1,.05);(0,1);(1,.1);(0,1)]$，按行展示的四行分别是下一角度/速度、再下一角度/速度。与正文Theta及U相乘，结果$[.09125,-.15,.0825,-.2]^T$；第二步角度$.09125-.15\times.05-.00125=.0825$，速度回到-.2。核对项目的N1/2/15独立递推，不只检查形状相同。
+\end{solution}
+\paragraph*{练习\ref{ex:v2-mpc-constraints}}
+\begin{solution}
+状态堆叠按角度/速度交替，Python零起始的1::2取每步速度。实际预测速度为offset加Theta行乘U，因此把offset移到上下界。静止、N2总时间0.1s、u最多2，最大角度$\tfrac12\times2\times.1^2=.01$rad，硬终点0.4不可行；本次实际OSQP返回primal infeasible。参考可以作为软目标，不等于可达硬等式。
+\end{solution}
+\paragraph*{练习\ref{ex:v2-mpc-gate}}
+\begin{solution}
+核对状态/status\_val、有限控制、原始约束违反量、elapsed、sample/start单调时间和age，以及真正执行的control/applied。200ms超过100ms输入年龄上限，即使solved且只花1ms也拒绝。从速度0.4回退clip(-8,-2,2)=-2，下一速度0.3rad/s，非立刻停止；初始超速则不能承诺下一步已回限内。
+\end{solution}
+\paragraph*{练习\ref{ex:v2-mpc-loop}}
+\begin{solution}
+本次vmax0.3最大约0.300000079rad/s，包含约8e-8数值容差，最终角度0.399982；r1最大输入约1.439、RMSE0.1400；reference0.7最大速度约0.800000040、最终0.700003；第20轮后负0.1扰动最终0.399974。提交对应NPZ/log与参数，指出每轮以新状态修正未来输入。数字是这次输入/模型下的结果，不能跨参考直接排名RMSE或把数值容差叫物理保证。
+\end{solution}
+\paragraph*{练习\ref{ex:v2-mpc-filter}}
+\begin{solution}
+本次alpha0.1最大速度0.820289超过0.8，4s时角度0.609772。新增状态为上一实际执行输入$u^{act}_{k-1}$，先预测$u^{act}_k=\alpha u_k+(1-\alpha)u^{act}_{k-1}$，再用它推进运动状态；同时重建预测、约束和初始滤波状态。调R只改变偏好，不会把缺失动态写进模型。日志control与applied分别对应计划接受的第一输入和滤波后的实际输入，遇回退时直接执行回退。
 \end{solution}
 
 \subsubsection*{章末习题}
-
-\paragraph*{第十章章末第 1 题}
+\paragraph*{章末题 \ref{prob:v2-mpc-step}}
 \begin{solution}
-0.1 和 0.19；模型描述输入不能瞬间变成期望输出。
+0.1、0.19。调节时间要求此后持续在指定容差带内；振荡可能先穿线再出去，需要检查整个后续序列与观察窗口，而非只找首次达到阈值。
 \end{solution}
-
-\paragraph*{第十章章末第 2 题}
+\paragraph*{章末题 \ref{prob:v2-mpc-delay}}
 \begin{solution}
-相位为 -0.1π rad，理想纯延时不改变幅值。
+相位$-0.1\pi$rad，纯延时不改幅值。再单独压低高频会改变频率分量比例，不能归为统一后移。
 \end{solution}
-
-\paragraph*{第十章章末第 3 题}
+\paragraph*{章末题 \ref{prob:v2-mpc-geometry}}
 \begin{solution}
-约为 0.08/(2×4)=0.01 rad；这只是几何近似，不是实车开火充分条件。
+$\arctan(.08/8)\approx.01$rad，约0.573°。速度/加速度条件只约束轨迹物理量级，未证明实际响应、误差或开火；还需辨识执行链、目标/弹道/测量与相应判定。
 \end{solution}
-
-\paragraph*{第十章章末第 4 题}
+\paragraph*{章末题 \ref{prob:v2-mpc-scalar}}
 \begin{solution}
-u|≤0.1 后呢？|无约束解为 0.25；约束解为 0.1。
+导数-2+8u，无约束u0.25；区间约束解0.1，完整代价$.9^2+3\times.1^2=.84$。
 \end{solution}
-
-\paragraph*{第十章章末第 5 题}
+\paragraph*{章末题 \ref{prob:v2-mpc-matrix}}
 \begin{solution}
-现在执行 0.2；下一周期读取新状态重新求解，不盲目继续执行旧序列。
+零起始行1/3/5是每步角速度。令b为Phi x减参考，展开得$U^T(\Theta^TQ\Theta+R)U+2b^TQ\Theta U+b^TQb$；标准式含1/2，因此H是括号的两倍，g为$2\Theta^TQb$，c为$b^TQb$。最优输入可删常数，报告完整代价要加回。实际验证比较了两种完整计算及中心差分梯度。
 \end{solution}
-
-\paragraph*{第十章章末第 6 题}
+\paragraph*{章末题 \ref{prob:v2-mpc-time}}
 \begin{solution}
-时域 0.1 s；求解超过周期，需检测超时与过期结果，并按已验证的回退策略处理。
+预测时域20×5ms=0.1s；求解8ms已超过5ms周期，还没算采集/发送。原10ms算例总8ms，余2ms；需记录整个链路实际时间与输入年龄，并拒绝过期结果，不用内部求解run\_time代替外部预算。
 \end{solution}
-
-\paragraph*{第十章章末第 7 题}
+\paragraph*{章末题 \ref{prob:v2-mpc-infeasible}}
 \begin{solution}
-控制仍应落在 [-0.2,0.2]；扰动后的控制根据新状态增大或维持限幅，而非直接沿用旧序列。
+最多0.01rad，小于0.4；硬等式必须达到，而软代价允许留误差并权衡输入。删终点不删除u/速度上限，也不删除状态、时效和原始约束验证；目标不可达时仍需报告跟踪效果。
+\end{solution}
+\paragraph*{章末题 \ref{prob:v2-mpc-fallback}}
+\begin{solution}
+clip(-24,-2,2)=-2rad/s$^2$，下一速度1.1rad/s仍超0.8。未来单调时间戳不满足输入约定，choose明确抛ValueError；工程接收端还需规定异常输入的回退与日志，不能将跨机器墙钟直接混成同一单调时钟。
+\end{solution}
+\paragraph*{章末题 \ref{prob:v2-mpc-filter}}
+\begin{solution}
+solved仅说明约定问题的数值求解，不能排除规划后动态改变。把滤波器状态加入执行器预测并重建约束/时效评估，检查真实合成输入；本次低通反例输入仍限幅而速度超限，支持二者不能互相替代。
+\end{solution}
+\paragraph*{章末题 \ref{prob:v2-mpc-experiment}}
+\begin{solution}
+一种做法是默认、vmax0.3与alpha0.1分别保存，再运行work-ms20或terminal失败。提交命令、版本、源码、NPZ、log与实际读取它们的图；标出rad/rad/s/rad/s$^2$，模拟k×dt与实际perf\_counter分别解释。检查每次接受都满足约定容差/时效，失败输出按状态回退。图和结论须来自同次保存结果，不宣称离线实验已经验证真实云台稳定性。
 \end{solution}
 
 \section*{第十一章：导航与 SLAM 初步}

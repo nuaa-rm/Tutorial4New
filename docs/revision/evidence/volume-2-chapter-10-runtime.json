@@ -1,0 +1,978 @@
+{
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "numpy": "1.26.4",
+  "scipy": "1.11.4",
+  "osqp": "1.0.4",
+  "offline": true,
+  "source_sha256": {
+    "controller.py": "5ba8ca6e63591283eb2457e5ff90b88bac825e7570147c96058e069519ed1ba4",
+    "model.py": "9654b66e5a62a07b969c61c836d78b682ec8248a9b908fccdb1969452d87270b",
+    "plot.py": "be3c6c1a61a74e9f9ecf10a91885334018fc32ed6b3b8bcf43ed12bc5666b888",
+    "prediction.py": "4b69afc59ad4f44e78a123aa74b75d30cb2ef64e13047607cc97005de70a477f",
+    "qp.py": "b313bbded5740a1fdb6849b3b775cf8afa5c9deedf2d6530fa99b6a3dc2c3e92",
+    "response.py": "9a8f58b2961d4a6eb0ab67a46bdcd6517effea33aa973d1920c4d838edb8fdab",
+    "run.py": "ba09f3bd71c8400f769cb875632c68179e0fe9bc64c69692510cf2975c5777ed",
+    "scalar.py": "1ca582d82a605085604def77f748c6c4044f383b4e4e73c5ffb6cf5dec97e171"
+  },
+  "records": [
+    {
+      "name": "一阶响应默认",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-mpc-venv/bin/python",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/mpc/horizon-control-demo/response.py",
+          "--output",
+          "/tmp/textbook-mpc-final/response"
+        ],
+        "result": {
+          "first_three": [
+            0.19999999999999996,
+            0.3599999999999999,
+            0.4879999999999999
+          ],
+          "steps_90": 11,
+          "steps_98": 18,
+          "phase_delay_rad": [
+            -0.12566370614359174,
+            -1.2566370614359172
+          ],
+          "steady_gain": [
+            0.9627270885276251,
+            0.3402202928517171
+          ],
+          "steady_phase": [
+            -0.30705287566428113,
+            -1.5554569029117709
+          ],
+          "epsilon_rad": 0.009999666686665238
+        }
+      }
+    },
+    {
+      "name": "一阶响应a0.5",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-mpc-venv/bin/python",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/mpc/horizon-control-demo/response.py",
+          "--a",
+          "0.5",
+          "--output",
+          "/tmp/textbook-mpc-final/fast"
+        ],
+        "result": {
+          "first_three": [
+            0.5,
+            0.75,
+            0.875
+          ],
+          "steps_90": 4,
+          "steps_98": 6,
+          "phase_delay_rad": [
+            -0.12566370614359174,
+            -1.2566370614359172
+          ],
+          "steady_gain": [
+            0.9960766670440262,
+            0.7529377601646758
+          ],
+          "steady_phase": [
+            -0.12541687287022532,
+            -1.0867763573769076
+          ],
+          "epsilon_rad": 0.009999666686665238
+        }
+      }
+    },
+    {
+      "name": "距离10m",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-mpc-venv/bin/python",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/mpc/horizon-control-demo/response.py",
+          "--distance",
+          "10",
+          "--output",
+          "/tmp/textbook-mpc-final/far"
+        ],
+        "result": {
+          "first_three": [
+            0.19999999999999996,
+            0.3599999999999999,
+            0.4879999999999999
+          ],
+          "steps_90": 11,
+          "steps_98": 18,
+          "phase_delay_rad": [
+            -0.12566370614359174,
+            -1.2566370614359172
+          ],
+          "steady_gain": [
+            0.9627270885276251,
+            0.3402202928517171
+          ],
+          "steady_phase": [
+            -0.30705287566428113,
+            -1.5554569029117709
+          ],
+          "epsilon_rad": 0.0049999583339583225
+        }
+      }
+    },
+    {
+      "name": "手算优化和滚动扰动",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-mpc-venv/bin/python",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/mpc/horizon-control-demo/scalar.py"
+        ],
+        "result": {
+          "bounded_u": 0.2,
+          "cost": 0.6800000000000002,
+          "weight9_u": 0.1,
+          "base": {
+            "controls": [
+              0.2,
+              0.2,
+              0.2,
+              0.19999999999999996,
+              0.09999999999999998,
+              0.04999999999999999
+            ],
+            "states": [
+              0.2,
+              0.4,
+              0.6000000000000001,
+              0.8,
+              0.9,
+              0.95
+            ]
+          },
+          "feedback": {
+            "controls": [
+              0.2,
+              0.2,
+              0.2,
+              0.2,
+              0.1499999999999999,
+              0.07499999999999996
+            ],
+            "states": [
+              0.2,
+              0.4,
+              0.5000000000000001,
+              0.7000000000000002,
+              0.8500000000000001,
+              0.925
+            ]
+          },
+          "old_sequence": {
+            "controls": [
+              0.2,
+              0.2,
+              0.2,
+              0.19999999999999996,
+              0.09999999999999998,
+              0.04999999999999999
+            ],
+            "states": [
+              0.2,
+              0.4,
+              0.5000000000000001,
+              0.7000000000000001,
+              0.8,
+              0.8500000000000001
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "有限时域闭环 default",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-mpc-venv/bin/python",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/mpc/horizon-control-demo/run.py",
+          "--output",
+          "/tmp/textbook-mpc-final/default"
+        ],
+        "result": {
+          "final_state": [
+            0.4000069244910002,
+            -1.564778960530194e-06
+          ],
+          "max_abs_control": 2.0,
+          "max_abs_speed": 0.6200444744340059,
+          "angle_rmse": 0.11705235008672632,
+          "fallback_count": 0,
+          "reasons": [
+            "accepted"
+          ],
+          "statuses": [
+            "solved"
+          ],
+          "max_elapsed_ms": 1.6134379984578118
+        }
+      }
+    },
+    {
+      "name": "有限时域闭环 short",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-mpc-venv/bin/python",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/mpc/horizon-control-demo/run.py",
+          "--output",
+          "/tmp/textbook-mpc-final/short",
+          "--horizon",
+          "1"
+        ],
+        "result": {
+          "final_state": [
+            0.42443608542769484,
+            0.11612451408583568
+          ],
+          "max_abs_control": 0.0987349583463118,
+          "max_abs_speed": 0.1409472333635264,
+          "angle_rmse": 0.26111573504447655,
+          "fallback_count": 0,
+          "reasons": [
+            "accepted"
+          ],
+          "statuses": [
+            "solved"
+          ],
+          "max_elapsed_ms": 0.8506890007993206
+        }
+      }
+    },
+    {
+      "name": "有限时域闭环 long",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-mpc-venv/bin/python",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/mpc/horizon-control-demo/run.py",
+          "--output",
+          "/tmp/textbook-mpc-final/long",
+          "--horizon",
+          "30"
+        ],
+        "result": {
+          "final_state": [
+            0.4000049810662379,
+            6.757478962280537e-07
+          ],
+          "max_abs_control": 2.0,
+          "max_abs_speed": 0.6209983231373187,
+          "angle_rmse": 0.11704466836204168,
+          "fallback_count": 0,
+          "reasons": [
+            "accepted"
+          ],
+          "statuses": [
+            "solved"
+          ],
+          "max_elapsed_ms": 6.901056993228849
+        }
+      }
+    },
+    {
+      "name": "有限时域闭环 weight",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-mpc-venv/bin/python",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/mpc/horizon-control-demo/run.py",
+          "--output",
+          "/tmp/textbook-mpc-final/weight",
+          "--r",
+          "1.0"
+        ],
+        "result": {
+          "final_state": [
+            0.3920417136538528,
+            0.005518867001145511
+          ],
+          "max_abs_control": 1.4386558675539312,
+          "max_abs_speed": 0.416812658177272,
+          "angle_rmse": 0.13996236573927062,
+          "fallback_count": 0,
+          "reasons": [
+            "accepted"
+          ],
+          "statuses": [
+            "solved"
+          ],
+          "max_elapsed_ms": 1.5536080027231947
+        }
+      }
+    },
+    {
+      "name": "有限时域闭环 speed",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-mpc-venv/bin/python",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/mpc/horizon-control-demo/run.py",
+          "--output",
+          "/tmp/textbook-mpc-final/speed",
+          "--vmax",
+          "0.3"
+        ],
+        "result": {
+          "final_state": [
+            0.39998228058854185,
+            9.894966966147585e-05
+          ],
+          "max_abs_control": 2.0,
+          "max_abs_speed": 0.30000007918808036,
+          "angle_rmse": 0.14074091555499513,
+          "fallback_count": 0,
+          "reasons": [
+            "accepted"
+          ],
+          "statuses": [
+            "solved"
+          ],
+          "max_elapsed_ms": 1.5115659989533015
+        }
+      }
+    },
+    {
+      "name": "有限时域闭环 jump",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-mpc-venv/bin/python",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/mpc/horizon-control-demo/run.py",
+          "--output",
+          "/tmp/textbook-mpc-final/jump",
+          "--reference",
+          "0.7"
+        ],
+        "result": {
+          "final_state": [
+            0.7000026109547237,
+            6.035860121947222e-05
+          ],
+          "max_abs_control": 1.9999999987977117,
+          "max_abs_speed": 0.8000000402389879,
+          "angle_rmse": 0.23642873283781948,
+          "fallback_count": 0,
+          "reasons": [
+            "accepted"
+          ],
+          "statuses": [
+            "solved"
+          ],
+          "max_elapsed_ms": 1.6026000012061559
+        }
+      }
+    },
+    {
+      "name": "有限时域闭环 disturb",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-mpc-venv/bin/python",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/mpc/horizon-control-demo/run.py",
+          "--output",
+          "/tmp/textbook-mpc-final/disturb",
+          "--disturb",
+          "-0.1"
+        ],
+        "result": {
+          "final_state": [
+            0.3999739823329535,
+            0.00010276862165257279
+          ],
+          "max_abs_control": 2.0,
+          "max_abs_speed": 0.6200444744340059,
+          "angle_rmse": 0.12011005978937614,
+          "fallback_count": 0,
+          "reasons": [
+            "accepted"
+          ],
+          "statuses": [
+            "solved"
+          ],
+          "max_elapsed_ms": 1.5293260003090836
+        }
+      }
+    },
+    {
+      "name": "有限时域闭环 mismatch",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-mpc-venv/bin/python",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/mpc/horizon-control-demo/run.py",
+          "--output",
+          "/tmp/textbook-mpc-final/mismatch",
+          "--gain",
+          "0.6"
+        ],
+        "result": {
+          "final_state": [
+            0.4003789998930235,
+            0.0014962074486556402
+          ],
+          "max_abs_control": 2.0,
+          "max_abs_speed": 0.5380875633768021,
+          "angle_rmse": 0.13230677191651116,
+          "fallback_count": 0,
+          "reasons": [
+            "accepted"
+          ],
+          "statuses": [
+            "solved"
+          ],
+          "max_elapsed_ms": 1.529162997030653
+        }
+      }
+    },
+    {
+      "name": "有限时域闭环 filtered",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-mpc-venv/bin/python",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/mpc/horizon-control-demo/run.py",
+          "--output",
+          "/tmp/textbook-mpc-final/filtered",
+          "--command-alpha",
+          "0.1"
+        ],
+        "result": {
+          "final_state": [
+            0.6097721363053867,
+            0.6674410826153548
+          ],
+          "max_abs_control": 1.7484452083304294,
+          "max_abs_speed": 0.8202889726014875,
+          "angle_rmse": 0.24553987710878075,
+          "fallback_count": 0,
+          "reasons": [
+            "accepted"
+          ],
+          "statuses": [
+            "solved"
+          ],
+          "max_elapsed_ms": 1.7246170027647167
+        }
+      }
+    },
+    {
+      "name": "有限时域闭环 infeasible",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-mpc-venv/bin/python",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/mpc/horizon-control-demo/run.py",
+          "--output",
+          "/tmp/textbook-mpc-final/infeasible",
+          "--horizon",
+          "2",
+          "--terminal",
+          "--steps",
+          "3"
+        ],
+        "result": {
+          "final_state": [
+            0.0,
+            0.0
+          ],
+          "max_abs_control": 0.0,
+          "max_abs_speed": 0.0,
+          "angle_rmse": 0.4,
+          "fallback_count": 3,
+          "reasons": [
+            "solver_status"
+          ],
+          "statuses": [
+            "primal infeasible"
+          ],
+          "max_elapsed_ms": 1.0575569976936094
+        }
+      }
+    },
+    {
+      "name": "有限时域闭环 maxiter",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-mpc-venv/bin/python",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/mpc/horizon-control-demo/run.py",
+          "--output",
+          "/tmp/textbook-mpc-final/maxiter",
+          "--max-iter",
+          "1",
+          "--steps",
+          "3"
+        ],
+        "result": {
+          "final_state": [
+            0.0,
+            0.0
+          ],
+          "max_abs_control": 0.0,
+          "max_abs_speed": 0.0,
+          "angle_rmse": 0.4,
+          "fallback_count": 3,
+          "reasons": [
+            "solver_status"
+          ],
+          "statuses": [
+            "maximum iterations reached"
+          ],
+          "max_elapsed_ms": 1.399183995090425
+        }
+      }
+    },
+    {
+      "name": "有限时域闭环 deadline",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-mpc-venv/bin/python",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/mpc/horizon-control-demo/run.py",
+          "--output",
+          "/tmp/textbook-mpc-final/deadline",
+          "--work-ms",
+          "20",
+          "--steps",
+          "3"
+        ],
+        "result": {
+          "final_state": [
+            0.0,
+            0.0
+          ],
+          "max_abs_control": 0.0,
+          "max_abs_speed": 0.0,
+          "angle_rmse": 0.4,
+          "fallback_count": 3,
+          "reasons": [
+            "deadline"
+          ],
+          "statuses": [
+            "solved"
+          ],
+          "max_elapsed_ms": 21.626173998811282
+        }
+      }
+    },
+    {
+      "name": "有限时域闭环 stale",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-mpc-venv/bin/python",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/mpc/horizon-control-demo/run.py",
+          "--output",
+          "/tmp/textbook-mpc-final/stale",
+          "--age-ms",
+          "200",
+          "--steps",
+          "3"
+        ],
+        "result": {
+          "final_state": [
+            0.0,
+            0.0
+          ],
+          "max_abs_control": 0.0,
+          "max_abs_speed": 0.0,
+          "angle_rmse": 0.4,
+          "fallback_count": 3,
+          "reasons": [
+            "stale_input"
+          ],
+          "statuses": [
+            "solved"
+          ],
+          "max_elapsed_ms": 1.7358519980916753
+        }
+      }
+    },
+    {
+      "name": "未来单调时间戳拒绝",
+      "status": "PASS",
+      "details": "预算/年龄为正、负载非负，时间戳不能来自未来"
+    },
+    {
+      "name": "非有限状态拒绝",
+      "status": "PASS",
+      "details": "状态必须是两个有限数"
+    },
+    {
+      "name": "零采样周期拒绝",
+      "status": "PASS",
+      "details": "dt须有限且为正"
+    },
+    {
+      "name": "负实际增益拒绝",
+      "status": "PASS",
+      "details": "控制须有限，实际增益须为正"
+    },
+    {
+      "name": "独立矩阵指数零阶保持",
+      "status": "PASS",
+      "details": {
+        "A": [
+          [
+            1.0,
+            0.05
+          ],
+          [
+            0.0,
+            1.0
+          ]
+        ],
+        "B": [
+          [
+            0.0012500000000000002
+          ],
+          [
+            0.05
+          ]
+        ]
+      }
+    },
+    {
+      "name": "预测矩阵与独立逐步递推 N1",
+      "status": "PASS",
+      "details": {
+        "max_error": 0.0
+      }
+    },
+    {
+      "name": "预测矩阵与独立逐步递推 N2",
+      "status": "PASS",
+      "details": {
+        "max_error": 0.0
+      }
+    },
+    {
+      "name": "预测矩阵与独立逐步递推 N15",
+      "status": "PASS",
+      "details": {
+        "max_error": 1.1102230246251565e-16
+      }
+    },
+    {
+      "name": "完整代价/梯度/正定性",
+      "status": "PASS",
+      "details": {
+        "full_cost": 10.26853950985156,
+        "expanded_cost": 10.268539509851562,
+        "hessian_min_eigenvalue": 0.2006817425757452
+      }
+    },
+    {
+      "name": "OSQP与独立SLSQP",
+      "status": "PASS",
+      "details": {
+        "max_control_difference": 8.397626982681317e-07
+      }
+    },
+    {
+      "name": "非零速度回退 0.4",
+      "status": "PASS",
+      "details": {
+        "log": {
+          "reason": "stale_input",
+          "status": "solved",
+          "status_val": 1,
+          "elapsed_ms": 1.298584000323899,
+          "age_ms": 201.2992679956369,
+          "solver_ms": 0.11696100000000001,
+          "violation": 5.693046034593863e-11,
+          "control": -2.0,
+          "sample_time": 43354.994799279004,
+          "start_time": 43355.194799963,
+          "end_time": 43355.196098547
+        },
+        "next_state": [
+          0.0175,
+          0.30000000000000004
+        ]
+      }
+    },
+    {
+      "name": "非零速度回退 1.2",
+      "status": "PASS",
+      "details": {
+        "log": {
+          "reason": "solver_status",
+          "status": "primal infeasible",
+          "status_val": 3,
+          "elapsed_ms": 1.0737859993241727,
+          "age_ms": 201.07420600106707,
+          "solver_ms": 0.048744,
+          "violation": null,
+          "control": -2.0,
+          "sample_time": 43354.996135955,
+          "start_time": 43355.196136375,
+          "end_time": 43355.197210161
+        },
+        "next_state": [
+          0.057499999999999996,
+          1.0999999999999999
+        ]
+      }
+    },
+    {
+      "name": "独立稳态递推 a0.8 f1.0",
+      "status": "PASS",
+      "details": {
+        "gain": 0.9627270885276282,
+        "phase": -0.3070528756642814
+      }
+    },
+    {
+      "name": "独立稳态递推 a0.8 f10.0",
+      "status": "PASS",
+      "details": {
+        "gain": 0.34022029285171507,
+        "phase": -1.5554569029117624
+      }
+    },
+    {
+      "name": "独立稳态递推 a0.5 f1.0",
+      "status": "PASS",
+      "details": {
+        "gain": 0.9960766670440268,
+        "phase": -0.125416872870225
+      }
+    },
+    {
+      "name": "独立稳态递推 a0.5 f10.0",
+      "status": "PASS",
+      "details": {
+        "gain": 0.7529377601646756,
+        "phase": -1.0867763573768996
+      }
+    },
+    {
+      "name": "负权重明确拒绝",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-mpc-venv/bin/python",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/mpc/horizon-control-demo/run.py",
+          "--r",
+          "-1"
+        ],
+        "result": {
+          "exit": 2,
+          "stderr": "usage: run.py [-h] [--horizon HORIZON] [--steps STEPS] [--reference REFERENCE]\n              [--q Q] [--r R] [--amax AMAX] [--vmax VMAX] [--gain GAIN]\n              [--disturb DISTURB] [--command-alpha COMMAND_ALPHA]\n              [--budget-ms BUDGET_MS] [--work-ms WORK_MS] [--age-ms AGE_MS]\n              [--max-iter MAX_ITER] [--terminal] [--output OUTPUT]\nrun.py: error: 权重、上限、增益与预算为正\n"
+        }
+      }
+    },
+    {
+      "name": "零时域明确拒绝",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-mpc-venv/bin/python",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/mpc/horizon-control-demo/run.py",
+          "--horizon",
+          "0"
+        ],
+        "result": {
+          "exit": 2,
+          "stderr": "usage: run.py [-h] [--horizon HORIZON] [--steps STEPS] [--reference REFERENCE]\n              [--q Q] [--r R] [--amax AMAX] [--vmax VMAX] [--gain GAIN]\n              [--disturb DISTURB] [--command-alpha COMMAND_ALPHA]\n              [--budget-ms BUDGET_MS] [--work-ms WORK_MS] [--age-ms AGE_MS]\n              [--max-iter MAX_ITER] [--terminal] [--output OUTPUT]\nrun.py: error: 参数须有限，步数与时域为正\n"
+        }
+      }
+    },
+    {
+      "name": "NaN参考明确拒绝",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-mpc-venv/bin/python",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/mpc/horizon-control-demo/run.py",
+          "--reference",
+          "nan"
+        ],
+        "result": {
+          "exit": 2,
+          "stderr": "usage: run.py [-h] [--horizon HORIZON] [--steps STEPS] [--reference REFERENCE]\n              [--q Q] [--r R] [--amax AMAX] [--vmax VMAX] [--gain GAIN]\n              [--disturb DISTURB] [--command-alpha COMMAND_ALPHA]\n              [--budget-ms BUDGET_MS] [--work-ms WORK_MS] [--age-ms AGE_MS]\n              [--max-iter MAX_ITER] [--terminal] [--output OUTPUT]\nrun.py: error: 参数须有限，步数与时域为正\n"
+        }
+      }
+    },
+    {
+      "name": "无效滤波明确拒绝",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-mpc-venv/bin/python",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/mpc/horizon-control-demo/run.py",
+          "--command-alpha",
+          "0"
+        ],
+        "result": {
+          "exit": 2,
+          "stderr": "usage: run.py [-h] [--horizon HORIZON] [--steps STEPS] [--reference REFERENCE]\n              [--q Q] [--r R] [--amax AMAX] [--vmax VMAX] [--gain GAIN]\n              [--disturb DISTURB] [--command-alpha COMMAND_ALPHA]\n              [--budget-ms BUDGET_MS] [--work-ms WORK_MS] [--age-ms AGE_MS]\n              [--max-iter MAX_ITER] [--terminal] [--output OUTPUT]\nrun.py: error: 负载/年龄非负，alpha在(0,1]\n"
+        }
+      }
+    },
+    {
+      "name": "负输入年龄明确拒绝",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-mpc-venv/bin/python",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/mpc/horizon-control-demo/run.py",
+          "--age-ms",
+          "-1"
+        ],
+        "result": {
+          "exit": 2,
+          "stderr": "usage: run.py [-h] [--horizon HORIZON] [--steps STEPS] [--reference REFERENCE]\n              [--q Q] [--r R] [--amax AMAX] [--vmax VMAX] [--gain GAIN]\n              [--disturb DISTURB] [--command-alpha COMMAND_ALPHA]\n              [--budget-ms BUDGET_MS] [--work-ms WORK_MS] [--age-ms AGE_MS]\n              [--max-iter MAX_ITER] [--terminal] [--output OUTPUT]\nrun.py: error: 负载/年龄非负，alpha在(0,1]\n"
+        }
+      }
+    },
+    {
+      "name": "不稳定一阶参数拒绝",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-mpc-venv/bin/python",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/mpc/horizon-control-demo/response.py",
+          "--a",
+          "1.1"
+        ],
+        "result": {
+          "exit": 2,
+          "stderr": "usage: response.py [-h] [--a A] [--delay DELAY] [--distance DISTANCE]\n                   [--output OUTPUT]\nresponse.py: error: a须在[0,1)，参数须有限\n"
+        }
+      }
+    },
+    {
+      "name": "响应实际绘图",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-mpc-venv/bin/python",
+          "plot.py",
+          "--kind",
+          "response",
+          "--input",
+          "/tmp/textbook-mpc-final/response/result.npz",
+          "--compare",
+          "/tmp/textbook-mpc-final/fast/result.npz",
+          "--output",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/images/mpc_response_candidate.pdf",
+          "--font",
+          "/run/host/usr/share/texmf-dist/fonts/opentype/public/fandol/FandolSong-Regular.otf"
+        ],
+        "cwd": "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/mpc/horizon-control-demo",
+        "exit": 0,
+        "stderr": "",
+        "input_sha256": {
+          "/tmp/textbook-mpc-final/response/result.npz": "4dbbabab09e9ceedffd72fb0851e5cbd424e0e69c4e90d52324280b237ef0542",
+          "/tmp/textbook-mpc-final/fast/result.npz": "d638d6803ef25d8478e51590dbbeacc5880299fcee848ef40f8a76447eba3722"
+        },
+        "output_sha256": "ed3854d9eedbfe3b7b0a86e3ef525c6187521eaca655e3f489ef8ec78df72a2b",
+        "output_bytes": 38797,
+        "published_output": "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/images/mpc_response_revised.pdf"
+      }
+    },
+    {
+      "name": "有限时域实际绘图",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-mpc-venv/bin/python",
+          "plot.py",
+          "--kind",
+          "control",
+          "--input",
+          "/tmp/textbook-mpc-final/default/result.npz",
+          "--compare",
+          "/tmp/textbook-mpc-final/short/result.npz",
+          "--output",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/images/mpc_horizon_candidate.pdf",
+          "--font",
+          "/run/host/usr/share/texmf-dist/fonts/opentype/public/fandol/FandolSong-Regular.otf"
+        ],
+        "cwd": "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/mpc/horizon-control-demo",
+        "exit": 0,
+        "stderr": "",
+        "input_sha256": {
+          "/tmp/textbook-mpc-final/default/result.npz": "7834981cc30fa91ca7d6be7cda5b64fc5e80672352ac3bee61f6c3cd85fbc863",
+          "/tmp/textbook-mpc-final/short/result.npz": "a666f051b251c45855cf0da4ab44313968f0c33c0b673b5a06f9bbec1bd5b591"
+        },
+        "output_sha256": "b60b11f479faa4a3ab19fdad9c7fd0478d9cb46ccaad8242050010714883bde7",
+        "output_bytes": 33621,
+        "published_output": "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/images/mpc_horizon_revised.pdf"
+      }
+    },
+    {
+      "name": "后置低通实际绘图",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-mpc-venv/bin/python",
+          "plot.py",
+          "--kind",
+          "control",
+          "--input",
+          "/tmp/textbook-mpc-final/default/result.npz",
+          "--compare",
+          "/tmp/textbook-mpc-final/filtered/result.npz",
+          "--output",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/images/mpc_filter_candidate.pdf",
+          "--compare-label",
+          "后置低通alpha0.1",
+          "--font",
+          "/run/host/usr/share/texmf-dist/fonts/opentype/public/fandol/FandolSong-Regular.otf"
+        ],
+        "cwd": "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/mpc/horizon-control-demo",
+        "exit": 0,
+        "stderr": "",
+        "input_sha256": {
+          "/tmp/textbook-mpc-final/default/result.npz": "7834981cc30fa91ca7d6be7cda5b64fc5e80672352ac3bee61f6c3cd85fbc863",
+          "/tmp/textbook-mpc-final/filtered/result.npz": "96199ae7a835973afc237cdf6436c235f116fba9d74e1fd4ea7a6be91480fb7e"
+        },
+        "output_sha256": "38edc95b52ae7b32f426a3ac1955d6d37141cb67c4558ecacb6c7440fbab206a",
+        "output_bytes": 39324,
+        "published_output": "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/images/mpc_filter_revised.pdf"
+      }
+    },
+    {
+      "name": "默认字体实际绘图",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-mpc-venv/bin/python",
+          "plot.py",
+          "--kind",
+          "response",
+          "--input",
+          "/tmp/textbook-mpc-final/response/result.npz",
+          "--compare",
+          "/tmp/textbook-mpc-final/fast/result.npz",
+          "--output",
+          "/tmp/mpc-default-font-final.pdf"
+        ],
+        "cwd": "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/mpc/horizon-control-demo",
+        "exit": 0,
+        "stderr": "",
+        "input_sha256": {
+          "/tmp/textbook-mpc-final/response/result.npz": "4dbbabab09e9ceedffd72fb0851e5cbd424e0e69c4e90d52324280b237ef0542",
+          "/tmp/textbook-mpc-final/fast/result.npz": "d638d6803ef25d8478e51590dbbeacc5880299fcee848ef40f8a76447eba3722"
+        },
+        "output_sha256": "a309819b53e99ff03cdd591136e45fb4a439dd61fc19f35cacdbbe57d05b81ed",
+        "output_bytes": 18398
+      }
+    }
+  ]
+}
