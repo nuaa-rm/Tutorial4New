@@ -17,6 +17,7 @@ cli.add_argument("--project", type=Path, required=True)
 cli.add_argument("--data", type=Path, required=True)
 cli.add_argument("--output", type=Path, required=True)
 cli.add_argument("--child", action="store_true")
+cli.add_argument("--stereo", action="store_true")
 args = cli.parse_args()
 args.output.mkdir(parents=True, exist_ok=True)
 if not args.child:
@@ -32,19 +33,33 @@ if not args.child:
         processes.append(xvfb); os.close(wfd)
         display = os.read(rfd, 100).decode().strip(); os.close(rfd)
         env = dict(os.environ, DISPLAY=":"+display, QT_QPA_PLATFORM="xcb",
-                   ROS_DOMAIN_ID="185", ROS_AUTOMATIC_DISCOVERY_RANGE="LOCALHOST",
+                   ROS_DOMAIN_ID="189" if args.stereo else "185", ROS_AUTOMATIC_DISCOVERY_RANGE="LOCALHOST",
                    ROS_LOG_DIR=str(folder/"ros-logs"), PYTHONUNBUFFERED="1")
         try:
             publog = (args.output/"publisher.txt").open("w")
             publisher = subprocess.Popen([sys.executable, str(args.project/"replay_ros.py"),
-                "--images", str(args.data/"train"), "--yaml", str(args.output/"committed.yaml"),
-                "--period", ".3"], env=env, stdout=publog, stderr=subprocess.STDOUT)
+                "--images", str(args.data/("left" if args.stereo else "train")), "--yaml", str(args.output/"committed.yaml"),
+                "--period", ".3", *(["--right", str(args.data/"right"), "--namespace", "left"] if args.stereo else [])], env=env, stdout=publog, stderr=subprocess.STDOUT)
             processes.append(publisher)
             result = subprocess.run([sys.executable, str(Path(__file__).resolve()), "--child",
                 "--project", str(args.project), "--data", str(args.data),
-                "--output", str(args.output)], env=env, timeout=180)
+                "--output", str(args.output), *(["--stereo"] if args.stereo else [])], env=env, timeout=180)
             if result.returncode: raise RuntimeError("GUI 子进程失败")
             assert (args.output/"committed.yaml").exists()
+            if args.stereo:
+                import numpy as np
+                sys.path.insert(0, str(args.project))
+                from model_io import load_yaml
+                result_file = args.output/"gui.json"
+                outcome = json.loads(result_file.read_text())
+                for side, name in [("left", "committed.yaml"), ("right", "committed_right.yaml")]:
+                    K,D,R,P,size = load_yaml(args.output/name)
+                    m = outcome["messages"][side]
+                    assert size == (640,480)
+                    assert all(np.allclose(value.reshape(-1), m[key], atol=1e-10, rtol=0)
+                               for value,key in [(K,"K"),(D,"D"),(R,"R"),(P,"P")])
+                outcome["both_persisted_K_D_R_P_match"] = True
+                result_file.write_text(json.dumps(outcome, indent=2))
         finally:
             for process in reversed(processes):
                 if process.poll() is None:
@@ -60,8 +75,11 @@ import rclpy
 from camera_calibration.calibrator import ChessboardInfo
 from camera_calibration.camera_calibrator import OpenCVCalibrationNode
 
-rclpy.init(args=["--ros-args", "-r", "image:=/camera/image_raw",
-                "-r", "camera/set_camera_info:=/camera/set_camera_info"])
+remaps = (["-r", "left:=/left/image_raw", "-r", "right:=/right/image_raw",
+           "-r", "left_camera/set_camera_info:=/left/set_camera_info",
+           "-r", "right_camera/set_camera_info:=/right/set_camera_info"] if args.stereo else
+          ["-r", "image:=/camera/image_raw", "-r", "camera/set_camera_info:=/camera/set_camera_info"])
+rclpy.init(args=["--ros-args", *remaps])
 board = ChessboardInfo(n_cols=9, n_rows=6, dim=.025)
 node = OpenCVCalibrationNode("camera_calibrator", [board], flags=cv2.CALIB_FIX_K3,
                             camera_name="front")
@@ -110,7 +128,15 @@ def driver():
             ["tar", "-tzf", str(args.output/"calibrationdata.tar.gz")]).decode().splitlines()
         capture("saved.xwd")
         message = node.c.as_message()
-        outcome["K"] = list(message.k); outcome["D"] = list(message.d)
+        if args.stereo:
+            assert not node.c.is_mono
+            outcome["messages"] = {side: {"K": list(m.k), "D": list(m.d),
+                                          "R": list(m.r), "P": list(m.p)}
+                                   for side,m in zip(["left","right"],message)}
+            right = message[1]
+            outcome["baseline_m"] = -right.p[3]/right.p[0]
+        else:
+            outcome["K"] = list(message.k); outcome["D"] = list(message.d)
         click(430)
         until(lambda: not rclpy.ok(), 10)
         outcome["commit_shutdown"] = True

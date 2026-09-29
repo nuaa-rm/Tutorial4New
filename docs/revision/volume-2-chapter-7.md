@@ -26,12 +26,12 @@
 | 12 参考答案 | 通过 | 13+10 全部 label/ref 定位；计算、实际对照、开放实践思路与判断标准齐全。 |
 | 13 作者口吻 | 通过 | 从上一章接着讲，随步骤解释原因与后果，使用“你/我们/首先/然后/不过”，保留适量自然吐槽。 |
 | 14 图片实际查看 | 通过 | 9 张旧图实际查看，新矢量图、真实 GUI 截图独立查看及正文尺寸检查；既有 Gaussian/salt 仅按新比较布局复核。 |
-| 15 标记/引用 | 通过 | 检查后发布 9 个 revised 文件，旧图全部调用同步；真实照片及 GUI 像素未改，渲染脚本支持候选/发布路径。 |
+| 15 标记/引用 | 通过 | 初次检查后发布 9 个 revised 文件，双目补测增加 1 个，旧图全部调用同步；真实照片及 GUI 像素未改，渲染脚本支持候选/发布路径。 |
 | 16 文件组织 | 通过 | E_camera 主讲成像与项目准备、E_calibration 讲模型与 ROS，E_camera_review/answers 沿用原职责。 |
-| 17 包含/引用 | 通过 | 29 个入口文件、214 标签、180 个被引用标签；路径、唯一性及全部 23 题定位通过。 |
+| 17 包含/引用 | 通过 | 29 个入口文件、313 标签、260 个被引用标签（全卷后续章节已整理后的最新检查）；路径、唯一性及全部 23 题定位通过。 |
 | 18 源码/排版 | 通过 | 保留公式/命令含义，消除长调用越界，回放拆分不把函数定义与说明交错；检查全章代码、照片和公式。 |
-| 19 实际运行 | 未完成 | 数值、图像求解、单目 GUI、CLI、参数保存/重启、真实 image_proc 和双目回放均实测；真实曝光/相机标定、HDR/硬件同步、厂商驱动与双目 GUI 操作未完成。 |
-| 20 编译/PDF | 通过 | 从卷入口编译到引用稳定，235 页；完整相机章、题解、目录和邻章衔接实际查看，无缺图、overfull、未定义引用。 |
+| 19 实际运行 | 未完成 | 数值、图像求解、单目 GUI、CLI、参数保存/重启、真实 image_proc 和双目回放均实测；真实曝光/相机标定、HDR/硬件同步和厂商驱动未完成；双目 GUI 操作已在补测中完成。 |
+| 20 编译/PDF | 通过 | 初次 235 页，本次全卷 269 页引用稳定；完整相机章、题解、目录和邻章衔接实际查看，无缺图、overfull、未定义引用。 |
 
 本章为 19 项通过、1 项未完成。软件模拟和教学回放支持正文结论，但不冒充物理相机验收。
 
@@ -56,7 +56,7 @@
 | 景深 | N4近1526.72/远2898.55 mm；N8近1234.57/远5263.16 mm；s7000远界null | 同单位、明确判据，远界无穷不输出负距离。 |
 | 服务 / 重启 | 错尺寸/零焦距拒绝，不覆盖已有文件；有效参数写盘并重启读回 | 保存与持久化实际成立，不只查看一次参数。 |
 | image_proc | 同时间戳/光学frame/mono8，真实输出与相同模型 remap 最大差0 | 验证使用链路，仍需另查模型质量。 |
-| 双目 | 93有效对、基线0.11994681 m、纵向RMS0.09093007 pixel | 使用拟合图的残差，实机独立验证与双目GUI仍未完成。 |
+| 双目 | 93有效对、基线0.11994681 m、纵向RMS0.09093007 pixel | 使用拟合图的残差，实机独立验证仍未完成；双目GUI另见补测记录。 |
 
 所有故意错误都限定在临时输出目录；不提交生成的数百张图片或归档。GUI 样本40时 Size覆盖仅约0.747，实际源码也允许 len(db)>=40 开放按钮，正文明确按钮可用不代表质量已合格。ROS 其他发行版只说明适用差异，不当作已经运行。
 
@@ -77,4 +77,16 @@
 
 模型核对采用 [OpenCV 4.6 官方接口](https://docs.opencv.org/4.6.0/d9/d0c/group__calib3d.html)、[Jazzy 标定器源码](https://github.com/ros-perception/image_pipeline/tree/jazzy/camera_calibration) 和 [CameraInfo 定义](https://github.com/ros2/common_interfaces/blob/jazzy/sensor_msgs/msg/CameraInfo.msg)；查表示例来自 [Basler 官方规格](https://docs.baslerweb.com/aca1920-155um)，曝光单位见 [Basler Exposure Time](https://docs.baslerweb.com/exposure-time)，景深/焦深条件与 [Edmund Optics 说明](https://www.edmundoptics.com/knowledge-center/application-notes/imaging/depth-of-field-and-depth-of-focus/) 交叉核对。
 
-交付完整 TeX diff 为 /tmp/volume-2-chapter-7.patch；对应本章单独提交。未完成项需要物理设备或实际双目 GUI 补测才能改为通过。
+交付完整 TeX diff 为 /tmp/volume-2-chapter-7.patch；对应本章单独提交。剩余未完成项需要物理设备及真实采集记录，不能用软件模拟改为通过。
+
+## 双目 GUI 补测（2026-09-29）
+
+复用已生成的 94 对左右图，扩展既有 verify_camera_gui.py / verify_camera_cli.py 的 --stereo 分支，分别使用域 189 / 190 与独立 Xvfb。GUI 直接使用已安装的 OpenCVCalibrationNode，真实点击 CALIBRATE、SAVE、COMMIT，没有修改内部采样或标定状态；正文 ros2 run 命令又由另一进程实际启动并显示左右角点。两项不能混称同一进程跑完全部步骤。
+
+点击前记录 41 对，后台随后又收入一对，归档中实际是 42 对图、left.yaml、right.yaml 与 ost.txt。GUI 所得基线 0.1200963222 m，两份回放 YAML 的 K/D/R/P 与 GUI 消息全部一致；服务接受参数后节点退出。Size 覆盖约 0.722879，因此明确保留“按钮可用不代表采样充分”。另行 CLI 检查确认左右 SetCameraInfo 服务、可靠 Image 发布者与约 10 Hz 输出，rqt 实际选择 /left/image_rect 并显示校正图；其退出堆栈来自脚本停止自有进程，原日志保留。
+
+完整原始输出、归档目录、参数、命令、截图/源码散列和边界见 [stereo.json](evidence/volume-2-chapter-7-stereo.json)。原始截图仅转换 XWD→PNG；正文裁去工具栏和滑块条，保留两侧图、epi 与按钮，没有修改界面像素或文字。calibrated.png → images/camera_stereo_revised.png 先以 candidate 实际查看，再检查正文尺寸后发布，文件字节一致。复现发布命令为 `magick /tmp/textbook-camera-stereo-gui/calibrated.xwd 02-专项技术栈/images/camera_stereo_revised.png`，必须复核新的实际结果后才能覆盖。
+
+正文删除旧的“双目 GUI 操作未验证”描述，加入模拟流程结果及质量边界。复查题解时补全双目固定外参与机器人安装外参的区别，保持原题要求。局部版面裁去无关界面条，避免第四项验收独占空页；没有删验收内容。全卷最终 269 页，检查物理页 4–5、154–158、257–260，包含变化段落/图、HDR、小结与全部验收、邻章及题解。无缺字、越界、未定义引用或缺图。完整 TeX follow-up diff：/tmp/volume-2-chapter-7-stereo-followup.patch。
+
+软件补测已完成，#19 仍因真实相机、曝光/HDR/硬件同步与厂商驱动留为未完成。

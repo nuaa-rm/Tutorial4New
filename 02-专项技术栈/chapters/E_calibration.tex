@@ -187,7 +187,15 @@ ros2 run camera_calibration cameracalibrator \
   -r left_camera/set_camera_info:=/left/set_camera_info \
   -r right_camera/set_camera_info:=/right/set_camera_info
 \end{tbash}
-两侧都识别到角点后，按单目方法采样、求解与保存，检查两份 YAML、纵向残差和基线。默认以相同时间戳配对；静态、无硬件同步的教学采集可在 \texttt{--ros-args} 前加 \texttt{--approximate 0.01}，容许约 10 ms 的时间差，但它既不会让曝光同时发生，也不会补偿运动目标。当前已实测离线双目求解和回放的同时间戳发布，真实双目装置及这一双目 GUI 操作仍需现场验证。
+两侧都识别到角点后，按单目方法采样、求解与保存，检查两份 YAML、纵向残差和基线。默认以相同时间戳配对；静态、无硬件同步的教学采集可在 \texttt{--ros-args} 前加 \texttt{--approximate 0.01}，容许约 10 ms 的时间差，但它既不会让曝光同时发生，也不会补偿运动目标。
+
+我们用这组模拟图实际跑过 Jazzy 的双目窗口，依次点击 CALIBRATE、SAVE、COMMIT。点击求解前记录到 41 对样本，随后又收到一对，归档中实际保存了 42 对图和左右 YAML；写入回放的两份参数也与 GUI 输出一致。用右侧 $P$ 算出的基线为 0.12010 m，与生成时的 0.12 m 接近。你可以对照图~\ref{fig:v2-camera-stereo-gui}，先看两侧都有角点，再看右侧的纵向残差与按钮。不过采样时 Size 覆盖只有约 0.72，按钮仍然开放了；这提醒我们继续补拍不同大小和位置的板，不能把按钮当质量合格证。这里验证的是模拟图到软件存档的流程，真实装置还要另拍同步验证图、量安装距离并检查曝光时序。
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth,trim=0 125bp 0 45bp,clip]{images/camera_stereo_revised.png}
+  \caption{模拟左右图在 Jazzy 双目标定器中的实际求解界面。右侧 epi 是当前图的纵向残差，不能代替独立验证。}
+  \label{fig:v2-camera-stereo-gui}
+\end{figure}
 \end{example}
 \begin{exercise}\label{ex:v2-camera-stereo}
 标准水平双目右侧 $P_{00}=800$ pixel、$P_{03}=-96$ pixel\,m，计算基线。若曝光相差 10 ms，解释 \texttt{--approximate} 能做什么、不能做什么，并指出双目固定外参与机器人安装外参的区别。

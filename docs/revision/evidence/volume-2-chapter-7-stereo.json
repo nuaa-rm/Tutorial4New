@@ -1,0 +1,331 @@
+{
+  "recorded_at": "2026-09-29T03:50:46.560808+00:00",
+  "environment": "Distrobox ubuntu2404, ROS 2 Jazzy, camera_calibration 5.0.13, separate Xvfb sessions",
+  "gui_command": [
+    "python3",
+    "scripts/verify_camera_gui.py",
+    "--project",
+    "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/camera/calibration-lab-demo",
+    "--data",
+    "/tmp/textbook-camera-data",
+    "--output",
+    "/tmp/textbook-camera-stereo-gui",
+    "--stereo"
+  ],
+  "gui_script_exit": 0,
+  "gui": {
+    "samples": 41,
+    "coverage": [
+      [
+        "X",
+        0.20292739210686986,
+        0.8710448235634691,
+        1.0
+      ],
+      [
+        "Y",
+        0.21854032249431316,
+        0.8528595190308912,
+        0.90617028076654
+      ],
+      [
+        "Size",
+        0.0,
+        0.2891517185301495,
+        0.7228792963253736
+      ],
+      [
+        "Skew",
+        0.0,
+        1.0,
+        1.0
+      ]
+    ],
+    "archive": [
+      "left-0000.png",
+      "left-0001.png",
+      "left-0002.png",
+      "left-0003.png",
+      "left-0004.png",
+      "left-0005.png",
+      "left-0006.png",
+      "left-0007.png",
+      "left-0008.png",
+      "left-0009.png",
+      "left-0010.png",
+      "left-0011.png",
+      "left-0012.png",
+      "left-0013.png",
+      "left-0014.png",
+      "left-0015.png",
+      "left-0016.png",
+      "left-0017.png",
+      "left-0018.png",
+      "left-0019.png",
+      "left-0020.png",
+      "left-0021.png",
+      "left-0022.png",
+      "left-0023.png",
+      "left-0024.png",
+      "left-0025.png",
+      "left-0026.png",
+      "left-0027.png",
+      "left-0028.png",
+      "left-0029.png",
+      "left-0030.png",
+      "left-0031.png",
+      "left-0032.png",
+      "left-0033.png",
+      "left-0034.png",
+      "left-0035.png",
+      "left-0036.png",
+      "left-0037.png",
+      "left-0038.png",
+      "left-0039.png",
+      "left-0040.png",
+      "left-0041.png",
+      "right-0000.png",
+      "right-0001.png",
+      "right-0002.png",
+      "right-0003.png",
+      "right-0004.png",
+      "right-0005.png",
+      "right-0006.png",
+      "right-0007.png",
+      "right-0008.png",
+      "right-0009.png",
+      "right-0010.png",
+      "right-0011.png",
+      "right-0012.png",
+      "right-0013.png",
+      "right-0014.png",
+      "right-0015.png",
+      "right-0016.png",
+      "right-0017.png",
+      "right-0018.png",
+      "right-0019.png",
+      "right-0020.png",
+      "right-0021.png",
+      "right-0022.png",
+      "right-0023.png",
+      "right-0024.png",
+      "right-0025.png",
+      "right-0026.png",
+      "right-0027.png",
+      "right-0028.png",
+      "right-0029.png",
+      "right-0030.png",
+      "right-0031.png",
+      "right-0032.png",
+      "right-0033.png",
+      "right-0034.png",
+      "right-0035.png",
+      "right-0036.png",
+      "right-0037.png",
+      "right-0038.png",
+      "right-0039.png",
+      "right-0040.png",
+      "right-0041.png",
+      "left.yaml",
+      "right.yaml",
+      "ost.txt"
+    ],
+    "messages": {
+      "left": {
+        "K": [
+          559.9884944440329,
+          0.0,
+          321.8523291886314,
+          0.0,
+          565.1016292021781,
+          239.8344237570045,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "D": [
+          -0.18323802031864966,
+          0.03951971346906663,
+          0.0006271291958536349,
+          -0.000717808809977162,
+          0.0
+        ],
+        "R": [
+          0.999707054526176,
+          -0.0008006041290041548,
+          -0.02419016667214688,
+          0.0008077842223081919,
+          0.9999996325438404,
+          0.00028704848764779577,
+          0.0241899279711167,
+          -0.00030650483306533447,
+          0.9997073338930447
+        ],
+        "P": [
+          549.2324677176889,
+          0.0,
+          340.6164436340332,
+          0.0,
+          0.0,
+          549.2324677176889,
+          240.26594161987305,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ]
+      },
+      "right": {
+        "K": [
+          562.6053083700939,
+          0.0,
+          320.5165026798582,
+          0.0,
+          567.7634523071912,
+          239.4008355229613,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "D": [
+          -0.18972488693832218,
+          0.07284146893564551,
+          0.001063765753456351,
+          -0.0015593222852109028,
+          0.0
+        ],
+        "R": [
+          0.9996416263871746,
+          -0.0008972168943672975,
+          -0.026754696706357016,
+          0.000889275392197657,
+          0.9999995569395113,
+          -0.0003087232710598012,
+          0.0267549618441425,
+          0.0002848203393791157,
+          0.9996419813583726
+        ],
+        "P": [
+          549.2324677176889,
+          0.0,
+          340.6164436340332,
+          -65.96079941421684,
+          0.0,
+          549.2324677176889,
+          240.26594161987305,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ]
+      }
+    },
+    "baseline_m": 0.12009632221546189,
+    "commit_shutdown": true,
+    "both_persisted_K_D_R_P_match": true,
+    "archived_pairs": 42
+  },
+  "gui_stdout": "Waiting for service camera/set_camera_info ...\nService camera/set_camera_info not found.\nWaiting for service left_camera/set_camera_info ...\nOK\nWaiting for service right_camera/set_camera_info ...\nOK\n[WARN] [1790653318.836139157] [camera_calibrator]: No publishers available for topic /image. Using system default QoS for subscriber.\n*** Added sample 1, p_x = 0.594, p_y = 0.219, p_size = 0.185, skew = 0.589\n*** Added sample 2, p_x = 0.465, p_y = 0.399, p_size = 0.180, skew = 0.079\n*** Added sample 3, p_x = 0.424, p_y = 0.720, p_size = 0.165, skew = 0.235\n*** Added sample 4, p_x = 0.633, p_y = 0.371, p_size = 0.227, skew = 0.029\n*** Added sample 5, p_x = 0.203, p_y = 0.673, p_size = 0.195, skew = 0.017\n*** Added sample 6, p_x = 0.544, p_y = 0.446, p_size = 0.207, skew = 0.471\n*** Added sample 7, p_x = 0.337, p_y = 0.708, p_size = 0.140, skew = 0.757\n*** Added sample 8, p_x = 0.493, p_y = 0.316, p_size = 0.144, skew = 0.661\n*** Added sample 9, p_x = 0.533, p_y = 0.695, p_size = 0.169, skew = 0.006\n*** Added sample 10, p_x = 0.559, p_y = 0.565, p_size = 0.136, skew = 0.618\n*** Added sample 11, p_x = 0.662, p_y = 0.318, p_size = 0.174, skew = 0.138\n*** Added sample 12, p_x = 0.600, p_y = 0.853, p_size = 0.289, skew = 0.179\n*** Added sample 13, p_x = 0.355, p_y = 0.509, p_size = 0.174, skew = 0.397\n*** Added sample 14, p_x = 0.378, p_y = 0.244, p_size = 0.209, skew = 0.120\n*** Added sample 15, p_x = 0.744, p_y = 0.602, p_size = 0.181, skew = 0.016\n*** Added sample 16, p_x = 0.607, p_y = 0.660, p_size = 0.159, skew = 0.243\n*** Added sample 17, p_x = 0.260, p_y = 0.413, p_size = 0.196, skew = 0.246\n*** Added sample 18, p_x = 0.622, p_y = 0.219, p_size = 0.233, skew = 0.326\n*** Added sample 19, p_x = 0.524, p_y = 0.472, p_size = 0.156, skew = 0.140\n*** Added sample 20, p_x = 0.741, p_y = 0.337, p_size = 0.215, skew = 0.576\n*** Added sample 21, p_x = 0.415, p_y = 0.546, p_size = 0.133, skew = 0.161\n*** Added sample 22, p_x = 0.355, p_y = 0.617, p_size = 0.172, skew = 0.084\n*** Added sample 23, p_x = 0.802, p_y = 0.786, p_size = 0.234, skew = 0.038\n*** Added sample 24, p_x = 0.551, p_y = 0.824, p_size = 0.223, skew = 0.082\n*** Added sample 25, p_x = 0.303, p_y = 0.246, p_size = 0.165, skew = 0.283\n*** Added sample 26, p_x = 0.844, p_y = 0.265, p_size = 0.197, skew = 0.340\n*** Added sample 27, p_x = 0.436, p_y = 0.688, p_size = 0.143, skew = 0.458\n*** Added sample 28, p_x = 0.871, p_y = 0.542, p_size = 0.277, skew = 0.191\n*** Added sample 29, p_x = 0.647, p_y = 0.315, p_size = 0.155, skew = 1.000\n*** Added sample 30, p_x = 0.771, p_y = 0.454, p_size = 0.220, skew = 0.053\n*** Added sample 31, p_x = 0.508, p_y = 0.684, p_size = 0.269, skew = 0.118\n*** Added sample 32, p_x = 0.425, p_y = 0.521, p_size = 0.242, skew = 0.046\n*** Added sample 33, p_x = 0.602, p_y = 0.455, p_size = 0.160, skew = 0.245\n*** Added sample 34, p_x = 0.311, p_y = 0.462, p_size = 0.142, skew = 0.528\n*** Added sample 35, p_x = 0.690, p_y = 0.449, p_size = 0.142, skew = 0.104\n*** Added sample 36, p_x = 0.829, p_y = 0.376, p_size = 0.259, skew = 0.282\n*** Added sample 37, p_x = 0.742, p_y = 0.336, p_size = 0.241, skew = 0.211\n*** Added sample 38, p_x = 0.580, p_y = 0.579, p_size = 0.237, skew = 0.402\n*** Added sample 39, p_x = 0.417, p_y = 0.327, p_size = 0.154, skew = 0.520\n*** Added sample 40, p_x = 0.767, p_y = 0.370, p_size = 0.188, skew = 1.000\n*** Added sample 41, p_x = 0.432, p_y = 0.782, p_size = 0.274, skew = 0.406\n**** Calibrating ****\nmono pinhole calibration...\n*** Added sample 42, p_x = 0.694, p_y = 0.879, p_size = 0.280, skew = 0.033\nmono pinhole calibration...\nstereo pinhole calibration...\nStereo RMS re-projection error: 0.23632110212788246\n\nLeft:\nD = [-0.18323802031864966, 0.03951971346906663, 0.0006271291958536349, -0.000717808809977162, 0.0]\nK = [559.9884944440329, 0.0, 321.8523291886314, 0.0, 565.1016292021781, 239.8344237570045, 0.0, 0.0, 1.0]\nR = [0.999707054526176, -0.0008006041290041548, -0.02419016667214688, 0.0008077842223081919, 0.9999996325438404, 0.00028704848764779577, 0.0241899279711167, -0.00030650483306533447, 0.9997073338930447]\nP = [549.2324677176889, 0.0, 340.6164436340332, 0.0, 0.0, 549.2324677176889, 240.26594161987305, 0.0, 0.0, 0.0, 1.0, 0.0]\n\nRight:\nD = [-0.18972488693832218, 0.07284146893564551, 0.001063765753456351, -0.0015593222852109028, 0.0]\nK = [562.6053083700939, 0.0, 320.5165026798582, 0.0, 567.7634523071912, 239.4008355229613, 0.0, 0.0, 1.0]\nR = [0.9996416263871746, -0.0008972168943672975, -0.026754696706357016, 0.000889275392197657, 0.9999995569395113, -0.0003087232710598012, 0.0267549618441425, 0.0002848203393791157, 0.9996419813583726]\nP = [549.2324677176889, 0.0, 340.6164436340332, -65.96079941421684, 0.0, 549.2324677176889, 240.26594161987305, 0.0, 0.0, 0.0, 1.0, 0.0]\nself.T = [-0.12005328286258245, 0.00010775244924308546, 0.003213140676423387]\nself.R = [0.9999967048397891, 8.0757326704682e-05, 0.0025658892840673382, -8.228041083433109e-05, 0.9999998205002542, 0.0005934891688063936, -0.0025658408948921636, -0.000593698335588945, 0.9999965319853806]\nNone\n# oST version 5.0 parameters\n\n\n[image]\n\nwidth\n640\n\nheight\n480\n\n[front/left]\n\ncamera matrix\n559.988494 0.000000 321.852329\n0.000000 565.101629 239.834424\n0.000000 0.000000 1.000000\n\ndistortion\n-0.183238 0.039520 0.000627 -0.000718 0.000000\n\nrectification\n0.999707 -0.000801 -0.024190\n0.000808 1.000000 0.000287\n0.024190 -0.000307 0.999707\n\nprojection\n549.232468 0.000000 340.616444 0.000000\n0.000000 549.232468 240.265942 0.000000\n0.000000 0.000000 1.000000 0.000000\n# oST version 5.0 parameters\n\n\n[image]\n\nwidth\n640\n\nheight\n480\n\n[front/right]\n\ncamera matrix\n562.605308 0.000000 320.516503\n0.000000 567.763452 239.400836\n0.000000 0.000000 1.000000\n\ndistortion\n-0.189725 0.072841 0.001064 -0.001559 0.000000\n\nrectification\n0.999642 -0.000897 -0.026755\n0.000889 1.000000 -0.000309\n0.026755 0.000285 0.999642\n\nprojection\n549.232468 0.000000 340.616444 -65.960799\n0.000000 549.232468 240.265942 0.000000\n0.000000 0.000000 1.000000 0.000000\n\n('Wrote calibration data to', '/tmp/calibrationdata.tar.gz')\n\nLeft:\nD = [-0.18323802031864966, 0.03951971346906663, 0.0006271291958536349, -0.000717808809977162, 0.0]\nK = [559.9884944440329, 0.0, 321.8523291886314, 0.0, 565.1016292021781, 239.8344237570045, 0.0, 0.0, 1.0]\nR = [0.999707054526176, -0.0008006041290041548, -0.02419016667214688, 0.0008077842223081919, 0.9999996325438404, 0.00028704848764779577, 0.0241899279711167, -0.00030650483306533447, 0.9997073338930447]\nP = [549.2324677176889, 0.0, 340.6164436340332, 0.0, 0.0, 549.2324677176889, 240.26594161987305, 0.0, 0.0, 0.0, 1.0, 0.0]\n\nRight:\nD = [-0.18972488693832218, 0.07284146893564551, 0.001063765753456351, -0.0015593222852109028, 0.0]\nK = [562.6053083700939, 0.0, 320.5165026798582, 0.0, 567.7634523071912, 239.4008355229613, 0.0, 0.0, 1.0]\nR = [0.9996416263871746, -0.0008972168943672975, -0.026754696706357016, 0.000889275392197657, 0.9999995569395113, -0.0003087232710598012, 0.0267549618441425, 0.0002848203393791157, 0.9996419813583726]\nP = [549.2324677176889, 0.0, 340.6164436340332, -65.96079941421684, 0.0, 549.2324677176889, 240.26594161987305, 0.0, 0.0, 0.0, 1.0, 0.0]\nself.T = [-0.12005328286258245, 0.00010775244924308546, 0.003213140676423387]\nself.R = [0.9999967048397891, 8.0757326704682e-05, 0.0025658892840673382, -8.228041083433109e-05, 0.9999998205002542, 0.0005934891688063936, -0.0025658408948921636, -0.000593698335588945, 0.9999965319853806]\n# oST version 5.0 parameters\n\n\n[image]\n\nwidth\n640\n\nheight\n480\n\n[front/left]\n\ncamera matrix\n559.988494 0.000000 321.852329\n0.000000 565.101629 239.834424\n0.000000 0.000000 1.000000\n\ndistortion\n-0.183238 0.039520 0.000627 -0.000718 0.000000\n\nrectification\n0.999707 -0.000801 -0.024190\n0.000808 1.000000 0.000287\n0.024190 -0.000307 0.999707\n\nprojection\n549.232468 0.000000 340.616444 0.000000\n0.000000 549.232468 240.265942 0.000000\n0.000000 0.000000 1.000000 0.000000\n# oST version 5.0 parameters\n\n\n[image]\n\nwidth\n640\n\nheight\n480\n\n[front/right]\n\ncamera matrix\n562.605308 0.000000 320.516503\n0.000000 567.763452 239.400836\n0.000000 0.000000 1.000000\n\ndistortion\n-0.189725 0.072841 0.001064 -0.001559 0.000000\n\nrectification\n0.999642 -0.000897 -0.026755\n0.000889 1.000000 -0.000309\n0.026755 0.000285 0.999642\n\nprojection\n549.232468 0.000000 340.616444 -65.960799\n0.000000 549.232468 240.265942 0.000000\n0.000000 0.000000 1.000000 0.000000\n\n{\"samples\": 41, \"coverage\": [[\"X\", 0.20292739210686986, 0.8710448235634691, 1.0], [\"Y\", 0.21854032249431316, 0.8528595190308912, 0.90617028076654], [\"Size\", 0.0, 0.2891517185301495, 0.7228792963253736], [\"Skew\", 0.0, 1.0, 1.0]], \"archive\": [\"left-0000.png\", \"left-0001.png\", \"left-0002.png\", \"left-0003.png\", \"left-0004.png\", \"left-0005.png\", \"left-0006.png\", \"left-0007.png\", \"left-0008.png\", \"left-0009.png\", \"left-0010.png\", \"left-0011.png\", \"left-0012.png\", \"left-0013.png\", \"left-0014.png\", \"left-0015.png\", \"left-0016.png\", \"left-0017.png\", \"left-0018.png\", \"left-0019.png\", \"left-0020.png\", \"left-0021.png\", \"left-0022.png\", \"left-0023.png\", \"left-0024.png\", \"left-0025.png\", \"left-0026.png\", \"left-0027.png\", \"left-0028.png\", \"left-0029.png\", \"left-0030.png\", \"left-0031.png\", \"left-0032.png\", \"left-0033.png\", \"left-0034.png\", \"left-0035.png\", \"left-0036.png\", \"left-0037.png\", \"left-0038.png\", \"left-0039.png\", \"left-0040.png\", \"left-0041.png\", \"right-0000.png\", \"right-0001.png\", \"right-0002.png\", \"right-0003.png\", \"right-0004.png\", \"right-0005.png\", \"right-0006.png\", \"right-0007.png\", \"right-0008.png\", \"right-0009.png\", \"right-0010.png\", \"right-0011.png\", \"right-0012.png\", \"right-0013.png\", \"right-0014.png\", \"right-0015.png\", \"right-0016.png\", \"right-0017.png\", \"right-0018.png\", \"right-0019.png\", \"right-0020.png\", \"right-0021.png\", \"right-0022.png\", \"right-0023.png\", \"right-0024.png\", \"right-0025.png\", \"right-0026.png\", \"right-0027.png\", \"right-0028.png\", \"right-0029.png\", \"right-0030.png\", \"right-0031.png\", \"right-0032.png\", \"right-0033.png\", \"right-0034.png\", \"right-0035.png\", \"right-0036.png\", \"right-0037.png\", \"right-0038.png\", \"right-0039.png\", \"right-0040.png\", \"right-0041.png\", \"left.yaml\", \"right.yaml\", \"ost.txt\"], \"messages\": {\"left\": {\"K\": [559.9884944440329, 0.0, 321.8523291886314, 0.0, 565.1016292021781, 239.8344237570045, 0.0, 0.0, 1.0], \"D\": [-0.18323802031864966, 0.03951971346906663, 0.0006271291958536349, -0.000717808809977162, 0.0], \"R\": [0.999707054526176, -0.0008006041290041548, -0.02419016667214688, 0.0008077842223081919, 0.9999996325438404, 0.00028704848764779577, 0.0241899279711167, -0.00030650483306533447, 0.9997073338930447], \"P\": [549.2324677176889, 0.0, 340.6164436340332, 0.0, 0.0, 549.2324677176889, 240.26594161987305, 0.0, 0.0, 0.0, 1.0, 0.0]}, \"right\": {\"K\": [562.6053083700939, 0.0, 320.5165026798582, 0.0, 567.7634523071912, 239.4008355229613, 0.0, 0.0, 1.0], \"D\": [-0.18972488693832218, 0.07284146893564551, 0.001063765753456351, -0.0015593222852109028, 0.0], \"R\": [0.9996416263871746, -0.0008972168943672975, -0.026754696706357016, 0.000889275392197657, 0.9999995569395113, -0.0003087232710598012, 0.0267549618441425, 0.0002848203393791157, 0.9996419813583726], \"P\": [549.2324677176889, 0.0, 340.6164436340332, -65.96079941421684, 0.0, 549.2324677176889, 240.26594161987305, 0.0, 0.0, 0.0, 1.0, 0.0]}}, \"baseline_m\": 0.12009632221546189, \"commit_shutdown\": true}\n",
+  "cli_command": [
+    "python3",
+    "scripts/verify_camera_cli.py",
+    "--project",
+    "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/camera/calibration-lab-demo",
+    "--data",
+    "/tmp/textbook-camera-data",
+    "--yaml",
+    "/tmp/textbook-camera-stereo-gui/committed.yaml",
+    "--output",
+    "/tmp/textbook-camera-stereo-cli",
+    "--stereo"
+  ],
+  "cli_script_exit": 0,
+  "cli_checks": [
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "info",
+        "/left/image_raw",
+        "--verbose"
+      ],
+      "exit": 0,
+      "output": "Type: sensor_msgs/msg/Image\n\nPublisher count: 1\n\nNode name: camera_replay\nNode namespace: /\nTopic type: sensor_msgs/msg/Image\nTopic type hash: RIHS01_d31d41a9a4c4bc8eae9be757b0beed306564f7526c88ea6a4588fb9582527d47\nEndpoint type: PUBLISHER\nGID: 01.0f.e8.b9.ad.9c.86.39.00.00.00.00.00.00.13.03\nQoS profile:\n  Reliability: RELIABLE\n  History (Depth): UNKNOWN\n  Durability: VOLATILE\n  Lifespan: Infinite\n  Deadline: Infinite\n  Liveliness: AUTOMATIC\n  Liveliness lease duration: Infinite\n\nSubscription count: 0\n\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "service",
+        "list",
+        "-t"
+      ],
+      "exit": 0,
+      "output": "/camera_replay/describe_parameters [rcl_interfaces/srv/DescribeParameters]\n/camera_replay/get_parameter_types [rcl_interfaces/srv/GetParameterTypes]\n/camera_replay/get_parameters [rcl_interfaces/srv/GetParameters]\n/camera_replay/get_type_description [type_description_interfaces/srv/GetTypeDescription]\n/camera_replay/list_parameters [rcl_interfaces/srv/ListParameters]\n/camera_replay/set_parameters [rcl_interfaces/srv/SetParameters]\n/camera_replay/set_parameters_atomically [rcl_interfaces/srv/SetParametersAtomically]\n/left/set_camera_info [sensor_msgs/srv/SetCameraInfo]\n/right/set_camera_info [sensor_msgs/srv/SetCameraInfo]\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "topic",
+        "hz",
+        "/left/image_raw"
+      ],
+      "exit": "observed_for_4_seconds",
+      "output": "average rate: 10.000\n\tmin: 0.100s max: 0.100s std dev: 0.00014s window: 11\naverage rate: 10.000\n\tmin: 0.100s max: 0.100s std dev: 0.00013s window: 21\n"
+    },
+    {
+      "command": [
+        "ros2",
+        "run",
+        "camera_calibration",
+        "cameracalibrator",
+        "--size",
+        "9x6",
+        "--square",
+        ".025",
+        "--k-coefficients",
+        "2",
+        "--ros-args",
+        "-r",
+        "left:=/left/image_raw",
+        "-r",
+        "right:=/right/image_raw",
+        "-r",
+        "left_camera/set_camera_info:=/left/set_camera_info",
+        "-r",
+        "right_camera/set_camera_info:=/right/set_camera_info"
+      ],
+      "window": "cli.xwd",
+      "started": true
+    },
+    {
+      "command": "rqt_image_view /left/image_rect",
+      "window": "rqt.xwd",
+      "started": true
+    }
+  ],
+  "cli_log": "Waiting for service camera/set_camera_info ...\nService camera/set_camera_info not found.\nWaiting for service left_camera/set_camera_info ...\nOK\nWaiting for service right_camera/set_camera_info ...\nOK\n[WARN] [1790653678.248394762] [cameracalibrator]: No publishers available for topic /image. Using system default QoS for subscriber.\n*** Added sample 1, p_x = 0.744, p_y = 0.602, p_size = 0.181, skew = 0.016\n*** Added sample 2, p_x = 0.607, p_y = 0.660, p_size = 0.159, skew = 0.243\n*** Added sample 3, p_x = 0.260, p_y = 0.413, p_size = 0.196, skew = 0.246\n*** Added sample 4, p_x = 0.622, p_y = 0.219, p_size = 0.233, skew = 0.326\n*** Added sample 5, p_x = 0.524, p_y = 0.472, p_size = 0.156, skew = 0.140\n*** Added sample 6, p_x = 0.544, p_y = 0.807, p_size = 0.221, skew = 0.180\n*** Added sample 7, p_x = 0.741, p_y = 0.337, p_size = 0.215, skew = 0.576\n*** Added sample 8, p_x = 0.415, p_y = 0.546, p_size = 0.133, skew = 0.161\n*** Added sample 9, p_x = 0.727, p_y = 0.323, p_size = 0.193, skew = 0.059\n*** Added sample 10, p_x = 0.355, p_y = 0.617, p_size = 0.172, skew = 0.084\nException in thread Thread-3:\nTraceback (most recent call last):\n  File \"/usr/lib/python3.12/threading.py\", line 1073, in _bootstrap_inner\n    self.run()\n  File \"/opt/ros/jazzy/lib/python3.12/site-packages/camera_calibration/camera_calibrator.py\", line 79, in run\n    rclpy.spin(self.node)\n  File \"/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/__init__.py\", line 247, in spin\n    executor.spin_once()\n  File \"/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py\", line 926, in spin_once\n    self._spin_once_impl(timeout_sec)\n  File \"/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py\", line 907, in _spin_once_impl\n    handler, entity, node = self.wait_for_ready_callbacks(\n                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py\", line 877, in wait_for_ready_callbacks\n    return next(self._cb_iter)\n           ^^^^^^^^^^^^^^^^^^^\n  File \"/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py\", line 785, in _wait_for_ready_callbacks\n    raise ExternalShutdownException()\nrclpy.executors.ExternalShutdownException\nTraceback (most recent call last):\n  File \"/opt/ros/jazzy/lib/camera_calibration/cameracalibrator\", line 33, in <module>\n    sys.exit(load_entry_point('camera-calibration==5.0.13', 'console_scripts', 'cameracalibrator')())\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/ros/jazzy/lib/python3.12/site-packages/camera_calibration/nodes/cameracalibrator.py\", line 226, in main\n    node.spin()\n  File \"/opt/ros/jazzy/lib/python3.12/site-packages/camera_calibration/camera_calibrator.py\", line 270, in spin\n    k = cv2.waitKey(6) & 0xFF\n        ^^^^^^^^^^^^^^\nKeyboardInterrupt\n[ros2run]: Interrupt\n",
+  "artifacts": {
+    "/tmp/textbook-camera-stereo-gui/sampling.png": "e49a3c0cb3053f8df4c426f7bac5faeff4c5c3734cd725b4b8385ed06d9e5c57",
+    "/tmp/textbook-camera-stereo-gui/calibrated.png": "531e6d7f9406e73f0e306bf3ce62ab05decdeec5efe89addb988084513f28abf",
+    "/tmp/textbook-camera-stereo-gui/committed.yaml": "56bf0675f045860f1e500c1eb360cc74d67bf2bf0ed89042eef58708de0dfe43",
+    "/tmp/textbook-camera-stereo-gui/committed_right.yaml": "26cfae3831f2e6c99d449d708e25f98f5aea8b296618ddcaa694a20dfb9ff00f",
+    "/tmp/textbook-camera-stereo-gui/calibrationdata.tar.gz": "5929ccc97864bb6c76eb9548f8b275a447fb8e3f7a23209f663a4ad47d98ba31",
+    "/tmp/textbook-camera-stereo-cli/cli.png": "916b65f6d70043d52f520181250b61a2a270419475e59d7ab2ba2bbf7725edb0",
+    "/tmp/textbook-camera-stereo-cli/rqt.png": "cf5fb126d0f903329207938b48bc0500fe2530efc99e82709a8764ebddf27fbf",
+    "/home/mijiao/Apps/Tutorial4New/scripts/verify_camera_gui.py": "2a6c54290b0631fe3e08d919a2643ba138f4586c5502413332d8933a12e15452",
+    "/home/mijiao/Apps/Tutorial4New/scripts/verify_camera_cli.py": "6e249b87fa1eff6cd344adf1aa73b253d15c24f396b68877aad6f7a044a6bda3"
+  },
+  "committed_yaml": {
+    "committed.yaml": "image_width: 640\nimage_height: 480\ncamera_name: front\ndistortion_model: plumb_bob\ncamera_matrix:\n  rows: 3\n  cols: 3\n  data:\n  - 559.9884944440329\n  - 0.0\n  - 321.8523291886314\n  - 0.0\n  - 565.1016292021781\n  - 239.8344237570045\n  - 0.0\n  - 0.0\n  - 1.0\ndistortion_coefficients:\n  rows: 1\n  cols: 5\n  data:\n  - -0.18323802031864966\n  - 0.03951971346906663\n  - 0.0006271291958536349\n  - -0.000717808809977162\n  - 0.0\nrectification_matrix:\n  rows: 3\n  cols: 3\n  data:\n  - 0.999707054526176\n  - -0.0008006041290041548\n  - -0.02419016667214688\n  - 0.0008077842223081919\n  - 0.9999996325438404\n  - 0.00028704848764779577\n  - 0.0241899279711167\n  - -0.00030650483306533447\n  - 0.9997073338930447\nprojection_matrix:\n  rows: 3\n  cols: 4\n  data:\n  - 549.2324677176889\n  - 0.0\n  - 340.6164436340332\n  - 0.0\n  - 0.0\n  - 549.2324677176889\n  - 240.26594161987305\n  - 0.0\n  - 0.0\n  - 0.0\n  - 1.0\n  - 0.0\n",
+    "committed_right.yaml": "image_width: 640\nimage_height: 480\ncamera_name: front\ndistortion_model: plumb_bob\ncamera_matrix:\n  rows: 3\n  cols: 3\n  data:\n  - 562.6053083700939\n  - 0.0\n  - 320.5165026798582\n  - 0.0\n  - 567.7634523071912\n  - 239.4008355229613\n  - 0.0\n  - 0.0\n  - 1.0\ndistortion_coefficients:\n  rows: 1\n  cols: 5\n  data:\n  - -0.18972488693832218\n  - 0.07284146893564551\n  - 0.001063765753456351\n  - -0.0015593222852109028\n  - 0.0\nrectification_matrix:\n  rows: 3\n  cols: 3\n  data:\n  - 0.9996416263871746\n  - -0.0008972168943672975\n  - -0.026754696706357016\n  - 0.000889275392197657\n  - 0.9999995569395113\n  - -0.0003087232710598012\n  - 0.0267549618441425\n  - 0.0002848203393791157\n  - 0.9996419813583726\nprojection_matrix:\n  rows: 3\n  cols: 4\n  data:\n  - 549.2324677176889\n  - 0.0\n  - 340.6164436340332\n  - -65.96079941421684\n  - 0.0\n  - 549.2324677176889\n  - 240.26594161987305\n  - 0.0\n  - 0.0\n  - 0.0\n  - 1.0\n  - 0.0\n"
+  },
+  "limits": [
+    "GUI 按钮验证直接实例化已安装 OpenCVCalibrationNode；正文 ros2 run 启动和校正图由另一进程验证。",
+    "41 对为点击前采样数；后台随后又收入一对，归档实际 42 对，未修改采样内部状态。",
+    "Size 覆盖约 0.723，按钮可用不等于采样充分；截图 epi 是当前参与拟合图的残差。",
+    "CLI 的 ExternalShutdownException/KeyboardInterrupt 出现在脚本停止其自有进程时；没有将启动检查写成该进程完成全部标定。",
+    "模拟输入固定种子 2026、真实生成基线 0.12 m；尚无物理双目、曝光同步、HDR 或厂商驱动验证。"
+  ]
+}
