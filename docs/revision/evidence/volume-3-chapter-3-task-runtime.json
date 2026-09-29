@@ -1,0 +1,352 @@
+{
+  "python": "3.12.3",
+  "files": {
+    "check.py": "238e5f77d4a2d0955e78050349054f826e91752a20db423852fc7127b55641ea",
+    "README.md": "da97c1bbab5505fdf39e61367844c18f339e90b2c33d10cef12bc5bb9b7a0ee9"
+  },
+  "records": [
+    {
+      "name": "实际检查器 default",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/navigation-task-demo/check.py"
+        ],
+        "result": {
+          "width": {
+            "required_m": 0.8999999999999999,
+            "straight_width_ok": false
+          },
+          "patrol_goal_map_m": [
+            1.0000000000000002,
+            3.0
+          ]
+        }
+      }
+    },
+    {
+      "name": "实际检查器 thin",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/navigation-task-demo/check.py",
+          "--robot",
+          ".5",
+          "--margin",
+          ".1"
+        ],
+        "result": {
+          "width": {
+            "required_m": 0.7,
+            "straight_width_ok": true
+          },
+          "patrol_goal_map_m": [
+            1.0000000000000002,
+            3.0
+          ]
+        }
+      }
+    },
+    {
+      "name": "实际检查器 narrow",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/navigation-task-demo/check.py",
+          "--corridor",
+          ".7"
+        ],
+        "result": {
+          "width": {
+            "required_m": 0.8999999999999999,
+            "straight_width_ok": false
+          },
+          "patrol_goal_map_m": [
+            1.0000000000000002,
+            3.0
+          ]
+        }
+      }
+    },
+    {
+      "name": "无效尺寸拒绝",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/navigation-task-demo/check.py",
+          "--corridor",
+          "-1"
+        ],
+        "stderr": "usage: check.py [-h] [--corridor CORRIDOR] [--robot ROBOT] [--margin MARGIN]\n                [--result RESULT]\ncheck.py: error: 尺寸必须为非负有限数\n"
+      }
+    },
+    {
+      "name": "无效尺寸拒绝",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/navigation-task-demo/check.py",
+          "--margin",
+          "nan"
+        ],
+        "stderr": "usage: check.py [-h] [--corridor CORRIDOR] [--robot ROBOT] [--margin MARGIN]\n                [--result RESULT]\ncheck.py: error: 尺寸必须为非负有限数\n"
+      }
+    },
+    {
+      "name": "解释同次实际结果 nav2",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/navigation-task-demo/check.py",
+          "--result",
+          "/tmp/textbook-v3-nav/nav2/result.json"
+        ],
+        "input": {
+          "plan_status": 4,
+          "plan_error": 0,
+          "path_poses": 123,
+          "follow_status": 4,
+          "follow_error": 0,
+          "odom_samples": 252,
+          "command_samples": 237,
+          "final_xy": [
+            4.979164077296007,
+            2.979946689754398
+          ],
+          "goal_error_m": 0.09962526899182057
+        },
+        "input_sha256": "a6e8a961ee3aebc9611f732ae4f985d36fe5d017672c5c6043c0711d162c6714",
+        "output": {
+          "width": {
+            "required_m": 0.8999999999999999,
+            "straight_width_ok": false
+          },
+          "patrol_goal_map_m": [
+            1.0000000000000002,
+            3.0
+          ],
+          "run": {
+            "next": "review trajectory and conditions",
+            "goal_error_m": 0.09962526899182057,
+            "boundary": "software result, not physical arrival"
+          }
+        }
+      }
+    },
+    {
+      "name": "解释同次实际结果 nav2-blocked",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/navigation-task-demo/check.py",
+          "--result",
+          "/tmp/textbook-v3-nav/nav2-blocked/result.json"
+        ],
+        "input": {
+          "plan_status": 6,
+          "plan_error": 206,
+          "path_poses": 0,
+          "odom_samples": 7,
+          "command_samples": 0,
+          "final_xy": [
+            4.979164077296007,
+            2.979946689754398
+          ],
+          "goal_error_m": 2.2084804639433777
+        },
+        "input_sha256": "5d9b969781d97a9f6ccd1734d6e2b782588d7826475683ecdc356b157c664776",
+        "output": {
+          "width": {
+            "required_m": 0.8999999999999999,
+            "straight_width_ok": false
+          },
+          "patrol_goal_map_m": [
+            1.0000000000000002,
+            3.0
+          ],
+          "run": {
+            "next": "inspect goal, map and TF",
+            "plan_error": 206,
+            "follow_requested": false
+          }
+        }
+      }
+    },
+    {
+      "name": "独立二维变换",
+      "status": "PASS",
+      "details": {
+        "point": [
+          2,
+          0
+        ],
+        "angle_deg": 0,
+        "translation": [
+          1,
+          1
+        ],
+        "result": [
+          3.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "独立二维变换",
+      "status": "PASS",
+      "details": {
+        "point": [
+          2,
+          0
+        ],
+        "angle_deg": -90,
+        "translation": [
+          1,
+          1
+        ],
+        "result": [
+          1.0000000000000002,
+          -1.0
+        ]
+      }
+    },
+    {
+      "name": "独立二维变换",
+      "status": "PASS",
+      "details": {
+        "point": [
+          0,
+          0
+        ],
+        "angle_deg": 90,
+        "translation": [
+          1,
+          1
+        ],
+        "result": [
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "人工跟踪失败分支",
+      "status": "PASS",
+      "details": {
+        "input": {
+          "plan_status": 4,
+          "plan_error": 0,
+          "follow_status": 6,
+          "follow_error": 101
+        },
+        "result": {
+          "next": "inspect controller and execution",
+          "follow_error": 101
+        },
+        "boundary": "人工软件分支输入，不是实车或实际服务器错误"
+      }
+    },
+    {
+      "name": "纸面地图实际填写/独立核对",
+      "status": "PASS",
+      "details": {
+        "route": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            0,
+            5
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            2,
+            5
+          ],
+          [
+            3,
+            5
+          ],
+          [
+            4,
+            5
+          ],
+          [
+            5,
+            5
+          ]
+        ],
+        "steps": 10,
+        "new_obstacle": [
+          3,
+          5
+        ],
+        "after_blocked": [],
+        "boundary": "格点棋子，没有车体或动力学"
+      }
+    },
+    {
+      "name": "纸面接口/取证产物",
+      "status": "PASS",
+      "details": {
+        "arrows": [
+          "雷达目标信息",
+          "决策任务选择",
+          "场地巡逻点",
+          "地图目标"
+        ],
+        "dimension": [
+          "0.8m通道",
+          "0.6m车宽",
+          "每侧0.15m裕量",
+          "总需求0.9m不通过"
+        ],
+        "command_without_motion": [
+          {
+            "sent": true,
+            "received": false,
+            "next": "通信/约定"
+          },
+          {
+            "sent": true,
+            "received": true,
+            "estop": true,
+            "next": "保持停止，核对原因"
+          }
+        ],
+        "unknown": "真实机械/执行/动态传感器未取证，不能编造反馈"
+      }
+    }
+  ],
+  "boundaries": [
+    "真实Nav2服务器+软件积分执行，未验证实车到位/制动/动态避障/SLAM",
+    "跟踪失败分支为人工输入，未冒充实际错误"
+  ]
+}

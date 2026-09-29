@@ -1,112 +1,129 @@
-\subsubsection{比赛故事：从「缺德地图」到 Nav2}
+\subsubsection{比赛故事：从“缺德地图”到 Nav2}
 
-想象你坐在哨兵「脑袋」里要去偷家：需要一张赛场地图、知道自己在哪、算出一条路，边走边躲动态障碍。
-这正是导航方向在 RM 中的缩影。算法细节见卷二「导航与 SLAM」；本章只讲\textbf{比赛语义}。
+想象你坐在哨兵“脑袋”里要去偷家。你首先得知道自己在哪里，再看地图上哪些地方能走，然后选一条路；车走起来以后，前面还可能突然多一台机器人。缺德地图要是只会告诉你“直行”，却不管眼前已经堵住的通道，照着走可就真缺德了。导航要把目的地、环境、自身状态和当前运动接起来，本章讲它们在比赛任务里怎样配合，算法细节回卷二“导航与SLAM初步”。
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{sentry_grid_revised.pdf}
+\caption{纸面地图的路线与封路；棋子模型只演练流程，不替代车体碰撞检查}
+\label{fig:v3-nav-grid}
+\end{figure}
 
 \begin{example}[用纸面地图走一遍]
-画一个 6 格乘 6 格的网格，将左下角标为起点、右上角标为终点，在中间留一条通道。用棋子代表机器人，先画完整路线，再逐格移动。放入一个新障碍后暂停，观察是否仍有安全通道，再决定绕行或等待。检查：目的地、路线和当前运动是三层不同信息。
+准备纸和棋子，画6乘6格，格号从0到5。起点$(0,0)$，终点$(5,5)$，把$x=3$、$y=0$到4的格子设为障碍。先画从起点沿$x=0$到$y=5$，再往右到终点的10步路线，逐格移动棋子。接下来在$(3,5)$放入新障碍，唯一缺口被堵住，旧线还在纸上，却已经不能穿过去。先暂停，再检查是否还有通道；本例没有其它通道，就报告无法继续，等待任务更新。能分别指出目的地、完整路线与下一步动作，才算走完这个例子。
 \end{example}
 
 \begin{exercise}
 \label{v3-ex-nav-1}
-全局路线仍存在，但通道被新障碍完全堵住，应盲目继续沿线前进吗？写出一种合理动作。
+全局路线仍存在，但通道被新障碍完全堵住，应盲目继续沿线前进吗？在图\ref{fig:v3-nav-grid}上指出封路位置，并写一种合理动作。
 \end{exercise}
 
 \subsubsection{赛场上的模块含义}
 
-对照 ROS2 导航框架 Navigation2（Nav2），比赛中常见对应关系：
+我们用ROS 2导航框架 Navigation2（Nav2）来对应刚才的流程。首先，\textbf{地图}描述环境，静态占据地图可以作为代价地图的一个输入，但二者不是同一个东西；代价地图还可以结合当前观测、车体外形和膨胀等信息。然后，\textbf{定位}告诉我们本车在哪里，可能使用激光雷达（Light Detection and Ranging，LiDAR）、里程计或惯性测量单元（Inertial Measurement Unit，IMU）等信息，坐标变换（Transform，TF）提供带时间的坐标关系，并不会凭空替你算出位姿。
 
-\begin{enumerate}
-    \item \textbf{地图}：赛前建图环节得到的静态层 + 比赛中代价地图动态层；
-    \item \textbf{定位}：激光雷达 / 里程计 / 惯性测量单元（Inertial Measurement Unit，IMU） 等融合（此处「雷达」指 \textbf{LiDAR，Light Detection and Ranging，激光探测与测距传感器}，不是雷达站方向）；
-    \item \textbf{全局规划}：在已知地图上找大致路线；
-    \item \textbf{局部规划 / 控制}：躲突然出现的障碍，输出速度指令给电控；
-    \item \textbf{恢复行为}：卡住后旋转、后退、清代价地图、重规划等；
-    \item \textbf{行为树（Behavior Tree）}：编排「规划—跟随—恢复」的比赛逻辑，而不是写死巨型 if-else。
-\end{enumerate}
+接下来，\textbf{全局规划}找大致路线，\textbf{局部控制}根据路径与附近环境给出当前速度；具体有没有动态障碍输入，要看传感器和代价地图层的配置，不能只因装了Nav2就当它已经看见另一台车。\textbf{恢复行为}处理异常，\textbf{行为树（Behavior Tree，BT）}编排任务、规划、跟随与重试的过程。图\ref{fig:v3_nav2}画核心关系，具体服务器和插件以安装版本与项目配置为准。
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.85\textwidth]{Nav2导航框架.png}
-    \caption{Nav2 导航框架示意（细节回卷二）}
-    \label{fig:v3_nav2}
+\centering
+\includegraphics[width=0.9\textwidth]{sentry_framework_revised.pdf}
+\caption{Nav2核心关系，复用卷二已整理图；本章实际例子直接调用规划和跟踪action}
+\label{fig:v3_nav2}
 \end{figure}
 
 \begin{example}[给六个模块贴标签]
-沿刚才的纸面演练标注：底图是地图，棋子所在格是定位，整条线是全局路径，下一步移动是局部控制，受阻后的等待或退回是恢复，决定何时重试的是行为树。检查六种职责都能找到对应物。
+回到纸面地图，给底图写“环境”，棋子位置写“定位”，整条线写“全局路径”，下一步移动写“局部控制”。新障碍出现后的等待或退回是恢复候选，决定何时重试与何时退出的是任务编排。最后分别圈出图中的规划、控制和行为服务器，说明这些职责如何对应。纸面上的棋子没有惯性，也没有传感器延迟，所以它只帮你认模块，不证明实车跟得上。
 \end{example}
+
+\begin{conclusion}
+地图描述环境，定位描述本车，路径描述打算怎样走，速度描述当前怎样动。恢复不是定位方法，清地图也不能让真实障碍消失。它们相互提供信息，各自的职责仍要分清。
+\end{conclusion}
 
 \begin{exercise}
 \label{v3-ex-nav-2}
-机器人报告的位置突然跳到墙另一侧，应先重画全局路线还是检查定位与坐标变换？说明理由。
+机器人报告的位置突然跳到墙另一侧，应先重画全局路线还是检查定位与坐标变换？写出你要保留的同一时刻附近的两类数据。
 \end{exercise}
 
 \subsubsection{建图与比赛流程}
 
-\begin{itemize}
-    \item 赛前按规则完成哨兵建图，检查噪声黑点、禁行区是否涂正确；
-    \item 赛中代价地图必须反映新障碍；车体轮廓要与实车一致，膨胀层结合安全裕量设置，避免「规划成功但车体擦墙」；
-    \item 动态障碍（其它机器人等）主要靠局部层与恢复行为，不能只信全局静态图。
-\end{itemize}
+赛前如果需要建图，就按适用赛季与赛制的流程准备，而不是把往年的时间窗口当成通用规则。你可以从官方\href{https://bbs.robomaster.com/wiki/20204847}{规则/资料中心}核对版本，再检查地图原点、分辨率、方向、静态障碍和允许通行区域。图里出现噪声黑点时，先回看传感器、建图与实际环境；随手把黑点涂白虽然能让规划通过，却也可能把真实障碍删掉。
+
+然后检查车体外形。路径中心线没碰墙，不代表车壳也没碰墙；转弯时还会扫过比直行更大的区域。膨胀层可以帮助留出距离，不过它的参数含义不能简单等同于两侧固定的机械裕量，要和车体轮廓、分辨率、控制误差一起核对。赛中有了新障碍，观测与代价地图也要及时更新；仅依赖赛前静态底图，并不能覆盖动态机器人。
 
 \begin{example}[用车体宽度检查通道]
-在纸上画宽 0.8 m 的通道，车体宽 0.6 m，两侧各留 0.15 m 教学安全裕量。需求总宽为 0.9 m，因此该通道不能按这组约束通行。检查：中心线不碰墙，不代表车体可安全通过。
+在纸上画宽0.8 m的直通道，车宽0.6 m，两侧各留0.15 m的教学裕量。总需求是$0.6+2\times0.15=0.9$ m，这组条件不通过。记录长度统一用米，再去运行下面的小检查器，核对它怎样表达这个结论。这里只检查直线宽度，转弯、定位偏差、实际制动和动态障碍仍需要另外验证。
 \end{example}
+
+本卷项目在 \path{examples/navigation-task-demo/}，核心只有 \texttt{check.py}；README说明怎样复用卷二实际Nav2输出，不新建另一套规划器。先看宽度函数与后面要用的二维变换函数：
+\lstinputlisting[language=Python,basicstyle=\ttfamily\small,frame=single,breaklines=true,numbers=none,firstline=1,lastline=22]{examples/navigation-task-demo/check.py}
+
+前一个函数接收通道宽、车宽和单侧裕量，三项都按米解释，不能直接填毫米数字。后一个函数明确使用“场地系点 → 导航地图系点”的变换，旋转和平移都有方向；长度换算只负责尺度，不能替你消除原点和朝向差异。
 
 \begin{exercise}
 \label{v3-ex-nav-3}
-若车体宽 0.5 m、两侧各留 0.1 m 裕量，宽 0.8 m 的直通道是否通过这项宽度检查？这能保证整段导航成功吗？
+若车体宽0.5 m、两侧各留0.1 m裕量，宽0.8 m直通道是否通过？在项目目录运行：
+\begin{tbash}
+python3 check.py --robot 0.5 --margin 0.1
+\end{tbash}
+核对宽度结果，这能保证整段导航成功吗？
 \end{exercise}
 
 \subsubsection{与雷达、决策的接口}
 
-导航消费「我在哪、路怎么走」；雷达站提供的全场目标位置可辅助战术决策，但\textbf{坐标系统、单位、延时}必须与队内约定一致。
-导航不负责高台俯视检测；雷达不负责底盘速度闭环。
+雷达站提供的是全场目标信息，导航需要的是本车位姿与自己的任务目标。你不能把敌车的位置直接当成本车定位，也不能直接拿它当底盘速度。先由决策根据任务选择一个巡逻点或其它允许的目标，再把这个目标转换到导航要求的坐标系，核对单位、采样时间、有效性和可达条件，最后交给导航。
 
 \begin{example}[核对决策接口]
-教学情景：雷达给出场地系敌方位置，决策据此选择己方巡逻目标，导航接收导航地图系目标点。画出这两条不同语义的箭头，在中间标注坐标转换与任务选择。检查：敌方位置不是可以直接执行的底盘速度。
+画“雷达目标信息 → 决策选任务 → 场地巡逻点 → 导航地图目标”的四框链路。教学巡逻点取场地系$(2,0)$ m，已知变换为地图系先接收绕原点逆时针90度的旋转，再加平移$(1,1)$ m，因此地图点是$(1,3)$ m。这个点由决策选出，不是直接复用敌方坐标；也没有据此命令真实机器人前往。下面检查器的默认输出会打印同一结果。
 \end{example}
 
 \begin{note}
-恢复行为并非每次都可安全执行。后退、旋转前需确认周围空间与急停；清代价地图不等于障碍物消失。行为树配置示例见 Nav2 官方文档：\url{https://docs.nav2.org/jazzy/getting_started/nav2_behavior_trees/trees/nav_through_poses_recovery/}。具体节点以队内版本为准。
+恢复行为有执行前提。后退或旋转前核对可用空间、底盘模式与急停，不能为了让任务通过就关闭保护。清代价地图后，仍然存在的障碍应由有效观测重新体现。\href{https://docs.nav2.org/jazzy/getting_started/nav2_behavior_trees/trees/nav_through_poses_recovery/}{Nav2行为树示例}能帮助你读任务与恢复关系；它不是本队赛场策略，节点与错误处理仍按实际版本核对。
 \end{note}
-
-\begin{conclusion}
-\begin{itemize}
-  \item 地图描述环境，定位描述自身。
-  \item 规划给路线，控制给当前运动。
-  \item 恢复处理异常，行为树编排流程。
-  \item 现象只提供线索，定位还要看中间量。
-\end{itemize}
-\end{conclusion}
 
 \begin{exercise}
 \label{v3-ex-nav-4}
-雷达场地原点与导航地图原点不同，只把米换成毫米能解决问题吗？
+雷达场地原点与导航地图原点不同，只把米换成毫米能解决问题吗？在教学变换里分别写出“只换单位”和“旋转后平移”的结果。
 \end{exercise}
 
-\subsubsection{故障对照（验收提示）}
+\subsubsection{从故障现象追到实际结果}
 
-\begin{center}
-\begin{tabular}{@{}p{0.30\textwidth}p{0.62\textwidth}@{}}
-\toprule[1.5pt]
-现象 & 优先怀疑 \\
-\midrule[1pt]
-全局路线穿墙 & 地图/膨胀/全局规划器 \\
-有路但贴障发抖 & 局部规划或控制频率 \\
-卡住原地转圈 & 恢复行为配置或代价地图未清 \\
-位姿跳变丢定位 & 坐标变换（TF）/ 定位源融合 \\
-指令有但不走 & 与电控接口或急停 \\
-\bottomrule[1.5pt]
-\end{tabular}
-\end{center}
-对照框图建立候选故障列表，再用日志排查；同一种现象可能来自多个模块。
+你很可能遇到“有路但不走”或者“卡住原地转圈”。这时候先留候选原因，再去找证据：路径穿墙，核对路径所属坐标系、地图与代价地图，以及当时使用的定位；贴障抖动，看看局部环境、路径、控制输出与实际反馈；位置跳变，回看定位输入和TF时间；有指令却不动，再核对指令年龄、接收记录、模式、急停与执行反馈。别把一个现象直接翻译成“某模块写错了”。
 
 \begin{example}[从现象追到证据]
-对“有速度指令但不走”，按顺序在纸上列出：导航输出时间戳、通信接收记录、电控模式与急停状态、执行反馈。若接收端未收到，先查通信；若收到但急停生效，保持停止并查明原因。检查：故障表提供候选，不是单凭现象下结论。
+针对“有速度指令但不走”，在纸上按导航输出、通信接收、电控模式/急停、执行反馈四处标检查点。设第一种记录为“发送了、接收端没有收到”，下一步查通信与约定；第二种为“接收了、急停生效”，则先保持停止并查明原因。这两种情况看起来都不走，却不是调同一个规划参数能解决的。记录缺失时就列为待取证，不能编一条接收日志填空。
 \end{example}
+
+接下来看完整检查器的后半段。\texttt{explain\_result} 读取规划与跟踪的结果，\texttt{--result} 指定自己的 \texttt{result.json}；\texttt{--corridor}、\texttt{--robot}、\texttt{--margin} 则修改前面的米制尺寸。状态4表示action成功，失败还要看错误码，它和本章阈值或赛场规则没有关系。
+\lstinputlisting[language=Python,basicstyle=\ttfamily\small,frame=single,breaklines=true,numbers=none,firstline=23]{examples/navigation-task-demo/check.py}
+
+\begin{example}[复用实际Nav2日志]
+Python检查器只需标准库；生成实际导航输入则需要卷二项目的Ubuntu 24.04/Jazzy、Nav2、PCL与相关Python包。先按卷二导航章与项目README准备环境，确认DDS域188空闲，使用localhost范围。在\textbf{仓库根目录}运行下面第一条命令，它会生成地图、启动自己的软件模型与实际服务器、调用action并清理进程；输出目录已存在时会覆盖，请给其它实验另取名字。随后进入本卷的小检查器：
+\begin{tbash}
+python3 scripts/verify_nav_examples.py \
+  --project 02-专项技术栈/examples/navigation/navigation-lab-demo \
+  --work /tmp/textbook-v3-nav --evidence /tmp/textbook-v3-nav-runtime.json
+cd 03-RM视觉概述/examples/navigation-task-demo
+python3 check.py
+python3 check.py --result /tmp/textbook-v3-nav/nav2/result.json
+python3 check.py --result /tmp/textbook-v3-nav/nav2-blocked/result.json
+\end{tbash}
+实际服务器与全部核心配置沿用卷二的完整讲解，这里新增的完整代码只负责任务前提与结果核对。默认宽度需求0.9 m，不通过；教学目标变换为$(1,3)$ m。实际默认Nav2规划与跟踪status4/error0，目标误差约0.10 m，检查器提示继续复核轨迹与条件；障碍内目标status6/error206（GOAL\_OCCUPIED），0路径，没有请求FollowPath，提示查看目标、地图和TF。样本数随调度变化，应看自己保存的JSON和日志，不用背一个固定次数。
+\end{example}
+
+\begin{note}
+本次实际运行的是Nav2服务器，但执行端是软件积分模型：定位固定、只有静态与膨胀层，没有动态雷达、真实SLAM、惯性或打滑。因此软件结果不能证明赛场定位、避障、制动与恢复空间已经验证。上车仍要按真实尺寸、传感器与规则准备场地，保留实测记录；恢复重试也要有次数与超时出口，不能一直等机器人自己想通。
+\end{note}
+
+\begin{conclusion}
+先分清任务、观测和自身定位，再看规划、控制与执行哪一步返回了什么。规划失败不会自动变成控制失败，action成功也不能替代真实到位反馈。故障现象只给你一个调查入口，下一步要靠相同时刻的记录缩小范围。
+\end{conclusion}
 
 \begin{exercise}
 \label{v3-ex-nav-5}
-“卡住原地转圈”能唯一证明行为树配置错误吗？至少再列出两个检查项。
+“卡住原地转圈”能唯一证明行为树配置错误吗？至少再列出两个检查项，并说明什么情况下旋转可能是已触发的恢复动作。
+\end{exercise}
+
+\begin{exercise}
+\label{v3-ex-nav-6}
+实际保存两份Nav2结果及检查器输出，对比成功与障碍内目标的status、error、路径数量和是否请求跟踪；分别写下一步要复核的证据。再把直通道改成0.7 m，核对默认车宽/裕量条件是否改变。
 \end{exercise}

@@ -1,0 +1,766 @@
+{
+  "environment": {
+    "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+    "versions": {
+      "ros-jazzy-nav2-bringup": "1.3.13-1noble.20260907.023821",
+      "ros-jazzy-nav2-planner": "1.3.13-1noble.20260903.031918",
+      "ros-jazzy-nav2-controller": "1.3.13-1noble.20260903.032018",
+      "libpcl-dev": "1.14.0+dfsg-1"
+    },
+    "ROS_DOMAIN_ID": 188,
+    "discovery": "LOCALHOST"
+  },
+  "source_sha256": {
+    "grid.py": "794ccadc8a2821a3712c87bc4fe714d7bc7addea987afc1da670c2ef0c595201",
+    "point_filters.cpp": "939a4b98416ab4827d4825a1d3dab2085cb492015dba185b1008b0cbefb4e647",
+    "CMakeLists.txt": "e8f55e204b50b6a06741dc82fee902a9825fd258c1622b627917f43dbf20d934",
+    "bt.py": "bb2187cc6de70557c4cde8d1b939041117f744118d9e72144a50fd23ef39ffaf",
+    "tf_demo.py": "adac174ec3a26cfb412f9ceb5206b1e499632c3399e05c2a1785b585ccb554d3",
+    "sim.py": "00304b23669d6891ecb04ad81b86be230f56813246d49ccd1241ea10630e9e6c",
+    "lab.launch.py": "869cd45bc6c8b4908ea0ef1c78f09000aac36ddd0b248bcab1523a7eee8eb570",
+    "params.yaml": "c3f7506f6a694620a6de52acced1ee27580a8b6b1318ee7dd4f5ff9acb46b783",
+    "client.py": "c9db397db9e1eed48cf7d5c8e645913eb71588361221d6a3423b7ddbe14f525a",
+    "localization.py": "fab01fc596bd6d7025719ffa6b0b9eacab46b92b5164c26dbd23218ce3436de3",
+    "plot.py": "b9373478723886b80d6a95e73b1edf3dbadbca02e0d5e5102eae2d5531791a26"
+  },
+  "records": [
+    {
+      "name": "地图/栅格 map",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/grid.py",
+          "--output",
+          "/tmp/textbook-v3-nav/map"
+        ],
+        "result": {
+          "dijkstra": {
+            "cost": 70,
+            "expanded": 1304,
+            "cells": 71
+          },
+          "astar": {
+            "cost": 70,
+            "expanded": 914,
+            "cells": 71
+          }
+        }
+      }
+    },
+    {
+      "name": "地图/栅格 blocked",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/grid.py",
+          "--output",
+          "/tmp/textbook-v3-nav/blocked",
+          "--blocked"
+        ],
+        "result": {
+          "dijkstra": {
+            "cost": null,
+            "expanded": 664,
+            "cells": 0
+          },
+          "astar": {
+            "cost": null,
+            "expanded": 664,
+            "cells": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "地图/栅格 wide",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/grid.py",
+          "--output",
+          "/tmp/textbook-v3-nav/wide",
+          "--margin",
+          "0.6"
+        ],
+        "result": {
+          "dijkstra": {
+            "cost": null,
+            "expanded": 0,
+            "cells": 0
+          },
+          "astar": {
+            "cost": null,
+            "expanded": 0,
+            "cells": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "地图/栅格 invalid",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/grid.py",
+          "--output",
+          "/tmp/textbook-v3-nav/invalid",
+          "--margin",
+          "-1"
+        ],
+        "result": {
+          "exit": 2,
+          "stderr": "usage: grid.py [-h] [--margin MARGIN] [--blocked] [--output OUTPUT]\ngrid.py: error: margin必须有限且非负\n"
+        }
+      }
+    },
+    {
+      "name": "地图/栅格 nan",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/grid.py",
+          "--output",
+          "/tmp/textbook-v3-nav/nan",
+          "--margin",
+          "nan"
+        ],
+        "result": {
+          "exit": 2,
+          "stderr": "usage: grid.py [-h] [--margin MARGIN] [--blocked] [--output OUTPUT]\ngrid.py: error: margin必须有限且非负\n"
+        }
+      }
+    },
+    {
+      "name": "独立栅格核对 dijkstra",
+      "status": "PASS",
+      "details": {
+        "cost": 70,
+        "expanded": 1304,
+        "min_clearance": 0.36055512754639896
+      }
+    },
+    {
+      "name": "独立栅格核对 astar",
+      "status": "PASS",
+      "details": {
+        "cost": 70,
+        "expanded": 914,
+        "min_clearance": 0.36055512754639896
+      }
+    },
+    {
+      "name": "不可通行起终点拒绝",
+      "status": "PASS",
+      "details": {
+        "margin": 3,
+        "path": []
+      }
+    },
+    {
+      "name": "PGM上下翻转与YAML",
+      "status": "PASS",
+      "details": {
+        "image_row0_map_y": 39,
+        "shape": [
+          60,
+          40
+        ],
+        "metadata": {
+          "image": "map.pgm",
+          "mode": "trinary",
+          "resolution": 0.1,
+          "origin": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "negate": 0,
+          "occupied_thresh": 0.65,
+          "free_thresh": 0.25
+        }
+      }
+    },
+    {
+      "name": "格心 (0, 0, 0)",
+      "status": "PASS",
+      "details": {
+        "ij": [
+          10,
+          20
+        ],
+        "resolution": 0.05,
+        "xy": [
+          0.525,
+          1.0250000000000001
+        ]
+      }
+    },
+    {
+      "name": "格心 (-2, -1, 0)",
+      "status": "PASS",
+      "details": {
+        "ij": [
+          10,
+          20
+        ],
+        "resolution": 0.05,
+        "xy": [
+          -1.475,
+          0.025000000000000133
+        ]
+      }
+    },
+    {
+      "name": "格心 (1, 2, 0)",
+      "status": "PASS",
+      "details": {
+        "ij": [
+          2,
+          3
+        ],
+        "resolution": 0.1,
+        "xy": [
+          1.25,
+          2.35
+        ]
+      }
+    },
+    {
+      "name": "格心 (1, 2, 1.5707963267948966)",
+      "status": "PASS",
+      "details": {
+        "ij": [
+          2,
+          3
+        ],
+        "resolution": 0.1,
+        "xy": [
+          0.6499999999999999,
+          2.25
+        ]
+      }
+    },
+    {
+      "name": "三顶点 [1, 2, 5]",
+      "status": "PASS",
+      "details": {
+        "path": [
+          "A",
+          "B",
+          "C"
+        ],
+        "cost": 3
+      }
+    },
+    {
+      "name": "三顶点 [1, 2, 2]",
+      "status": "PASS",
+      "details": {
+        "path": [
+          "A",
+          "C"
+        ],
+        "cost": 2
+      }
+    },
+    {
+      "name": "三顶点 [2, 2, 5]",
+      "status": "PASS",
+      "details": {
+        "path": [
+          "A",
+          "B",
+          "C"
+        ],
+        "cost": 4
+      }
+    },
+    {
+      "name": "三顶点 [4, 4, 5]",
+      "status": "PASS",
+      "details": {
+        "path": [
+          "A",
+          "C"
+        ],
+        "cost": 5
+      }
+    },
+    {
+      "name": "负边权拒绝",
+      "status": "PASS",
+      "details": {
+        "weight": -1
+      }
+    },
+    {
+      "name": "恢复 success",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/bt.py"
+        ],
+        "result": {
+          "status": "Success",
+          "retries": 2,
+          "ticks": 4,
+          "log": [
+            [
+              "navigate",
+              "Failure"
+            ],
+            [
+              "clear",
+              "Success"
+            ],
+            [
+              "navigate",
+              "Failure"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Success"
+            ],
+            [
+              "navigate",
+              "Success"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "恢复 fail",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/bt.py",
+          "--fail"
+        ],
+        "result": {
+          "status": "Failure",
+          "retries": 2,
+          "ticks": 4,
+          "log": [
+            [
+              "navigate",
+              "Failure"
+            ],
+            [
+              "clear",
+              "Success"
+            ],
+            [
+              "navigate",
+              "Failure"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Success"
+            ],
+            [
+              "navigate",
+              "Failure"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "恢复 stuck",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/bt.py",
+          "--stuck"
+        ],
+        "result": {
+          "status": "Timeout",
+          "retries": 1,
+          "ticks": 10,
+          "log": [
+            [
+              "navigate",
+              "Failure"
+            ],
+            [
+              "clear",
+              "Success"
+            ],
+            [
+              "navigate",
+              "Failure"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Running"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "控制节点 [False, ['Running', 'Success']]",
+      "status": "PASS",
+      "details": {
+        "status": "Running",
+        "log": [
+          [
+            "0",
+            "Running"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "控制节点 [False, ['Failure', 'Success']]",
+      "status": "PASS",
+      "details": {
+        "status": "Success",
+        "log": [
+          [
+            "0",
+            "Failure"
+          ],
+          [
+            "1",
+            "Success"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "控制节点 [False, ['Failure', 'Failure']]",
+      "status": "PASS",
+      "details": {
+        "status": "Failure",
+        "log": [
+          [
+            "0",
+            "Failure"
+          ],
+          [
+            "1",
+            "Failure"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "控制节点 [True, ['Running', 'Success']]",
+      "status": "PASS",
+      "details": {
+        "status": "Running",
+        "log": [
+          [
+            "0",
+            "Running"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "控制节点 [True, ['Success', 'Success']]",
+      "status": "PASS",
+      "details": {
+        "status": "Success",
+        "log": [
+          [
+            "0",
+            "Success"
+          ],
+          [
+            "1",
+            "Success"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "控制节点 [True, ['Failure', 'Success']]",
+      "status": "PASS",
+      "details": {
+        "status": "Failure",
+        "log": [
+          [
+            "0",
+            "Failure"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "定位修正和长墙退化",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/localization.py"
+        ],
+        "result": {
+          "map_odom_xy": [
+            0.2999999999999998,
+            0.0
+          ],
+          "corrected_xy": [
+            0.20000000000000018,
+            0.0
+          ],
+          "odom_base_unchanged": [
+            2.0,
+            0.5
+          ],
+          "wall_eigenvalues": [
+            0.0,
+            2.0
+          ],
+          "wall_shift_x_residual": [
+            0.0,
+            0.0
+          ]
+        }
+      }
+    },
+    {
+      "name": "真实tf2合成与缺失",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/tf_demo.py"
+        ],
+        "result": {
+          "xy": [
+            1.0000000000000004,
+            4.0
+          ],
+          "missing": "LookupException"
+        }
+      }
+    },
+    {
+      "name": "PCL构建 cmake",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "cmake",
+          "-S",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo",
+          "-B",
+          "/tmp/textbook-v3-nav/build"
+        ],
+        "exit": 0
+      }
+    },
+    {
+      "name": "PCL构建 cmake",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "cmake",
+          "--build",
+          "/tmp/textbook-v3-nav/build",
+          "-j4"
+        ],
+        "exit": 0
+      }
+    },
+    {
+      "name": "真实PCL三种过滤",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-v3-nav/build/point_filters"
+        ],
+        "result": {
+          "centroid_x": 0.02,
+          "input": 32,
+          "height": 31,
+          "clean": 30
+        }
+      }
+    },
+    {
+      "name": "实际Nav2规划控制",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/client.py",
+          "--output",
+          "/tmp/textbook-v3-nav/nav2"
+        ],
+        "result": {
+          "plan_status": 4,
+          "plan_error": 0,
+          "path_poses": 123,
+          "follow_status": 4,
+          "follow_error": 0,
+          "odom_samples": 252,
+          "command_samples": 237,
+          "final_xy": [
+            4.979164077296007,
+            2.979946689754398
+          ],
+          "goal_error_m": 0.09962526899182057
+        }
+      }
+    },
+    {
+      "name": "实际保存路径/轨迹/速度独立核对",
+      "status": "PASS",
+      "details": {
+        "min_obstacle_gap_m": {
+          "path": 0.36635370949437773,
+          "trajectory": 0.40448583313711467
+        },
+        "max_v": 0.6,
+        "radius_m": 0.15
+      }
+    },
+    {
+      "name": "实际障碍内目标拒绝",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/client.py",
+          "--blocked-goal",
+          "--output",
+          "/tmp/textbook-v3-nav/nav2-blocked"
+        ],
+        "result": {
+          "plan_status": 6,
+          "plan_error": 206,
+          "path_poses": 0,
+          "odom_samples": 7,
+          "command_samples": 0,
+          "final_xy": [
+            4.979164077296007,
+            2.979946689754398
+          ],
+          "goal_error_m": 2.2084804639433777
+        }
+      }
+    },
+    {
+      "name": "实际map_server地图",
+      "status": "PASS",
+      "details": {
+        "frame": "map",
+        "resolution": 0.10000000149011612,
+        "shape": [
+          60,
+          40
+        ],
+        "values": [
+          0,
+          100
+        ]
+      }
+    },
+    {
+      "name": "实际全局代价地图",
+      "status": "PASS",
+      "details": {
+        "frame": "map",
+        "shape": [
+          60,
+          40
+        ],
+        "raw_values": [
+          0,
+          121,
+          136,
+          156,
+          164,
+          172,
+          206,
+          221,
+          253,
+          254
+        ]
+      }
+    },
+    {
+      "name": "实际广播TF链",
+      "status": "PASS",
+      "details": {
+        "map_to_base_xy": [
+          4.979164077296007,
+          2.979946689754398
+        ]
+      }
+    },
+    {
+      "name": "实际广播树缺失分支",
+      "status": "PASS",
+      "details": {
+        "error": "LookupException"
+      }
+    },
+    {
+      "name": "制动与延时量级",
+      "status": "PASS",
+      "details": {
+        "v": 2,
+        "a": 1,
+        "braking_m": 2,
+        "latency_s": 0.2,
+        "minimum_forward_m_without_margin": 2.4
+      }
+    }
+  ],
+  "raw_launch": {
+    "sha256": "fa63b30e556d7f5e54057f531c63b53078e05fb6d5e26cda5939bbc194de426b",
+    "text": "[INFO] [launch]: All log files can be found below /home/mijiao/.ros/log/2026-09-29-10-04-50-515065-mijiao-arch-972661\n[INFO] [launch]: Default logging verbosity is set to INFO\n[INFO] [map_server-1]: process started with pid [972667]\n[INFO] [planner_server-2]: process started with pid [972668]\n[INFO] [controller_server-3]: process started with pid [972669]\n[INFO] [lifecycle_manager-4]: process started with pid [972670]\n[INFO] [python3-5]: process started with pid [972671]\n[lifecycle_manager-4] [INFO] [1790647490.581497253] [lifecycle_manager]: Creating\n[controller_server-3] [INFO] [1790647490.582844648] [controller_server]: \n[controller_server-3] \tcontroller_server lifecycle node launched. \n[controller_server-3] \tWaiting on external lifecycle transitions to activate\n[controller_server-3] \tSee https://design.ros2.org/articles/node_lifecycle.html for more information.\n[lifecycle_manager-4] [INFO] [1790647490.583556199] [lifecycle_manager]: \u001b[34m\u001b[1mCreating and initializing lifecycle service clients\u001b[0m\u001b[0m\n[controller_server-3] [INFO] [1790647490.584532856] [controller_server]: Creating controller server\n[controller_server-3] [INFO] [1790647490.587037176] [local_costmap.local_costmap]: \n[controller_server-3] \tlocal_costmap lifecycle node launched. \n[controller_server-3] \tWaiting on external lifecycle transitions to activate\n[controller_server-3] \tSee https://design.ros2.org/articles/node_lifecycle.html for more information.\n[controller_server-3] [INFO] [1790647490.587221476] [local_costmap.local_costmap]: Creating Costmap\n[planner_server-2] [INFO] [1790647490.587243754] [planner_server]: \n[planner_server-2] \tplanner_server lifecycle node launched. \n[planner_server-2] \tWaiting on external lifecycle transitions to activate\n[planner_server-2] \tSee https://design.ros2.org/articles/node_lifecycle.html for more information.\n[planner_server-2] [INFO] [1790647490.588416503] [planner_server]: Creating\n[planner_server-2] [INFO] [1790647490.590972272] [global_costmap.global_costmap]: \n[planner_server-2] \tglobal_costmap lifecycle node launched. \n[planner_server-2] \tWaiting on external lifecycle transitions to activate\n[planner_server-2] \tSee https://design.ros2.org/articles/node_lifecycle.html for more information.\n[planner_server-2] [INFO] [1790647490.591170866] [global_costmap.global_costmap]: Creating Costmap\n[map_server-1] [INFO] [1790647490.600930504] [map_server]: \n[map_server-1] \tmap_server lifecycle node launched. \n[map_server-1] \tWaiting on external lifecycle transitions to activate\n[map_server-1] \tSee https://design.ros2.org/articles/node_lifecycle.html for more information.\n[map_server-1] [INFO] [1790647490.600988169] [map_server]: Creating\n[lifecycle_manager-4] [INFO] [1790647490.788761408] [lifecycle_manager]: \u001b[34m\u001b[1mStarting managed nodes bringup...\u001b[0m\u001b[0m\n[lifecycle_manager-4] [INFO] [1790647490.788801049] [lifecycle_manager]: \u001b[34m\u001b[1mConfiguring map_server\u001b[0m\u001b[0m\n[map_server-1] [INFO] [1790647490.889109698] [map_server]: Configuring\n[map_server-1] [INFO] [1790647490.889163215] [map_io]: Loading yaml file: /tmp/textbook-v3-nav/map/map.yaml\n[map_server-1] [INFO] [1790647490.889365142] [map_io]: resolution: 0.1\n[map_server-1] [INFO] [1790647490.889371532] [map_io]: origin[0]: 0\n[map_server-1] [INFO] [1790647490.889374917] [map_io]: origin[1]: 0\n[map_server-1] [INFO] [1790647490.889377314] [map_io]: origin[2]: 0\n[map_server-1] [INFO] [1790647490.889380335] [map_io]: free_thresh: 0.25\n[map_server-1] [INFO] [1790647490.889383053] [map_io]: occupied_thresh: 0.65\n[map_server-1] [INFO] [1790647490.889386487] [map_io]: mode: trinary\n[map_server-1] [INFO] [1790647490.889389937] [map_io]: negate: 0\n[map_server-1] [INFO] [1790647490.889511284] [map_io]: Loading image_file: /tmp/textbook-v3-nav/map/map.pgm\n[map_server-1] [INFO] [1790647490.889627109] [map_io]: Read map /tmp/textbook-v3-nav/map/map.pgm: 60 X 40 map @ 0.1 m/cell\n[lifecycle_manager-4] [INFO] [1790647490.893078665] [lifecycle_manager]: \u001b[34m\u001b[1mConfiguring planner_server\u001b[0m\u001b[0m\n[planner_server-2] [INFO] [1790647490.893320834] [planner_server]: Configuring\n[planner_server-2] [INFO] [1790647490.893340558] [global_costmap.global_costmap]: Configuring\n[planner_server-2] [INFO] [1790647490.896021770] [global_costmap.global_costmap]: Using plugin \"static\"\n[planner_server-2] [INFO] [1790647490.897831357] [global_costmap.global_costmap]: Subscribing to the map topic (/map) with transient local durability\n[planner_server-2] [INFO] [1790647490.898743241] [global_costmap.global_costmap]: Initialized plugin \"static\"\n[planner_server-2] [INFO] [1790647490.898758987] [global_costmap.global_costmap]: Using plugin \"inflation\"\n[planner_server-2] [INFO] [1790647490.898919336] [global_costmap.global_costmap]: Initialized plugin \"inflation\"\n[planner_server-2] [INFO] [1790647490.906555038] [planner_server]: Created global planner plugin GridBased of type nav2_navfn_planner::NavfnPlanner\n[planner_server-2] [INFO] [1790647490.906574700] [planner_server]: Configuring plugin GridBased of type NavfnPlanner\n[planner_server-2] [INFO] [1790647490.906681132] [planner_server]: Planner Server has GridBased  planners available.\n[lifecycle_manager-4] [INFO] [1790647490.909825270] [lifecycle_manager]: \u001b[34m\u001b[1mConfiguring controller_server\u001b[0m\u001b[0m\n[controller_server-3] [INFO] [1790647490.909974515] [controller_server]: Configuring controller interface\n[controller_server-3] [INFO] [1790647490.909987821] [controller_server]: getting progress checker plugins..\n[controller_server-3] [INFO] [1790647490.909997482] [controller_server]: getting goal checker plugins..\n[controller_server-3] [INFO] [1790647490.910042647] [controller_server]: Controller frequency set to 20.0000Hz\n[controller_server-3] [INFO] [1790647490.910057417] [local_costmap.local_costmap]: Configuring\n[controller_server-3] [INFO] [1790647490.912888655] [local_costmap.local_costmap]: Using plugin \"static\"\n[controller_server-3] [INFO] [1790647490.914948102] [local_costmap.local_costmap]: Subscribing to the map topic (/map) with transient local durability\n[controller_server-3] [INFO] [1790647490.915812423] [local_costmap.local_costmap]: Initialized plugin \"static\"\n[controller_server-3] [INFO] [1790647490.915823376] [local_costmap.local_costmap]: Using plugin \"inflation\"\n[controller_server-3] [INFO] [1790647490.915986248] [local_costmap.local_costmap]: Initialized plugin \"inflation\"\n[controller_server-3] [INFO] [1790647490.923598305] [controller_server]: Created progress_checker : progress of type nav2_controller::SimpleProgressChecker\n[controller_server-3] [INFO] [1790647490.923679630] [controller_server]: Controller Server has progress  progress checkers available.\n[controller_server-3] [INFO] [1790647490.923923963] [controller_server]: Created goal checker : goal of type nav2_controller::SimpleGoalChecker\n[controller_server-3] [INFO] [1790647490.924018267] [controller_server]: Controller Server has goal  goal checkers available.\n[controller_server-3] [INFO] [1790647490.924564556] [controller_server]: Created controller : FollowPath of type nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController\n[controller_server-3] [INFO] [1790647490.925918037] [controller_server]: Controller Server has FollowPath  controllers available.\n[lifecycle_manager-4] [INFO] [1790647490.928728501] [lifecycle_manager]: \u001b[34m\u001b[1mActivating map_server\u001b[0m\u001b[0m\n[map_server-1] [INFO] [1790647490.928874956] [map_server]: Activating\n[map_server-1] [INFO] [1790647490.929017880] [map_server]: Creating bond (map_server) to lifecycle manager.\n[planner_server-2] [INFO] [1790647490.929180994] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 60 X 40 at 0.100000 m/pix\n[controller_server-3] [INFO] [1790647490.929180801] [local_costmap.local_costmap]: StaticLayer: Resizing static layer to 60 X 40 at 0.100000 m/pix\n[lifecycle_manager-4] [INFO] [1790647491.031340647] [lifecycle_manager]: Server map_server connected with bond.\n[lifecycle_manager-4] [INFO] [1790647491.031375351] [lifecycle_manager]: \u001b[34m\u001b[1mActivating planner_server\u001b[0m\u001b[0m\n[planner_server-2] [INFO] [1790647491.031594200] [planner_server]: Activating\n[planner_server-2] [INFO] [1790647491.031627725] [global_costmap.global_costmap]: Activating\n[planner_server-2] [INFO] [1790647491.031637226] [global_costmap.global_costmap]: Checking transform\n[planner_server-2] [INFO] [1790647491.031682133] [global_costmap.global_costmap]: Timed out waiting for transform from base_link to map to become available, tf error: Invalid frame ID \"map\" passed to canTransform argument target_frame - frame does not exist\n[planner_server-2] [INFO] [1790647491.531819506] [global_costmap.global_costmap]: start\n[planner_server-2] [INFO] [1790647491.581974765] [planner_server]: Activating plugin GridBased of type NavfnPlanner\n[planner_server-2] [INFO] [1790647491.582986967] [planner_server]: Creating bond (planner_server) to lifecycle manager.\n[lifecycle_manager-4] [INFO] [1790647491.685059963] [lifecycle_manager]: Server planner_server connected with bond.\n[lifecycle_manager-4] [INFO] [1790647491.685094098] [lifecycle_manager]: \u001b[34m\u001b[1mActivating controller_server\u001b[0m\u001b[0m\n[controller_server-3] [INFO] [1790647491.685217429] [controller_server]: Activating\n[controller_server-3] [INFO] [1790647491.685250971] [local_costmap.local_costmap]: Activating\n[controller_server-3] [INFO] [1790647491.685260663] [local_costmap.local_costmap]: Checking transform\n[controller_server-3] [INFO] [1790647491.685376067] [local_costmap.local_costmap]: start\n[controller_server-3] [INFO] [1790647491.735565475] [controller_server]: Activating controller: FollowPath of type regulated_pure_pursuit_controller::RegulatedPurePursuitController\n[controller_server-3] [INFO] [1790647491.735607828] [controller_server]: Creating bond (controller_server) to lifecycle manager.\n[controller_server-3] [INFO] [1790647491.749836450] [controller_server]: Received a goal, begin computing control effort.\n[lifecycle_manager-4] [INFO] [1790647491.838763906] [lifecycle_manager]: Server controller_server connected with bond.\n[lifecycle_manager-4] [INFO] [1790647491.838799770] [lifecycle_manager]: \u001b[34m\u001b[1mManaged nodes are active\u001b[0m\u001b[0m\n[lifecycle_manager-4] [INFO] [1790647491.838809653] [lifecycle_manager]: \u001b[34m\u001b[1mCreating bond timer...\u001b[0m\u001b[0m\n[controller_server-3] [INFO] [1790647503.600042667] [controller_server]: Reached the goal!\n[planner_server-2] [WARN] [1790647504.683622163] [planner_server]: GridBased plugin failed to plan from (4.98, 2.98) to (3.00, 2.00): \"Goal Coordinates of(3.000000, 2.000000) was in lethal cost\"\n[planner_server-2] [WARN] [1790647504.683663011] [planner_server]: [compute_path_to_pose] [ActionServer] Aborting handle.\n[WARNING] [launch]: user interrupted with ctrl-c (SIGINT)\n[INFO] [python3-5]: sending signal 'SIGINT' to process[python3-5]\n[INFO] [lifecycle_manager-4]: sending signal 'SIGINT' to process[lifecycle_manager-4]\n[INFO] [controller_server-3]: sending signal 'SIGINT' to process[controller_server-3]\n[INFO] [planner_server-2]: sending signal 'SIGINT' to process[planner_server-2]\n[INFO] [map_server-1]: sending signal 'SIGINT' to process[map_server-1]\n[lifecycle_manager-4] [INFO] [1790647510.108289006] [rclcpp]: signal_handler(SIGINT/SIGTERM)\n[lifecycle_manager-4] [INFO] [1790647510.108357011] [lifecycle_manager]: Running Nav2 LifecycleManager rcl preshutdown (lifecycle_manager)\n[lifecycle_manager-4] [INFO] [1790647510.108380176] [lifecycle_manager]: \u001b[34m\u001b[1mTerminating bond timer...\u001b[0m\u001b[0m\n[controller_server-3] [INFO] [1790647510.108720631] [rclcpp]: signal_handler(SIGINT/SIGTERM)\n[controller_server-3] [INFO] [1790647510.108751603] [controller_server]: Running Nav2 LifecycleNode rcl preshutdown (controller_server)\n[controller_server-3] [INFO] [1790647510.108778066] [controller_server]: Deactivating\n[controller_server-3] [INFO] [1790647510.108787081] [controller_server]: Deactivating controller: FollowPath of type regulated_pure_pursuit_controller::RegulatedPurePursuitController\n[controller_server-3] [INFO] [1790647510.108795865] [local_costmap.local_costmap]: Deactivating\n[planner_server-2] [INFO] [1790647510.109061390] [rclcpp]: signal_handler(SIGINT/SIGTERM)\n[planner_server-2] [INFO] [1790647510.109108536] [planner_server]: Running Nav2 LifecycleNode rcl preshutdown (planner_server)\n[planner_server-2] [INFO] [1790647510.109131533] [planner_server]: Deactivating\n[planner_server-2] [INFO] [1790647510.109144066] [global_costmap.global_costmap]: Deactivating\n[map_server-1] [INFO] [1790647510.109952117] [rclcpp]: signal_handler(SIGINT/SIGTERM)\n[map_server-1] [INFO] [1790647510.110018802] [map_server]: Running Nav2 LifecycleNode rcl preshutdown (map_server)\n[map_server-1] [INFO] [1790647510.110056550] [map_server]: Deactivating\n[map_server-1] [INFO] [1790647510.110071423] [map_server]: Destroying bond (map_server) to lifecycle manager.\n[map_server-1] [INFO] [1790647510.120366480] [map_server]: Cleaning up\n[map_server-1] [INFO] [1790647510.120406651] [map_server]: Destroying bond (map_server) to lifecycle manager.\n[map_server-1] [INFO] [1790647510.122072107] [map_server]: Destroying\n[lifecycle_manager-4] [INFO] [1790647510.140861782] [lifecycle_manager]: Destroying lifecycle_manager\n[controller_server-3] [INFO] [1790647510.185844367] [controller_server]: Destroying bond (controller_server) to lifecycle manager.\n[controller_server-3] [INFO] [1790647510.196221732] [controller_server]: Cleaning up\n[controller_server-3] [INFO] [1790647510.196253076] [controller_server]: Cleaning up controller: FollowPath of type regulated_pure_pursuit_controller::RegulatedPurePursuitController\n[controller_server-3] [INFO] [1790647510.196298735] [local_costmap.local_costmap]: Cleaning up\n[controller_server-3] [INFO] [1790647510.203188595] [controller_server]: Destroying bond (controller_server) to lifecycle manager.\n[controller_server-3] [INFO] [1790647510.205969680] [local_costmap.local_costmap]: Destroying\n[controller_server-3] [INFO] [1790647510.208781825] [controller_server]: Destroying\n[INFO] [map_server-1]: process has finished cleanly [pid 972667]\n[INFO] [python3-5]: process has finished cleanly [pid 972671]\n[INFO] [lifecycle_manager-4]: process has finished cleanly [pid 972670]\n[INFO] [controller_server-3]: process has finished cleanly [pid 972669]\n[planner_server-2] [INFO] [1790647510.532177797] [planner_server]: Deactivating plugin GridBased of type NavfnPlanner\n[planner_server-2] [INFO] [1790647510.532216455] [planner_server]: Destroying bond (planner_server) to lifecycle manager.\n[planner_server-2] [INFO] [1790647510.542434234] [planner_server]: Cleaning up\n[planner_server-2] [INFO] [1790647510.544807683] [global_costmap.global_costmap]: Cleaning up\n[planner_server-2] [INFO] [1790647510.545796641] [planner_server]: Cleaning up plugin GridBased of type NavfnPlanner\n[planner_server-2] [INFO] [1790647510.545897769] [planner_server]: Destroying plugin GridBased of type NavfnPlanner\n[planner_server-2] [INFO] [1790647510.548676394] [planner_server]: Destroying bond (planner_server) to lifecycle manager.\n[planner_server-2] [INFO] [1790647510.549870841] [global_costmap.global_costmap]: Destroying\n[planner_server-2] [INFO] [1790647510.551097934] [planner_server]: Destroying\n[INFO] [planner_server-2]: process has finished cleanly [pid 972668]\n"
+  }
+}
