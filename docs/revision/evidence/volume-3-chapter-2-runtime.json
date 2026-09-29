@@ -1,0 +1,609 @@
+{
+  "python": "3.12.3",
+  "opencv": "4.6.0",
+  "numpy": "1.26.4",
+  "files": {
+    "replay.py": "7f77173c54d53e45d3624be0ac12d1c12847e804221c49ee0be0dca30d82c6b5",
+    "frames.csv": "dcdda6d9b842aa0a40896ffd651d1c13ca247a31da16606aa59b5a0703c08c31",
+    "README.md": "ed85190d1c7271fd462c2fef3e1891e5c6a20ada088447e4e137d0d43e361508"
+  },
+  "records": [
+    {
+      "name": "时间线 [35, 65, 'sample']",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/aim-replay-demo/replay.py",
+          "--delay-ms",
+          "35",
+          "--flight-ms",
+          "65",
+          "--state-at",
+          "sample"
+        ],
+        "result": {
+          "timeline": {
+            "sample_ms": 10,
+            "control_ms": 45.0,
+            "hit_ms": 110.0,
+            "state_ms": 10,
+            "horizon_ms": 100.0,
+            "x_hit_m": 4.2,
+            "wrong_repeat_delay_x_m": 4.2
+          },
+          "first_changes": {
+            "corner_u_px": {
+              "frame": 120,
+              "difference": 129.0
+            },
+            "camera_x_m": {
+              "frame": 120,
+              "difference": 1.2899999999999998
+            },
+            "state_x_m": {
+              "frame": 121,
+              "difference": 0.8
+            },
+            "yaw_command_deg": {
+              "frame": 122,
+              "difference": 19.7
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "时间线 [35, 65, 'control']",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/aim-replay-demo/replay.py",
+          "--delay-ms",
+          "35",
+          "--flight-ms",
+          "65",
+          "--state-at",
+          "control"
+        ],
+        "result": {
+          "timeline": {
+            "sample_ms": 10,
+            "control_ms": 45.0,
+            "hit_ms": 110.0,
+            "state_ms": 45.0,
+            "horizon_ms": 65.0,
+            "x_hit_m": 4.2,
+            "wrong_repeat_delay_x_m": 4.2700000000000005
+          },
+          "first_changes": {
+            "corner_u_px": {
+              "frame": 120,
+              "difference": 129.0
+            },
+            "camera_x_m": {
+              "frame": 120,
+              "difference": 1.2899999999999998
+            },
+            "state_x_m": {
+              "frame": 121,
+              "difference": 0.8
+            },
+            "yaw_command_deg": {
+              "frame": 122,
+              "difference": 19.7
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "时间线 [25, 60, 'sample']",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/aim-replay-demo/replay.py",
+          "--delay-ms",
+          "25",
+          "--flight-ms",
+          "60",
+          "--state-at",
+          "sample"
+        ],
+        "result": {
+          "timeline": {
+            "sample_ms": 10,
+            "control_ms": 35.0,
+            "hit_ms": 95.0,
+            "state_ms": 10,
+            "horizon_ms": 85.0,
+            "x_hit_m": 4.17,
+            "wrong_repeat_delay_x_m": 4.17
+          },
+          "first_changes": {
+            "corner_u_px": {
+              "frame": 120,
+              "difference": 129.0
+            },
+            "camera_x_m": {
+              "frame": 120,
+              "difference": 1.2899999999999998
+            },
+            "state_x_m": {
+              "frame": 121,
+              "difference": 0.8
+            },
+            "yaw_command_deg": {
+              "frame": 122,
+              "difference": 19.7
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "时间线 [25, 60, 'control']",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/aim-replay-demo/replay.py",
+          "--delay-ms",
+          "25",
+          "--flight-ms",
+          "60",
+          "--state-at",
+          "control"
+        ],
+        "result": {
+          "timeline": {
+            "sample_ms": 10,
+            "control_ms": 35.0,
+            "hit_ms": 95.0,
+            "state_ms": 35.0,
+            "horizon_ms": 60.0,
+            "x_hit_m": 4.17,
+            "wrong_repeat_delay_x_m": 4.22
+          },
+          "first_changes": {
+            "corner_u_px": {
+              "frame": 120,
+              "difference": 129.0
+            },
+            "camera_x_m": {
+              "frame": 120,
+              "difference": 1.2899999999999998
+            },
+            "state_x_m": {
+              "frame": 121,
+              "difference": 0.8
+            },
+            "yaw_command_deg": {
+              "frame": 122,
+              "difference": 19.7
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "时间线 [0, 0, 'sample']",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/aim-replay-demo/replay.py",
+          "--delay-ms",
+          "0",
+          "--flight-ms",
+          "0",
+          "--state-at",
+          "sample"
+        ],
+        "result": {
+          "timeline": {
+            "sample_ms": 10,
+            "control_ms": 10.0,
+            "hit_ms": 10.0,
+            "state_ms": 10,
+            "horizon_ms": 0.0,
+            "x_hit_m": 4.0,
+            "wrong_repeat_delay_x_m": 4.0
+          },
+          "first_changes": {
+            "corner_u_px": {
+              "frame": 120,
+              "difference": 129.0
+            },
+            "camera_x_m": {
+              "frame": 120,
+              "difference": 1.2899999999999998
+            },
+            "state_x_m": {
+              "frame": 121,
+              "difference": 0.8
+            },
+            "yaw_command_deg": {
+              "frame": 122,
+              "difference": 19.7
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "时间线 [0, 0, 'control']",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/aim-replay-demo/replay.py",
+          "--delay-ms",
+          "0",
+          "--flight-ms",
+          "0",
+          "--state-at",
+          "control"
+        ],
+        "result": {
+          "timeline": {
+            "sample_ms": 10,
+            "control_ms": 10.0,
+            "hit_ms": 10.0,
+            "state_ms": 10.0,
+            "horizon_ms": 0.0,
+            "x_hit_m": 4.0,
+            "wrong_repeat_delay_x_m": 4.0
+          },
+          "first_changes": {
+            "corner_u_px": {
+              "frame": 120,
+              "difference": 129.0
+            },
+            "camera_x_m": {
+              "frame": 120,
+              "difference": 1.2899999999999998
+            },
+            "state_x_m": {
+              "frame": 121,
+              "difference": 0.8
+            },
+            "yaw_command_deg": {
+              "frame": 122,
+              "difference": 19.7
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "像素阈值 150",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/aim-replay-demo/replay.py",
+          "--pixel-threshold",
+          "150"
+        ],
+        "result": {
+          "corner_u_px": null,
+          "camera_x_m": {
+            "frame": 120,
+            "difference": 1.2899999999999998
+          },
+          "state_x_m": {
+            "frame": 121,
+            "difference": 0.8
+          },
+          "yaw_command_deg": {
+            "frame": 122,
+            "difference": 19.7
+          }
+        }
+      }
+    },
+    {
+      "name": "像素阈值 129",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/aim-replay-demo/replay.py",
+          "--pixel-threshold",
+          "129"
+        ],
+        "result": {
+          "corner_u_px": null,
+          "camera_x_m": {
+            "frame": 120,
+            "difference": 1.2899999999999998
+          },
+          "state_x_m": {
+            "frame": 121,
+            "difference": 0.8
+          },
+          "yaw_command_deg": {
+            "frame": 122,
+            "difference": 19.7
+          }
+        }
+      }
+    },
+    {
+      "name": "像素阈值 128",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/aim-replay-demo/replay.py",
+          "--pixel-threshold",
+          "128"
+        ],
+        "result": {
+          "corner_u_px": {
+            "frame": 120,
+            "difference": 129.0
+          },
+          "camera_x_m": {
+            "frame": 120,
+            "difference": 1.2899999999999998
+          },
+          "state_x_m": {
+            "frame": 121,
+            "difference": 0.8
+          },
+          "yaw_command_deg": {
+            "frame": 122,
+            "difference": 19.7
+          }
+        }
+      }
+    },
+    {
+      "name": "像素阈值 0",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/aim-replay-demo/replay.py",
+          "--pixel-threshold",
+          "0"
+        ],
+        "result": {
+          "corner_u_px": {
+            "frame": 119,
+            "difference": 1.0
+          },
+          "camera_x_m": {
+            "frame": 120,
+            "difference": 1.2899999999999998
+          },
+          "state_x_m": {
+            "frame": 121,
+            "difference": 0.8
+          },
+          "yaw_command_deg": {
+            "frame": 122,
+            "difference": 19.7
+          }
+        }
+      }
+    },
+    {
+      "name": "无效参数 ['--delay-ms', '-1']",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/aim-replay-demo/replay.py",
+          "--delay-ms",
+          "-1"
+        ],
+        "exit": 2,
+        "stderr": "usage: replay.py [-h] [--delay-ms DELAY_MS] [--flight-ms FLIGHT_MS]\n                 [--state-at {sample,control}]\n                 [--pixel-threshold PIXEL_THRESHOLD] [--replay REPLAY]\nreplay.py: error: 时长必须为非负有限数\n"
+      }
+    },
+    {
+      "name": "无效参数 ['--flight-ms', 'nan']",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/aim-replay-demo/replay.py",
+          "--flight-ms",
+          "nan"
+        ],
+        "exit": 2,
+        "stderr": "usage: replay.py [-h] [--delay-ms DELAY_MS] [--flight-ms FLIGHT_MS]\n                 [--state-at {sample,control}]\n                 [--pixel-threshold PIXEL_THRESHOLD] [--replay REPLAY]\nreplay.py: error: 时长必须为非负有限数\n"
+      }
+    },
+    {
+      "name": "无效参数 ['--pixel-threshold', '-1']",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/aim-replay-demo/replay.py",
+          "--pixel-threshold",
+          "-1"
+        ],
+        "exit": 2,
+        "stderr": "usage: replay.py [-h] [--delay-ms DELAY_MS] [--flight-ms FLIGHT_MS]\n                 [--state-at {sample,control}]\n                 [--pixel-threshold PIXEL_THRESHOLD] [--replay REPLAY]\nreplay.py: error: 像素变化阈值必须为非负有限数\n"
+      }
+    },
+    {
+      "name": "实际OpenCV核对纸面PnP",
+      "status": "PASS",
+      "details": {
+        "camera_matrix": [
+          [
+            600.0,
+            0.0,
+            320.0
+          ],
+          [
+            0.0,
+            600.0,
+            240.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "points": [
+          [
+            -0.1,
+            -0.05,
+            0.0
+          ],
+          [
+            0.1,
+            -0.05,
+            0.0
+          ],
+          [
+            0.1,
+            0.05,
+            0.0
+          ],
+          [
+            -0.1,
+            0.05,
+            0.0
+          ]
+        ],
+        "pixels": [
+          [
+            290.0,
+            225.0
+          ],
+          [
+            350.0,
+            225.0
+          ],
+          [
+            350.0,
+            255.0
+          ],
+          [
+            290.0,
+            255.0
+          ]
+        ],
+        "rvec": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tvec": [
+          0.0,
+          0.0,
+          1.9999999999999991
+        ]
+      }
+    },
+    {
+      "name": "缩放一半同步K",
+      "status": "PASS",
+      "details": {
+        "K": [
+          [
+            300.0,
+            0.0,
+            160.0
+          ],
+          [
+            0.0,
+            300.0,
+            120.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "first_pixel": [
+          145.0,
+          112.5
+        ],
+        "tvec": [
+          0.0,
+          0.0,
+          1.9999999999999991
+        ]
+      }
+    },
+    {
+      "name": "只缩像点不改内参",
+      "status": "PASS",
+      "details": {
+        "tvec": [
+          -1.0666666225947965,
+          -0.799999966744814,
+          3.9999998337156493
+        ],
+        "truth_tvec": [
+          0.0,
+          0.0,
+          2.0
+        ]
+      }
+    },
+    {
+      "name": "云台理想下界手算核对",
+      "status": "PASS",
+      "details": {
+        "20deg_100deg_s": 0.2,
+        "15deg_100deg_s": 0.15,
+        "10ms_max_degree": 1.0,
+        "boundary": "不包含加速度、延迟与反馈，未做实车转动"
+      }
+    },
+    {
+      "name": "指标/算法纸面产物",
+      "status": "PASS",
+      "details": {
+        "A": {
+          "hit": 12,
+          "total": 20,
+          "lost": 0,
+          "delay_ms": [
+            10,
+            20
+          ],
+          "light": "亮"
+        },
+        "B": {
+          "hit": 12,
+          "total": 20,
+          "lost": 6,
+          "delay_ms": [
+            10,
+            60
+          ],
+          "light": "暗"
+        },
+        "hit_rate": [
+          0.6,
+          0.6
+        ],
+        "confound": "光照不同，不能直接归因算法",
+        "mapping": {
+          "BA": "重投影/几何",
+          "Kalman": "状态不确定性/状态估计",
+          "MPC": "轨迹与控制代价/控制序列"
+        }
+      }
+    }
+  ],
+  "boundaries": [
+    "CSV为人工教学数据，不是真实机器或完整算法输出",
+    "匀速/定飞行时间是假设，未发送控制/开火，纸面转动未冒充实车测试"
+  ]
+}
