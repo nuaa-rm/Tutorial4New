@@ -1,6 +1,6 @@
 {
-  "recorded_at": "2026-09-29T06:08:56.191374+00:00",
-  "content_head": "44944b43f4ce8c2775a26b04b70d70d584092329",
+  "recorded_at": "2026-09-29T06:45:42.451225+00:00",
+  "content_head": "cda643542bff43d8df31150ede72d7920c7a7a0a",
   "chapter_count": 21,
   "item_count": 420,
   "totals": {
@@ -24,7 +24,7 @@
     }
   },
   "question_counts": {
-    "exercises": 233,
+    "exercises": 234,
     "chapter_problems": 187
   },
   "pdfs": [
@@ -37,8 +37,8 @@
     },
     {
       "path": "02-专项技术栈/main.pdf",
-      "pages": 270,
-      "sha256": "80684b0a3fa641599b3898ac521f45b917679931cbd14788be3e2f4a8e0ea665",
+      "pages": 272,
+      "sha256": "6fd73db0dee2a66fc2c9668e693738aa4c118805e9c1a19cffa78cae98102067",
       "bad_log_lines": [],
       "font_shape_substitutions": 2
     },
@@ -509,7 +509,7 @@
       "volume": 2,
       "chapter": 1,
       "report": "docs/revision/volume-2-chapter-1.md",
-      "report_sha256": "54687cfe3d73d04c401b77c8aedf0f0569acd5c71c08d44f70f5be96fc5b0cf7",
+      "report_sha256": "414e388a878b01baa7de59884bc5e48c02a7558b41917cfafe10b1f63a3e7f32",
       "counts": {
         "通过": 19,
         "未完成": 1
@@ -526,21 +526,21 @@
           "item": 2,
           "name": "2 核心示例",
           "status": "通过",
-          "evidence": "A_ros2、project、engineering 的环境/图、发布订阅/QoS、定时器/接口/服务、完整工程/rqt、依赖/Launch/日志/调试示例有前提、操作与判断。",
+          "evidence": "A_ros2、project、engineering 的环境/图、发布订阅/QoS、定时器/接口/服务、完整工程/rqt、依赖/Launch/日志/调试与头文件参数补充示例有前提、操作与判断。",
           "report_line": 18
         },
         {
           "item": 3,
           "name": "3 复杂概念项目",
           "status": "通过",
-          "evidence": "basic-interfaces-demo 与复用的 training_tools 均有完整源码、构建文件、清单、配置和 README；不再依赖正文之外的缺失工程。",
+          "evidence": "basic-interfaces-demo 与复用的 training_tools 均有完整源码、构建文件、清单、配置和 README；新增 header_flags.py 复用其真实数据库，不另造框架或工程。",
           "report_line": 19
         },
         {
           "item": 4,
           "name": "4 正文展示项目",
           "status": "通过",
-          "evidence": "两个工程的目录、完整核心代码和行为配置直接引入；按执行顺序讲接口生成、收发回调、安装、参数覆盖、命名空间/重映射与进程事件。",
+          "evidence": "两个工程的目录、完整核心代码和行为配置直接引入；按执行顺序讲接口生成、收发回调、安装、参数覆盖、命名空间/重映射与进程事件。header_flags.py 的45行完整分为1–22和23–45行展示，讲清提取、路径转换和限定片段的作用。",
           "report_line": 20
         },
         {
@@ -554,7 +554,7 @@
           "item": 6,
           "name": "6 随堂练习",
           "status": "通过",
-          "evidence": "12 个 exercise 覆盖关系见下表，QoS 与回复观察新增独立任务，其余相邻知识合并但能力不遗漏。",
+          "evidence": "13 个 exercise 覆盖关系见下表，QoS、回复观察与头文件解析参数有独立任务，其余相邻知识合并但能力不遗漏。",
           "report_line": 22
         },
         {
@@ -596,7 +596,7 @@
           "item": 12,
           "name": "12 答案定位",
           "status": "通过",
-          "evidence": "answers.tex 的 12+10 题解通过 ref 定位，按正文顺序排列；开放实践有命令、输出或判断依据。",
+          "evidence": "answers.tex 的 13+10 题解通过 ref 定位，按正文顺序排列；开放实践有命令、输出或判断依据。",
           "report_line": 28
         },
         {
@@ -631,7 +631,7 @@
           "item": 17,
           "name": "17 包含与引用",
           "status": "通过",
-          "evidence": "main→core→project→engineering→review 顺序明确；README、OpenCV 调用说明同步。当前结构检查 29 个包含文件、314 个标签、261 个被引用标签无失效/重复/循环。",
+          "evidence": "main→core→project→engineering→review 顺序明确；README、OpenCV 调用说明同步。当前结构检查 29 个包含文件、315 个标签、262 个被引用标签无失效/重复/循环。",
           "report_line": 33
         },
         {
@@ -645,14 +645,14 @@
           "item": 19,
           "name": "19 实际运行",
           "status": "未完成",
-          "evidence": "Jazzy 的构建、通信、变体、Launch、日志、测试、真实 rqt 插件及 GDB 回调断点均通过；新增 CLion 实际构建/运行/回调断点、参数与默认值变体、colcon 安装对照、编译数据库导入/源码编译/头文件跳转完成；外部库头文件的 clangd 诊断限制见下文。真实第二主机上的发现范围/恢复仍未完成，Humble 未实测。不能用同机不同域替代第二主机。",
+          "evidence": "Jazzy 的构建、通信、变体、Launch、日志、测试、真实 rqt 插件及 GDB 回调断点均通过；CLion 实际构建/运行/回调断点、参数与默认值变体、colcon 安装对照、编译数据库导入/源码编译/头文件跳转完成。后续实际补齐选定外部头文件的解析参数，rclcpp.hpp 诊断15→0→15→0，保留node.hpp的10条unused-include警告，脚本与备份分支实测通过。真实第二主机上的发现范围/恢复仍未完成，Humble 未实测。不能用同机不同域替代第二主机。",
           "report_line": 35
         },
         {
           "item": 20,
           "name": "20 编译与 PDF",
           "status": "通过",
-          "evidence": "从卷入口 XeLaTeX 编译至引用稳定，无缺文件、未定义引用、重复标签或越界。最初全卷 179 页的检查保留；各章整理后的当前全卷为 270 页。此次新增图后两次编译稳定，实际查看物理页 4–5、35–39、246–248 及图所在页 36。没有修改共享模板。",
+          "evidence": "从卷入口 XeLaTeX 编译至引用稳定，无缺文件、未定义引用、重复标签或越界。最初全卷179页与CLion图补测270页的检查保留，当前272页。新增代码/练习后实际查看物理页4–5、36–42、247–250；代码加行号后两次编译稳定，再看37–39页及完整38页。题解长路径越界已修正，没有修改共享模板。",
           "report_line": 36
         }
       ]

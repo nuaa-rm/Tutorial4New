@@ -1,12 +1,12 @@
 # 全书修订与验收汇总
 
-2026-09-29，正文提交截至 `44944b4`。三卷 21 章已经按卷、按章分别完成首次整理与提交，并继续补做现有环境中的软件操作；已发现的索引限制明确保留。**全量验收仍未完成**：420 项检查中，407 项通过、11 项未完成、2 项不适用。没有用软件回放、模拟数据、结构脚本或历史截图替代实机操作和他人确认。
+2026-09-29，正文提交截至 `cda6435`。三卷21章已经按卷、按章分别完成首次整理与提交，并继续补做现有环境中的软件操作；选定外部头文件的缺失解析参数已经实际补齐。**全量验收仍未完成**：420项检查中，407项通过、11项未完成、2项不适用。没有用软件回放、模拟数据、结构脚本或历史截图替代实机操作和他人确认。
 
 验收依据是 [textbook-chapter/SKILL.md](../../.agents/skills/textbook-chapter/SKILL.md) 的完整章节 20 项清单。它明确要求：“缺少运行环境、硬件或资料导致无法确认的项目记为‘未完成’，说明已做的检查与缺口，不得当作已通过。”下列状态按这一标准保留，未降低原有章末验收要求。
 
 ## 内容与逐章提交
 
-各章现在都有学习目标/学时/本卷边界、核心操作示例与随堂练习、难点归纳、章末小结/习题/验收和可定位题解。复杂概念采用各卷 examples 内的小项目，正文展示完整核心源码、关键配置、执行顺序、运行命令与结果解读。233 道随堂练习和 187 道章末习题均有定位题解；开放题给判断标准或可行思路。
+各章现在都有学习目标/学时/本卷边界、核心操作示例与随堂练习、难点归纳、章末小结/习题/验收和可定位题解。复杂概念采用各卷 examples 内的小项目，正文展示完整核心源码、关键配置、执行顺序、运行命令与结果解读。234道随堂练习和187道章末习题均有定位题解；开放题给判断标准或可行思路。
 
 语言继续以修订前 `c5543bb` 的卷一 `Chapter1/11.tex`、`12.tex`、`13.tex` 为参照，保留承接实际处境、你/我们、自然过渡和随步骤解释的写法；技术错误、危险操作和验证边界另行修正。各章的能力覆盖、题量依据、文件/图片变更和 20 项逐项依据见下表链接，提交顺序见 [progress.md](progress.md)。
 
@@ -36,27 +36,29 @@
 
 后续独立提交：`4cfafb1` 修复卷一第三章中文跨卷路径缺字；`90aeebd` 补跑卷一第一章 apt/zsh/AstroNvim；`bb02edd` 补跑卷二第七章双目 GUI、保存/提交与 CLI；`f08b276` 补跑卷一第一章 VS Code GUI，并按用户指示用 Maple Mono NF CN 修正终端截图。`ee937b5` 修复同节正文误居中和长配置名越界，并补装 Ninja 1.11.1、实际构建运行。`52c292c` 补测卷一 CLion GUI 并替换三张历史图片；`44944b4` 补测卷二 CLion 真实发布回调、新旧产物与编译数据库，补充运行参数覆盖/连续断点说明。相关 tex 源码未改名或移动。两项不适用仅是卷三第七章没有图片对应的检查 14/15。
 
+`cda6435` 继续补测卷二第一章，核对clangd真实解析命令并补齐选定外部头文件的include路径与宏；正文展示完整45行脚本、配置操作、诊断对照、练习与题解。rclcpp.hpp实际15→0→15→0，node.hpp的10条unused-include警告保留，未关闭诊断或把结果扩大为所有库头文件都正常。
+
 ## 实际验证与现有产物
 
 卷二主要使用 Distrobox ubuntu2404 的 Ubuntu 24.04.5 / ROS 2 Jazzy，缺少的依赖按需安装并记录。CPU/CUDA/ONNX、ROS 回调与 rqt、图像桥接与标定、滤波/几何/BA/ICP、OSQP 控制、实际 Nav2/PCL/恢复流程均保留运行证据和负例。数值结果只在各自验证条件下成立，不把 Jazzy 实测扩大为所有发行版兼容承诺。
 
-最新 VS Code 截图来自独立 Xvfb 和临时编辑器配置，真实构建、单步、符号重命名、撤销均完成。集成终端设置 terminal.integrated.fontFamily=Maple Mono NF CN，实际查看系统/文件夹/箭头图标正常；原始界面像素未修改。CLion 的编辑器、控制台与终端也使用 Maple Mono NF CN，字体配置、真实调试过程和源码恢复均有证据。卷二发布回调停在 publish 前，msg.data=from_ide，继续后实际收到话题消息；GUI 修改默认值后 IDE/旧安装分别发 from_debug/ready，colcon 重建后 ros2 run 发 from_debug。编译数据库成功导入，源码实际编译并跳转至 Jazzy 头文件；外部 rclcpp.hpp 的 15 条 clangd 子头文件诊断经重载、调整根目录和重开仍未消除，没有用成功编译掩盖索引限制。双目标定使用离线生成的成对棋盘格，真实点击 CALIBRATE/SAVE/COMMIT、保存左右 YAML 并核对服务记录；这仍不替代实机标定质量。
+最新VS Code截图来自独立Xvfb和临时编辑器配置，真实构建、单步、符号重命名、撤销均完成。集成终端设置terminal.integrated.fontFamily=Maple Mono NF CN，实际查看系统/文件夹/箭头图标正常；原始界面像素未修改。CLion的编辑器、控制台与终端也使用Maple Mono NF CN，字体配置、真实调试过程和源码恢复均有证据。卷二发布回调停在publish前，msg.data=from_ide，继续后实际收到话题消息；GUI修改默认值后IDE/旧安装分别发from_debug/ready，colcon重建后ros2 run发from_debug。编译数据库成功导入，源码实际编译并跳转至Jazzy头文件。初次补测的rclcpp.hpp诊断经重载等操作仍未消除；后续实际命令对照确认遗漏27个ROS include路径，使用限定的CompileFlags.Add后15条错误消失，停用/恢复分别为15/0，见[补测证据](evidence/volume-2-chapter-1-clangd-context.json)。双目标定使用离线生成的成对棋盘格，真实点击CALIBRATE/SAVE/COMMIT、保存左右YAML并核对服务记录；这仍不替代实机标定质量。
 
 三卷入口均编译到引用和编号稳定，受影响的目录、正文、图表/代码与题解已分章实际查看。最终日志没有缺字、越界、重复标签、未定义引用或要求重跑的引用警告。仍有模板字体形状替代提示（2/2/1 条），没有声称日志完全无警告。
 
 | 卷 | 通过 | 未完成 | 不适用 | 当前 PDF |
 | --- | --- | --- | --- | --- |
 | 一 | 59 | 1 | 0 | [main.pdf](../../01-基础通识/main.pdf)，206 页 |
-| 二 | 215 | 5 | 0 | [main.pdf](../../02-专项技术栈/main.pdf)，270 页 |
+| 二 | 215 | 5 | 0 | [main.pdf](../../02-专项技术栈/main.pdf)，272页 |
 | 三 | 133 | 5 | 2 | [main.pdf](../../03-RM视觉概述/main.pdf)，58 页 |
-| 合计 | 407 | 11 | 2 | 534 页 |
+| 合计 | 407 | 11 | 2 | 536页 |
 
 PDF 是本地编译产物，按仓库原有规则不提交。完整检查矩阵含每项状态、报告行号/散列、三卷 PDF 页数/散列，见 [whole-book-checklist.json](evidence/whole-book-checklist.json)；21 章真实结构检查输出见 [whole-book-structure.json](evidence/whole-book-structure.json)。结构脚本只核对包含关系、资源、标签和题解定位，不能自行判断技术内容或实际操作通过。
 
-完整 `.tex` diff 已输出到 `/tmp/tutorial-all-chapters.tex.patch`（22518 行，1483909 字节），涵盖 c5543bb 到 44944b4，没有省略中间段落。该临时文件不入库，可在仓库根目录重建：
+完整`.tex` diff已输出到`/tmp/tutorial-all-chapters.tex.patch`（22582行，1491232字节），涵盖c5543bb到cda6435，没有省略中间段落。该临时文件不入库，可在仓库根目录重建：
 
 ```bash
-git -c core.quotepath=false diff c5543bb 44944b4 -- '*.tex' > /tmp/tutorial-all-chapters.tex.patch
+git -c core.quotepath=false diff c5543bb cda6435 -- '*.tex' > /tmp/tutorial-all-chapters.tex.patch
 ```
 
 ## 11 项未完成及其具体缺口
@@ -66,7 +68,7 @@ git -c core.quotepath=false diff c5543bb 44944b4 -- '*.tex' > /tmp/tutorial-all-
 | 卷/章 | 已完成的相关检查 | 仍缺少的原有验收条件 |
 | --- | --- | --- |
 | 一/1 | 命令/归档/Git/Conda/软件回环、apt/zsh/AstroNvim 临时配置、Ubuntu VS Code/CLion 实际 GUI | Windows+UEFI 双系统实际写盘/安装/启动与系统恢复、桌面/登录切换、Windows IDE 工具链、物理串口。 |
-| 二/1 | 真实 Jazzy 通信、DDS/QoS/发现、rqt、GDB/CLion 回调断点、编译数据库导入/源码编译及产物对照 | 第二台物理主机的发现范围实验；外部库头文件 clangd 诊断仍未消除，见下文。 |
+| 二/1 | 真实Jazzy通信、DDS/QoS/发现、rqt、GDB/CLion回调断点、编译数据库导入/源码编译、产物对照及选定外部头文件缺失参数修复 | 第二台物理主机的发现范围和恢复实验。 |
 | 二/2 | TCP/CRC/重连/过期/重试/PTY 与 ROS 桥接 | 实际板端 USB/串口和跨物理主机的协议收发。 |
 | 二/3 | IQ 生成/解析/CFO/变体与 libiio/pyadi-iio 无设备负例 | Pluto 接入、实际射频链路与接收数据。 |
 | 二/4 | OpenCV 算法、视频/PNG/窗口、实际 Jazzy 图像桥接 | 实际相机采集和设备参数验证。 |
