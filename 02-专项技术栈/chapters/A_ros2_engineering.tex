@@ -393,11 +393,66 @@ test -f build/training_tools/compile_commands.json
 在 CLion 的 File $\rightarrow$ Open 中选择这个 JSON，再选 Open as Project，以编译数据库项目打开，核对 heartbeat.cpp 的包含路径。你可以在 \texttt{rclcpp/rclcpp.hpp} 上跳转到实际头文件，确认它来自当前发行版的安装目录。它只涵盖该包；修改项目根目录不会自动合并其他包的编译数据库。接口包须先构建，生成的消息头文件才存在。需要整个工作空间索引时，应显式收集各包的数据库并按工具支持方式合并。
 \end{example}
 
+\paragraph*{源码不红，库头文件却红怎么办}
+这时候你可能会碰到一个看起来很矛盾的情况：heartbeat.cpp 能编译，跳进 rclcpp.hpp 却满屏红线，提示它自己的子头文件找不到。先别急着重装 ROS，我们要检查的是编辑器解析这个文件时用了哪些参数。头文件通常没有独立的编译记录，编辑器需要借用包含它的源码的参数；如果这一步没有借到，只有系统头文件路径，就会找不到 ROS 的头文件。本次 Jazzy 与 CLion 2026.2.3 补测正好遇到了这个情况：源码有 27 个 ROS include 路径，外部头文件的 clangd 解析命令却没有带上它们。成功编译说明编译器的配置可用，不能顺便证明编辑器的配置也正确。
+
+\begin{example}[给指定头文件补上当前源码的解析参数]
+仅当你确认遇到了上面的参数缺失时再做这个例子。我们继续用同一个 training\_tools 工程，随书 \nolinkurl{examples/ros2/header_flags.py} 读取其编译数据库，输出一段 clangd 配置；它不执行编译命令，也不修改数据库。先把这个文件复制到 \texttt{\textasciitilde/ros2\_ws}，代码如下：
+\Needspace{25\baselineskip}
+\par\medskip\noindent\begin{minipage}{\linewidth}
+\lstinputlisting[frame=single,basicstyle=\ttfamily\footnotesize,language=Python,numbers=left,firstline=1,lastline=22,caption={读取选定源码的编译命令}]{examples/ros2/header_flags.py}
+\end{minipage}\par\smallskip
+源码路径必须唯一对应一条命令，否则脚本会提示你核对路径或选对数据库。接下来只提取 include 路径、宏和语言标准，把相对 include 路径按原构建目录转成绝对路径；输出参数 \texttt{-o} 等构建选项没有复制过去。
+\Needspace{26\baselineskip}
+\par\medskip\noindent\begin{minipage}{\linewidth}
+\lstinputlisting[frame=single,basicstyle=\ttfamily\footnotesize,language=Python,numbers=left,firstline=23,lastline=45,firstnumber=23,caption={生成只作用于指定头文件的配置}]{examples/ros2/header_flags.py}
+\end{minipage}\par\smallskip
+通用形式为 \texttt{python3 header\_flags.py 数据库 源码 头文件 [更多头文件]}。它输出 JSON，JSON 也是合法的 YAML。\texttt{If.PathMatch} 使用完整路径的正则表达式匹配，\texttt{re.escape} 把文件名中的点等字符转义，因此这段配置只作用于你选定的文件。先生成并查看片段：
+\par\medskip\noindent\begin{minipage}{\linewidth}
+\begin{tbash}
+cd ~/ros2_ws
+header=/opt/ros/$ROS_DISTRO/include/rclcpp/rclcpp/rclcpp.hpp
+test -f "$header"
+python3 header_flags.py build/training_tools/compile_commands.json \
+  src/training_tools/src/heartbeat.cpp "$header" \
+  > /tmp/ros-header-flags.json
+cat /tmp/ros-header-flags.json
+\end{tbash}
+\end{minipage}\par\smallskip
+这里的数据库和源码换成你的实际路径；头文件也以刚才跳转显示的路径为准。旧发行版的安装目录层级可能不同，不能只换发行版名字就认定路径存在。确认输出与数据库中的 include 路径相符后，放进用户配置目录。已有配置先备份，再追加为一个新片段：
+\par\medskip\noindent\begin{minipage}{\linewidth}
+\begin{tbash}
+cfg_dir="${XDG_CONFIG_HOME:-$HOME/.config}/clangd"
+mkdir -p "$cfg_dir"
+if [ -f "$cfg_dir/config.yaml" ]; then
+  backup=$(mktemp "$cfg_dir/config.yaml.before-header-flags.XXXXXX")
+  cp -p "$cfg_dir/config.yaml" "$backup"
+  printf '备份：%s\n' "$backup"
+  printf '\n---\n' >> "$cfg_dir/config.yaml"
+fi
+cat /tmp/ros-header-flags.json >> "$cfg_dir/config.yaml"
+\end{tbash}
+\end{minipage}\par\smallskip
+配置放在这里，是因为库头文件位于工作空间之外，工作空间中的 \texttt{.clangd} 不会作用于它。IDE 需要使用同一个 \texttt{XDG\_CONFIG\_HOME}，默认不用额外设置；如果你用临时配置启动 IDE，就在那套临时目录里操作。随后关闭这个头文件标签，再从源码重新跳转，查看 Problems 中的诊断和实际解析参数。本次补测里，rclcpp.hpp 的 15 条找不到子头文件的错误变为零；停用片段后又出现 15 条，恢复片段后再次为零，没有关闭诊断。
+
+这只是把选定源码的解析条件借给选定头文件。其他包可能有不同的宏和路径，你要选它实际使用的源码重新生成；同一个头文件有多个编译上下文时也要先选定上下文。数据库、依赖或发行版变化后重新核对片段，不要把旧路径永久挂着。若仍有其他诊断，按其具体原因继续检查，不能一股脑关掉红线。
+\end{example}
+
+\begin{note}
+可以从 Find Action 搜索 Show Clangd Tool Window 查看诊断工具；需要解析命令时，搜索 Registry，把 \texttt{clion.clang.clangd.debug} 临时设为 2，关闭并重开头文件后在 IDE 日志中查看 ASTWorker 的 command，查完恢复为 0。这次补测据此比较源码与头文件的实际 include 路径。配置格式和头文件参数借用机制分别见 \href{https://clangd.llvm.org/config}{clangd 配置文档}与 \href{https://clangd.llvm.org/design/compile-commands}{编译命令说明}；不要把 clangd 进程自身的参数与它解析某个文件的编译参数混在一起。
+\end{note}
+
+\begin{exercise}
+\label{ex:v2-ros-header-context}
+从 heartbeat.cpp 的数据库条目中找出 rclcpp 的 include 路径，说明它与 \texttt{rclcpp/rclcpp.hpp} 拼接后怎样定位文件。生成只匹配该头文件的配置，核对路径与宏；把源码参数换成不存在的路径，确认脚本会拒绝输出。若你的 IDE 确实存在上述缺失参数的问题，再在保留诊断的前提下比较启用片段前后的结果；没有此问题时记录实际参数，不必人为制造红线。
+\end{exercise}
+
 \begin{conclusion}
 \begin{itemize}
 \item 找不到 ament：检查 IDE 环境；找不到生成接口头：先构建接口包。
 \item CLion 与 colcon 使用不同构建目录，避免 CMake 缓存和生成器相互覆盖；两者不必强制使用同一种生成器。
 \item 断点不命中：检查 Debug 配置、正在运行的二进制路径，以及代码是否重新构建。
+\item 源码能编译但外部头文件报错：比较二者实际解析参数；给指定头文件补参数后仍保留诊断，按具体错误继续查。
 \item build、install、log、\texttt{.idea}、\texttt{cmake-build-*} 和生成的编译数据库通常不提交 Git；源码、清单和启动配置需要提交。
 \end{itemize}
 \end{conclusion}

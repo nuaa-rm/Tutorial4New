@@ -1,0 +1,846 @@
+{
+  "recorded_at": "2026-09-29T06:40:38.475647+00:00",
+  "environment": {
+    "distrobox": "ubuntu2404",
+    "ROS_DISTRO": "jazzy",
+    "clion": "2026.2.3",
+    "clangd": "23.0.0",
+    "font": "Maple Mono NF CN",
+    "display": ":1",
+    "temporary_profile": "/tmp/textbook-clion-gui",
+    "license": "与前次相同的正常试用配置；未重置试用"
+  },
+  "root_cause": {
+    "source_ros_include_paths": 27,
+    "header_ros_include_paths_before": 0,
+    "actual_commands": [
+      {
+        "log_lines": [
+          "2026-09-29 14:25:28,986 [ 505985]   WARN - c.j.c.l.d.c.c.l.s.ClangServerAccessorImpl - clangd: I[14:25:28.986] ASTWorker building file /tmp/textbook-clion-gui/ros2_ws/src/training_tools/src/heartbeat.cpp version 4 with command ",
+          "2026-09-29 14:25:28,986 [ 505985]   WARN - c.j.c.l.d.c.c.l.s.ClangServerAccessorImpl - clangd: [/tmp/textbook-clion-gui/ros2_ws/build/training_tools]",
+          "2026-09-29 14:25:28,986 [ 505985]   WARN - c.j.c.l.d.c.c.l.s.ClangServerAccessorImpl - clangd: /usr/bin/c++ --driver-mode=g++ -nostdinc -nostdlib -nocudalib -nostdlibinc -ibuiltininc -ccc-no-implicit-pch-or-pth -D__JETBRAINS_IDE__=20260203L -D__CLION_IDE__=20260203L -DDEFAULT_RMW_IMPLEMENTATION=rmw_fastrtps_cpp -DFASTCDR_DYN_LINK -g -c -fsized-deallocation --target=x86_64-unknown-linux-unknown -fgnuc-version=13.3.0 -fno-define-target-os-macros -Wno-unused-variable -Wno-infinite-recursion -Wno-array-bounds -Wno-return-stack-address -Werror=implicit-function-declaration -Wshadow -Wno-shadow-field-in-constructor-modified -Wno-shadow-ivar -Wuninitialized -Wunused-label -Wunused-lambda-capture -iquote/tmp/textbook-clion-gui/ros2_ws/src/training_tools/src -isystem/opt/ros/jazzy/include/rclcpp -isystem/opt/ros/jazzy/include/std_msgs -isystem/opt/ros/jazzy/include/builtin_interfaces -isystem/opt/ros/jazzy/include/rosidl_runtime_c -isystem/opt/ros/jazzy/include/rcutils -isystem/opt/ros/jazzy/include/rosidl_typesupport_interface -isystem/opt/ros/jazzy/include/fastcdr -isystem/opt/ros/jazzy/include/rosidl_runtime_cpp -isystem/opt/ros/jazzy/include/rosidl_typesupport_fastrtps_cpp -isystem/opt/ros/jazzy/include/rmw -isystem/opt/ros/jazzy/include/rosidl_dynamic_typesupport -isystem/opt/ros/jazzy/include/rosidl_typesupport_fastrtps_c -isystem/opt/ros/jazzy/include/rosidl_typesupport_introspection_c -isystem/opt/ros/jazzy/include/rosidl_typesupport_introspection_cpp -isystem/opt/ros/jazzy/include/libstatistics_collector -isystem/opt/ros/jazzy/include/rcl -isystem/opt/ros/jazzy/include/rcl_interfaces -isystem/opt/ros/jazzy/include/service_msgs -isystem/opt/ros/jazzy/include/rcl_logging_interface -isystem/opt/ros/jazzy/include/rcl_yaml_param_parser -isystem/opt/ros/jazzy/include/type_description_interfaces -isystem/opt/ros/jazzy/include/rcpputils -isystem/opt/ros/jazzy/include/statistics_msgs -isystem/opt/ros/jazzy/include/rosgraph_msgs -isystem/opt/ros/jazzy/include/rosidl_typesupport_cpp -isystem/opt/ros/jazzy/include/rosidl_typesupport_c -isystem/opt/ros/jazzy/include/tracetools -isystem/usr/include/c++/13 -isystem/usr/include/x86_64-linux-gnu/c++/13 -isystem/usr/include/c++/13/backward -isystem/usr/lib/gcc/x86_64-linux-gnu/13/include -isystem/usr/local/include -isystem/usr/include/x86_64-linux-gnu -isystem/usr/include -ferror-limit=0 -imacros/clion_clangd_inmemory_directory/macros/tmp/textbook-clion-gui/ros2_ws/src/training_tools/src/heartbeat.cpp -std=gnu++17 -resource-dir=/tmp/textbook-clion-app/clion-2026.2.3/bin/clang/linux/x64 -- /tmp/textbook-clion-gui/ros2_ws/src/training_tools/src/heartbeat.cpp"
+        ],
+        "ros_include_count": 27
+      },
+      {
+        "log_lines": [
+          "2026-09-29 14:25:30,142 [ 507141]   WARN - c.j.c.l.d.c.c.l.s.ClangServerAccessorImpl - clangd: I[14:25:30.142] ASTWorker building file /opt/ros/jazzy/include/rclcpp/rclcpp/rclcpp.hpp version 6 with command ",
+          "2026-09-29 14:25:30,142 [ 507141]   WARN - c.j.c.l.d.c.c.l.s.ClangServerAccessorImpl - clangd: [/tmp/textbook-clion-gui/ros2_ws/build/training_tools]",
+          "2026-09-29 14:25:30,142 [ 507141]   WARN - c.j.c.l.d.c.c.l.s.ClangServerAccessorImpl - clangd: /usr/bin/c++ --driver-mode=g++ -nostdinc -nostdlib -nocudalib -nostdlibinc -ibuiltininc -ccc-no-implicit-pch-or-pth -D__JETBRAINS_IDE__=20260203L -D__CLION_IDE__=20260203L -std=gnu++17 -fsized-deallocation -x c++ --target=x86_64-unknown-linux-unknown -fgnuc-version=13.3.0 -fno-define-target-os-macros -Wno-unused-variable -Wno-infinite-recursion -Wno-array-bounds -Wno-return-stack-address -Werror=implicit-function-declaration -Wshadow -Wno-shadow-field-in-constructor-modified -Wno-shadow-ivar -Wuninitialized -Wunused-label -Wunused-lambda-capture -iquote/opt/ros/jazzy/include/rclcpp/rclcpp -isystem/usr/include/c++/13 -isystem/usr/include/x86_64-linux-gnu/c++/13 -isystem/usr/include/c++/13/backward -isystem/usr/lib/gcc/x86_64-linux-gnu/13/include -isystem/usr/local/include -isystem/usr/include/x86_64-linux-gnu -isystem/usr/include -ferror-limit=0 -imacros/clion_clangd_inmemory_directory/macros/opt/ros/jazzy/include/rclcpp/rclcpp/rclcpp.hpp -resource-dir=/tmp/textbook-clion-app/clion-2026.2.3/bin/clang/linux/x64 -- /opt/ros/jazzy/include/rclcpp/rclcpp/rclcpp.hpp"
+        ],
+        "ros_include_count": 0
+      },
+      {
+        "log_lines": [
+          "2026-09-29 14:26:49,209 [ 586208]   WARN - c.j.c.l.d.c.c.l.s.ClangServerAccessorImpl - clangd: I[14:26:49.209] ASTWorker building file /opt/ros/jazzy/include/rclcpp/rclcpp/rclcpp.hpp version 9 with command ",
+          "2026-09-29 14:26:49,209 [ 586208]   WARN - c.j.c.l.d.c.c.l.s.ClangServerAccessorImpl - clangd: [/tmp/textbook-clion-gui/ros2_ws/build/training_tools]",
+          "2026-09-29 14:26:49,209 [ 586208]   WARN - c.j.c.l.d.c.c.l.s.ClangServerAccessorImpl - clangd: /usr/bin/c++ --driver-mode=g++ -nostdinc -nostdlib -nocudalib -nostdlibinc -ibuiltininc -ccc-no-implicit-pch-or-pth -D__JETBRAINS_IDE__=20260203L -D__CLION_IDE__=20260203L -std=gnu++17 -fsized-deallocation -x c++ --target=x86_64-unknown-linux-unknown -fgnuc-version=13.3.0 -fno-define-target-os-macros -Wno-unused-variable -Wno-infinite-recursion -Wno-array-bounds -Wno-return-stack-address -Werror=implicit-function-declaration -Wshadow -Wno-shadow-field-in-constructor-modified -Wno-shadow-ivar -Wuninitialized -Wunused-label -Wunused-lambda-capture -iquote/opt/ros/jazzy/include/rclcpp/rclcpp -isystem/usr/include/c++/13 -isystem/usr/include/x86_64-linux-gnu/c++/13 -isystem/usr/include/c++/13/backward -isystem/usr/lib/gcc/x86_64-linux-gnu/13/include -isystem/usr/local/include -isystem/usr/include/x86_64-linux-gnu -isystem/usr/include -ferror-limit=0 -imacros/clion_clangd_inmemory_directory/macros/opt/ros/jazzy/include/rclcpp/rclcpp/rclcpp.hpp -resource-dir=/tmp/textbook-clion-app/clion-2026.2.3/bin/clang/linux/x64 -DDEFAULT_RMW_IMPLEMENTATION=rmw_fastrtps_cpp -DFASTCDR_DYN_LINK -isystem /opt/ros/jazzy/include/rclcpp -isystem /opt/ros/jazzy/include/std_msgs -isystem /opt/ros/jazzy/include/builtin_interfaces -isystem /opt/ros/jazzy/include/rosidl_runtime_c -isystem /opt/ros/jazzy/include/rcutils -isystem /opt/ros/jazzy/include/rosidl_typesupport_interface -isystem /opt/ros/jazzy/include/fastcdr -isystem /opt/ros/jazzy/include/rosidl_runtime_cpp -isystem /opt/ros/jazzy/include/rosidl_typesupport_fastrtps_cpp -isystem /opt/ros/jazzy/include/rmw -isystem /opt/ros/jazzy/include/rosidl_dynamic_typesupport -isystem /opt/ros/jazzy/include/rosidl_typesupport_fastrtps_c -isystem /opt/ros/jazzy/include/rosidl_typesupport_introspection_c -isystem /opt/ros/jazzy/include/rosidl_typesupport_introspection_cpp -isystem /opt/ros/jazzy/include/libstatistics_collector -isystem /opt/ros/jazzy/include/rcl -isystem /opt/ros/jazzy/include/rcl_interfaces -isystem /opt/ros/jazzy/include/service_msgs -isystem /opt/ros/jazzy/include/rcl_logging_interface -isystem /opt/ros/jazzy/include/rcl_yaml_param_parser -isystem /opt/ros/jazzy/include/type_description_interfaces -isystem /opt/ros/jazzy/include/rcpputils -isystem /opt/ros/jazzy/include/statistics_msgs -isystem /opt/ros/jazzy/include/rosgraph_msgs -isystem /opt/ros/jazzy/include/rosidl_typesupport_cpp -isystem /opt/ros/jazzy/include/rosidl_typesupport_c -isystem /opt/ros/jazzy/include/tracetools -- /opt/ros/jazzy/include/rclcpp/rclcpp/rclcpp.hpp"
+        ],
+        "ros_include_count": 27
+      },
+      {
+        "log_lines": [
+          "2026-09-29 14:29:48,630 [ 765629]   WARN - c.j.c.l.d.c.c.l.s.ClangServerAccessorImpl - clangd: I[14:29:48.630] ASTWorker building file /opt/ros/jazzy/include/rclcpp/rclcpp/rclcpp.hpp version 12 with command ",
+          "2026-09-29 14:29:48,630 [ 765629]   WARN - c.j.c.l.d.c.c.l.s.ClangServerAccessorImpl - clangd: [/tmp/textbook-clion-gui/ros2_ws/build/training_tools]",
+          "2026-09-29 14:29:48,630 [ 765629]   WARN - c.j.c.l.d.c.c.l.s.ClangServerAccessorImpl - clangd: /usr/bin/c++ --driver-mode=g++ -nostdinc -nostdlib -nocudalib -nostdlibinc -ibuiltininc -ccc-no-implicit-pch-or-pth -D__JETBRAINS_IDE__=20260203L -D__CLION_IDE__=20260203L -std=gnu++17 -fsized-deallocation -x c++ --target=x86_64-unknown-linux-unknown -fgnuc-version=13.3.0 -fno-define-target-os-macros -Wno-unused-variable -Wno-infinite-recursion -Wno-array-bounds -Wno-return-stack-address -Werror=implicit-function-declaration -Wshadow -Wno-shadow-field-in-constructor-modified -Wno-shadow-ivar -Wuninitialized -Wunused-label -Wunused-lambda-capture -iquote/opt/ros/jazzy/include/rclcpp/rclcpp -isystem/usr/include/c++/13 -isystem/usr/include/x86_64-linux-gnu/c++/13 -isystem/usr/include/c++/13/backward -isystem/usr/lib/gcc/x86_64-linux-gnu/13/include -isystem/usr/local/include -isystem/usr/include/x86_64-linux-gnu -isystem/usr/include -ferror-limit=0 -imacros/clion_clangd_inmemory_directory/macros/opt/ros/jazzy/include/rclcpp/rclcpp/rclcpp.hpp -resource-dir=/tmp/textbook-clion-app/clion-2026.2.3/bin/clang/linux/x64 -- /opt/ros/jazzy/include/rclcpp/rclcpp/rclcpp.hpp"
+        ],
+        "ros_include_count": 0
+      },
+      {
+        "log_lines": [
+          "2026-09-29 14:30:23,927 [ 800926]   WARN - c.j.c.l.d.c.c.l.s.ClangServerAccessorImpl - clangd: I[14:30:23.927] ASTWorker building file /opt/ros/jazzy/include/rclcpp/rclcpp/rclcpp.hpp version 15 with command ",
+          "2026-09-29 14:30:23,927 [ 800926]   WARN - c.j.c.l.d.c.c.l.s.ClangServerAccessorImpl - clangd: [/tmp/textbook-clion-gui/ros2_ws/build/training_tools]",
+          "2026-09-29 14:30:23,927 [ 800926]   WARN - c.j.c.l.d.c.c.l.s.ClangServerAccessorImpl - clangd: /usr/bin/c++ --driver-mode=g++ -nostdinc -nostdlib -nocudalib -nostdlibinc -ibuiltininc -ccc-no-implicit-pch-or-pth -D__JETBRAINS_IDE__=20260203L -D__CLION_IDE__=20260203L -std=gnu++17 -fsized-deallocation -x c++ --target=x86_64-unknown-linux-unknown -fgnuc-version=13.3.0 -fno-define-target-os-macros -Wno-unused-variable -Wno-infinite-recursion -Wno-array-bounds -Wno-return-stack-address -Werror=implicit-function-declaration -Wshadow -Wno-shadow-field-in-constructor-modified -Wno-shadow-ivar -Wuninitialized -Wunused-label -Wunused-lambda-capture -iquote/opt/ros/jazzy/include/rclcpp/rclcpp -isystem/usr/include/c++/13 -isystem/usr/include/x86_64-linux-gnu/c++/13 -isystem/usr/include/c++/13/backward -isystem/usr/lib/gcc/x86_64-linux-gnu/13/include -isystem/usr/local/include -isystem/usr/include/x86_64-linux-gnu -isystem/usr/include -ferror-limit=0 -imacros/clion_clangd_inmemory_directory/macros/opt/ros/jazzy/include/rclcpp/rclcpp/rclcpp.hpp -resource-dir=/tmp/textbook-clion-app/clion-2026.2.3/bin/clang/linux/x64 -DDEFAULT_RMW_IMPLEMENTATION=rmw_fastrtps_cpp -DFASTCDR_DYN_LINK -isystem /opt/ros/jazzy/include/rclcpp -isystem /opt/ros/jazzy/include/std_msgs -isystem /opt/ros/jazzy/include/builtin_interfaces -isystem /opt/ros/jazzy/include/rosidl_runtime_c -isystem /opt/ros/jazzy/include/rcutils -isystem /opt/ros/jazzy/include/rosidl_typesupport_interface -isystem /opt/ros/jazzy/include/fastcdr -isystem /opt/ros/jazzy/include/rosidl_runtime_cpp -isystem /opt/ros/jazzy/include/rosidl_typesupport_fastrtps_cpp -isystem /opt/ros/jazzy/include/rmw -isystem /opt/ros/jazzy/include/rosidl_dynamic_typesupport -isystem /opt/ros/jazzy/include/rosidl_typesupport_fastrtps_c -isystem /opt/ros/jazzy/include/rosidl_typesupport_introspection_c -isystem /opt/ros/jazzy/include/rosidl_typesupport_introspection_cpp -isystem /opt/ros/jazzy/include/libstatistics_collector -isystem /opt/ros/jazzy/include/rcl -isystem /opt/ros/jazzy/include/rcl_interfaces -isystem /opt/ros/jazzy/include/service_msgs -isystem /opt/ros/jazzy/include/rcl_logging_interface -isystem /opt/ros/jazzy/include/rcl_yaml_param_parser -isystem /opt/ros/jazzy/include/type_description_interfaces -isystem /opt/ros/jazzy/include/rcpputils -isystem /opt/ros/jazzy/include/statistics_msgs -isystem /opt/ros/jazzy/include/rosgraph_msgs -isystem /opt/ros/jazzy/include/rosidl_typesupport_cpp -isystem /opt/ros/jazzy/include/rosidl_typesupport_c -isystem /opt/ros/jazzy/include/tracetools -- /opt/ros/jazzy/include/rclcpp/rclcpp/rclcpp.hpp"
+        ],
+        "ros_include_count": 27
+      },
+      {
+        "log_lines": [
+          "2026-09-29 14:34:34,249 [1051248]   WARN - c.j.c.l.d.c.c.l.s.ClangServerAccessorImpl - clangd: I[14:34:34.249] ASTWorker building file /opt/ros/jazzy/include/rclcpp/rclcpp/node.hpp version 3 with command ",
+          "2026-09-29 14:34:34,249 [1051248]   WARN - c.j.c.l.d.c.c.l.s.ClangServerAccessorImpl - clangd: [/tmp/textbook-clion-gui/ros2_ws/build/training_tools]",
+          "2026-09-29 14:34:34,249 [1051248]   WARN - c.j.c.l.d.c.c.l.s.ClangServerAccessorImpl - clangd: /usr/bin/c++ --driver-mode=g++ -nostdinc -nostdlib -nocudalib -nostdlibinc -ibuiltininc -ccc-no-implicit-pch-or-pth -D__JETBRAINS_IDE__=20260203L -D__CLION_IDE__=20260203L -std=gnu++17 -fsized-deallocation -x c++ --target=x86_64-unknown-linux-unknown -fgnuc-version=13.3.0 -fno-define-target-os-macros -Wno-unused-variable -Wno-infinite-recursion -Wno-array-bounds -Wno-return-stack-address -Werror=implicit-function-declaration -Wshadow -Wno-shadow-field-in-constructor-modified -Wno-shadow-ivar -Wuninitialized -Wunused-label -Wunused-lambda-capture -iquote/opt/ros/jazzy/include/rclcpp/rclcpp -isystem/usr/include/c++/13 -isystem/usr/include/x86_64-linux-gnu/c++/13 -isystem/usr/include/c++/13/backward -isystem/usr/lib/gcc/x86_64-linux-gnu/13/include -isystem/usr/local/include -isystem/usr/include/x86_64-linux-gnu -isystem/usr/include -ferror-limit=0 -imacros/clion_clangd_inmemory_directory/macros/opt/ros/jazzy/include/rclcpp/rclcpp/node.hpp -resource-dir=/tmp/textbook-clion-app/clion-2026.2.3/bin/clang/linux/x64 -DDEFAULT_RMW_IMPLEMENTATION=rmw_fastrtps_cpp -DFASTCDR_DYN_LINK -isystem /opt/ros/jazzy/include/rclcpp -isystem /opt/ros/jazzy/include/std_msgs -isystem /opt/ros/jazzy/include/builtin_interfaces -isystem /opt/ros/jazzy/include/rosidl_runtime_c -isystem /opt/ros/jazzy/include/rcutils -isystem /opt/ros/jazzy/include/rosidl_typesupport_interface -isystem /opt/ros/jazzy/include/fastcdr -isystem /opt/ros/jazzy/include/rosidl_runtime_cpp -isystem /opt/ros/jazzy/include/rosidl_typesupport_fastrtps_cpp -isystem /opt/ros/jazzy/include/rmw -isystem /opt/ros/jazzy/include/rosidl_dynamic_typesupport -isystem /opt/ros/jazzy/include/rosidl_typesupport_fastrtps_c -isystem /opt/ros/jazzy/include/rosidl_typesupport_introspection_c -isystem /opt/ros/jazzy/include/rosidl_typesupport_introspection_cpp -isystem /opt/ros/jazzy/include/libstatistics_collector -isystem /opt/ros/jazzy/include/rcl -isystem /opt/ros/jazzy/include/rcl_interfaces -isystem /opt/ros/jazzy/include/service_msgs -isystem /opt/ros/jazzy/include/rcl_logging_interface -isystem /opt/ros/jazzy/include/rcl_yaml_param_parser -isystem /opt/ros/jazzy/include/type_description_interfaces -isystem /opt/ros/jazzy/include/rcpputils -isystem /opt/ros/jazzy/include/statistics_msgs -isystem /opt/ros/jazzy/include/rosgraph_msgs -isystem /opt/ros/jazzy/include/rosidl_typesupport_cpp -isystem /opt/ros/jazzy/include/rosidl_typesupport_c -isystem /opt/ros/jazzy/include/tracetools -- /opt/ros/jazzy/include/rclcpp/rclcpp/node.hpp"
+        ],
+        "ros_include_count": 27
+      }
+    ],
+    "finding": "同一 GUI 进程的源码解析命令带真实 ROS include 路径，外部头文件解析命令遗漏这些路径；加限定片段后命令带27个路径。"
+  },
+  "gui_observations": [
+    {
+      "stage": "原配置重启复现",
+      "file": "rclcpp.hpp",
+      "errors": 15,
+      "diagnostics_enabled": true
+    },
+    {
+      "stage": "提取include/宏限定单头文件",
+      "file": "rclcpp.hpp",
+      "errors": 0,
+      "diagnostics_enabled": true
+    },
+    {
+      "stage": "停用片段并实际关闭/重开标签",
+      "file": "rclcpp.hpp",
+      "errors": 15,
+      "diagnostics_enabled": true
+    },
+    {
+      "stage": "随书脚本生成片段后恢复",
+      "file": "rclcpp.hpp",
+      "errors": 0,
+      "diagnostics_enabled": true
+    },
+    {
+      "stage": "实际从rclcpp.hpp子include跳转",
+      "file": "node.hpp",
+      "errors": 0,
+      "warnings": 10,
+      "warning_kind": "Possibly unused #include directive",
+      "diagnostics_enabled": true
+    }
+  ],
+  "fragment": {
+    "If": {
+      "PathMatch": [
+        "/opt/ros/jazzy/include/rclcpp/rclcpp/rclcpp\\.hpp",
+        "/opt/ros/jazzy/include/rclcpp/rclcpp/node\\.hpp"
+      ]
+    },
+    "CompileFlags": {
+      "Add": [
+        "-DDEFAULT_RMW_IMPLEMENTATION=rmw_fastrtps_cpp",
+        "-DFASTCDR_DYN_LINK",
+        "-isystem",
+        "/opt/ros/jazzy/include/rclcpp",
+        "-isystem",
+        "/opt/ros/jazzy/include/std_msgs",
+        "-isystem",
+        "/opt/ros/jazzy/include/builtin_interfaces",
+        "-isystem",
+        "/opt/ros/jazzy/include/rosidl_runtime_c",
+        "-isystem",
+        "/opt/ros/jazzy/include/rcutils",
+        "-isystem",
+        "/opt/ros/jazzy/include/rosidl_typesupport_interface",
+        "-isystem",
+        "/opt/ros/jazzy/include/fastcdr",
+        "-isystem",
+        "/opt/ros/jazzy/include/rosidl_runtime_cpp",
+        "-isystem",
+        "/opt/ros/jazzy/include/rosidl_typesupport_fastrtps_cpp",
+        "-isystem",
+        "/opt/ros/jazzy/include/rmw",
+        "-isystem",
+        "/opt/ros/jazzy/include/rosidl_dynamic_typesupport",
+        "-isystem",
+        "/opt/ros/jazzy/include/rosidl_typesupport_fastrtps_c",
+        "-isystem",
+        "/opt/ros/jazzy/include/rosidl_typesupport_introspection_c",
+        "-isystem",
+        "/opt/ros/jazzy/include/rosidl_typesupport_introspection_cpp",
+        "-isystem",
+        "/opt/ros/jazzy/include/libstatistics_collector",
+        "-isystem",
+        "/opt/ros/jazzy/include/rcl",
+        "-isystem",
+        "/opt/ros/jazzy/include/rcl_interfaces",
+        "-isystem",
+        "/opt/ros/jazzy/include/service_msgs",
+        "-isystem",
+        "/opt/ros/jazzy/include/rcl_logging_interface",
+        "-isystem",
+        "/opt/ros/jazzy/include/rcl_yaml_param_parser",
+        "-isystem",
+        "/opt/ros/jazzy/include/type_description_interfaces",
+        "-isystem",
+        "/opt/ros/jazzy/include/rcpputils",
+        "-isystem",
+        "/opt/ros/jazzy/include/statistics_msgs",
+        "-isystem",
+        "/opt/ros/jazzy/include/rosgraph_msgs",
+        "-isystem",
+        "/opt/ros/jazzy/include/rosidl_typesupport_cpp",
+        "-isystem",
+        "/opt/ros/jazzy/include/rosidl_typesupport_c",
+        "-isystem",
+        "/opt/ros/jazzy/include/tracetools"
+      ]
+    }
+  },
+  "script": {
+    "path": "02-专项技术栈/examples/ros2/header_flags.py",
+    "sha256": "ef6eb9831af18be72fce023efcf590d21be44123a05a721669dc0468ee156cc6",
+    "lines": 45,
+    "fully_included_in_body": [
+      [
+        1,
+        22
+      ],
+      [
+        23,
+        45
+      ]
+    ]
+  },
+  "runtime": [
+    {
+      "name": "正文生成单头文件片段",
+      "argv": [
+        "bash",
+        "-lc",
+        "source /opt/ros/jazzy/setup.bash\ncd /tmp/textbook-clion-gui/ros2_ws\nheader=/opt/ros/$ROS_DISTRO/include/rclcpp/rclcpp/rclcpp.hpp\ntest -f \"$header\" || exit 1\npython3 header_flags.py build/training_tools/compile_commands.json src/training_tools/src/heartbeat.cpp \"$header\" > /tmp/textbook-clion-gui/ros-header-flags-one.json\n"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "不存在的源码拒绝输出",
+      "argv": [
+        "python3",
+        "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/ros2/header_flags.py",
+        "/tmp/textbook-clion-gui/ros2_ws/build/training_tools/compile_commands.json",
+        "/tmp/textbook-clion-gui/ros2_ws/src/training_tools/src/not-present.cpp",
+        "/opt/ros/jazzy/include/rclcpp/rclcpp/rclcpp.hpp"
+      ],
+      "returncode": 2,
+      "stdout": "",
+      "stderr": "usage: header_flags.py [-h] database source headers [headers ...]\nheader_flags.py: error: 源码必须唯一对应一条编译命令，请核对路径和数据库\n"
+    },
+    {
+      "name": "正文已有配置备份追加",
+      "argv": [
+        "env",
+        "XDG_CONFIG_HOME=/tmp/textbook-clion-gui/xdg-config",
+        "bash",
+        "-lc",
+        "cfg_dir=\"${XDG_CONFIG_HOME:-$HOME/.config}/clangd\"\nmkdir -p \"$cfg_dir\"\nif [ -f \"$cfg_dir/config.yaml\" ]; then\n  backup=$(mktemp \"$cfg_dir/config.yaml.before-header-flags.XXXXXX\")\n  cp -p \"$cfg_dir/config.yaml\" \"$backup\"\n  printf '备份：%s\\n' \"$backup\"\n  printf '\\n---\\n' >> \"$cfg_dir/config.yaml\"\nfi\ncat /tmp/textbook-clion-gui/ros-header-flags.json >> \"$cfg_dir/config.yaml\"\n"
+      ],
+      "returncode": 0,
+      "stdout": "备份：/tmp/textbook-clion-gui/xdg-config/clangd/config.yaml.before-header-flags.uP3RL4\n",
+      "stderr": ""
+    },
+    {
+      "name": "备份和追加字节核对",
+      "backup": "/tmp/textbook-clion-gui/xdg-config/clangd/config.yaml.before-header-flags.uP3RL4",
+      "backup_sha256": "9cf80851ad8f34007034cdf2622efe4dc0bac7c74272909db30047e7218b6b52",
+      "unchanged_prefix": true
+    },
+    {
+      "name": "恢复本次临时配置为一个片段",
+      "sha256": "9cf80851ad8f34007034cdf2622efe4dc0bac7c74272909db30047e7218b6b52"
+    },
+    {
+      "name": "arguments形式、相对源码与含空格的附着include路径",
+      "argv": [
+        "python3",
+        "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/ros2/header_flags.py",
+        "/tmp/textbook-clion-gui/header-arguments-variant.json",
+        "/tmp/textbook-clion-gui/ros2_ws/src/training_tools/src/heartbeat.cpp",
+        "/opt/ros/jazzy/include/rclcpp/rclcpp/rclcpp.hpp"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "output": {
+        "If": {
+          "PathMatch": [
+            "/opt/ros/jazzy/include/rclcpp/rclcpp/rclcpp\\.hpp"
+          ]
+        },
+        "CompileFlags": {
+          "Add": [
+            "-DDEFAULT_RMW_IMPLEMENTATION=rmw_fastrtps_cpp",
+            "-DFASTCDR_DYN_LINK",
+            "-isystem",
+            "/opt/ros/jazzy/include/rclcpp",
+            "-isystem",
+            "/opt/ros/jazzy/include/std_msgs",
+            "-isystem",
+            "/opt/ros/jazzy/include/builtin_interfaces",
+            "-isystem",
+            "/opt/ros/jazzy/include/rosidl_runtime_c",
+            "-isystem",
+            "/opt/ros/jazzy/include/rcutils",
+            "-isystem",
+            "/opt/ros/jazzy/include/rosidl_typesupport_interface",
+            "-isystem",
+            "/opt/ros/jazzy/include/fastcdr",
+            "-isystem",
+            "/opt/ros/jazzy/include/rosidl_runtime_cpp",
+            "-isystem",
+            "/opt/ros/jazzy/include/rosidl_typesupport_fastrtps_cpp",
+            "-isystem",
+            "/opt/ros/jazzy/include/rmw",
+            "-isystem",
+            "/opt/ros/jazzy/include/rosidl_dynamic_typesupport",
+            "-isystem",
+            "/opt/ros/jazzy/include/rosidl_typesupport_fastrtps_c",
+            "-isystem",
+            "/opt/ros/jazzy/include/rosidl_typesupport_introspection_c",
+            "-isystem",
+            "/opt/ros/jazzy/include/rosidl_typesupport_introspection_cpp",
+            "-isystem",
+            "/opt/ros/jazzy/include/libstatistics_collector",
+            "-isystem",
+            "/opt/ros/jazzy/include/rcl",
+            "-isystem",
+            "/opt/ros/jazzy/include/rcl_interfaces",
+            "-isystem",
+            "/opt/ros/jazzy/include/service_msgs",
+            "-isystem",
+            "/opt/ros/jazzy/include/rcl_logging_interface",
+            "-isystem",
+            "/opt/ros/jazzy/include/rcl_yaml_param_parser",
+            "-isystem",
+            "/opt/ros/jazzy/include/type_description_interfaces",
+            "-isystem",
+            "/opt/ros/jazzy/include/rcpputils",
+            "-isystem",
+            "/opt/ros/jazzy/include/statistics_msgs",
+            "-isystem",
+            "/opt/ros/jazzy/include/rosgraph_msgs",
+            "-isystem",
+            "/opt/ros/jazzy/include/rosidl_typesupport_cpp",
+            "-isystem",
+            "/opt/ros/jazzy/include/rosidl_typesupport_c",
+            "-isystem",
+            "/opt/ros/jazzy/include/tracetools",
+            "-I",
+            "/tmp/textbook-clion-gui/ros2_ws/generated headers",
+            "-D",
+            "HEADER_CONTEXT_TEST=1"
+          ]
+        }
+      },
+      "expected_absolute_include": "/tmp/textbook-clion-gui/ros2_ws/generated headers"
+    }
+  ],
+  "standalone_checks": [
+    {
+      "name": "默认resource目录缺少标准头文件",
+      "returncode": 3,
+      "errors": 2,
+      "finding": "stddef.h缺失，不能把此结果当作ROS include缺失"
+    },
+    {
+      "name": "使用GUI的resource目录仍缺少标准头文件",
+      "returncode": 3,
+      "errors": 2
+    },
+    {
+      "name": "仅query-driver不足以补齐此安装包标准头",
+      "returncode": 3,
+      "errors": 2
+    },
+    {
+      "name": "相同数据库+GCC resource目录",
+      "returncode": 0,
+      "errors": 0,
+      "scope": "独立解析对照；GUI成功另有真实画面与实际命令证据"
+    }
+  ],
+  "images": [
+    {
+      "path": "docs/revision/evidence/volume-2-chapter-1-clangd-assets/ros-index-baseline-diagnostics.png",
+      "sha256": "5df918a67ddbb03d421cbabe2d77694f5cb8061422bf4e268ed2cba91e22e55a",
+      "pixels": "1600x1000",
+      "viewed": true
+    },
+    {
+      "path": "docs/revision/evidence/volume-2-chapter-1-clangd-assets/ros-index-config-reopen.png",
+      "sha256": "52cd4c22d2129bff4522f6fdec487066be9442407df81ce704755634385d13a1",
+      "pixels": "1600x1000",
+      "viewed": true
+    },
+    {
+      "path": "docs/revision/evidence/volume-2-chapter-1-clangd-assets/ros-index-disabled-diagnostics.png",
+      "sha256": "4f4b31c35bc534ec4b90b2e98f86acb61956b1af5c019d5818728bb541ae8b11",
+      "pixels": "1600x1000",
+      "viewed": true
+    },
+    {
+      "path": "docs/revision/evidence/volume-2-chapter-1-clangd-assets/ros-index-final-config-diagnostics.png",
+      "sha256": "08e29e24688d730eb169f79ae1c8e47f1ab819f2ba607946ef915072a47eaefd",
+      "pixels": "1600x1000",
+      "viewed": true
+    },
+    {
+      "path": "docs/revision/evidence/volume-2-chapter-1-clangd-assets/ros-index-node-header-jump.png",
+      "sha256": "285ef08c2c1ec3fc5db62d4419ad606226d994a9fbf27cfd88444a215c8b7ac5",
+      "pixels": "1600x1000",
+      "viewed": true
+    },
+    {
+      "path": "docs/revision/evidence/volume-2-chapter-1-clangd-assets/ros-index-debug-zero-restored.png",
+      "sha256": "ff0ed530230dd351bba8eba88b49645f47c689f1d702940b43677ea98695b3bf",
+      "pixels": "1600x1000",
+      "viewed": true
+    }
+  ],
+  "actions": [
+    {
+      "click": [
+        712,
+        81
+      ],
+      "name": "ros-index-baseline-header",
+      "wait": 4
+    },
+    {
+      "click": [
+        1105,
+        117
+      ],
+      "name": "ros-index-baseline-diagnostics",
+      "wait": 1
+    },
+    {
+      "keys": "Escape ctrl+shift+a",
+      "text": "Debug Log Settings",
+      "name": "ros-index-log-search",
+      "wait": 1
+    },
+    {
+      "keys": "Return",
+      "name": "ros-index-log-dialog",
+      "wait": 2
+    },
+    {
+      "text": "#com.jetbrains.cidr.lang.daemon.clang.clangd:trace\n#com.jetbrains.cidr.lang.daemon.clang.clangd.connector:trace",
+      "name": "ros-index-log-categories",
+      "wait": 1
+    },
+    {
+      "click": [
+        850,
+        615
+      ],
+      "name": "ros-index-log-enabled",
+      "wait": 1
+    },
+    {
+      "keys": "ctrl+w",
+      "name": "ros-index-header-close",
+      "wait": 1
+    },
+    {
+      "keys": "ctrl+b",
+      "name": "ros-index-header-log-reopen",
+      "wait": 3
+    },
+    {
+      "keys": "ctrl+shift+a",
+      "text": "clangd",
+      "name": "ros-index-clangd-search",
+      "wait": 2
+    },
+    {
+      "click": [
+        451,
+        544
+      ],
+      "name": "ros-index-clangd-toolwindow",
+      "wait": 2
+    },
+    {
+      "click": [
+        497,
+        614
+      ],
+      "name": "ros-index-clangd-info",
+      "wait": 2
+    },
+    {
+      "keys": "ctrl+shift+a",
+      "text": "Registry",
+      "name": "ros-index-registry-search",
+      "wait": 2
+    },
+    {
+      "keys": "Return",
+      "name": "ros-index-registry-dialog",
+      "wait": 1
+    },
+    {
+      "text": "clion.clang.clangd.debug",
+      "name": "ros-index-registry-filter",
+      "wait": 1
+    },
+    {
+      "click": [
+        737,
+        287
+      ],
+      "name": "ros-index-registry-debug-value",
+      "wait": 0.3
+    },
+    {
+      "keys": "F2 ctrl+a",
+      "text": "2",
+      "name": "ros-index-registry-debug-two",
+      "wait": 0.5
+    },
+    {
+      "keys": "Return",
+      "name": "ros-index-registry-debug-apply",
+      "wait": 0.5
+    },
+    {
+      "click": [
+        999,
+        745
+      ],
+      "name": "ros-index-registry-debug-close",
+      "wait": 0.5
+    },
+    {
+      "click": [
+        601,
+        140
+      ],
+      "name": "ros-index-focus-header",
+      "wait": 0.5
+    },
+    {
+      "keys": "ctrl+w",
+      "name": "ros-index-debug-header-close",
+      "wait": 0.5
+    },
+    {
+      "keys": "ctrl+b",
+      "name": "ros-index-debug-header-reopen",
+      "wait": 3
+    },
+    {
+      "keys": "ctrl+shift+a",
+      "text": "Registry",
+      "name": "ros-index-registry-open-again",
+      "wait": 1
+    },
+    {
+      "keys": "Return",
+      "name": "ros-index-registry-again",
+      "wait": 1
+    },
+    {
+      "keys": "ctrl+a",
+      "text": "2",
+      "name": "ros-index-debug-two-edit",
+      "wait": 0.5
+    },
+    {
+      "keys": "Tab",
+      "name": "ros-index-debug-two-committed",
+      "wait": 0.5
+    },
+    {
+      "click": [
+        1000,
+        745
+      ],
+      "name": "ros-index-registry-two-close",
+      "wait": 0.5
+    },
+    {
+      "click": [
+        600,
+        145
+      ],
+      "name": "ros-index-debug-focus",
+      "wait": 0.5
+    },
+    {
+      "keys": "ctrl+w",
+      "name": "ros-index-debug-close-header",
+      "wait": 0.5
+    },
+    {
+      "keys": "ctrl+b",
+      "name": "ros-index-debug-reopen-header",
+      "wait": 3
+    },
+    {
+      "click": [
+        763,
+        83
+      ],
+      "name": "ros-index-close-tab-actual",
+      "wait": 0.5
+    },
+    {
+      "click": [
+        776,
+        198
+      ],
+      "name": "ros-index-source-include-focus",
+      "wait": 0.5
+    },
+    {
+      "keys": "ctrl+b",
+      "name": "ros-index-log-real-reopen",
+      "wait": 3
+    },
+    {
+      "click": [
+        1041,
+        902
+      ],
+      "name": "ros-index-header-context-click",
+      "wait": 1
+    },
+    {
+      "click": [
+        763,
+        83
+      ],
+      "name": "ros-index-config-close",
+      "wait": 0.5
+    },
+    {
+      "click": [
+        776,
+        198
+      ],
+      "name": "ros-index-config-source-focus",
+      "wait": 0.5
+    },
+    {
+      "keys": "ctrl+b",
+      "name": "ros-index-config-reopen",
+      "wait": 3
+    },
+    {
+      "click": [
+        763,
+        83
+      ],
+      "name": "ros-index-disabled-close",
+      "wait": 0.5
+    },
+    {
+      "click": [
+        776,
+        198
+      ],
+      "name": "ros-index-disabled-source-focus",
+      "wait": 0.5
+    },
+    {
+      "keys": "ctrl+b",
+      "name": "ros-index-disabled-reopen",
+      "wait": 3
+    },
+    {
+      "click": [
+        1100,
+        117
+      ],
+      "name": "ros-index-disabled-diagnostics",
+      "wait": 1
+    },
+    {
+      "keys": "Escape",
+      "click": [
+        763,
+        83
+      ],
+      "name": "ros-index-final-config-close",
+      "wait": 0.5
+    },
+    {
+      "click": [
+        776,
+        198
+      ],
+      "name": "ros-index-final-config-source-focus",
+      "wait": 0.5
+    },
+    {
+      "keys": "ctrl+b",
+      "name": "ros-index-final-config-reopen",
+      "wait": 3
+    },
+    {
+      "click": [
+        1100,
+        117
+      ],
+      "name": "ros-index-final-config-diagnostics",
+      "wait": 1
+    },
+    {
+      "click": [
+        695,
+        220
+      ],
+      "name": "ros-index-node-goto-focus",
+      "wait": 0.3
+    },
+    {
+      "keys": "ctrl+g",
+      "text": "179",
+      "name": "ros-index-node-line-dialog",
+      "wait": 0.5
+    },
+    {
+      "keys": "Return",
+      "name": "ros-index-node-include-line",
+      "wait": 1
+    },
+    {
+      "click": [
+        785,
+        270
+      ],
+      "name": "ros-index-node-include-focus",
+      "wait": 0.5
+    },
+    {
+      "keys": "ctrl+b",
+      "name": "ros-index-node-header-jump",
+      "wait": 4
+    },
+    {
+      "keys": "ctrl+shift+a",
+      "text": "Registry",
+      "name": "ros-index-registry-restore-search",
+      "wait": 1
+    },
+    {
+      "keys": "Return",
+      "name": "ros-index-registry-restore-dialog",
+      "wait": 1
+    },
+    {
+      "keys": "ctrl+a",
+      "text": "0",
+      "name": "ros-index-debug-zero-edit",
+      "wait": 0.5
+    },
+    {
+      "keys": "Tab",
+      "name": "ros-index-debug-zero-restored",
+      "wait": 0.5
+    },
+    {
+      "click": [
+        999,
+        745
+      ],
+      "name": "ros-index-registry-restored-close",
+      "wait": 0.5
+    },
+    {
+      "keys": "ctrl+shift+a",
+      "text": "Debug Log Settings",
+      "name": "ros-index-disable-log-search",
+      "wait": 1
+    },
+    {
+      "keys": "Return",
+      "name": "ros-index-disable-log-dialog",
+      "wait": 1
+    },
+    {
+      "keys": "ctrl+a BackSpace",
+      "name": "ros-index-debug-log-cleared",
+      "wait": 0.5
+    },
+    {
+      "click": [
+        850,
+        615
+      ],
+      "name": "ros-index-debug-log-clear-applied",
+      "wait": 0.5
+    },
+    {
+      "keys": "ctrl+shift+a",
+      "text": "Exit",
+      "name": "ros-index-exit-search",
+      "wait": 1
+    },
+    {
+      "keys": "Return",
+      "name": "ros-index-exit-confirm",
+      "wait": 1
+    },
+    {
+      "click": [
+        680,
+        521
+      ],
+      "name": "ros-index-exit-complete",
+      "wait": 4
+    },
+    {
+      "quit": true
+    }
+  ],
+  "corrections": [
+    "Ctrl+W 在此键位方案下扩展选区，并未关闭标签；之后使用实际标签关闭按钮，日志有fileClosed/fileOpened。",
+    "Registry单击/F2没有编辑数值而进入搜索，第一次仍为0；之后双击Value，实际设置2，采集结束恢复0。",
+    "XDG配置只指定CompilationDatabase时不足以覆盖GUI提供的虚拟命令；限定CompileFlags.Add实际生效。"
+  ],
+  "official_sources": [
+    "https://clangd.llvm.org/config",
+    "https://clangd.llvm.org/design/compile-commands",
+    "https://www.jetbrains.com/help/clion/compilation-database.html"
+  ],
+  "limits": [
+    "只为指定的rclcpp.hpp和node.hpp补充所选heartbeat.cpp的解析条件，不能外推为任意库或工程的全部头文件正常。",
+    "未修改系统ROS头文件或个人IDE配置，未关闭诊断；node.hpp的10条unused-include警告保留。",
+    "第二台物理主机的发现范围与恢复实验仍未完成。"
+  ],
+  "logging_restored": {
+    "value": 0,
+    "log": "2026-09-29 14:37:09,973 [1206972]   INFO - #c.i.o.u.r.RegistryValue - Registry value 'clion.clang.clangd.debug' has changed to '0' by USER"
+  },
+  "source_unchanged": {
+    "byte_equal_to_repository": true,
+    "sha256": "bb7ad115b1a15fc8035b638ab97f5eba104d216cd3f39c688cbd369b9beb5972"
+  },
+  "pdf_qa": {
+    "compile_passes": [
+      {
+        "returncode": 0,
+        "log": "/tmp/textbook-v2-header-numbered-xe1.txt"
+      },
+      {
+        "returncode": 0,
+        "log": "/tmp/textbook-v2-header-numbered-xe2.txt"
+      }
+    ],
+    "pages_viewed": [
+      4,
+      5,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      247,
+      248,
+      249,
+      250
+    ],
+    "numbered_code_pages_rechecked": [
+      37,
+      38,
+      39
+    ],
+    "full_page_viewed": 38,
+    "pdf_sha256": "6fd73db0dee2a66fc2c9668e693738aa4c118805e9c1a19cffa78cae98102067",
+    "bad_log_lines": [],
+    "first_compile_correction": "题解的不可断开长路径越界32.91656pt；改用nolinkurl后最终越界为0。"
+  },
+  "cleanup": {
+    "checked_at": "2026-09-29T06:44:08.885080+00:00",
+    "gui_exit_requested_via_confirm_exit": true,
+    "controller_returncode": 0,
+    "remaining_test_processes": [],
+    "scope": "实际读取ubuntu2404的/proc，匹配临时CLion安装、临时heartbeat和本次Xvfb特征；没有终止无关进程。"
+  }
+}

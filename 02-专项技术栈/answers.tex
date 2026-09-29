@@ -134,6 +134,11 @@ ros2 launch training_tools team.launch.py robot:=blue watch:=false
 定时器仍为 200 毫秒，所以理论消息频率是 5 Hz；alive 限流改成 1000 毫秒后约为 1 Hz。修改源码、重新构建、加载环境并重启后，用 \texttt{ros2 topic hz /status} 测量前者，按日志时间戳检查后者。调度、观测窗口和所用时钟会影响实测间隔。WARN 阈值仅隐藏 INFO/DEBUG 日志，发布逻辑仍运行，不会因此停止消息。
 \end{solution}
 
+\paragraph*{随堂练习 \ref{ex:v2-ros-header-context}}
+\begin{solution}
+Jazzy 本例数据库里有 \texttt{-isystem} 和 \nolinkurl{/opt/ros/jazzy/include/rclcpp}，后接 \nolinkurl{rclcpp/rclcpp.hpp} 就是实际的完整路径。片段中的 include 路径与宏应来自所选 heartbeat.cpp 的条目，PathMatch 应只匹配指定头文件；例如本例还保留 \nolinkurl{DEFAULT_RMW_IMPLEMENTATION} 和 \nolinkurl{FASTCDR_DYN_LINK}。不存在的源码路径不能唯一匹配数据库，脚本应退出并提示核对路径，标准输出为空。GUI 有参数缺失时，启用前后的实际解析命令应能看出这些路径被补上，Problems 中相应的 file not found 消失；若原本已有完整参数，则不需要追加这段配置，也不能把其他原因导致的诊断当作同一种问题。
+\end{solution}
+
 \paragraph*{随堂练习 \ref{ex:v2-ros-ide}}
 \begin{solution}
 IDE 默认运行独立构建目录中的目标，\texttt{ros2 run} 根据已加载环境运行安装目录中的目标。仅执行 IDE Build 时，安装目录可能仍是旧程序。先去掉运行配置中的 \texttt{-p text:=from\_ide} 等文本覆盖，才能观察修改后的默认值；否则参数会掩盖源码默认值的变化。停止旧进程，然后执行：
