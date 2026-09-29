@@ -1,6 +1,6 @@
 {
-  "recorded_at": "2026-09-29T04:46:07.733835+00:00",
-  "content_head": "ee937b532031db2b23d23a0b1a518b63b37282d3",
+  "recorded_at": "2026-09-29T06:08:56.191374+00:00",
+  "content_head": "44944b43f4ce8c2775a26b04b70d70d584092329",
   "chapter_count": 21,
   "item_count": 420,
   "totals": {
@@ -31,14 +31,14 @@
     {
       "path": "01-基础通识/main.pdf",
       "pages": 206,
-      "sha256": "541f804eb38eb3e9d485e886a27933cf8707ad1a85d21fa7193ad36712b49d4f",
+      "sha256": "9c765e0e6df552eab1172ff39f22fad1e30ef5aad20ff3481d1d3ce7bb4c5bea",
       "bad_log_lines": [],
       "font_shape_substitutions": 2
     },
     {
       "path": "02-专项技术栈/main.pdf",
-      "pages": 269,
-      "sha256": "573a60e9d51587ff6c6df332223006eac9a56e85821ed33eafa0846ba0bcb30f",
+      "pages": 270,
+      "sha256": "80684b0a3fa641599b3898ac521f45b917679931cbd14788be3e2f4a8e0ea665",
       "bad_log_lines": [],
       "font_shape_substitutions": 2
     },
@@ -55,7 +55,7 @@
       "volume": 1,
       "chapter": 1,
       "report": "docs/revision/volume-1-chapter-1.md",
-      "report_sha256": "f1c2e70c82852395a3cc63ed7ae7cfeffb70b0e21c5ba6c5e2653839f311f7ec",
+      "report_sha256": "7b1eea6c66b452d8c56cb74c4d37251f3816980ca87e6ba10654336c8791c4b0",
       "counts": {
         "通过": 19,
         "未完成": 1
@@ -156,14 +156,14 @@
           "item": 14,
           "name": "14 图片实际检查",
           "status": "通过",
-          "evidence": "本轮查看原图及段落，现正文使用 25 张图；四张机制图重绘；2026-09-29 两张 VS Code 图换为 Ubuntu 实测，原始截图与正文尺寸实际检查；旧安装器照片注明示例边界。",
+          "evidence": "本轮查看原图及段落，现正文使用 25 张图；四张机制图重绘；2026-09-29 五张 IDE 图换为 Ubuntu 实测，原始截图与正文尺寸实际检查；旧安装器照片注明示例边界。",
           "report_line": 34
         },
         {
           "item": 15,
           "name": "15 图片标记与引用",
           "status": "通过",
-          "evidence": "四张重绘图与两张新 VS Code 截图经独立图和正文尺寸检查后使用 `_revised`；正文路径和生成脚本/IDE 图片说明一致。",
+          "evidence": "四张重绘图与五张新 IDE 截图经独立图和正文尺寸检查后使用 `_revised`；正文路径和生成脚本/IDE 图片说明一致。",
           "report_line": 35
         },
         {
@@ -191,14 +191,14 @@
           "item": 19,
           "name": "19 示例实际运行",
           "status": "未完成",
-          "evidence": "Bash/Git/tar/链接/权限/筛选/Conda/CMake/GDB/pySerial、apt/zsh/AstroNvim 临时配置及 Ubuntu VS Code GUI 已实际完成；真实写盘/系统恢复、原生桌面与登录设置、CLion 当前 GUI、Windows 安装/工具链和物理串口未验证。详见下文及两份补跑证据。",
+          "evidence": "Bash/Git/tar/链接/权限/筛选/Conda/CMake/GDB/pySerial、apt/zsh/AstroNvim 临时配置及 Ubuntu VS Code GUI 已实际完成；真实写盘/系统恢复、原生桌面与登录设置、Windows 安装/工具链和物理串口未验证。CLion 的 Ubuntu GUI 本次补跑已完成，详见下文与独立证据。",
           "report_line": 39
         },
         {
           "item": 20,
           "name": "20 编译和 PDF",
           "status": "通过",
-          "evidence": "原首次整理 179 页；全卷后续整理及本次 VS Code 换图后，XeLaTeX 两次生成 206 页，引用稳定。原目录、正文、题解检查保留，本次实际查看物理页 7–8、62–67 与 IDE 题解 172，无缺字/越界/未定义引用；共享模板未改。",
+          "evidence": "原首次整理 179 页；全卷后续整理及本次 VS Code 换图后，XeLaTeX 两次生成 206 页，引用稳定。原目录、正文、题解检查保留，本次实际查看物理页 7–8、56、58、60–67 与 IDE 题解 172，无缺字/越界/未定义引用；共享模板未改。",
           "report_line": 40
         }
       ]
@@ -509,7 +509,7 @@
       "volume": 2,
       "chapter": 1,
       "report": "docs/revision/volume-2-chapter-1.md",
-      "report_sha256": "a57eed0d0b5923a2a491f093cccb3299dde7f5b342a435f4819e54d5db517c53",
+      "report_sha256": "54687cfe3d73d04c401b77c8aedf0f0569acd5c71c08d44f70f5be96fc5b0cf7",
       "counts": {
         "通过": 19,
         "未完成": 1
@@ -610,14 +610,14 @@
           "item": 14,
           "name": "14 图片实际检查",
           "status": "通过",
-          "evidence": "实际查看原版本截图、软件分层图和节点图；重绘两张青色中文矢量图，新 rqt 截图来自真实插件运行。独立图和正文尺寸均实际查看。",
+          "evidence": "实际查看原版本截图、软件分层图和节点图；重绘两张青色中文矢量图，rqt 和新增 CLion 回调截图来自真实窗口。原图与正文实际尺寸均查看，CLion 使用 Maple Mono NF CN。",
           "report_line": 30
         },
         {
           "item": 15,
           "name": "15 图片标记与引用",
           "status": "通过",
-          "evidence": "检查后使用 ros2_arch_revised.pdf、ros2_node_revised.pdf、ros2_rqt_revised.png，正文与生成脚本的发布路径一致；旧图保留。",
+          "evidence": "检查后使用 ros2_arch_revised.pdf、ros2_node_revised.pdf、ros2_rqt_revised.png 和 ros2_clion_revised.png，正文与生成脚本的发布路径一致；旧图保留。",
           "report_line": 31
         },
         {
@@ -631,7 +631,7 @@
           "item": 17,
           "name": "17 包含与引用",
           "status": "通过",
-          "evidence": "main→core→project→engineering→review 顺序明确；README、OpenCV 调用说明同步。结构检查 29 个包含文件、91 个标签、45 个被引用标签无失效/重复/循环。",
+          "evidence": "main→core→project→engineering→review 顺序明确；README、OpenCV 调用说明同步。当前结构检查 29 个包含文件、314 个标签、261 个被引用标签无失效/重复/循环。",
           "report_line": 33
         },
         {
@@ -645,14 +645,14 @@
           "item": 19,
           "name": "19 实际运行",
           "status": "未完成",
-          "evidence": "Jazzy 的构建、通信、变体、Launch、日志、测试、真实 rqt 插件及 GDB 回调断点均通过；尚缺 CLion 图形断点和真实第二主机上的发现范围/恢复测试。Humble 未实测，只有版本文档核对。不能用同机不同域或 GDB 替代这两项。",
+          "evidence": "Jazzy 的构建、通信、变体、Launch、日志、测试、真实 rqt 插件及 GDB 回调断点均通过；新增 CLion 实际构建/运行/回调断点、参数与默认值变体、colcon 安装对照、编译数据库导入/源码编译/头文件跳转完成；外部库头文件的 clangd 诊断限制见下文。真实第二主机上的发现范围/恢复仍未完成，Humble 未实测。不能用同机不同域替代第二主机。",
           "report_line": 35
         },
         {
           "item": 20,
           "name": "20 编译与 PDF",
           "status": "通过",
-          "evidence": "从卷入口 XeLaTeX 编译至引用稳定，无缺文件、未定义引用、重复标签或越界。最终 179 页；实际检查目录物理页 4–5、正文 7–37、题解 162–165 及相邻章入口。没有修改共享模板。",
+          "evidence": "从卷入口 XeLaTeX 编译至引用稳定，无缺文件、未定义引用、重复标签或越界。最初全卷 179 页的检查保留；各章整理后的当前全卷为 270 页。此次新增图后两次编译稳定，实际查看物理页 4–5、35–39、246–248 及图所在页 36。没有修改共享模板。",
           "report_line": 36
         }
       ]

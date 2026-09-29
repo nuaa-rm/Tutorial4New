@@ -63,5 +63,75 @@
     "设备清单为经授权在主机实际读取的记录，未以沙箱中空的设备命名空间代替主机检查。",
     "未发现 video/USB串口设备节点与对应 USB 产品；不排除尚未连接的设备或网络相机/远端设备。",
     "有界 CLion 命令/常见路径/桌面入口搜索没有匹配，不声称整个磁盘绝对没有 CLion。"
-  ]
+  ],
+  "latest_host_device_check": {
+    "recorded_at": "2026-09-29T06:08:28.915443+00:00",
+    "devices": {
+      "/dev/video*": [],
+      "/dev/serial/by-id/*": [],
+      "/dev/ttyUSB*": [],
+      "/dev/ttyACM*": []
+    },
+    "usb_products": [
+      {
+        "node": "usb3",
+        "manufacturer": "Linux 7.2.7-arch1-1 xhci-hcd",
+        "product": "xHCI Host Controller"
+      },
+      {
+        "node": "usb1",
+        "manufacturer": "Linux 7.2.7-arch1-1 xhci-hcd",
+        "product": "xHCI Host Controller"
+      },
+      {
+        "node": "3-2",
+        "manufacturer": "GenesysLogic",
+        "product": "USB2.1 Hub"
+      },
+      {
+        "node": "4-3",
+        "manufacturer": "GenesysLogic",
+        "product": "USB3.2 Hub"
+      },
+      {
+        "node": "usb4",
+        "manufacturer": "Linux 7.2.7-arch1-1 xhci-hcd",
+        "product": "xHCI Host Controller"
+      },
+      {
+        "node": "usb2",
+        "manufacturer": "Linux 7.2.7-arch1-1 xhci-hcd",
+        "product": "xHCI Host Controller"
+      },
+      {
+        "node": "3-5",
+        "manufacturer": "ITE Tech. Inc.",
+        "product": "ITE Device(8910)"
+      },
+      {
+        "node": "3-1",
+        "manufacturer": "Logitech",
+        "product": "G502 X"
+      }
+    ]
+  },
+  "CLion_installed_followup": {
+    "recorded_at": "2026-09-29T06:08:56.267142+00:00",
+    "location": "/tmp/textbook-clion-app/clion-2026.2.3",
+    "version": "2026.2.3",
+    "official_package_sha256": "dbb7d298392bbe471153af98f6f3393173da897eaff1c1c79f2eade6e26d3860",
+    "actual_GUI_tests": [
+      "volume-1-chapter-1-clion-gui.json",
+      "volume-2-chapter-1-clion-gui.json"
+    ],
+    "scope": "temporary official installation; original command/common-path search retained as historical result, not current unavailability"
+  },
+  "second_host_followup": {
+    "alias": "orin",
+    "configured_hostname": "nvidia",
+    "mode": "read-only SSH BatchMode, ConnectTimeout5; remote OS/ROS directory query only",
+    "returncode": 255,
+    "stderr": "ssh: Could not resolve hostname nvidia: Name or service not known",
+    "limit": "no second physical host communication/discovery experiment; no robot command or unknown-address scan"
+  }
 }

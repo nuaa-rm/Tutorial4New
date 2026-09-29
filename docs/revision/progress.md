@@ -8,10 +8,10 @@
 
 | 卷 | 章 | 进度 |
 | --- | --- | --- |
-| 一 | 1 Linux 工作环境 | 首次单章提交 0c2a991；apt/zsh/AstroNvim 补跑 90aeebd，Ubuntu VS Code GUI 与 Maple Mono NF CN 截图补跑 f08b276，正文对齐/Ninja 补充 ee937b5。真实安装/恢复、CLion/Windows、桌面登录与板端验证仍待补，详见 volume-1-chapter-1.md。 |
+| 一 | 1 Linux 工作环境 | 首次单章提交 0c2a991；apt/zsh/AstroNvim 补跑 90aeebd，Ubuntu VS Code GUI 与 Maple Mono NF CN 截图补跑 f08b276，正文对齐/Ninja 补充 ee937b5，Ubuntu CLion GUI 与 Maple Mono NF CN 截图补测 52c292c。真实安装/恢复、Windows 工具链、桌面登录与板端验证仍待补，详见 volume-1-chapter-1.md。 |
 | 一 | 2 现代 C++ 基础 | 已单章提交 66cad2d；20 项通过，70 个程序、10 个变体、14 张图已验证，详见 volume-1-chapter-2.md。 |
 | 一 | 3 编译过程与 CMake 基础 | 首次单章提交 b93d17e，中文跨卷路径显示修复 4cfafb1；20 项通过，随书工程、题解定位、构建/安装/窗口与 Jazzy 选读验证完成，详见 volume-1-chapter-3.md。 |
-| 二 | 1 ROS2 基础 | 已单章提交 5eb75ed；内容、项目与 Jazzy/rqt 核验已整理；CLion 图形断点与第二主机发现范围仍未完成，详见 volume-2-chapter-1.md。 |
+| 二 | 1 ROS2 基础 | 首次单章提交 5eb75ed；Jazzy/rqt 核验已整理，CLion 实际回调、产物对照与编译数据库补测 44944b4；外部库头文件 clangd 诊断限制保留，第二主机发现范围仍未完成，详见 volume-2-chapter-1.md。 |
 | 二 | 2 多机通信方法 | 已单章提交 f6934b2；30 条 Ubuntu/Jazzy 记录通过，跨物理主机与真实串口设备验证待补，详见 volume-2-chapter-2.md。 |
 | 二 | 3 SDR 与电磁波解析 | 已单章提交 a80b582；内容、完整 IQ 项目、题解与 PDF 已整理；23 条记录（含 75 组参数变体）通过，Pluto/射频实机未完成，详见 volume-2-chapter-3.md。 |
 | 二 | 4 OpenCV 与图像处理基础 | 已单章提交 95c3d92；内容、完整图像/ROS 工程、12+10 题解与 PDF 已整理；64 条 Ubuntu/Jazzy 记录通过，物理相机未完成，详见 volume-2-chapter-4.md。 |
@@ -30,4 +30,4 @@
 | 三 | 6 工程准则与调车文化 | 内容、完整实验记录、5+7题解与图/PDF已整理；7条运行/独立复核记录通过，真实同学签认未实施；已单章提交915d40f，详见volume-3-chapter-6.md。 |
 | 三 | 7 进阶地图与资料索引 | 内容、完整资料卡项目、4+6题解与PDF已整理；14条本地运行记录通过，队内真实资料/责任人及同学复核未完成；已单章提交15b1fa6，详见volume-3-chapter-7.md。 |
 
-全书汇总见 [whole-book-audit.md](whole-book-audit.md)：21 章各 20 项共 420 项，407 通过、11 未完成、2 不适用。随堂 233 题与章末 187 题均有定位题解；三卷现有 PDF 为 206、269、58 页。未完成项没有当作已通过，当前目标仍未达到全量验收。
+全书汇总见 [whole-book-audit.md](whole-book-audit.md)：21 章各 20 项共 420 项，407 通过、11 未完成、2 不适用。随堂 233 题与章末 187 题均有定位题解；三卷现有 PDF 为 206、270、58 页。未完成项没有当作已通过，当前目标仍未达到全量验收。
