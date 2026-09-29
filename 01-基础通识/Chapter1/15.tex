@@ -1,15 +1,15 @@
 \subsubsection{Git 管什么，GitHub 又是什么}
-代码昨天还能跑，今天改了几处却坏了，这时候如果只有一个“最终版.cpp”，就不太容易找回昨天的状态了。我们需要版本控制（Version Control），把每次有意义的改动记录下来，之后既能查看改过什么，也能找回已经提交的内容。Git 就是这样的工具，它在本地保存提交（Commit）和历史，也能帮助多人协作。
+代码昨天还能跑，今天改了几处却坏了，这时候如果只有一个“最终版的最终版5.cpp”，就不太容易找回昨天的状态了。我们需要版本控制（Version Control），把每次有意义的改动记录下来，之后既能查看改过什么，也能找回已经提交的内容。Git 就是这样的工具，它在本地保存提交（Commit）和历史，也能帮助多人协作。
 
 这里先分清 Git 和 GitHub：Git 是我们使用的版本控制工具，GitHub 是可以托管 Git 仓库的网站之一，装了 Git 并不等于注册了 GitHub。Git 也可以完全离线使用，所以我们先在练习目录里学操作，把流程走通，再去处理比赛工程。
 \Needspace{8\baselineskip}
 \begin{example}[检查工具]
-Ubuntu 可先运行 \texttt{git --version}；命令不存在时用 \texttt{sudo apt install git} 安装。成功应打印版本，装工具不等于创建仓库。后面的本地实验需要 Git 2.28 或以上。
+Ubuntu 可先运行 \texttt{git --version}；命令不存在时用 \texttt{sudo apt install git} 安装。成功应打印版本。
 \end{example}
 
-\subsubsection{四个区域与提交身份}
+\subsubsection{四个区域}
 \label{sec:git-regions}
-Git 的名字一下子有点多，我们先让四个区域混个脸熟，不用急着背，后面的实验都会用到。工作区（Working tree）就是你正在编辑的文件；暂存区（Index）保存这次准备提交的版本；本地仓库记录已经提交的历史；远程仓库则是另一份用来交换提交的仓库，通常在服务器上，也可以像下面的实验一样放在本机。
+Git 的概念一下子有点多，我们先来了解一下最基本的4个区域。工作区（Working tree）就是你正在编辑的文件；暂存区（Index）保存这次准备提交的版本；本地仓库记录已经提交的历史；远程仓库则是另一份用来交换提交的仓库，通常在服务器上，也可以像下面的实验一样放在本机。
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.9\textwidth]{git-workflow_revised.pdf}
@@ -20,12 +20,12 @@ Git 的名字一下子有点多，我们先让四个区域混个脸熟，不用�
 
 如果不知道自己走到了哪一步，可以先看 \texttt{git status}。想看具体改动，\texttt{git diff} 比较工作区和暂存区，\texttt{git diff --cached} 比较暂存区和当前提交。这两个 diff 看的是不同位置，后面我们会用同一个文件对比一次。
 
+\subsubsection{配置提交者信息}
+准备开始存档之前，我们先告诉 Git“这次改动是谁写的”。\texttt{git config [作用域] 键 值} 用来设置配置，\texttt{git config [作用域] --get 键} 用来读回配置。先在独立目录里试，不改你平时使用的工程。
 \Needspace{8\baselineskip}
-\begin{example}[只配置练习仓库的作者]
-在新目录操作，名称可换成自己的：
-
-
-\Needspace{11\baselineskip}
+\begin{example}[配置练习仓库的作者]
+确认当前目录下没有同名的 \texttt{git-config-lab}，再执行下面的命令。名称和邮箱可以换成自己的；\texttt{git init} 把当前目录变成仓库，\texttt{--initial-branch=main} 指定初始分支名：
+\Needspace{10\baselineskip}
 \begin{tbash}
 mkdir git-config-lab
 cd git-config-lab
@@ -35,49 +35,71 @@ git config user.email 'student@example.invalid'
 git config --local --get user.name
 git config --local --get user.email
 \end{tbash}
-
-
-执行后应该能读回刚设置的名字和邮箱。\texttt{git config [作用域] 键 值} 用来设置配置，\texttt{--get} 则读取它；这里不加全局作用域，只改当前练习仓库。如果以后想让自己的仓库通常都使用同一份身份，可以加 \texttt{--global} 设置当前用户的通用配置。还有一点别弄混：名字和邮箱是提交里的作者信息，不是 GitHub 登录认证，填了邮箱也不会自动获得推送权限。
+执行后应该能读回刚设置的名字和邮箱。这里没有加作用域选项，写入的就是当前仓库的本地配置；读回时加上 \texttt{--local}，明确检查的也是这一层。常用的三个作用域如下，同一个键同时出现时，本地配置优先于用户配置，用户配置优先于系统配置。
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+作用域 & 常见保存位置 & 适用范围\\
+\midrule
+\texttt{--system} & \texttt{/etc/gitconfig} & 系统中的所有用户\\
+\texttt{--global} & \path{~/.gitconfig} & 当前用户的仓库\\
+\texttt{--local} & \texttt{.git/config} & 当前仓库\\
+\bottomrule
+\end{tabular}
+\end{center}
+如果以后想让自己的仓库通常都使用同一份身份，可以加 \texttt{--global} 设置。想查某个配置到底从哪来，用 \texttt{git config --show-origin --list} 看值和来源即可，不必挨个打开配置文件。
 \end{example}
+\begin{note}
+名字和邮箱是提交里的作者信息，不是 GitHub 登录认证；名字也不必与 GitHub 用户名相同。要让 GitHub 把提交关联到你的账号，可使用账号中已验证的邮箱，或从 Settings → Emails 复制 GitHub 提供的 noreply 邮箱。
+\end{note}
 \begin{exercise}\label{ex:v1-git-config}
 新建独立仓库，设置并读回本地作者身份。解释 add 后再改文件为何可以同时出现“已暂存”和“未暂存”状态；通过一次实际修改核对。
 \end{exercise}
 
 \subsubsection{从修改到远程：不联网的完整实验}
 \label{sec:git-local-demo}
-概念看过了，我们来完整走一遍。项目放在本卷 \texttt{examples/git-workflow-demo/}，只有 \texttt{demo.sh} 和 \texttt{README.md}。这一次把“远程”也放在本地临时目录里，你不用先处理网站账号和网络认证，就能看清文件是怎样从自己的工作区走到队友那里去的。
+配置好身份，我们来完整走一遍“修改 → 暂存 → 提交 → 推送 → 队友获取”。项目放在本卷 \texttt{examples/git-workflow-demo/}。\texttt{README.md} 说明运行方法，三个脚本分别演示日常流转、提交历史和子模块：
+\begin{lstlisting}[language={},frame=single]
+git-workflow-demo/
+  README.md
+  demo.sh
+  history.sh
+  submodule.sh
+\end{lstlisting}
+这一次把“远程”也放在本地临时目录里，你不用先处理网站账号和网络认证，就能看清文件是怎样从自己的工作区走到队友那里去的。\texttt{demo.sh} 覆盖四个区域的流转和两种 diff，后面再沿用它创建的仓库练分支与忽略规则。另外两个脚本各自新建实验目录，互不影响；我们讲到对应操作时再运行。
 \Needspace{8\baselineskip}
 \begin{example}[两次提交与另一份克隆]
-目录中唯一的核心脚本完整如下：
+下面是完整脚本。可以先顺着命令看一遍，再运行并对照后面的讲解：
 
 \lstinputlisting[language=bash,frame=single,numbers=left,breaklines=true]{examples/git-workflow-demo/demo.sh}
 
 从本卷目录运行：
 
-
-\Needspace{6\baselineskip}
+\Needspace{5\baselineskip}
 \begin{tbash}
 cd examples/git-workflow-demo
 bash demo.sh
 \end{tbash}
 
+\textbf{先准备两份仓库。}脚本开头的 \texttt{mktemp -d} 新建临时目录，\texttt{git init --bare} 在里面建立不含普通工作区的裸仓库（Bare Repository），作为交换提交的“远程”。随后，\texttt{git clone 仓库 目录} 把它克隆（Clone）到 \texttt{student}，得到自己的本地仓库和工作区。克隆会自动把来源记为远程名 \texttt{origin}，它只是地址的简称，并不是什么特殊服务器。
 
-\texttt{git init --bare} 建立不含普通工作区的“远程”；\texttt{git clone 仓库 目录} 获取一份本地工作副本。脚本第一次写 camera 后 add、commit、push；第二次写 radar，先看工作区差异，再 add 看暂存差异，最后提交并推送。\texttt{-u} 记录上游，此后在同一分支可直接 push。
+\textbf{再存下第一版。}脚本写入 camera 后，用 \texttt{git add modules.txt} 暂存（Stage）这个文件的当前版本，再用 \texttt{git commit -m '说明'} 提交。\texttt{-m} 后面写这次改了什么，别让日志里挤满“改好了”和“这次真改好了”，更别挤满了“1”或是“11111”。到这里，提交还只在本地；\texttt{git push -u origin main} 才把它推送（Push）到远程。\texttt{-u} 把本地 main 与 origin/main 建立上游关系，此后在这个分支里可以直接 \texttt{git push}。
 
-运行时先看看 WORKTREE DIFF，再看看 STAGED DIFF：里面都有新增的 radar，但它们出现在 add 前后两个阶段。最后 TEAMMATE CONTENT 应该是 camera、radar 两行，COMMIT COUNT 为 2。我们在 teammate 这份克隆里看到了两次提交，就说明它们确实已经进入远程，不只是留在 student 的本地仓库里。第一次克隆时提示空仓库，是因为我们刚刚创建的“远程”还没有内容；后面如果还有失败提示，就要按具体错误处理，不能都当成这条警告忽略掉。
+\textbf{然后对照两种差异。}追加 radar 后，WORKTREE DIFF 下的 \texttt{git diff} 显示工作区比暂存区多了这一行。再次 add 后，同一行出现在 STAGED DIFF 下的 \texttt{git diff --cached} 中，表示它已经暂存，但还没有写进新的提交。这时候再 commit、push，就完成了第二次存档与交换。add 记下的是当时的版本，不会替你自动收集之后的编辑。
+
+\textbf{最后站到队友那边看看。}脚本从远程克隆出 \texttt{teammate}，TEAMMATE CONTENT 应显示 camera、radar 两行，COMMIT COUNT 应为 2。这说明两次提交都进入了远程，并且能被另一份克隆取到。终端最后会打印实验目录，后面的操作就在它的 \texttt{student} 子目录里进行。第一次克隆时提示空仓库，是因为我们刚刚创建的“远程”还没有内容；其他失败提示仍要按具体错误处理。
 \end{example}
 \begin{exercise}\label{ex:v1-git-commits}
 在脚本打印的 student 仓库中增加第三行并提交，先\textbf{不推送}。记录 student 和 remote 的提交数，再 push，最后在 teammate 中执行 \texttt{git pull --ff-only} 并检查第三行。解释为什么本地 commit 成功不代表队友已经收到。
 \end{exercise}
 
-\subsubsection{分支、合并与实际远程}
+\subsubsection{分支与合并}
 如果你正在写新功能，又不想把没写完的东西直接混进主线，我们就可以开一个分支（Branch）。它是指向某次提交的可移动名字，不是把整个项目永久复制一遍。等功能写完、差异也检查过了，再合并（Merge）回主线。分支 A 和分支 B 表示：我们联合！不过联合之前，还是先看清各自改了什么。
 \Needspace{8\baselineskip}
 \begin{example}[没有冲突的最小分支实验]
-在刚才的 student 仓库中执行；开始前 \texttt{git status --short} 应为空，不能把未完成修改顺手混入实验：
+在刚才的 student 仓库中执行；开始前 \texttt{git status --short} 应为空，别把未完成修改顺手混入实验：
 
-
-\Needspace{11\baselineskip}
+\Needspace{10\baselineskip}
 \begin{tbash}
 git switch -c feature-note
 printf 'check timestamps\n' > review.txt
@@ -88,22 +110,159 @@ git merge --ff-only feature-note
 git log --oneline --graph -4
 \end{tbash}
 
-
 执行完再看 main，应该已经出现了新文件，日志里也能找到刚刚的提交。因为 main 没有另外前进，它可以直接沿着这条历史走到新位置，这就叫快进。\texttt{--ff-only} 只允许这种情况；如果两条分支各自有了新提交，它会拒绝，而不是自动帮我们解决冲突。你在旧教程里看到的 \texttt{checkout -b 名称} 也能创建并切换分支，这里我们使用职责更明确的 switch。
 \end{example}
 \begin{exercise}\label{ex:v1-git-branch}
 在自己的练习仓库创建另一个分支，增加一个小文件并提交，切回 main，合并并查看图形日志。指出分支名、提交与工作文件的关系，最后保留记录，不操作真实远程。
 \end{exercise}
-
-换成服务器仓库时，\texttt{git remote -v} 查看地址，\texttt{git fetch 远程} 取回提交但不合并工作区，\texttt{git pull} 包含取回及整合步骤，\texttt{git push} 把本地分支的提交发出去。HTTPS 的访问令牌与 SSH 密钥是认证方式，按托管服务说明设置，不在教材、脚本或提交中写凭据。已有上游时使用简短命令；无上游时先核对远程名和当前分支，不假设都叫 origin/main。
+这里演示的是快进合并（Fast-forward Merge）。如果两条分支都向前走了，普通 \texttt{git merge 分支名} 可能创建一个合并提交，也可能遇到冲突，所以“合并”不一定意味着总会新增一个节点。遇到冲突时先看 \texttt{git status}，打开冲突文件，核对两边的意图并删除冲突标记；确认内容正确后再 add、commit。别为了让报错消失，随手把队友那半边删掉。
 \begin{note}
-\texttt{git reset --hard} 会丢弃所覆盖路径的未提交修改；强制推送会改写远程历史，影响队友。本章不需要这些操作。合并冲突时先读 status 和冲突块，确认两边意图，编辑后 add、commit；想取消未完成合并，可先保存新增工作，再按实际状态使用 \texttt{git merge --abort}。未提交内容没有可靠的 Git 恢复保证。
+\texttt{git reset --hard} 会丢弃所覆盖路径的未提交修改；强制推送会改写远程历史，影响队友。本章的实验不需要这些操作。想取消未完成合并时，先保存需要保留的工作，再按实际状态使用 \texttt{git merge --abort}；未提交内容没有可靠的 Git 恢复保证。
 \end{note}
+
+\subsubsection{变基：让功能接在新的主线后面}
+\label{sec:git-rebase}
+刚才 main 没有另行前进，所以合并很顺利。如果你写功能期间，队友也往 main 里加了提交，两条历史就会分开。除了合并，我们还可以在自己的功能分支上执行 \texttt{git rebase main}，把功能提交重新应用到 main 的新位置，这就是变基（Rebase）。它整理的是提交的起点，运行完仍要检查功能，再决定是否合入主线。
+\begin{note}
+下面只变基自己尚未推送的练习分支，开始前工作区应干净。变基会重新生成提交，编号随之改变；\textbf{不要直接改写队友已经据此继续开发的公共历史}。实验先保留一个指向原提交的分支，便于对照，不需要强制推送。
+\end{note}
+\Needspace{8\baselineskip}
+\begin{example}[观察变基前后的提交]
+\texttt{history.sh} 同时演示变基和下一节的优选。从本卷目录运行下列命令，随后按两节讲解对照输出；也可以把展示的脚本片段依次放在同一个 Bash 终端执行：
+\Needspace{5\baselineskip}
+\begin{tbash}
+cd examples/git-workflow-demo
+bash history.sh
+\end{tbash}
+
+脚本先在新的临时目录里建立仓库并提交 README。这里 \texttt{commit.gpgsign false} 只关闭练习仓库的提交签名，避免实验依赖你平时的签名工具；真实项目沿用自己的要求。
+\Needspace{14\baselineskip}
+\lstinputlisting[language=bash,frame=single,numbers=left,breaklines=true,firstline=1,lastline=13]{examples/git-workflow-demo/history.sh}
+
+接下来，功能分支增加 camera.txt，main 增加 review.txt。它们修改不同文件，先让我们看清没有冲突的情况。\texttt{git branch feature-before-rebase} 只给原功能提交留一个名字；变基在 \texttt{feature-camera} 上执行，目标是 main：
+\Needspace{10\baselineskip}
+\lstinputlisting[language=bash,frame=single,numbers=left,breaklines=true,firstline=15,lastline=24,firstnumber=15]{examples/git-workflow-demo/history.sh}
+
+\Needspace{15\baselineskip}
+现在先打印分开的历史，再切回功能分支变基，最后回到 main 快进合并：
+\lstinputlisting[language=bash,frame=single,numbers=left,breaklines=true,firstline=25,lastline=34,firstnumber=25]{examples/git-workflow-demo/history.sh}
+
+看 BEFORE REBASE 与 AFTER REBASE 两段日志，按“较早 → 较晚”的顺序画出来，应是下面的关系。A 是 README 的初始提交，M 是主线的 review.txt 提交，F 是功能提交：
+\Needspace{8\baselineskip}
+\begin{lstlisting}[language={},frame=single]
+before:  A---M       main
+          \--F       feature-camera
+after:   A---M---F'  feature-camera
+             ^      main
+\end{lstlisting}
+F 和 F' 都增加 camera.txt，但 F' 的父提交变成了 M，因此它们的编号不同。OLD AND NEW FEATURE COMMITS 会打印这两个编号，旧提交仍由 \texttt{feature-before-rebase} 指着。注意：变基结束时 main 还停在 M；最后切回 main 再快进合并，它才到达 F'，并同时包含 camera.txt 与 review.txt。
+\end{example}
+\Needspace{7\baselineskip}
+\begin{exercise}\label{ex:v1-git-rebase}
+对照 history.sh 的日志，用 \texttt{git show --format=fuller 提交编号} 检查两个功能提交，并核对它们的父提交。说明“修改内容相同”为什么不代表“同一次提交”，以及变基结束后 main 是否已经自动合入功能。保留实验中的原提交分支作为证据。
+\end{exercise}
+如果变基遇到冲突，它会停在当前重放的提交。先看 status、打开文件并核对两边意图，解决后 add，再执行 \texttt{git rebase --continue}；若决定取消这次变基，用 \texttt{git rebase --abort} 返回开始时的分支状态。\texttt{--skip} 会跳过当前提交的改动，不能把它当作通用的“继续”按钮。更多用法见\href{https://git-scm.com/docs/git-rebase}{变基官方文档}。
+
+\subsubsection{优选：只取需要的那次修改}
+\label{sec:git-cherry-pick}
+还有一种情况：实验分支上既有临时调试内容，又有主线急需的修正，我们只想拿后者。这时可以用优选（Cherry-pick，也常叫“挑选提交”）：先切到接收修改的分支，再执行 \texttt{git cherry-pick 提交编号}，把那次提交引入的改动应用到当前分支。它不会把来源分支的整条历史一起合入。
+\Needspace{17\baselineskip}
+\begin{example}[只拿标定修正，不拿调试文件]
+继续看同一个 history.sh。前半段合并结束后，main 已有相机模块与检查说明；后半段在 experiment 上先提交 debug.txt，再单独提交 calibration.txt。\texttt{fix\_commit} 记下第二次提交的编号，避免我们手抄一串并不适用于自己实验的编号：
+\Needspace{12\baselineskip}
+\lstinputlisting[language=bash,frame=single,numbers=left,breaklines=true,firstline=36,lastline=44,firstnumber=36]{examples/git-workflow-demo/history.sh}
+
+\Needspace{19\baselineskip}
+主线另外增加 release.txt 后才接收修正，因此来源与目标的历史已经不同。优选前的 \texttt{git show --stat} 帮我们确认挑的是哪次修改；这里可以再用 \texttt{git show 提交编号} 查看完整差异。\texttt{-x} 会在这次无冲突的优选说明里附上来源提交编号，方便对照，尤其适合把公开开发分支的修正移到维护分支：
+\lstinputlisting[language=bash,frame=single,numbers=left,breaklines=true,firstline=45,lastline=57,firstnumber=45]{examples/git-workflow-demo/history.sh}
+
+AFTER CHERRY-PICK 应显示主线多了一个标定修正提交，编号与 experiment 上的原提交不同；MAIN FILES 中有 calibration.txt 与 release.txt，没有 debug.txt，experiment 分支仍保留原来的两次提交。\textbf{优选取的是这次提交相对其父提交的改动}，不是把该提交当时的全部文件复制过来，所以它之前加入的 debug.txt 不会跟过来。
+\end{example}
+\Needspace{7\baselineskip}
+\begin{exercise}\label{ex:v1-git-cherry-pick}
+在 history.sh 打印的仓库中，新建维护分支并优选 experiment 中的调试提交。用文件列表和图形日志说明接收了什么、没有接收什么，并比较来源与新提交编号。再解释：如果修正依赖于此前未合入的功能，“没有冲突”是否足以证明修正能工作？
+\end{exercise}
+优选也可能发生冲突：解决文件并 add 后，用 \texttt{git cherry-pick --continue} 继续，或用 \texttt{git cherry-pick --abort} 取消。即使没有文本冲突，也要检查依赖和运行结果；某次修正可能调用了之前提交才有的函数，Git 不会替我们检查程序逻辑。参数细节见\href{https://git-scm.com/docs/git-cherry-pick}{优选官方文档}。
+\begin{conclusion}
+合并把两条历史接到一起，可能快进，也可能新增合并提交；变基把当前分支的一串功能提交重新接在新起点后面；优选把指定提交的改动应用到当前分支。本实验的后两种操作都产生了新的提交编号；优选一项改动，也不表示来源分支的其他历史已经合入。操作前确认所在分支与干净工作区，操作后检查文件、日志和实际功能。
+\end{conclusion}
+
+\Needspace{18\baselineskip}
+\subsubsection{子模块：给外部依赖固定一个版本}
+\label{sec:git-submodule}
+如果视觉工程需要复用另一份相机工具仓库，我们可以把它作为子模块（Submodule）放进工程。主仓库记录的是\textbf{依赖仓库的地址、路径和指定提交}，依赖本身仍有独立的历史。这样队友拿到同一次主仓库提交时，就能使用同一版工具，而不是今天克隆一次、明天又悄悄换了内容。
+
+本卷 \texttt{examples/git-workflow-demo/submodule.sh} 新建三份仓库：helper 模拟依赖来源，student 是引用依赖的主工程，teammate 是队友的克隆。依赖中只放 version.txt，让我们一眼看出用了哪个版本。
+\begin{note}
+本实验的依赖地址是自己刚创建的可信本地路径。Git 会限制递归操作使用本地 file 协议，下面用 \texttt{-c protocol.file.allow=always} 仅为当前命令放行；不要为陌生仓库照抄全局放行设置。真实协作应填写队友能访问的 SSH/HTTPS 仓库地址，不能把你的临时目录路径交给队友当远程地址。
+\end{note}
+\Needspace{8\baselineskip}
+\begin{example}[加入、克隆与更新相机工具子模块]
+从本卷目录运行，然后依次对照下面四段过程：
+\Needspace{5\baselineskip}
+\begin{tbash}
+cd examples/git-workflow-demo
+bash submodule.sh
+\end{tbash}
+
+\Needspace{17\baselineskip}
+\textbf{先给依赖做一次提交。}脚本在 helper 仓库写入 v1 并提交。没有提交的空仓库还没有可供主工程记录的版本：
+\lstinputlisting[language=bash,frame=single,numbers=left,breaklines=true,firstline=1,lastline=13]{examples/git-workflow-demo/submodule.sh}
+
+\Needspace{18\baselineskip}
+\textbf{再让主工程引用它。}\texttt{git submodule add 地址 路径} 克隆依赖，并暂存新建的 .gitmodules 和子模块记录；我们随后在主仓库提交这两项：
+\lstinputlisting[language=bash,frame=single,numbers=left,breaklines=true,firstline=15,lastline=27,firstnumber=15]{examples/git-workflow-demo/submodule.sh}
+.gitmodules 保存地址与路径，\texttt{git ls-tree HEAD libs/helper} 的输出则应是模式 160000、类型 commit、一串编号和路径。这个特殊记录叫 gitlink，它记下 helper 的提交编号，主仓库并没有把 version.txt 当成自己的普通文件存一遍。
+
+\Needspace{12\baselineskip}
+\textbf{然后站到队友这边。}普通 clone 得到主仓库后，libs/helper 里还没有依赖文件。BEFORE INITIALIZATION 下的状态以 \texttt{-} 开头，表示尚未初始化。\texttt{--init} 初始化缺少的子模块，\texttt{--recursive} 也处理它们内部嵌套的子模块：
+\lstinputlisting[language=bash,frame=single,numbers=left,breaklines=true,firstline=29,lastline=35,firstnumber=29]{examples/git-workflow-demo/submodule.sh}
+初始化后应能读到 camera-utils v1。真实远程也可以在最初使用 \texttt{git clone --recurse-submodules 地址 目录} 一步完成克隆与初始化。默认更新会把子模块检出到主仓库记录的提交，出现游离 HEAD（Detached HEAD）是预期状态；如果要在子模块里开发，应先切到自己的分支再修改、提交。
+
+\Needspace{18\baselineskip}
+\textbf{最后升级一次依赖，再通知队友。}脚本先在 helper 提交 v2，记下编号；回到 student 后，用 \texttt{git -C 路径} 在子模块目录执行 fetch 和 switch，选择刚才的提交。这里明确选择编号，让我们知道究竟升级到了哪里：
+\lstinputlisting[language=bash,frame=single,numbers=left,breaklines=true,firstline=37,lastline=48,firstnumber=37]{examples/git-workflow-demo/submodule.sh}
+\texttt{git diff --submodule=log} 应显示依赖从旧提交到新提交的变化；\texttt{git add libs/helper} 暂存的是新编号，随后 commit 把这次依赖升级写进\textbf{主仓库}。helper 的 v2 提交和主仓库“使用 v2”的提交，是两份仓库里的两次操作。
+
+\Needspace{11\baselineskip}
+队友先拉取主工程。这里用 \texttt{-c submodule.recurse=false} 明确关闭 pull 的自动递归，便于观察中间状态：
+\lstinputlisting[language=bash,frame=single,numbers=left,breaklines=true,firstline=50,lastline=55,firstnumber=50]{examples/git-workflow-demo/submodule.sh}
+AFTER PULL 下，主仓库已记录 v2，子模块工作文件却仍是 v1，状态以 \texttt{+} 开头，表示当前检出的提交与主仓库记录不同。接下来再更新子模块工作区：
+\Needspace{8\baselineskip}
+\lstinputlisting[language=bash,frame=single,numbers=left,breaklines=true,firstline=56,lastline=60,firstnumber=56]{examples/git-workflow-demo/submodule.sh}
+update 后应变成 camera-utils v2，状态首字符回到空格；不带 \texttt{--remote} 的 update 跟随\textbf{主仓库固定的提交}，不是自动追最新版本。
+\end{example}
+\Needspace{8\baselineskip}
+\begin{exercise}\label{ex:v1-git-submodule}
+沿用 submodule.sh 的实验目录，在 helper 提交 v3，让 student 选择并提交这个新版本，再同步 teammate。分别记录 helper 的 v3 编号、student 记录的依赖编号，以及队友 pull 后、update 前后的文件内容与子模块状态。说明为什么只在 helper 提交，或只在 student 的子模块工作区切到 v3，都还不算完成主工程的依赖升级。
+\end{exercise}
+真实协作中，先把依赖的新提交推到队友能访问的依赖远程，再推送引用它的主仓库提交，否则队友可能找不到被记录的版本。若想主动追踪依赖远程分支，可查 \texttt{git submodule update --remote}，但仍须检查改动，并在主仓库提交新的依赖编号；它与日常按固定版本 update 的目的不同。配置与选项见\href{https://git-scm.com/docs/git-submodule}{子模块官方文档}。
+\begin{conclusion}
+子模块要分别看两层：依赖仓库提交文件，主仓库提交“使用哪个依赖提交”。队友既要拿到主工程的更新，也要让子模块工作区切到记录的版本。遇到空目录先检查初始化，遇到状态中的 \texttt{+} 先核对子模块编号，别急着把所有依赖更新到最新。
+\end{conclusion}
 
 \subsubsection{忽略构建产物}
 工程编译几次后，目录里通常会多出构建产物和日志，我们不必把它们每次都交给队友。可以用 \texttt{.gitignore} 告诉 Git，哪些未跟踪文件可以忽略。不过已经跟踪过的文件，不会因为写进了这份名单就自动退出历史。
 
-常用的模式有 \texttt{*.log}（匹配日志）、\texttt{/build/}（仓库根目录下的 build）和 \texttt{!路径}（取消忽略）。如果想忽略 build 里的大部分文件，又保留一个例外，就要留意：把父目录整个忽略以后，Git 不会再进去寻找例外。下面我们实际试一下。
+\Needspace{15\baselineskip}
+最好在第一次提交前就写好 \texttt{.gitignore}，免得构建产物和大文件一起进入历史，每次克隆都得跟着下载。下面这些模式够我们先用起来；表中的“根目录”指这份 \texttt{.gitignore} 位于仓库根目录的情况。
+\begin{center}
+\small
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.60\textwidth}}
+\toprule
+模式 & 作用\\
+\midrule
+\texttt{/text.txt} & 只忽略根目录下的这个文件\\
+\texttt{text.txt} & 忽略各级目录中名为 text.txt 的文件或目录\\
+\texttt{/build/} & 忽略根目录下的 build 目录及其内容\\
+\texttt{img*} & 匹配以 img 开头的文件或目录名\\
+\texttt{*.log} & 匹配以 .log 结尾的文件或目录名\\
+\texttt{!README.md} & 取消对 README.md 的忽略；须在匹配的忽略规则之后\\
+\texttt{\# 说明} & 以 \# 开头的行是注释\\
+\bottomrule
+\end{tabular}
+\end{center}
+如果想忽略 build 里的大部分文件，又保留一个例外，就要留意：把父目录整个忽略以后，Git 不会再进去寻找例外。下面我们实际试一下。
 \Needspace{8\baselineskip}
 \begin{example}[保留 build 中的一个文件]
 在练习仓库创建 \texttt{.gitignore}：
@@ -114,15 +273,13 @@ git log --oneline --graph -4
 \end{lstlisting}
 然后验证：
 
-
-\Needspace{8\baselineskip}
+\Needspace{7\baselineskip}
 \begin{tbash}
 mkdir -p build
 touch run.log build/cache.tmp build/keep.txt
 git status --short --untracked-files=all
 git check-ignore -v run.log build/cache.tmp
 \end{tbash}
-
 
 status 应列出 .gitignore 与 build/keep.txt，不显示另两项。已跟踪文件若确实要停止跟踪，可用 \texttt{git rm --cached 路径} 后提交；这保留工作文件，\textbf{不会抹去旧提交里的内容或泄露过的凭据}。
 \end{example}
@@ -132,4 +289,196 @@ status 应列出 .gitignore 与 build/keep.txt，不显示另两项。已跟踪�
 \begin{conclusion}
 Git 操作先问“我正在改哪个区域”：编辑改工作区，add 更新暂存快照，commit 建本地历史，push 交换提交。分支组织历史，忽略规则控制未跟踪文件。每次提交前看 status、diff 和 diff --cached，避免把旧产物或无关文件一起交给队友。
 \end{conclusion}
-官方命令与忽略规则可在 \url{https://git-scm.com/docs} 查；想观察分支关系可用 \href{https://learngitbranching.js.org/?locale=zh_CN}{Learn Git Branching 中文版}，网页动画辅助理解，不能代替本地文件验证。
+
+\Needspace{19\baselineskip}
+完整流程走过之后，再回头看命令就容易多了。下面留一张速查表，忘记时按“现在想做什么”来找；其中的路径、说明、仓库和分支名都要按实际情况替换。
+\begin{center}
+\small
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.48\textwidth}>{\raggedright\arraybackslash}p{0.42\textwidth}}
+\toprule
+命令形式 & 什么时候用\\
+\midrule
+\texttt{git status} & 确认当前分支、暂存与未暂存状态\\
+\texttt{git diff [--cached]} & 分别检查未暂存或已暂存的改动\\
+\texttt{git add 路径} & 选择要放进下一次提交的文件版本\\
+\texttt{git commit -m '说明'} & 把暂存区记成一次本地提交\\
+\texttt{git log --oneline --graph --all} & 查看各分支的提交历史\\
+\texttt{git switch [-c] 分支名} & 切换分支；加 -c 时新建并切换\\
+\texttt{git branch -a} & 查看本地分支和远程跟踪分支\\
+\texttt{git merge --ff-only 分支名} & 仅在能快进时把该分支合入当前分支\\
+\texttt{git remote -v} & 核对远程名及获取、推送地址\\
+\texttt{git fetch 远程名} & 取回远程提交，更新远程跟踪分支\\
+\texttt{git pull --ff-only 远程名 分支名} & 取回提交，再尝试快进当前分支\\
+\texttt{git push [-u] 远程名 分支名} & 推送提交；加 -u 时记录上游关系\\
+\bottomrule
+\end{tabular}
+\end{center}
+\texttt{fetch} 不会替你改工作区，\texttt{pull} 还会整合到当前分支，\texttt{push} 则更新远程分支；推送成功不代表队友的工作区已经同步，也不代表功能分支已经合进 main。\texttt{pull --ff-only} 如果拒绝，先查清双方的提交，不要紧接着强制推送。
+
+\begin{note}
+如果你想继续练习分支、合并、变基和优选，可以访问\href{https://learngitbranching.js.org/?locale=zh_CN}{Learn Git Branching 中文版}，相信网页动画能加深你的理解。遇到更复杂的提交整理或子模块管理问题，再查\href{https://git-scm.com/book/zh/v2}{Pro Git 中文版}，先把本章的实际流程练熟。
+\end{note}
+
+\subsubsection{与 GitHub 进行远程交互}
+\label{sec:git-github}
+本地流程已经走通了，接下来我们把“远程”换成 GitHub。先注册账号并验证邮箱，再准备一个自己的练习仓库。下面以 SSH 为主线，HTTPS 作为另一种选择；\textbf{两种认证方式选一种即可}。公开仓库通常可以直接通过 HTTPS 克隆，但推送仍需要认证和写入权限；私有仓库连读取也需要相应权限。
+
+\par\medskip\noindent\textbf{先配置 SSH：把公钥交给 GitHub}\par
+SSH 用一对密钥验证身份：公钥（Public Key）可以交给 GitHub，私钥（Private Key）留在自己的电脑上。组内推荐这种方式，配好以后，克隆和推送都可以沿用它。
+\Needspace{8\baselineskip}
+\begin{example}[添加密钥并验证连接]
+先在文件管理器中打开家目录，显示隐藏文件，检查 \texttt{.ssh} 里是否已有自己在用的密钥。已有合适的密钥时可以直接用对应的 \texttt{.pub} 文件，不必再生成。下面按首次配置、使用默认路径的情况演示：
+\Needspace{4\baselineskip}
+\begin{tbash}
+ssh-keygen -t ed25519 -C '你的邮箱'
+\end{tbash}
+\texttt{-t ed25519} 选择密钥类型，\texttt{-C} 添加便于辨认的注释。命令先询问保存位置，默认保存为 \path{~/.ssh/id_ed25519}，也可以另选路径。\textbf{只有这个路径尚未使用时才直接回车，看到覆盖提示时不要覆盖已有密钥}。接下来会询问保护私钥的口令，建议设置并记住；它不是 GitHub 登录密码，输入时终端也不会显示字符。
+
+\Needspace{6\baselineskip}
+生成后查看公钥：
+\Needspace{4\baselineskip}
+\begin{tbash}
+cat ~/.ssh/id_ed25519.pub
+\end{tbash}
+如果用了其他保存位置，这里的路径也要跟着换。复制输出的完整一行，在 GitHub 头像菜单中进入 Settings → SSH and GPG keys → New SSH key，填一个能认出这台电脑的 Title，例如“Ubuntu 笔记本”。Key type 选择 Authentication Key，把公钥粘到 Key 中，再点击 Add SSH key。\textbf{不要复制没有 .pub 后缀的私钥，也不要把私钥提交进仓库。}
+
+现在回到终端测试：
+\Needspace{4\baselineskip}
+\begin{tbash}
+ssh -T git@github.com
+\end{tbash}
+首次连接可能询问是否信任服务器。先将显示的指纹与\href{https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints}{GitHub 官方 SSH 指纹}核对，一致后才输入 yes。设置过私钥口令时，按提示输入口令；成功应看到下面的消息，其中 USERNAME 是你的账号：
+\begin{lstlisting}[language={},frame=single]
+Hi USERNAME! You've successfully authenticated, but GitHub does not provide shell access.
+\end{lstlisting}
+后半句表示 GitHub 不提供交互式 Shell，并不是连接失败；这个测试的退出码为 1 也属于预期。看到 \texttt{Permission denied (publickey)} 时，检查上传的公钥、使用的私钥和账号；若用了自定义文件名，可按\href{https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent?platform=linux}{官方密钥配置说明}把它加入 ssh-agent。完整测试说明见\href{https://docs.github.com/en/authentication/connecting-to-github-with-ssh/testing-your-ssh-connection}{官方连接测试文档}。
+\end{example}
+
+\par\medskip\noindent\textbf{如果使用 HTTPS：用令牌代替账户密码}\par
+HTTPS 地址形如 \path{https://github.com/YOUR_USER/git-lab.git}，其中 YOUR\_USER 要换成自己的用户名。GitHub 不接受用账户密码进行 Git 操作；终端要求输入 Password 时，可使用个人访问令牌（Personal Access Token，PAT）。下面以访问自己的练习仓库为例：
+\begin{enumerate}
+\item 先建立下一段的练习仓库，再进入 Settings → Developer settings → Personal access tokens → Fine-grained tokens，点击 Generate new token。
+\item 填写用途名称和过期时间，Resource owner 选择自己；Repository access 选择 Only select repositories，并选中练习仓库。
+\item 在 Repository permissions 中把 Contents 设为 Read and write，然后生成并复制令牌，离开页面后不能再查看原值，遗失时需要重新生成。
+\item 克隆时选择 HTTPS 地址。终端要求用户名时输入 GitHub 用户名，要求 Password 时粘贴令牌；粘贴后不显示字符是正常的，不要反复输入。若凭据管理器已接管认证，按其登录提示操作。
+\end{enumerate}
+令牌要像密码一样保管，不写进克隆地址、脚本或提交中。它只能使用你本来就拥有的权限，不能让你直接推送到别人的仓库。组织仓库还可能需要管理员批准，其他适用范围与限制见\href{https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens}{GitHub 令牌说明}。
+
+\Needspace{18\baselineskip}
+\par\medskip\noindent\textbf{建立自己的远程仓库，再克隆到本地}\par
+\Needspace{8\baselineskip}
+\begin{example}[创建并克隆练习仓库]
+在 GitHub 的“+”菜单选择 New repository，Owner 选自己，Repository name 填 \texttt{git-lab}。公开或私有按你的需要选，这里只放练习内容。勾选添加 README，让远程先有一次初始提交，再点击 Create repository。
+
+进入仓库页面，点击 Code，选择 SSH 并复制地址。在一个存放练习项目的目录中执行下面的命令，\texttt{YOUR\_USER} 换成你的 GitHub 用户名，名字和邮箱也换成自己的：
+\Needspace{10\baselineskip}
+\begin{tbash}
+git clone git@github.com:YOUR_USER/git-lab.git
+cd git-lab
+git config user.name '你的名字'
+git config user.email '你已验证的邮箱或 noreply 邮箱'
+git remote -v
+git branch --show-current
+git status
+\end{tbash}
+这里应该能看到 origin 指向自己的 GitHub 仓库，目录里有 README，工作区没有待提交修改。后面假设默认分支叫 main；如果网页和命令显示的是其他名字，后续的 main 也要一起换掉。使用 HTTPS 时只替换 clone 的地址，其他 Git 操作相同。
+\end{example}
+\begin{note}
+“克隆已有远程”和“上传已有本地仓库”是两条起步路线，不要混着做。clone 已经配置好 origin，不需要再 init 或 remote add。若要上传自己已有的本地仓库，应在 GitHub 建立\textbf{不初始化 README、.gitignore 或许可证的空仓库}，再用 \texttt{git remote add 远程名 地址} 添加地址，并用 \texttt{git push -u 远程名 分支名} 推送。已有 origin 时先看 \texttt{git remote -v}，可以另取名为 github；不要为了消除报错就覆盖原来的远程。
+\end{note}
+\begin{exercise}\label{ex:v1-github-access}
+用 SSH 或 HTTPS 完成自己练习仓库的认证与克隆，记录 origin 地址、默认分支和工作区状态。说明提交者邮箱、SSH 公钥或访问令牌分别解决什么问题。记录中不放私钥和令牌；暂时不能联网时，先完成本地实验，远程认证留待联网后核验。
+\end{exercise}
+
+\subsubsection{提 Issue：先把问题说清楚}
+\label{sec:git-issue}
+现在仓库里只有一个简单的 README。如果我们想补上模块列表，直接改当然也能做，不过多人协作时，先把“为什么改、准备改什么”留下来，队友才不用猜。GitHub 的议题（Issue）可以记录故障、功能需求和讨论，不一定非得等程序报错才能提。
+
+\begin{example}[为模块列表开一个 Issue]
+在自己的 \texttt{git-lab} 仓库进入 Issues，先搜索有没有相同问题，再点击 New issue。项目提供模板时按模板填；练习仓库没有模板时，直接写标题和正文即可。标题可以写“文档：补充模块列表与查看方法”，正文把下面几件事交代清楚：
+\begin{description}[style=nextline]
+\item[现状] README 只有仓库名称，新同学看不出我们记录了哪些模块。
+\item[希望的结果] 新增 modules.txt，列出 camera、radar；README 说明怎样查看这个文件。
+\item[完成标准] 在仓库根目录运行 cat modules.txt，能够看到两行模块名；README 中的操作与实际结果一致。
+\end{description}
+点击 Create 后记下它的编号，例如 \texttt{\#1}，后面的 PR 会用到；实际编号以网页为准。如果 Issues 入口不存在或不允许创建，先检查仓库是否启用了此功能以及你的访问权限。
+\end{example}
+
+如果报的是程序故障，正文还要补上\textbf{环境与版本、最短复现步骤、预期结果和实际结果}，报错尽量贴可复制的文字。写“跑不起来，急”很能表达心情，但队友还是不知道从哪里下手。贴日志前移除令牌、私钥等信息；问题有进展时在原 Issue 下补充，解决后说明原因，不必为同一个问题反复开新帖。创建入口与模板说明见\href{https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/creating-an-issue}{GitHub Issue 文档}。
+
+\subsubsection{提 PR：把修改交给队友检查}
+\label{sec:git-pr}
+Issue 说清了要做什么，接下来我们动手改。拉取请求（Pull Request，PR）用来提议把一个分支的修改合入另一个分支，给大家留出检查差异、讨论和验证的地方。它是 GitHub 上的协作流程，\textbf{不是终端里的 \texttt{git pull} 命令}。推送功能分支只是把提交传上去，开 PR 才是在请求合并。
+\Needspace{8\baselineskip}
+\begin{example}[从 Issue 到合并的完整流程]
+下面承接刚才的 \texttt{git-lab} 仓库和模块列表 Issue，演示建分支、提交、推送、评审与同步。
+
+\textbf{先在本地开分支。}在 \texttt{git-lab} 目录中确认 \texttt{git status --short} 没有输出，再同步主线并创建功能分支。本例会新建 \texttt{modules.txt}，已有同名资料时先换一个名字：
+\Needspace{9\baselineskip}
+\begin{tbash}
+git switch main
+git pull --ff-only origin main
+git switch -c docs-module-list
+printf 'camera\nradar\n' > modules.txt
+printf '\n查看模块列表：在仓库根目录运行 cat modules.txt。\n' >> README.md
+git status --short
+\end{tbash}
+此时 README 应显示为已修改，modules.txt 则尚未跟踪。先运行 \texttt{cat modules.txt}，再用 \texttt{git diff -- README.md} 检查说明的改动，然后暂存并核对：
+\Needspace{7\baselineskip}
+\begin{tbash}
+git add README.md modules.txt
+git diff --cached
+git commit -m 'Document module list'
+git push -u origin docs-module-list
+\end{tbash}
+这次明确写出两个文件名，避免把无关文件顺手带上。推送后，GitHub 上应出现 \texttt{docs-module-list} 分支，main 里还没有这次修改。
+
+\textbf{然后在网页开 PR。}回到仓库页面，点击新分支提示中的 Compare \& pull request；没有提示时，从 Pull requests → New pull request 进入。核对 \textbf{base 是 main，compare 是 docs-module-list}：base 是准备接收改动的目标，compare 是装着这次改动的来源。下面的差异应只涉及 README 和 modules.txt；如果方向选反或混入其他提交，先回去检查。
+
+标题写“文档：补充模块列表与查看方法”，正文写明改动和验证结果，例如：
+\begin{quote}
+新增 modules.txt，记录 camera 与 radar；README 补充查看方法。\\
+验证：在仓库根目录运行 cat modules.txt，输出 camera、radar 两行。\\
+Closes \#1
+\end{quote}
+\texttt{Closes \#1} 中的数字换成刚才的 Issue 编号，放在 PR 描述正文中。这会关联同一仓库的 Issue；PR 合入\textbf{默认分支}时，GitHub 才会按这个关键词自动关闭对应 Issue。只想关联讨论、不打算关闭时写 \texttt{Refs \#1} 即可。相关规则见\href{https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue}{Issue 与 PR 关联说明}。
+
+准备好后点击 Create pull request；还没写完、想先交流思路时可以选择 Create draft pull request。创建后查看 Files changed，核对实际差异；Conversation 中会显示讨论和检查结果。有队友参与时，可在可用的 Reviewers 入口请求评审。按钮与分支选择说明见\href{https://docs.github.com/en/pull-requests/how-tos/create-pull-requests/creating-a-pull-request}{GitHub PR 文档}。
+
+\textbf{评审要求修改时，继续改同一分支。}回到本地的 \texttt{docs-module-list}，编辑对应文件，检查后再 add、commit、push。新的提交会自动出现在原 PR 中，不用每改一行就再开一个 PR。回复评审时说明改在哪、怎样验证；有不同看法也可以先讨论，别只留一句“已处理”让队友玩找不同。
+
+\textbf{最后合并，再同步本地。}自己的练习仓库可以由你完成合并；团队项目则等维护者评审，并满足项目要求的检查与分支规则。这个实验选择 Create a merge commit，再点击合并确认。网页应显示 Merged，main 中出现模块列表，对应 Issue 也已关闭。想合并但没有按钮、检查失败或存在冲突时，先处理对应原因。
+
+GitHub 合并成功后，本地 main 还停在旧位置，我们再接回来：
+\Needspace{8\baselineskip}
+\begin{tbash}
+git switch main
+git pull --ff-only origin main
+cat modules.txt
+git log --oneline --graph -5
+git branch -d docs-module-list
+\end{tbash}
+确认输出和日志都包含这次修改后，再删掉本地功能分支。网页 PR 上的 Delete branch 删除的是远程功能分支，两者不是同一回事；远程删除后可用 \texttt{git fetch --prune origin} 清理本地过期的远程跟踪记录。本实验使用合并提交，所以 \texttt{-d} 能检查分支已合并；其他项目若用压缩合并（Squash）或变基合并，删除时可能仍提示未合并，先核对改动，不要直接换成强制删除。
+\end{example}
+
+\par\medskip\noindent\textbf{没有原仓库写权限时：先 Fork，再提 PR}\par
+参与开源项目时，你通常不能直接往对方仓库推送。可以先在项目页面点击 Fork，在自己的账号下建立一份派生仓库，再\textbf{克隆自己的 Fork}，从新分支修改、提交并推送到自己的 origin。然后去原项目开 PR，选择 compare across forks：base repository 选原项目，base 选它希望接收修改的分支，head repository 选你的 Fork，compare 选你的功能分支。不要把目标选成自己的 main，否则维护者收不到这次合并请求。私有仓库是否允许 Fork 要看项目设置。
+
+自己的 Fork 不会自动一直追上原项目。需要取回原项目更新时，可以额外添加名为 upstream 的远程；下面假设两个仓库的主线都叫 main，本地 main 没有自己的额外提交，且工作区干净。地址换成\textbf{原项目}的地址，已有 upstream 时只检查，不重复添加：
+\Needspace{8\baselineskip}
+\begin{tbash}
+git remote add upstream git@github.com:UPSTREAM_OWNER/REPO.git
+git fetch upstream
+git switch main
+git merge --ff-only upstream/main
+git push origin main
+\end{tbash}
+这里 origin 仍指向自己的 Fork，upstream 指向原项目；功能分支继续推到 origin，PR 再交给原项目的维护者。\texttt{--ff-only} 拒绝时先查看历史，不能靠强制推送把自己或队友的提交抹掉。具体界面可参考\href{https://docs.github.com/en/pull-requests/how-tos/create-pull-requests/creating-a-pull-request-from-a-fork}{从 Fork 创建 PR 的说明}。
+
+\Needspace{9\baselineskip}
+\begin{exercise}\label{ex:v1-github-collaboration}
+在自己的练习仓库完成一次模块列表 Issue 与 PR：保留 Issue 编号、功能分支名、PR 链接、Files changed 差异和验证结果，合并后同步本地 main，并检查 Issue 是否关闭。再说明参与没有写权限的项目时，origin、upstream、PR 的 base 与 compare 各应指向哪里。练习只在自己的仓库或明确允许练习的项目中进行；不能联网时先写好 Issue 与 PR 草稿，实际创建与合并待联网后验证。
+\end{exercise}
+\begin{conclusion}
+一轮协作可以这样串起来：Issue 记录问题与完成标准，功能分支保存具体修改，push 把提交送到 GitHub，PR 供队友检查并决定是否合并，最后 pull 把主线接回本地。认证解决“你是谁”，仓库权限决定“你能做什么”；commit、push、开 PR 和合并是四个不同的动作，完成一个不代表后面的也已经完成。
+\end{conclusion}

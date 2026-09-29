@@ -1,0 +1,51 @@
+{
+  "lab": "/tmp/tutorial-git-validation-xpicjc4q",
+  "results": {
+    "local_config": true,
+    "two_diffs": true,
+    "fast_forward_branch": true,
+    "ignore_exception": true,
+    "github_git_steps_with_local_remote": true,
+    "merge_commit_sync_and_branch_delete": true,
+    "fork_sync_with_local_remotes": true
+  },
+  "not_tested": [
+    "GitHub SSH/HTTPS authentication",
+    "GitHub issue/PR web creation and merge"
+  ],
+  "local_demo": {
+    "lab": "/tmp/tmp.emvhkFxAHA",
+    "modules": [
+      "camera",
+      "radar"
+    ],
+    "commit_count": 2
+  },
+  "validation_date": "2026-09-29",
+  "document_git_workflows_with_local_remotes_executed": true,
+  "build": {
+    "engine": "xelatex",
+    "entry": "01-基础通识/main.tex",
+    "pages": 212,
+    "references_stable": true,
+    "undefined_references": false,
+    "git_overfull_boxes": false,
+    "existing_unmodified_overfull_box": "Chapter1/11.tex:263-265",
+    "output": "/tmp/tutorial-git-review-build/main.pdf"
+  },
+  "visual_review": {
+    "git_printed_pages": [
+      40,
+      51
+    ],
+    "git_physical_pages": [
+      48,
+      59
+    ],
+    "new_answers_printed_page": 170,
+    "new_answers_physical_page": 178,
+    "contents_physical_page": 7,
+    "short_code_blocks_kept_together": true,
+    "github_step_headings_kept_with_examples": true
+  }
+}

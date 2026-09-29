@@ -1,0 +1,125 @@
+{
+  "validation_date": "2026-09-29",
+  "git_version": "git version 2.55.0",
+  "scripts": {
+    "demo.sh": {
+      "lab": "/tmp/tmp.gCIDG7ec54",
+      "exit_code": 0,
+      "output": "lab=/tmp/tmp.gCIDG7ec54\nInitialized empty Git repository in /tmp/tmp.gCIDG7ec54/remote.git/\n[main (root-commit) 2d66303] Record camera module\n 1 file changed, 1 insertion(+)\n create mode 100644 modules.txt\nbranch 'main' set up to track 'origin/main'.\n\nWORKTREE DIFF\ndiff --git a/modules.txt b/modules.txt\nindex c9076b8..1b718a4 100644\n--- a/modules.txt\n+++ b/modules.txt\n@@ -1 +1,2 @@\n camera\n+radar\n\nSTAGED DIFF\ndiff --git a/modules.txt b/modules.txt\nindex c9076b8..1b718a4 100644\n--- a/modules.txt\n+++ b/modules.txt\n@@ -1 +1,2 @@\n camera\n+radar\n[main 91b4f35] Record radar module\n 1 file changed, 1 insertion(+)\n\nTEAMMATE CONTENT\ncamera\nradar\n\nCOMMIT COUNT\n2\n保留实验目录以便检查：/tmp/tmp.gCIDG7ec54\n"
+    },
+    "history.sh": {
+      "lab": "/tmp/tmp.JZVc7vgmTB",
+      "exit_code": 0,
+      "output": "lab=/tmp/tmp.JZVc7vgmTB\nInitialized empty Git repository in /tmp/tmp.JZVc7vgmTB/.git/\n[main (root-commit) b4f0ab4] Start vision project\n 1 file changed, 1 insertion(+)\n create mode 100644 README.md\n[feature-camera 74db677] Add camera module\n 1 file changed, 1 insertion(+)\n create mode 100644 camera.txt\n[main 2cb0699] Add team review note\n 1 file changed, 1 insertion(+)\n create mode 100644 review.txt\n\nBEFORE REBASE\n* 2cb0699 Add team review note\n| * 74db677 Add camera module\n|/  \n* b4f0ab4 Start vision project\n\nAFTER REBASE\n* 3c6e9cc Add camera module\n* 2cb0699 Add team review note\n* b4f0ab4 Start vision project\n\nOLD AND NEW FEATURE COMMITS\n74db6777de0a617cc14725fd02c69c2426f70dd4\n3c6e9cca3f27352896032161144a8c164837219c\nUpdating 2cb0699..3c6e9cc\nFast-forward\n camera.txt | 1 +\n 1 file changed, 1 insertion(+)\n create mode 100644 camera.txt\n[experiment 7d7822b] Add experimental debug note\n 1 file changed, 1 insertion(+)\n create mode 100644 debug.txt\n[experiment 63c8a41] Fix camera calibration offset\n 1 file changed, 1 insertion(+)\n create mode 100644 calibration.txt\n[main 0569faf] Add release checklist\n 1 file changed, 1 insertion(+)\n create mode 100644 release.txt\ncommit 63c8a418f413b928e1a70cb54ba330de3e03900a\nAuthor: Training Student <student@example.invalid>\nDate:   Tue Sep 29 23:49:21 2026 +0800\n\n    Fix camera calibration offset\n\n calibration.txt | 1 +\n 1 file changed, 1 insertion(+)\n[main 861ca1f] Fix camera calibration offset\n Date: Tue Sep 29 23:49:21 2026 +0800\n 1 file changed, 1 insertion(+)\n create mode 100644 calibration.txt\n\nAFTER CHERRY-PICK\n* 861ca1f Fix camera calibration offset\n* 0569faf Add release checklist\n| * 63c8a41 Fix camera calibration offset\n| * 7d7822b Add experimental debug note\n|/  \n* 3c6e9cc Add camera module\n* 2cb0699 Add team review note\n\nMAIN FILES\nREADME.md\ncalibration.txt\ncamera.txt\nrelease.txt\nreview.txt\n\nPICKED COMMIT MESSAGE\nFix camera calibration offset\n\n(cherry picked from commit 63c8a418f413b928e1a70cb54ba330de3e03900a)\n\n保留实验目录以便检查：/tmp/tmp.JZVc7vgmTB\n"
+    },
+    "submodule.sh": {
+      "lab": "/tmp/tmp.Qen84Ru86J",
+      "exit_code": 0,
+      "output": "lab=/tmp/tmp.Qen84Ru86J\nInitialized empty Git repository in /tmp/tmp.Qen84Ru86J/helper/.git/\n[main (root-commit) 140f881] Release camera helper v1\n 1 file changed, 1 insertion(+)\n create mode 100644 version.txt\nInitialized empty Git repository in /tmp/tmp.Qen84Ru86J/student/.git/\n[main (root-commit) b4f0ab4] Start vision project\n 1 file changed, 1 insertion(+)\n create mode 100644 README.md\ndiff --git a/.gitmodules b/.gitmodules\nnew file mode 100644\nindex 0000000..038858d\n--- /dev/null\n+++ b/.gitmodules\n@@ -0,0 +1,3 @@\n+[submodule \"libs/helper\"]\n+\tpath = libs/helper\n+\turl = /tmp/tmp.Qen84Ru86J/helper\n[main 670e981] Pin camera helper v1\n 2 files changed, 4 insertions(+)\n create mode 100644 .gitmodules\n create mode 160000 libs/helper\n\nRECORDED SUBMODULE\n160000 commit 140f881536268674e4029794dff3c59b611d99b8\tlibs/helper\n\nBEFORE INITIALIZATION\n-140f881536268674e4029794dff3c59b611d99b8 libs/helper\nSubmodule path 'libs/helper': checked out '140f881536268674e4029794dff3c59b611d99b8'\ncamera-utils v1\n[main d0c1981] Release camera helper v2\n 1 file changed, 1 insertion(+), 1 deletion(-)\nSubmodule libs/helper 140f881..d0c1981:\n  > Release camera helper v2\n[main dad4941] Pin camera helper v2\n 1 file changed, 1 insertion(+), 1 deletion(-)\nUpdating 670e981..dad4941\nFast-forward\n libs/helper | 2 +-\n 1 file changed, 1 insertion(+), 1 deletion(-)\n\nAFTER PULL, BEFORE SUBMODULE UPDATE\ncamera-utils v1\n+140f881536268674e4029794dff3c59b611d99b8 libs/helper (heads/main)\nSubmodule path 'libs/helper': checked out 'd0c19811a8910a69f466ab65e2f06322c073b065'\n\nAFTER SUBMODULE UPDATE\ncamera-utils v2\n d0c19811a8910a69f466ab65e2f06322c073b065 libs/helper (remotes/origin/HEAD)\n保留实验目录以便检查：/tmp/tmp.Qen84Ru86J\n"
+    }
+  },
+  "checks": {
+    "original_demo_still_two_commits": true,
+    "rebase": {
+      "old": "74db6777de0a617cc14725fd02c69c2426f70dd4",
+      "new": "3c6e9cca3f27352896032161144a8c164837219c",
+      "old_parent": "b4f0ab449c6545f0ac29b40b3a10744f83862fee",
+      "new_parent": "2cb0699c0b05ca64969567c3cffb938785296b48",
+      "same_camera_content": true,
+      "no_merge_commit": true
+    },
+    "cherry_pick": {
+      "source": "63c8a418f413b928e1a70cb54ba330de3e03900a",
+      "picked": "861ca1fc5ed9d39a05ea6d4c2605d68ed1e6cf57",
+      "only_calibration_change_received": true,
+      "source_recorded": true
+    },
+    "submodule": {
+      "mode_160000": true,
+      "v2": "d0c19811a8910a69f466ab65e2f06322c073b065",
+      "uninitialized_minus_prefix": true,
+      "pull_only_keeps_v1_and_plus_prefix": true,
+      "update_checks_out_v2": true
+    }
+  },
+  "exercises": {
+    "cherry_pick_maintenance": true,
+    "submodule_v3": {
+      "helper_v3": "f08870c42015af2d910c08e1f4779eb01c85fede",
+      "student_recorded_v3": true,
+      "before_update_content": "camera-utils v2",
+      "before_update_plus_prefix": true,
+      "after_update_content": "camera-utils v3"
+    }
+  },
+  "not_tested": [
+    "GitHub authentication and issue/PR web actions",
+    "publishing submodule repositories to a real remote"
+  ],
+  "build": {
+    "engine": "xelatex",
+    "entry": "01-基础通识/main.tex",
+    "pages": 220,
+    "references_stable": true,
+    "undefined_references": false,
+    "duplicate_labels": false,
+    "git_overfull_boxes": false,
+    "existing_unmodified_overfull_box": "Chapter1/11.tex:263-265",
+    "output": "/tmp/tutorial-git-advanced-build/main.pdf"
+  },
+  "visual_review": {
+    "physical_pages": [
+      7,
+      50,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      184,
+      185,
+      186
+    ],
+    "new_concepts_printed_pages": [
+      45,
+      51
+    ],
+    "new_answers_printed_pages": [
+      176,
+      177
+    ],
+    "contents_physical_page": 7,
+    "code_blocks_kept_together": true,
+    "ignore_table_intro_kept_with_table": true,
+    "github_step_headings_and_short_code_blocks_checked": true,
+    "output": "/tmp/tutorial-git-advanced-build/final-pages/"
+  },
+  "structure": {
+    "first_chapter_exercises": 41,
+    "first_chapter_end_problems": 12,
+    "included_files": 23,
+    "labels": 185,
+    "referenced_labels": 122,
+    "answers_match": true,
+    "git_examples": 12,
+    "git_exercises": 9,
+    "git_conclusions": 4,
+    "all_nonempty_advanced_source_lines_shown_in_text": true
+  },
+  "source_sha256": {
+    "01-基础通识/Chapter1/15.tex": "a36accf4c244bacd2aa0a9cddeb6c122bea0f13c3abe9e2f3850528040451498",
+    "01-基础通识/answers.tex": "b51d00308568a080f75d5443e7b021d21ed35da9e22d8ce2facfb6d2c63c2d20",
+    "01-基础通识/examples/git-workflow-demo/history.sh": "de98bc609c6dbc33a7b28b12ed2cb51ea8c9f36bd95e48737641467a5e1ea9c8",
+    "01-基础通识/examples/git-workflow-demo/submodule.sh": "7907acf6bec2d6617e5824f9dfa6bd780b83369d93f6d380a606e4c847c41651",
+    "01-基础通识/examples/git-workflow-demo/README.md": "16e6e3b40ca5dba143a3426486420cd87f7758df80d69034ae6faffe61df4eb9"
+  }
+}

@@ -248,6 +248,20 @@ printf '%s\n' "$PATH"
 \begin{solution}
 在干净练习仓库中 switch -c 新分支，新增文件并 add、commit；switch main 后文件通常暂时不在该版本中。merge --ff-only 新分支后，main 指向新提交且文件出现。图形日志可同时显示两个分支名指向同一提交，说明分支是名字而不是永久复制出来的文件夹。
 \end{solution}
+\paragraph*{随堂练习~\ref{ex:v1-git-rebase}：变基与提交身份}
+\begin{solution}
+用 \texttt{git rev-parse feature-before-rebase feature-camera} 取得 F 和 F' 的编号，再用 \texttt{git show --format=fuller 编号} 比较改动；两者都增加 camera.txt。\texttt{git rev-parse feature-before-rebase\textasciicircum{} feature-camera\textasciicircum{}} 可查看父提交，分别是初始 README 提交 A 和增加 review.txt 的主线提交 M。父提交属于提交身份的一部分，所以相同改动在不同起点上重放后会得到不同编号。变基只移动 feature-camera，main 在变基结束时仍停在 M；脚本随后明确切回 main 并快进合并，主线才到达 F'。最终状态可用 \texttt{git log --oneline --graph --all} 连同保留的旧分支一起检查。
+\end{solution}
+\paragraph*{随堂练习~\ref{ex:v1-git-cherry-pick}：优选与改动依赖}
+\begin{solution}
+脚本结束在 main，先确认工作区干净，用 \texttt{git switch -c maintenance} 新建维护分支；\texttt{git log --oneline experiment} 找到调试提交，核对 \texttt{git show 编号} 后执行 \texttt{git cherry-pick -x 编号}。维护分支新增 debug.txt，保留从 main 继承的 calibration.txt 与其他文件；此次优选没有再次合入标定提交，也没有改写 experiment。来源与目标父提交、提交说明不同，新编号也不同。没有冲突只表示文本改动可以应用，不能保证缺少前置功能时程序仍正确；还要检查依赖并构建、运行相应验证。
+\end{solution}
+\paragraph*{随堂练习~\ref{ex:v1-git-submodule}：两层版本与队友同步}
+\begin{solution}
+在 helper 中把 version.txt 改为 v3 后 add、commit，记下 \texttt{git rev-parse HEAD}。回到 student，先 \texttt{git -C libs/helper fetch origin}，再 \texttt{git -C libs/helper switch --detach v3的实际编号}，检查 \texttt{git diff --submodule=log} 后 add libs/helper、commit。\texttt{git ls-tree HEAD libs/helper} 应记录 helper 的 v3 编号，student 自己的 HEAD 是另一份主仓库提交，不能混用。
+
+在 teammate 中先 \texttt{git -c submodule.recurse=false pull --ff-only}，应看到主仓库记录 v3，但依赖工作文件仍为 v2，\texttt{git submodule status} 以 \texttt{+} 开头；再执行正文的命令级 file 许可与 \texttt{submodule update --init --recursive}，文件变为 v3，状态首字符为空格。只在 helper 提交尚未改变主仓库记录，只在 student 子模块工作区切换尚未提交新记录，都不能让队友按主工程历史复现升级。真实远程流程还必须先发布依赖提交，再发布引用它的主仓库提交。
+\end{solution}
 \paragraph*{随堂练习~\ref{ex:v1-git-ignore}：忽略规则与例外}
 \begin{solution}
 \texttt{.gitignore} 写为：
@@ -270,6 +284,18 @@ git check-ignore -v --no-index build/keep.txt
 
 status 应显示 \texttt{build/keep.txt}，不显示另外两项。最后一条可能打印以 \texttt{!} 开头的例外规则，这表示取消忽略；不要只凭“有输出”就判断被忽略。
 已经被 Git 跟踪的文件，不会因为新增规则自动停止跟踪。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:v1-github-access}：认证与克隆}
+\begin{solution}
+SSH 路线应看到连接测试的成功消息及自己的账号；HTTPS 路线可通过后续练习中的成功推送确认认证与写入权限。克隆后，用 \texttt{git remote -v} 核对 origin 是自己的练习仓库，用 \texttt{git branch --show-current} 记录实际分支，\texttt{git status} 应显示工作区干净。仅能克隆公开仓库不能证明有推送权限。提交者邮箱是提交里的作者信息，已验证邮箱或账号提供的 noreply 邮箱可用于关联账号；SSH 公钥与本机私钥配合验证身份，HTTPS 令牌是另一种远程认证凭据。二者都不能绕过仓库访问权限，记录中不能包含私钥或令牌。无法联网时，认证和克隆记为待核验。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:v1-github-collaboration}：Issue 与 PR 闭环}
+\begin{solution}
+Issue 应写出现状、预期结果与可检查的完成标准。PR 的 base 应为练习仓库的 main，compare 为 docs-module-list，差异只包含 README 的说明和新增的 modules.txt；描述给出 \texttt{cat modules.txt} 的验证结果，并用 \texttt{Closes \#实际编号} 关联 Issue。合入默认分支后，应看到 PR 为 Merged、Issue 为 Closed；本地切回 main 并 \texttt{git pull --ff-only origin main} 后，能读到 camera、radar 两行，日志包含这次修改。
+
+Fork 路线中，origin 指向自己的 Fork，upstream 指向原项目；PR 的 base repository 与 base 分支指向原项目及其接收修改的分支，head repository 与 compare 分支指向自己的 Fork 及功能分支。判断标准是提交是否推到正确仓库、PR 是否交给正确项目，以及合并后本地主线是否真正更新。草稿只能证明准备了内容，不能当作实际创建、推送或合并的证据。
 \end{solution}
 
 \paragraph*{随堂练习~\ref{ex:v1-conda-config}：配置来源}
