@@ -1,8 +1,8 @@
-ubuntu系统提供了完整的图形化界面，日常操作点点鼠标都能完成。但命令行才是真正的基本功：装环境、连开发板、远程调试，样样绕不开它。下面我们就把最常用的操作过一遍。
+ubuntu系统提供了完整的图形化界面，日常操作点点鼠标都能完成。但命令行才是真正的基本功：装环境、连机载电脑或开发板、远程调试，样样绕不开它。下面我们就把最常用的操作过一遍。
 \subsubsection{linux文件系统基本概念}
 \textbf{linux目录结构}
 
-先看根目录如何把不同用途的文件串成一棵树：
+让我们先看看根目录如何把不同用途的文件串成一棵树：
 
 \begin{figure}[H]
     \centering
@@ -11,14 +11,14 @@ ubuntu系统提供了完整的图形化界面，日常操作点点鼠标都能�
     \label{fig:linux7} % 图片标签，用于引用
 \end{figure}
 
-目录树从根目录 / 出发。图中的 /home 保存用户目录，/usr 保存许多程序与库；在 Ubuntu 的 usr-merge 布局里，/bin、/sbin、/lib 通常是指向 /usr 中对应目录的符号链接，实机可用 ls -ld 检查，不只看图记结论。
+目录树从根目录 / 出发。图中的 /home 保存用户目录，/usr 保存许多程序与库；在 Ubuntu 的 usr-merge 布局里，/bin、/sbin、/lib 通常是指向 /usr 中对应目录的符号链接。
 
 \textbf{“一切皆文件”}
 
-在linux系统中有一个非常重要的、区别于windows系统的概念是“一切皆文件”，也就是把一切资源都看作是文件，包括硬件设备（通常称为设备文件），这样好处是用户可以用读写文件的方式实现对硬件的访问。例如 U 盘连接后通常有 /dev 下的块设备节点。对原始设备节点的写入可能破坏分区数据；日常文件操作应使用挂载后的目录，不把设备节点当作普通文本文件。简单来说：你以为是 U 盘设备？其实是我文件哒！
+在linux系统中有一个非常重要的、区别于windows系统的概念是“一切皆文件”，也就是把一切资源都看作是文件，包括硬件设备（通常称为设备文件），这样好处是用户可以用读写文件的方式实现对硬件的访问。例如 U 盘连接后通常有 /dev 下的块设备节点。对原始设备节点的写入可能破坏分区数据；日常文件操作应使用挂载后的目录，不要把设备节点当作普通文本文件。简单来说：你以为是普普通通的文件？其实我是整个 U 盘设备哒！
 
 \begin{note}
-“一切皆文件”是统一接口的概括，不代表所有资源都是磁盘上的普通文件；设备、管道、套接字有不同类型和操作限制。
+“一切皆文件”是统一接口的概括，不代表所有资源都是磁盘上随便能打开的普通文件；设备、管道、套接字有不同类型和操作限制。非要较真的话，网卡的相关接口也没有完全被封装为文件形式。
 \end{note}
 
 \textbf{挂载}
@@ -100,7 +100,7 @@ findmnt /
 说明：
 \begin{enumerate}
 	\item -\enspace 可以切换到用户家目录，否则保持位置不变
-	\item su 不接用户名通常尝试切换到 root；Ubuntu 默认不启用 root 密码，日常管理员命令用 sudo，不为练习开启 root 登录
+	\item su 不接用户名通常尝试切换到 root
 	\item 命令前加sudo：以超级用户权限运行命令
 \end{enumerate}
 
@@ -544,7 +544,7 @@ tar命令的参数繁多，此处只列举了以上最最常见的参数。
 
 \begin{table}[H]\centering
 \begin{note}
-归档命令也有删除选项：zip 的 -m 会在压缩后移除源文件，本章练习不使用它；tar 的 -r 只适用于可追加的未压缩归档，不直接追加到 .tar.gz。先保留源数据，再做解包核验。
+归档命令也有删除选项：zip 的 -m 会在压缩后移除源文件；tar 的 -r 只适用于可追加的未压缩归档，不直接追加到 .tar.gz。
 \end{note}
 \textbf{zip\enspace 选项和参数}
 
@@ -566,7 +566,7 @@ tar命令的参数繁多，此处只列举了以上最最常见的参数。
 
 \Needspace{8\baselineskip}
 \begin{example}[硬链接、软链接和复制]
-在新练习目录中执行，不改真实资料：
+在新练习目录中执行：
 
 
 \Needspace{11\baselineskip}
@@ -628,7 +628,7 @@ cat hard.txt copy.txt
 
 \Needspace{8\baselineskip}
 \begin{example}
-先在练习目录建样本，再查找自己的文件，避免其他用户目录的权限错误干扰判断：
+先在练习目录建样本，再查找自己的文件：
 
 
 \Needspace{8\baselineskip}
@@ -868,7 +868,7 @@ Vim 启动后通常处于普通模式，按 i 进入插入模式，Esc 返回普
 \begin{note}
 vim是一个完全可以在终端中运行的文本编辑器，功能强大，如果是远程控制等情况没有图形化界面，vim的优点就会比较突出，但是新手可能难以适应。
 如果你对vim感到无从下手，可以试试更简单的终端文本编辑器nano，这个操作比较符合直觉。或者是使用在vim基础上发展的nvim，而且加入一些美化，比如AstroNvim
-\url{https://astronvim.com/}（开箱即用的 Neovim 配置，安装方法见本节末尾的"AstroNvim"小节）。如果你想进行vim的命令学习，推荐vim-adventure\url{https://vim-adventures.com/}，这是一个图形化的使用vim命令的小游戏，可以轻松入门vim内容，但是完整版需要付费，也可用自带的 vimtutor 练习基础操作。
+\url{https://astronvim.com/}（开箱即用的 Neovim 配置，安装方法见本节末尾的"AstroNvim"小节）。如果你想进行vim的命令学习，推荐 vim-adventure \url{https://vim-adventures.com/}，这是一个图形化的使用vim命令的小游戏，可以轻松入门vim内容，但是完整版需要付费，也可用自带的 vimtutor 练习基础操作。
 \end{note}
 
 以上就是linux系统中关于文件和目录的基本操作，俗话说熟能生巧，请读者利用空余时间多加练习，尽快适应linux系统的命令行操作。
@@ -879,7 +879,7 @@ Vim 本身有语法高亮与基础补全，但插件组合需要配置。Neovim�
 
 \textbf{安装新版 Neovim}
 
-AstroNvim 需要较新版本的 Neovim（当前 AstroNvim 文档要求稳定版 0.11 及以上，安装前再次核对），而 Ubuntu 22.04 仓库自带的版本太老，因此先核对官方要求再安装。下面仅用于 \texttt{x86\_64}；ARM 机器换用对应架构包，不把主机下载包复制给 Jetson 当作同一架构。下载失败时停止，不继续解压：
+AstroNvim 需要较新版本的 Neovim，而 Ubuntu 22.04 仓库自带的版本太老，因此先核对官方要求再安装。下面仅用于 \texttt{x86\_64}，如果是在 Nvidia Orin NX 等 ARM 机器安装需要换用 arm64 架构包：
 
 \Needspace{8\baselineskip}
 \begin{example}
@@ -908,29 +908,7 @@ export PATH=/opt/nvim-linux-x86_64/bin:$PATH
 
 \textbf{安装 AstroNvim}
 
-\Needspace{8\baselineskip}
-\begin{example}
-备份可能存在的旧配置，然后克隆 AstroNvim 模板并启动：
-
-\begin{tbash}
-# 目标备份名不能已存在，存在时先换名字
-if [ -e ~/.config/nvim ]; then
-    mv -i ~/.config/nvim ~/.config/nvim.bak
-fi
-if [ -e ~/.local/share/nvim ]; then
-    mv -i ~/.local/share/nvim ~/.local/share/nvim.bak
-fi
-git clone --depth 1 https://github.com/AstroNvim/template ~/.config/nvim
-nvim
-\end{tbash}
-
-\end{example}
-
-首次启动会自动下载安装全部插件，泡杯茶等它跑完，看到编辑界面就大功告成了。条件检查会跳过不存在的旧目录；克隆或插件下载失败时先处理网络与错误，不把所有报错都忽略。
-
-\begin{note}
-保留模板的 Git 信息不妨碍本节搜索练习。已有 .bak 目录时不要覆盖，改用带日期的备份名；完整迁移还应检查 ~/.local/state/nvim 与 ~/.cache/nvim。仅在确认路径和用途后清理旧文件。
-\end{note}
+首次启动会自动下载安装全部插件，泡杯茶等它跑完，看到编辑界面就大功告成了。
 
 \begin{figure}[H]
     \centering
