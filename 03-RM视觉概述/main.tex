@@ -12,6 +12,7 @@
 ]{elegantbook}
 
 \input{../templates/preamble.tex}
+\usepackage{needspace}
 % 题解引用只显示题号，保留模板原有的题目列表外观。
 \setlist[enumerate,1]{ref=\arabic*}
 
@@ -236,19 +237,18 @@
 
 \chapter{进阶地图与资料索引}
 \begin{introduction}
-  \item 学习目标：按方向列出学习路径，定位教材入口，并填写可追溯的资料与责任记录。
-  \item 建议学时：约 1 小时，含本地索引检查。
+  \item 学习目标：按方向列出带产出的学习路径，实际打开教材入口，核对版本并更新资料卡。
+  \item 建议学时：约 1--2 小时，含本地索引和副本迁移检查。
   \item 本卷边界：本章只维护入口和版本；知识正文留在相应卷章，队内地址和人员由负责人确认。
 \end{introduction}
 \label{ch:v3-index}
 
 \section{学习路径与资料维护}
 \input{chapters/06_index.tex}
-
-% 章末复习与验收集中排版，避免末页只剩一个条目。
-\clearpage
 \section{本章小结}
-先按问题找到卷册，再按方向建立学习顺序，用真实入口、版本、责任人和复核日期把资料连起来。必须能判断资料是否适用；不必背路径，但要能查到并验证。活页负责入口变更，专项正文负责知识解释。
+\begin{conclusion}
+先按问题找到卷册，再按方向安排能检查的产物；实际打开入口，核对章名、显示版本和具体内容，写明真实负责人及检查日期。你需要能区分可打开、声明一致和接口适用，缺项继续保留待确认。活页维护入口，专项正文解释知识，协议变化还要同步实现与验证。
+\end{conclusion}
 
 \begin{problemset}
 \item \label{v3-prob-index-1}\textbf{基础题}：三卷分别主要解决什么问题？

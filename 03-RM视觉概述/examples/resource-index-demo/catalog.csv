@@ -1,0 +1,7 @@
+key,volume,entry,chapter,version,owner
+build,01-基础通识,Chapter3/3.tex,编译过程与 CMake 基础,2026.09,
+geometry,02-专项技术栈,chapters/G_ba.tex,几何视觉与 Bundle Adjustment,2026.08,
+engineering,03-RM视觉概述,chapters/05_engineering.tex,工程准则与调车文化,2026.08,
+communication,02-专项技术栈,chapters/J_comm.tex,多机通信方法,2026.08,
+lecture,,视觉培训/最小二乘法/,,,
+team,,,,,

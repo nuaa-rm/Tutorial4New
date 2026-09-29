@@ -1,0 +1,323 @@
+{
+  "python": "3.12.3",
+  "files": {
+    "audit.py": "d56eb01aa9ebbeb924a7384edbc848479e5654eb3c154b90623cd309863c867a",
+    "catalog.csv": "50b3cf82894ca0b14bd57031e9c640e69f4a12c4ab837debcfe97bf4733132ee",
+    "README.md": "89d37423c34a03bc816c9cb77f4a9f61997851abaf9fa82e93b5a4095a136b19"
+  },
+  "records": [
+    {
+      "name": "实际教材入口 build",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/resource-index-demo/audit.py",
+          "build"
+        ],
+        "stdout": {
+          "key": "build",
+          "checked_on": "2026-09-29",
+          "owner": null,
+          "method": "本机文件检查",
+          "entry": "/home/mijiao/Apps/Tutorial4New/01-基础通识/Chapter3/3.tex",
+          "sha256": "d077d8cceeb45266eb50f520dd81521ee165c243bb35145425e36d2f3db5146b",
+          "main_sha256": "b04bef89421b49beae8da12d6eaedd09d7516a6a5cb9c3bdb9139d9960623af0",
+          "chapter": "编译过程与 CMake 基础",
+          "book_version": "2026.09",
+          "status": "入口与声明一致"
+        },
+        "read_content_marker": "target\\_link\\_libraries"
+      }
+    },
+    {
+      "name": "实际教材入口 geometry",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/resource-index-demo/audit.py",
+          "geometry"
+        ],
+        "stdout": {
+          "key": "geometry",
+          "checked_on": "2026-09-29",
+          "owner": null,
+          "method": "本机文件检查",
+          "entry": "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/chapters/G_ba.tex",
+          "sha256": "6117fe8e5582005c88a304678e93858975a22f8fbcaf6d300ee571438b5c334c",
+          "main_sha256": "b6463d9c1b1a50c159e68bbab8eabe0ff5ee4e364846c19290e66cebfd1e7b8b",
+          "chapter": "几何视觉与 Bundle Adjustment",
+          "book_version": "2026.08",
+          "status": "入口与声明一致"
+        },
+        "read_content_marker": "PnP"
+      }
+    },
+    {
+      "name": "实际教材入口 engineering",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/resource-index-demo/audit.py",
+          "engineering"
+        ],
+        "stdout": {
+          "key": "engineering",
+          "checked_on": "2026-09-29",
+          "owner": null,
+          "method": "本机文件检查",
+          "entry": "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/chapters/05_engineering.tex",
+          "sha256": "7c41ef0d7c2e9bed55b2cbe5cef7a69a00a07c21f4cd0919910e95c75289e68e",
+          "main_sha256": "a90271f97b7a4c3d86e0d99fc59d4fdc6e5e6a7353af2599942912ccb5bb0892",
+          "chapter": "工程准则与调车文化",
+          "book_version": "2026.08",
+          "status": "入口与声明一致"
+        },
+        "read_content_marker": "required"
+      }
+    },
+    {
+      "name": "实际教材入口 communication",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/resource-index-demo/audit.py",
+          "communication"
+        ],
+        "stdout": {
+          "key": "communication",
+          "checked_on": "2026-09-29",
+          "owner": null,
+          "method": "本机文件检查",
+          "entry": "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/chapters/J_comm.tex",
+          "sha256": "c832557bb7c37fbe2a77a4343bb8810cd5ec12429eecd59a14e4d9f2c61cc11f",
+          "main_sha256": "b6463d9c1b1a50c159e68bbab8eabe0ff5ee4e364846c19290e66cebfd1e7b8b",
+          "chapter": "多机通信方法",
+          "book_version": "2026.08",
+          "status": "入口与声明一致"
+        },
+        "read_content_marker": "CRC"
+      }
+    },
+    {
+      "name": "明确缺项 lecture",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/resource-index-demo/audit.py",
+          "lecture"
+        ],
+        "stdout": {
+          "key": "lecture",
+          "checked_on": "2026-09-29",
+          "owner": null,
+          "method": "本机文件检查",
+          "entry": "/home/mijiao/Apps/Tutorial4New/视觉培训/最小二乘法",
+          "status": "本机未取得文件"
+        }
+      }
+    },
+    {
+      "name": "明确缺项 team",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/resource-index-demo/audit.py",
+          "team"
+        ],
+        "stdout": {
+          "key": "team",
+          "checked_on": "2026-09-29",
+          "owner": null,
+          "method": "本机文件检查",
+          "status": "未取得入口"
+        }
+      }
+    },
+    {
+      "name": "清单变式 version",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/resource-index-demo/audit.py",
+          "communication",
+          "--catalog",
+          "/tmp/textbook-v3-index-final/bad-version.csv"
+        ],
+        "stdout": {
+          "key": "communication",
+          "checked_on": "2026-09-29",
+          "owner": null,
+          "method": "本机文件检查",
+          "entry": "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/chapters/J_comm.tex",
+          "sha256": "c832557bb7c37fbe2a77a4343bb8810cd5ec12429eecd59a14e4d9f2c61cc11f",
+          "main_sha256": "b6463d9c1b1a50c159e68bbab8eabe0ff5ee4e364846c19290e66cebfd1e7b8b",
+          "chapter": "多机通信方法",
+          "book_version": "2026.08",
+          "status": "章名或版本不一致"
+        }
+      }
+    },
+    {
+      "name": "清单变式 chapter",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/resource-index-demo/audit.py",
+          "communication",
+          "--catalog",
+          "/tmp/textbook-v3-index-final/bad-chapter.csv"
+        ],
+        "stdout": {
+          "key": "communication",
+          "checked_on": "2026-09-29",
+          "owner": null,
+          "method": "本机文件检查",
+          "entry": "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/chapters/J_comm.tex",
+          "sha256": "c832557bb7c37fbe2a77a4343bb8810cd5ec12429eecd59a14e4d9f2c61cc11f",
+          "main_sha256": "b6463d9c1b1a50c159e68bbab8eabe0ff5ee4e364846c19290e66cebfd1e7b8b",
+          "chapter": "多机通信方法",
+          "book_version": "2026.08",
+          "status": "章名或版本不一致"
+        }
+      }
+    },
+    {
+      "name": "清单变式 entry",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/resource-index-demo/audit.py",
+          "communication",
+          "--catalog",
+          "/tmp/textbook-v3-index-final/bad-entry.csv"
+        ],
+        "stdout": {
+          "key": "communication",
+          "checked_on": "2026-09-29",
+          "owner": null,
+          "method": "本机文件检查",
+          "entry": "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/chapters/not_here.tex",
+          "status": "本机未取得文件"
+        }
+      }
+    },
+    {
+      "name": "只移动正文",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/resource-index-demo/audit.py",
+          "communication",
+          "--catalog",
+          "/tmp/textbook-v3-index-final/moved.csv",
+          "--root",
+          "/tmp/textbook-v3-index-final/book"
+        ],
+        "stdout": {
+          "key": "communication",
+          "checked_on": "2026-09-29",
+          "owner": null,
+          "method": "本机文件检查",
+          "entry": "/tmp/textbook-v3-index-final/book/02-专项技术栈/chapters/comm_copy.tex",
+          "sha256": "c832557bb7c37fbe2a77a4343bb8810cd5ec12429eecd59a14e4d9f2c61cc11f",
+          "main_sha256": "b6463d9c1b1a50c159e68bbab8eabe0ff5ee4e364846c19290e66cebfd1e7b8b",
+          "status": "入口未被主文件引用"
+        },
+        "boundary": "副本仅用于该入口检查，不声称整卷可编译"
+      }
+    },
+    {
+      "name": "同步主文件后迁移",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/resource-index-demo/audit.py",
+          "communication",
+          "--catalog",
+          "/tmp/textbook-v3-index-final/moved.csv",
+          "--root",
+          "/tmp/textbook-v3-index-final/book"
+        ],
+        "stdout": {
+          "key": "communication",
+          "checked_on": "2026-09-29",
+          "owner": null,
+          "method": "本机文件检查",
+          "entry": "/tmp/textbook-v3-index-final/book/02-专项技术栈/chapters/comm_copy.tex",
+          "sha256": "c832557bb7c37fbe2a77a4343bb8810cd5ec12429eecd59a14e4d9f2c61cc11f",
+          "main_sha256": "46a264fb23a715090b55791ff2e3223629b30989d7d1083ad8e4f92752e580c0",
+          "chapter": "多机通信方法",
+          "book_version": "2026.08",
+          "status": "入口与声明一致"
+        },
+        "same_content": true,
+        "changed_main": true
+      }
+    },
+    {
+      "name": "未知名称拒绝",
+      "status": "PASS",
+      "details": {
+        "stderr": "usage: audit.py [-h] [--catalog CATALOG] [--root ROOT] key\naudit.py: error: 没有这个索引名称，请先检查catalog.csv\n",
+        "returncode": 2
+      }
+    },
+    {
+      "name": "章末实际打开两个卷二入口",
+      "status": "PASS",
+      "details": [
+        {
+          "file": "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/chapters/J_comm.tex",
+          "chapter": "多机通信方法",
+          "checked_on": "2026-09-29",
+          "meaning": "接收字节、解析教学帧，输出有效消息",
+          "sha256": "c832557bb7c37fbe2a77a4343bb8810cd5ec12429eecd59a14e4d9f2c61cc11f"
+        },
+        {
+          "file": "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/chapters/G_ba.tex",
+          "chapter": "几何视觉与 Bundle Adjustment",
+          "checked_on": "2026-09-29",
+          "meaning": "空间点与像素对应，输出位姿/重投影检查",
+          "sha256": "6117fe8e5582005c88a304678e93858975a22f8fbcaf6d300ee571438b5c334c"
+        }
+      ]
+    },
+    {
+      "name": "方向学习计划产物",
+      "status": "PASS",
+      "details": [
+        {
+          "step": "卷一工程",
+          "product": "构建/运行/调试记录"
+        },
+        {
+          "step": "卷三导航与工程",
+          "product": "地图/定位/目标接口图及前提"
+        },
+        {
+          "step": "卷二ROS2与导航",
+          "product": "正常与无路路线的运行记录"
+        },
+        {
+          "step": "现场",
+          "product": "受控现场演示，当前未完成"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    "教材四入口与教学副本实际打开，目录/链接存在不证明协议适用",
+    "队内讲义/仓库/当年协议/实际责任人尚未提供，不编造批准或第二人签名"
+  ]
+}

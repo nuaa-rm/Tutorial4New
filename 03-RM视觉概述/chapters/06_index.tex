@@ -1,5 +1,7 @@
 \subsubsection{三卷分工}
 
+前一章我们已经留下了可复查的记录。不过接下来真遇到问题时，三卷教材加上队内讲义摆在眼前，你可能还会卡在“我现在该翻哪一本？”这一章就给它们做个索引。先看问题落在哪里，再沿入口找到具体内容，比从第一页重新读到最后一页省事得多。
+
 \begin{center}
 \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.43\textwidth}>{\raggedright\arraybackslash}p{0.24\textwidth}@{}}
 \toprule[1.5pt]
@@ -13,86 +15,113 @@
 \end{center}
 
 \begin{example}[把问题放回正确卷册]
-建立三行书签：卷一编译与 CMake、卷二几何视觉与 BA、卷三工程准则。分别给“链接错误”“PnP 点序”“联调前如何留证据”连线。检查：先按问题性质找入口，避免从头翻整套书。
+在教材根目录进入\texttt{01-基础通识}，打开卷一主文件\texttt{main.tex}，搜索“编译过程与 CMake 基础”，沿\texttt{input}进入\path{Chapter3/3.tex}；接着进入\texttt{02-专项技术栈}，打开卷二主文件\texttt{main.tex}，搜索“几何视觉与 Bundle Adjustment”，进入\path{chapters/G_ba.tex}；最后沿本卷主文件进入\path{chapters/05_engineering.tex}。分别给“链接错误”“PnP点序”“联调前怎样留证据”建立书签，再读对应段落确认它能回答哪一步。能打开正确文件并说明用途，才算找到了入口。
 \end{example}
 
 \begin{exercise}
 \label{v3-ex-index-1}
-Git 操作不熟、坐标广播积压、调车没有版本记录，分别优先查哪卷？
+Git操作不熟、坐标广播积压、调车没有版本记录，分别优先查哪卷？
 \end{exercise}
 
 \subsubsection{按方向的推荐顺序}
 
+找到了入口，我们再安排顺序。下面这些路线是补齐前置能力的参考，不要求你为了解决一个串口问题先把所有专项读完。读到每一步，留下一份能检查的产物，再决定要不要往下走。
+
 \textbf{自瞄（学习时间 $\rightarrow$ 工程时间）：}
-卷一 $\rightarrow$ 本卷第\ref{ch:v3-overview}、\ref{ch:v3-aim}、\ref{ch:v3-engineering}章 $\rightarrow$ 卷二 ROS2、OpenCV、深度学习、相机、滤波、BA、MPC $\rightarrow$ 回本卷做链路答辩 $\rightarrow$ 实车仓库。
+卷一 $\rightarrow$ 本卷第\ref{ch:v3-overview}、\ref{ch:v3-aim}、\ref{ch:v3-engineering}章 $\rightarrow$ 卷二ROS2、OpenCV、深度学习、相机、滤波、BA、MPC $\rightarrow$ 回本卷做链路答辩 $\rightarrow$ 实车仓库。
 
 \textbf{雷达：}
-卷一 $\rightarrow$ 本卷第\ref{ch:v3-overview}、\ref{ch:v3-radar}、\ref{ch:v3-engineering}章 $\rightarrow$ 卷二 ROS2、多机通信、SDR、OpenCV、深度学习、相机 $\rightarrow$ 开源/队内雷达仓库部署文档。
+卷一 $\rightarrow$ 本卷第\ref{ch:v3-overview}、\ref{ch:v3-radar}、\ref{ch:v3-engineering}章 $\rightarrow$ 卷二ROS2、多机通信、SDR、OpenCV、深度学习、相机 $\rightarrow$ 队内指定雷达仓库与部署文档。SDR仅在需要无线电接收时进入工程链路，规则与现场条件另行确认。
 
 \textbf{导航：}
-卷一 $\rightarrow$ 本卷第\ref{ch:v3-overview}、\ref{ch:v3-nav}、\ref{ch:v3-engineering}章 $\rightarrow$ 卷二 ROS2、导航（通信建议）$\rightarrow$ 建图与实车。
+卷一 $\rightarrow$ 本卷第\ref{ch:v3-overview}、\ref{ch:v3-nav}、\ref{ch:v3-engineering}章 $\rightarrow$ 卷二ROS2、导航（通信建议）$\rightarrow$ 建图与实车。
 
 \begin{example}[给导航新人排顺序]
-写出“卷一通识 → 本卷职责、导航、工程准则 → 卷二 ROS2 与导航 → 回到本卷答辩 → 受控实车”。在每一步旁标注输出：基础小工程、链路图、专项练习、现场演示。检查：学习计划包含产出，不能只有书单。
+先用卷一工程证明能构建、运行和调试；接着画本卷导航的任务链路，写出地图、定位和目标的接口；然后完成卷二ROS2与导航项目，保留正常路线和无路可走的记录；回到本卷检查任务前提，最后安排受控现场验证。在计划中逐项写下产物和完成标准，现场没有做过就仍写“未完成”。这样队友能判断你卡在哪一步，书单也终于不用兼职许愿单了。
 \end{example}
 
 \begin{exercise}
 \label{v3-ex-index-2}
-雷达新人不会串口帧解析，是否应先因“看起来高级”而跳去 MPC？写出更直接的补课顺序。
+雷达新人不会串口帧解析，是否应先因“看起来高级”而跳去MPC？写出更直接的补课顺序。
 \end{exercise}
 
 \subsubsection{资料索引（活页）}
 
-\begin{itemize}
-    \item 卷二各章：\texttt{02-专项技术栈/}
-    \item 自瞄公式与导读：\texttt{视觉培训/最小二乘法/}（讲义 + BA/Kalman/MPC）
-    \item 雷达站参考实现：队内指定开源仓库与部署说明（注意许可证与权重策略）
-    \item 相机 / 控制器 PPT、视觉小课堂：队内资料目录
-    \item 裁判系统协议：当年官方文档（勿依赖过期拷贝）
-\end{itemize}
+教材文件可以直接打开，队内资料则未必已经在你的电脑上。原稿提到的\texttt{视觉培训/最小二乘法/}是讲义入口提示，本仓库当前没有这个目录；雷达参考仓库、相机/控制器PPT和视觉小课堂的地址也要由队内确认。别为了填满表格随手猜一个地址。裁判协议则需要取得适用赛季的官方原件，记录具体修订和所用字段，再与当前实现核对，前面雷达章的教学帧不能顶替它。
 
-\begin{example}[检查一个真实入口]
-在本地文件浏览器依次打开项目目录、02-专项技术栈、main.tex，搜索“多机通信方法”，沿其 input 找到章节文件。记录入口、章名和检查日期。若队内讲义路径在本机不存在，记录“本机未取得访问入口”，交负责人确认。检查：书中提到的路径不等于当前电脑必定存在。
+如果只记路径，文件能打开时你仍可能读错版本。我们用卷内\path{examples/resource-index-demo}把路径、章名、封面版本、文件散列和检查日期放进一张资料卡，实际负责人未知就保持空值。项目只有\texttt{audit.py}、\texttt{catalog.csv}和README，Python3.10以上标准库即可运行。
+
+\begin{example}[真正打开入口，再写资料卡]
+首先看清单。\texttt{key}是命令里选用的名称，\texttt{volume}和\texttt{entry}从教材根目录拼出路径；\texttt{chapter/version}是我们准备核对的声明，\texttt{owner}留给真实负责人。以下是完整的\texttt{catalog.csv}，空列也是有意义的：
+
+\lstinputlisting[language={},basicstyle=\ttfamily\small,frame=single,breaklines=true,numbers=none]{examples/resource-index-demo/catalog.csv}
+程序先处理未取得入口和缺文件的情况。能读到正文时，记下内容散列，再找到同卷主文件；这时候仍没有判断内容是否适用，只是在核对入口的实际状态：
+
+\par\vspace{6pt}
+\noindent\begin{minipage}[t]{\linewidth}
+\lstinputlisting[language=Python,basicstyle=\ttfamily\small,frame=single,breaklines=true,numbers=none,aboveskip=0pt,belowskip=0pt,firstline=1,lastline=25]{examples/resource-index-demo/audit.py}
+\end{minipage}\par\vspace{6pt}
+接着按本书明确的\texttt{chapter/input/version}写法，找到这个入口前面的章标题和主文件中的显示版本，与清单比较。下面接上段，是同一个函数的剩余部分：
+
+\par\vspace{6pt}
+\noindent\begin{minipage}[t]{\linewidth}
+\lstinputlisting[language=Python,basicstyle=\ttfamily\small,frame=single,breaklines=true,numbers=none,aboveskip=0pt,belowskip=0pt,firstline=26,lastline=38]{examples/resource-index-demo/audit.py}
+\end{minipage}\par\vspace{6pt}
+最后读命令参数和CSV，选出要查的一行。\texttt{--catalog}可指定练习副本的清单，\texttt{--root}可指定教材副本的根目录；默认使用当前仓库，不必填写我的绝对路径。没有这个名称时直接报错，不替你猜：
+
+\par\vspace{6pt}
+\noindent\begin{minipage}[t]{\linewidth}
+\lstinputlisting[language=Python,basicstyle=\ttfamily\small,frame=single,breaklines=true,numbers=none,aboveskip=0pt,belowskip=0pt,firstline=41]{examples/resource-index-demo/audit.py}
+\end{minipage}\par\vspace{6pt}
+在本卷目录进入项目，通用形式为\texttt{python3 audit.py 索引名称 [选项]}，先照下面运行：
+\begin{tbash}
+cd examples/resource-index-demo
+python3 audit.py communication
+python3 audit.py lecture
+python3 audit.py team
+\end{tbash}
+通信入口应给出实际章名“多机通信方法”、版本2026.08、两个文件散列和当天检查日期，状态为“入口与声明一致”；负责人仍是\texttt{null}。讲义输出“本机未取得文件”，队内资源输出“未取得入口”。再分别把命令的名称换成\texttt{build}、\texttt{geometry}和\texttt{engineering}，核对三个书签；卷一显示2026.09，卷二和本卷显示2026.08，不能因为它们属于一套书就代填相同版本。
+
+打开通信正文，读出“接收字节到有效消息”的用途，写在资料卡旁边。再去练习副本把通信行的版本改成2026.07，重跑应报告不一致。先实际打开，再解释内容，最后记录边界，缺项也就有了可追踪的位置。
 \end{example}
 
 \begin{note}
-队内仓库地址、接口责任人和复盘日期由负责人填写。本书不虚构这些信息；本机没有路径时应记录待确认，不要把未访问的资料标成已核验。
+这个短程序按本书的直接包含写法检查，不是通用LaTeX解析器，也不检查协议字段或链接在线状态。封面版本可能在多次修订中保持相同，所以另外记录源码散列。\texttt{checked\_on}是本机检查日期，不是队内批准日期；\texttt{owner=null}也不能写成“负责人已确认”。
 \end{note}
 
 \begin{conclusion}
-\begin{itemize}
-  \item 路径回答在哪里，版本回答适用哪套实现。
-  \item 责任人回答由谁确认，核对日期回答何时验证。
-  \item 四项一起记录，才能让索引可追溯。
-\end{itemize}
+路径告诉你在哪里，版本和散列指出具体内容，负责人说明由谁确认，检查日期说明何时核对。能打开文件只是第一步，还要读出它处理的输入、输出及适用环境；入口缺失、声明不一致和接口未确认分别记录，不用一个“已检查”把它们都盖过去。
 \end{conclusion}
 
 \begin{exercise}
 \label{v3-ex-index-3}
-只有一个没有版本号的协议截图，够不够作为联调依据？还需取得什么信息？
+只有一个没有版本号的协议截图，够不够作为联调依据？还需取得什么信息？再运行\texttt{team}资料卡，说明\texttt{null}负责人为什么不能改成“已确认”。
 \end{exercise}
 
+\Needspace{12\baselineskip}
 \subsubsection{版本与责任}
 
+现在你已经能区分文件找到了和接口确认了。接下来交接时，把用途、适用实现和待确认人补进资料记录：
 \begin{center}
 \begin{tabular}{@{}p{0.30\textwidth}p{0.62\textwidth}@{}}
 \toprule[1.5pt]
-项目 & 填写 \\
+项目 & 填写依据 \\
 \midrule[1pt]
-教材版本 & \texttt{2026.08} \\
-本卷维护 & 视觉组培训负责人 \\
-接口文档责任人 & （队内填写） \\
-下次复盘日期 & （队内填写） \\
+本卷封面显示版本 & \texttt{2026.08}，具体修订另记提交或源码散列 \\
+本卷维护角色 & 视觉组培训负责人，实际姓名待队内确认 \\
+接口双方及适用版本 & 原始文档、部署实现和实际责任人，未取得就注明 \\
+复核日期与下一次复盘 & 实际核对日期；下次日期由队内约定 \\
 \bottomrule[1.5pt]
 \end{tabular}
 \end{center}
-本章为活页：仅入口路径变化时更新本章即可；协议字段或行为变化时，还须同步接口文档、实现和验证，不能只换链接。
 
-\begin{example}[完成一次索引变更]
-教学情景：部署说明从路径 A 迁到 B。记录旧入口、新入口、适用分支或版本、检查日期与维护人；用新入口实际打开文档，再让另一位同学复核。无法访问 B 时记录受阻原因，不能标成已完成。
+仅入口迁移时，我们更新索引和相关引用；如果协议字段或行为也变了，还要同步文档、收发实现与验证，活页不能替接口变更打掩护。
+
+\begin{example}[在练习副本完成一次入口迁移]
+把通信章正文复制到练习副本的\path{chapters/comm_copy.tex}，将副本\texttt{main.tex}的对应\texttt{input}和副本CSV的\texttt{entry}一起改到新位置。使用\texttt{--root}和\texttt{--catalog}指向副本，重新打开新入口并比较内容散列：正文未改时应相同，主文件散列则会变化。记录旧/新入口、显示版本、实际检查日期和操作者，再让同学复查。只移动正文而未改主文件时，程序应报告“入口未被主文件引用”；访问失败就保留受阻状态。教学副本中的迁移不能写成队内部署文档已经迁移。
 \end{example}
 
 \begin{exercise}
 \label{v3-ex-index-4}
-教材活页改了协议链接，但消息字段定义也变了，仅修改活页是否足够？
+教材活页改了协议链接，但消息字段定义也变了，仅修改活页是否足够？在你的副本中只移动文件而不改\texttt{input}，解释资料卡为何不能报告一致。
 \end{exercise}
