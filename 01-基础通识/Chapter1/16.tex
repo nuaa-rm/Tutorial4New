@@ -1,7 +1,7 @@
 \subsubsection{先判断是否需要 Conda}
 一个 Python 项目要求这个版本的包，另一个项目又要求那个版本，如果都装进同一套环境里，很容易互相打架。这时候我们可以用环境管理器（Environment Manager），给每个项目准备一套相对独立的解释器和依赖，用哪个项目就切到哪套环境，不必每次都拆东墙补西墙。
 
-Conda 就是同时管理解释器、包和环境的工具。如果你接触的 Python 项目不多，只需要系统 Python 和几个包，也可以跳过 Conda，用标准库自带的 venv，更轻量一些。本节属于选修内容，下面的操作都在独立练习环境里做，不改系统 Python。
+Conda 就是同时管理解释器、包和环境的工具。如果你接触的 Python 项目不多，只需要系统 Python 和几个包，也可以跳过 Conda，用标准库自带的 venv，更轻量一些。
 \begin{note}
 环境隔离不是安全沙箱，也不保证所有依赖冲突都消失。安装器与下载渠道按当前官方说明核对：\url{https://docs.conda.io/projects/conda/en/stable/user-guide/install/}。已装好就不重复安装；\texttt{conda --version} 应能显示版本，\texttt{conda info --base} 能找到安装位置。
 \end{note}
@@ -9,7 +9,7 @@ Conda 就是同时管理解释器、包和环境的工具。如果你接触的 P
 \subsubsection{先读配置，再决定是否更改}
 安装好以后，我们先看看它现在怎样工作，不急着把网上的配置整段复制进去。Conda 可以从用户的 \texttt{\textasciitilde/.condarc} 等位置读取配置，\path|conda config --show-sources| 告诉你配置来自哪里，\texttt{--show 键名} 显示实际值，\texttt{--set 键名 值} 则用来设置单值。
 
-本节不为省一次确认就全局开启 always\_yes，也不加入旧的 pkgs/free 渠道。下载慢时可以按当前渠道文档选择镜像，不过混用渠道可能影响依赖解算和许可适用条件，要按项目需要核对，不能把“加得越多就越容易装好”当成经验。
+下载慢时可以按当前渠道文档选择镜像，不过混用渠道可能影响依赖解算和许可适用条件，要按项目需要核对，不能把“加得越多就越容易装好”当成经验。
 \Needspace{8\baselineskip}
 \begin{example}[检查自动激活与下载渠道]
 
