@@ -370,6 +370,47 @@
       66,
       172
     ],
-    "bad_log_lines": []
+    "bad_log_lines": [],
+    "content_head": "f08b276"
+  },
+  "toolchain_followup": {
+    "apt_command": "distrobox enter ubuntu2404 -- bash -c 'sudo apt-get install -y ninja-build > /tmp/textbook-vscode-gui/apt-ninja.txt && ninja --version'",
+    "returncode": 0,
+    "version_stdout": "1.11.1\n",
+    "apt_raw_log": "Reading package lists...\nBuilding dependency tree...\nReading state information...\nThe following package was automatically installed and is no longer required:\n  libtext-charwidth-perl\nUse 'sudo apt autoremove' to remove it.\nThe following NEW packages will be installed:\n  ninja-build\n0 upgraded, 1 newly installed, 0 to remove and 7 not upgraded.\nNeed to get 129 kB of archives.\nAfter this operation, 364 kB of additional disk space will be used.\nGet:1 http://archive.ubuntu.com/ubuntu noble/universe amd64 ninja-build amd64 1.11.1-2 [129 kB]\nFetched 129 kB in 1s (104 kB/s)\nSelecting previously unselected package ninja-build.\n(Reading database ... \n(Reading database ... 5%\n(Reading database ... 10%\n(Reading database ... 15%\n(Reading database ... 20%\n(Reading database ... 25%\n(Reading database ... 30%\n(Reading database ... 35%\n(Reading database ... 40%\n(Reading database ... 45%\n(Reading database ... 50%\n(Reading database ... 55%\n(Reading database ... 60%\n(Reading database ... 65%\n(Reading database ... 70%\n(Reading database ... 75%\n(Reading database ... 80%\n(Reading database ... 85%\n(Reading database ... 90%\n(Reading database ... 95%\n(Reading database ... 100%\n(Reading database ... 167749 files and directories currently installed.)\nPreparing to unpack .../ninja-build_1.11.1-2_amd64.deb ...\nUnpacking ninja-build (1.11.1-2) ...\nSetting up ninja-build (1.11.1-2) ...\nProcessing triggers for man-db (2.12.0-4build2) ...\n",
+    "stderr": "dpkg-preconfigure: unable to re-open stdin: No such file or directory\n",
+    "build_run_command": "distrobox enter ubuntu2404 -- bash -c 'set -e; cmake -S /home/mijiao/Apps/Tutorial4New/01-基础通识/examples/ide-demo -B /tmp/textbook-vscode-gui/ninja-build -G Ninja -DCMAKE_BUILD_TYPE=Debug; cmake --build /tmp/textbook-vscode-gui/ninja-build; /tmp/textbook-vscode-gui/ninja-build/ide_demo'",
+    "build_run_returncode": 0,
+    "build_run_raw_log": "-- The CXX compiler identification is GNU 13.3.0\n-- Detecting CXX compiler ABI info\n-- Detecting CXX compiler ABI info - done\n-- Check for working CXX compiler: /usr/bin/c++ - skipped\n-- Detecting CXX compile features\n-- Detecting CXX compile features - done\n-- Configuring done (0.1s)\n-- Generating done (0.0s)\n-- Build files have been written to: /tmp/textbook-vscode-gui/ninja-build\n[1/2] Building CXX object CMakeFiles/ide_demo.dir/main.cpp.o\n[2/2] Linking CXX executable ide_demo\ntotal = 75\n",
+    "limits": "原 GUI 流程实际使用 Unix Makefiles；此项仅验证补装依赖及 Ninja 命令行构建运行。"
+  },
+  "alignment_followup": {
+    "changes": [
+      "17_ide.tex 开头 begin{center} 改为与末尾 endgroup 对应的 begingroup，正文恢复常规对齐，保留表格/图片局部居中。",
+      "ASCII 字体配置名改用 path，支持在点号处换行，修复取消居中后出现的22.19037pt越界。"
+    ],
+    "pdf_path": "01-基础通识/main.pdf",
+    "pdf_pages": 206,
+    "pdf_sha256": "541f804eb38eb3e9d485e886a27933cf8707ad1a85d21fa7193ad36712b49d4f",
+    "viewed_physical_pages": [
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      7,
+      8,
+      172
+    ],
+    "bad_log_lines": [],
+    "image_pixels_changed": false
   }
 }

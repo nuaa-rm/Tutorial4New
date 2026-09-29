@@ -101,3 +101,11 @@
 两张历史 VS Code JPEG 的正文引用换为 vscode_run_revised.png、vscode_debug_revised.png，原图保留。真实 1600×1000 截图仅格式转换和正文 trim 裁边；先看原图、候选 PDF 物理页 62–67 和目录 7–8，再字节不变地加 revised 标记并编译复查。IDE 图片 README 同步，.tex 文件没有改名或移动。新增截图工具另行实测启动、字体和退出，完整语义操作使用临时控制器，证据区分两次运行。
 
 第19项仍未完成：本次没有重跑 Windows 软件安装/工具链、CLion 当前 GUI、UEFI 双系统写盘/系统恢复、GNOME/GRUB/登录 shell 或物理串口。临时 Ubuntu GUI 验证也不代替用户桌面集成验证。所有本次启动进程已经退出，检查两组明确临时配置路径没有残留 VS Code 进程。
+
+## IDE 正文排版与工具链补充
+
+进一步复查发现 17_ide.tex 开头误用了 begin{center}，末尾却是 endgroup，长正文被居中。改为与末尾对应的 begingroup，保留局部表格/图片的居中与 emergencystretch 分组；正文恢复普通段落排版，与相邻 11/12/13 一致。新字体配置名改用可换行的 ASCII path，修复取消居中后出现的 22.19pt 越界，没有改变配置项内容。
+
+实际检查 IDE 全节物理页55–67、目录7–8、题解172；两次最终 XeLaTeX 编译仍为206页，无缺字/越界/未定义引用，题解与标签定位通过。此前整段居中的版面问题未被早期检查发现，本次修正后更新最终检查依据。
+
+VS Code 当时因缺 Ninja 使用 Unix Makefiles，这次补装 Ubuntu ninja-build 1.11.1。在独立 ninja-build 目录用 -G Ninja、Debug 实际配置、构建并运行同一 ide-demo，输出 total = 75，退出0。补充日志保留在 VS Code 证据的 toolchain_followup；原 GUI 流程仍只按当时实际使用的 Makefiles 记录，未声称补装后又做了 Ninja GUI 验证。
