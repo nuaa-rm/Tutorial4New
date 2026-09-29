@@ -1,0 +1,67 @@
+{
+  "devices": {
+    "/dev/video*": [],
+    "/dev/serial/by-id/*": [],
+    "/dev/ttyUSB*": [],
+    "/dev/ttyACM*": []
+  },
+  "usb_products": [
+    {
+      "node": "usb3",
+      "manufacturer": "Linux 7.2.7-arch1-1 xhci-hcd",
+      "product": "xHCI Host Controller"
+    },
+    {
+      "node": "usb1",
+      "manufacturer": "Linux 7.2.7-arch1-1 xhci-hcd",
+      "product": "xHCI Host Controller"
+    },
+    {
+      "node": "3-2",
+      "manufacturer": "GenesysLogic",
+      "product": "USB2.1 Hub"
+    },
+    {
+      "node": "4-3",
+      "manufacturer": "GenesysLogic",
+      "product": "USB3.2 Hub"
+    },
+    {
+      "node": "usb4",
+      "manufacturer": "Linux 7.2.7-arch1-1 xhci-hcd",
+      "product": "xHCI Host Controller"
+    },
+    {
+      "node": "usb2",
+      "manufacturer": "Linux 7.2.7-arch1-1 xhci-hcd",
+      "product": "xHCI Host Controller"
+    },
+    {
+      "node": "3-5",
+      "manufacturer": "ITE Tech. Inc.",
+      "product": "ITE Device(8910)"
+    },
+    {
+      "node": "3-1",
+      "manufacturer": "Logitech",
+      "product": "G502 X"
+    }
+  ],
+  "clion_command": null,
+  "common_clion_paths": [],
+  "bounded_CLion_followup": {
+    "matches": [],
+    "searched_roots": [
+      "/opt",
+      "/home/mijiao/Apps",
+      "/home/mijiao/.local/share/JetBrains/Toolbox/apps",
+      "/home/mijiao/.local/share/applications",
+      "/usr/share/applications"
+    ]
+  },
+  "limits": [
+    "设备清单为经授权在主机实际读取的记录，未以沙箱中空的设备命名空间代替主机检查。",
+    "未发现 video/USB串口设备节点与对应 USB 产品；不排除尚未连接的设备或网络相机/远端设备。",
+    "有界 CLion 命令/常见路径/桌面入口搜索没有匹配，不声称整个磁盘绝对没有 CLion。"
+  ]
+}

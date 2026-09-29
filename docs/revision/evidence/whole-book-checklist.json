@@ -1,0 +1,3242 @@
+{
+  "recorded_at": "2026-09-29T04:46:07.733835+00:00",
+  "content_head": "ee937b532031db2b23d23a0b1a518b63b37282d3",
+  "chapter_count": 21,
+  "item_count": 420,
+  "totals": {
+    "通过": 407,
+    "未完成": 11,
+    "不适用": 2
+  },
+  "volume_totals": {
+    "1": {
+      "通过": 59,
+      "未完成": 1
+    },
+    "2": {
+      "通过": 215,
+      "未完成": 5
+    },
+    "3": {
+      "通过": 133,
+      "未完成": 5,
+      "不适用": 2
+    }
+  },
+  "question_counts": {
+    "exercises": 233,
+    "chapter_problems": 187
+  },
+  "pdfs": [
+    {
+      "path": "01-基础通识/main.pdf",
+      "pages": 206,
+      "sha256": "541f804eb38eb3e9d485e886a27933cf8707ad1a85d21fa7193ad36712b49d4f",
+      "bad_log_lines": [],
+      "font_shape_substitutions": 2
+    },
+    {
+      "path": "02-专项技术栈/main.pdf",
+      "pages": 269,
+      "sha256": "573a60e9d51587ff6c6df332223006eac9a56e85821ed33eafa0846ba0bcb30f",
+      "bad_log_lines": [],
+      "font_shape_substitutions": 2
+    },
+    {
+      "path": "03-RM视觉概述/main.pdf",
+      "pages": 58,
+      "sha256": "9cf88fc5ac3eaef47dede9c7322c8472855796580a24f6d00a15bd677d367f62",
+      "bad_log_lines": [],
+      "font_shape_substitutions": 1
+    }
+  ],
+  "chapters": [
+    {
+      "volume": 1,
+      "chapter": 1,
+      "report": "docs/revision/volume-1-chapter-1.md",
+      "report_sha256": "f1c2e70c82852395a3cc63ed7ae7cfeffb70b0e21c5ba6c5e2653839f311f7ec",
+      "counts": {
+        "通过": 19,
+        "未完成": 1
+      },
+      "checks": [
+        {
+          "item": 1,
+          "name": "1 章首提要",
+          "status": "通过",
+          "evidence": "`main.tex` 第一章 introduction：可验证目标、建议学时、本卷边界齐全。",
+          "report_line": 21
+        },
+        {
+          "item": 2,
+          "name": "2 核心小节示例",
+          "status": "通过",
+          "evidence": "下表逐节列出覆盖；四步安装、Timeshift 恢复和 IDE 界面使用连续操作示例，给出前提、操作与结果判断。",
+          "report_line": 22
+        },
+        {
+          "item": 3,
+          "name": "3 复杂概念项目",
+          "status": "通过",
+          "evidence": "`examples/shell-environment-demo`、`git-workflow-demo`、`serial-loop-demo`，复用 `ide-demo`；源码、依赖与 README 齐全。",
+          "report_line": 23
+        },
+        {
+          "item": 4,
+          "name": "4 正文讲清项目",
+          "status": "通过",
+          "evidence": "`14_shell.tex`、`15.tex`、`17_ide.tex`、`18_serial.tex` 展示文件结构/文件组成、完整核心代码与执行顺序；源码直接用 lstinputlisting 引入。",
+          "report_line": 24
+        },
+        {
+          "item": 5,
+          "name": "5 命令语法参数",
+          "status": "通过",
+          "evidence": "`14_fs.tex` 参数表，Shell/Git/Conda/归档/串口各节说明参数与可替换路径；实际设备名、UEFI 和 Shell 条件不照抄。",
+          "report_line": 25
+        },
+        {
+          "item": 6,
+          "name": "6 随堂练习",
+          "status": "通过",
+          "evidence": "38 个 exercise，逐节任务见覆盖表；IDE 安装、界面、调试由综合练习明确分项。",
+          "report_line": 26
+        },
+        {
+          "item": 7,
+          "name": "7 难点归纳",
+          "status": "通过",
+          "evidence": "UEFI/GPT、备份边界、链接、Vim 模式、环境继承、Git 区域、Conda、IDE、串口有 conclusion 或对应对比表。",
+          "report_line": 27
+        },
+        {
+          "item": 8,
+          "name": "8 易错与危险提示",
+          "status": "通过",
+          "evidence": "写盘/格式化、tar 覆盖、rm、chmod、PATH、Git 丢弃历史、环境删除、接线和 udev 权限均在操作前说明影响。",
+          "report_line": 28
+        },
+        {
+          "item": 9,
+          "name": "9 本章小结",
+          "status": "通过",
+          "evidence": "`main.tex` “本章小结”归纳安装维护、命令、Shell、Git、Conda、IDE 与串口的联系和掌握程度。",
+          "report_line": 29
+        },
+        {
+          "item": 10,
+          "name": "10 章末习题",
+          "status": "通过",
+          "evidence": "12 题含基础、提高、实践与选修自测；题量依据见上文，不与随堂任务仅换说法重复。",
+          "report_line": 30
+        },
+        {
+          "item": 11,
+          "name": "11 本章验收",
+          "status": "通过",
+          "evidence": "`main.tex` “本章验收”检查独立演示；无硬件时注明板端待补，不把软件回环当板端通过。",
+          "report_line": 31
+        },
+        {
+          "item": 12,
+          "name": "12 答案定位",
+          "status": "通过",
+          "evidence": "`answers.tex` 每道题使用 ref 指向题目；结构脚本核验 38+12 对应。开放题给可行流程和判断标准。",
+          "report_line": 32
+        },
+        {
+          "item": 13,
+          "name": "13 作者语言习惯",
+          "status": "通过",
+          "evidence": "对照原 11/12/13 的连贯段落、自然过渡与条件选择修订，不沿用错误单位和技术结论。",
+          "report_line": 33
+        },
+        {
+          "item": 14,
+          "name": "14 图片实际检查",
+          "status": "通过",
+          "evidence": "本轮查看原图及段落，现正文使用 25 张图；四张机制图重绘；2026-09-29 两张 VS Code 图换为 Ubuntu 实测，原始截图与正文尺寸实际检查；旧安装器照片注明示例边界。",
+          "report_line": 34
+        },
+        {
+          "item": 15,
+          "name": "15 图片标记与引用",
+          "status": "通过",
+          "evidence": "四张重绘图与两张新 VS Code 截图经独立图和正文尺寸检查后使用 `_revised`；正文路径和生成脚本/IDE 图片说明一致。",
+          "report_line": 35
+        },
+        {
+          "item": 16,
+          "name": "16 文件组织",
+          "status": "通过",
+          "evidence": "保留 11/12/13 等编号文件，主文件清楚列出各节主题；新项目用概念名目录，避免打断作者指定的文件参照。",
+          "report_line": 36
+        },
+        {
+          "item": 17,
+          "name": "17 包含与引用",
+          "status": "通过",
+          "evidence": "全卷后续章节整理后的入口展开 23 个文件、175 个标签、121 个被引用标签；本章 38+12 题定位通过，无失效资源、循环包含、重复标签或未定义引用。",
+          "report_line": 37
+        },
+        {
+          "item": 18,
+          "name": "18 源码和格式",
+          "status": "通过",
+          "evidence": "命令不再滥用数学模式；表格列宽/三线表、图注、标题、代码协调，短源码与参数表连续排版。较早 CRLF 文件统一为 LF。短代码前保留分页空间，文件系统参数表标题与表体一起排版；IDE 初始短比较表改为普通 tabular，避免四行表跨页。",
+          "report_line": 38
+        },
+        {
+          "item": 19,
+          "name": "19 示例实际运行",
+          "status": "未完成",
+          "evidence": "Bash/Git/tar/链接/权限/筛选/Conda/CMake/GDB/pySerial、apt/zsh/AstroNvim 临时配置及 Ubuntu VS Code GUI 已实际完成；真实写盘/系统恢复、原生桌面与登录设置、CLion 当前 GUI、Windows 安装/工具链和物理串口未验证。详见下文及两份补跑证据。",
+          "report_line": 39
+        },
+        {
+          "item": 20,
+          "name": "20 编译和 PDF",
+          "status": "通过",
+          "evidence": "原首次整理 179 页；全卷后续整理及本次 VS Code 换图后，XeLaTeX 两次生成 206 页，引用稳定。原目录、正文、题解检查保留，本次实际查看物理页 7–8、62–67 与 IDE 题解 172，无缺字/越界/未定义引用；共享模板未改。",
+          "report_line": 40
+        }
+      ]
+    },
+    {
+      "volume": 1,
+      "chapter": 2,
+      "report": "docs/revision/volume-1-chapter-2.md",
+      "report_sha256": "90ca6f54a496a30b26684d61d78d8889f4eeff6f7a5cd69cd8dd3f5b1c164805",
+      "counts": {
+        "通过": 20
+      },
+      "checks": [
+        {
+          "item": 1,
+          "name": "1 章首提要",
+          "status": "通过",
+          "evidence": "`main.tex` 第二章 introduction：可验证学习目标、建议学时与本卷边界。",
+          "report_line": 22
+        },
+        {
+          "item": 2,
+          "name": "2 核心小节示例",
+          "status": "通过",
+          "evidence": "下表列出对应关系；44 个正文独立程序包含前提、完整代码、运行命令和结果解读。",
+          "report_line": 23
+        },
+        {
+          "item": 3,
+          "name": "3 复杂概念项目",
+          "status": "通过",
+          "evidence": "六个概念目录位于本卷 examples；源码、公共头文件及各 README 齐全。",
+          "report_line": 24
+        },
+        {
+          "item": 4,
+          "name": "4 正文讲清项目",
+          "status": "通过",
+          "evidence": "每个项目在对应知识点旁展示目录/文件组成，核心代码用 lstinputlisting 直接引入；解释执行顺序、关键语句和输出。智能指针公共头文件完整展示。",
+          "report_line": 25
+        },
+        {
+          "item": 5,
+          "name": "5 命令语法参数",
+          "status": "通过",
+          "evidence": "项目介绍解释 g++、-std、-Wall/-Wextra、-pthread、-o，逐例给出工作目录与运行命令；C++20 指定初始化另用 c++20，调试失效迭代器解释 GCC 条件。",
+          "report_line": 26
+        },
+        {
+          "item": 6,
+          "name": "6 随堂练习",
+          "status": "通过",
+          "evidence": "27 道有标签的 exercise，核心能力覆盖见下表；模板、引用/移动、容器和经典协作的合并练习明确列出分项任务。",
+          "report_line": 27
+        },
+        {
+          "item": 7,
+          "name": "7 难点归纳",
+          "status": "通过",
+          "evidence": "构造/赋值及 static/友元、捕获方式、引用/移动、智能指针、迭代器、同步/经典问题、内存均有 conclusion 或对应对比表。",
+          "report_line": 28
+        },
+        {
+          "item": 8,
+          "name": "8 易错提示",
+          "status": "通过",
+          "evidence": "引用悬空、未初始化访问、重复接管裸指针、循环引用、无效迭代器、非严格排序、数据竞争、线程销毁、等待/锁与死锁有紧邻提示。错误代码的运行条件和教学项目边界写明。",
+          "report_line": 29
+        },
+        {
+          "item": 9,
+          "name": "9 本章小结",
+          "status": "通过",
+          "evidence": "`main.tex` 第二章小结把类、Lambda、引用/移动、所有权、容器、并发与内存连起来，并指向下一章多文件构建。",
+          "report_line": 30
+        },
+        {
+          "item": 10,
+          "name": "10 章末习题",
+          "status": "通过",
+          "evidence": "12 题覆盖基础、提高和 Armor 综合实践；保留原有 10 题并补模板与内存，避免遗漏本章两块核心内容。容器题同时检查查询、适配器和安全删除。",
+          "report_line": 31
+        },
+        {
+          "item": 11,
+          "name": "11 本章验收",
+          "status": "通过",
+          "evidence": "六项独立演示任务要求重新构建、解释预测、修改运行参数、保存核对记录；与有标准答案的习题分工清楚。",
+          "report_line": 32
+        },
+        {
+          "item": 12,
+          "name": "12 答案定位",
+          "status": "通过",
+          "evidence": "`answers.tex` 有全部 27+12 个答案；题解以 ref 指向题目，按正文顺序排列。开放实践有可行代码或判断标准，26 个完整答案程序参与实际构建。",
+          "report_line": 33
+        },
+        {
+          "item": 13,
+          "name": "13 作者语言习惯",
+          "status": "通过",
+          "evidence": "参照原 11/12/13 的段落推进、条件说明与操作中的原因解释；不保留原文错误结论，也不为模仿而虚构经历。",
+          "report_line": 34
+        },
+        {
+          "item": 14,
+          "name": "14 图片实际检查",
+          "status": "通过",
+          "evidence": "实际查看 14 张原图及上下文，重绘并查看独立图与正文排版尺寸，统一字体、青色线框、箭头、术语与信息密度。",
+          "report_line": 35
+        },
+        {
+          "item": 15,
+          "name": "15 图片标记与引用",
+          "status": "通过",
+          "evidence": "14 张通过检查后发布为 `_revised.pdf`，includegraphics 与生成脚本路径已同步。旧图保留为历史资源。",
+          "report_line": 36
+        },
+        {
+          "item": 16,
+          "name": "16 文件组织",
+          "status": "通过",
+          "evidence": "编号文件继续沿用；`Chapter2/README.md` 列清实际入口、主题与未启用历史文件，六个项目以概念命名。没有为了外观一致批量移动文件。",
+          "report_line": 37
+        },
+        {
+          "item": 17,
+          "name": "17 包含与引用",
+          "status": "通过",
+          "evidence": "从卷入口展开 23 个文件、156 个标签、102 个被引用标签，无重复/循环包含、失效路径、重复标签、未定义引用；27+12 题解定位检查通过。",
+          "report_line": 38
+        },
+        {
+          "item": 18,
+          "name": "18 源码和格式",
+          "status": "通过",
+          "evidence": "命令、类型、路径与数学复杂度各用对应环境；表格列宽、图片图注、标题、行号与短代码分页协调。短答案在标题前留空间，长程序自然跨页。第一章两处长文本同时作断行修正。",
+          "report_line": 39
+        },
+        {
+          "item": 19,
+          "name": "19 示例实际运行",
+          "status": "通过",
+          "evidence": "Ubuntu 24.04.5 / GCC 13.3.0 构建并运行全部 70 个正文/答案程序，无编译警告或非预期失败；10 个关键变体另行核验，详见下文和 evidence。",
+          "report_line": 40
+        },
+        {
+          "item": 20,
+          "name": "20 编译和 PDF",
+          "status": "通过",
+          "evidence": "卷入口 XeLaTeX 编译至引用稳定，203 页；无 Overfull、未定义引用或重复标签警告。实际查看目录 7–8、正文 76–139、题解 176–201；未修改共享模板。最后的短代码分页修正另复查受影响页面。",
+          "report_line": 41
+        }
+      ]
+    },
+    {
+      "volume": 1,
+      "chapter": 3,
+      "report": "docs/revision/volume-1-chapter-3.md",
+      "report_sha256": "8c54817dc0eb94d63cb20ed09c40c53a6e9f0582051a5fea6e7f7b48bf26f877",
+      "counts": {
+        "通过": 20
+      },
+      "checks": [
+        {
+          "item": 1,
+          "name": "1 章首提要",
+          "status": "通过",
+          "evidence": "main.tex 第三章 introduction 有行为目标、3–5 天建议学时及卷一/卷二边界。",
+          "report_line": 18
+        },
+        {
+          "item": 2,
+          "name": "2 核心小节示例",
+          "status": "通过",
+          "evidence": "3.tex 的四阶段、配置、文件、编译、链接、安装、模块、OpenCV 八个完整示例，均给出前提、代码/步骤与结果判断。",
+          "report_line": 19
+        },
+        {
+          "item": 3,
+          "name": "3 复杂概念项目",
+          "status": "通过",
+          "evidence": "examples/build-pipeline-demo 的四步工程完整；ROS 选读复用已有完整项目，不保留缺少源码的假运行示例。",
+          "report_line": 20
+        },
+        {
+          "item": 4,
+          "name": "4 正文展示项目",
+          "status": "通过",
+          "evidence": "章首列目录与各阶段作用，完整源码/头文件/CMake 配置直接引入；解释声明与定义、编译选项、PUBLIC 传播、模块函数、安装和依赖。两张关系图辅助阅读。",
+          "report_line": 21
+        },
+        {
+          "item": 5,
+          "name": "5 语法与参数",
+          "status": "通过",
+          "evidence": "g++、cmake、目标命令、安装规则和模块函数有通用语法及参数说明，具体示例说明工作目录、可替换名字、单配置生成器和图形环境。",
+          "report_line": 22
+        },
+        {
+          "item": 6,
+          "name": "6 随堂练习",
+          "status": "通过",
+          "evidence": "9 个 exercise，逐节覆盖见下表；编译四阶段/宏、重命名、路径与实现、增量/开关、共享库、安装、模块、作用域、缺包/退出码。",
+          "report_line": 23
+        },
+        {
+          "item": 7,
+          "name": "7 难点归纳",
+          "status": "通过",
+          "evidence": "四阶段/产物、配置/构建/安装、声明/定义/链接、三作用域和读陌生构建文件均有 conclusion；阶段排错表归纳可观察现象。",
+          "report_line": 24
+        },
+        {
+          "item": 8,
+          "name": "8 易错提示",
+          "status": "通过",
+          "evidence": "缓存、编译器/生成器切换、配置成功不等于构建成功、glob 收入重复 main、头文件路径不等于实现、动态部署、安装覆盖、退出码读取有明确说明。",
+          "report_line": 25
+        },
+        {
+          "item": 9,
+          "name": "9 本章小结",
+          "status": "通过",
+          "evidence": "main.tex 回顾编译、工作流、目标/依赖、阶段排错，说明要练熟与用到再查的内容并承接卷二。",
+          "report_line": 26
+        },
+        {
+          "item": 10,
+          "name": "10 章末习题",
+          "status": "通过",
+          "evidence": "10 题有基础、提高和真实增量构建实践，覆盖核心知识，模块打印与变量/宏问题合并，避免机械扩题。",
+          "report_line": 27
+        },
+        {
+          "item": 11,
+          "name": "11 本章验收",
+          "status": "通过",
+          "evidence": "五项操作任务检查空目录构建、工程调整、故障定位、安装交付与外部依赖；要求新构建和实际输出，区别于知识自测。",
+          "report_line": 28
+        },
+        {
+          "item": 12,
+          "name": "12 答案定位",
+          "status": "通过",
+          "evidence": "answers.tex 按正文顺序提供全部 9+10 题解，用 ref 定位，不再手写题号。开放操作题给可执行命令与判断标准。",
+          "report_line": 29
+        },
+        {
+          "item": 13,
+          "name": "13 作者语言习惯",
+          "status": "通过",
+          "evidence": "保留从实际报错/工程需要接着讲的段落，使用你/我们、自然过渡、随步骤解释原因；没有改成术语提纲或操作清单。",
+          "report_line": 30
+        },
+        {
+          "item": 14,
+          "name": "14 图片实际检查",
+          "status": "通过",
+          "evidence": "实际查看两张原图及上下文，重绘为中文青色矢量图，检查独立图与正文尺寸下的箭头、字体、术语和图文关系。",
+          "report_line": 31
+        },
+        {
+          "item": 15,
+          "name": "15 图片标记与引用",
+          "status": "通过",
+          "evidence": "两图检查后发布为 build-stages_revised.pdf、cmake-module_revised.pdf，正文和生成脚本一致。旧图保留历史追溯。",
+          "report_line": 32
+        },
+        {
+          "item": 16,
+          "name": "16 文件组织",
+          "status": "通过",
+          "evidence": "保留单一正文入口 Chapter3/3.tex；项目按步骤分目录，中间配置与最终入口的职责在正文和 README 写明。",
+          "report_line": 33
+        },
+        {
+          "item": 17,
+          "name": "17 包含与引用",
+          "status": "通过",
+          "evidence": "入口包含 23 个文件、175 个标签、121 个被引用标签，无循环/失效路径、重复标签和未定义引用；项目和跨卷 CMake 引入路径均有效。",
+          "report_line": 34
+        },
+        {
+          "item": 18,
+          "name": "18 源码与格式",
+          "status": "通过",
+          "evidence": "标题仍用卷内层级映射；语法、表格、图注、行号与相邻正文协调；短程序/配置和答案命令分页已修正。",
+          "report_line": 35
+        },
+        {
+          "item": 19,
+          "name": "19 实际运行",
+          "status": "通过",
+          "evidence": "Ubuntu 24.04.5 中完成 54 次构建/运行/安装/故障/图形命令，另核验缺包/恢复两次配置；Jazzy 选读工程构建、3 个测试与节点启动通过。详见运行证据。",
+          "report_line": 36
+        },
+        {
+          "item": 20,
+          "name": "20 编译与 PDF",
+          "status": "通过",
+          "evidence": "从卷入口 XeLaTeX 编译至引用稳定；目录、正文、题解及两图实际尺寸检查通过，无缺文件、未定义引用、重复标签或越界。最终页数与复查页记录在下文。",
+          "report_line": 37
+        }
+      ]
+    },
+    {
+      "volume": 2,
+      "chapter": 1,
+      "report": "docs/revision/volume-2-chapter-1.md",
+      "report_sha256": "a57eed0d0b5923a2a491f093cccb3299dde7f5b342a435f4819e54d5db517c53",
+      "counts": {
+        "通过": 19,
+        "未完成": 1
+      },
+      "checks": [
+        {
+          "item": 1,
+          "name": "1 章首提要",
+          "status": "通过",
+          "evidence": "main.tex 第一章 introduction 包含可操作目标、基础约一周与工程 2–3 天学时、卷一前置和卷三集成边界。",
+          "report_line": 17
+        },
+        {
+          "item": 2,
+          "name": "2 核心示例",
+          "status": "通过",
+          "evidence": "A_ros2、project、engineering 的环境/图、发布订阅/QoS、定时器/接口/服务、完整工程/rqt、依赖/Launch/日志/调试示例有前提、操作与判断。",
+          "report_line": 18
+        },
+        {
+          "item": 3,
+          "name": "3 复杂概念项目",
+          "status": "通过",
+          "evidence": "basic-interfaces-demo 与复用的 training_tools 均有完整源码、构建文件、清单、配置和 README；不再依赖正文之外的缺失工程。",
+          "report_line": 19
+        },
+        {
+          "item": 4,
+          "name": "4 正文展示项目",
+          "status": "通过",
+          "evidence": "两个工程的目录、完整核心代码和行为配置直接引入；按执行顺序讲接口生成、收发回调、安装、参数覆盖、命名空间/重映射与进程事件。",
+          "report_line": 20
+        },
+        {
+          "item": 5,
+          "name": "5 语法与参数",
+          "status": "通过",
+          "evidence": "ros2、colcon、rosdep、Launch 与日志命令有通用形式或参数解释，说明终端环境、工作目录、替换名字、两发行版条件与 GUI 前提。",
+          "report_line": 21
+        },
+        {
+          "item": 6,
+          "name": "6 随堂练习",
+          "status": "通过",
+          "evidence": "12 个 exercise 覆盖关系见下表，QoS 与回复观察新增独立任务，其余相邻知识合并但能力不遗漏。",
+          "report_line": 22
+        },
+        {
+          "item": 7,
+          "name": "7 难点归纳",
+          "status": "通过",
+          "evidence": "包/节点/话题、QoS、消息语义、域/发现范围/中间件、构建安装/Launch、IDE 产物均有 conclusion 或明确对比表。",
+          "report_line": 23
+        },
+        {
+          "item": 8,
+          "name": "8 易错提示",
+          "status": "通过",
+          "evidence": "混加载发行版、回调生命周期、参数类型、静态对端、旧进程/daemon、环境继承、遗漏安装、日志级别与工具接口查询问题均有说明；使用独立工作空间避免覆盖。",
+          "report_line": 24
+        },
+        {
+          "item": 9,
+          "name": "9 本章小结",
+          "status": "通过",
+          "evidence": "A_ros2_review 用功能包、通信闭环、构建启动观察与排错串联知识，区分要练熟和按项目查询的内容。",
+          "report_line": 25
+        },
+        {
+          "item": 10,
+          "name": "10 章末习题",
+          "status": "通过",
+          "evidence": "10 题覆盖核心概念、环境、QoS、接口、服务、发现、Launch、日志与新旧产物，包含基础、提高、实际运行任务。",
+          "report_line": 26
+        },
+        {
+          "item": 11,
+          "name": "11 本章验收",
+          "status": "通过",
+          "evidence": "5 项现场操作检查不同输入、增加接口字段、图形观察、指定 Launch 参数与调试，区别于知识题。",
+          "report_line": 27
+        },
+        {
+          "item": 12,
+          "name": "12 答案定位",
+          "status": "通过",
+          "evidence": "answers.tex 的 12+10 题解通过 ref 定位，按正文顺序排列；开放实践有命令、输出或判断依据。",
+          "report_line": 28
+        },
+        {
+          "item": 13,
+          "name": "13 作者语言习惯",
+          "status": "通过",
+          "evidence": "保留原来的你/我们、首先/然后/不过、操作中的解释与轻松提醒；修正技术错误，不照抄错字或单位错误。",
+          "report_line": 29
+        },
+        {
+          "item": 14,
+          "name": "14 图片实际检查",
+          "status": "通过",
+          "evidence": "实际查看原版本截图、软件分层图和节点图；重绘两张青色中文矢量图，新 rqt 截图来自真实插件运行。独立图和正文尺寸均实际查看。",
+          "report_line": 30
+        },
+        {
+          "item": 15,
+          "name": "15 图片标记与引用",
+          "status": "通过",
+          "evidence": "检查后使用 ros2_arch_revised.pdf、ros2_node_revised.pdf、ros2_rqt_revised.png，正文与生成脚本的发布路径一致；旧图保留。",
+          "report_line": 31
+        },
+        {
+          "item": 16,
+          "name": "16 文件组织",
+          "status": "通过",
+          "evidence": "原 appendix_ros2.tex 改为 A_ros2_project.tex 并移到节点讲解后；完整工程与工程机制两部分职责清楚，项目按消息包/节点包组织。",
+          "report_line": 32
+        },
+        {
+          "item": 17,
+          "name": "17 包含与引用",
+          "status": "通过",
+          "evidence": "main→core→project→engineering→review 顺序明确；README、OpenCV 调用说明同步。结构检查 29 个包含文件、91 个标签、45 个被引用标签无失效/重复/循环。",
+          "report_line": 33
+        },
+        {
+          "item": 18,
+          "name": "18 源码与格式",
+          "status": "通过",
+          "evidence": "短命令和配置整体排版，长实现按函数边界展示全部内容；图注、表格、标题映射和行号沿用本卷，章末题解编号不再带列表尾点。",
+          "report_line": 34
+        },
+        {
+          "item": 19,
+          "name": "19 实际运行",
+          "status": "未完成",
+          "evidence": "Jazzy 的构建、通信、变体、Launch、日志、测试、真实 rqt 插件及 GDB 回调断点均通过；尚缺 CLion 图形断点和真实第二主机上的发现范围/恢复测试。Humble 未实测，只有版本文档核对。不能用同机不同域或 GDB 替代这两项。",
+          "report_line": 35
+        },
+        {
+          "item": 20,
+          "name": "20 编译与 PDF",
+          "status": "通过",
+          "evidence": "从卷入口 XeLaTeX 编译至引用稳定，无缺文件、未定义引用、重复标签或越界。最终 179 页；实际检查目录物理页 4–5、正文 7–37、题解 162–165 及相邻章入口。没有修改共享模板。",
+          "report_line": 36
+        }
+      ]
+    },
+    {
+      "volume": 2,
+      "chapter": 2,
+      "report": "docs/revision/volume-2-chapter-2.md",
+      "report_sha256": "df5c75c644964895db08b2a1596d661003919211f7c2f62de41bcf38ebc71296",
+      "counts": {
+        "通过": 19,
+        "未完成": 1
+      },
+      "checks": [
+        {
+          "item": 1,
+          "name": "1 章首提要",
+          "status": "通过",
+          "evidence": "main.tex 第二章有 TCP/拆帧/ROS/校验/状态/事件/代次目标、2–3 天学时和教学帧/赛场边界。",
+          "report_line": 26
+        },
+        {
+          "item": 2,
+          "name": "2 核心示例",
+          "status": "通过",
+          "evidence": "J_comm 的拓扑场景与九个操作示例有前提、完整输入/源码、运行目录和结果；共用覆盖见上表。",
+          "report_line": 27
+        },
+        {
+          "item": 3,
+          "name": "3 复杂概念项目",
+          "status": "通过",
+          "evidence": "stream-link-demo 有十个 Python 文件及 README，无缺源码、构建依赖或输入数据，仿真与实机范围明确。",
+          "report_line": 28
+        },
+        {
+          "item": 4,
+          "name": "4 正文展示项目",
+          "status": "通过",
+          "evidence": "目录和核心源码直接引入，解释字段、缓存、锁、归属、优先级、年龄、事件确认、PTY 与 ROS 分支的协作。",
+          "report_line": 29
+        },
+        {
+          "item": 5,
+          "name": "5 语法与参数",
+          "status": "通过",
+          "evidence": "解释 socket 收发、timeout、长度、CRC 范围/字节序、角色/host/port/rounds 与 --ros，说明替换参数及容器解释器环境。",
+          "report_line": 30
+        },
+        {
+          "item": 6,
+          "name": "6 随堂练习",
+          "status": "通过",
+          "evidence": "8 个 exercise 明确覆盖每项核心能力，状态练习复用 TCP 两轮回显，不机械按子标题扩题。",
+          "report_line": 31
+        },
+        {
+          "item": 7,
+          "name": "7 难点归纳",
+          "status": "通过",
+          "evidence": "字节/帧、状态/事件/代次、调度/数据时效有 conclusion；故障表将机制与实机处理对应。",
+          "report_line": 32
+        },
+        {
+          "item": 8,
+          "name": "8 易错提示",
+          "status": "通过",
+          "evidence": "环回地址、唯一读取者、非法长度、旧清理、未确认不等于未执行、非持久去重、读超时/EOF、单位与时间来源均说明；操作真实设备前有明确边界提醒。",
+          "report_line": 33
+        },
+        {
+          "item": 9,
+          "name": "9 本章小结",
+          "status": "通过",
+          "evidence": "J_comm_review 串联所有者→组帧→转换→数据策略→归属与故障，给出练熟与查真实文档的范围。",
+          "report_line": 34
+        },
+        {
+          "item": 10,
+          "name": "10 章末习题",
+          "status": "通过",
+          "evidence": "9 题覆盖全部核心知识，含提高题和事件确认实践；半帧跨连接、归属竞态、时钟混用与随堂任务分工。",
+          "report_line": 35
+        },
+        {
+          "item": 11,
+          "name": "11 本章验收",
+          "status": "通过",
+          "evidence": "四项现场演示检查两终端重连、有效帧/PTY、隔离/阈值、ROS 输入与事件确认，区别于知识自测。",
+          "report_line": 36
+        },
+        {
+          "item": 12,
+          "name": "12 答案定位",
+          "status": "通过",
+          "evidence": "answers.tex 的 8+9 题解均用 ref；开放方案有可行边界与判断，修改参数时交代断言和日志一起调整。",
+          "report_line": 37
+        },
+        {
+          "item": 13,
+          "name": "13 作者语言习惯",
+          "status": "通过",
+          "evidence": "从读者刚完成 ROS 的处境接着讲，用你/我们和自然条件分支，随操作解释原因；轻松提醒不替代字段、时钟和异常机制。",
+          "report_line": 38
+        },
+        {
+          "item": 14,
+          "name": "14 图片实际检查",
+          "status": "通过",
+          "evidence": "原章无图片，新字节流图实际查看独立渲染与正文尺寸，颜色/字体/箭头沿用前两章青色矢量风格，数值与 parser_demo 一致。",
+          "report_line": 39
+        },
+        {
+          "item": 15,
+          "name": "15 标记与引用",
+          "status": "通过",
+          "evidence": "候选图检查后发布 comm_stream_revised.pdf，正文和生成脚本的发布路径一致。",
+          "report_line": 40
+        },
+        {
+          "item": 16,
+          "name": "16 文件组织",
+          "status": "通过",
+          "evidence": "保留可定位的 J_comm/J_comm_review 文件；项目解析器与状态分开，入口各自承担一个概念，没有另造相同 ROS 包。",
+          "report_line": 41
+        },
+        {
+          "item": 17,
+          "name": "17 包含与引用",
+          "status": "通过",
+          "evidence": "29 个包含文件、109 个标签、63 个被引用标签；题目/题解匹配，无重复/失效/循环，直接源码路径有效。",
+          "report_line": 42
+        },
+        {
+          "item": 18,
+          "name": "18 源码与格式",
+          "status": "通过",
+          "evidence": "标题沿用实际映射；完整文件按函数边界引入并保留行号。短配置整体显示，长 ROS 桥接拆成三段以减少整页空白；文字、路径与数学语义分别排版。",
+          "report_line": 43
+        },
+        {
+          "item": 19,
+          "name": "19 实际运行",
+          "status": "未完成",
+          "evidence": "Ubuntu/Jazzy 完成 30 条命令/后台记录，真实 TCP/线程/socket/pySerial PTY/ROS 通过；尚未在第二物理主机测试 host 参数，也未验证真实板端、接线与 USB 拔插。模拟不是实机验收，未把这些缺口记为不适用。",
+          "report_line": 44
+        },
+        {
+          "item": 20,
+          "name": "20 编译与 PDF",
+          "status": "通过",
+          "evidence": "从卷入口 XeLaTeX 编译至引用稳定，无缺资源、未定义引用、重复标签或越界；完整正文、图、目录和题解实际检查，页数与范围见下文。无共享模板变化。",
+          "report_line": 45
+        }
+      ]
+    },
+    {
+      "volume": 2,
+      "chapter": 3,
+      "report": "docs/revision/volume-2-chapter-3.md",
+      "report_sha256": "964c75abcab80a3a06943b3b0f7d37a45de5a5a0e4a1469cf346a105fee20ecc",
+      "counts": {
+        "通过": 19,
+        "未完成": 1
+      },
+      "checks": [
+        {
+          "item": 1,
+          "name": "1 章首提要",
+          "status": "通过",
+          "evidence": "main 第三章有录存/回放/同步/校验/切换/时效目标、3–5 天学时、教学波形/赛场边界。",
+          "report_line": 28
+        },
+        {
+          "item": 2,
+          "name": "2 核心示例",
+          "status": "通过",
+          "evidence": "K_sdr 的边界场景、tone、完整生成/录存/回放、校验、阶段/融合、capture 各有前提和结果判断；共享示例对应能力见上表。",
+          "report_line": 29
+        },
+        {
+          "item": 3,
+          "name": "3 复杂项目",
+          "status": "通过",
+          "evidence": "iq-replay-demo 八文件+README，提供合成输入，无缺核心实现或外找样本要求。",
+          "report_line": 30
+        },
+        {
+          "item": 4,
+          "name": "4 正文展示项目",
+          "status": "通过",
+          "evidence": "目录、全部核心源码、参数与执行过程直接展示，两个图辅助采样边界与同步结果。",
+          "report_line": 31
+        },
+        {
+          "item": 5,
+          "name": "5 语法/参数",
+          "status": "通过",
+          "evidence": "generate/decode、毫米/弧度/频偏/噪声、dtype/npy、设备 URI/LO/带宽/增益与版本差异有说明，目录可替换。",
+          "report_line": 32
+        },
+        {
+          "item": 6,
+          "name": "6 随堂练习",
+          "status": "通过",
+          "evidence": "八题覆盖表中八项能力，波形/录存综合练习与阶段/融合共用程序均明确分工。",
+          "report_line": 33
+        },
+        {
+          "item": 7,
+          "name": "7 难点归纳",
+          "status": "通过",
+          "evidence": "IQ/符号/比特/帧/字段、同步/解调/CRC、阶段/接收/融合有两个 conclusion。",
+          "report_line": 34
+        },
+        {
+          "item": 8,
+          "name": "8 易错提示",
+          "status": "通过",
+          "evidence": "采样率计数、uint8 负号、alias、已知频偏、有限单帧、非通用幅值阈值、覆盖录包、时钟、硬件前置和接收/发射边界均说明。",
+          "report_line": 35
+        },
+        {
+          "item": 9,
+          "name": "9 章末小结",
+          "status": "通过",
+          "evidence": "K_sdr_review 串联采样→参考→比特→校验→上层，指明熟练内容与设备/协议查阅范围。",
+          "report_line": 36
+        },
+        {
+          "item": 10,
+          "name": "10 章末习题",
+          "status": "通过",
+          "evidence": "九题覆盖核心内容，含元数据/未知频偏/迟到结果提高题与独立录包组合实践。",
+          "report_line": 37
+        },
+        {
+          "item": 11,
+          "name": "11 本章验收",
+          "status": "通过",
+          "evidence": "四项现场检查独立进程、异常拒收、配置/数据源变化及硬件验证范围，与知识题分工。",
+          "report_line": 38
+        },
+        {
+          "item": 12,
+          "name": "12 答案定位",
+          "status": "通过",
+          "evidence": "8+9 题解均 ref，给参数结果、断言变更、开放实践判断与实机缺口；不存在沿用旧题号。",
+          "report_line": 39
+        },
+        {
+          "item": 13,
+          "name": "13 作者口吻",
+          "status": "通过",
+          "evidence": "从字节流接到复数样本，按操作随步骤解释“为什么”，自然你/我们、条件与轻松提醒，技术含义独立准确。",
+          "report_line": 40
+        },
+        {
+          "item": 14,
+          "name": "14 图片实际查看",
+          "status": "通过",
+          "evidence": "新流程图与实际计算曲线独立渲染及正文尺寸查看；保留 IQ/峰/符号实际数值，不伪造实机采集。",
+          "report_line": 41
+        },
+        {
+          "item": 15,
+          "name": "15 标记/引用",
+          "status": "通过",
+          "evidence": "候选检查后发布 sdr_chain_revised.pdf/sdr_replay_revised.pdf，正文和脚本发布路径一致。",
+          "report_line": 42
+        },
+        {
+          "item": 16,
+          "name": "16 文件组织",
+          "status": "通过",
+          "evidence": "保留含义清楚的 K_sdr/K_sdr_review，数值核心与入口/硬件分开，沿用原 answers.tex。",
+          "report_line": 43
+        },
+        {
+          "item": 17,
+          "name": "17 包含/引用",
+          "status": "通过",
+          "evidence": "入口 29 文件，128 标签、82 被引用标签；路径、标签唯一性、8+9 题解覆盖与编译引用检查通过。",
+          "report_line": 44
+        },
+        {
+          "item": 18,
+          "name": "18 源码/格式",
+          "status": "通过",
+          "evidence": "实际章节映射保留，代码按职责连续展示，短代码和段落分开、长代码分段，数学/路径/URL 分别排版。",
+          "report_line": 45
+        },
+        {
+          "item": 19,
+          "name": "19 实际运行",
+          "status": "未完成",
+          "evidence": "23 条记录和其中 75 组参数变体通过；硬件库安装/import/help 已核验，USB 扫描没有设备。模拟调用/失败清理不算 RX 实机；未验证 Pluto、接线/天线、稳定/丢样或真实赛场波形。",
+          "report_line": 46
+        },
+        {
+          "item": 20,
+          "name": "20 编译/PDF",
+          "status": "通过",
+          "evidence": "卷入口 XeLaTeX 至引用稳定，无缺资源/重复/未定义引用/越界；受影响正文、目录、图与答案实际查看，最终页范围见下文。共享模板未修改。",
+          "report_line": 47
+        }
+      ]
+    },
+    {
+      "volume": 2,
+      "chapter": 4,
+      "report": "docs/revision/volume-2-chapter-4.md",
+      "report_sha256": "abce5777b41ac6319cdd7617211bd0407a3a2e9711d118a02747f2521a436651",
+      "counts": {
+        "通过": 19,
+        "未完成": 1
+      },
+      "checks": [
+        {
+          "item": 1,
+          "name": "1 章首提要",
+          "status": "通过",
+          "evidence": "main 第四章含构建/读写/分割/几何/特征/ROS 目标、1–1.5 周学时和卷三赛场边界。",
+          "report_line": 15
+        },
+        {
+          "item": 2,
+          "name": "2 核心示例",
+          "status": "通过",
+          "evidence": "B_opencv 的 12 个核心小节都有完整示例、前提、操作和结果，14 个程序及 ROS 共享覆盖关系见上文。",
+          "report_line": 16
+        },
+        {
+          "item": 3,
+          "name": "3 复杂项目",
+          "status": "通过",
+          "evidence": "两个工程完整，合成 PNG/MJPG 输入由 sample_demo 生成，无外找测试图要求。",
+          "report_line": 17
+        },
+        {
+          "item": 4,
+          "name": "4 正文展示项目",
+          "status": "通过",
+          "evidence": "目录、全部核心源码、两套构建配置直接展示，逐步解释流水线和回调，配实际六阶段图。",
+          "report_line": 18
+        },
+        {
+          "item": 5,
+          "name": "5 语法/参数",
+          "status": "通过",
+          "evidence": "CMake -S/-B、文件与相机参数、图像类型、HSV、核/阈值、ORB 距离和 ROS 目录/版本均说明。",
+          "report_line": 19
+        },
+        {
+          "item": 6,
+          "name": "6 随堂练习",
+          "status": "通过",
+          "evidence": "12 题覆盖全部能力，共用 IO/流水线任务同时包含视频和窗口，不用“自行尝试”代替任务。",
+          "report_line": 20
+        },
+        {
+          "item": 7,
+          "name": "7 难点归纳",
+          "status": "通过",
+          "evidence": "conclusion 区分 Mat 共享/clone、滤波/形态学、像素/encoding/Header；轮廓/像素面积有明确对照。",
+          "report_line": 21
+        },
+        {
+          "item": 8,
+          "name": "8 易错提示",
+          "status": "通过",
+          "evidence": "空输入、写失败、视频后端、红色色环、核去目标、坐标/画布、匹配不等于身份、文件覆盖和编码不符均说明。",
+          "report_line": 22
+        },
+        {
+          "item": 9,
+          "name": "9 本章小结",
+          "status": "通过",
+          "evidence": "B_opencv_review 串联输入→分割→降噪→几何→绘图与 ROS，指出参数及赛场内容的查阅位置。",
+          "report_line": 23
+        },
+        {
+          "item": 10,
+          "name": "10 章末习题",
+          "status": "通过",
+          "evidence": "10 题覆盖核心内容，含特征几何与时间语义提高、单段红色流水线实践。",
+          "report_line": 24
+        },
+        {
+          "item": 11,
+          "name": "11 本章验收",
+          "status": "通过",
+          "evidence": "四项现场展示构建/窗口/视频、中间图/面积、ROI/缩放和 Jazzy 编码回调，与知识题分工。",
+          "report_line": 25
+        },
+        {
+          "item": 12,
+          "name": "12 答案定位",
+          "status": "通过",
+          "evidence": "12+10 题全部 ref，给具体输出、开放实践判断与实际版本边界。",
+          "report_line": 26
+        },
+        {
+          "item": 13,
+          "name": "13 作者口吻",
+          "status": "通过",
+          "evidence": "从前章采样接到图像，随操作说明原因与常见卡点，以“你/我们/不过/接下来”自然推进。",
+          "report_line": 27
+        },
+        {
+          "item": 14,
+          "name": "14 图片实际查看",
+          "status": "通过",
+          "evidence": "两张旧噪声图独立查看并核对同场景；新六阶段图实际生成、独立渲染和正文尺寸核对。",
+          "report_line": 28
+        },
+        {
+          "item": 15,
+          "name": "15 标记/引用",
+          "status": "通过",
+          "evidence": "已检查噪声图与新图带 _revised，B_opencv/E_camera 所有调用同步，脚本发布路径一致。",
+          "report_line": 29
+        },
+        {
+          "item": 16,
+          "name": "16 文件组织",
+          "status": "通过",
+          "evidence": "保留清楚的 B_opencv/B_opencv_review；普通图像与 ROS 工程分开，沿用 answers.tex。",
+          "report_line": 30
+        },
+        {
+          "item": 17,
+          "name": "17 包含/引用",
+          "status": "通过",
+          "evidence": "29 个入口文件、151 个标签、106 个被引用标签，路径/唯一性/22 题解定位检查通过。",
+          "report_line": 31
+        },
+        {
+          "item": 18,
+          "name": "18 源码/格式",
+          "status": "通过",
+          "evidence": "沿用标题映射；本章 cvblock 保持完整短代码，长源码沿职责分段，去掉不可断行的文件长串。",
+          "report_line": 32
+        },
+        {
+          "item": 19,
+          "name": "19 实际运行",
+          "status": "未完成",
+          "evidence": "64 条软件记录通过；无物理相机，驱动/参数设置、USB 连续帧及真实采集时间未验证；Humble 只给适配说明。",
+          "report_line": 33
+        },
+        {
+          "item": 20,
+          "name": "20 编译/PDF",
+          "status": "通过",
+          "evidence": "卷入口至引用稳定，212 页；受影响目录、全章、图、答案和噪声图其他调用页均实际检查。",
+          "report_line": 34
+        }
+      ]
+    },
+    {
+      "volume": 2,
+      "chapter": 5,
+      "report": "docs/revision/volume-2-chapter-5.md",
+      "report_sha256": "ff4e1219c8f9ad0373f2bc33d80a84afbcc1b8fddb0232444c43d2fedbf0788e",
+      "counts": {
+        "通过": 20
+      },
+      "checks": [
+        {
+          "item": 1,
+          "name": "1 章首提要",
+          "status": "通过",
+          "evidence": "main 第五章列数据划分、形状/梯度、训练/保存/推理和数值核对目标，保留 1.5–2 周学时及卷三边界。",
+          "report_line": 15
+        },
+        {
+          "item": 2,
+          "name": "2 核心示例",
+          "status": "通过",
+          "evidence": "C_dl 的 12 个核心小节均有前提、完整示例、运行方法和结果，共享示例/练习的覆盖关系见上文。",
+          "report_line": 16
+        },
+        {
+          "item": 3,
+          "name": "3 复杂项目",
+          "status": "通过",
+          "evidence": "完整 LeNet 工程自行下载 MNIST，数据、模型、循环、入口、保存/重载和导出均有实现，不要求读者补函数。",
+          "report_line": 17
+        },
+        {
+          "item": 4,
+          "name": "4 正文展示项目",
+          "status": "通过",
+          "evidence": "目录、14 个源码、导出依赖全部在对应小节直接展示，配六张图逐步解释。",
+          "report_line": 18
+        },
+        {
+          "item": 5,
+          "name": "5 语法/参数",
+          "status": "通过",
+          "evidence": "pip/venv、CLI、Conv2d/MaxPool、Module/forward/flatten、CE/SGD/Adam、状态/保存、导出和计时参数均说明。",
+          "report_line": 19
+        },
+        {
+          "item": 6,
+          "name": "6 随堂练习",
+          "status": "通过",
+          "evidence": "12 道任务覆盖所有核心能力，明确要求手算、改动、运行和解释，组合题覆盖损失/优化与导出/计时。",
+          "report_line": 20
+        },
+        {
+          "item": 7,
+          "name": "7 难点归纳",
+          "status": "通过",
+          "evidence": "conclusion 区分三集合、logits/概率/损失、backward/step/zero_grad、eval/no_grad、参数/部署及吞吐/响应。",
+          "report_line": 21
+        },
+        {
+          "item": 8,
+          "name": "8 易错提示",
+          "status": "通过",
+          "evidence": "解释器选错、版本/构建不符、数据泄漏、尺寸与参数错配、结果覆盖、批量加权、异步计时和单类 NMS 限制均说明。",
+          "report_line": 22
+        },
+        {
+          "item": 9,
+          "name": "9 本章小结",
+          "status": "通过",
+          "evidence": "C_dl_review 串联拟合→数据→特征→损失→训练→保存→跨运行时，说明卷三与官方文档的后续范围。",
+          "report_line": 23
+        },
+        {
+          "item": 10,
+          "name": "10 章末习题",
+          "status": "通过",
+          "evidence": "10 题覆盖基础、提高与完整实践，没有用单一改值题代替部署和数据判断。",
+          "report_line": 24
+        },
+        {
+          "item": 11,
+          "name": "11 本章验收",
+          "status": "通过",
+          "evidence": "四项要求实际训练/形状/梯度、独立加载、CPU/CUDA 和 ONNX 完整分数/计时现场展示，与知识题分工。",
+          "report_line": 25
+        },
+        {
+          "item": 12,
+          "name": "12 答案定位",
+          "status": "通过",
+          "evidence": "全部 12+10 题 ref 对应，含无设备时须记录缺失、现实成绩可变化及开放实践判据。",
+          "report_line": 26
+        },
+        {
+          "item": 13,
+          "name": "13 作者口吻",
+          "status": "通过",
+          "evidence": "随步骤说明原因，以“我们/你/不过/然后”自然推进；训练卡顿、存档和解释器问题从实际处境展开。",
+          "report_line": 27
+        },
+        {
+          "item": 14,
+          "name": "14 图片实际查看",
+          "status": "通过",
+          "evidence": "五张旧图逐张查看；六张新图独立渲染并检查正文尺寸、箭头、数值、标题及图文对应。",
+          "report_line": 28
+        },
+        {
+          "item": 15,
+          "name": "15 标记/引用",
+          "status": "通过",
+          "evidence": "六张图检查后才改 _revised；全部调用更新，脚本默认 candidate、检查后发布 revised，无失效旧调用。",
+          "report_line": 29
+        },
+        {
+          "item": 16,
+          "name": "16 文件组织",
+          "status": "通过",
+          "evidence": "保留清楚的 C_dl/C_dl_review 和 answers；完整项目位于本卷 examples/dl，不在正文目录堆放源码。",
+          "report_line": 30
+        },
+        {
+          "item": 17,
+          "name": "17 包含/引用",
+          "status": "通过",
+          "evidence": "29 个入口文件、174 个标签、134 个被引用标签，包含/资源/唯一性/22 个题解定位均通过。",
+          "report_line": 31
+        },
+        {
+          "item": 18,
+          "name": "18 源码/格式",
+          "status": "通过",
+          "evidence": "局部 dlblock 保持短代码完整，长代码按逻辑边界分段；行号连续、命令不受转义改写，未修改共享模板。",
+          "report_line": 32
+        },
+        {
+          "item": 19,
+          "name": "19 实际运行",
+          "status": "通过",
+          "evidence": "42 条记录通过：实际 CPU 三轮完整 MNIST、CUDA 小规模训练、独立加载、全部练习变体、ONNX 数值/输入限制和计时。后续概述范围不作为实测能力。",
+          "report_line": 33
+        },
+        {
+          "item": 20,
+          "name": "20 编译/PDF",
+          "status": "通过",
+          "evidence": "卷入口至引用稳定，219 页；实际检查全章、目录、题解及相邻章衔接；无缺文件、overfull 或未定义引用。",
+          "report_line": 34
+        }
+      ]
+    },
+    {
+      "volume": 2,
+      "chapter": 6,
+      "report": "docs/revision/volume-2-chapter-6.md",
+      "report_sha256": "5a6bb631441b03a6e4770addf48e3f72acb65f0e31393ea8a6b09c9d4b8716fc",
+      "counts": {
+        "通过": 20
+      },
+      "checks": [
+        {
+          "item": 1,
+          "name": "1 章首提要",
+          "status": "通过",
+          "evidence": "main 第六章列环境核对、构建、索引/归约/错误和含传输计时目标，保留 3–5 天学时及卷三边界。",
+          "report_line": 15
+        },
+        {
+          "item": 2,
+          "name": "2 核心示例",
+          "status": "通过",
+          "evidence": "D_cuda 十个核心小节有完整代码或操作，前提、参数和输出判断明确；部署复用前章导出与本章流水线。",
+          "report_line": 16
+        },
+        {
+          "item": 3,
+          "name": "3 复杂项目",
+          "status": "通过",
+          "evidence": "六个目标完整构建；CPU 输入、CUDA 缓冲、核启动、结果校验、归约及计时均有实现。",
+          "report_line": 17
+        },
+        {
+          "item": 4,
+          "name": "4 正文展示项目",
+          "status": "通过",
+          "evidence": "项目结构、全部 8 个源码与完整 CMake 均在概念附近直接展示，四张关系图补充数据流。",
+          "report_line": 18
+        },
+        {
+          "item": 5,
+          "name": "5 语法/参数",
+          "status": "通过",
+          "evidence": "apt 开发包范围、PATH、nvcc、架构、CMake、启动语法、索引、API、工具与 CLI 参数均说明。",
+          "report_line": 19
+        },
+        {
+          "item": 6,
+          "name": "6 随堂练习",
+          "status": "通过",
+          "evidence": "10 道任务逐节覆盖，要求手算、运行变体、记录退出状态及解释测量范围。",
+          "report_line": 20
+        },
+        {
+          "item": 7,
+          "name": "7 难点归纳",
+          "status": "通过",
+          "evidence": "conclusion 区分依赖/独立任务、驱动/编译器/运行库、全局/共享/私有、边界/屏障与时间口径。",
+          "report_line": 21
+        },
+        {
+          "item": 8,
+          "name": "8 易错提示",
+          "status": "通过",
+          "evidence": "容器装驱动、旧安装器适用范围、缓存架构、无效线程早退、异步错误、断言上下文与故意越界均提醒。",
+          "report_line": 22
+        },
+        {
+          "item": 9,
+          "name": "9 本章小结",
+          "status": "通过",
+          "evidence": "D_cuda_review 串联主机→分配→传输→启动→同步→校验和正确性→计时。",
+          "report_line": 23
+        },
+        {
+          "item": 10,
+          "name": "10 章末习题",
+          "status": "通过",
+          "evidence": "9 题覆盖基础、提高与现场实践，不用首元素打印代替完整结果/访问验证。",
+          "report_line": 24
+        },
+        {
+          "item": 11,
+          "name": "11 本章验收",
+          "status": "通过",
+          "evidence": "四项现场任务分别检查环境/构建、索引/归约、正常/负例工具和含传输计时。",
+          "report_line": 25
+        },
+        {
+          "item": 12,
+          "name": "12 答案定位",
+          "status": "通过",
+          "evidence": "全部 10+9 题定位无遗漏；计算字节、跳过数、partial、返回状态和开放实践判据齐全。",
+          "report_line": 26
+        },
+        {
+          "item": 13,
+          "name": "13 作者口吻",
+          "status": "通过",
+          "evidence": "从框架、现有容器和数据搬运的问题展开，用“你/我们/首先/不过”解释具体后果，自然连续推进。",
+          "report_line": 27
+        },
+        {
+          "item": 14,
+          "name": "14 图片实际查看",
+          "status": "通过",
+          "evidence": "五张旧图逐张查看；四张新矢量图独立渲染并在正文实际尺寸检查，索引图拥挤标签已改。",
+          "report_line": 28
+        },
+        {
+          "item": 15,
+          "name": "15 标记/引用",
+          "status": "通过",
+          "evidence": "八张在实际检查后发布 _revised，保留截图像素和输出，全部调用同步，无旧路径残留。",
+          "report_line": 29
+        },
+        {
+          "item": 16,
+          "name": "16 文件组织",
+          "status": "通过",
+          "evidence": "保留清楚的 D_cuda/D_cuda_review 与既有答案入口，完整项目归入本卷 examples/cuda。",
+          "report_line": 30
+        },
+        {
+          "item": 17,
+          "name": "17 包含/引用",
+          "status": "通过",
+          "evidence": "29 个入口文件、196 个标签、156 个被引用标签，路径/唯一性/题解定位通过。",
+          "report_line": 31
+        },
+        {
+          "item": 18,
+          "name": "18 源码/格式",
+          "status": "通过",
+          "evidence": "长命令与索引公式消除越界；局部代码布局保持完整源码，流水线按逻辑边界连续分段，修正大块留白。",
+          "report_line": 32
+        },
+        {
+          "item": 19,
+          "name": "19 实际运行",
+          "status": "通过",
+          "evidence": "53 条实际记录，包括 CPU/GPU 六目标、边界变体、错误进程、四项正常工具检查、无设备、计时及缺屏障负例。",
+          "report_line": 33
+        },
+        {
+          "item": 20,
+          "name": "20 编译/PDF",
+          "status": "通过",
+          "evidence": "卷入口编译至引用稳定，231 页；全章、图、代码、答案、目录和相邻衔接实际查看，无 overfull/缺图/未定义引用。",
+          "report_line": 34
+        }
+      ]
+    },
+    {
+      "volume": 2,
+      "chapter": 7,
+      "report": "docs/revision/volume-2-chapter-7.md",
+      "report_sha256": "ffd34037b18aa103030e3cdf70c48bf5ca602f9cd4a8bb9a44828dd2791f1154",
+      "counts": {
+        "通过": 19,
+        "未完成": 1
+      },
+      "checks": [
+        {
+          "item": 1,
+          "name": "1 章首提要",
+          "status": "通过",
+          "evidence": "main 第七章保留可验证的曝光、格式、模型、ROS 部署目标、4–6 天建议学时和卷三/几何章边界。",
+          "report_line": 15
+        },
+        {
+          "item": 2,
+          "name": "2 核心示例",
+          "status": "通过",
+          "evidence": "E_camera/E_calibration 有查表、操作、完整数值和图像/ROS 示例；快门共用运动预算、项目准备共用后续运行练习，覆盖关系写明。",
+          "report_line": 16
+        },
+        {
+          "item": 3,
+          "name": "3 复杂项目",
+          "status": "通过",
+          "evidence": "11 文件组成完整链路，模拟输入可生成、依赖和运行路径齐全，无未实现回调或伪代码。",
+          "report_line": 17
+        },
+        {
+          "item": 4,
+          "name": "4 正文展示",
+          "status": "通过",
+          "evidence": "项目结构、全部源码、数据生成条件、K/D/R/P 与 YAML 配置作用在相应概念旁讲解。",
+          "report_line": 18
+        },
+        {
+          "item": 5,
+          "name": "5 命令/参数",
+          "status": "通过",
+          "evidence": "通用形式、米/毫米/毫秒单位、内角点、径向参数、重映射、发行版与可替换路径均说明。",
+          "report_line": 19
+        },
+        {
+          "item": 6,
+          "name": "6 随堂练习",
+          "status": "通过",
+          "evidence": "13 题覆盖传感器、曝光、噪声、格式/Gamma、景深、运动/焦段、拟合、裁剪、ROS、双目、HDR。",
+          "report_line": 20
+        },
+        {
+          "item": 7,
+          "name": "7 难点归纳",
+          "status": "通过",
+          "evidence": "三处 conclusion 串联快门/模糊、亮度/信息、拟合/验证/部署及不同外参。",
+          "report_line": 21
+        },
+        {
+          "item": 8,
+          "name": "8 易错提示",
+          "status": "通过",
+          "evidence": "输出覆盖、自动曝光、模型/坐标系、正面退化、尺寸不一致、参数单位、归档覆盖和服务缺失均明确。",
+          "report_line": 22
+        },
+        {
+          "item": 9,
+          "name": "9 本章小结",
+          "status": "通过",
+          "evidence": "E_camera_review 用 conclusion 回顾成像→标定→独立检查→部署，保留查阅与实拍边界。",
+          "report_line": 23
+        },
+        {
+          "item": 10,
+          "name": "10 章末习题",
+          "status": "通过",
+          "evidence": "10 个综合自测任务覆盖基础、条件比较、单位/时序提高与运行实践。",
+          "report_line": 24
+        },
+        {
+          "item": 11,
+          "name": "11 本章验收",
+          "status": "通过",
+          "evidence": "四项要求提交真实设备/模式、图片和配置、不同独立验证图、重启读回与校正输出；双目/HDR 另交同步证据。",
+          "report_line": 25
+        },
+        {
+          "item": 12,
+          "name": "12 参考答案",
+          "status": "通过",
+          "evidence": "13+10 全部 label/ref 定位；计算、实际对照、开放实践思路与判断标准齐全。",
+          "report_line": 26
+        },
+        {
+          "item": 13,
+          "name": "13 作者口吻",
+          "status": "通过",
+          "evidence": "从上一章接着讲，随步骤解释原因与后果，使用“你/我们/首先/然后/不过”，保留适量自然吐槽。",
+          "report_line": 27
+        },
+        {
+          "item": 14,
+          "name": "14 图片实际查看",
+          "status": "通过",
+          "evidence": "9 张旧图实际查看，新矢量图、真实 GUI 截图独立查看及正文尺寸检查；既有 Gaussian/salt 仅按新比较布局复核。",
+          "report_line": 28
+        },
+        {
+          "item": 15,
+          "name": "15 标记/引用",
+          "status": "通过",
+          "evidence": "初次检查后发布 9 个 revised 文件，双目补测增加 1 个，旧图全部调用同步；真实照片及 GUI 像素未改，渲染脚本支持候选/发布路径。",
+          "report_line": 29
+        },
+        {
+          "item": 16,
+          "name": "16 文件组织",
+          "status": "通过",
+          "evidence": "E_camera 主讲成像与项目准备、E_calibration 讲模型与 ROS，E_camera_review/answers 沿用原职责。",
+          "report_line": 30
+        },
+        {
+          "item": 17,
+          "name": "17 包含/引用",
+          "status": "通过",
+          "evidence": "29 个入口文件、313 标签、260 个被引用标签（全卷后续章节已整理后的最新检查）；路径、唯一性及全部 23 题定位通过。",
+          "report_line": 31
+        },
+        {
+          "item": 18,
+          "name": "18 源码/排版",
+          "status": "通过",
+          "evidence": "保留公式/命令含义，消除长调用越界，回放拆分不把函数定义与说明交错；检查全章代码、照片和公式。",
+          "report_line": 32
+        },
+        {
+          "item": 19,
+          "name": "19 实际运行",
+          "status": "未完成",
+          "evidence": "数值、图像求解、单目 GUI、CLI、参数保存/重启、真实 image_proc 和双目回放均实测；真实曝光/相机标定、HDR/硬件同步和厂商驱动未完成；双目 GUI 操作已在补测中完成。",
+          "report_line": 33
+        },
+        {
+          "item": 20,
+          "name": "20 编译/PDF",
+          "status": "通过",
+          "evidence": "初次 235 页，本次全卷 269 页引用稳定；完整相机章、题解、目录和邻章衔接实际查看，无缺图、overfull、未定义引用。",
+          "report_line": 34
+        }
+      ]
+    },
+    {
+      "volume": 2,
+      "chapter": 8,
+      "report": "docs/revision/volume-2-chapter-8.md",
+      "report_sha256": "cbcecefe778cbe051765b35b65cb1ce20dffa28ad2cab12759dc49b8a4831fc5",
+      "counts": {
+        "通过": 20
+      },
+      "checks": [
+        {
+          "item": 1,
+          "name": "1 章首提要",
+          "status": "通过",
+          "evidence": "main 第八章有低通、位置/速度递推、融合与sigma核对、同序列比较目标，约1周和卷三边界。",
+          "report_line": 11
+        },
+        {
+          "item": 2,
+          "name": "2 核心示例",
+          "status": "通过",
+          "evidence": "F_filter有11个example，包含原数值与完整运行；过程/观测、低高通、融合、状态协方差、KF/EKF/UT/UKF各有对应示例。",
+          "report_line": 12
+        },
+        {
+          "item": 3,
+          "name": "3 复杂项目",
+          "status": "通过",
+          "evidence": "examples/filter/state-estimation-demo：10个Python核心文件及README，依赖、输入生成与运行方式完整。",
+          "report_line": 13
+        },
+        {
+          "item": 4,
+          "name": "4 正文展示",
+          "status": "通过",
+          "evidence": "10个文件全部直接引入，较长smooth/run连续分段不漏源码；解释各模块、输入条件、参数和输出，并配实际数组图。",
+          "report_line": 14
+        },
+        {
+          "item": 5,
+          "name": "5 命令/参数",
+          "status": "通过",
+          "evidence": "Ubuntu依赖、可替换路径、通用CLI形式与alpha/window/dt/q/r/bias/seed/drop-every/output及字体条件说明。",
+          "report_line": 15
+        },
+        {
+          "item": 6,
+          "name": "6 随堂练习",
+          "status": "通过",
+          "evidence": "10题覆盖偏置、窗口、低通、融合、协方差/Q、标量更新、轨迹综合、EKF、UT与UKF；准备/建模/序列共用综合题，覆盖关系明示。",
+          "report_line": 16
+        },
+        {
+          "item": 7,
+          "name": "7 难点归纳",
+          "status": "通过",
+          "evidence": "conclusion分别归纳平滑/延迟、先验/后验与Q/R/P/S、三类估计及统计传播，章末串联知识地图。",
+          "report_line": 17
+        },
+        {
+          "item": 8,
+          "name": "8 易错提示",
+          "status": "通过",
+          "evidence": "方差与标准差、单位、采样间隔、相关性、H不可逆、雅可比不等于h、奇异Cholesky、输出覆盖及缺测均说明。",
+          "report_line": 18
+        },
+        {
+          "item": 9,
+          "name": "9 本章小结",
+          "status": "通过",
+          "evidence": "F_filter_review用conclusion把抖动、模型、估计、验证串起来，明确必须动手核对的量。",
+          "report_line": 19
+        },
+        {
+          "item": 10,
+          "name": "10 章末习题",
+          "status": "通过",
+          "evidence": "10题合并基础计算、模型条件与实际运行，包含高通、Q时间幂次、单位、相关性、缺测与参数比较。",
+          "report_line": 20
+        },
+        {
+          "item": 11,
+          "name": "11 本章验收",
+          "status": "通过",
+          "evidence": "四项现场操作要求真实保存输入/输出、改参数、核对手算、sigma重建与同一非线性序列；不与自测题重复。",
+          "report_line": 21
+        },
+        {
+          "item": 12,
+          "name": "12 参考答案",
+          "status": "通过",
+          "evidence": "10+10全部label/ref互相定位，计算、运行数值、开放实践提交和判断标准齐全。",
+          "report_line": 22
+        },
+        {
+          "item": 13,
+          "name": "13 作者口吻",
+          "status": "通过",
+          "evidence": "承接实际处境，随步骤解释原因，保留连贯段落与温和吐槽，不虚构作者经历。",
+          "report_line": 23
+        },
+        {
+          "item": 14,
+          "name": "14 图片实际查看",
+          "status": "通过",
+          "evidence": "4张旧图实际查看；6张新图独立查看与正文尺寸检查，真实数组不在绘图时重算。",
+          "report_line": 24
+        },
+        {
+          "item": 15,
+          "name": "15 标记/引用",
+          "status": "通过",
+          "evidence": "检查后原字节发布6个revised文件，同步所有includegraphics；渲染脚本有候选/检查后输出选项，plot以明确output路径运行。",
+          "report_line": 25
+        },
+        {
+          "item": 16,
+          "name": "16 文件组织",
+          "status": "通过",
+          "evidence": "沿用F_filter、F_filter_review、answers职责，项目模块按用途命名，没有另建重复题解。",
+          "report_line": 26
+        },
+        {
+          "item": 17,
+          "name": "17 包含/引用",
+          "status": "通过",
+          "evidence": "29个入口文件、236标签、195个被引用标签；资源、标签唯一性与20道题解定位通过。",
+          "report_line": 27
+        },
+        {
+          "item": 18,
+          "name": "18 源码/排版",
+          "status": "通过",
+          "evidence": "保留公式和命令含义，长run分段按初始化/递推，不留孤立一行初始化；两条scalar命令同块，表格与图注协调。",
+          "report_line": 28
+        },
+        {
+          "item": 19,
+          "name": "19 实际运行",
+          "status": "通过",
+          "evidence": "Ubuntu24.04/Jazzy中50条实际记录，含16组轨迹、独立矩阵/差分/Monte Carlo核对、退化负例与三次真实绘图；本章核心是明确模拟输入的软件实验。",
+          "report_line": 29
+        },
+        {
+          "item": 20,
+          "name": "20 编译/PDF",
+          "status": "通过",
+          "evidence": "从卷入口编译至引用稳定，239页；目录、完整滤波章、题解和邻章边界逐页实际查看，无缺图、overfull、未定义引用或重跑警告。",
+          "report_line": 30
+        }
+      ]
+    },
+    {
+      "volume": 2,
+      "chapter": 9,
+      "report": "docs/revision/volume-2-chapter-9.md",
+      "report_sha256": "93bfa94c18f4bed42ca130349df1490a8ce04d9e75460e518c3233cfc9ba0db4",
+      "counts": {
+        "通过": 20
+      },
+      "checks": [
+        {
+          "item": 1,
+          "name": "1 章首提要",
+          "status": "通过",
+          "evidence": "main 第九章包含可运行投影/PnP/雅可比/位姿与联合BA/ICP目标、1–1.5周学时及卷三工程边界。",
+          "report_line": 11
+        },
+        {
+          "item": 2,
+          "name": "2 核心示例",
+          "status": "通过",
+          "evidence": "G_ba有15个example；投影、坐标、DLT/P3P、RQ/旋转、李代数、残差/优化、BA/图与配准均有完整步骤和实际结果。",
+          "report_line": 12
+        },
+        {
+          "item": 3,
+          "name": "3 复杂项目",
+          "status": "通过",
+          "evidence": "examples/geometry/pose-lab-demo含16个Python文件、README与忽略规则；输入全部小规模生成，依赖及运行位置明确。",
+          "report_line": 13
+        },
+        {
+          "item": 4,
+          "name": "4 正文展示",
+          "status": "通过",
+          "evidence": "16个文件共502行完整引入，bundle按初始化/优化两段连续展示；说明配合、实际参数、正深度及输出，并配真实残差图。",
+          "report_line": 14
+        },
+        {
+          "item": 5,
+          "name": "5 命令/参数",
+          "status": "通过",
+          "evidence": "Ubuntu依赖、可替换教材路径、通用CLI与noise/scale/swap/outlier/huber/loop/initial-shift/output/font说明齐全。",
+          "report_line": 15
+        },
+        {
+          "item": 6,
+          "name": "6 随堂练习",
+          "status": "通过",
+          "evidence": "14题覆盖投影/尺寸/方向、DLT/PnP/P3P、RQ/旋转、李代数、最小二乘/雅可比、BA/图/配准；共用项目的覆盖关系在各处明确。",
+          "report_line": 16
+        },
+        {
+          "item": 7,
+          "name": "7 难点归纳",
+          "status": "通过",
+          "evidence": "conclusion归纳分解与投影、位姿/BA/图及配准条件，章末串联模型、方向、导数与真实误差。",
+          "report_line": 17
+        },
+        {
+          "item": 8,
+          "name": "8 易错提示",
+          "status": "通过",
+          "evidence": "像素/米、尺度、负深度、多解、退化、残差符号、左右扰动、反射、规范、鲁棒梯度、输出覆盖及ICP局部对应均说明。",
+          "report_line": 18
+        },
+        {
+          "item": 9,
+          "name": "9 本章小结",
+          "status": "通过",
+          "evidence": "G_ba_review用conclusion给出投影→位姿→联合优化知识图，区分数值停止与实际精度。",
+          "report_line": 19
+        },
+        {
+          "item": 10,
+          "name": "10 章末习题",
+          "status": "通过",
+          "evidence": "10题包含基础计算、配置/退化、规范与相对位姿、配准/指数及实际比较，覆盖全部核心知识。",
+          "report_line": 20
+        },
+        {
+          "item": 11,
+          "name": "11 本章验收",
+          "status": "通过",
+          "evidence": "四项现场操作要求真实运行与记录候选、差分雅可比、BA锚定/异常比较、对应/ICP；与理论自测分工明确。",
+          "report_line": 21
+        },
+        {
+          "item": 12,
+          "name": "12 参考答案",
+          "status": "通过",
+          "evidence": "14+10全部label/ref定位；既有answers第九章给计算、实测结果、开放实践思路与判断标准。",
+          "report_line": 22
+        },
+        {
+          "item": 13,
+          "name": "13 作者口吻",
+          "status": "通过",
+          "evidence": "保留承接问题、随操作解释原因的连贯段落，未虚构作者经历，轻松表达不改变数学条件。",
+          "report_line": 23
+        },
+        {
+          "item": 14,
+          "name": "14 图片实际查看",
+          "status": "通过",
+          "evidence": "3张旧图实际查看；5个候选独立检查并在完整正文尺寸查看，真实数组图未修改观察值。",
+          "report_line": 24
+        },
+        {
+          "item": 15,
+          "name": "15 标记/引用",
+          "status": "通过",
+          "evidence": "查看通过后5图原字节发布为revised，全部includegraphics更新；生成器有候选/检查后输出开关，plot接受明确输出路径。",
+          "report_line": 25
+        },
+        {
+          "item": 16,
+          "name": "16 文件组织",
+          "status": "通过",
+          "evidence": "沿用G_ba、G_ba_review、answers职责，模块按用途命名，未另建重复题解或无关框架。",
+          "report_line": 26
+        },
+        {
+          "item": 17,
+          "name": "17 包含/引用",
+          "status": "通过",
+          "evidence": "29个入口文件、262标签、211个被引用标签；唯一性、路径及14+10题解定位通过，原有效sec/eq/fig标签保留。",
+          "report_line": 27
+        },
+        {
+          "item": 18,
+          "name": "18 源码/排版",
+          "status": "通过",
+          "evidence": "目录树与短Schur代码不跨页；PnP命令块不留孤立边框；P3P图紧跟推导，完整代码、公式与图注可读。",
+          "report_line": 28
+        },
+        {
+          "item": 19,
+          "name": "19 实际运行",
+          "status": "通过",
+          "evidence": "Ubuntu24.04/Jazzy中43条实际记录：40条数值/参数/负例及3次真实数组绘图，16个源码SHA256与最终文件一致。",
+          "report_line": 29
+        },
+        {
+          "item": 20,
+          "name": "20 编译/PDF",
+          "status": "通过",
+          "evidence": "卷入口编译至引用稳定，244页；目录、完整正文和题解及邻章边界实际查看，发布改名后复核像素，无缺图/overfull/未定义引用/重跑警告。",
+          "report_line": 30
+        }
+      ]
+    },
+    {
+      "volume": 2,
+      "chapter": 10,
+      "report": "docs/revision/volume-2-chapter-10.md",
+      "report_sha256": "9ae1ce0a29db529b9083a58ab46389a18b0de52064fa3bf75bf742ccade1f670",
+      "counts": {
+        "通过": 20
+      },
+      "checks": [
+        {
+          "item": 1,
+          "name": "1 章首提要",
+          "status": "通过",
+          "evidence": "main第十章有响应/几何/预测矩阵/约束QP/闭环与失败验证目标，3–5天及卷三实车边界齐全。",
+          "report_line": 11
+        },
+        {
+          "item": 2,
+          "name": "2 核心示例",
+          "status": "通过",
+          "evidence": "H_mpc有13个example，7个核心小节均有完整步骤/代码/结果；response共用时逐项解释阶跃、稳态与半角。",
+          "report_line": 12
+        },
+        {
+          "item": 3,
+          "name": "3 复杂项目",
+          "status": "通过",
+          "evidence": "examples/mpc/horizon-control-demo含8个Python文件、requirements、README与忽略规则，全部离线输入可生成。",
+          "report_line": 13
+        },
+        {
+          "item": 4,
+          "name": "4 正文展示",
+          "status": "通过",
+          "evidence": "8文件288行全部直接引入，run按参数/闭环连续分段，requirements完整展示；说明作用、单位、合作过程与真实图。",
+          "report_line": 14
+        },
+        {
+          "item": 5,
+          "name": "5 命令/参数",
+          "status": "通过",
+          "evidence": "Ubuntu依赖/虚拟环境与可替换路径、通用CLI、horizon/weights/limits/reference/扰动/增益/低通/时效/输出及字体明确。",
+          "report_line": 15
+        },
+        {
+          "item": 6,
+          "name": "6 随堂练习",
+          "status": "通过",
+          "evidence": "11题覆盖阶跃、频响、几何/包络、保持输入模型、标量、预测、约束、时效、闭环和滤波；7小节核心能力均有任务。",
+          "report_line": 16
+        },
+        {
+          "item": 7,
+          "name": "7 难点归纳",
+          "status": "通过",
+          "evidence": "conclusion归纳幅相/延时、模型/预测/代价/约束和实际执行链，章末串联全部知识。",
+          "report_line": 17
+        },
+        {
+          "item": 8,
+          "name": "8 易错提示",
+          "status": "通过",
+          "evidence": "输入含义、秒/步、稳态/启动、度/rad、软/硬目标、标量截断/耦合QP、数值容差、输出覆盖、超速回退及时钟边界均说明。",
+          "report_line": 18
+        },
+        {
+          "item": 9,
+          "name": "9 本章小结",
+          "status": "通过",
+          "evidence": "H_mpc_review用conclusion串起响应→量级→QP→滚动→实际失败，并说明查文档与实车测量的分工。",
+          "report_line": 19
+        },
+        {
+          "item": 10,
+          "name": "10 章末习题",
+          "status": "通过",
+          "evidence": "10题有基础、提高与实际运行，覆盖核心概念，修复旧题残缺；实践要求真实保存同次数据/日志/图。",
+          "report_line": 20
+        },
+        {
+          "item": 11,
+          "name": "11 本章验收",
+          "status": "通过",
+          "evidence": "四项现场操作覆盖实际响应、两步预测/闭环、四种真实失败/非零速度回退及低通反例；与理论自测分工清楚。",
+          "report_line": 21
+        },
+        {
+          "item": 12,
+          "name": "12 参考答案",
+          "status": "通过",
+          "evidence": "11+10全部label/ref定位；计算、当前实测结果、开放实践思路和判断标准齐全，沿用既有answers。",
+          "report_line": 22
+        },
+        {
+          "item": 13,
+          "name": "13 作者口吻",
+          "status": "通过",
+          "evidence": "从读者处境接着讲，按手算→完整求解→实际执行顺序带着操作，解释原因，轻松表达不改变技术条件。",
+          "report_line": 23
+        },
+        {
+          "item": 14,
+          "name": "14 图片实际查看",
+          "status": "通过",
+          "evidence": "原章没有插图；新增3张实际数组图独立查看并在正文尺寸检查，另查看默认字体实际输出。",
+          "report_line": 24
+        },
+        {
+          "item": 15,
+          "name": "15 标记/引用",
+          "status": "通过",
+          "evidence": "检查后原字节发布3个revised文件，同步全部引用；plot使用显式output，不捏造运行命令，证据分别保存candidate与发布路径。",
+          "report_line": 25
+        },
+        {
+          "item": 16,
+          "name": "16 文件组织",
+          "status": "通过",
+          "evidence": "沿用H_mpc/H_mpc_review/answers结构，8模块用途清楚，没有重复题解或额外框架。",
+          "report_line": 26
+        },
+        {
+          "item": 17,
+          "name": "17 包含/引用",
+          "status": "通过",
+          "evidence": "29入口文件、286标签、235被引用标签；路径、唯一性和21题解定位通过。",
+          "report_line": 27
+        },
+        {
+          "item": 18,
+          "name": "18 源码/排版",
+          "status": "通过",
+          "evidence": "目录树完整，代码直接引入，run分段不遗漏；长行可读、权重公式独立显示，题解编号与图注协调。",
+          "report_line": 28
+        },
+        {
+          "item": 19,
+          "name": "19 实际运行",
+          "status": "通过",
+          "evidence": "Ubuntu24.04/Jazzy、OSQP1.0.4最终版本43记录：39数值/闭环/失败/独立核对及4次绘图，8源码SHA256一致。",
+          "report_line": 29
+        },
+        {
+          "item": 20,
+          "name": "20 编译/PDF",
+          "status": "通过",
+          "evidence": "卷入口编译至引用稳定，255页，无缺图/overfull/未定义引用/重跑警告；目录、全部正文/题解及邻章实际检查，最后变化4页逐页复查。",
+          "report_line": 30
+        }
+      ]
+    },
+    {
+      "volume": 2,
+      "chapter": 11,
+      "report": "docs/revision/volume-2-chapter-11.md",
+      "report_sha256": "312cb3e52411c6345b1517f512bb9a13135bfc611fe357201e1903e8f1c76327",
+      "counts": {
+        "通过": 20
+      },
+      "checks": [
+        {
+          "item": 1,
+          "name": "1 章首提要",
+          "status": "通过",
+          "evidence": "main第十一章含TF/点云/地图/最短路/有限恢复/实际Nav2软件闭环目标、约1周及卷三边界。",
+          "report_line": 11
+        },
+        {
+          "item": 2,
+          "name": "2 核心示例",
+          "status": "通过",
+          "evidence": "I_nav有11个example，9个核心小节均有可执行步骤/完整输入/结果解释；grid在地图/搜索共用时分别说明职责。",
+          "report_line": 12
+        },
+        {
+          "item": 3,
+          "name": "3 复杂项目",
+          "status": "通过",
+          "evidence": "examples/navigation/navigation-lab-demo含11个核心文件、README和忽略规则，生成点云与6×4m小地图，无缺失数据。",
+          "report_line": 13
+        },
+        {
+          "item": 4,
+          "name": "4 正文展示",
+          "status": "通过",
+          "evidence": "11文件557行完整直接引入；grid/client/BT/YAML连续分段不遗漏，解释执行顺序、服务器配合、参数和保存数组。",
+          "report_line": 14
+        },
+        {
+          "item": 5,
+          "name": "5 命令/参数",
+          "status": "通过",
+          "evidence": "容器/ROS环境、依赖、项目目录、独立DDS域、所有CLI、地图元数据、插件ID/频率/外形/膨胀/速度/时效和字体路径明确。",
+          "report_line": 15
+        },
+        {
+          "item": 6,
+          "name": "6 随堂练习",
+          "status": "通过",
+          "evidence": "11题覆盖数据链、TF、修正/退化、融合时间、过滤、地图、代价/制动、搜索、真实Nav2失败、慢速变式与BT。",
+          "report_line": 16
+        },
+        {
+          "item": 7,
+          "name": "7 难点归纳",
+          "status": "通过",
+          "evidence": "conclusion分别归纳坐标、定位/建图/融合、地图/外形/制动和任务恢复，章末串起完整导航链。",
+          "report_line": 17
+        },
+        {
+          "item": 8,
+          "name": "8 易错提示",
+          "status": "通过",
+          "evidence": "独立坐标/单父发布、时间外推、地面误删、未知地图/无损输入、配置版本、覆盖输出、模型/真实底盘和有限恢复均解释。",
+          "report_line": 18
+        },
+        {
+          "item": 9,
+          "name": "9 本章小结",
+          "status": "通过",
+          "evidence": "I_nav_review回顾定位→环境→规划→控制→恢复，说明必须独立操作的内容和查资料/真实工程的分工。",
+          "report_line": 19
+        },
+        {
+          "item": 10,
+          "name": "10 章末习题",
+          "status": "通过",
+          "evidence": "10题有基础、提高和实际运行，覆盖全部核心能力，实践要求保存自己的结果与日志。",
+          "report_line": 20
+        },
+        {
+          "item": 11,
+          "name": "11 本章验收",
+          "status": "通过",
+          "evidence": "四项可现场演示，实际地图/PCL、Nav2闭环/故障/轨迹余量、TF与缺失、两种恢复/重试/超时；与自测分工明确。",
+          "report_line": 21
+        },
+        {
+          "item": 12,
+          "name": "12 参考答案",
+          "status": "通过",
+          "evidence": "11+10题全部label/ref定位，计算、执行结果、开放实践思路与验收标准齐全，沿用answers。",
+          "report_line": 22
+        },
+        {
+          "item": 13,
+          "name": "13 作者口吻",
+          "status": "通过",
+          "evidence": "保留原叙述和游戏类比，操作时解释原因与可观察现象，轻松表达不沿用技术错误。",
+          "report_line": 23
+        },
+        {
+          "item": 14,
+          "name": "14 图片实际查看",
+          "status": "通过",
+          "evidence": "原5图均实际查看；3概念图重绘，2真实图保持字节，新增实际数组图；4矢量图独立/正文大小检查，默认字体也实际查看。",
+          "report_line": 24
+        },
+        {
+          "item": 15,
+          "name": "15 标记/引用",
+          "status": "通过",
+          "evidence": "实际正文检查后发布4个revised PDF与2个revised截图，更新引用/生成脚本；已查全部调用方，卷三独立旧图保留。",
+          "report_line": 25
+        },
+        {
+          "item": 16,
+          "name": "16 文件组织",
+          "status": "通过",
+          "evidence": "沿用I_nav/I_nav_review/answers，项目职责清楚，无重复题解或额外ROS包。",
+          "report_line": 26
+        },
+        {
+          "item": 17,
+          "name": "17 包含/引用",
+          "status": "通过",
+          "evidence": "29入口文件、312标签、259被引用标签；路径/唯一性/21题解定位检查通过。",
+          "report_line": 27
+        },
+        {
+          "item": 18,
+          "name": "18 源码/排版",
+          "status": "通过",
+          "evidence": "代码直接引入，长类名与实际图例尺寸已调整，公式/标题/图注/题解协调，完整TeX diff审阅。",
+          "report_line": 28
+        },
+        {
+          "item": 19,
+          "name": "19 实际运行",
+          "status": "通过",
+          "evidence": "Ubuntu24.04/Jazzy/Nav2 1.3.13/PCL1.14.0，51条真实记录；默认/慢速Nav2、拒绝目标、地图/TF、过滤/搜索/BT/断流和绘图，源码SHA一致。",
+          "report_line": 29
+        },
+        {
+          "item": 20,
+          "name": "20 编译/PDF",
+          "status": "通过",
+          "evidence": "按项目README从卷入口xelatex编译至引用稳定，268页，无缺图/overfull/未定义或重跑引用；目录、全部正文/答案及邻页实际查看，变化页复查。",
+          "report_line": 30
+        }
+      ]
+    },
+    {
+      "volume": 3,
+      "chapter": 1,
+      "report": "docs/revision/volume-3-chapter-1.md",
+      "report_sha256": "afc5d6f7f4b432e7465afe7a8bb8cd807565273c009595fac83eb7c02b9a4712",
+      "counts": {
+        "通过": 20
+      },
+      "checks": [
+        {
+          "item": 1,
+          "name": "1 章首提要",
+          "status": "通过",
+          "evidence": "main第1章目标含画链路/填写接口/实际拒绝验证；约2小时、卷一二边界齐全。",
+          "report_line": 9
+        },
+        {
+          "item": 2,
+          "name": "2 核心示例",
+          "status": "通过",
+          "evidence": "01_overview五核心小节、6个example；纸面实例有输入/步骤/检查，接口另有实际运行。",
+          "report_line": 10
+        },
+        {
+          "item": 3,
+          "name": "3 复杂项目",
+          "status": "通过",
+          "evidence": "examples/interface-card-demo两核心文件，仅Python标准库；完整教学卡与接收端、README，不重复ROS/通信实现。",
+          "report_line": 11
+        },
+        {
+          "item": 4,
+          "name": "4 正文展示",
+          "status": "通过",
+          "evidence": "70行核心JSON/Python完整直接引入，Python1–31/32–54不遗漏；解释contract/message、检查顺序与CLI变式。",
+          "report_line": 12
+        },
+        {
+          "item": 5,
+          "name": "5 命令参数",
+          "status": "通过",
+          "evidence": "Python版本、从卷三进入项目、默认card路径、unit/frame/age/delta/invalid/now与替换含义明确；查书入口是实际文件。",
+          "report_line": 13
+        },
+        {
+          "item": 6,
+          "name": "6 随堂练习",
+          "status": "通过",
+          "evidence": "6题覆盖两路线/任务与器件/数据流/接口变更/边界运行/本地入口，新增接口运行题有具体四条命令。",
+          "report_line": 14
+        },
+        {
+          "item": 7,
+          "name": "7 难点归纳",
+          "status": "通过",
+          "evidence": "数据流conclusion与接口conclusion分别解释数值类型不等于物理含义、双方变更须同步。",
+          "report_line": 15
+        },
+        {
+          "item": 8,
+          "name": "8 易错提示",
+          "status": "通过",
+          "evidence": "时钟不一致、负年龄、单位与frame冲突、hold不等于实车停转、教学卡不等于真实协议均讲清。",
+          "report_line": 16
+        },
+        {
+          "item": 9,
+          "name": "9 本章小结",
+          "status": "通过",
+          "evidence": "main串起任务→观测→数据流→接口，区分独立能力与回卷一二查实现。",
+          "report_line": 17
+        },
+        {
+          "item": 10,
+          "name": "10 章末习题",
+          "status": "通过",
+          "evidence": "沿用6题，基础/提高/实践覆盖五核心能力，实践查真实需求并明确未知字段。",
+          "report_line": 18
+        },
+        {
+          "item": 11,
+          "name": "11 本章验收",
+          "status": "通过",
+          "evidence": "陌生任务现场画链路；两人解释同卡，再实际制造单位冲突和过期；与知识自测分工清楚。",
+          "report_line": 19
+        },
+        {
+          "item": 12,
+          "name": "12 题解",
+          "status": "通过",
+          "evidence": "6+6题全label/ref，新增边界输出、90度只改一端的结果、开放实践可行标准，题解按正文题序排列。",
+          "report_line": 20
+        },
+        {
+          "item": 13,
+          "name": "13 作者口吻",
+          "status": "通过",
+          "evidence": "从“学了很多，上车先用哪个”推进，操作与解释相连，保留日常类比与轻松表达。",
+          "report_line": 21
+        },
+        {
+          "item": 14,
+          "name": "14 图片实际查看",
+          "status": "通过",
+          "evidence": "原inline TikZ在基线PDF物理7页实际查看；新青色/Fandol图独立和正文尺寸实际查看，非真实协议图。",
+          "report_line": 22
+        },
+        {
+          "item": 15,
+          "name": "15 图片标记",
+          "status": "通过",
+          "evidence": "inline图整理为figures/overview_dataflow_revised.pdf，实际检查后改名；正文与生成脚本输出标记同步，无其它调用方。",
+          "report_line": 23
+        },
+        {
+          "item": 16,
+          "name": "16 文件组织",
+          "status": "通过",
+          "evidence": "沿用01_overview/main/answers；项目两核心文件，图生成与实际核验脚本各有明确职责。",
+          "report_line": 24
+        },
+        {
+          "item": 17,
+          "name": "17 包含引用",
+          "status": "通过",
+          "evidence": "11入口文件、91标签、87被引用标签，路径/重复/未定义/12题解覆盖检查通过；专项文件名按磁盘核对。",
+          "report_line": 25
+        },
+        {
+          "item": 18,
+          "name": "18 源码排版",
+          "status": "通过",
+          "evidence": "核心代码直接引入，卡片完整置于一页，CLI块保持整块且段落断开；标题图注题解格式一致，无overfull。",
+          "report_line": 26
+        },
+        {
+          "item": 19,
+          "name": "19 实际运行",
+          "status": "通过",
+          "evidence": "Ubuntu24.04/Python3.12.3实际18条记录；默认/变式/边界/拒绝/源码SHA、本地章节读取与已填写纸面产物。",
+          "report_line": 27
+        },
+        {
+          "item": 20,
+          "name": "20 编译PDF",
+          "status": "通过",
+          "evidence": "卷三xelatex两遍至稳定，39页；目录、全部章正文/章末、下一章邻页与题解实际查看；出版变化页再检查。",
+          "report_line": 28
+        }
+      ]
+    },
+    {
+      "volume": 3,
+      "chapter": 2,
+      "report": "docs/revision/volume-3-chapter-2.md",
+      "report_sha256": "687d2f343b3301ed19181c7cd9c533be070fbbbb163402f672ca7272d8d3f93b",
+      "counts": {
+        "通过": 20
+      },
+      "checks": [
+        {
+          "item": 1,
+          "name": "1 章首提要",
+          "status": "通过",
+          "evidence": "main第2章目标/约2小时/卷二实现边界齐全，建议含时间线和中间量回放。",
+          "report_line": 9
+        },
+        {
+          "item": 2,
+          "name": "2 核心示例",
+          "status": "通过",
+          "evidence": "六核心小节各1个example，指标/PnP/时间/限幅/误差对象/取证均给完整输入、操作和结果判断。",
+          "report_line": 10
+        },
+        {
+          "item": 3,
+          "name": "3 复杂项目",
+          "status": "通过",
+          "evidence": "examples/aim-replay-demo含Python与五帧CSV、README；只演示状态时刻和取证，不重复完整滤波/控制实现。",
+          "report_line": 11
+        },
+        {
+          "item": 4,
+          "name": "4 正文展示",
+          "status": "通过",
+          "evidence": "57行replay.py按1–24/25–57完整引入、6行CSV完整显示，时间函数与回放函数分别在对应概念附近讲清，图辅助关系。",
+          "report_line": 12
+        },
+        {
+          "item": 5,
+          "name": "5 命令参数",
+          "status": "通过",
+          "evidence": "Python3.10+标准库/卷三起始目录，delay/flight/state-at/pixel-threshold与replay路径及默认值讲清。",
+          "report_line": 13
+        },
+        {
+          "item": 6,
+          "name": "6 随堂练习",
+          "status": "通过",
+          "evidence": "6题覆盖指标、缩放内参、两种状态时刻、控制下界、算法输出和实际回放取证。",
+          "report_line": 14
+        },
+        {
+          "item": 7,
+          "name": "7 难点归纳",
+          "status": "通过",
+          "evidence": "conclusion归纳状态时刻/命中时刻与取证边界；误差视角段落明确三者的变量和输出区别。",
+          "report_line": 15
+        },
+        {
+          "item": 8,
+          "name": "8 易错提示",
+          "status": "通过",
+          "evidence": "点序/单位/外参/缩裁内参、重复时间补偿、失跟后不确定性、物理限制、阈值消失不等于修复均解释。",
+          "report_line": 16
+        },
+        {
+          "item": 9,
+          "name": "9 本章小结",
+          "status": "通过",
+          "evidence": "main串起观测→空间→状态→预测→控制，再落到证据与回卷二实现。",
+          "report_line": 17
+        },
+        {
+          "item": 10,
+          "name": "10 章末习题",
+          "status": "通过",
+          "evidence": "7题含基础/提高/实践，覆盖六核心能力；时间记录要求注明时钟、参考时刻和定飞行时间假设。",
+          "report_line": 18
+        },
+        {
+          "item": 11,
+          "name": "11 本章验收",
+          "status": "通过",
+          "evidence": "保留向学长画三段并标噪声、在给定回放展示中间量与判断边界，人工数据能支持概述回放操作，未缩减原考核。",
+          "report_line": 19
+        },
+        {
+          "item": 12,
+          "name": "12 题解",
+          "status": "通过",
+          "evidence": "6+7label/ref完整，缩放具体值、85/60ms两种状态、下界/反馈与阈值变式结果、开放取证标准均定位。",
+          "report_line": 20
+        },
+        {
+          "item": 13,
+          "name": "13 作者口吻",
+          "status": "通过",
+          "evidence": "用实际疑惑带出概念，说明云台也得有能力转过去、谁立功需控制变量，连贯讲解不靠梗替代结论。",
+          "report_line": 21
+        },
+        {
+          "item": 14,
+          "name": "14 图片实际查看",
+          "status": "通过",
+          "evidence": "原inline链路图在基线物理12页实际查看；链路重绘/新增时间线均独立与正文尺寸实际检查。",
+          "report_line": 22
+        },
+        {
+          "item": 15,
+          "name": "15 标记引用",
+          "status": "通过",
+          "evidence": "2候选图实际检查后发布aim_chain/time_revised.pdf，正文/生成脚本同步，无旧外部图调用方。",
+          "report_line": 23
+        },
+        {
+          "item": 16,
+          "name": "16 文件组织",
+          "status": "通过",
+          "evidence": "沿用02_aim/main/answers，项目和脚本职责明确，未改其它章内容或共享模板。",
+          "report_line": 24
+        },
+        {
+          "item": 17,
+          "name": "17 包含引用",
+          "status": "通过",
+          "evidence": "11入口文件、93标签、88被引用标签，路径/重复/未定义/13题解覆盖均通过。",
+          "report_line": 25
+        },
+        {
+          "item": 18,
+          "name": "18 源码排版",
+          "status": "通过",
+          "evidence": "核心直接引入、公式和单位准确；第一代码块调整段落与上方间距，避免前页只剩空边框；图与题解协调，完整diff审阅。",
+          "report_line": 26
+        },
+        {
+          "item": 19,
+          "name": "19 实际运行",
+          "status": "通过",
+          "evidence": "Ubuntu24.04/Python3.12.3/OpenCV4.6/NumPy1.26.4共18条记录，实际回放/变式/拒绝、独立PnP投影与解算、缩放反例和纸面产物。",
+          "report_line": 27
+        },
+        {
+          "item": 20,
+          "name": "20 编译PDF",
+          "status": "通过",
+          "evidence": "xelatex两遍至稳定，43页；目录、全部正文/章末、邻章与题解实际查看，出版变化页再检查，无影响阅读警告。",
+          "report_line": 28
+        }
+      ]
+    },
+    {
+      "volume": 3,
+      "chapter": 3,
+      "report": "docs/revision/volume-3-chapter-3.md",
+      "report_sha256": "2696dc4f85d12bd341b0c54b6e3449d45f4d86a09ee6fc6437296f21bf770f8b",
+      "counts": {
+        "通过": 19,
+        "未完成": 1
+      },
+      "checks": [
+        {
+          "item": 1,
+          "name": "1 章首提要",
+          "status": "通过",
+          "evidence": "main第3章含模块/故障目标、约2–3小时、卷二算法与配置边界，建议实际日志核对。",
+          "report_line": 9
+        },
+        {
+          "item": 2,
+          "name": "2 核心示例",
+          "status": "通过",
+          "evidence": "五核心小节有7个example，纸面网格/六职责/宽度/决策/取证/实际结果均有前提、完整输入、操作和判断。",
+          "report_line": 10
+        },
+        {
+          "item": 3,
+          "name": "3 复杂项目",
+          "status": "通过",
+          "evidence": "卷三examples/navigation-task-demo含check.py和README；实际Nav2复用卷二已完整整理的项目，避免重复维护算法与配置。",
+          "report_line": 11
+        },
+        {
+          "item": 4,
+          "name": "4 正文展示",
+          "status": "通过",
+          "evidence": "新核心50行直接按1–22/23–50引入，三个函数/CLI完整；卷二核心11文件557行及影响行为配置已在对应章完整讲解，此处明确作为前置复用，非另造缺源项目。",
+          "report_line": 12
+        },
+        {
+          "item": 5,
+          "name": "5 命令参数",
+          "status": "通过",
+          "evidence": "Python版本、米制参数、变换方向、仓库根/项目起始目录、Jazzy前置依赖、DDS域188/localhost与输出覆盖说明齐全。",
+          "report_line": 13
+        },
+        {
+          "item": 6,
+          "name": "6 随堂练习",
+          "status": "通过",
+          "evidence": "6题覆盖动态封路、定位TF、宽度、坐标/任务接口、恢复候选和实际成功/拒绝结果。",
+          "report_line": 14
+        },
+        {
+          "item": 7,
+          "name": "7 难点归纳",
+          "status": "通过",
+          "evidence": "模块conclusion与取证conclusion解释地图/自身/路线/速度、规划/跟踪/执行与失败层次，直线宽度不是整场碰撞保证。",
+          "report_line": 15
+        },
+        {
+          "item": 8,
+          "name": "8 易错提示",
+          "status": "通过",
+          "evidence": "不随意涂白障碍、车体非中心点、单位非坐标变换、急停与恢复空间、有限重试、软件非实车均明确。",
+          "report_line": 16
+        },
+        {
+          "item": 9,
+          "name": "9 本章小结",
+          "status": "通过",
+          "evidence": "main串起任务→定位/环境→路径/当前动作→取证，保留真实条件还需验证的边界。",
+          "report_line": 17
+        },
+        {
+          "item": 10,
+          "name": "10 章末习题",
+          "status": "通过",
+          "evidence": "6题含基础/提高/实践，覆盖五核心能力，宽度实践要求保存可重算输入与图。",
+          "report_line": 18
+        },
+        {
+          "item": 11,
+          "name": "11 本章验收",
+          "status": "通过",
+          "evidence": "保留框图解释/临时障碍变化与给定卡住日志的候选取证操作，没有把自测题重复当考核。",
+          "report_line": 19
+        },
+        {
+          "item": 12,
+          "name": "12 题解",
+          "status": "通过",
+          "evidence": "6+6题label/ref完整；坐标具体计算、实际action状态/错误/缺follow字段与开放取证标准定位。",
+          "report_line": 20
+        },
+        {
+          "item": 13,
+          "name": "13 作者口吻",
+          "status": "通过",
+          "evidence": "从偷家地图讲动作、逐步接模块与接口，操作同时解释原因，算法细节回卷二，未改成冷的检查清单。",
+          "report_line": 21
+        },
+        {
+          "item": 14,
+          "name": "14 图片实际查看",
+          "status": "通过",
+          "evidence": "原Nav2 PNG实际查看，替换为卷二已整理矢量图；新增两网格图独立/正文尺寸检查，旧路线与封路边界说明。",
+          "report_line": 22
+        },
+        {
+          "item": 15,
+          "name": "15 标记引用",
+          "status": "通过",
+          "evidence": "实际检查后发布sentry_framework/grid_revised.pdf，正文和生成脚本同步；查全部调用方后删除卷三无调用旧PNG。",
+          "report_line": 23
+        },
+        {
+          "item": 16,
+          "name": "16 文件组织",
+          "status": "通过",
+          "evidence": "沿用03_sentry/main/answers，新项目只做前提/结果核对，图脚本复用卷二PDF避免复制图源。",
+          "report_line": 24
+        },
+        {
+          "item": 17,
+          "name": "17 包含引用",
+          "status": "通过",
+          "evidence": "11入口文件、95标签、91被引用标签，包含/资源/唯一/未定义与12题解定位检查通过。",
+          "report_line": 25
+        },
+        {
+          "item": 18,
+          "name": "18 源码排版",
+          "status": "通过",
+          "evidence": "核心代码直接引入，长内联函数名越界已重述修复；移除本章无必要clearpage避免正文末尾大块空白，格式/图注/单位协调。",
+          "report_line": 26
+        },
+        {
+          "item": 19,
+          "name": "19 实际运行",
+          "status": "未完成",
+          "evidence": "40条实际Jazzy/Nav2/PCL/TF/算法记录及13条任务记录通过；卷二明确留给卷三的真实赛场建图、动态传感器、车体制动/恢复空间仍缺设备与原始记录，不能以软件替代。",
+          "report_line": 27
+        },
+        {
+          "item": 20,
+          "name": "20 编译PDF",
+          "status": "通过",
+          "evidence": "本卷xelatex两遍至稳定45页；目录、全部正文/章末、邻章与题解实际查看，出版变化页复查，无缺图/overfull/未定义引用等。",
+          "report_line": 28
+        }
+      ]
+    },
+    {
+      "volume": 3,
+      "chapter": 4,
+      "report": "docs/revision/volume-3-chapter-4.md",
+      "report_sha256": "5d68df2c3c5faf39779599447fd2f7365229e6911643023adb0e04ae96f07e0e",
+      "counts": {
+        "通过": 19,
+        "未完成": 1
+      },
+      "checks": [
+        {
+          "item": 1,
+          "name": "1 章首提要",
+          "status": "通过",
+          "evidence": "main第4章目标可验证，约2–3小时平面/选源实跑，卷二实现与适用规则边界。",
+          "report_line": 9
+        },
+        {
+          "item": 2,
+          "name": "2 核心示例",
+          "status": "通过",
+          "evidence": "五核心小节各有example，输入输出纸面产物、旁路遮挡、实际高度变化、选源变式与取证位置有前提和判断。",
+          "report_line": 10
+        },
+        {
+          "item": 3,
+          "name": "3 复杂项目",
+          "status": "通过",
+          "evidence": "examples/radar-fusion-demo含两个程序、消息JSON、README与依赖，人工模型/消息可稳定复现。",
+          "report_line": 11
+        },
+        {
+          "item": 4,
+          "name": "4 正文展示",
+          "status": "通过",
+          "evidence": "plane.py37行、choose.py58行、sources.json12行，共107行核心直接引入；仅跳过无语义的块间空行，代码/关键配置完整，按执行顺序讲解。",
+          "report_line": 12
+        },
+        {
+          "item": 5,
+          "name": "5 命令参数",
+          "status": "通过",
+          "evidence": "项目目录、Python/NumPy/OpenCV依赖、高度米制范围、毫秒年龄、失效/坐标系参数与命令输出解读齐全。",
+          "report_line": 13
+        },
+        {
+          "item": 6,
+          "name": "6 随堂练习",
+          "status": "通过",
+          "evidence": "6题覆盖站/器件、状态/事件、实际高度偏差、失效回退、边界/未来时间、故障对应专项。",
+          "report_line": 14
+        },
+        {
+          "item": 7,
+          "name": "7 难点归纳",
+          "status": "通过",
+          "evidence": "两处conclusion分别总结单应/PnP输入前提与身份/坐标/单位/时钟/质量/年龄顺序，选源非加权融合。",
+          "report_line": 15
+        },
+        {
+          "item": 8,
+          "name": "8 易错提示",
+          "status": "通过",
+          "evidence": "地面映射不保证车顶、独立验证点、接收非采样、可选退出不阻塞、旧值不可续期、硬件/规则边界明确。",
+          "report_line": 16
+        },
+        {
+          "item": 9,
+          "name": "9 本章小结",
+          "status": "通过",
+          "evidence": "main串起全场身份→几何位置→合格新鲜信息共享，列必须会运行解释的两例与实际设备/规则验证边界。",
+          "report_line": 17
+        },
+        {
+          "item": 10,
+          "name": "10 章末习题",
+          "status": "通过",
+          "evidence": "保留7题基础/提高/实践，覆盖五核心能力，实践保存可重算四种选源表。",
+          "report_line": 18
+        },
+        {
+          "item": 11,
+          "name": "11 本章验收",
+          "status": "通过",
+          "evidence": "保留口述职责/画数据流与学长给状态现场回退的两条操作性任务。",
+          "report_line": 19
+        },
+        {
+          "item": 12,
+          "name": "12 题解",
+          "status": "通过",
+          "evidence": "6+7题label/ref定位完整，新高度0.5实跑结果与边界题解，开放题有产物和判断标准，按正文编号顺序排列。",
+          "report_line": 20
+        },
+        {
+          "item": 13,
+          "name": "13 作者口吻",
+          "status": "通过",
+          "evidence": "由眼前问题进入、连贯带操作/解释原因，返老还童提醒落回采样时间，不虚构作者经验或把正文改成步骤清单。",
+          "report_line": 21
+        },
+        {
+          "item": 14,
+          "name": "14 图片实际查看",
+          "status": "通过",
+          "evidence": "旧内联TikZ在原PDF物理25页实际查看；统一青色/Fandol重绘主路并补有序事件分支，新高度侧视图独立与正文尺寸实际查看。",
+          "report_line": 22
+        },
+        {
+          "item": 15,
+          "name": "15 标记引用",
+          "status": "通过",
+          "evidence": "candidate图在正文检查后发布radar_chain/plane_revised.pdf；正文/生成脚本输出一致，无未检查改名。",
+          "report_line": 23
+        },
+        {
+          "item": 16,
+          "name": "16 文件组织",
+          "status": "通过",
+          "evidence": "保留03b_radar/main/answers结构，无失效拆分；项目聚焦映射和选源，TCP/串口/SDR复用卷二，不复制协议工程。",
+          "report_line": 24
+        },
+        {
+          "item": 17,
+          "name": "17 包含引用",
+          "status": "通过",
+          "evidence": "11入口文件、97标签、93被引用标签，资源、唯一性、题解定位检查通过，无缺图与未定义引用。",
+          "report_line": 25
+        },
+        {
+          "item": 18,
+          "name": "18 源码排版",
+          "status": "通过",
+          "evidence": "完整代码直接引入，按函数分块并保留整块，修复跨页只剩imports/半条配置/单条命令与边框碰文字；三线表与图注协调。",
+          "report_line": 26
+        },
+        {
+          "item": 19,
+          "name": "19 实际运行",
+          "status": "未完成",
+          "evidence": "Ubuntu中26条软件/纸面记录通过；真实高台相机、地形高度、现场标定误差和适用裁判/无线电链路缺设备/协议记录，未以人工投影或消息替代。",
+          "report_line": 27
+        },
+        {
+          "item": 20,
+          "name": "20 编译PDF",
+          "status": "通过",
+          "evidence": "xelatex两遍稳定49页；目录、完整本章、邻章与题解实际查看，出版字节改名后受影响页复查，无overfull/缺图/重复或未定义引用。",
+          "report_line": 28
+        }
+      ]
+    },
+    {
+      "volume": 3,
+      "chapter": 5,
+      "report": "docs/revision/volume-3-chapter-5.md",
+      "report_sha256": "4a6cf078f6917d7812bb03a54365f2bcca59e688ec4e87e2e33da387095c1d50",
+      "counts": {
+        "通过": 19,
+        "未完成": 1
+      },
+      "checks": [
+        {
+          "item": 1,
+          "name": "1 章首提要",
+          "status": "通过",
+          "evidence": "main第5章检查/快门/有效帧率与延迟目标，2–3小时，现场检查与卷二成像/SDK边界。",
+          "report_line": 9
+        },
+        {
+          "item": 2,
+          "name": "2 核心示例",
+          "status": "通过",
+          "evidence": "五核心小节各1例，图片/人工运动对照/时刻实际可运行；曝光单变量与查看器/程序步骤有设备前提、操作与判断，实机未完成另记。",
+          "report_line": 10
+        },
+        {
+          "item": 3,
+          "name": "3 复杂项目",
+          "status": "通过",
+          "evidence": "examples/front-check-demo含3程序、时刻CSV、README与依赖，保存完整人工输入与输出，SDK复用卷二。",
+          "report_line": 11
+        },
+        {
+          "item": 4,
+          "name": "4 正文展示",
+          "status": "通过",
+          "evidence": "check_image.py38、make_frames.py31、timing.py37、times.csv4，共110行核心直接引入；只跳过无语义空行，配置与函数/CLI完整，逐段解释作用。",
+          "report_line": 12
+        },
+        {
+          "item": 5,
+          "name": "5 命令参数",
+          "status": "通过",
+          "evidence": "卷目录进入项目、图片占位路径需替换、8位灰度/BGR限制、生成输出目录参数、CSV路径与未知元数据说明。",
+          "report_line": 13
+        },
+        {
+          "item": 6,
+          "name": "6 随堂练习",
+          "status": "通过",
+          "evidence": "5题覆盖设备信息、倾斜/拖影、时刻表变式、几何配置变化与设备占用/SDK排查。",
+          "report_line": 14
+        },
+        {
+          "item": 7,
+          "name": "7 难点归纳",
+          "status": "通过",
+          "evidence": "conclusion区分快门时序/曝光积分、采样吞吐/结果延迟/执行端到端，记录部分帧时不能宣称原生采集频率。",
+          "report_line": 15
+        },
+        {
+          "item": 8,
+          "name": "8 易错提示",
+          "status": "通过",
+          "evidence": "近最大值比例只是线索、白背景非独立过曝证据、人工图非实拍、不猜采样时刻、先备份/读回再改配置、释放查看器。",
+          "report_line": 16
+        },
+        {
+          "item": 9,
+          "name": "9 本章小结",
+          "status": "通过",
+          "evidence": "main按设备身份→原图/观测→配对时间梳理掌握点，真实设备/恢复/运动对照仍需实做。",
+          "report_line": 17
+        },
+        {
+          "item": 10,
+          "name": "10 章末习题",
+          "status": "通过",
+          "evidence": "保留7题基础/提高/实践，覆盖所有核心能力，实践要求原件与未知元数据，非伪造测量。",
+          "report_line": 18
+        },
+        {
+          "item": 11,
+          "name": "11 本章验收",
+          "status": "通过",
+          "evidence": "原两条设备设置读取确认/保存恢复及型号页+实际帧流考核保留，未降低为纯软件验收。",
+          "report_line": 19
+        },
+        {
+          "item": 12,
+          "name": "12 题解",
+          "status": "通过",
+          "evidence": "5+7题完整label/ref，补人工对照定位与50fps/50ms结果/60ms端到端实际变式；开放题可复核标准。",
+          "report_line": 20
+        },
+        {
+          "item": 13,
+          "name": "13 作者口吻",
+          "status": "通过",
+          "evidence": "从前端问题承接、带着读文件/改条件/核对时间、随步骤给原因，保留商家高清与免死金牌提醒，不虚构作者实车经验。",
+          "report_line": 21
+        },
+        {
+          "item": 14,
+          "name": "14 图片实际查看",
+          "status": "通过",
+          "evidence": "原章无独立图片；两幅新增实际数据图分别独立与正文尺寸查看，灰度数据不改，青色坐标/Fandol与邻章一致。",
+          "report_line": 22
+        },
+        {
+          "item": 15,
+          "name": "15 标记引用",
+          "status": "通过",
+          "evidence": "正文候选检查后发布front_motion/time_revised.pdf，相关引用与脚本输出同步。",
+          "report_line": 23
+        },
+        {
+          "item": 16,
+          "name": "16 文件组织",
+          "status": "通过",
+          "evidence": "沿用04_camera_field/main/answers，项目只检查图/时刻，图生成脚本从实际PNG和CSV读取，不另造SDK封装。",
+          "report_line": 24
+        },
+        {
+          "item": 17,
+          "name": "17 包含引用",
+          "status": "通过",
+          "evidence": "11入口文件、99标签、95被引用标签，资源存在/唯一/题解引用定位检查通过。",
+          "report_line": 25
+        },
+        {
+          "item": 18,
+          "name": "18 源码排版",
+          "status": "通过",
+          "evidence": "按完整函数分段，修复生成程序整块导致大片留白、目录/命令跨页，外部间距避免框碰正文，单位/图注/代码一致。",
+          "report_line": 26
+        },
+        {
+          "item": 19,
+          "name": "19 实际运行",
+          "status": "未完成",
+          "evidence": "Ubuntu18条软件/教学观测记录通过；设备设置读回、查看器/SDK采集、备份恢复、真实曝光/运动/光照对照和采样到执行测量缺相机/原始记录，原实机验收仍未完成。",
+          "report_line": 27
+        },
+        {
+          "item": 20,
+          "name": "20 编译PDF",
+          "status": "通过",
+          "evidence": "xelatex两遍54页至引用稳定，目录、全部本章/章末、邻章与题解实际查看，最终改变页面复查，无缺图/overfull/未定义等。",
+          "report_line": 28
+        }
+      ]
+    },
+    {
+      "volume": 3,
+      "chapter": 6,
+      "report": "docs/revision/volume-3-chapter-6.md",
+      "report_sha256": "28d7dc373d1890f893c24aa7d4f99043b5f956bd53e9ee45bef86b04a3428974",
+      "counts": {
+        "通过": 19,
+        "未完成": 1
+      },
+      "checks": [
+        {
+          "item": 1,
+          "name": "1 章首",
+          "status": "通过",
+          "evidence": "main目标为复述/写记录/验证，2小时，过程与专项算法边界。",
+          "report_line": 9
+        },
+        {
+          "item": 2,
+          "name": "2 核心示例",
+          "status": "通过",
+          "evidence": "四主题各有例；五准则共用基线/失败/回滚，逐项说明覆盖，交接与迁移有具体产物判断。",
+          "report_line": 10
+        },
+        {
+          "item": 3,
+          "name": "3 演示项目",
+          "status": "通过",
+          "evidence": "examples/experiment-record-demo含run.py、README，Python3.10+，雷达章明确前置。",
+          "report_line": 11
+        },
+        {
+          "item": 4,
+          "name": "4 正文展示",
+          "status": "通过",
+          "evidence": "完整56行程序直接引入三段，跳过无语义空行；固定条件/源码散列/判据/CLI作用和预期结果逐段解释。",
+          "report_line": 12
+        },
+        {
+          "item": 5,
+          "name": "5 命令",
+          "status": "通过",
+          "evidence": "进入卷内项目、radio-limit毫秒、record输出及覆盖、三个独立文件路径明确。",
+          "report_line": 13
+        },
+        {
+          "item": 6,
+          "name": "6 随堂练习",
+          "status": "通过",
+          "evidence": "5题覆盖实测边界、固定判据、学习/工程、失败保存、定位积压。",
+          "report_line": 14
+        },
+        {
+          "item": 7,
+          "name": "7 难点归纳",
+          "status": "通过",
+          "evidence": "conclusion串联固定条件、观察中间量、单变量、失败/回滚与复核；不把valid当任务通过。",
+          "report_line": 15
+        },
+        {
+          "item": 8,
+          "name": "8 易错/危险",
+          "status": "通过",
+          "evidence": "不随参数放宽任务判据，不编造签认/实测，记录覆盖提醒；实车急停/场地监督前提保留。",
+          "report_line": 16
+        },
+        {
+          "item": 9,
+          "name": "9 本章小结",
+          "status": "通过",
+          "evidence": "五准则联系证据与交接，软件/现场分别记，工具回前两卷。",
+          "report_line": 17
+        },
+        {
+          "item": 10,
+          "name": "10 章末题",
+          "status": "通过",
+          "evidence": "保留7题基础/归因提高/计划实践，覆盖四主题，未执行计划明确标注。",
+          "report_line": 18
+        },
+        {
+          "item": 11,
+          "name": "11 验收",
+          "status": "通过",
+          "evidence": "原经历说明、完整记录及另一人复核保留，不用自动脚本冒充同学签认。",
+          "report_line": 19
+        },
+        {
+          "item": 12,
+          "name": "12 题解",
+          "status": "通过",
+          "evidence": "5+7题ref/label完整，新增valid与passed差异及散列/回滚判断标准。",
+          "report_line": 20
+        },
+        {
+          "item": 13,
+          "name": "13 口吻",
+          "status": "通过",
+          "evidence": "用你/我们与首先/接着说明为何做，保留“蒙好”等自然提醒，不写成冷清单。",
+          "report_line": 21
+        },
+        {
+          "item": 14,
+          "name": "14 查看图片",
+          "status": "通过",
+          "evidence": "原章无外部图；新增图独立与正文实际尺寸查看，三次实跑数据一致，青色/Fandol与邻章协调。",
+          "report_line": 22
+        },
+        {
+          "item": 15,
+          "name": "15 标记",
+          "status": "通过",
+          "evidence": "engineering_trial_candidate.pdf实际检查后改为engineering_trial_revised.pdf；正文与生成脚本同步。",
+          "report_line": 23
+        },
+        {
+          "item": 16,
+          "name": "16 组织",
+          "status": "通过",
+          "evidence": "沿用05_engineering/main/answers；记录项目复用前章，不移动无关文件。",
+          "report_line": 24
+        },
+        {
+          "item": 17,
+          "name": "17 引用",
+          "status": "通过",
+          "evidence": "11入口、101标签、96被引用标签，路径/唯一性/题解检查通过。",
+          "report_line": 25
+        },
+        {
+          "item": 18,
+          "name": "18 格式",
+          "status": "通过",
+          "evidence": "原31行整块造成留白，拆成完整计算与记录两段；长返回表达式换行；删除本章多余clearpage，57→56页。",
+          "report_line": 26
+        },
+        {
+          "item": 19,
+          "name": "19 实跑",
+          "status": "未完成",
+          "evidence": "分进程三次实验、独立脚本核对等7条通过；真实同学签认与原经历考核未实施，不伪造。用户回复“你自己定吧”后自行安排本次自动复核，不再要求用户亲自运行。",
+          "report_line": 27
+        },
+        {
+          "item": 20,
+          "name": "20 编译/PDF",
+          "status": "通过",
+          "evidence": "xelatex两遍56页稳定，无缺图/未定义/overfull；目录、全部正文/章末、相邻章和参考答案实际查看，最终变化页复查。",
+          "report_line": 28
+        }
+      ]
+    },
+    {
+      "volume": 3,
+      "chapter": 7,
+      "report": "docs/revision/volume-3-chapter-7.md",
+      "report_sha256": "b2ebdd9ff6d39e6f9f988f8ddcaed52037cce13d019a7f6123bff9e7258adac4",
+      "counts": {
+        "通过": 17,
+        "不适用": 2,
+        "未完成": 1
+      },
+      "checks": [
+        {
+          "item": 1,
+          "name": "1 章首",
+          "status": "通过",
+          "evidence": "main目标为列产出/实际打开/核对更新，1–2小时，入口与专项知识/队内确认边界。",
+          "report_line": 9
+        },
+        {
+          "item": 2,
+          "name": "2 核心示例",
+          "status": "通过",
+          "evidence": "四主题各1例：三个书签、导航计划、实际资料卡、教学副本迁移，前提/操作/结果明确。",
+          "report_line": 10
+        },
+        {
+          "item": 3,
+          "name": "3 项目",
+          "status": "通过",
+          "evidence": "examples/resource-index-demo含标准库audit.py、完整CSV清单及README，复用现有教材内容。",
+          "report_line": 11
+        },
+        {
+          "item": 4,
+          "name": "4 核心展示",
+          "status": "通过",
+          "evidence": "56行audit.py与7行CSV完整直接引入，函数按执行顺序分三段，只跳过空行；解释名称/路径/声明/空负责人/散列/CLI。",
+          "report_line": 12
+        },
+        {
+          "item": 5,
+          "name": "5 命令",
+          "status": "通过",
+          "evidence": "卷内进入目录、索引名与两可选参数、默认根目录与副本路径说明；名称未知直接拒绝。",
+          "report_line": 13
+        },
+        {
+          "item": 6,
+          "name": "6 随堂题",
+          "status": "通过",
+          "evidence": "4题覆盖分工、顺序、来源与负责人、协议变更/引用失效，紧邻四核心主题。",
+          "report_line": 14
+        },
+        {
+          "item": 7,
+          "name": "7 归纳",
+          "status": "通过",
+          "evidence": "conclusion区分路径/显示版本与SHA/负责人/日期，以及可打开、声明一致、接口适用。",
+          "report_line": 15
+        },
+        {
+          "item": 8,
+          "name": "8 易错",
+          "status": "通过",
+          "evidence": "显示版本不唯一、文件存在不证明协议适用、本机日期非批准、空负责人非确认、教学副本非队内部署；只在练习副本改入口。",
+          "report_line": 16
+        },
+        {
+          "item": 9,
+          "name": "9 小结",
+          "status": "通过",
+          "evidence": "main串起问题→路线产物→入口和具体内容→责任与日期，缺项待确认。",
+          "report_line": 17
+        },
+        {
+          "item": 10,
+          "name": "10 章末题",
+          "status": "通过",
+          "evidence": "保留6题基础/协议冲突提高/实际打开两卷二入口实践，未机械增加题量。",
+          "report_line": 18
+        },
+        {
+          "item": 11,
+          "name": "11 验收",
+          "status": "通过",
+          "evidence": "原现场找到专项并说明链路、计划资料卡及临时更换入口/版本考核保留。",
+          "report_line": 19
+        },
+        {
+          "item": 12,
+          "name": "12 题解",
+          "status": "通过",
+          "evidence": "4+6题label/ref完整，补空负责人和只移动正文时未引用的判断标准。",
+          "report_line": 20
+        },
+        {
+          "item": 13,
+          "name": "13 口吻",
+          "status": "通过",
+          "evidence": "用你/我们与接着/这时候推进，随动作解释用途、具体失败与处理，保留书单/许愿单自然提醒。",
+          "report_line": 21
+        },
+        {
+          "item": 14,
+          "name": "14 图片查看",
+          "status": "不适用",
+          "evidence": "本章没有引用图片，卷分工和资料责任用三线表比较，文件状态用实际输出解释。",
+          "report_line": 22
+        },
+        {
+          "item": 15,
+          "name": "15 图片标记",
+          "status": "不适用",
+          "evidence": "无图片和生成脚本，没有以不适用掩盖未查看资源。",
+          "report_line": 23
+        },
+        {
+          "item": 16,
+          "name": "16 组织",
+          "status": "通过",
+          "evidence": "沿用06_index/main/answers；项目只有索引检查职责，明确脚本不是通用TeX解析器。",
+          "report_line": 24
+        },
+        {
+          "item": 17,
+          "name": "17 引用",
+          "status": "通过",
+          "evidence": "11入口、101标签、96被引用标签，包含/文件资源/标签唯一/题解检查通过。",
+          "report_line": 25
+        },
+        {
+          "item": 18,
+          "name": "18 格式",
+          "status": "通过",
+          "evidence": "完整函数分段，Needspace保持责任标题与表格；删除多余clearpage；中文path漏字改texttt，拆开长目录/文件避免越界。",
+          "report_line": 26
+        },
+        {
+          "item": 19,
+          "name": "19 实跑",
+          "status": "未完成",
+          "evidence": "14条本地入口/故意错误/缺项/副本迁移实际运行通过；实际队内资料与协议/责任人未取得、真实同学迁移复核未实施，不编造确认。",
+          "report_line": 27
+        },
+        {
+          "item": 20,
+          "name": "20 编译/PDF",
+          "status": "通过",
+          "evidence": "xelatex58页引用稳定，无缺字/overfull/未定义/缺图，目录、完整本章/小结及全部题解实际查看；最终文字变化页复查。",
+          "report_line": 28
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "逐项状态取自完整章节人工修订记录，不把结构脚本、编译或模拟运行替代真实操作验收。",
+    "缺环境、物理设备、队内资料或真人确认的 11 项保持未完成；本次为完成已有环境中的软件补测后的汇总，不宣称全量验收完成。"
+  ]
+}
