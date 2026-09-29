@@ -1,0 +1,268 @@
+{
+  "python": "3.12.3",
+  "platform": "Linux-7.2.7-arch1-1-x86_64-with-glibc2.39",
+  "files": {
+    "receiver.py": "9898a0199de97ee41d49c16537d06e503ac3de5c577d53a805e7fe9a65f6c5bb",
+    "card.json": "2693e2efc24b9a6630f49478ff038deb8462124f9b2b701767deb7757c5e2e23",
+    "README.md": "03d8a4a468bf506968435eaa30a3c2bde9de419a1639d1ee77ed964c5dc534bf"
+  },
+  "records": [
+    {
+      "name": "默认消息",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/interface-card-demo/receiver.py"
+        ],
+        "stdout": {
+          "decision": "accept",
+          "age_ms": 80,
+          "delta_deg": 5.729577951308233
+        }
+      }
+    },
+    {
+      "name": "仅发送端改度",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/interface-card-demo/receiver.py",
+          "--unit",
+          "deg"
+        ],
+        "stdout": {
+          "decision": "hold",
+          "reason": "unit mismatch"
+        }
+      }
+    },
+    {
+      "name": "过期101",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/interface-card-demo/receiver.py",
+          "--age-ms",
+          "101"
+        ],
+        "stdout": {
+          "decision": "hold",
+          "reason": "time invalid",
+          "age_ms": 101.0
+        }
+      }
+    },
+    {
+      "name": "无效观测",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/interface-card-demo/receiver.py",
+          "--invalid"
+        ],
+        "stdout": {
+          "decision": "hold",
+          "reason": "observation invalid"
+        }
+      }
+    },
+    {
+      "name": "负角度",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/interface-card-demo/receiver.py",
+          "--delta",
+          "-0.1"
+        ],
+        "stdout": {
+          "decision": "accept",
+          "age_ms": 80,
+          "delta_deg": -5.729577951308233
+        }
+      }
+    },
+    {
+      "name": "边界100",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/interface-card-demo/receiver.py",
+          "--age-ms",
+          "100"
+        ],
+        "stdout": {
+          "decision": "accept",
+          "age_ms": 100.0,
+          "delta_deg": 5.729577951308233
+        }
+      }
+    },
+    {
+      "name": "未来时间",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/interface-card-demo/receiver.py",
+          "--age-ms",
+          "-1"
+        ],
+        "stdout": {
+          "decision": "hold",
+          "reason": "time invalid",
+          "age_ms": -1.0
+        }
+      }
+    },
+    {
+      "name": "相机坐标系",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/interface-card-demo/receiver.py",
+          "--frame",
+          "camera"
+        ],
+        "stdout": {
+          "decision": "hold",
+          "reason": "frame mismatch"
+        }
+      }
+    },
+    {
+      "name": "非有限值",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/interface-card-demo/receiver.py",
+          "--delta",
+          "nan"
+        ],
+        "stdout": {
+          "decision": "hold",
+          "reason": "invalid number"
+        }
+      }
+    },
+    {
+      "name": "消息约定 clock",
+      "status": "PASS",
+      "details": {
+        "decision": "hold",
+        "reason": "clock mismatch"
+      }
+    },
+    {
+      "name": "消息约定 version",
+      "status": "PASS",
+      "details": {
+        "decision": "hold",
+        "reason": "version mismatch"
+      }
+    },
+    {
+      "name": "两端改度仍需修改实现",
+      "status": "PASS",
+      "details": {
+        "decision": "hold",
+        "reason": "unsupported contract"
+      }
+    },
+    {
+      "name": "布尔值不是角度",
+      "status": "PASS",
+      "details": {
+        "delta_yaw": true,
+        "result": {
+          "decision": "hold",
+          "reason": "invalid number"
+        }
+      }
+    },
+    {
+      "name": "实际打开专项入口 相机与成像",
+      "status": "PASS",
+      "details": {
+        "path": "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/chapters/E_camera.tex",
+        "sha256": "b476f10cfba11fbc7ba0bf846e002141d3fa08887fdef809d2655425ac94fd37",
+        "first_line": "\\subsubsection{先把相机参数认清楚}"
+      }
+    },
+    {
+      "name": "实际打开专项入口 几何",
+      "status": "PASS",
+      "details": {
+        "path": "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/chapters/G_ba.tex",
+        "sha256": "6117fe8e5582005c88a304678e93858975a22f8fbcaf6d300ee571438b5c334c",
+        "first_line": "\\subsubsection{先把空间点投到图像上}"
+      }
+    },
+    {
+      "name": "实际打开专项入口 滤波",
+      "status": "PASS",
+      "details": {
+        "path": "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/chapters/F_filter.tex",
+        "sha256": "1f841762592e85f9cd77d443f35e57c46c74d6cf67b08830b48a92b19165496c",
+        "first_line": "\\subsubsection{无处不在的噪声}"
+      }
+    },
+    {
+      "name": "纸面演练已填写",
+      "status": "PASS",
+      "details": {
+        "路线": [
+          "图像:像素阵列",
+          "网络框:像素坐标",
+          "灯条角点:像素坐标",
+          "位姿:旋转和平移/相机系"
+        ],
+        "分工": {
+          "跟随装甲转云台": "自瞄",
+          "绕开障碍到补给点": "导航",
+          "共享全场目标位置": "雷达",
+          "网络识别装甲": "待确认输出用途"
+        },
+        "帧42": [
+          "图像",
+          "角点/px",
+          "相机系位置/m",
+          "带时间戳状态",
+          "云台水平增量/rad"
+        ],
+        "接口": {
+          "来源": "chapters/01_overview.tex 云台目标角需求",
+          "发送": "视觉",
+          "接收": "电控",
+          "unit": "rad",
+          "frame": "gimbal_delta_left_positive",
+          "clock": "demo_clock",
+          "实车发送频率": "待双方确认",
+          "真实失效动作": "待双方确认",
+          "性质": "教学设计，不是现行队内协议"
+        }
+      }
+    },
+    {
+      "name": "90度核对",
+      "status": "PASS",
+      "details": {
+        "degree": 90,
+        "radian": 1.5707963267948966,
+        "only_receiver_still_deg": 1.5707963267948966
+      }
+    }
+  ],
+  "boundaries": [
+    "纸面演练由修订者填写，未冒充两人现场考核",
+    "不连接真实执行器；真实协议、时钟、频率、失效动作待队内确认"
+  ]
+}

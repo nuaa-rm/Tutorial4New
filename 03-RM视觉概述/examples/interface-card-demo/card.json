@@ -1,0 +1,16 @@
+{ "contract": {
+    "version": 1,
+    "unit": "rad",
+    "frame": "gimbal_delta_left_positive",
+    "clock": "demo_clock",
+    "max_age_ms": 100
+  },
+  "message": {
+    "version": 1,
+    "unit": "rad",
+    "frame": "gimbal_delta_left_positive",
+    "clock": "demo_clock",
+    "delta_yaw": 0.1,
+    "sample_ms": 20,
+    "valid": true
+  } }

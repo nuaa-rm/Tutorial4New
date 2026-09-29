@@ -15,7 +15,7 @@
 
 \paragraph*{随堂练习 \ref{v3-ex-overview-2}}
 \begin{solution}
-激光雷达定位在此场景归导航；位置广播归雷达；网络识别装甲可能服务自瞄或雷达，须继续确认输出用途。
+定位本车在此场景归导航，定位全场敌车则可能归雷达；位置广播归雷达。网络识别装甲可能服务自瞄或雷达，你还需要确认输出用途。器件名不能替你回答任务是什么。
 \end{solution}
 
 \paragraph*{随堂练习 \ref{v3-ex-overview-3}}
@@ -25,7 +25,12 @@
 
 \paragraph*{随堂练习 \ref{v3-ex-overview-4}}
 \begin{solution}
-同步消息或协议版本、字段单位、发送端转换、接收端解析与限幅、接口文档和验证样例；联调时用已知角度确认解释一致。
+同步消息或协议版本、字段单位、发送端转换、接收端解析与限幅、接口文档和验证样例。已知输入为90度时，改成弧度应发送约1.570796；双方都应解释成同一物理转角。若接收端仍按度解释，就只会得到约1.57度，这正是只改一端的错误。先在教学接收端核对，实车再按队内要求联调。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{v3-ex-overview-6}}
+\begin{solution}
+100 ms 在含边界阈值内，默认消息可接收；101 ms 过期，$-1$ ms 表示采样时间在接收时间之后，两者返回 time invalid；frame camera 与约定不一致，返回 frame mismatch。两边都改 deg 虽然字符串一致，接收程序却只实现了 rad 的解释，因此返回 unsupported contract，不能仍调用弧度到度的转换。保存自己的四条终端输出，并和卡片字段一一对应。
 \end{solution}
 
 \paragraph*{随堂练习 \ref{v3-ex-overview-5}}
