@@ -1,0 +1,948 @@
+{
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "opencv": "4.6.0",
+  "numpy": "1.26.4",
+  "scipy": "1.11.4",
+  "synthetic": true,
+  "source_sha256": {
+    "basics.py": "fe46257b11b5f182280a3cc50036edf584aeee9a76363d4614bbdf1db0b6718e",
+    "bundle_demo.py": "dec4aa5fd5105706dcaedc40d0ba02df0a34d9d8fa43f712bb35d55138907197",
+    "dlt.py": "b072552e3bad97087bdee149ee5c689ea3a2be90c2b42c2ce9bbae39ffe1875a",
+    "graph_demo.py": "37c6ef25ff9d45ffbf885bd32e2e8e084dddf526f474735938189c1759c0d663",
+    "jacobian_demo.py": "2faf7b5e858de15cab74da4580544570b03bd903a12b84ab2df0fdcfd555f936",
+    "lie.py": "1195e0e039873ea9b8b11d2a5f9002661aceb05cdabcca47d63aac2f243d23ee",
+    "lie_demo.py": "e094aa1dda014c261ec4d0286527ab37cdd7fc31734ec6bd8ae691cbbe433896",
+    "model.py": "5b33b80edd9be5af6ac85584e1656468cde23467d804151a669a1ec4bf2722f4",
+    "numeric_demo.py": "068409a28457d1acb1e0726256c206bde4204e0334a1e82956c0da7e06932a0a",
+    "optimize.py": "4da999c9633a27aafb45a75863245523123981ecc74ae1d601b72983e431a58c",
+    "plot.py": "acfa7bbba2bed7b27d26477da426e5ba8648feec4d2ff0de87ccd2c425021910",
+    "pnp_demo.py": "b1c12e0f4d7a1b5969d17debc1eb46f77b553f11e873887fe8035897a267cf79",
+    "pose_demo.py": "cc827b25e0e6601a7e0529fe3e783144a6188dac1963f35ca8da45b9ff55a2f5",
+    "registration_demo.py": "555042cc69d0179356ed6ed504e40b5073619b3b1dfbaac06d549577b1626f7e",
+    "residual.py": "8cbabdfdf43a37e5fa27d4dc3da888c4f48a2e6cfb2a501e97f3459b45b0525a",
+    "schur.py": "a3eada9e27b028bba6cb26746943a0e21fde4e597aa1579fa47a30b7a9b9fbd9"
+  },
+  "records": [
+    {
+      "name": "basics.py",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/geometry/pose-lab-demo/basics.py"
+        ],
+        "result": {
+          "pixel": [
+            [
+              400.0,
+              280.0
+            ]
+          ],
+          "double_depth": [
+            [
+              360.0,
+              260.0
+            ]
+          ],
+          "half_size": [
+            [
+              200.0,
+              140.0
+            ]
+          ],
+          "crop_left20": [
+            [
+              180.0,
+              140.0
+            ]
+          ],
+          "transformed": [
+            [
+              -1.0,
+              1.2246467991473532e-16,
+              3.0
+            ]
+          ],
+          "camera_center": [
+            -6.123233995736766e-17,
+            1.0,
+            0.0
+          ]
+        }
+      }
+    },
+    {
+      "name": "numeric_demo.py",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/geometry/pose-lab-demo/numeric_demo.py"
+        ],
+        "result": {
+          "rq_K": [
+            [
+              799.9999999999999,
+              10.000000000000028,
+              320.0
+            ],
+            [
+              0.0,
+              819.9999999999999,
+              239.99999999999997
+            ],
+            [
+              0.0,
+              0.0,
+              0.9999999999999999
+            ]
+          ],
+          "rq_det": 0.9999999999999997,
+          "qr_rotation_error": 2.828359900176004,
+          "reflection_det": -1.0,
+          "corrected_det": 1.0,
+          "projection_distance": 0.017255987458257852
+        }
+      }
+    },
+    {
+      "name": "jacobian_demo.py",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/geometry/pose-lab-demo/jacobian_demo.py"
+        ],
+        "result": {
+          "pose_max_error": 2.26158363147988e-08,
+          "point_max_error": 9.497728825635932e-09
+        }
+      }
+    },
+    {
+      "name": "lie_demo.py",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/geometry/pose-lab-demo/lie_demo.py"
+        ],
+        "result": {
+          "quarter_turn": [
+            1.1102230246251565e-16,
+            1.0,
+            0.0
+          ],
+          "se3_translation": [
+            0.6366197723675814,
+            0.6366197723675813,
+            0.0
+          ],
+          "left_bch_error": 9.196333106867327e-12,
+          "right_bch_error": 9.196078421933427e-12,
+          "left_right_difference": 4.472138943404189e-06,
+          "element_add_orthogonality_error": 0.02087764592819683
+        }
+      }
+    },
+    {
+      "name": "PnP/DLT/P3P默认",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/geometry/pose-lab-demo/pnp_demo.py"
+        ],
+        "result": {
+          "pnp": {
+            "rms_pixel": 1.4210854715202004e-14,
+            "translation": [
+              -1.3064990750479468e-17,
+              -5.10222369683575e-17,
+              2.0
+            ],
+            "positive_depth": true,
+            "rotation_determinant": 0.9999999999999999
+          },
+          "dlt": {
+            "rms_pixel": 1.660299836536854e-13,
+            "translation": [
+              2.516645107410342e-17,
+              -5.19058053403383e-17,
+              2.0
+            ],
+            "positive_depth": true,
+            "rotation_determinant": 0.9999999999999991
+          },
+          "p3p_candidates": [
+            {
+              "rms_all_points": 67.56748071041653,
+              "rms_three_points": 3.197958976789066e-05,
+              "rms_extra_points": 85.46685392175965,
+              "positive_depth": true,
+              "translation": [
+                -0.1040884242114042,
+                -0.15607107137489495,
+                2.1795758958985902
+              ]
+            },
+            {
+              "rms_all_points": 5.636625669091865e-05,
+              "rms_three_points": 3.6348214882674966e-05,
+              "rms_extra_points": 6.550368076879484e-05,
+              "positive_depth": true,
+              "translation": [
+                2.4652203546755846e-08,
+                -1.3765101868762342e-07,
+                2.000001540257633
+              ]
+            }
+          ],
+          "p3p_count": 2
+        }
+      }
+    },
+    {
+      "name": "米到毫米",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/geometry/pose-lab-demo/pnp_demo.py",
+          "--scale",
+          "1000"
+        ],
+        "result": {
+          "pnp": {
+            "rms_pixel": 2.842170943040401e-14,
+            "translation": [
+              -1.5878819483688466e-14,
+              9.791094960840282e-15,
+              1999.9999999999995
+            ],
+            "positive_depth": true,
+            "rotation_determinant": 0.9999999999999999
+          },
+          "dlt": {
+            "rms_pixel": 2.1387218315698548e-13,
+            "translation": [
+              -8.179096599083596e-14,
+              -3.460387022689214e-14,
+              1999.9999999999955
+            ],
+            "positive_depth": true,
+            "rotation_determinant": 1.0000000000000009
+          },
+          "p3p_candidates": [
+            {
+              "rms_all_points": 67.56756903726598,
+              "rms_three_points": 0.00010151980299798876,
+              "rms_extra_points": 85.46696564733617,
+              "positive_depth": true,
+              "translation": [
+                -104.08835437398838,
+                -156.07108253875975,
+                2179.572626499107
+              ]
+            },
+            {
+              "rms_all_points": 0.00017892254158069542,
+              "rms_three_points": 0.00011537953136170405,
+              "rms_extra_points": 0.0002079273422683155,
+              "positive_depth": true,
+              "translation": [
+                7.825303000785766e-05,
+                -0.00043694424470430704,
+                2000.0048892221794
+              ]
+            }
+          ],
+          "p3p_count": 2
+        }
+      }
+    },
+    {
+      "name": "交换对应点",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/geometry/pose-lab-demo/pnp_demo.py",
+          "--swap"
+        ],
+        "result": {
+          "pnp": {
+            "rms_pixel": null,
+            "translation": [
+              -0.02821802237440673,
+              -0.06491427598255112,
+              0.08146939216583567
+            ],
+            "positive_depth": false,
+            "rotation_determinant": 1.0000000000000002
+          },
+          "dlt": {
+            "rms_pixel": null,
+            "translation": [
+              -0.06286566628556055,
+              -0.0502115002916556,
+              -1.8441341971142273
+            ],
+            "positive_depth": false,
+            "rotation_determinant": 0.9999999999999987
+          },
+          "p3p_candidates": [
+            {
+              "rms_all_points": 50.357481219164455,
+              "rms_three_points": 5.739516743905653e-05,
+              "rms_extra_points": 63.69773515266948,
+              "positive_depth": true,
+              "translation": [
+                0.05349086807114974,
+                -0.009565259989625083,
+                2.434874973319555
+              ]
+            },
+            {
+              "rms_all_points": 50.20373473431979,
+              "rms_three_points": 6.046543913595073e-05,
+              "rms_extra_points": 63.503259522926236,
+              "positive_depth": true,
+              "translation": [
+                0.17086969681879713,
+                0.11011423212013348,
+                2.1584574883375023
+              ]
+            }
+          ],
+          "p3p_count": 2
+        }
+      }
+    },
+    {
+      "name": "观测噪声0.3",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/geometry/pose-lab-demo/pnp_demo.py",
+          "--noise",
+          "0.3"
+        ],
+        "result": {
+          "pnp": {
+            "rms_pixel": 0.2985887249504014,
+            "translation": [
+              -0.00027936608436058175,
+              -0.0004050843066209988,
+              1.9980130914261032
+            ],
+            "positive_depth": true,
+            "rotation_determinant": 0.9999999999999998
+          },
+          "dlt": {
+            "rms_pixel": 2.1856549853906553,
+            "translation": [
+              -0.0005389548107073221,
+              -0.0006682082724496309,
+              1.9497122116304009
+            ],
+            "positive_depth": true,
+            "rotation_determinant": 0.9999999999999982
+          },
+          "p3p_candidates": [
+            {
+              "rms_all_points": 67.35216699416638,
+              "rms_three_points": 4.652015780942985e-06,
+              "rms_extra_points": 85.19450121983289,
+              "positive_depth": true,
+              "translation": [
+                -0.10310026823495441,
+                -0.1566687295660246,
+                2.179434666895642
+              ]
+            },
+            {
+              "rms_all_points": 0.3260960464848733,
+              "rms_three_points": 5.29884629209441e-06,
+              "rms_extra_points": 0.41248249712691665,
+              "positive_depth": true,
+              "translation": [
+                -0.00037721709735941394,
+                -0.0004355991643883797,
+                2.0013266712852316
+              ]
+            }
+          ],
+          "p3p_count": 2
+        }
+      }
+    },
+    {
+      "name": "尺度0拒绝",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/geometry/pose-lab-demo/pnp_demo.py",
+          "--scale",
+          "0"
+        ],
+        "result": {
+          "exit": 2,
+          "stderr": "usage: pnp_demo.py [-h] [--scale SCALE] [--noise NOISE] [--swap]\npnp_demo.py: error: scale为正、noise非负且有限\n"
+        }
+      }
+    },
+    {
+      "name": "负噪声拒绝",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/geometry/pose-lab-demo/pnp_demo.py",
+          "--noise",
+          "-1"
+        ],
+        "result": {
+          "exit": 2,
+          "stderr": "usage: pnp_demo.py [-h] [--scale SCALE] [--noise NOISE] [--swap]\npnp_demo.py: error: scale为正、noise非负且有限\n"
+        }
+      }
+    },
+    {
+      "name": "平移图闭环 2.0",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/geometry/pose-lab-demo/graph_demo.py",
+          "--loop",
+          "2.0"
+        ],
+        "result": {
+          "positions_m": [
+            0.0,
+            0.9999999999999994,
+            1.9999999999999998
+          ],
+          "rank_fixed": 2,
+          "rank_unfixed": 2,
+          "weighted_residual_sum": 4.417621069237666e-29
+        }
+      }
+    },
+    {
+      "name": "平移图闭环 2.2",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/geometry/pose-lab-demo/graph_demo.py",
+          "--loop",
+          "2.2"
+        ],
+        "result": {
+          "positions_m": [
+            0.0,
+            1.0666666666666662,
+            2.1333333333333333
+          ],
+          "rank_fixed": 2,
+          "rank_unfixed": 2,
+          "weighted_residual_sum": 1.3333333333333333
+        }
+      }
+    },
+    {
+      "name": "真实ICP初值 0",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/geometry/pose-lab-demo/registration_demo.py",
+          "--initial-shift",
+          "0"
+        ],
+        "result": {
+          "known_max_error": 9.992007221626409e-16,
+          "icp_nearest_rms": 3.0708954276390457e-15,
+          "icp_known_pair_rms": 3.0708954276390457e-15,
+          "icp_transform_max_error": 4.5727310826748635e-15,
+          "nearest_cost_nonincreasing": true,
+          "iterations": 3,
+          "history": [
+            0.0102810901473929,
+            4.456334266783645e-05,
+            6.996517700116842e-30,
+            9.430398727494398e-30
+          ]
+        }
+      }
+    },
+    {
+      "name": "真实ICP初值 2",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/geometry/pose-lab-demo/registration_demo.py",
+          "--initial-shift",
+          "2"
+        ],
+        "result": {
+          "known_max_error": 9.992007221626409e-16,
+          "icp_nearest_rms": 2.3157156939211503e-15,
+          "icp_known_pair_rms": 2.3157156939211503e-15,
+          "icp_transform_max_error": 2.96637714392034e-15,
+          "nearest_cost_nonincreasing": true,
+          "iterations": 9,
+          "history": [
+            1.7850564779345173,
+            0.231531765257172,
+            0.16905557329472667,
+            0.1565449727448859,
+            0.1359808255785486,
+            0.08130377240547977,
+            0.027129755532082578,
+            0.001717144863416787,
+            1.779918273992502e-30,
+            5.362539175072714e-30
+          ]
+        }
+      }
+    },
+    {
+      "name": "位姿优化 default",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/geometry/pose-lab-demo/pose_demo.py",
+          "--output",
+          "/tmp/textbook-geometry-verify/pose-default"
+        ],
+        "result": {
+          "synthetic": true,
+          "initial_cost": 15978.88759899126,
+          "final_cost": 0.710230083006381,
+          "accepted_cost_nonincreasing": true,
+          "inlier_rms_pixel": 0.21990481153025784,
+          "translation_error_m": 0.006144700197096057,
+          "rotation_determinant": 1.0
+        }
+      }
+    },
+    {
+      "name": "位姿优化 clean",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/geometry/pose-lab-demo/pose_demo.py",
+          "--output",
+          "/tmp/textbook-geometry-verify/pose-clean",
+          "--noise",
+          "0"
+        ],
+        "result": {
+          "synthetic": true,
+          "initial_cost": 15867.485987177348,
+          "final_cost": 6.977316934498805e-26,
+          "accepted_cost_nonincreasing": true,
+          "inlier_rms_pixel": 8.445097327513836e-14,
+          "translation_error_m": 2.447256494129904e-15,
+          "rotation_determinant": 1.0
+        }
+      }
+    },
+    {
+      "name": "位姿优化 outlier",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/geometry/pose-lab-demo/pose_demo.py",
+          "--output",
+          "/tmp/textbook-geometry-verify/pose-outlier",
+          "--outlier",
+          "80"
+        ],
+        "result": {
+          "synthetic": true,
+          "initial_cost": 18166.652468217915,
+          "final_cost": 5645.2563859629645,
+          "accepted_cost_nonincreasing": true,
+          "inlier_rms_pixel": 8.23500209435676,
+          "translation_error_m": 0.2128297987808659,
+          "rotation_determinant": 1.0000000000000004
+        }
+      }
+    },
+    {
+      "name": "位姿优化 robust",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/geometry/pose-lab-demo/pose_demo.py",
+          "--output",
+          "/tmp/textbook-geometry-verify/pose-robust",
+          "--outlier",
+          "80",
+          "--huber",
+          "2"
+        ],
+        "result": {
+          "synthetic": true,
+          "initial_cost": 1633.6701201038495,
+          "final_cost": 224.7917035459916,
+          "accepted_cost_nonincreasing": true,
+          "inlier_rms_pixel": 0.15322669289883253,
+          "translation_error_m": 0.004893708063831083,
+          "rotation_determinant": 1.0000000000000002
+        }
+      }
+    },
+    {
+      "name": "三相机联合BA default",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/geometry/pose-lab-demo/bundle_demo.py",
+          "--output",
+          "/tmp/textbook-geometry-schur/default"
+        ],
+        "result": {
+          "synthetic": true,
+          "variables": 71,
+          "residuals": 120,
+          "first_pose_fixed": true,
+          "known_first_point_depth_m": 3.5,
+          "initial_rms_pixel": 28.83825460479662,
+          "final_rms_pixel": 0.2687634515985683,
+          "clean_truth_rms_pixel": 0.33447428653005984,
+          "point_rmse_m": 0.13506771100466078,
+          "jacobian_rank": 71,
+          "schur_max_difference": 2.9699092713103906e-19,
+          "evaluations": 25,
+          "loss": "linear"
+        }
+      }
+    },
+    {
+      "name": "三相机联合BA clean",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/geometry/pose-lab-demo/bundle_demo.py",
+          "--output",
+          "/tmp/textbook-geometry-schur/clean",
+          "--noise",
+          "0"
+        ],
+        "result": {
+          "synthetic": true,
+          "variables": 71,
+          "residuals": 120,
+          "first_pose_fixed": true,
+          "known_first_point_depth_m": 3.5,
+          "initial_rms_pixel": 28.84213041368928,
+          "final_rms_pixel": 3.261280213575618e-14,
+          "clean_truth_rms_pixel": 3.288802053521507e-14,
+          "point_rmse_m": 1.9305976876253498e-14,
+          "jacobian_rank": 71,
+          "schur_max_difference": 5.429729610636224e-25,
+          "evaluations": 17,
+          "loss": "linear"
+        }
+      }
+    },
+    {
+      "name": "三相机联合BA outlier",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/geometry/pose-lab-demo/bundle_demo.py",
+          "--output",
+          "/tmp/textbook-geometry-schur/outlier",
+          "--outlier",
+          "80"
+        ],
+        "result": {
+          "synthetic": true,
+          "variables": 71,
+          "residuals": 120,
+          "first_pose_fixed": true,
+          "known_first_point_depth_m": 3.5,
+          "initial_rms_pixel": 29.126040913826756,
+          "final_rms_pixel": 5.3413023851116055,
+          "clean_truth_rms_pixel": 5.133769936483327,
+          "point_rmse_m": 1.8463834768177148,
+          "jacobian_rank": 71,
+          "schur_max_difference": 1.6349588349839905e-11,
+          "evaluations": 28,
+          "loss": "linear"
+        }
+      }
+    },
+    {
+      "name": "三相机联合BA robust",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/geometry/pose-lab-demo/bundle_demo.py",
+          "--output",
+          "/tmp/textbook-geometry-schur/robust",
+          "--outlier",
+          "80",
+          "--loss",
+          "huber"
+        ],
+        "result": {
+          "synthetic": true,
+          "variables": 71,
+          "residuals": 120,
+          "first_pose_fixed": true,
+          "known_first_point_depth_m": 3.5,
+          "initial_rms_pixel": 29.126040913826756,
+          "final_rms_pixel": 10.335515732571247,
+          "clean_truth_rms_pixel": 4.8918864275496805,
+          "point_rmse_m": 1.6563611616199156,
+          "jacobian_rank": 71,
+          "schur_max_difference": 1.228162016531087e-11,
+          "evaluations": 44,
+          "loss": "huber"
+        }
+      }
+    },
+    {
+      "name": "负Huber拒绝",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/geometry/pose-lab-demo/pose_demo.py",
+          "--huber",
+          "-1"
+        ],
+        "result": {
+          "exit": 2,
+          "stderr": "usage: pose_demo.py [-h] [--noise NOISE] [--outlier OUTLIER] [--huber HUBER]\n                    [--output OUTPUT]\npose_demo.py: error: 噪声/异常偏移/Huber阈值须非负有限\n"
+        }
+      }
+    },
+    {
+      "name": "SO3独立矩阵指数 [0.0, 0.0, 0.0]",
+      "status": "PASS",
+      "details": {
+        "max_error": 0.0
+      }
+    },
+    {
+      "name": "SO3独立矩阵指数 [1e-08, 0.0, 0.0]",
+      "status": "PASS",
+      "details": {
+        "max_error": 0.0
+      }
+    },
+    {
+      "name": "SO3独立矩阵指数 [0.3, -0.2, 0.1]",
+      "status": "PASS",
+      "details": {
+        "max_error": 1.1102230246251565e-16
+      }
+    },
+    {
+      "name": "SO3独立矩阵指数 [0.0, 0.0, 3.141592653589793]",
+      "status": "PASS",
+      "details": {
+        "max_error": 3.023042455886225e-17
+      }
+    },
+    {
+      "name": "SE3独立矩阵指数",
+      "status": "PASS",
+      "details": [
+        [
+          0.9752903089530457,
+          -0.12733457491763028,
+          -0.18054007669439773,
+          1.0080169772626524
+        ],
+        [
+          0.06803131640494,
+          0.9505806179060914,
+          -0.3029327134026371,
+          0.2816495387595049
+        ],
+        [
+          0.21019170595074285,
+          0.28316496056507373,
+          0.9357548032779188,
+          -0.1607518542689473
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "DLT先去畸变",
+      "status": "PASS",
+      "details": {
+        "transform_max_error": 9.241218901223647e-13
+      }
+    },
+    {
+      "name": "共面DLT明确拒绝",
+      "status": "PASS",
+      "details": "本DLT示例不接受共面或共线点"
+    },
+    {
+      "name": "零深度拒绝",
+      "status": "PASS",
+      "details": "投影点须在相机前方且有限"
+    },
+    {
+      "name": "无效投影拒绝 [0.0, 0.0, -1.0]",
+      "status": "PASS",
+      "details": "投影点须在相机前方且有限"
+    },
+    {
+      "name": "无效投影拒绝 [0.0, 0.0, nan]",
+      "status": "PASS",
+      "details": "投影点须在相机前方且有限"
+    },
+    {
+      "name": "BA未固定规范的秩",
+      "status": "PASS",
+      "details": {
+        "variables": 78,
+        "rank": 71,
+        "nullity": 7
+      }
+    },
+    {
+      "name": "整体坐标/尺度图像不变",
+      "status": "PASS",
+      "details": {
+        "frame_max_error": 5.684341886080802e-14,
+        "scale_max_error": 0.0
+      }
+    },
+    {
+      "name": "共线配准明确拒绝",
+      "status": "PASS",
+      "details": "共线或重复点不能唯一约束三维旋转"
+    },
+    {
+      "name": "对称点云最近邻不等于标签配对",
+      "status": "PASS",
+      "details": {
+        "nearest_rms": 0.0,
+        "known_pair_rms": 2.0
+      }
+    },
+    {
+      "name": "原三点质心差与完整配准",
+      "status": "PASS",
+      "details": {
+        "translation_only": [
+          0.3333333333333333,
+          2.0,
+          3.0
+        ],
+        "squared_sum": 2.666666666666667,
+        "rigid_translation": [
+          1.0,
+          2.0,
+          3.0
+        ]
+      }
+    },
+    {
+      "name": "原标量最小二乘 2.0",
+      "status": "PASS",
+      "details": {
+        "t": 2.0,
+        "squared_sum": 0.0
+      }
+    },
+    {
+      "name": "原标量最小二乘 4.0",
+      "status": "PASS",
+      "details": {
+        "t": 4.0,
+        "squared_sum": 24.0
+      }
+    },
+    {
+      "name": "联合BA正文绘图",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "python3",
+          "plot.py",
+          "--input",
+          "/tmp/textbook-geometry-verify/bundle-default/result.npz",
+          "--output",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/images/geometry_bundle_candidate.pdf",
+          "--font",
+          "/run/host/usr/share/texmf-dist/fonts/opentype/public/fandol/FandolSong-Regular.otf"
+        ],
+        "exit": 0,
+        "input_sha256": "9a1a0ab72a93e3b3b14594dbdb3d26d0c8bf683b0b7e1efe402701e0f1813436",
+        "output_sha256": "2ac24291af77355913217f4fc358fd8a2e06d143e151be9d0fc1fc0bc164024e",
+        "output_bytes": 16466,
+        "cwd": "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/geometry/pose-lab-demo",
+        "published_output": "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/images/geometry_bundle_revised.pdf"
+      }
+    },
+    {
+      "name": "联合BA默认字体绘图",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "python3",
+          "plot.py",
+          "--input",
+          "/tmp/textbook-geometry-verify/bundle-default/result.npz",
+          "--output",
+          "/tmp/geometry-default-font.pdf"
+        ],
+        "exit": 0,
+        "input_sha256": "9a1a0ab72a93e3b3b14594dbdb3d26d0c8bf683b0b7e1efe402701e0f1813436",
+        "output_sha256": "38d9882c5cd2109dd0ce4d2b810a302933d39ea3c8ccff172b966c8e9310711e",
+        "output_bytes": 11226,
+        "cwd": "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/geometry/pose-lab-demo"
+      }
+    },
+    {
+      "name": "位姿默认字体绘图",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "python3",
+          "plot.py",
+          "--input",
+          "/tmp/textbook-geometry-verify/pose-default/result.npz",
+          "--output",
+          "/tmp/geometry-pose-font.pdf"
+        ],
+        "exit": 0,
+        "input_sha256": "f22be6fd03bca6552d46105fbbc6e6d76fa610f80063af03782c6ad3dbf691f2",
+        "output_sha256": "573928952891b551c8379ef752e7f7cbf5dc421fae0bfcf8b8a848c62fb5847a",
+        "output_bytes": 10004,
+        "cwd": "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/geometry/pose-lab-demo"
+      }
+    }
+  ]
+}

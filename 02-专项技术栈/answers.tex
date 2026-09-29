@@ -956,112 +956,126 @@ R=0.9输出K=0.55、x=1.1、P=0.495；R=9输出约0.108911、0.217822、0.980198
 \addcontentsline{toc}{section}{第九章题解：几何视觉与 Bundle Adjustment}
 \subsubsection*{随堂练习}
 
-\paragraph*{随堂练习 9.1}
+\paragraph*{随堂练习 \ref{ex:v2-ba-projection}}
 \begin{solution}
-深度由 2 m 变为 4 m，$u=800\times0.2/4+320=360$，$v=800\times0.1/4+240=260$。缩半的是相对主点的偏移，主点本身仍为 (320,240)，因此不能把原像素坐标 (400,280) 整体除以 2。
+深度2变4时，$u=800\times0.2/4+320=360$、$v=800\times0.1/4+240=260$。缩半的是相对主点偏移，不能将(400,280)整体除2。齐次链K、$\Pi$、T、$P_h$尺寸依次为$3\times3$、$3\times4$、$4\times4$、$4\times1$；省掉$\Pi$时KT内维不匹配。
 \end{solution}
 
-\paragraph*{随堂练习 9.2}
+\paragraph*{随堂练习 \ref{ex:v2-ba-resize}}
 \begin{solution}
-先缩小到一半，$f_y=410$、$c_y=120$；再从顶部裁去 10 pixel，相当于图像原点下移 10，最终 $f_y=410$、$c_y=110$。这里按连续坐标缩放模型计算，实际重采样还需统一像素中心约定。
+先缩半得到fy=410、cy=120，再裁顶部10pixel后fy仍410、cy=110。旧K会把焦距尺度与图像原点位置都用错；实际重采样还要统一像素中心约定。
 \end{solution}
 
-\paragraph*{随堂练习 9.3}
+\paragraph*{随堂练习 \ref{ex:v2-ba-transform}}
 \begin{solution}
-列向量约定下取
-\[
-R=\begin{bmatrix}0&-1&0\\1&0&0\\0&0&1\end{bmatrix},\quad
-p=\begin{bmatrix}0\\2\\3\end{bmatrix},\quad
-t=\begin{bmatrix}1\\0\\0\end{bmatrix}.
-\]
-于是 $Rp+t=(-1,0,3)^T$。代入 $R^T(q-t)$ 应恢复原点坐标 (0,2,3)。
+$R=\left[\begin{smallmatrix}0&-1&0\\1&0&0\\0&0&1\end{smallmatrix}\right]$，$Rp+t=(-1,0,3)^T$，$R^T(q-t)$恢复(0,2,3)。相机中心为$-R^Tt=(0,1,0)^T$。若$T_{gc}$把相机变到云台，$T_{co}$把物体变到相机，则$T_{go}=T_{gc}T_{co}$，从右往左先做物体到相机。
 \end{solution}
 
-\paragraph*{随堂练习 9.4}
+\paragraph*{随堂练习 \ref{ex:v2-ba-dlt}}
 \begin{solution}
-保留原三维点顺序，只交换两项二维观测，然后重新求位姿并对所有点计算重投影 RMS。通常误差会明显增大，也可能返回不合理位姿或失败；具体值受求解器影响。成功返回只表示算法给出了结果，仍须核对点序、残差、正深度与位姿范围，不能把布尔返回值当成数据正确的证明。
+按行堆叠m时，两行为$[P_h^T,0^T,-xP_h^T]$及$[0^T,P_h^T,-yP_h^T]$。若m是解，任意非零整体倍数也是齐次解，因此需消除尺度/符号并核对旋转。共面输入被本实现明确拒绝；六点只够数量，点配置与A的秩仍须满足条件。归一化DLT先去畸变并移除K，不直接把原pixel当x/y。
 \end{solution}
 
-\paragraph*{随堂练习 9.5}
+\paragraph*{随堂练习 \ref{ex:v2-ba-pnp}}
 \begin{solution}
-三个差值变为 2、2、8，因此 $t=(2+2+8)/3=4$。预测为 [4,5,6]，观测为 [2,3,10]，残差平方和为 $2^2+2^2+(-4)^2=24$。平方损失对大残差赋予很大代价，导致异常点把解从 2 拉到 4；可考虑异常点检测或适当的鲁棒损失。
+本次默认PnP/DLT RMS约$1.4\times10^{-14}$/$1.7\times10^{-13}$pixel且正深度；交换后PnP返回成功，却有负深度，RMS记为null，不是零误差。scale1000时z平移由2变2000，旋转和像素基本不变。输出是物体到相机方向，反向必须用完整逆变换。还要核对对应、深度、误差、单位和合理范围，不能以返回成功代替这些检查。
 \end{solution}
 
-\paragraph*{随堂练习 9.6}
+\paragraph*{随堂练习 \ref{ex:v2-ba-p3p}}
 \begin{solution}
-共有 3 个位姿顶点和 2 个路标顶点，即 5 个顶点；每个相机都观测两个点，共 6 条观测边。可以固定第一个相机位姿作为参考坐标。若是纯单目联合优化，还需处理整体尺度自由度；本题的图也不保证拥有足够的几何约束，固定参考并不自动保证所有参数可观。
+本次两个候选的三点RMS约$3.2\times10^{-5}$/$3.6\times10^{-5}$pixel，额外点RMS却约85.47/$6.6\times10^{-5}$pixel，所以应结合额外观测和正深度选择。solveP3P直接返回三点问题的候选，solvePnP使用P3P标志时要求四点，用额外点选解。最多四解不等于每次四解，输入和退化条件变化后应重新核对实际返回值，不能固定候选下标。
 \end{solution}
 
-\paragraph*{随堂练习 9.7}
+\paragraph*{随堂练习 \ref{ex:v2-ba-rq}}
 \begin{solution}
-\texttt{numpy.linalg.qr(M)} 返回 Q 和上三角因子 U，应检查 \texttt{Q @ U} 重建 M。通常 Q 不等于原来的旋转 R，U 也不等于原内参 K，因为原模型是 K 在左、R 在右。可以打印两个差值矩阵或使用 allclose 验证，而不能只看到一个正交矩阵就称其为相机旋转。
+RQ是上三角因子在左、正交因子在右，对应M=KR；QR是M=QU。两者都能重建输入，但矩阵乘法不可交换，所以Q不必是原R、U不必是原K。本次RQ恢复给定K/R，QR正交因子与原R差的范数约2.82836。
 \end{solution}
 
-\paragraph*{随堂练习 9.8}
+\paragraph*{随堂练习 \ref{ex:v2-ba-rotation}}
 \begin{solution}
-该矩阵本身是反射矩阵，未修正的 $UV^T$ 行列式为 -1。反射会改变坐标系手性，三维适当旋转必须满足正交性且行列式为 +1。按正文公式加入行列式修正后得到适当旋转；本例奇异值相同，最近旋转可能不唯一，不应要求某个固定的矩阵元素结果。
+diag(1,1,-1)正交但行列式-1，会改变手性；绕z轴180°应为diag(-1,-1,1)，行列式+1。用$U\operatorname{diag}(1,1,\det(UV^T))V^T$修正后检查$R^TR=I$、det=1及投影目标值。本例奇异值相同，最近旋转可能不唯一，不以固定矩阵元素判错。
 \end{solution}
 
-\paragraph*{随堂练习 9.9}
+\paragraph*{随堂练习 \ref{ex:v2-ba-lie}}
 \begin{solution}
-例如令目标点为 $Q=PR^T+t$，其中 P 按行存放点，R 为绕 z 轴 90° 的旋转。只用质心差估计平移会得到 $(1/3,2,3)$，不能恢复原来的 $(1,2,3)$；三点残差平方和为 $8/3$。旋转改变点集相对质心的方向，单一平移无法补偿，需同时估计 R 和 t。
+$-\pi/2$绕z轴把(1,0,0)变(0,-1,0)。$\rho=(1,0,0),\phi=(0,0,\pi/2)$时$t=J_l(\phi)\rho=(2/\pi,2/\pi,0)$，rho不是这次的最终t。左/右乘是不同参考中的扰动，导数必须匹配；直接元素相加本次正交误差约0.02088，而指数更新仍保持SO(3)。
 \end{solution}
 
-\paragraph*{随堂练习 9.10}
+\paragraph*{随堂练习 \ref{ex:v2-ba-least}}
 \begin{solution}
-角度改为 $-\pi/2$ 时，x 轴单位向量变为 $(0,-1,0)$，绕 z 轴的方向与正角相反。旋转矩阵的元素不能自由变化：需同时满足 $R^TR=I$ 和 $\det R=1$。逐元素相加通常破坏这些约束，应按统一约定用旋转复合或李代数扰动。
+差值为2、2、8，t=4；预测[4,5,6]对观测[2,3,10]的平方和为24。异常点把最小二乘解从真实2拉到4。代价相对当前观测下降，并不证明匹配正确或接近真值。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-ba-jacobian}}
+\begin{solution}
+每点$J_{\rm pose}$为$2\times6$、$J_{\rm point}$为$2\times3$，按观测减预测带负号。本次中心差分最大差约$2.3\times10^{-8}$/$9.5\times10^{-9}$。左乘$q$增量为$[I,-q^\wedge]\delta\xi$；右乘作用在另一个参考中，须重新推导或正确转换导数，不能只换更新代码。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-ba-bundle}}
+\begin{solution}
+第一相机固定消掉六个整体刚体自由度，但同时缩放点与其余平移仍保持像素，因此还需尺度。项目的3.5m深度是明确给定的模拟先验，不是从单目像素自动读出来的。两相机12参数加点59分量为71变量，60条二维观测给120残差，当前J秩71。默认像素RMS约0.269pixel、点RMSE约0.135m；无噪声分别约$3.3\times10^{-14}$pixel/$1.9\times10^{-14}$m。实际记录固定条件、秩及两类误差，不由低像素误差承诺真实深度精度。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-ba-graph}}
+\begin{solution}
+图示5顶点/6观测边，可固定一相机作为参考，但仍需尺度条件，且两个点本身不保证其他未知量充分可观。位姿图边是相对测量，BA边是像素投影。闭环2.2m的等权平移解约0/1.06667/2.13333，未固定三变量秩2；固定后两变量满秩。默认阻尼方程的Schur/直接解最大差约$3.0\times10^{-19}$，不证明无参考原问题唯一。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-ba-registration}}
+\begin{solution}
+目标质心$(2/3,7/3,3)$、源质心$(1/3,1/3,0)$，只用质心差得到t=(1/3,2,3)，平方和8/3。完整SVD恢复绕z轴90°和t=(1,2,3)。刚体拟合使用既有对应，ICP每轮重新查询最近邻，再拟合并累计变换；当前40点例默认3轮、初始平移2m为9轮，不保证所有点云都如此。
 \end{solution}
 
 \subsubsection*{章末习题}
 
-\paragraph*{第九章章末第 1 题}
+\paragraph*{章末题 \ref{prob:v2-ba-projection}}
 \begin{solution}
-u=330 pixel；缩图后 fx=300、cx=150，未裁剪时对应 u=165。
+u=330pixel。缩半后fx=300、cx=150，再裁左10pixel后cx=140，因此u=155pixel。图像原点改变影响主点，裁剪没有再改变焦距尺度。
 \end{solution}
 
-\paragraph*{第九章章末第 2 题}
+\paragraph*{章末题 \ref{prob:v2-ba-frame}}
 \begin{solution}
-p=Rᵀ(q-t)，因为旋转矩阵满足 R⁻¹=Rᵀ。
+p=$R^T(q-t)$，相机光心为$-R^Tt$。已校正图像应使用对应新内参与零畸变；再传旧D会对已经校正的坐标重复补偿，而不是提高精度。
 \end{solution}
 
-\paragraph*{第九章章末第 3 题}
+\paragraph*{章末题 \ref{prob:v2-ba-pnp}}
 \begin{solution}
-输入是三维点、对应二维点、内参与畸变；输出把物体系变到相机系的位姿。成功不代表对应正确，还需检查几何与残差。
+校准DLT先去畸变并归一化像素，通用投影矩阵需至少六点及足够秩，共面/退化不能仅按点数判定。P3P的余弦方程可能多组正距离；额外点核对参与求解三点之外的几何，正深度排除相机后方解，两项作用不同，也不能代替匹配可靠性。
 \end{solution}
 
-\paragraph*{第九章章末第 4 题}
+\paragraph*{章末题 \ref{prob:v2-ba-residual}}
 \begin{solution}
-3²+4²=25 pixel²；残差符号约定不影响平方和，但雅可比需保持一致。
+e=(-3,-4)，平方和25pixel$^2$。固定20点优化J为$40\times6$，联合项目为$120\times71$。正规方程右端$-J^Te$，与残差及参数化保持一致；若将e/J同时取负，平方目标不变，但不能只改其中一个。
 \end{solution}
 
-\paragraph*{第九章章末第 5 题}
+\paragraph*{章末题 \ref{prob:v2-ba-gauge}}
 \begin{solution}
-分别代表相机姿态、三维点和图像约束；固定参考是为消除整体坐标变换的规范自由度。
+点改为$GP$、相机T改为$TG^{-1}$时投影相同；点与平移同倍缩放也不改变透视比。首相机固定后，尺度仍未确定。项目用明确已知深度锚补尺度。Schur消元并回代恢复当前线性方程的全部增量；删旧变量需要保留适当先验，边缘化涉及固定线性化点，不能直接丢约束又称等价。
 \end{solution}
 
-\paragraph*{第九章章末第 6 题}
+\paragraph*{章末题 \ref{prob:v2-ba-matrix}}
 \begin{solution}
-使用 RQ；普通 QR 的相乘顺序是正交因子在左，不能直接交换。
+选RQ，核对上三角K在左的重建关系。SVD投影加入行列式修正$U\operatorname{diag}(1,1,\det(UV^T))V^T$，再检查$R^TR=I$、$\det R=1$。因子顺序与旋转约束是两件事，做完其中之一不能替另一项验收。
 \end{solution}
 
-\paragraph*{第九章章末第 7 题}
+\paragraph*{章末题 \ref{prob:v2-ba-graph}}
 \begin{solution}
-使用 U diag(1,1,det(UVᵀ)) Vᵀ，要求奇异值按标准降序排列，以得到最近的适当旋转。
+固定路标仍是固定点像素残差。位姿图声明$T_{wi}$为i到世界，$Z_{ij}$对应$T_{wi}^{-1}T_{wj}$，误差由测量和预测的相对变换取对数。低方差测量应更可信，平方项权重用$\Omega=\Sigma^{-1}$；一维例方差0.01时按标准差0.1白化。
 \end{solution}
 
-\paragraph*{第九章章末第 8 题}
+\paragraph*{章末题 \ref{prob:v2-ba-icp}}
 \begin{solution}
-交替更新最近邻或其它对应关系，再估计刚体变换，直到满足收敛或停止条件。
+ICP增加反复最近邻匹配。以立方体八顶点为例，绕z轴90°仍与原点集重合，最近邻误差可为零，但固定标签配对误差非零。需要可辨识的几何、可靠初值、额外特征或其他物理约束，不能仅用停止条件宣布物理对应正确。
 \end{solution}
 
-\paragraph*{第九章章末第 9 题}
+\paragraph*{章末题 \ref{prob:v2-ba-lie}}
 \begin{solution}
-结果为 (-1,0,0)；不能，左右扰动属于不同参考约定，雅可比必须匹配。
+结果(-1,0,0)。帽矩阵为$\left[\begin{smallmatrix}\phi^\wedge&\rho\\0^T&0\end{smallmatrix}\right]$，指数的t=$J_l(\phi)\rho$，存在旋转耦合时通常不能直接把t当rho。对数接近0/$\pi$要处理分支与数值条件，判断应重建旋转而非固定轴符号。
 \end{solution}
 
-\paragraph*{第九章章末第 10 题}
+\paragraph*{章末题 \ref{prob:v2-ba-experiment}}
 \begin{solution}
-理想条件下旋转不变，平移约为原来的 1000 倍；这验证了位移单位由三维点单位决定。
+保存四目录及同种子/噪声条件。默认像素RMS约0.269、点RMSE0.135；无噪声两类误差接近浮点零。异常点普通平方/Huber的干净点真值RMS约5.134/4.892pixel，点RMSE约1.846/1.656m，鲁棒变体仍不够准确。无噪声对照支持本输入条件下模型/程序能恢复真值，不能推广成实机精度。提交真实数组、共同坐标范围残差图及参考/尺度/边界说明，区分观测误差、真值误差和不同损失cost。
 \end{solution}
 
 \section*{第十章：模型预测控制}
