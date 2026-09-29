@@ -1,0 +1,1054 @@
+{
+  "environment": {
+    "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+    "versions": {
+      "ros-jazzy-nav2-bringup": "1.3.13-1noble.20260907.023821",
+      "ros-jazzy-nav2-planner": "1.3.13-1noble.20260903.031918",
+      "ros-jazzy-nav2-controller": "1.3.13-1noble.20260903.032018",
+      "libpcl-dev": "1.14.0+dfsg-1"
+    },
+    "ROS_DOMAIN_ID": 188,
+    "discovery": "LOCALHOST"
+  },
+  "source_sha256": {
+    "grid.py": "794ccadc8a2821a3712c87bc4fe714d7bc7addea987afc1da670c2ef0c595201",
+    "point_filters.cpp": "939a4b98416ab4827d4825a1d3dab2085cb492015dba185b1008b0cbefb4e647",
+    "CMakeLists.txt": "e8f55e204b50b6a06741dc82fee902a9825fd258c1622b627917f43dbf20d934",
+    "bt.py": "bb2187cc6de70557c4cde8d1b939041117f744118d9e72144a50fd23ef39ffaf",
+    "tf_demo.py": "adac174ec3a26cfb412f9ceb5206b1e499632c3399e05c2a1785b585ccb554d3",
+    "sim.py": "00304b23669d6891ecb04ad81b86be230f56813246d49ccd1241ea10630e9e6c",
+    "lab.launch.py": "869cd45bc6c8b4908ea0ef1c78f09000aac36ddd0b248bcab1523a7eee8eb570",
+    "params.yaml": "c3f7506f6a694620a6de52acced1ee27580a8b6b1318ee7dd4f5ff9acb46b783",
+    "client.py": "c9db397db9e1eed48cf7d5c8e645913eb71588361221d6a3423b7ddbe14f525a",
+    "localization.py": "fab01fc596bd6d7025719ffa6b0b9eacab46b92b5164c26dbd23218ce3436de3",
+    "plot.py": "b9373478723886b80d6a95e73b1edf3dbadbca02e0d5e5102eae2d5531791a26",
+    "README.md": "7508c9a9e40e54b281767130964ba79095d96a43669075a1974df96d2a704cc4"
+  },
+  "records": [
+    {
+      "name": "地图/栅格 map",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/grid.py",
+          "--output",
+          "/tmp/textbook-nav-final/map"
+        ],
+        "result": {
+          "dijkstra": {
+            "cost": 70,
+            "expanded": 1304,
+            "cells": 71
+          },
+          "astar": {
+            "cost": 70,
+            "expanded": 914,
+            "cells": 71
+          }
+        }
+      }
+    },
+    {
+      "name": "地图/栅格 blocked",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/grid.py",
+          "--output",
+          "/tmp/textbook-nav-final/blocked",
+          "--blocked"
+        ],
+        "result": {
+          "dijkstra": {
+            "cost": null,
+            "expanded": 664,
+            "cells": 0
+          },
+          "astar": {
+            "cost": null,
+            "expanded": 664,
+            "cells": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "地图/栅格 wide",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/grid.py",
+          "--output",
+          "/tmp/textbook-nav-final/wide",
+          "--margin",
+          "0.6"
+        ],
+        "result": {
+          "dijkstra": {
+            "cost": null,
+            "expanded": 0,
+            "cells": 0
+          },
+          "astar": {
+            "cost": null,
+            "expanded": 0,
+            "cells": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "地图/栅格 invalid",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/grid.py",
+          "--output",
+          "/tmp/textbook-nav-final/invalid",
+          "--margin",
+          "-1"
+        ],
+        "result": {
+          "exit": 2,
+          "stderr": "usage: grid.py [-h] [--margin MARGIN] [--blocked] [--output OUTPUT]\ngrid.py: error: margin必须有限且非负\n"
+        }
+      }
+    },
+    {
+      "name": "地图/栅格 nan",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/grid.py",
+          "--output",
+          "/tmp/textbook-nav-final/nan",
+          "--margin",
+          "nan"
+        ],
+        "result": {
+          "exit": 2,
+          "stderr": "usage: grid.py [-h] [--margin MARGIN] [--blocked] [--output OUTPUT]\ngrid.py: error: margin必须有限且非负\n"
+        }
+      }
+    },
+    {
+      "name": "独立栅格核对 dijkstra",
+      "status": "PASS",
+      "details": {
+        "cost": 70,
+        "expanded": 1304,
+        "min_clearance": 0.36055512754639896
+      }
+    },
+    {
+      "name": "独立栅格核对 astar",
+      "status": "PASS",
+      "details": {
+        "cost": 70,
+        "expanded": 914,
+        "min_clearance": 0.36055512754639896
+      }
+    },
+    {
+      "name": "不可通行起终点拒绝",
+      "status": "PASS",
+      "details": {
+        "margin": 3,
+        "path": []
+      }
+    },
+    {
+      "name": "PGM上下翻转与YAML",
+      "status": "PASS",
+      "details": {
+        "image_row0_map_y": 39,
+        "shape": [
+          60,
+          40
+        ],
+        "metadata": {
+          "image": "map.pgm",
+          "mode": "trinary",
+          "resolution": 0.1,
+          "origin": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "negate": 0,
+          "occupied_thresh": 0.65,
+          "free_thresh": 0.25
+        }
+      }
+    },
+    {
+      "name": "格心 (0, 0, 0)",
+      "status": "PASS",
+      "details": {
+        "ij": [
+          10,
+          20
+        ],
+        "resolution": 0.05,
+        "xy": [
+          0.525,
+          1.0250000000000001
+        ]
+      }
+    },
+    {
+      "name": "格心 (-2, -1, 0)",
+      "status": "PASS",
+      "details": {
+        "ij": [
+          10,
+          20
+        ],
+        "resolution": 0.05,
+        "xy": [
+          -1.475,
+          0.025000000000000133
+        ]
+      }
+    },
+    {
+      "name": "格心 (1, 2, 0)",
+      "status": "PASS",
+      "details": {
+        "ij": [
+          2,
+          3
+        ],
+        "resolution": 0.1,
+        "xy": [
+          1.25,
+          2.35
+        ]
+      }
+    },
+    {
+      "name": "格心 (1, 2, 1.5707963267948966)",
+      "status": "PASS",
+      "details": {
+        "ij": [
+          2,
+          3
+        ],
+        "resolution": 0.1,
+        "xy": [
+          0.6499999999999999,
+          2.25
+        ]
+      }
+    },
+    {
+      "name": "三顶点 [1, 2, 5]",
+      "status": "PASS",
+      "details": {
+        "path": [
+          "A",
+          "B",
+          "C"
+        ],
+        "cost": 3
+      }
+    },
+    {
+      "name": "三顶点 [1, 2, 2]",
+      "status": "PASS",
+      "details": {
+        "path": [
+          "A",
+          "C"
+        ],
+        "cost": 2
+      }
+    },
+    {
+      "name": "三顶点 [2, 2, 5]",
+      "status": "PASS",
+      "details": {
+        "path": [
+          "A",
+          "B",
+          "C"
+        ],
+        "cost": 4
+      }
+    },
+    {
+      "name": "三顶点 [4, 4, 5]",
+      "status": "PASS",
+      "details": {
+        "path": [
+          "A",
+          "C"
+        ],
+        "cost": 5
+      }
+    },
+    {
+      "name": "负边权拒绝",
+      "status": "PASS",
+      "details": {
+        "weight": -1
+      }
+    },
+    {
+      "name": "恢复 success",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/bt.py"
+        ],
+        "result": {
+          "status": "Success",
+          "retries": 2,
+          "ticks": 4,
+          "log": [
+            [
+              "navigate",
+              "Failure"
+            ],
+            [
+              "clear",
+              "Success"
+            ],
+            [
+              "navigate",
+              "Failure"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Success"
+            ],
+            [
+              "navigate",
+              "Success"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "恢复 fail",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/bt.py",
+          "--fail"
+        ],
+        "result": {
+          "status": "Failure",
+          "retries": 2,
+          "ticks": 4,
+          "log": [
+            [
+              "navigate",
+              "Failure"
+            ],
+            [
+              "clear",
+              "Success"
+            ],
+            [
+              "navigate",
+              "Failure"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Success"
+            ],
+            [
+              "navigate",
+              "Failure"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "恢复 stuck",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/bt.py",
+          "--stuck"
+        ],
+        "result": {
+          "status": "Timeout",
+          "retries": 1,
+          "ticks": 10,
+          "log": [
+            [
+              "navigate",
+              "Failure"
+            ],
+            [
+              "clear",
+              "Success"
+            ],
+            [
+              "navigate",
+              "Failure"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Running"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "控制节点 [False, ['Running', 'Success']]",
+      "status": "PASS",
+      "details": {
+        "status": "Running",
+        "log": [
+          [
+            "0",
+            "Running"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "控制节点 [False, ['Failure', 'Success']]",
+      "status": "PASS",
+      "details": {
+        "status": "Success",
+        "log": [
+          [
+            "0",
+            "Failure"
+          ],
+          [
+            "1",
+            "Success"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "控制节点 [False, ['Failure', 'Failure']]",
+      "status": "PASS",
+      "details": {
+        "status": "Failure",
+        "log": [
+          [
+            "0",
+            "Failure"
+          ],
+          [
+            "1",
+            "Failure"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "控制节点 [True, ['Running', 'Success']]",
+      "status": "PASS",
+      "details": {
+        "status": "Running",
+        "log": [
+          [
+            "0",
+            "Running"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "控制节点 [True, ['Success', 'Success']]",
+      "status": "PASS",
+      "details": {
+        "status": "Success",
+        "log": [
+          [
+            "0",
+            "Success"
+          ],
+          [
+            "1",
+            "Success"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "控制节点 [True, ['Failure', 'Success']]",
+      "status": "PASS",
+      "details": {
+        "status": "Failure",
+        "log": [
+          [
+            "0",
+            "Failure"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "定位修正和长墙退化",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/localization.py"
+        ],
+        "result": {
+          "map_odom_xy": [
+            0.2999999999999998,
+            0.0
+          ],
+          "corrected_xy": [
+            0.20000000000000018,
+            0.0
+          ],
+          "odom_base_unchanged": [
+            2.0,
+            0.5
+          ],
+          "wall_eigenvalues": [
+            0.0,
+            2.0
+          ],
+          "wall_shift_x_residual": [
+            0.0,
+            0.0
+          ]
+        }
+      }
+    },
+    {
+      "name": "真实tf2合成与缺失",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/tf_demo.py"
+        ],
+        "result": {
+          "xy": [
+            1.0000000000000004,
+            4.0
+          ],
+          "missing": "LookupException"
+        }
+      }
+    },
+    {
+      "name": "PCL构建 cmake",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "cmake",
+          "-S",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo",
+          "-B",
+          "/tmp/textbook-nav-final/build"
+        ],
+        "exit": 0
+      }
+    },
+    {
+      "name": "PCL构建 cmake",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "cmake",
+          "--build",
+          "/tmp/textbook-nav-final/build",
+          "-j4"
+        ],
+        "exit": 0
+      }
+    },
+    {
+      "name": "真实PCL三种过滤",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/textbook-nav-final/build/point_filters"
+        ],
+        "result": {
+          "centroid_x": 0.02,
+          "input": 32,
+          "height": 31,
+          "clean": 30
+        }
+      }
+    },
+    {
+      "name": "实际Nav2规划控制",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/client.py",
+          "--output",
+          "/tmp/textbook-nav-final/nav2"
+        ],
+        "result": {
+          "plan_status": 4,
+          "plan_error": 0,
+          "path_poses": 123,
+          "follow_status": 4,
+          "follow_error": 0,
+          "odom_samples": 263,
+          "command_samples": 237,
+          "final_xy": [
+            4.979188198419823,
+            2.979970069778389
+          ],
+          "goal_error_m": 0.09959167821597317
+        }
+      }
+    },
+    {
+      "name": "实际保存路径/轨迹/速度独立核对",
+      "status": "PASS",
+      "details": {
+        "min_obstacle_gap_m": {
+          "path": 0.36635370949437773,
+          "trajectory": 0.404505026542308
+        },
+        "max_v": 0.6,
+        "radius_m": 0.15
+      }
+    },
+    {
+      "name": "实际障碍内目标拒绝",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/client.py",
+          "--blocked-goal",
+          "--output",
+          "/tmp/textbook-nav-final/nav2-blocked"
+        ],
+        "result": {
+          "plan_status": 6,
+          "plan_error": 206,
+          "path_poses": 0,
+          "odom_samples": 7,
+          "command_samples": 0,
+          "final_xy": [
+            4.979188198419823,
+            2.979970069778389
+          ],
+          "goal_error_m": 2.208512454668474
+        }
+      }
+    },
+    {
+      "name": "实际map_server地图",
+      "status": "PASS",
+      "details": {
+        "frame": "map",
+        "resolution": 0.10000000149011612,
+        "shape": [
+          60,
+          40
+        ],
+        "values": [
+          0,
+          100
+        ]
+      }
+    },
+    {
+      "name": "实际全局代价地图",
+      "status": "PASS",
+      "details": {
+        "frame": "map",
+        "shape": [
+          60,
+          40
+        ],
+        "raw_values": [
+          0,
+          121,
+          136,
+          156,
+          164,
+          172,
+          206,
+          221,
+          253,
+          254
+        ]
+      }
+    },
+    {
+      "name": "实际广播TF链",
+      "status": "PASS",
+      "details": {
+        "map_to_base_xy": [
+          4.979188198419823,
+          2.979970069778389
+        ]
+      }
+    },
+    {
+      "name": "实际广播树缺失分支",
+      "status": "PASS",
+      "details": {
+        "error": "LookupException"
+      }
+    },
+    {
+      "name": "制动与延时量级",
+      "status": "PASS",
+      "details": {
+        "v": 2,
+        "a": 1,
+        "braking_m": 2,
+        "latency_s": 0.2,
+        "minimum_forward_m_without_margin": 2.4
+      }
+    },
+    {
+      "name": "实际Nav2慢速0.3变式",
+      "status": "PASS",
+      "details": {
+        "launch_command": [
+          "ros2",
+          "launch",
+          "/tmp/textbook-nav-slow-project/lab.launch.py",
+          "map:=/tmp/textbook-nav-final/map/map.yaml"
+        ],
+        "client_command": [
+          "/usr/bin/python3",
+          "/tmp/textbook-nav-slow-project/client.py",
+          "--output",
+          "/tmp/textbook-nav-final/slow"
+        ],
+        "changed_parameter": "FollowPath.desired_linear_vel: 0.6 -> 0.3",
+        "params_sha256": "9b1e71333cc1108cf9e258b96e4c456fdbe400a8c4adf19ce905b7cb10aca368",
+        "result": {
+          "plan_status": 4,
+          "plan_error": 0,
+          "path_poses": 123,
+          "follow_status": 4,
+          "follow_error": 0,
+          "odom_samples": 454,
+          "command_samples": 448,
+          "final_xy": [
+            4.980309341689159,
+            2.9810138351422824
+          ],
+          "goal_error_m": 0.09806058738134583
+        },
+        "max_v": 0.3,
+        "elapsed_s": 23.460929927998222
+      }
+    },
+    {
+      "name": "实际数组绘图 nav_paths_candidate.pdf",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "distrobox",
+          "enter",
+          "ubuntu2404",
+          "--",
+          "python3",
+          "02-专项技术栈/examples/navigation/navigation-lab-demo/plot.py",
+          "--map",
+          "/tmp/textbook-nav-final/map",
+          "--nav2",
+          "/tmp/textbook-nav-final/nav2",
+          "--output",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/images/nav_paths_candidate.pdf",
+          "--font",
+          "/run/host/usr/share/texmf-dist/fonts/opentype/public/fandol/FandolSong-Regular.otf"
+        ],
+        "output_sha256": "d8a5347be36e0c15f14ccb2f36b8f091bcba4de689d41ec92f5fe57ee1c40759",
+        "path_poses": 123,
+        "trajectory_samples": 263,
+        "source_sha256": "4523a304aacf9c08a17d79f5c815d436c937c3a92d2fc8f82513cfea7504f442"
+      }
+    },
+    {
+      "name": "实际数组绘图 textbook-nav-default-font.pdf",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "distrobox",
+          "enter",
+          "ubuntu2404",
+          "--",
+          "python3",
+          "02-专项技术栈/examples/navigation/navigation-lab-demo/plot.py",
+          "--map",
+          "/tmp/textbook-nav-final/map",
+          "--nav2",
+          "/tmp/textbook-nav-final/nav2",
+          "--output",
+          "/tmp/textbook-nav-default-font.pdf"
+        ],
+        "output_sha256": "6ce2dd96aca6f7b96399bb4508022672574e1ef262c6e3f62f6ff631598e2d80",
+        "path_poses": 123,
+        "trajectory_samples": 263,
+        "source_sha256": "4523a304aacf9c08a17d79f5c815d436c937c3a92d2fc8f82513cfea7504f442"
+      }
+    },
+    {
+      "name": "真实静态TF命令 x=1",
+      "status": "PASS",
+      "details": {
+        "publisher": [
+          "ros2",
+          "run",
+          "tf2_ros",
+          "static_transform_publisher",
+          "--x",
+          "1",
+          "--y",
+          "0",
+          "--z",
+          "0",
+          "--yaw",
+          "0",
+          "--pitch",
+          "0",
+          "--roll",
+          "0",
+          "--frame-id",
+          "demo_map",
+          "--child-frame-id",
+          "demo_base"
+        ],
+        "query": [
+          "ros2",
+          "run",
+          "tf2_ros",
+          "tf2_echo",
+          "demo_map",
+          "demo_base"
+        ],
+        "output": "[INFO] [1790645232.593692009] [tf2_echo]: Waiting for transform demo_map ->  demo_base: Invalid frame ID \"demo_map\" passed to canTransform argument target_frame - frame does not exist\nAt time 0.0\n- Translation: [1.000, 0.000, 0.000]\n- Rotation: in Quaternion (xyzw) [0.000, 0.000, 0.000, 1.000]\n- Rotation: in RPY (radian) [0.000, -0.000, 0.000]\n- Rotation: in RPY (degree) [0.000, -0.000, 0.000]\n- Matrix:\n  1.000  0.000  0.000  1.000\n  0.000  1.000  0.000  0.000\n  0.000  0.000  1.000  0.000\n  0.000  0.000  0.000  1.000\nAt time 0.0\n- Translation: [1.000, 0.000, 0.000]\n- Rotation: in Quaternion (xyzw) [0.000, 0.000, 0.000, 1.000]\n- Rotation: in RPY (radian) [0.000, -0.000, 0.000]\n- Rotation: in RPY (degree) [0.000, -0.000, 0.000]\n- Matrix:\n  1.000  0.000  0.000  1.000\n  0.000  1.000  0.000  0.000\n  0.000  0.000  1.000  0.000\n  0.000  0.000  0.000  1.000\nAt time 0.0\n- Translation: [1.000, 0.000, 0.000]\n- Rotation: in Quaternion (xyzw) [0.000, 0.000, 0.000, 1.000]\n- Rotation: in RPY (radian) [0.000, -0.000, 0.000]\n- Rotation: in RPY (degree) [0.000, -0.000, 0.000]\n- Matrix:\n  1.000  0.000  0.000  1.000\n  0.000  1.000  0.000  0.000\n  0.000  0.000  1.000  0.000\n  0.000  0.000  0.000  1.000\nAt time 0.0\n- Translation: [1.000, 0.000, 0.000]\n- Rotation: in Quaternion (xyzw) [0.000, 0.000, 0.000, 1.000]\n- Rotation: in RPY (radian) [0.000, -0.000, 0.000]\n- Rotation: in RPY (degree) [0.000, -0.000, 0.000]\n- Matrix:\n  1.000  0.000  0.000  1.000\n  0.000  1.000  0.000  0.000\n  0.000  0.000  1.000  0.000\n  0.000  0.000  0.000  1.000\n[INFO] [1790645237.446785524] [rclcpp]: signal_handler(SIGINT/SIGTERM)\n"
+      }
+    },
+    {
+      "name": "真实静态TF命令 x=2",
+      "status": "PASS",
+      "details": {
+        "publisher": [
+          "ros2",
+          "run",
+          "tf2_ros",
+          "static_transform_publisher",
+          "--x",
+          "2",
+          "--y",
+          "0",
+          "--z",
+          "0",
+          "--yaw",
+          "0",
+          "--pitch",
+          "0",
+          "--roll",
+          "0",
+          "--frame-id",
+          "demo_map",
+          "--child-frame-id",
+          "demo_base"
+        ],
+        "query": [
+          "ros2",
+          "run",
+          "tf2_ros",
+          "tf2_echo",
+          "demo_map",
+          "demo_base"
+        ],
+        "output": "[INFO] [1790645237.884917001] [tf2_echo]: Waiting for transform demo_map ->  demo_base: Invalid frame ID \"demo_map\" passed to canTransform argument target_frame - frame does not exist\nAt time 0.0\n- Translation: [2.000, 0.000, 0.000]\n- Rotation: in Quaternion (xyzw) [0.000, 0.000, 0.000, 1.000]\n- Rotation: in RPY (radian) [0.000, -0.000, 0.000]\n- Rotation: in RPY (degree) [0.000, -0.000, 0.000]\n- Matrix:\n  1.000  0.000  0.000  2.000\n  0.000  1.000  0.000  0.000\n  0.000  0.000  1.000  0.000\n  0.000  0.000  0.000  1.000\nAt time 0.0\n- Translation: [2.000, 0.000, 0.000]\n- Rotation: in Quaternion (xyzw) [0.000, 0.000, 0.000, 1.000]\n- Rotation: in RPY (radian) [0.000, -0.000, 0.000]\n- Rotation: in RPY (degree) [0.000, -0.000, 0.000]\n- Matrix:\n  1.000  0.000  0.000  2.000\n  0.000  1.000  0.000  0.000\n  0.000  0.000  1.000  0.000\n  0.000  0.000  0.000  1.000\nAt time 0.0\n- Translation: [2.000, 0.000, 0.000]\n- Rotation: in Quaternion (xyzw) [0.000, 0.000, 0.000, 1.000]\n- Rotation: in RPY (radian) [0.000, -0.000, 0.000]\n- Rotation: in RPY (degree) [0.000, -0.000, 0.000]\n- Matrix:\n  1.000  0.000  0.000  2.000\n  0.000  1.000  0.000  0.000\n  0.000  0.000  1.000  0.000\n  0.000  0.000  0.000  1.000\nAt time 0.0\n- Translation: [2.000, 0.000, 0.000]\n- Rotation: in Quaternion (xyzw) [0.000, 0.000, 0.000, 1.000]\n- Rotation: in RPY (radian) [0.000, -0.000, 0.000]\n- Rotation: in RPY (degree) [0.000, -0.000, 0.000]\n- Matrix:\n  1.000  0.000  0.000  2.000\n  0.000  1.000  0.000  0.000\n  0.000  0.000  1.000  0.000\n  0.000  0.000  0.000  1.000\n[INFO] [1790645242.740887062] [rclcpp]: signal_handler(SIGINT/SIGTERM)\n"
+      }
+    },
+    {
+      "name": "恢复边界 [0, 'Success']",
+      "status": "PASS",
+      "details": {
+        "status": "Failure",
+        "used": 0,
+        "log": [
+          [
+            "navigate",
+            "Failure"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "恢复边界 [2, 'Failure']",
+      "status": "PASS",
+      "details": {
+        "status": "Failure",
+        "used": 0,
+        "log": [
+          [
+            "navigate",
+            "Failure"
+          ],
+          [
+            "clear",
+            "Failure"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "带记忆Sequence续跑",
+      "status": "PASS",
+      "details": {
+        "log": [
+          [
+            "first",
+            "Success"
+          ],
+          [
+            "second",
+            "Running"
+          ],
+          [
+            "second",
+            "Success"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "软件cmd_vel断流停止积分",
+      "status": "PASS",
+      "details": {
+        "domain": 189,
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/sim.py"
+        ],
+        "samples": 75,
+        "initial_x": 0.55,
+        "final_x": 0.8499992559998646,
+        "after_3s_velocity": [
+          0.0
+        ]
+      }
+    },
+    {
+      "name": "正文尺寸调整后绘图 nav_paths_candidate.pdf",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "distrobox",
+          "enter",
+          "ubuntu2404",
+          "--",
+          "python3",
+          "02-专项技术栈/examples/navigation/navigation-lab-demo/plot.py",
+          "--map",
+          "/tmp/textbook-nav-final/map",
+          "--nav2",
+          "/tmp/textbook-nav-final/nav2",
+          "--output",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/images/nav_paths_candidate.pdf",
+          "--font",
+          "/run/host/usr/share/texmf-dist/fonts/opentype/public/fandol/FandolSong-Regular.otf"
+        ],
+        "output_sha256": "a1d2eea24de6af3e2aab8e29b5412dc22a5c641f4ee6815a86dad3f682cb8bf1",
+        "path_poses": 123,
+        "trajectory_samples": 263,
+        "source_sha256": "b9373478723886b80d6a95e73b1edf3dbadbca02e0d5e5102eae2d5531791a26",
+        "published_output": "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/images/nav_paths_revised.pdf",
+        "published_sha256": "a1d2eea24de6af3e2aab8e29b5412dc22a5c641f4ee6815a86dad3f682cb8bf1"
+      }
+    },
+    {
+      "name": "正文尺寸调整后绘图 textbook-nav-default-font.pdf",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "distrobox",
+          "enter",
+          "ubuntu2404",
+          "--",
+          "python3",
+          "02-专项技术栈/examples/navigation/navigation-lab-demo/plot.py",
+          "--map",
+          "/tmp/textbook-nav-final/map",
+          "--nav2",
+          "/tmp/textbook-nav-final/nav2",
+          "--output",
+          "/tmp/textbook-nav-default-font.pdf"
+        ],
+        "output_sha256": "b025c61bb821ae840dcaa69e5a77da5c32c4123beeee9da15e1d152d2125b2df",
+        "path_poses": 123,
+        "trajectory_samples": 263,
+        "source_sha256": "b9373478723886b80d6a95e73b1edf3dbadbca02e0d5e5102eae2d5531791a26"
+      }
+    }
+  ],
+  "nav2_logs": [
+    {
+      "path": "/home/mijiao/Apps/Tutorial4New/docs/revision/evidence/volume-2-chapter-11-launch.txt",
+      "sha256": "e485ac2fb974ab26e3d098a1856924a59b0c5411086d2ecdb0fc47d1486a687b"
+    },
+    {
+      "path": "/home/mijiao/Apps/Tutorial4New/docs/revision/evidence/volume-2-chapter-11-slow-launch.txt",
+      "sha256": "73e5eeab4ccb7797ae5e1911e790701ca0514ed3aa45b27b390d390d10d93aa4"
+    }
+  ]
+}

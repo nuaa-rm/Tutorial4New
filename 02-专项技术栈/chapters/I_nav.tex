@@ -1,7 +1,5 @@
 \subsubsection{导航技术总览}
-
-\noindent\textbf{用语说明：}视觉组三个方向之一是\textbf{导航}（赛场上主要落地在哨兵等移动平台）。
-本章出现的「激光雷达 / LiDAR」指测距传感器，与方向名「雷达」（高台全场感知站）不是同一概念。
+\noindent\textbf{用语说明：}视觉组三个方向之一是\textbf{导航}，赛场上主要落地在哨兵等移动平台。本章的激光雷达（LiDAR）是测距传感器，与方向名“雷达站”不是一回事。
 
 现在，你坐在哨兵的脑袋里面，你的目标是悄悄摸到敌方基地后面偷家。
 但是没认真看规则的你忘记了地图长什么样，你打开手机，发现好心的wzx部长已经帮你存了一份\textbf{标准赛场地图[1]}。
@@ -17,464 +15,341 @@
 此时，你要能够在不依靠缺德地图的情况下\textbf{自己找到[6]}信号比较好能重新连接上缺德地图服务的地方。
 最终你成功到达了目的地。
 
+
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{Nav2导航框架.png}
-    \caption{Nav2导航框架}
-    \label{fig:I_nav-1}
+\centering
+\includegraphics[width=.94\textwidth]{nav_framework_revised.pdf}
+\caption{Nav2 的核心调用与数据关系；并非所有项目都只启动这几个服务器}
+\label{fig:I_nav-1}
 \end{figure}
-从上面可以看出，导航需要：
 
-\textbf{[1]地图（全局代价地图Global Costmap）}
+先别急着给哨兵装手机，我们把刚才的六样东西对上号。[1]是记录场地的\textbf{地图（Map）}，它还要经过障碍更新、外形与通行余量等处理，才成为全局代价地图（Global Costmap）。[2]相当于整个导航系统，其中负责找路的是\textbf{规划器（Planner）}。[3]是\textbf{定位（Localization）}，其结果通过带时间的位姿、TF 等接口传给其他模块；TF 是坐标关系，自己不会凭空算出位置。[4]对应不断更新的\textbf{局部代价地图（Local Costmap）}。[5]对应\textbf{控制器（Controller）}，根据路径、位姿和附近障碍算出速度。[6]则是\textbf{恢复（Recovery）}策略，由任务逻辑决定什么时候等、什么时候重试，以及什么时候向上层报告失败。
 
-\textbf{[2]导航系统（全局规划器Global Planner）}
+不过，手机“信号不好”只是帮助记忆的类比。真实机器人可能是 TF 缺失、观测过期、没有可行控制或长期不前进，处理方式各不相同，不能一律先倒车再说。我们先定位，给规划器当前位置和目标；规划器给出路径，控制器跟踪，新的障碍进入代价地图后还可能触发重规划。这几个模块一直交换最新数据，才形成导航闭环。
 
-\textbf{[3]定位系统（多传感器融合定位）Sensor Transform}
+\begin{example}\label{ex:nav-overview}
+这章的小项目在本卷的 \texttt{examples/navigation/navigation-lab-demo}。首先在 Ubuntu 24.04 的 Jazzy 环境安装依赖，再进入项目。下面的路径是仓库位置示例，换成你自己的；宿主没有 ROS 时先执行第一行进入容器。
+\begin{tbash}
+distrobox enter ubuntu2404
+bash
+source /opt/ros/jazzy/setup.bash
+sudo apt-get install --no-install-recommends \
+  ros-jazzy-navigation2 ros-jazzy-nav2-bringup \
+  libpcl-dev cmake g++ python3-numpy python3-scipy \
+  python3-matplotlib python3-yaml fonts-wqy-zenhei
+cd /home/mijiao/Apps/Tutorial4New/02-专项技术栈/\
+examples/navigation/navigation-lab-demo
+export ROS_DOMAIN_ID=188
+export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
+\end{tbash}
+本章实跑使用 Nav2 1.3.13、PCL 1.14.0。Humble 上概念共用，但插件名称、检查器参数与速度消息的版本差异要核对，不能直接照抄所有配置。两终端需要同一套环境与 Domain ID；188 是演示选择，若本机已有项目使用它就换一个空闲值。
 
-\textbf{[4]附近的视野（局部代价地图Local Costmap）}
-
-\textbf{[5]车手（局部规划器Local Planner）}
-
-\textbf{[6]应急方案（恢复行为树Recovery Behavior Tree）}
-
-因此，导航的工作流程就是：
-
-通过传感器数据与全局地图匹配，获得自身在地图的坐标；
-根据目标坐标，利用全局规划器算出路径；
-实时更新自身定位，并将扫描到的障碍物信息融合到局部代价地图中；
-根据局部代价地图，利用局部规划器算出车各个方向的速度应该是多少，发给下位机；
-如果遇到特殊情况则进入恢复行为树，暂停部分服务，直到脱离特殊情况；
-根据规定的时间间隔（或情况），重新获取定位和目标，规划全局路径，并一直循环。
-
-\begin{example}
-机器人从 A 到 B：定位给出当前位姿，地图表示环境，规划器输出路径，控制器根据路径和局部障碍计算速度，恢复逻辑在失败时组织重试。将这五项写成五个模块，比“导航坏了”更容易定位问题。
+我们用生成的小地图，让真实 Nav2 服务器规划、控制，再由软件积分速度，观察机器人是否真的沿路前进。地图、TF、最短路和恢复的代码会在相应小节依次展开，完整调用在\ref{sec:nav-real}节。
 \end{example}
-
-\begin{exercise}
-已有路径但没有速度输出，先检查哪一模块？没有可用位姿时又应从哪里查起？
+\begin{exercise}\label{ex:nav-chain}
+已有路径却没有速度输出，先查哪一段？如果连当前位置都拿不到，为什么反复点“重新规划”通常没用？画出你要检查的两个数据链。
 \end{exercise}
 
-\subsubsection{定位}
-导航最重要的技术就是
-\textbf{SLAM（simultaneous localization and mapping,实时定位和建图技术）}简称SM(不是)。
+\subsubsection{先把坐标关系接起来}
+我们上一章让云台转到了某个角度，导航现在要回答“小哨兵在场地哪里”。在 ROS 中，变换（Transform）描述两个坐标系（Frame）的相对平移和旋转；一组有父子关系的变换就组成 TF 树。车体、雷达、相机都有自己的坐标系，查询一条连通路径，才能把某个雷达点换算到地图里。
 
-\begin{note}
-定位演示视频：\url{https://www.bilibili.com/video/BV1tS4y1S7qE}。
-\end{note}
-
-视频中随着机器人的移动，机器人的传感器获取到了环境信息，然后完成对博物馆地图的构建。
-有小伙伴可能会问，只看到建图没看到定位呀。细心观察可以发现建图的过程中，其实一直都在计算机器人的位置。
-
-该技术的基础就是定位。我们先来了解一下在ROS中如何表示定位信息。
-在ROS中，我们使用tf树（transform tree）来表示物体（或者其他东西）之间的相对位置关系。
-每个需要用到的东西（如车体，雷达，相机）都有一个以自身为原点的三维坐标系（frame）。
-一个tf表示一个坐标系在另一个坐标系下的位姿信息（平移、旋转）。tf树的原理就是通过表示坐标系之间的关系来确定各个坐标系之间的相对位置。
-常见的frame的约定俗成的名称有：
-\begin{itemize}
-\item /map：世界坐标系
-\item /odom：里程计坐标系
-\item /base\_link：小哨兵的坐标系
-\item /camera\_link：相机坐标系
-\item /laser\_link：激光雷达坐标
-\item /imu\_link：IMU坐标系
-\item ...
-\end{itemize}
-
-tf的主要信息包含父子节点（即两个坐标系，注意有父子关系，由父节点指向子节点）之间由xyz表示的平移关系和四元数表示的旋转关系。
-多个父子节点的tf可以组成一个tf树，树的根节点一般是map，树的叶子节点一般是各个传感器的坐标系。
-通过tf树可以算出任意两个节点之间的坐标关系（相对位置）。
 \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.8\textwidth]{tf树.png}
-        \caption{map到livox到livox\_192\_168\_1\_104的tf树}
+\centering
+\includegraphics[width=.8\textwidth]{tf树_revised.png}
+\caption{原项目的真实 TF 截图，记录 map、livox 与设备坐标系；图中的时间和频率保留原值，不能当成本章实验结果}
 \label{fig:I_nav-2}
 \end{figure}
+
+名字通常用 \texttt{map}、\texttt{odom}、\texttt{base\_link}、\texttt{camera\_link}、\texttt{laser\_link}。它们是坐标系名称，开头不要加话题名那样的斜杠。图\ref{fig:I_nav-2}是原项目自定义关系的例子；想接入常见的移动机器人导航链，我们更常采用图\ref{fig:I_nav-3}的约定。
 \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.8\textwidth]{REP-105标准.png}
-        \caption{REP-105标准}
+\centering
+\includegraphics[width=.89\textwidth]{nav_frames_revised.pdf}
+\caption{REP-105 的常见地图、里程计和车体关系；每个子坐标系只有一个父坐标系}
 \label{fig:I_nav-3}
 \end{figure}
-但是可怜的小哨兵并没有GPS直接定位。
-所以他只能用其他的定位技术，比如激光雷达、IMU、里程计、视觉相机等。
 
-\subparagraph*{ 激光雷达定位}
-先简单介绍一下激光雷达的工作原理：激光雷达的工作原理是通过发射一束激光，然后接收到反射回来的信号，通过解码，得到反射点的坐标，根据反射光的强弱还能获得强度信息。
-
-激光雷达定位主要分为四步：
-\begin{enumerate}
-\item 所有定位方法开始，都要先要有一张已有的地图，地图上记录了各个障碍物的位置、大小、置信度等信息。将地图上的某一点设为原点，以原点为中心展开的坐标系为map坐标系。
-\item 激光雷达扫描四周环境，得到一张激光雷达“视野内”的地图，上面记载了周围的障碍物信息（更多细节将在下一节详细介绍）
-\item 将这张地图与已有的地图进行对比匹配，得到雷达最可能存在的位置，将该位置与map坐标系之间的相对位置变化记为map与ladar之间的tf。
-\item 结合laser与baselink之间的tf(一般是提前固定写好的，由雷达固定在车体的位置和朝向决定)，得到baselink与map之间的相对位置变化，即得到小哨兵在map坐标系下的位置。
-\end{enumerate}
-其中从匹配方式大体可分为两种：二维和三维匹配。
-\begin{itemize}
-
-\item 三维匹配：直接将扫描到的点云与之前存储的点云匹配，定位更准确，但是匹配速度慢(如ICP,NDT匹配算法)。常会用到kd-tree,oct-tree等数据结构加速匹配。
-\item 二维匹配：将三维的点云信息按一定规则压缩到二维（二向箔），获得附近的实时的二维地图，与已有的地图进行匹配（如AMCL算法）。
-                地图为栅格地图。
-\end{itemize}
-按照匹配对象来分，也可以分为两种：全局匹配和局部匹配。
-\begin{itemize}
-        \item 局部匹配：一般与先前一小段时间内的储存的点云或者栅格地图进行匹配，获得相对移动，是一种动态的匹配。
-        因为要防止匹配目标过大，耗时太久，导致实时性不佳（局部路径规划对实时性需求较高），所以需要将较久之前扫描到的点云，或者距离较远的点云从kdtree之类的数据结构中清理掉。
-        \item 全局匹配：将激光雷达的扫描信息与整个地图进行匹配，得到小哨兵的位置。一般用于重定位，即小哨兵迷失了方向的时候
-                （如刚刚上电不知道自己在哪；被狠狠地创飞了，定位可能歪了；被神秘的力量干扰，导致进入恢复行为树；刚从恢复行为里出来，与定位系统失联许久……），将原先的tf清除，重新进行定位。
-\end{itemize}
-运动过程中多用动态的匹配，以便较快的更新定位，提高实时性。与整张全局地图的匹配，一般在特定情况下（如刚开机上电不知道自己在哪的时候；定位可能出现偏差的情况；或者执行完恢复行为之后。也可以时不时重定位一下，上赛季就是这么干的，效果好像不太行QAQ）才进行，又叫重定位，即直接清零更新baselink和map之间的tf。
-\subparagraph*{ 里程计，IMU定位}
-里程计定位较为简单，直接获取机器人各个方向运动的里程，加在map坐标系下的位置即为小哨兵的位置。
-IMU，即惯性测量单元，可以测量各方向的角速度和线加速度，通过积分，获得类似里程计的数据，加在map坐标系下的位置即为小哨兵的位置。
-这两个方法一般电控端就可以独立完成，纯电控的机器人常用。
-
-\subparagraph*{ 视觉定位}
-视觉定位也是近年来较为流行的SLAM技术，它与激光雷达定位类似，但他获取的特征信息在相同情况下比激光雷达多。
-它通过提取图像中的特征点（一般是角点），与原先存储的地图里的特征点对比匹配，计算出相机的相对位移，累加后得到小哨兵在map坐标系的坐标变换。
-
-\subparagraph*{ 多传感器融合}
-以上各个定位方法都有自己的局限性：
-\begin{itemize}
-\item imu,里程计定位：由于IMU和里程计对运动（速度，加速度）测量的精度较高，定位较为准确。但由于其本身稳定性较差，易受干扰（如IMU受热噪声干扰的零漂，轮式里程计打滑等情况）；
-        且他们都是“开环”的测量方式，一旦出现意外情况（比如受干扰，或者某些情况下超过其测量范围(比如被别的机器人肘了一下，瞬时加速度太大IMU测量不了)），
-        测量的位置歪掉了，就再也回不来了，因为没法校正。
-\item 视觉定位：视觉定位的精度较低，且受相机的分辨率、光照、遮挡等因素影响较大。且对需要物体纹理较多效果才比较好。
-\item 雷达定位：激光雷达只能获取深度信息，这会导致在一些特殊情况中定位失效。
-        如雷达在非常长的两堵一模一样的墙之间前进，虽然车在前进，但在雷达的视野里，左右离墙的距离不变，而前后因为超出探测距离所以数据也不变，他就以为自己没有运动了；
-        又如雷达在一个一个正方形房间的正中心，你趁雷达不注意（即在两次雷达扫描的间隔之间），把他旋转90度。在雷达的视野里，前后左右的障碍物与之前的完全相同，所以他会以为自己没旋转。
-\end{itemize}
-为了解决这些问题，人们将多种传感器的数据融合在一起得到更准确定位方法。
-
-基本原理是通过前后数据之间对比得出机器人位置的变化。
-然后回环检测，判断机器人是否到达之前到过的位置，可以解决位置估计误差问题，建图时可以纠正地图误差。
-
-最常见的融合方法（也是我们现在使用的方法）是激光雷达和里程计的融合。
-我们新建一个节点odom，他作为map的子节点，作为base\_link的父节点。
-里程计提供 odom -> base\_link 的tf。
-里程计可以来自许多数据源，包括激光雷达、车轮编码器、VIO和IMU。
-里程计的目标是提供基于机器人运动的平滑和连续的局部坐标系。
-这样平滑输出就可用于精确运动的航行位置推算和在全局位置更新之间准确地更新机器人的位置。
-
-而雷达重定位输出map到odom的tf作为校正数值记录。
-全局定位系统会相对全局坐标的坐标变换进行更新，以解决里程计的漂移问题。
-
-这样，小哨兵的位置就通过激光雷达和里程计 fusion 的方式得到。
-
-其他的融合方法还有：激光雷达与视觉融合，将点云与图像匹配，使点云除了位置信息外，还能拥有颜色等信息。
-\begin{figure}[H]
-        \centering
-        \includegraphics[width=0.8\textwidth]{经典视觉SLAM结构.png}
-        \caption{经典视觉SLAM结构}
-\label{fig:I_nav-4}
-\end{figure}
-
-从算法的对数据的处理方式上看，目前常用的SLAM开源算法可以分为两类
-
-1.基于滤波:
-比如扩展卡尔曼滤波（EKF: Extended Kalman Filter）、粒子滤波(PF: Particle Filter)等。
-ROS中的gmapping、hector\_slam算法都是基于滤波实现的。
-我们使用的point-lio也使用了流形扩展卡尔曼滤波。
-
-2.基于图优化，先通过传感器进行构图，然后对图进行优化。
+\texttt{odom} 要让短时间的位置变化平滑、连续，即使走久了会漂；\texttt{map} 要对齐全局场地，定位修正时允许跳变；\texttt{base\_link} 固连车体。通常里程计发布 \texttt{odom→base\_link}，全局定位发布 \texttt{map→odom}，安装外参发布车体到传感器的固定变换。不要让两个节点抢着发布同一个子坐标系，不然哨兵可能没动，坐标先吵起来了。各坐标系的职责可对照\href{https://github.com/ros-infrastructure/rep/blob/master/rep-0105.rst}{REP-105 原文}。
 
 \begin{example}
-仅演示静态 TF 接口，使用独立演示坐标系，避免覆盖真实定位节点的变换。终端二应看到平移 (1,0,0)。
+先做一条最简单的静态变换。终端一保持运行，终端二查询：
 \begin{tbash}
-# 先在两个终端加载 Humble 环境
-# 终端一
-ros2 run tf2_ros static_transform_publisher --x 1 --y 0 --z 0 --yaw 0 --pitch 0 --roll 0 --frame-id demo_map --child-frame-id demo_base
+# 终端一；只用独立演示坐标系
+ros2 run tf2_ros static_transform_publisher \
+  --x 1 --y 0 --z 0 --yaw 0 --pitch 0 --roll 0 \
+  --frame-id demo_map --child-frame-id demo_base
 # 终端二
 ros2 run tf2_ros tf2_echo demo_map demo_base
 \end{tbash}
+稍等发现完成，应看到平移 $(1,0,0)$ 和零旋转。停止终端一后把 x 改为 2，再启动同一个发布程序，核对新的平移。不要同时启动两份发布者。
 \end{example}
-
-\begin{exercise}
-将 x 改为 2 并重启发布程序，核对输出；说明真实 map 到 odom 的定位修正为何不能用固定值长期代替。
-\end{exercise}
-
-\begin{conclusion}
-\begin{itemize}
-\item map 提供全局参考，定位修正可能使位姿跳变。
-\item odom 提供局部连续参考，长期可能漂移。
-\item base\_link 固连机器人；同一子坐标系不要由多个节点争相发布父变换。
-\end{itemize}
-\end{conclusion}
-
-\subsubsection{建图}
-\textbf{导航需要地图。}
-
-
-我们使用的是二维地图（毕竟小哨兵还没学会飞行，在z轴上运动能力为0（其实还有roll和pitch），而且二维导航相关的导航，定位，建图方案都比较成熟）
-在机器人导航的时候，仅仅靠一张SLAM建立的原始地图是不够的，机器人在运动过程中可能会出现新的障碍物，
-也有可能发现原始地图中某一块的障碍物消失了，所以在机器人导航过程中维护的地图是一个动态的地图。那么怎么样才能建立一个动态的地图呢？
-
-\subparagraph*{ 地图的获取}
-首先，我们接收激光雷达扫描到的点云图，然后对其进行处理，压缩到二维，得到地图。
-
-处理的第一步是进行点云的滤波。下面是一些常用的滤波方法：
-\textbf{*注意：因为点云是通过物体表面反射光信息获取的，所以一个实体只有表面会有点云，内部是没有的。}
-\begin{enumerate}
-\item \textbf{Voxel滤波}：因为我们用的激光雷达比较牛逼，获得的近处点云比较稠密（保证远处的分辨率），这样直接计算会导致计算量过大，
-为了防止出现“三帧电竞”的情况出现，我们可以将点云按照空间分辨率进行分割，又叫体素网格下采样。
-\begin{tcode}
-    pcl::VoxelGrid<pcl::PointXYZ> voxfilter;
-    voxfilter.setInputCloud(cloud);
-    // 设置滤波器的体素大小
-    voxfilter.setLeafSize(0.1, 0.1, 0.1);
-    voxfilter.filter(*cloud);
-\end{tcode}
-这样，我们就将cloud里每个0.1m*0.1m*0.1m的体素（三维空间中的一个小立方体单元）内的点替换为该体素的中心点。
-将临近的点聚合到一个体素中来实现，可以减少点云数据的复杂度，同时保留整体的形状和结构。
-\item \textbf{直通滤波}：直通滤波就是最简单的剔除不需要点云的滤波方法。比如小哨兵小小的，对它来说50cm以上的障碍物根本不影响他通过，那我们就可以把0.5m以上的点剔除掉。
-\begin{tcode}
-    pcl::PassThrough<pcl::PointXYZI> pass_through_filter_z_;
-    pass_through_filter_z_.setFilterFieldName("z");
-    pass_through_filter_z_.setFilterLimits(min_z, max_z);
-    pass_through_filter_z_.setFilterLimitsNegative(false);
-    pass_through_filter_z_.setInputCloud(input_cloud);
-    pass_through_filter_z_.filter(*input_cloud);
-\end{tcode}
-这样，我们就将cloud里的z轴坐标在min\_z和max\_z之外的点剔除掉了。
-同样的道理，还可以通过设置xy范围，把远处的，懒得考虑的点剔除掉。以及设置剔除一定半径内的点云，把哨兵本体的点云剔除掉。
-\item \textbf{统计滤波}：在点云处理中，统计滤波是一种用于识别和移除离群点的方法，这些离群点可能是由于测量误差或噪声引起的。
-该方法基于假设，即点云数据中的大部分点是符合高斯分布的，而离群点则是那些与这种分布显著不同的点。
-\begin{tcode}
-    pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
-    sor.setInputCloud(cloud);
-    // 设置近邻点的数量
-    sor.setMeanK(50); 
-    // 设置标准差倍数阈值
-    sor.setStddevMulThresh(1.0); 
-    // 设置为false表示移除离群点，设置为true表示保留离群点
-    sor.setNegative(false); 
-    sor.filter(*cloud);
-\end{tcode}
-通过这种方式，我们可以计算每个点到其K个最近邻点的平均距离，并根据这个平均距离与全局平均距离的比较来确定是否为离群点。
-如果一个点的平均距离超过了全局平均距离加上标准差倍数的阈值，那么这个点就被认为是离群点并被移除。
-这样可以有效地减少点云中的噪声和异常值，提高后续处理的准确性和效率。
-
-\item \textbf{特殊方法滤波}：有时候一些特殊的物体需要滤掉，这时候就要自己编写特定的代码剔除。比如地板，是的，地板也是实体，也会产生点云，但他不是障碍物，所以需要过滤掉。
-我们可以简单的通过直通滤波，把z轴坐标在轮子以下的点剔除掉。也可以通过聚类（即将点云数据中的点根据它们的空间位置或属性特征分组），将最大的聚类剔除掉，这样就剔除了地板。
-而我们现在用的是tc学长写的法向量剔除法，计算每个点的法向量，然后剔除法向量与z平面夹角小于一定角度的点（通俗来说：平的就是地板）。
-\end{enumerate}
-
-现在，你就获取到了此时此刻哨兵周围的障碍物地图(准确来说是一个地图层：障碍层，下面会介绍)了。
-然后，让哨兵动起来，经过赛场的每一个角落，将每一时刻获取的点云叠加起来
-（通过我们上一节讲的定位方法就可以获取每一帧点云之间的相对位置，就可以进行拼接叠加了），就得到了一个完整的地图——这，就是建图
-（比赛前会有哨兵建图环节，就是把赛场建成一张图。在陌生未知的环境下也可以一遍建图一遍在刚刚建出来的地图上进行导航）。
-这张地图可以为三维点云格式（.pcd文件），也可以压缩成二维栅格地图格式（ .pgm, .png, .jpg文件），因为是按照真实世界按比例缩小，所以要有一个yaml文件来记录比例尺等参数来表示缩小比例。。
-
-\textbf{*栅格地图：即用二维图片记录地图信息。用一个个像素表示地图上的障碍物的位置、大小信息，灰度表示障碍物置信度，支持pgm,png,jpg格式，可人工修改。
-用于定位的地图应保留可复核的真实几何信息；禁止区使用 keepout 等导航约束表达，编辑地图前保留原始版本并实地核对}
-
-\subparagraph*{ 地图的处理}
-现在的地图以及可以满足定位这一功能的需求了，但是为了满足地图的另一功能——路径规划的需求，我们还需要对地图进行处理。
-
-\paragraph*{ 代价地图}
-首先我们引入代价地图的概念,想要计算出最佳的路径，我们就要给每一条路径一个分值。所以我们把不想去的地方设置一个大大的代价，
-比如不希望机器人进入障碍物内部，就用致命代价标记不可通行区域，在路径规划的时候路径就会避开它（具体算法见本章路径规划小节）。
-
-\paragraph*{ 地图层layer}
-为了让人们方便对地图进行自定义操作和拓展（“掺点小料”），nav2提供了一种非常灵活的地图处理机制，即地图的“层”，又叫$plugins$“插件”。
-将一层层的地图层叠加在一起，就可以形成一个完整的地图（根据不同的需求，我们可以有很多张完整的地图，用在不同的地方，最常见的就是，
-根据更新频率方式和用途不同，可以分为全局代价地图和局部代价地图）。
-比如：
-
-\textbf{global\_costmap全局代价地图}是用来进行全局路径规划的，一般包含
-\begin{enumerate}
-    \item $"static_layer"$静态层
-    \item $"obstacle_layer"$障碍层
-    \item $"inflation_layer"$膨胀层
-\end{enumerate}
-静态层一般就是之前SLAM建好的地图(.pgm文件),可以在上面进行路径规划。
-障碍层用于动态的记录传感器感知到的障碍物信息。
-但哨兵不是一个不计体积，不计质量，不计重力的理想质点。而路径规划又是按照质点来规划的，所以为了不让哨兵撞墙，膨胀层堂堂登场！
-
-\textbf{膨胀层}通过将指定地图层（一般是所有下方地图层）里的障碍物膨胀
-（就是把障碍物周围的点的代价加大，一般离障碍物越近代价越大，但不会到无穷大，可以自定义加大规则）
-一定的距离（一般至少是机器人的半径，但建议能覆盖全图，形成一个势场），让路径规划的时候避开这些膨胀的障碍物。
-
-\textbf{local\_costmap局部(本地)代价地图} 是用来进行局部路径规划的，一般包含
-\begin{enumerate}
-    \item {$obstacle\_layer$} 障碍层
-    \item {$inflation\_layer$} 膨胀层
-\end{enumerate}
-    local\_costmap相比于global\_costmap，一般会限定一个较小的范围（如以机器人为中心的5m*m的正方形）以加快控制器计算速度。
-这是因为控制器的计算复杂度比较高，且由于是通过直接发布速度控制信息（x,y线速度,yaw角速度）直接控制机器人的运动，发布频率越快越好。
-
-*而且没必要。
-
-对人类来说，永远不要担心2小时以后，和8公里以外的事情(哲学小课堂\~)。
-
-而对于哨兵来说，
-永远不要担心dt\_ref(轨迹时间分辨率)以后，和local\_costmap以外的事情。
-但是因此要确保local\_costmap之外的障碍物不能影响到机器人的路径规划，换句话说，任何障碍物突然进入local\_costmap的范围内，
-机器人都应该能从容优雅地避开，所以local\_costmap的极限范围与机器人的性能有关（最大速度，最大加速度）
-
-还有一些其他地图层：
-\begin{enumerate}
-    \item $DenoiseLayer$：从最终成本图中去除椒盐噪声。
-    \item $KeepoutFilter$：在成本图中标记禁止区、较高权重或较低权重的区域
-    \item $SpeedFilter$：根据位置降低或提高机器人速度
-\end{enumerate}
-除了这些地图层，还可以自定义的地图层。比如你想哨兵不走回头路，那么你就可以把哨兵走过的路径当成障碍物，
-变成一层地图层，添加在整张地图里，这样路径规划时就不会考虑这片区域了。
-
-*值得注意的是，地图层之间是有顺序的。比如膨胀层通常在需膨胀的障碍层之后，这样它就会把下面的静态层，障碍层，自定义层……都进行膨胀。
 
 \begin{example}
-分辨率 0.05 m/cell、原点 (0,0)、原点偏航为 0 时，栅格索引 (10,20) 的格心为 (0.525,1.025) m。图像行号与地图 y 轴还需按文件格式转换。
-\begin{tpython}
-resolution=0.05
-i,j=10,20
-x,y=(i+0.5)*resolution,(j+0.5)*resolution
-assert abs(x-0.525)<1e-12 and abs(y-1.025)<1e-12
-print(x,y)
-\end{tpython}
+一条边会查了，我们再查询两条边合成后的结果。\texttt{tf\_demo.py} 使用真实 tf2 Buffer 存入独立静态变换：第一条平移 $(1,2)$、旋转 $90^\circ$；第二条在父坐标系里沿 x 平移 2。代码完整如下：
+\lstinputlisting[language=Python,basicstyle=\footnotesize\ttfamily]{examples/navigation/navigation-lab-demo/tf_demo.py}
+\begin{tbash}
+python3 tf_demo.py
+\end{tbash}
+输出约为 \texttt{xy: [1,4]}，缺失分支是 \texttt{LookupException}。为什么不是 $(3,2)$？因为第二条的 x 轴已经转向了地图的 y 轴。TF 连通还不够，动态变换也要覆盖查询时间；查旧时刻或未来时刻时出现外推异常，要先检查时间戳、时钟和缓存，不能靠把所有变换设为静态解决。
 \end{example}
+\begin{exercise}\label{ex:nav-tf}
+完成 x=1 与 x=2 的命令实验，然后把 \texttt{tf\_demo.py} 第一条旋转改为零，预测并核对合成结果。解释真实 map→odom 为何不能长期用一个固定值代替。
+\end{exercise}
+\begin{conclusion}
+地图负责全局一致，里程计负责局部连续，车体负责固定参考。位置可用要同时满足树连通、时间可查、单位与方向正确。TF 是这些关系的传递工具，定位算法才负责估计它们。
+\end{conclusion}
 
-\begin{exercise}
-地图原点改为 (-2,-1)，求同一格心位置；解释分辨率与图像像素数共同决定了什么。
+\subsubsection{定位、建图和融合到底在忙什么}
+导航里常听到 \textbf{SLAM（Simultaneous Localization and Mapping，同时定位与建图）}，简称 SM（不是）。定位可以在已有地图上匹配当前位置；SLAM 则在未知环境中同时估计自己的运动和地图，所以“所有定位都必须先有地图”并不成立。
+
+可怜的小哨兵在场馆里通常没有可直接使用的 GPS，只好看周围的墙、柱子，读车轮和 IMU。激光雷达发射光并接收返回信号，测距后结合扫描角度得到点，有的还提供回波强度。将当前扫描与已有地图或局部子地图对齐，再结合雷达到车体的外参，就能估计车体位置。三维方法如 ICP、NDT，二维方法如基于栅格地图的 AMCL，各有适用条件；三维保留了高度信息，不意味着任何场景都一定更准确，精度和耗时还取决于几何、噪声、初值与实现。
+
+局部匹配通常只看附近或最近的地图，让运动估计及时更新；全局重定位则扩大搜索范围，处理刚上电不知道在哪、位置已经明显不对等情况。不过，重定位不是“清空 TF，再把车体位置归零”。我们要用新的全局估计修正 map→odom，让 odom→base\_link 继续平滑，控制器才不会突然把定位修正当成底盘瞬移。
+
+\begin{example}
+设里程计认为车体在 $(2,0.5)$，地图匹配认为它在 $(2.3,0.5)$。按照变换相乘关系，
+\[
+T_{map,base}=T_{map,odom}T_{odom,base},\qquad
+T_{map,odom}=T_{map,base}T_{odom,base}^{-1}.
+\]
+我们用 \texttt{localization.py} 跑一下这个修正，也顺便看看长走廊为什么容易让雷达迷路。
+\lstinputlisting[language=Python,basicstyle=\footnotesize\ttfamily]{examples/navigation/navigation-lab-demo/localization.py}
+\begin{tbash}
+python3 localization.py
+\end{tbash}
+第一次 map→odom 的平移是 $(0.3,0)$；全局估计改为 $(2.2,0.5)$ 后修正变成 $(0.2,0)$，而里程计坐标仍是 $(2,0.5)$。两面沿 x 无限延伸的墙只约束横向，代码里的法向量矩阵特征值是 0 和 2，沿 x 移动 100 m 仍产生零墙面残差。这是几何退化的极简演示：实际走廊如果能看到端点、柱子等特征，纵向仍可能受到约束，不能把这两个数当成真实雷达定位误差。
+\end{example}
+\begin{exercise}\label{ex:nav-localization}
+地图估计改成 $(1.8,0.7)$，计算新的 map→odom 平移。再给墙面约束增加法向量 $(1,0)$，运行查看新的特征值，说明它补上了哪个方向的信息。
 \end{exercise}
 
-\begin{note}
-不要只保存地图图片；原点、分辨率和阈值等元数据也是地图的一部分。标记未知区域时，不要误当作已确认的空地。
-\end{note}
+轮式里程计把车轮运动累加起来，打滑会积累误差；IMU（Inertial Measurement Unit，惯性测量单元）测角速度和比力，要处理重力、偏置、安装方向与积分漂移，不能把读出的加速度直接加到地图坐标上。视觉里程计（Visual Odometry，VO）利用图像特征或像素变化估计运动，单目尺度、光照、遮挡、纹理都可能影响结果，也没有一个“视觉精度一定比激光低”的通用排名。
 
-\subsubsection{路径规划}
-现在我们有了地图和定位，终于可以进入我们的正题导航了。
-我们使用的是Nav2导航框架，该项目力求以安全的方式让移动机器人从A点移动到B点。
-Nav2也可以应用于其他应用，包括机器人导航，如下动态点跟踪，在这个过程中需要完成动态路径规划、
-计算电机的速度、避免障碍、恢复行为。
-
-Nav2使用行为树（详情见下一个章节）调用模块化服务器来完成一个动作。
-动作可以是计算路径、控制力、恢复或任何其他与导航相关的操作。
-服务器可以简单分为一大三小四个服务。
-一大：
-BT Navigator Server 导航行为树服务，
-通过这个大的服务来进行下面三个小服务组织和调用。
-\subparagraph*{全局规划器}
-
-Planner Server，规划服务器，（全局规划器）是Nav2中的核心模块之一，
-它负责根据所选的命名法和算法规划机器人的全局路径，即从起始点到目标点的路径。
-说白了就是在地图上找路。
-他们通过全局代价地图global\_costmap，根据当前机器人的位置和目标位置，计算出从当前位置到目标位置的(时间或路程)最优路径。
-路径规划算法有很多种，还有他们的优化版本。
-这里，我们介绍两个最经典好用的算法：$Dijkstra$算法和$A*$算法
-\paragraph*{$Dijkstra$算法}
-$Dijkstra$ 算法适用于非负边权，每次扩展当前累计代价最小的候选点；普通广度优先搜索仅在所有边代价相等时能这样求最短路径。A* 在累计代价上再加到目标的启发式估计。
-
-
-\begin{note}
-最短路演示视频：\url{https://www.bilibili.com/video/BV19b4y1d7Hz/}。
-\end{note}
-
-
-
-\subparagraph*{控制器}
-如果只有规划器会怎么样呢？
-
-想象在一张游戏地图上，给角色指定一个远处目标。
+所以我们让传感器互相补位：轮子短时间走得连贯，地图匹配给全局修正，IMU 提供较快的运动信息。但“融合”也不是把三个坐标平均一下，外参、时间同步、噪声和退化条件都要先说清楚。否则融合的可能只是三份不同步的错误。第八章的滤波和第九章的几何优化，就是你继续深入时会用到的工具。
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{英雄联盟.png}
-    \caption{全局路径（用A*算法根据障碍物（建筑）算出来的）}
-\label{fig:I_nav-5}
+\centering
+\includegraphics[width=.92\textwidth]{nav_slam_revised.pdf}
+\caption{常见视觉 SLAM 的概念流程；回环可以修正累计误差，但不是所有里程计系统都有回环模块}
+\label{fig:I_nav-4}
 \end{figure}
-全局路线生成后，移动目标仍可能突然挡住前方。
-这是为什么？因为敌方是动态的，他的位置不是事先知道的，事先知道的只有地图，而规划时使用的代价地图未必包含后来出现的障碍；局部控制还要持续检查最新观测。
-局部规划器就是在你的视野里出现动态障碍物的时候，规划出一条道路绕开他，然后继续跟着全局路径走。
 
-回到缺德地图，你这位车手就是局部规划器，缺德地图（全局规划器）只给大致的路线。
-如何避让冲出来的小学生，掉头，超车，等红灯等都是车手（局部规划器）决定的。
-
-控制器，在ROS 1中也被称为局部规划器，是我们跟随全局计算路径或完成局部任务的方法。控制器有权访问局部环境表达，
-以尝试计算要跟随的基准路径的可行\textbf{控制工作}(即速度、加速度、角速度等)。许多控制器会将机器人向前投射到空间中，并在每次更新迭代时计算局部可行路径。
-控制器可以被编写为具有以下功能的工具：
-\begin{itemize}
-    \item 跟随路径
-    \item 使用里程计坐标系中的探测器，让机器人与充电站（桩）对接
-    \item 登上电梯
-    \item 与某个工具的接口交互
-\end{itemize}
-在Nav2中，控制器的一般任务是计算一个有效的\textbf{控制工作}以跟随全局规划路径。
-然而，有多个控制器类和局部规划器类。
-Nav2项目的目标就是所有控制器算法都可以作为此服务器中的插件，以用于一般研究和产业任务中。
-
-DWA、TEB 是常见局部规划思路。Nav2 可用控制器插件随版本与项目配置而异，查验参数文件中的 plugin 字段后再确定实际算法。
-
-\begin{example}
-用三顶点非负权图检查 Dijkstra：A 到 C 的直达代价为 5，经 B 的代价为 3，因此最短距离应为 3。
-\begin{tpython}
-import heapq
-graph={"A":[("B",1),("C",5)],"B":[("C",2)],"C":[]}
-dist={"A":0}; queue=[(0,"A")]
-while queue:
-    cost,node=heapq.heappop(queue)
-    if cost!=dist[node]: continue
-    for other,weight in graph[node]:
-        candidate=cost+weight
-        if candidate<dist.get(other,float("inf")):
-            dist[other]=candidate
-            heapq.heappush(queue,(candidate,other))
-assert dist["C"]==3
-print(dist)
-\end{tpython}
-\end{example}
-
-\begin{exercise}
-把 A 到 C 的权重改为 2，验证新结果；说明为什么最少边数与最低代价不是同一目标。
+从求解方式看，可以看到滤波与图优化两类思路，但具体系统经常组合使用。gmapping 使用粒子滤波；hector\_mapping 的核心是扫描匹配，不能一起塞进“都是滤波”的筐里。\href{https://index.ros.org/p/hector_mapping/}{hector\_mapping 的介绍}可以帮助核对这一点。Point-LIO 是激光惯性里程计的例子，\href{https://github.com/hku-mars/Point-LIO}{其原仓库}强调点时间戳、雷达与 IMU 同步、外参和 IMU 量程；原版提供的是 ROS 1 构建流程，接 Jazzy 时还要核对实际采用的移植版本。这里没有把它装上就宣布“小哨兵会定位了”，本章先把输入输出和故障原因对上。
+\begin{exercise}\label{ex:nav-fusion}
+一份雷达数据落后 IMU 0.1 s，车体以 1 m/s 平移。仅考虑这个时间差，两份数据对应的位置会相差多少？再分别给出轮子打滑、白墙缺纹理和长走廊中的一个排查方向。
 \end{exercise}
-
-\subsubsection{恢复行为与行为树}
-
-当局部规划失败、代价地图被完全堵住，或机器人长时间无法推进时，Nav2 会进入\textbf{恢复（Recovery）}流程：
-尝试一系列动作使系统回到可规划状态，再继续导航。
-
-\paragraph*{常见恢复行为}
-\begin{itemize}
-    \item 原地旋转：清理周围未知区域或等待障碍离开；
-    \item 后退一小段：脱离当前局部死锁；
-    \item 清空代价地图：剔除过时障碍；
-    \item 重新规划全局路径：目标仍有效但原路径不可行时。
-\end{itemize}
-
-\paragraph*{行为树（Behavior Tree）简介}
-Nav2 用行为树编排「规划—控制—恢复」逻辑，而非写死的巨型状态机。
-树节点大致分为：
-\begin{itemize}
-    \item \textbf{控制节点}：Sequence（顺序执行）、Fallback（失败则试下一分支）等；
-    \item \textbf{执行节点}：调用规划器、控制器、恢复插件；
-    \item \textbf{装饰节点}：超时、重试、强制成功/失败等。
-\end{itemize}
-
-典型逻辑可理解为：Fallback\{ 跟随路径成功；否则执行恢复后再试 \}。
-具体 XML 行为树配置随 Nav2 版本变化，以官方文档与队内导航仓库为准。
-赛场「偷家」叙事与建图作业流程见卷三；本章掌握模块职责与接口即可。
-
-\begin{example}
-简化 Fallback：只有当前子项失败才尝试下一个。Running 应立即向上传递，不能一边跟踪一边错误启动恢复。
-\begin{tpython}
-def fallback(statuses):
-    for status in statuses:
-        if status != "Failure": return status
-    return "Failure"
-assert fallback(["Failure","Success"])=="Success"
-assert fallback(["Running","Success"])=="Running"
-print("状态检查通过")
-\end{tpython}
-\end{example}
-
-\begin{exercise}
-补充所有分支均失败的测试，并说明应由哪一层决定重试上限。
-\end{exercise}
-
 \begin{conclusion}
-\begin{itemize}
-\item 规划器输出路径，控制器输出可执行运动命令。
-\item 代价地图反映障碍与通行代价，必须匹配机器人外形和制动需求。
-\item 恢复不是无限重试；超时、重试上限和失败出口都要明确。
-\end{itemize}
+已有地图上的定位、连续运动估计和同时建图承担不同任务。回环是再次认出到过的地方并施加一致性约束，既可能纠正轨迹，也可能纠正地图；它不是凭空把所有误差清零。先问清传感器提供什么、哪个方向可观测，再选择融合或优化方法。
 \end{conclusion}
 
+\subsubsection{先把点云收拾一下}
+导航需要地图。小哨兵还没学会飞行，我们先用二维导航表达，但 z、roll、pitch 仍会影响坡道、车体高度和传感器投影。地图通常可以从三维点云处理得到，也可以直接使用二维扫描建图。激光测到的主要是可见表面，没看到的地方不能自动当成空地。
+
+首先，近处点云太密，全部计算容易变成“三帧电竞”，这时候可以用\textbf{体素下采样（Voxel Grid）}。PCL 的 VoxelGrid 把同一体素内的点合成\textbf{质心}，不是固定的体素几何中心。叶子尺寸越大，点越少，细小障碍也更可能被抹掉；不要只盯着帧率。
+
+然后，用\textbf{直通滤波（Pass Through）}留下某个坐标范围。z 范围要先统一到合适坐标系，再根据车体可碰撞高度选择。雷达装在车顶时，“z 大于 0.5”未必就是离地 0.5 m；横梁、桌面等也可能让车体过不去，不能因为点在某个高度之外就宣判安全。
+
+\textbf{统计离群点移除（Statistical Outlier Removal，SOR）}则计算点到 K 个近邻的平均距离，以全局均值加标准差倍数作阈值。这是对邻域平均距离分布的假设，不是“所有点坐标都符合高斯分布”。稀疏的真实障碍也可能被误删，所以换场地、换密度时要看滤前滤后。
+
+\begin{example}
+\texttt{point\_filters.cpp} 自己生成两组小点云，不需要雷达。第一组只有两个点，让你看清质心；第二组放入 30 个近点、1 个远离群点和 1 个低点，分别观察直通与 SOR。
+\lstinputlisting[language=C++,basicstyle=\footnotesize\ttfamily]{examples/navigation/navigation-lab-demo/point_filters.cpp}
+完整构建配置是 \texttt{CMakeLists.txt}，这里同时启用 C 与 C++，兼容 PCL 依赖中可能出现的 C/MPI 目标。
+\lstinputlisting[language=bash,basicstyle=\footnotesize\ttfamily]{examples/navigation/navigation-lab-demo/CMakeLists.txt}
+\begin{tbash}
+cmake -S . -B build
+cmake --build build -j4
+./build/point_filters
+\end{tbash}
+实测输出为质心 x=0.02、输入 32、直通后 31、统计过滤后 30。0.1 m 体素的中心 x 是 0.05，这就能直接区分“体素中心”和“点的质心”。PCL 的\href{https://pointclouds.org/documentation/tutorials/voxel_grid.html}{VoxelGrid 教程}与\href{https://pointclouds.org/documentation/tutorials/statistical_outlier.html}{SOR 教程}可查参数；网页版本可能更新，本例在 PCL 1.14.0 上实际编译运行。
+\end{example}
+\begin{exercise}\label{ex:nav-filter}
+将两个点的 x 改为 0.01 和 0.09，先手算质心，再同步修改程序中的核对值并运行。若叶子尺寸改为 0.02，它们还在同一个体素吗？说明为什么不能为了让程序返回 0 就忽略真实输出。
+\end{exercise}
+
+最后还有地面提取。简单的 z 截取、平面拟合、法向量和聚类都能提供线索，但“最大聚类就是地板”“平的就是地板”都只是特定场景的假设。桌面也平，墙面也可能是最大一组点，我们还要结合高度、朝向、连续性与场地结构。原项目的法向量方法可以保留为工程选择，阈值与误删风险应通过真实地面和障碍样本验证，这部分放到卷三建图实验。
+
+\subsubsection{把地图保存完整，再谈哪里能走}
+现在，你拿到了某个时刻附近的点。要拼成完整地图，先用每一帧的位姿把它们变到共同坐标系，再处理动态物体、遮挡和误差，不能把传感器原坐标下的数组直接叠起来。三维地图常存为 PCD；二维栅格通常由 PGM/PNG 图片与 YAML 元数据共同表示。尽量保留无损图片，JPG 的压缩边缘可能影响障碍判定。
+
+栅格索引 $(i,j)$ 对应的不是格角而是格心。设分辨率 r、地图原点 $(o_x,o_y)$ 和偏航 $\psi$，先得到局部格心，再旋转平移：
+\[
+\begin{bmatrix}x\\y\end{bmatrix}=
+\begin{bmatrix}o_x\\o_y\end{bmatrix}+
+\begin{bmatrix}\cos\psi&-\sin\psi\\\sin\psi&\cos\psi\end{bmatrix}
+\begin{bmatrix}(i+0.5)r\\(j+0.5)r\end{bmatrix}.
+\]
+所以宽 W、高 H 格的地图覆盖 $Wr\times Hr$，只把图片缩放一下而不改元数据，场地就会被你偷偷放大或缩小。图像通常从顶部开始数行，而地图从较小 y 向上数；没有旋转时，第 v 行对应 $j=H-1-v$。
+
+\begin{example}\label{ex:nav-grid-project}
+我们把栅格换算、生成输入和找路放进同一个 \texttt{grid.py}。本小节先看 \texttt{cell\_center} 和生成 PGM/YAML 的部分；\texttt{shortest} 与 \texttt{plan} 在下一小节继续使用，所以这里给出完整文件，后面直接对照。
+\lstinputlisting[language=Python,basicstyle=\footnotesize\ttfamily,firstline=1,lastline=43]{examples/navigation/navigation-lab-demo/grid.py}
+\lstinputlisting[language=Python,basicstyle=\footnotesize\ttfamily,firstnumber=44,firstline=44]{examples/navigation/navigation-lab-demo/grid.py}
+\begin{tbash}
+python3 grid.py --output out/map
+python3 -c 'from grid import cell_center; print(\
+cell_center(10,20,.05,(0,0,0)))'
+cat out/map/map.yaml
+\end{tbash}
+第二行得到 $(0.525,1.025)$ m。生成图固定 60×40 格、0.1 m/cell，也就是 6×4 m，黑色边框和中央矩形是人为障碍。保存时上下翻转，\texttt{map.yaml} 的内容如下，图片路径相对 YAML 所在目录解释：
+\begin{tbash}
+image: map.pgm
+mode: trinary
+resolution: 0.1
+origin: [0.0, 0.0, 0.0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.25
+\end{tbash}
+这是三值地图模式：图像灰度经 negate 规则转换为占据概率，再按两个阈值分类。ROS 的占据栅格（OccupancyGrid）用 -1 表示未知、0～100 表示占据；Nav2 原始代价地图有另一套 0～255 的编码。未知不等于自由，两套数组也不能不转换就直接交换。
+\end{example}
+\begin{exercise}\label{ex:nav-map}
+把原点改为 $(-2,-1)$，求同一个 $(10,20)$ 格心。如果改为原点 $(1,2)$、偏航 $90^\circ$、分辨率 0.1，求 $(2,3)$ 格心并用函数核对。40 行图片的第 0 行对应哪个地图 j？
+\end{exercise}
+\begin{note}
+定位地图应保留可复核的几何信息。禁止通行区用导航约束表达，编辑前保留原始版本，再核对实际场地；把未知刷成白色只是骗过规划器，墙不会因为你修图就消失。
+\end{note}
+
+\subsubsection{给路径算代价，也给车留空间}
+地图能帮助定位，但要找路，还需要代价地图（Costmap）：自由区域代价低，越靠近障碍代价越高，致命障碍不能通过。为了方便“掺点小料”，Nav2 用地图层（Layer）插件组合信息。静态层（Static Layer）接收已有地图，障碍层（Obstacle Layer）根据观测标记、清除障碍，体素层（Voxel Layer）可保留高度信息，膨胀层（Inflation Layer）在障碍周围生成代价分布，通常放在要膨胀的障碍层之后。
+
+哨兵不是不计体积的理想质点，膨胀层因此堂堂登场。不过，调一个 inflation\_radius 就不代表完成了碰撞检查，还要正确配置车体轮廓（Footprint）或半径，并留出定位、离散化和控制误差的余量。KeepoutFilter 和 SpeedFilter 是代价地图过滤器，配置接口与普通 layer 有区别，分别表达禁止区和区域限速；区域限速不能替代底盘本身的速度上限。
+
+全局代价地图供较大范围的规划，局部代价地图供附近控制；内容和更新速度由任务决定，不是固定的“三层对两层”。本项目已知一张静态地图，所以两张代价地图都使用静态层与膨胀层；没有伪装成雷达正实时扫描动态障碍。
+
+\begin{example}
+假设车速 v=2 m/s、可用制动减速度 a=1 m/s$^2$，理想制动距离为 $v^2/(2a)=2$ m；再加 0.2 s 的总延迟，至少多走 0.4 m。若机器人位于 4 m 方形局部窗口的正中心，正前方可见长度只有 2 m，这还没算余量就不够。窗口应覆盖预测、停车与观测需求，频率也要能在预算内完成，不是越快越好。
+
+离线 \texttt{plan} 用障碍格心距离大于 margin 判断可通行，\texttt{--margin} 默认 0.35 m。它只是四邻接算法实验的模型，不是完整 Nav2 footprint 检查。运行 \texttt{python3 grid.py --margin 0.6 --output out/wide}，比较通道变窄后的路线；margin 大到起终点也被挡住时，代码明确返回无路。
+\end{example}
+\begin{exercise}\label{ex:nav-costmap}
+速度保持 2 m/s、延迟仍为 0.2 s，将减速度改为 2 m/s$^2$，计算不含额外余量的前向距离需求。5 m 方形窗口的半宽够不够？再解释清空动态障碍层为什么不应清掉静态墙。
+\end{exercise}
+\begin{conclusion}
+图片是地图输入，地图层组合成代价地图，外形检查与控制再决定运动是否可行。全局地图不能自动看到新障碍，局部地图也不能只靠扩大范围补救过期观测。配置外形、更新范围、延时和制动能力时，要把它们放在同一个量级里看。
+\end{conclusion}
+
+\subsubsection{现在终于可以找路了}
+有了地图和定位，我们进入正题。Dijkstra 在非负边权图上，每次取累计代价最小的候选点向外扩展；普通广度优先搜索只有在各边等权时才能直接这样求最低代价。A* 则按 $f(n)=g(n)+h(n)$ 选候选点，其中 g 是已经走过的代价，h 是到目标的估计。
+
+本例的四邻接就是每格只连接上下左右四格。在 \texttt{grid.py} 的四邻接图里每步代价为 1，曼哈顿距离不高估剩余步数，并满足一致性，所以 A* 可以更有方向地找到同样最低代价的路线。若随手把 h 乘十，或者用了与边权不匹配的距离，就不能继续宣称最优。最少拐弯、最短距离、最快时间，也不是同一个优化目标；Nav2 插件的结果由代价与约束共同决定。
+\begin{example}
+先跑三顶点图，再对照上面的完整 \texttt{shortest}：
+\begin{tpython}
+from grid import shortest
+graph = {"A": [("B", 1), ("C", 5)],
+         "B": [("C", 2)], "C": []}
+print(shortest(graph.__getitem__, "A", "C"))
+\end{tpython}
+输出路径 A→B→C、代价 3。返回值还记录取出的候选点次数，用于比较这份实现的搜索工作量。再运行：
+\begin{tbash}
+python3 grid.py --output out/map
+python3 grid.py --blocked --output out/blocked
+\end{tbash}
+默认地图中两算法总代价均为 70、路径均有 71 格；本实现 Dijkstra 扩展 1304 次，A* 扩展 914 次，数量也受相同代价时的取点顺序影响。\texttt{--blocked} 加入一面贯穿地图的墙，二者都返回空路径和 \texttt{cost: null}。返回“无路”才是合理结果，不能为了完成任务穿墙。
+\end{example}
+\begin{exercise}\label{ex:nav-search}
+将三顶点图 A→C 改为 2，运行核对；再看默认栅格，解释为什么 A* 与 Dijkstra 同代价却可能取到不同路线。若边权为负，程序怎样处理？
+\end{exercise}
+
+\subsubsection{让规划出的路径真的变成运动}\label{sec:nav-real}
+如果只有规划器会怎么样？想象你在游戏里给角色指定了远处目标：
+\begin{figure}[H]
+\centering
+\includegraphics[width=.48\textwidth]{英雄联盟_revised.png}
+\caption{原游戏小地图，用来类比全局路线；截图本身不能证明游戏使用了 A*}
+\label{fig:I_nav-5}
+\end{figure}
+规划时没看到的移动目标可能突然挡路，只有路线还不够。回到缺德地图，你这位车手对应控制器，地图只告诉你怎么绕到目的地，你还要根据视野和车的能力决定眼下怎样转向、减速。Nav2 控制器通常输出 Twist 或 TwistStamped 速度，而不是直接替底盘算电机电流；电控执行接口还要在卷三接起来。
+
+DWA、TEB 是常见的局部规划思路，但不能看到 Nav2 就默认它们正在运行。我们在 Jazzy 1.3.13 上明确选 Navfn 规划器和调节纯追踪（Regulated Pure Pursuit，RPP）控制器。RPP 根据前方追踪点与几何关系跟踪路径，同时调节速度并检查碰撞；它不是任意动态障碍下都能自行绕路的控制器。算法与参数可对照\href{https://api.nav2.org/nav2-jazzy/html/md_nav2_regulated_pure_pursuit_controller_README.html}{Jazzy 的 RPP 说明}，实际插件以加载日志与配置为准。
+
+\begin{example}\label{ex:nav-real-run}
+首先看 \texttt{params.yaml}。\texttt{GridBased}、\texttt{FollowPath} 是我们给插件实例起的名字，后面的 action 请求要用相同 ID。控制频率 20 Hz；局部窗口 4×4 m；车体用半径 0.15 m 的圆；膨胀半径 0.35 m。配置固定使用 Jazzy 的 Twist 输出，没有速度平滑器、真实传感器或碰撞监控器。
+\lstinputlisting[language=bash,basicstyle=\footnotesize\ttfamily,firstline=1,lastline=37]{examples/navigation/navigation-lab-demo/params.yaml}
+接下来是两张代价地图的完整配置：
+\lstinputlisting[language=bash,basicstyle=\footnotesize\ttfamily,firstnumber=38,firstline=38]{examples/navigation/navigation-lab-demo/params.yaml}
+
+然后，\texttt{sim.py} 接收实际 \texttt{cmd\_vel}，用单调时钟的实际间隔积分平面运动，发布 odom 和 TF。固定 map→odom 为单位变换，是因为软件模型没有定位漂移；它明确替代了本实验的定位输入，不能搬到真实哨兵上当定位系统。
+\lstinputlisting[language=Python,basicstyle=\footnotesize\ttfamily]{examples/navigation/navigation-lab-demo/sim.py}
+该模型忽略惯性、打滑和碰撞动力学，断流 0.5 s 后只让软件停止积分。导航避障取决于实际代价地图和控制器检查，最后还应检查保存轨迹是否与障碍相交。
+
+\texttt{lab.launch.py} 把 map\_server、planner\_server、controller\_server、生命周期管理器和软件模型一起启动。生命周期管理器负责配置、激活服务器，\texttt{map} 启动参数替换地图文件位置；整个示例不需要新建 ROS 包。
+\lstinputlisting[language=Python,basicstyle=\footnotesize\ttfamily]{examples/navigation/navigation-lab-demo/lab.launch.py}
+
+最后，\texttt{client.py} 等服务器真正激活，再调用 \texttt{ComputePathToPose}，成功后才调用 \texttt{FollowPath}。它订阅并保存真实服务器输出的速度和软件 odom，超时会请求取消，失败则保留状态和错误码。
+\lstinputlisting[language=Python,basicstyle=\footnotesize\ttfamily,firstline=1,lastline=49]{examples/navigation/navigation-lab-demo/client.py}
+\lstinputlisting[language=Python,basicstyle=\footnotesize\ttfamily,firstnumber=50,firstline=50]{examples/navigation/navigation-lab-demo/client.py}
+两个终端都进入项目、加载同一 ROS 环境和隔离 Domain，然后运行：
+\begin{tbash}
+# 终端一：先生成地图，launch终端保持运行
+python3 grid.py --output out/map
+ros2 launch "$PWD/lab.launch.py"
+# 终端二
+python3 client.py --output out/nav2
+ros2 topic type /cmd_vel
+ros2 param get planner_server GridBased.plugin
+ros2 param get controller_server FollowPath.plugin
+ros2 run tf2_ros tf2_echo map base_link
+\end{tbash}
+看到 \texttt{Managed nodes are active} 后地图与服务器已经激活；刚启动时短暂的“等待 TF”与一直超时不是同一种情况。客户端也会检查生命周期，避免“action 能连上，地图却还没准备好”的竞争。
+
+实跑中规划状态和跟踪状态均为 4（Succeeded），错误码为 0，路径有 123 个点，最终位置距离目标约 0.10 m，与配置的 0.1 m 位置容差对应。具体 odom/速度样本数随运行调度变化，以你保存的 \texttt{result.json} 为准。本例同时观测到 60×40 的 map 和 global costmap；map 的值是 0/100，原始 costmap 中还有 253、254 和一系列膨胀代价，能看出它们不是同一数组。
+\end{example}
+\begin{exercise}\label{ex:nav-run}
+实际启动该闭环，保存结果，核对插件 ID、cmd\_vel 类型、路径长度和最终位置误差。然后运行 \texttt{python3 client.py --blocked-goal --output out/nav2-blocked}，目标落在障碍中；它有没有继续调用控制器？从日志指出中断位置。
+\end{exercise}
+
+\begin{example}
+现在把保存的数据画出来。\texttt{plot.py} 只读上面那次结果，不另造一条“看上去很成功”的轨迹。
+\lstinputlisting[language=Python,basicstyle=\footnotesize\ttfamily]{examples/navigation/navigation-lab-demo/plot.py}
+\begin{tbash}
+python3 plot.py --map out/map --nav2 out/nav2 \
+  --output out/navigation.pdf
+\end{tbash}
+默认字体使用依赖里的文泉驿，\texttt{--font} 可换成你机器上的中文字库；教材插图使用 Fandol 与其他章协调。左图看离线格心路线，右图看真实 Navfn 路径与软件轨迹，两边的模型与代价不同，不要求路径点一一重合。
+\begin{figure}[H]
+\centering
+\includegraphics[width=.96\textwidth]{nav_paths_revised.pdf}
+\caption{实际保存数据：四邻接离线路线与 Jazzy Nav2 的规划、跟踪结果}
+\label{fig:nav-paths}
+\end{figure}
+\end{example}
+\begin{exercise}\label{ex:nav-plot}
+把 \texttt{desired\_linear\_vel} 改为 0.3，停止终端一并重新启动，从同一初始位置跑到同一目标，保存到另一个输出目录。比较实际速度峰值与到达时长；说明为什么不能只改图上的标签就声称已经验证了慢速运行。
+\end{exercise}
+\begin{note}
+项目输出目录用于保存当前实验，重复运行同一路径会覆盖数据。终端一 Ctrl+C 结束本项目；演示没有连接真实底盘，不应把这些配置直接启动在正在运动的机器人环境里。本章的圆形模型与静态场地软件验证，不能证明真实底盘制动、雷达覆盖或动态避障能力。
+\end{note}
+
+\subsubsection{失败以后，别让哨兵无限重试}
+规划无路、控制无有效速度、进度长期不变时，任务需要选择恢复。清空过时障碍信息、等障碍离开、重新规划、旋转或后退都有用途，但要针对原因：清地图不能清掉真实墙，倒车也要先核对后方可行空间；TF 丢失时更应该修复数据链，而不是盲目转圈。
+
+Nav2 的行为树（Behavior Tree，BT）用任务节点和控制节点组织流程。执行节点调用规划、控制或行为服务器；顺序（Sequence）按顺序执行，失败就停；选择（Fallback）只在当前分支失败时才试下一分支。节点返回 Success、Failure 或 Running；Running 表示还没完成，必须向上传递，不能一边跟踪路径一边误启动恢复。具体还有带记忆、响应式等控制节点，名称相似也要看执行语义。
+
+\begin{example}
+\texttt{bt.py} 是可以逐 tick 运行的等价教学模拟器，\texttt{Control} 实现带记忆的顺序/选择节点，\texttt{Recovery} 在导航失败后轮流清理、等待，成功才重试导航，最多完成两次恢复；恢复分支自己失败则立即退出。这与实际 Nav2 的\href{https://docs.nav2.org/rolling/configuration_and_development/configuration_guide/core_servers/bt_plugins/controls/RecoveryNode/}{RecoveryNode 重试职责}相对应，但本文件不是 Nav2 插件，也没有真的删代价地图。
+\lstinputlisting[language=Python,basicstyle=\footnotesize\ttfamily,firstline=1,lastline=35]{examples/navigation/navigation-lab-demo/bt.py}
+\lstinputlisting[language=Python,basicstyle=\footnotesize\ttfamily,firstnumber=36,firstline=36]{examples/navigation/navigation-lab-demo/bt.py}
+\begin{tbash}
+python3 bt.py
+python3 bt.py --fail
+python3 bt.py --stuck
+\end{tbash}
+默认日志依次为导航失败、清理成功、导航失败、等待 Running、等待成功、导航成功，最终重试计数为 2。\texttt{--fail} 让导航持续失败，恢复两次后结束为 Failure；\texttt{--stuck} 让等待一直 Running，十次 tick 后外层预算输出 Timeout。这个 tick 预算不是秒级实时保证，真实任务还要结合时钟期限和取消逻辑。
+
+要直接核对 Fallback 的 Running 传播，可以在项目目录执行：
+\begin{tpython}
+from bt import Control, Script, RUNNING, SUCCESS
+log = []
+root = Control([Script("follow", [RUNNING], log),
+                Script("recover", [SUCCESS], log)], sequence=False)
+print(root.tick(), log)
+\end{tpython}
+只应记录 \texttt{follow}，不会调用 \texttt{recover}。真实导航的完整 BT XML 应结合已安装版本查看，BT Navigator 组织的不止规划与控制，还可以调用行为、平滑等服务，不能把导航软件永久写成“一大三小”。
+\end{example}
+\begin{exercise}\label{ex:nav-bt}
+用 \texttt{Control} 分别核对两个分支均 Failure 的 Fallback、第一分支 Running 的 Sequence。再运行三种恢复序列，记录每次 tick 的返回值，解释恢复次数和 tick 预算各自限制什么。
+\end{exercise}
+\begin{conclusion}
+规划器说“路在哪”，控制器说“现在怎么动”，恢复逻辑说“失败后怎么办”。恢复次数要有限，Running 要有上层时间预算，最终失败要能通知任务决策；让哨兵原地重试到比赛结束，日志可能挺努力，任务还是没完成。
+\end{conclusion}

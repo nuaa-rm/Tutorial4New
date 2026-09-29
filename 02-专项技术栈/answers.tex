@@ -1175,75 +1175,116 @@ solved仅说明约定问题的数值求解，不能排除规划后动态改变�
 \addcontentsline{toc}{section}{第十一章题解：导航与 SLAM 初步}
 \subsubsection*{随堂练习}
 
-\paragraph*{随堂练习 11.1}
+\paragraph*{随堂练习 \ref{ex:nav-chain}}
 \begin{solution}
-已有路径但没有速度时，先检查控制器是否激活、是否收到路径、局部代价地图与 TF 是否可用，以及进度/目标检查和下游速度接口。没有位姿时，先从定位输入、时间戳、TF 连通性和定位节点状态查起；没有坐标变换基础时，反复重算路径不能解决问题。
+已有路径没有速度，先沿路径→控制器→cmd\_vel 检查，核对 controller\_server 是否激活、局部代价地图和 TF 是否可用、插件 ID 和进度/目标条件。没有位置时沿传感器/里程计→定位→TF→规划起点查时间戳、坐标关系和节点状态。重规划不能补出缺失变换。
 \end{solution}
 
-\paragraph*{随堂练习 11.2}
+\paragraph*{随堂练习 \ref{ex:nav-tf}}
 \begin{solution}
-停止原发布程序后，把 x 改为 2 再启动，tf2\_echo 应看到 x 平移为 2，y、z 为 0。不要让两个发布者同时发布同一个子坐标系。真实 map 到 odom 的变换用于随定位结果修正累计漂移，通常随时间变化；固定演示值不能长期替代定位输出。
+先停止旧发布者再修改 x，两次分别看到 (1,0,0) 和 (2,0,0)。第一条 yaw 变成零时，两段平移直接相加，结果 (3,2)。真实 map→odom 要跟随全局定位修正累计漂移，不能用静态值长期替代；本实验只存入独立坐标系，没有覆盖真实定位。
 \end{solution}
 
-\paragraph*{随堂练习 11.3}
+\paragraph*{随堂练习 \ref{ex:nav-localization}}
 \begin{solution}
-原例格心相对原点为 (0.525,1.025) m，加上新原点 (-2,-1)，得到 (-1.475,0.025) m。分辨率与栅格宽高共同决定地图覆盖的物理尺寸，例如宽 W 格时宽度为 $W\times resolution$。本题假定原点偏航为零，存在旋转时还需先旋转再平移。
-\end{solution}
-
-\paragraph*{随堂练习 11.4}
-\begin{solution}
-A 到 C 的直达代价改为 2，经 B 的代价仍为 $1+2=3$，所以最短距离为 2，走直接边。最少边只统计经过多少条边，最低代价则累加边权；原例直接边代价 5 时，一条边反而不如两条边的总代价 3。
-\end{solution}
-
-\paragraph*{随堂练习 11.5}
-\begin{solution}
-加入以下断言：
+新的修正为 $(1.8,0.7)-(2,0.5)=(-0.2,0.2)$。增添法向量后可运行：
 \begin{tpython}
-assert fallback(["Failure", "Failure"]) == "Failure"
+import numpy as np
+normals = np.array([[0.,1.], [0.,-1.], [1.,0.]])
+print(np.linalg.eigvalsh(normals.T @ normals))
 \end{tpython}
-基础 Fallback 只传播子项状态；重试上限应由上层任务编排、重试装饰节点或明确的恢复策略决定，同时设超时与最终失败出口。不能由每个底层模块各自无限重试。
+结果是 1、2，补上沿 x 的约束；这是局部线性墙面约束模型，不是实车全局重定位的成功证明。
 \end{solution}
 
+\paragraph*{随堂练习 \ref{ex:nav-fusion}}
+\begin{solution}
+仅平移时间差为 $1\times0.1=0.1$ m。先检查统一时间基准与同步，再谈融合。打滑可对照轮速和其他运动观测；白墙应检查特征数量、跟踪和曝光；长走廊应检查可见几何是否缺乏纵向约束，并考虑其他观测。不能只把噪声参数调小来宣称定位更准确。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:nav-filter}}
+\begin{solution}
+均值为 (0.01+0.09)/2=0.05，y、z 仍为 0.01；同步修改质心断言，0.1 m 叶子仍得到一个点。0.02 m 叶子时两点不在同一体素，输出两个点，此时原先“size=1”的检查应失败。先看实际坐标与数量，再按新预期核对，不删除检查把变化伪装成相同结果。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:nav-map}}
+\begin{solution}
+无旋转时格心 (-1.475,0.025) m。第二问局部格心 (0.25,0.35)，旋转后 (-0.35,0.25)，加原点得到 (0.65,2.25) m。可以直接调用 cell\_center(2,3,.1,(1,2,math.pi/2))。40 行图片第 0 行对应 j=39。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:nav-costmap}}
+\begin{solution}
+制动距离 $2^2/(2\times2)=1$ m，延迟增加 0.4 m，共 1.4 m；5 m 窗口半宽 2.5 m，在这组理想条件下有余量，仍需考虑障碍感知范围、动态物体和其他误差。清动态障碍是处理过时观测，静态层仍应提供墙体；真实墙不能因为清除服务而被当作自由空间。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:nav-search}}
+\begin{solution}
+A→C 代价 2，直接边更便宜。四邻接图存在多条同为 70 的路线，候选点排序与启发式改变取点顺序，路线可能不同。shortest 检查有限非负边权，负权触发 ValueError，本函数不承担负权图的最短路。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:nav-run}}
+\begin{solution}
+默认插件分别为 NavfnPlanner 和 RegulatedPurePursuitController，完整类名见本章配置；cmd\_vel 为 geometry\_msgs/msg/Twist；本次路径 123 点，状态均为 4、错误码为 0，位置误差约 0.10 m。障碍内目标返回状态 6（Aborted）、规划错误码 206（GOAL\_OCCUPIED）、路径 0 点，没有调用 FollowPath。保留自己的 result 与启动日志，样本数随运行调度变化，不照抄教材的计数。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:nav-plot}}
+\begin{solution}
+从新启动的初始位置保存慢速实验，记录运行开始/结束及命令样本，比较峰值和时长；模型、地图和目标保持一致。速度上限下降时通常用时更长，曲率调速和调度会影响精确时长。图必须读取慢速保存的数组与日志，并保留默认结果用于比较；改图例不产生新的实验数据。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:nav-bt}}
+\begin{solution}
+Fallback 两项 Failure 返回 Failure，Sequence 首项 Running 立即返回 Running，不调用后一项。用两个 Script 和 Control 即可核对，log 应只含实际执行节点。默认每 tick 返回 Running、Running、Running、Success；持续失败为 Running、Running、Running、Failure；等待卡住时十次树返回 Running，外层预算将最终结果标为 Timeout。两次恢复限制的是恢复成功后的再次尝试次数，tick 预算限制演示调用次数；它不能替代真实时间期限。
+\end{solution}
 \subsubsection*{章末习题}
 
-\paragraph*{第十一章章末第 1 题}
+\paragraph*{章末题 \ref{prob:nav-chain}}
 \begin{solution}
-先检查控制器状态、局部代价地图、TF、输入路径和进度条件，不能只反复调用全局规划。
+输入查路径 frame/时间、TF 与局部代价地图；状态查生命周期、插件和进度检查；输出查 cmd\_vel 类型、发布者与底盘订阅/看门狗。路径已有并不说明控制链就绪，换规划器通常不会修复缺失坐标变换或下游接口。
 \end{solution}
 
-\paragraph*{第十一章章末第 2 题}
+\paragraph*{章末题 \ref{prob:nav-frames}}
 \begin{solution}
-map 是全局参考，可发生定位修正；odom 局部连续但可能漂移；base\_link 固连机器人。
+map 给全局参考，允许定位修正；odom 局部连续但可能漂移；base\_link 固连车体。$T_{map,odom}=T_{map,base}T_{odom,base}^{-1}$；odom→base\_link 保持局部连续，全局修正写入 map→odom。
 \end{solution}
 
-\paragraph*{第十一章章末第 3 题}
+\paragraph*{章末题 \ref{prob:nav-cell}}
 \begin{solution}
-格心为 (1.25,2.35) m；需区分栅格索引与图片行坐标。
+格心 (1.25,2.35) m；图片第 0 行对应 j=39。该换算以题目的无旋转、图像从顶部数行为前提。
 \end{solution}
 
-\paragraph*{第十一章章末第 4 题}
+\paragraph*{章末题 \ref{prob:nav-filter}}
 \begin{solution}
-静态层提供已有地图，障碍层更新传感器障碍，膨胀层在障碍周围形成代价分布以反映通行余量。
+VoxelGrid 以同一体素内输入点的质心近似局部表面，体素中心是与点分布无关的几何位置。SOR 检查 K、标准差倍数、距离分布和密度变化；稀疏真障碍可能具有较大近邻距离。平面方向不足以区分地板和桌面，还需高度、结构与场景证据。
 \end{solution}
 
-\paragraph*{第十一章章末第 5 题}
+\paragraph*{章末题 \ref{prob:nav-layers}}
 \begin{solution}
-选择 A-B-C，总代价 4；最少边的直达路线并非最低代价。
+静态层供已有场地，障碍层用观测标记/清除，膨胀层增加近障碍通行代价。OccupancyGrid 的 100 表示占据，原始 costmap 的 254 表示致命障碍，编码与未知值不同，需要明确转换。本例 map 实测 0/100，costmap 还有 253 和多种膨胀代价。
 \end{solution}
 
-\paragraph*{第十一章章末第 6 题}
+\paragraph*{章末题 \ref{prob:nav-dijkstra}}
 \begin{solution}
-不执行，应返回 Running；失败才尝试后续分支。
+A→B→C，代价 4，小于直达 5。四邻接单位边权可用曼哈顿距离 $|i-i_g|+|j-j_g|$，它不高估并满足一致性；换邻接规则或代价后需重新核对启发式条件。
 \end{solution}
 
-\paragraph*{第十一章章末第 7 题}
+\paragraph*{章末题 \ref{prob:nav-running}}
 \begin{solution}
-制动距离 v²/(2a)=2 m；还需加入感知、通信、控制延迟与余量，否则障碍被发现时可能已无法及时停车。
+不会，立即传播 Running。恢复成功只是允许重新执行导航；导航下一次仍可能失败，所以 Recovery 只有主任务成功才返回 Success，重试耗尽则返回 Failure。
 \end{solution}
 
-\paragraph*{第十一章章末第 8 题}
+\paragraph*{章末题 \ref{prob:nav-braking}}
 \begin{solution}
-到 C 的最短距离为 5，应走直接边。
+$v^2/(2a)+vT=2+0.4=2.4$ m，4 m 窗口的前向半宽只有 2 m，不够。额外余量还未计入，计算也假定制动能力可用、路面和运动状态满足模型。
+\end{solution}
+
+\paragraph*{章末题 \ref{prob:nav-runtime}}
+\begin{solution}
+分别用不同输出目录保存默认和 blocked-goal。默认规划与跟踪成功；障碍内目标在规划阶段以 GOAL\_OCCUPIED 结束，没有路径也没有跟踪请求。对照插件、代价地图与规划日志说明目标被占据；路径与真实软件轨迹同时检查。验收以本机实际状态/结果为准，不以教材图或代码存在代替执行。
+\end{solution}
+
+\paragraph*{章末题 \ref{prob:nav-recovery}}
+\begin{solution}
+用脚本的节点日志对照答案\ref{ex:nav-bt}，它保存的节点调用次数不一定等于 tick 次数，因为同一 tick 可以结束一项并启动下一项。把 Recovery 的 retries 改为 0 后第一次导航 Failure 就返回 Failure，clear/wait 不执行。持续 Running 分支需要外层预算；恢复分支自身 Failure 则应立即失败，可用 Script("clear", [FAILURE], log) 核对。
 \end{solution}
 
 \endgroup

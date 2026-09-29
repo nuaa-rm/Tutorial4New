@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.16)
+project(point_filters LANGUAGES C CXX)
+find_package(PCL REQUIRED COMPONENTS filters)
+add_executable(point_filters point_filters.cpp)
+target_compile_features(point_filters PRIVATE cxx_std_17)
+target_include_directories(point_filters PRIVATE ${PCL_INCLUDE_DIRS})
+target_link_libraries(point_filters PRIVATE ${PCL_LIBRARIES})

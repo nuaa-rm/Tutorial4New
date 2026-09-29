@@ -2,3 +2,6 @@
 *.pdf binary
 *.png binary
 *.ttf binary
+
+# 真实 Nav2 日志保留原始输出字节，包括 ROS 打印的行尾空白。
+docs/revision/evidence/volume-2-chapter-11-*launch.txt -whitespace
