@@ -25,11 +25,11 @@ UEFI 安装还要确认 EFI 系统分区（ESP），通常复用已有分区并�
 
 \paragraph*{随堂练习~\ref{ex:v1-usb-image}：镜像与启动盘}
 \begin{solution}
-校验值应与同一下载版本的 SHA256SUMS 中对应 ISO 条目一致，目标应为已备份的 U 盘，Etcher 写入和校验均成功。启动菜单选择这只盘的 UEFI 项，进入 Try Ubuntu；不把看到安装器首页当作正式系统已装好。没有 U 盘只完成校验时，实际启动仍待验证。
+校验值应与同一下载版本的 SHA256SUMS 中对应 ISO 条目一致，目标应为已备份的 U 盘，Etcher 写入和校验均成功。
 \end{solution}
 \paragraph*{随堂练习~\ref{ex:v1-installer-review}：分区核对}
 \begin{solution}
-ESP 保留、不格式化，UEFI 引导文件位于其中；/boot 保存内核等文件，可在根分区内；swap 是交换空间，没有 /swap 挂载点。GPT 不分旧式主/逻辑分区。格式化只针对计划新建或替换的 Ubuntu 分区，Windows 数据与恢复分区保留。独立 /home 要保留也须取消格式化并先备份。
+ESP 保留、不格式化，UEFI 引导文件位于其中；/boot 保存内核等文件，可在根分区内；swap 是交换空间，没有 /swap 挂载点。
 \end{solution}
 \paragraph*{随堂练习~\ref{ex:v1-boot-order}：记录启动顺序}
 \begin{solution}
@@ -40,17 +40,7 @@ ESP 保留、不格式化，UEFI 引导文件位于其中；/boot 保存内核�
 
 \paragraph*{随堂练习~\ref{ex:v1-resize-plan}：扩容规划}
 \begin{solution}
-隔着其他分区时，未分配空间不与根分区相邻，不能直接把那块空间加进去。先验证备份与恢复介质，核对是否能迁移大文件；确需移动分区时制定完整离线方案，在 Live 环境卸载目标并确认电源可靠。完成后用 lsblk 查分区大小、df -hT / 查文件系统容量，并测试系统启动。只作规划不算实际扩容验证。
-\end{solution}
-\paragraph*{随堂练习~\ref{ex:v1-grub-plan}：引导配置}
-\begin{solution}
-菜单标题或 ID 来自本机 grub.cfg，不能从其他机器截图抄序号。主题控制显示，GRUB\_DEFAULT 控制菜单默认项，固件 Boot 顺序控制先启动哪个引导程序。备份 /etc/default/grub 后修改该源配置，update-grub 生成，再验证；必要时恢复对应备份并重新生成。实际写入与重启留到有恢复介质和明确方案时执行。
-\end{solution}
-\paragraph*{随堂练习~\ref{ex:v1-desktop-plugins}：桌面插件（选修）}
-\begin{solution}
-按正文步骤安装 Extension Manager，在其中查找并启用与当前 GNOME 版本兼容的 Caffeine 和 Clipboard Indicator。
-验证时分两步：先记下自动熄屏时间，启用 Caffeine，等待超过该时间；再复制三段普通文字，从剪贴板历史中重新选择第一段并粘贴。
-分别记录插件状态和验证结果。没有兼容版本时，记录版本及提示，不把“能搜到插件”当作“已经启用”。剪贴板测试用普通文字就好，不要用密码。
+隔着其他分区时，未分配空间不与根分区相邻，不能直接把那块空间加进去。先验证备份与恢复介质，核对是否能迁移大文件；确需移动分区时制定完整离线方案，在 Live 环境卸载目标并确认电源可靠。完成后用 lsblk 查分区大小、df -hT / 查文件系统容量，并测试系统启动。
 \end{solution}
 
 \paragraph*{随堂练习~\ref{ex:v1-snapshot}：创建与恢复快照（选修）}
