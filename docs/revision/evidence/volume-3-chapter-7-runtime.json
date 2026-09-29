@@ -21,7 +21,7 @@
           "owner": null,
           "method": "本机文件检查",
           "entry": "/home/mijiao/Apps/Tutorial4New/01-基础通识/Chapter3/3.tex",
-          "sha256": "d077d8cceeb45266eb50f520dd81521ee165c243bb35145425e36d2f3db5146b",
+          "sha256": "6e404993aed18656d25d0bb2a4674b70d8037b0c43d1ed4ccfdf5f6598da5b74",
           "main_sha256": "b04bef89421b49beae8da12d6eaedd09d7516a6a5cb9c3bdb9139d9960623af0",
           "chapter": "编译过程与 CMake 基础",
           "book_version": "2026.09",
@@ -148,7 +148,7 @@
           "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/resource-index-demo/audit.py",
           "communication",
           "--catalog",
-          "/tmp/textbook-v3-index-final/bad-version.csv"
+          "/tmp/textbook-v3-index-path-followup/bad-version.csv"
         ],
         "stdout": {
           "key": "communication",
@@ -173,7 +173,7 @@
           "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/resource-index-demo/audit.py",
           "communication",
           "--catalog",
-          "/tmp/textbook-v3-index-final/bad-chapter.csv"
+          "/tmp/textbook-v3-index-path-followup/bad-chapter.csv"
         ],
         "stdout": {
           "key": "communication",
@@ -198,7 +198,7 @@
           "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/resource-index-demo/audit.py",
           "communication",
           "--catalog",
-          "/tmp/textbook-v3-index-final/bad-entry.csv"
+          "/tmp/textbook-v3-index-path-followup/bad-entry.csv"
         ],
         "stdout": {
           "key": "communication",
@@ -219,16 +219,16 @@
           "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/resource-index-demo/audit.py",
           "communication",
           "--catalog",
-          "/tmp/textbook-v3-index-final/moved.csv",
+          "/tmp/textbook-v3-index-path-followup/moved.csv",
           "--root",
-          "/tmp/textbook-v3-index-final/book"
+          "/tmp/textbook-v3-index-path-followup/book"
         ],
         "stdout": {
           "key": "communication",
           "checked_on": "2026-09-29",
           "owner": null,
           "method": "本机文件检查",
-          "entry": "/tmp/textbook-v3-index-final/book/02-专项技术栈/chapters/comm_copy.tex",
+          "entry": "/tmp/textbook-v3-index-path-followup/book/02-专项技术栈/chapters/comm_copy.tex",
           "sha256": "c832557bb7c37fbe2a77a4343bb8810cd5ec12429eecd59a14e4d9f2c61cc11f",
           "main_sha256": "b6463d9c1b1a50c159e68bbab8eabe0ff5ee4e364846c19290e66cebfd1e7b8b",
           "status": "入口未被主文件引用"
@@ -245,16 +245,16 @@
           "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/resource-index-demo/audit.py",
           "communication",
           "--catalog",
-          "/tmp/textbook-v3-index-final/moved.csv",
+          "/tmp/textbook-v3-index-path-followup/moved.csv",
           "--root",
-          "/tmp/textbook-v3-index-final/book"
+          "/tmp/textbook-v3-index-path-followup/book"
         ],
         "stdout": {
           "key": "communication",
           "checked_on": "2026-09-29",
           "owner": null,
           "method": "本机文件检查",
-          "entry": "/tmp/textbook-v3-index-final/book/02-专项技术栈/chapters/comm_copy.tex",
+          "entry": "/tmp/textbook-v3-index-path-followup/book/02-专项技术栈/chapters/comm_copy.tex",
           "sha256": "c832557bb7c37fbe2a77a4343bb8810cd5ec12429eecd59a14e4d9f2c61cc11f",
           "main_sha256": "46a264fb23a715090b55791ff2e3223629b30989d7d1083ad8e4f92752e580c0",
           "chapter": "多机通信方法",
