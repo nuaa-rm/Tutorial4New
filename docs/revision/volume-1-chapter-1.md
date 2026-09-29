@@ -62,7 +62,7 @@
 - Miniforge3/Conda 26.7.2 临时安装：官方 SHA256 校验通过，Python 3.10.21、NumPy 2.2.6；配置读取、关闭自动激活、创建/激活/导入/退出/删除成功。此版本提示 auto_activate_base 是 auto_activate 的别名，正文已有版本差异提示。测试写配置使用 `--file /tmp/tutorial-conda/.condarc`，没有改用户登录配置。日志：`evidence/volume-1-chapter-1-conda.txt`。
 - Distrobox `ubuntu2404` 实际为 Ubuntu 24.04.5 / ROS 2 Jazzy。安装缺少的 python3-serial、gdb、python3-venv 等依赖；系统 Python + pySerial 3.5 回环实测 hello 和二进制变体，十六进制分别为 `68 65 6c 6c 6f 0a`、`00 41 ff 0a`，超时读取为空。
 - 同一容器 GCC 13.3 / CMake 构建 ide-demo 输出 `total = 75`。GDB 15.1 断点读到 score=60、bonus=15，步入/步过/返回后 result=75、total=75，程序正常退出。这验证程序与命令行调试，没有代替两套 GUI 的实际点击。
-- **尚缺验证环境**：Windows+UEFI 实际压缩/写 USB/安装/启动切换、Live 扩容、Timeshift 系统恢复与重装、当前 GNOME/GRUB/zsh/AstroNvim 新配置过程、CLion/VS Code 当前 GUI 全流程、真实 USB CDC ACM 板/TTL 接线、udev 身份绑定与板端协议。软件安装和配置教程中尚未逐条执行的 apt tree/cowsay、AstroNvim 插件和主题命令也属于未完成的运行覆盖。保留操作前提与验证标准，不盲目改主力系统来凑验证。
+- **尚缺验证环境**：Windows+UEFI 实际压缩/写 USB/安装/启动切换、Live 扩容、Timeshift 系统恢复与重装、当前 GNOME/GRUB/zsh/AstroNvim 新配置过程、CLion/VS Code 当前 GUI 全流程、真实 USB CDC ACM 板/TTL 接线、udev 身份绑定与板端协议。软件安装/配置的后续补跑见本文末尾：apt、AstroNvim与zsh临时安装及配置已实际完成，原生桌面与登录切换仍待验证。保留操作前提与验证标准，不盲目改主力系统来凑验证。
 - 已有五张 IDE 真实截图用于认按钮，界面版本为 CLion 2025.1.3、VS Code 1.137.0 Windows 中文界面；本次没有把历史截图当作当前操作实测。
 
 ## 图片与 LaTeX 整理
@@ -77,3 +77,13 @@
 旧图保留为历史资源，第一章引用已切换；没有重命名或移动 .tex 文件。淘汰本章中与 UEFI/GPT 路线冲突的 install5/install6 图和过时快捷键表引用，真实截图不篡改。图生成脚本区分 candidate 与检查后的 revised 输出。源文件直接引入项目代码；题解从手写题号改为标签引用，避免新增习题导致串号。新增结构脚本只检查路径、标签和题解定位，不冒充内容、运行或视觉验收。
 
 编译日志中尚存第二章原有的越界警告，将在第二章修订中处理；不把第一章通过扩大为整卷版面通过。
+
+## 全书收尾补跑：包管理、zsh 与 AstroNvim
+
+补跑证据见evidence/volume-1-chapter-1-extra-tools.json。Ubuntu中实际执行apt update、search cowsay、install tree/cowsay/ripgrep/gcc；tree列出1目录1文件，cowsay输出hello textbook，再remove本次新装cowsay并核对未安装。复用已有Neovim0.12.5，不重复写/opt。
+
+审阅官方Oh My Zsh安装脚本后，用临时ZDOTDIR/ZSH与--unattended实际安装；克隆p10k、autosuggestions、syntax-highlighting，设置主题/插件并验证三个函数可用和别名输出migrated_alias。实际PTY完成p10k向导，ASCII/Lean/256色/两行/紧凑等选择保存临时.p10k.zsh与.zshrc，原始选择输出及源码散列保留；没有虚构用户终端字体显示或修改登录shell。
+
+临时XDG配置、数据、状态和缓存中按官方模板安装AstroNvim6系列与插件，9种语法解析器实际编译/安装。用Neovim输入接口执行Space-ff，真实选择器找到hello.txt；退出输入模式后确认并打开其实际缓冲区，读到hello textbook；Space-fw输入textbook找到hello.txt第1行第7列。初次自动确认尚在insert模式，缓冲区未打开；保存失败诊断，增加Esc和状态等待后实际成功，没有改搜索实现。执行LspInstall clangd，Mason安装后实际运行clangd23.1.0，退出0。遵循官方0.11+需求及搜索/LSP入口：[AstroNvim](https://docs.astronvim.com/)，向导与临时配置参考[Powerlevel10k](https://github.com/romkatv/powerlevel10k)。
+
+移除原未完成清单中的apt tree/cowsay、AstroNvim模板/插件/搜索/LSP、zsh框架/主题/插件及别名配置软件缺口；第19项仍未完成：登录shell切换与本机终端字体/主题设置、实际GNOME/GRUB、双系统写盘/备份恢复、CLion/VS Code原生GUI和物理串口不能由这些临时软件流程替代。文本与图片未改，无新增PDF布局变更。

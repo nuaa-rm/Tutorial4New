@@ -1,0 +1,395 @@
+{
+  "apt_records": [
+    {
+      "name": "cowsay-before",
+      "command": [
+        "dpkg-query",
+        "-W",
+        "-f=${Status}\n",
+        "cowsay"
+      ],
+      "returncode": 1,
+      "duration_s": 0.01123547500174027,
+      "log": "/tmp/textbook-extra-tools/cowsay-before.log"
+    },
+    {
+      "name": "apt-update",
+      "command": [
+        "sudo",
+        "apt",
+        "update"
+      ],
+      "returncode": 0,
+      "duration_s": 4.055833159996837,
+      "log": "/tmp/textbook-extra-tools/apt-update.log"
+    },
+    {
+      "name": "apt-search-cowsay",
+      "command": [
+        "apt",
+        "search",
+        "^cowsay$"
+      ],
+      "returncode": 0,
+      "duration_s": 0.9057200950046536,
+      "log": "/tmp/textbook-extra-tools/apt-search-cowsay.log"
+    },
+    {
+      "name": "apt-install-tools",
+      "command": [
+        "sudo",
+        "apt",
+        "install",
+        "-y",
+        "tree",
+        "cowsay",
+        "ripgrep",
+        "gcc"
+      ],
+      "returncode": 0,
+      "duration_s": 4.32202802500251,
+      "log": "/tmp/textbook-extra-tools/apt-install-tools.log"
+    },
+    {
+      "name": "tree-run",
+      "command": [
+        "tree",
+        "/tmp/textbook-extra-tools/sample"
+      ],
+      "returncode": 0,
+      "duration_s": 0.0010797159993671812,
+      "log": "/tmp/textbook-extra-tools/tree-run.log"
+    },
+    {
+      "name": "cowsay-run",
+      "command": [
+        "/usr/games/cowsay",
+        "hello textbook"
+      ],
+      "returncode": 0,
+      "duration_s": 0.015190156002063304,
+      "log": "/tmp/textbook-extra-tools/cowsay-run.log"
+    },
+    {
+      "name": "cowsay-remove",
+      "command": [
+        "sudo",
+        "apt",
+        "remove",
+        "-y",
+        "cowsay"
+      ],
+      "returncode": 0,
+      "duration_s": 1.7473264500004007,
+      "log": "/tmp/textbook-extra-tools/cowsay-remove.log"
+    },
+    {
+      "name": "cowsay-after",
+      "command": [
+        "dpkg-query",
+        "-W",
+        "-f=${Status}\n",
+        "cowsay"
+      ],
+      "returncode": 1,
+      "duration_s": 0.011851244998979382,
+      "log": "/tmp/textbook-extra-tools/cowsay-after.log"
+    },
+    {
+      "name": "nvim-version",
+      "command": [
+        "nvim",
+        "--version"
+      ],
+      "returncode": 0,
+      "duration_s": 0.005830834998050705,
+      "log": "/tmp/textbook-extra-tools/nvim-version.log"
+    }
+  ],
+  "setup_records": [
+    {
+      "name": "omz-install",
+      "command": [
+        "sh",
+        "/tmp/textbook-extra-tools/install-ohmyzsh.sh",
+        "--unattended"
+      ],
+      "returncode": 0,
+      "duration_s": 1.5425853010019637,
+      "log": "/tmp/textbook-extra-tools/omz-install.log"
+    },
+    {
+      "name": "clone-p10k",
+      "command": [
+        "git",
+        "clone",
+        "--depth=1",
+        "https://github.com/romkatv/powerlevel10k.git",
+        "/tmp/textbook-extra-tools/omz/custom/themes/powerlevel10k"
+      ],
+      "returncode": 0,
+      "duration_s": 1.5829369959974429,
+      "log": "/tmp/textbook-extra-tools/clone-p10k.log"
+    },
+    {
+      "name": "clone-autosuggestions",
+      "command": [
+        "git",
+        "clone",
+        "--depth=1",
+        "https://github.com/zsh-users/zsh-autosuggestions",
+        "/tmp/textbook-extra-tools/omz/custom/plugins/zsh-autosuggestions"
+      ],
+      "returncode": 0,
+      "duration_s": 1.098554989999684,
+      "log": "/tmp/textbook-extra-tools/clone-autosuggestions.log"
+    },
+    {
+      "name": "clone-syntax",
+      "command": [
+        "git",
+        "clone",
+        "--depth=1",
+        "https://github.com/zsh-users/zsh-syntax-highlighting",
+        "/tmp/textbook-extra-tools/omz/custom/plugins/zsh-syntax-highlighting"
+      ],
+      "returncode": 0,
+      "duration_s": 1.310875874994963,
+      "log": "/tmp/textbook-extra-tools/clone-syntax.log"
+    },
+    {
+      "name": "zsh-loaded",
+      "command": [
+        "zsh",
+        "-ic",
+        "whence -w p10k _zsh_autosuggest_start _zsh_highlight; textbook_hello; typeset -p ZSH_THEME plugins"
+      ],
+      "returncode": 0,
+      "duration_s": 0.6925216780000483,
+      "log": "/tmp/textbook-extra-tools/zsh-loaded.log"
+    },
+    {
+      "name": "astro-lazy-sync",
+      "command": [
+        "nvim",
+        "--headless",
+        "+Lazy! sync",
+        "+qa"
+      ],
+      "returncode": 0,
+      "duration_s": 34.665831653997884,
+      "log": "/tmp/textbook-extra-tools/astro-lazy-sync.log"
+    }
+  ],
+  "p10k_wizard": [
+    {
+      "choice": "n",
+      "output": "\u001b[?25l\u001b[H\u001b[2J\u001b[3J                          \u001b[1mDoes this look like a \u001b[0m\u001b[32mlock\u001b[39m\u001b[1m?\u001b[0m\r\n                 reference: https://fontawesome.com/icons/lock\r\n\r\n                                 --->    <---\r\n\r\n\u001b[1m(y)  Yes.\u001b[0m\r\n\r\n\u001b[1m(n)  No.\u001b[0m\r\n\r\n(r)  Restart from the beginning.\r\n(q)  Quit and do nothing.\r\n\r\n\u001b[1mChoice [ynrq]: \u001b[0m\u001b[?25h"
+    },
+    {
+      "choice": "n",
+      "output": "\u001b[?25l\u001b[H\u001b[2J\u001b[3J                             Let's try another one.\r\n                          \u001b[1mDoes this look like a \u001b[0m\u001b[32mlock\u001b[39m\u001b[1m?\u001b[0m\r\n                 reference: https://fontawesome.com/icons/lock\r\n\r\n                                 --->    <---\r\n\r\n\u001b[1m(y)  Yes.\u001b[0m\r\n\r\n\u001b[1m(n)  No.\u001b[0m\r\n\r\n(r)  Restart from the beginning.\r\n(q)  Quit and do nothing.\r\n\r\n\u001b[1mChoice [ynrq]: \u001b[0m\u001b[?25h"
+    },
+    {
+      "choice": "n",
+      "output": "\u001b[?25l\u001b[H\u001b[2J\u001b[3J                 \u001b[1mDoes this look like\u001b[0m \u001b[32m><\u001b[39m \u001b[1mbut taller and fatter?\u001b[0m\r\n\r\n                                 --->  ❯❮  <---\r\n\r\n\u001b[1m(y)  Yes.\u001b[0m\r\n\r\n\u001b[1m(n)  No.\u001b[0m\r\n\r\n(r)  Restart from the beginning.\r\n(q)  Quit and do nothing.\r\n\r\n\u001b[1mChoice [ynrq]: \u001b[0m\u001b[?25h"
+    },
+    {
+      "choice": "n",
+      "output": "\u001b[?25l\u001b[H\u001b[2J\u001b[3J                                  \u001b[1mPrompt Style\u001b[0m\r\n\r\n\u001b[1m(1)  Lean.\u001b[0m\r\n\r\n  \u001b[38;5;31m\u001b[1m\u001b[38;5;31m\u001b[38;5;39m~\u001b[0m\u001b[38;5;39m\u001b[38;5;31m/\u001b[1m\u001b[38;5;31m\u001b[38;5;39msrc\u001b[0m\u001b[38;5;39m\u001b[39m \u001b[38;5;76mmaster\u001b[39m \u001b[38;5;242m                                                            \u001b[39m \u001b[38;5;101m5s\u001b[39m\r\n  \u001b[38;5;76m>\u001b[39m \u001b[07m \u001b[27m\u001b[38;5;242m                                                                         \u001b[39m\r\n\r\n\u001b[1m(2)  Classic.\u001b[0m\r\n\r\n  \u001b[38;5;238m\u001b[48;5;238m \u001b[38;5;31m\u001b[1m\u001b[38;5;31m\u001b[48;5;238m\u001b[38;5;39m~\u001b[0m\u001b[38;5;39m\u001b[48;5;238m\u001b[48;5;238m\u001b[38;5;31m/\u001b[1m\u001b[38;5;31m\u001b[48;5;238m\u001b[38;5;39msrc\u001b[0m\u001b[38;5;39m\u001b[48;5;238m\u001b[48;5;238m \u001b[38;5;246m|\u001b[39m \u001b[38;5;248m\u001b[38;5;76mmaster \u001b[49m\u001b[38;5;238m\u001b[39m\u001b[38;5;242m                                                        \u001b[39m\u001b[38;5;238m\u001b[48;5;238m\u001b[39m \u001b[38;5;248m\u001b[38;5;101m5s \u001b[49m\u001b[38;5;238m\u001b[39m\r\n  \u001b[38;5;76m>\u001b[39m \u001b[07m \u001b[27m\u001b[38;5;242m                                                                         \u001b[39m\r\n\r\n\u001b[1m(3)  Rainbow.\u001b[0m\r\n\r\n  \u001b[34m\u001b[44m\u001b[38;5;254m \u001b[1m\u001b[38;5;254m\u001b[44m\u001b[38;5;255m~\u001b[0m\u001b[38;5;255m\u001b[44m\u001b[44m\u001b[38;5;254m/\u001b[1m\u001b[38;5;254m\u001b[44m\u001b[38;5;255msrc\u001b[0m\u001b[38;5;255m\u001b[44m\u001b[44m \u001b[42m\u001b[34m \u001b[30mmaster \u001b[49m\u001b[32m\u001b[39m\u001b[38;5;242m                                                         \u001b[39m\u001b[33m\u001b[43m \u001b[30m5s \u001b[33m\u001b[49m\u001b[39m\r\n  \u001b[38;5;76m>\u001b[39m \u001b[07m \u001b[27m\u001b[38;5;242m                                                                         \u001b[39m\r\n\r\n(r)  Restart from the beginning.\r\n(q)  Quit and do nothing.\r\n\r\n\u001b[1mChoice [123rq]: \u001b[0m\u001b[?25h"
+    },
+    {
+      "choice": "1",
+      "output": "\u001b[?25l\u001b[H\u001b[2J\u001b[3J                                 \u001b[1mPrompt Colors\u001b[0m\r\n\r\n\u001b[1m(1)  256 colors.\u001b[0m\r\n\r\n  \u001b[38;5;31m\u001b[1m\u001b[38;5;31m\u001b[38;5;39m~\u001b[0m\u001b[38;5;39m\u001b[38;5;31m/\u001b[1m\u001b[38;5;31m\u001b[38;5;39msrc\u001b[0m\u001b[38;5;39m\u001b[39m \u001b[38;5;76mmaster\u001b[39m \u001b[38;5;242m                                                            \u001b[39m \u001b[38;5;101m5s\u001b[39m\r\n  \u001b[38;5;76m>\u001b[39m \u001b[07m \u001b[27m\u001b[38;5;242m                                                                         \u001b[39m\r\n\r\n\u001b[1m(2)  8 colors.\u001b[0m\r\n\r\n  \u001b[34m\u001b[34m~/src\u001b[39m \u001b[32mmaster\u001b[39m \u001b[38;5;242m                                                            \u001b[39m \u001b[33m5s\u001b[39m\r\n  \u001b[32m>\u001b[39m \u001b[07m \u001b[27m\u001b[38;5;242m                                                                         \u001b[39m\r\n\r\n(r)  Restart from the beginning.\r\n(q)  Quit and do nothing.\r\n\r\n\u001b[1mChoice [12rq]: \u001b[0m\u001b[?25h"
+    },
+    {
+      "choice": "1",
+      "output": "\u001b[?25l\u001b[H\u001b[2J\u001b[3J                               \u001b[1mShow current time?\u001b[0m\r\n\r\n\u001b[1m(n)  No.\u001b[0m\r\n\r\n  \u001b[38;5;31m\u001b[1m\u001b[38;5;31m\u001b[38;5;39m~\u001b[0m\u001b[38;5;39m\u001b[38;5;31m/\u001b[1m\u001b[38;5;31m\u001b[38;5;39msrc\u001b[0m\u001b[38;5;39m\u001b[39m \u001b[38;5;76mmaster\u001b[39m \u001b[38;5;242m                                                            \u001b[39m \u001b[38;5;101m5s\u001b[39m\r\n  \u001b[38;5;76m>\u001b[39m \u001b[07m \u001b[27m\u001b[38;5;242m                                                                         \u001b[39m\r\n\r\n\u001b[1m(1)  12-hour format.\u001b[0m\r\n\r\n  \u001b[38;5;31m\u001b[1m\u001b[38;5;31m\u001b[38;5;39m~\u001b[0m\u001b[38;5;39m\u001b[38;5;31m/\u001b[1m\u001b[38;5;31m\u001b[38;5;39msrc\u001b[0m\u001b[38;5;39m\u001b[39m \u001b[38;5;76mmaster\u001b[39m \u001b[38;5;242m                                                \u001b[39m \u001b[38;5;101m5s\u001b[39m \u001b[38;5;66m04:23:42 PM\u001b[39m\r\n  \u001b[38;5;76m>\u001b[39m \u001b[07m \u001b[27m\u001b[38;5;242m                                                                         \u001b[39m\r\n\r\n\u001b[1m(2)  24-hour format.\u001b[0m\r\n\r\n  \u001b[38;5;31m\u001b[1m\u001b[38;5;31m\u001b[38;5;39m~\u001b[0m\u001b[38;5;39m\u001b[38;5;31m/\u001b[1m\u001b[38;5;31m\u001b[38;5;39msrc\u001b[0m\u001b[38;5;39m\u001b[39m \u001b[38;5;76mmaster\u001b[39m \u001b[38;5;242m                                                   \u001b[39m \u001b[38;5;101m5s\u001b[39m \u001b[38;5;66m16:23:42\u001b[39m\r\n  \u001b[38;5;76m>\u001b[39m \u001b[07m \u001b[27m\u001b[38;5;242m                                                                         \u001b[39m\r\n\r\n(r)  Restart from the beginning.\r\n(q)  Quit and do nothing.\r\n\r\n\u001b[1mChoice [n12rq]: \u001b[0m\u001b[?25h"
+    },
+    {
+      "choice": "n",
+      "output": "\u001b[?25l\u001b[H\u001b[2J\u001b[3J                                 \u001b[1mPrompt Height\u001b[0m\r\n\r\n\u001b[1m(1)  One line.\u001b[0m\r\n\r\n  \u001b[38;5;31m\u001b[1m\u001b[38;5;31m\u001b[38;5;39m~\u001b[0m\u001b[38;5;39m\u001b[38;5;31m/\u001b[1m\u001b[38;5;31m\u001b[38;5;39msrc\u001b[0m\u001b[38;5;39m\u001b[39m \u001b[38;5;76mmaster\u001b[39m \u001b[38;5;76m>\u001b[39m \u001b[07m \u001b[27m\u001b[38;5;242m                                                         \u001b[39m \u001b[38;5;101m5s\u001b[39m\r\n\r\n\u001b[1m(2)  Two lines.\u001b[0m\r\n\r\n  \u001b[38;5;31m\u001b[1m\u001b[38;5;31m\u001b[38;5;39m~\u001b[0m\u001b[38;5;39m\u001b[38;5;31m/\u001b[1m\u001b[38;5;31m\u001b[38;5;39msrc\u001b[0m\u001b[38;5;39m\u001b[39m \u001b[38;5;76mmaster\u001b[39m \u001b[38;5;242m                                                            \u001b[39m \u001b[38;5;101m5s\u001b[39m\r\n  \u001b[38;5;76m>\u001b[39m \u001b[07m \u001b[27m\u001b[38;5;242m                                                                         \u001b[39m\r\n\r\n(r)  Restart from the beginning.\r\n(q)  Quit and do nothing.\r\n\r\n\u001b[1mChoice [12rq]: \u001b[0m\u001b[?25h"
+    },
+    {
+      "choice": "2",
+      "output": "\u001b[?25l\u001b[H\u001b[2J\u001b[3J                               \u001b[1mPrompt Connection\u001b[0m\r\n\r\n\u001b[1m(1)  Disconnected.\u001b[0m\r\n\r\n  \u001b[38;5;31m\u001b[1m\u001b[38;5;31m\u001b[38;5;39m~\u001b[0m\u001b[38;5;39m\u001b[38;5;31m/\u001b[1m\u001b[38;5;31m\u001b[38;5;39msrc\u001b[0m\u001b[38;5;39m\u001b[39m \u001b[38;5;76mmaster\u001b[39m \u001b[38;5;242m                                                            \u001b[39m \u001b[38;5;101m5s\u001b[39m\r\n  \u001b[38;5;76m>\u001b[39m \u001b[07m \u001b[27m\u001b[38;5;242m                                                                         \u001b[39m\r\n\r\n\u001b[1m(2)  Dotted.\u001b[0m\r\n\r\n  \u001b[38;5;31m\u001b[1m\u001b[38;5;31m\u001b[38;5;39m~\u001b[0m\u001b[38;5;39m\u001b[38;5;31m/\u001b[1m\u001b[38;5;31m\u001b[38;5;39msrc\u001b[0m\u001b[38;5;39m\u001b[39m \u001b[38;5;76mmaster\u001b[39m \u001b[38;5;242m............................................................\u001b[39m \u001b[38;5;101m5s\u001b[39m\r\n  \u001b[38;5;76m>\u001b[39m \u001b[07m \u001b[27m\u001b[38;5;242m                                                                         \u001b[39m\r\n\r\n\u001b[1m(3)  Solid.\u001b[0m\r\n\r\n  \u001b[38;5;31m\u001b[1m\u001b[38;5;31m\u001b[38;5;39m~\u001b[0m\u001b[38;5;39m\u001b[38;5;31m/\u001b[1m\u001b[38;5;31m\u001b[38;5;39msrc\u001b[0m\u001b[38;5;39m\u001b[39m \u001b[38;5;76mmaster\u001b[39m \u001b[38;5;242m------------------------------------------------------------\u001b[39m \u001b[38;5;101m5s\u001b[39m\r\n  \u001b[38;5;76m>\u001b[39m \u001b[07m \u001b[27m\u001b[38;5;242m                                                                         \u001b[39m\r\n\r\n(r)  Restart from the beginning.\r\n(q)  Quit and do nothing.\r\n\r\n\u001b[1mChoice [123rq]: \u001b[0m\u001b[?25h"
+    },
+    {
+      "choice": "1",
+      "output": "\u001b[?25l\u001b[H\u001b[2J\u001b[3J                                 \u001b[1mPrompt Spacing\u001b[0m\r\n\r\n\u001b[1m(1)  Compact.\u001b[0m\r\n\r\n  \u001b[38;5;31m\u001b[1m\u001b[38;5;31m\u001b[38;5;39m~\u001b[0m\u001b[38;5;39m\u001b[38;5;31m/\u001b[1m\u001b[38;5;31m\u001b[38;5;39msrc\u001b[0m\u001b[38;5;39m\u001b[39m \u001b[38;5;76mmaster\u001b[39m \u001b[38;5;242m                                                            \u001b[39m \u001b[38;5;101m5s\u001b[39m\r\n  \u001b[38;5;76m>\u001b[39m \u001b[07m \u001b[27m\u001b[38;5;242m                                                                         \u001b[39m\r\n  \u001b[38;5;31m\u001b[1m\u001b[38;5;31m\u001b[38;5;39m~\u001b[0m\u001b[38;5;39m\u001b[38;5;31m/\u001b[1m\u001b[38;5;31m\u001b[38;5;39msrc\u001b[0m\u001b[38;5;39m\u001b[39m \u001b[38;5;76mmaster\u001b[39m \u001b[38;5;242m                                                            \u001b[39m \u001b[38;5;101m5s\u001b[39m\r\n  \u001b[38;5;76m>\u001b[39m \u001b[07m \u001b[27m\u001b[38;5;242m                                                                         \u001b[39m\r\n\r\n\u001b[1m(2)  Sparse.\u001b[0m\r\n\r\n  \u001b[38;5;31m\u001b[1m\u001b[38;5;31m\u001b[38;5;39m~\u001b[0m\u001b[38;5;39m\u001b[38;5;31m/\u001b[1m\u001b[38;5;31m\u001b[38;5;39msrc\u001b[0m\u001b[38;5;39m\u001b[39m \u001b[38;5;76mmaster\u001b[39m \u001b[38;5;242m                                                            \u001b[39m \u001b[38;5;101m5s\u001b[39m\r\n  \u001b[38;5;76m>\u001b[39m \u001b[07m \u001b[27m\u001b[38;5;242m                                                                         \u001b[39m\r\n\r\n  \u001b[38;5;31m\u001b[1m\u001b[38;5;31m\u001b[38;5;39m~\u001b[0m\u001b[38;5;39m\u001b[38;5;31m/\u001b[1m\u001b[38;5;31m\u001b[38;5;39msrc\u001b[0m\u001b[38;5;39m\u001b[39m \u001b[38;5;76mmaster\u001b[39m \u001b[38;5;242m                                                            \u001b[39m \u001b[38;5;101m5s\u001b[39m\r\n  \u001b[38;5;76m>\u001b[39m \u001b[07m \u001b[27m\u001b[38;5;242m                                                                         \u001b[39m\r\n\r\n(r)  Restart from the beginning.\r\n(q)  Quit and do nothing.\r\n\r\n\u001b[1mChoice [12rq]: \u001b[0m\u001b[?25h"
+    },
+    {
+      "choice": "1",
+      "output": "\u001b[?25l\u001b[H\u001b[2J\u001b[3J                                  \u001b[1mPrompt Flow\u001b[0m\r\n\r\n\u001b[1m(1)  Concise.\u001b[0m\r\n\r\n  \u001b[38;5;31m\u001b[1m\u001b[38;5;31m\u001b[38;5;39m~\u001b[0m\u001b[38;5;39m\u001b[38;5;31m/\u001b[1m\u001b[38;5;31m\u001b[38;5;39msrc\u001b[0m\u001b[38;5;39m\u001b[39m \u001b[38;5;76mmaster\u001b[39m \u001b[38;5;242m                                                            \u001b[39m \u001b[38;5;101m5s\u001b[39m\r\n  \u001b[38;5;76m>\u001b[39m \u001b[07m \u001b[27m\u001b[38;5;242m                                                                         \u001b[39m\r\n\r\n\u001b[1m(2)  Fluent.\u001b[0m\r\n\r\n  \u001b[38;5;31m\u001b[1m\u001b[38;5;31m\u001b[38;5;39m~\u001b[0m\u001b[38;5;39m\u001b[38;5;31m/\u001b[1m\u001b[38;5;31m\u001b[38;5;39msrc\u001b[0m\u001b[38;5;39m\u001b[39m on \u001b[38;5;76mmaster\u001b[39m \u001b[38;5;242m                                                    \u001b[39m took \u001b[38;5;101m5s\u001b[39m\r\n  \u001b[38;5;76m>\u001b[39m \u001b[07m \u001b[27m\u001b[38;5;242m                                                                         \u001b[39m\r\n\r\n(r)  Restart from the beginning.\r\n(q)  Quit and do nothing.\r\n\r\n\u001b[1mChoice [12rq]: \u001b[0m\u001b[?25h"
+    },
+    {
+      "choice": "1",
+      "output": "\u001b[?25l\u001b[H\u001b[2J\u001b[3J                            \u001b[1mEnable Transient Prompt?\u001b[0m\r\n\r\n\u001b[1m(y)  Yes.\u001b[0m\r\n\r\n  \u001b[38;5;76m>\u001b[39m \u001b[32mgit\u001b[39m pull\r\n  \u001b[38;5;76m>\u001b[39m \u001b[32mgit\u001b[39m branch x\r\n  \u001b[38;5;31m\u001b[1m\u001b[38;5;31m\u001b[38;5;39m~\u001b[0m\u001b[38;5;39m\u001b[38;5;31m/\u001b[1m\u001b[38;5;31m\u001b[38;5;39msrc\u001b[0m\u001b[38;5;39m\u001b[39m \u001b[38;5;76mmaster\u001b[39m \u001b[38;5;242m                                                            \u001b[39m \u001b[38;5;101m5s\u001b[39m\r\n  \u001b[38;5;76m>\u001b[39m \u001b[32mgit\u001b[39m checkout x\u001b[07m \u001b[27m\u001b[38;5;242m                                                           \u001b[39m\r\n\r\n\u001b[1m(n)  No.\u001b[0m\r\n\r\n  \u001b[38;5;31m\u001b[1m\u001b[38;5;31m\u001b[38;5;39m~\u001b[0m\u001b[38;5;39m\u001b[38;5;31m/\u001b[1m\u001b[38;5;31m\u001b[38;5;39msrc\u001b[0m\u001b[38;5;39m\u001b[39m \u001b[38;5;76mmaster\u001b[39m \u001b[38;5;242m                                                            \u001b[39m \u001b[38;5;101m5s\u001b[39m\r\n  \u001b[38;5;76m>\u001b[39m \u001b[32mgit\u001b[39m pull\u001b[38;5;242m                                                                  \u001b[39m\r\n  \u001b[38;5;31m\u001b[1m\u001b[38;5;31m\u001b[38;5;39m~\u001b[0m\u001b[38;5;39m\u001b[38;5;31m/\u001b[1m\u001b[38;5;31m\u001b[38;5;39msrc\u001b[0m\u001b[38;5;39m\u001b[39m \u001b[38;5;76mmaster\u001b[39m \u001b[38;5;242m                                                            \u001b[39m \u001b[38;5;101m5s\u001b[39m\r\n  \u001b[38;5;76m>\u001b[39m \u001b[32mgit\u001b[39m branch x\u001b[38;5;242m                                                              \u001b[39m\r\n  \u001b[38;5;31m\u001b[1m\u001b[38;5;31m\u001b[38;5;39m~\u001b[0m\u001b[38;5;39m\u001b[38;5;31m/\u001b[1m\u001b[38;5;31m\u001b[38;5;39msrc\u001b[0m\u001b[38;5;39m\u001b[39m \u001b[38;5;76mmaster\u001b[39m \u001b[38;5;242m                                                            \u001b[39m \u001b[38;5;101m5s\u001b[39m\r\n  \u001b[38;5;76m>\u001b[39m \u001b[32mgit\u001b[39m checkout x\u001b[07m \u001b[27m\u001b[38;5;242m                                                           \u001b[39m\r\n\r\n(r)  Restart from the beginning.\r\n(q)  Quit and do nothing.\r\n\r\n\u001b[1mChoice [ynrq]: \u001b[0m\u001b[?25h"
+    },
+    {
+      "choice": "n",
+      "output": "\u001b[?25l\u001b[H\u001b[2J\u001b[3J                              \u001b[1mInstant Prompt Mode\u001b[0m\r\n\r\n            https://github.com/romkatv/powerlevel10k#instant-prompt\r\n\r\n\u001b[1m(1)  Verbose (recommended).\u001b[0m\r\n\r\n\u001b[1m(2)  Quiet.\u001b[0m Choose this if you've read and understood instant prompt\r\n     documentation.\r\n\r\n\u001b[1m(3)  Off.\u001b[0m Choose this if you've tried instant prompt and found it incompatible\r\n     with your zsh configuration files.\r\n\r\n(r)  Restart from the beginning.\r\n(q)  Quit and do nothing.\r\n\r\n\u001b[1mChoice [123rq]: \u001b[0m\u001b[?25h"
+    },
+    {
+      "choice": "1",
+      "output": "\u001b[?25l\u001b[H\u001b[2J\u001b[3J             \u001b[1mApply changes to \u001b[0m\u001b[32m/tmp/textbook-extra-tools/zsh/.zshrc\u001b[39m\u001b[1m?\u001b[0m\r\n\r\n\u001b[1m(y)  Yes (recommended).\u001b[0m\r\n\r\n\u001b[1m(n)  No. I know which changes to apply and will do it myself.\u001b[0m\r\n\r\n(r)  Restart from the beginning.\r\n(q)  Quit and do nothing.\r\n\r\n\u001b[1mChoice [ynrq]: \u001b[0m\u001b[?25h"
+    },
+    {
+      "choice": "y",
+      "output": "\u001b[?1049l\u001b[23;0;0t\r\nNew config: \u001b[4m/tmp/textbook-extra-tools/zsh/.p10k.zsh\u001b[24m.\r\nBackup of \u001b[4m/tmp/textbook-extra-tools/zsh/.zshrc\u001b[24m: \u001b[4m/tmp/.zshrc.FTeQ3ONJ01\u001b[24m.\r\n\r\nSee \u001b[1m/tmp/textbook-extra-tools/zsh/.zshrc\u001b[0m changes:\r\n\r\n  \u001b[32mdiff\u001b[39m \u001b[1m/tmp/.zshrc.FTeQ3ONJ01\u001b[0m \u001b[1m/tmp/textbook-extra-tools/zsh/.zshrc\u001b[0m\r\n\r\nFile feature requests and bug reports at\r\nhttps://github.com/romkatv/powerlevel10k/issues\r\n\r\n\u001b[?25h"
+    }
+  ],
+  "astro_search": [
+    {
+      "desc": "Find files",
+      "step": "ff mapping"
+    },
+    {
+      "items": [
+        {
+          "file": "hello.txt",
+          "text": "hello.txt"
+        }
+      ],
+      "step": "actual file picker"
+    },
+    {
+      "step": "selection mode",
+      "current": {
+        "_path": "/tmp/textbook-extra-tools/sample/hello.txt",
+        "score": 146,
+        "text": "hello.txt",
+        "idx": 1,
+        "file": "hello.txt",
+        "cwd": "/tmp/textbook-extra-tools/sample",
+        "match_topk": 1,
+        "match_tick": 1
+      },
+      "mode": "n"
+    },
+    {
+      "buffers": [
+        "miniicons://2/filetype-match-scratch",
+        "/tmp/textbook-extra-tools/sample/hello.txt"
+      ],
+      "cwd": "/tmp/textbook-extra-tools/sample",
+      "current": "/tmp/textbook-extra-tools/sample/hello.txt",
+      "step": "confirm diagnostic"
+    },
+    {
+      "lines": [
+        "hello textbook"
+      ],
+      "filename": "/tmp/textbook-extra-tools/sample/hello.txt",
+      "step": "opened selected file"
+    },
+    {
+      "items": [
+        {
+          "file": "hello.txt",
+          "pos": [
+            1,
+            6
+          ],
+          "text": "hello.txt:1:7:hello textbook"
+        }
+      ],
+      "step": "actual word picker"
+    }
+  ],
+  "clangd": {
+    "returncode": 0,
+    "path": "/tmp/textbook-extra-tools/astro-data/nvim/mason/bin/clangd",
+    "command": "LspInstall clangd",
+    "version": "clangd version 23.1.0 (https://github.com/llvm/llvm-project ea7d852a70e8bdfaf601d6626a760f9771b2c4b4)\nFeatures: linux+grpc\nPlatform: x86_64-unknown-linux-gnu\n"
+  },
+  "first_search_failure": [
+    {
+      "desc": "Find files",
+      "step": "ff mapping"
+    },
+    {
+      "items": [
+        {
+          "file": "hello.txt",
+          "text": "hello.txt"
+        }
+      ],
+      "step": "actual file picker"
+    },
+    {
+      "error": "/tmp/textbook-extra-tools/verify-astro.lua:30: assertion failed!"
+    }
+  ],
+  "second_search_failure": [
+    {
+      "step": "ff mapping",
+      "desc": "Find files"
+    },
+    {
+      "step": "actual file picker",
+      "items": [
+        {
+          "file": "hello.txt",
+          "text": "hello.txt"
+        }
+      ]
+    },
+    {
+      "buffers": [
+        "",
+        "miniicons://2/filetype-match-scratch",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "cwd": "/tmp/textbook-extra-tools/sample",
+      "step": "confirm diagnostic",
+      "current": ""
+    },
+    {
+      "error": "/tmp/textbook-extra-tools/verify-astro.lua:30: assertion failed!"
+    }
+  ],
+  "logs": {
+    "astro-clangd.log": "Downloading file \"https://github.com/clangd/clangd/releases/download/23.1.0/clangd-linux-23.1.0.zip\"…\nUnpacking \"clangd-linux-23.1.0.zip\"…\nArchive:  clangd-linux-23.1.0.zip\n  inflating: ./clangd_23.1.0/LICENSE.TXT  \n  inflating: ./clangd_23.1.0/bin/clangd  \n   creating: ./clangd_23.1.0/lib/clang/\n   creating: ./clangd_23.1.0/lib/clang/23/\n   creating: ./clangd_23.1.0/lib/clang/23/include/\n  inflating: ./clangd_23.1.0/lib/clang/23/include/__clang_cuda_builtin_vars.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__clang_cuda_cmath.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__clang_cuda_complex_builtins.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__clang_cuda_device_functions.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__clang_cuda_intrinsics.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__clang_cuda_libdevice_declares.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__clang_cuda_math.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__clang_cuda_math_forward_declares.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__clang_cuda_runtime_wrapper.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__clang_cuda_texture_intrinsics.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__clang_gpu_builtin_vars.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__clang_gpu_device_functions.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__clang_gpu_intrinsics.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__clang_hip_cmath.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__clang_hip_libdevice_declares.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__clang_hip_math.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__clang_hip_runtime_wrapper.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__clang_hip_stdlib.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__clang_spirv_builtins.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__clang_spirv_libdevice_declares.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__clang_spirv_math.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__float_float.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__float_header_macro.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__float_infinity_nan.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__stdarg___gnuc_va_list.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__stdarg___va_copy.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__stdarg_header_macro.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__stdarg_va_arg.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__stdarg_va_copy.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__stdarg_va_list.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__stddef_header_macro.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__stddef_max_align_t.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__stddef_null.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__stddef_nullptr_t.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__stddef_offsetof.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__stddef_ptrdiff_t.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__stddef_rsize_t.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__stddef_size_t.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__stddef_unreachable.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__stddef_wchar_t.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__stddef_wint_t.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__wmmintrin_aes.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/__wmmintrin_pclmul.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/adcintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/adxintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/altivec.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/amdgpuintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/amdhsa_abi.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/ammintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/amo.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/amxavx512intrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/amxcomplexintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/amxfp16intrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/amxfp8intrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/amxintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/amxmovrsintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/andes_vector.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/arm64_neon.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/arm64intr.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/arm_acle.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/arm_bf16.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/arm_cde.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/arm_cmse.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/arm_fp16.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/arm_mve.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/arm_neon.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/arm_neon_sve_bridge.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/arm_sme.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/arm_sve.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/arm_vector_types.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/armintr.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx10_2_512bf16intrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx10_2_512convertintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx10_2_512minmaxintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx10_2_512niintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx10_2_512satcvtdsintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx10_2_512satcvtintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx10_2bf16intrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx10_2convertintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx10_2copyintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx10_2minmaxintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx10_2niintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx10_2satcvtdsintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx10_2satcvtintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx2intrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512bf16intrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512bitalgintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512bmmintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512bmmvlintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512bwintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512cdintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512dqintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512fintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512fp16intrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512ifmaintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512ifmavlintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512vbmi2intrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512vbmiintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512vbmivlintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512vlbf16intrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512vlbitalgintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512vlbwintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512vlcdintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512vldqintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512vlfp16intrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512vlintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512vlvbmi2intrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512vlvnniintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512vlvp2intersectintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512vnniintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512vp2intersectintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512vpopcntdqintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avx512vpopcntdqvlintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avxifmaintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avxintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avxneconvertintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avxvnniint16intrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avxvnniint8intrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/avxvnniintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/bmi2intrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/bmiintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/builtins.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/cet.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/cetintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/cldemoteintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/clflushoptintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/clwbintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/clzerointrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/cmpccxaddintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/cpuid.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/crc32intrin.h  \n   creating: ./clangd_23.1.0/lib/clang/23/include/cuda_wrappers/\n   creating: ./clangd_23.1.0/lib/clang/23/include/cuda_wrappers/__utility/\n  inflating: ./clangd_23.1.0/lib/clang/23/include/cuda_wrappers/__utility/declval.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/cuda_wrappers/algorithm  \n   creating: ./clangd_23.1.0/lib/clang/23/include/cuda_wrappers/bits/\n  inflating: ./clangd_23.1.0/lib/clang/23/include/cuda_wrappers/bits/basic_string.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/cuda_wrappers/bits/basic_string.tcc  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/cuda_wrappers/bits/c++config.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/cuda_wrappers/bits/shared_ptr_base.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/cuda_wrappers/cmath  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/cuda_wrappers/complex  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/cuda_wrappers/new  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/emmintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/endian.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/enqcmdintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/f16cintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/float.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/fma4intrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/fmaintrin.h  \n   creating: ./clangd_23.1.0/lib/clang/23/include/fuzzer/\n  inflating: ./clangd_23.1.0/lib/clang/23/include/fuzzer/FuzzedDataProvider.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/fxsrintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/gfniintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/gpuintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/hexagon_circ_brev_intrinsics.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/hexagon_protos.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/hexagon_types.h  \n   creating: ./clangd_23.1.0/lib/clang/23/include/hlsl/\n  inflating: ./clangd_23.1.0/lib/clang/23/include/hlsl.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/hlsl/hlsl_alias_intrinsics.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/hlsl/hlsl_alias_intrinsics_gen.inc  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/hlsl/hlsl_basic_types.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/hlsl/hlsl_compat_overloads.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/hlsl/hlsl_detail.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/hlsl/hlsl_inline_intrinsics_gen.inc  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/hlsl/hlsl_intrinsic_helpers.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/hlsl/hlsl_intrinsics.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/hlsl/hlsl_spirv.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/hresetintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/htmintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/htmxlintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/hvx_hexagon_protos.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/ia32intrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/immintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/intrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/intrin0.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/inttypes.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/invpcidintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/iso646.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/keylockerintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/larchintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/lasxintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/limits.h  \n   creating: ./clangd_23.1.0/lib/clang/23/include/llvm_libc_wrappers/\n  inflating: ./clangd_23.1.0/lib/clang/23/include/llvm_libc_wrappers/assert.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/llvm_libc_wrappers/ctype.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/llvm_libc_wrappers/inttypes.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/llvm_libc_wrappers/stdio.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/llvm_libc_wrappers/stdlib.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/llvm_libc_wrappers/string.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/llvm_libc_wrappers/time.h  \n   creating: ./clangd_23.1.0/lib/clang/23/include/llvm_offload_wrappers/\n  inflating: ./clangd_23.1.0/lib/clang/23/include/llvm_offload_wrappers/__llvm_offload.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/llvm_offload_wrappers/__llvm_offload_device.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/llvm_offload_wrappers/__llvm_offload_host.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/lsxintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/lwpintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/lzcntintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/mm3dnow.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/mm_malloc.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/mmintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/module.modulemap  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/movdirintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/movrs_avx10_2_512intrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/movrs_avx10_2intrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/movrsintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/msa.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/mwaitxintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/nmmintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/nvptxintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/omp-tools.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/omp.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/ompx.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/opencl-c-base.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/opencl-c.h  \n   creating: ./clangd_23.1.0/lib/clang/23/include/openmp_wrappers/\n  inflating: ./clangd_23.1.0/lib/clang/23/include/openmp_wrappers/__clang_openmp_device_functions.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/openmp_wrappers/cmath  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/openmp_wrappers/complex  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/openmp_wrappers/complex.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/openmp_wrappers/complex_cmath.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/openmp_wrappers/math.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/openmp_wrappers/new  \n   creating: ./clangd_23.1.0/lib/clang/23/include/orc_rt/\n  inflating: ./clangd_23.1.0/lib/clang/23/include/orc_rt/c_api.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/pconfigintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/pkuintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/pmmintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/popcntintrin.h  \n   creating: ./clangd_23.1.0/lib/clang/23/include/ppc_wrappers/\n  inflating: ./clangd_23.1.0/lib/clang/23/include/ppc_wrappers/bmi2intrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/ppc_wrappers/bmiintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/ppc_wrappers/emmintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/ppc_wrappers/immintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/ppc_wrappers/mm_malloc.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/ppc_wrappers/mmintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/ppc_wrappers/nmmintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/ppc_wrappers/pmmintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/ppc_wrappers/smmintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/ppc_wrappers/tmmintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/ppc_wrappers/x86gprintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/ppc_wrappers/x86intrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/ppc_wrappers/xmmintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/prfchiintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/prfchwintrin.h  \n   creating: ./clangd_23.1.0/lib/clang/23/include/profile/\n  inflating: ./clangd_23.1.0/lib/clang/23/include/profile/InstrProfData.inc  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/profile/MemProfData.inc  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/profile/instr_prof_interface.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/ptrauth.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/ptwriteintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/raointintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/rdpruintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/rdseedintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/riscv_bitmanip.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/riscv_corev_alu.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/riscv_crypto.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/riscv_mips.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/riscv_nds.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/riscv_ntlh.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/riscv_packed_simd.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/riscv_vector.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/rtmintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/s390intrin.h  \n   creating: ./clangd_23.1.0/lib/clang/23/include/sanitizer/\n  inflating: ./clangd_23.1.0/lib/clang/23/include/sanitizer/allocator_interface.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/sanitizer/asan_interface.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/sanitizer/common_interface_defs.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/sanitizer/coverage_interface.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/sanitizer/dfsan_interface.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/sanitizer/hwasan_interface.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/sanitizer/linux_syscall_hooks.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/sanitizer/lsan_interface.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/sanitizer/memprof_interface.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/sanitizer/msan_interface.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/sanitizer/netbsd_syscall_hooks.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/sanitizer/rtsan_interface.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/sanitizer/safestack_interface.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/sanitizer/scudo_interface.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/sanitizer/tsan_interface.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/sanitizer/tsan_interface_atomic.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/sanitizer/tysan_interface.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/sanitizer/ubsan_interface.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/serializeintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/sgxintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/sha512intrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/shaintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/sifive_vector.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/sm3intrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/sm4evexintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/sm4intrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/smmintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/spirvintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/stdalign.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/stdarg.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/stdatomic.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/stdbool.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/stdckdint.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/stdcountof.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/stddef.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/stddefer.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/stdint.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/stdnoreturn.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/tbmintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/tgmath.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/tmmintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/tsxldtrkintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/uintrintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/unwind.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/usermsrintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/vadefs.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/vaesintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/varargs.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/vecintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/velintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/velintrin_approx.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/velintrin_gen.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/vpclmulqdqintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/waitpkgintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/wasm_simd128.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/wbnoinvdintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/wmmintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/x86gprintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/x86intrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/xmmintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/xopintrin.h  \n   creating: ./clangd_23.1.0/lib/clang/23/include/xray/\n  inflating: ./clangd_23.1.0/lib/clang/23/include/xray/xray_interface.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/xray/xray_log_interface.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/xray/xray_records.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/xsavecintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/xsaveintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/xsaveoptintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/xsavesintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/xtestintrin.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/yvals_core.h  \n   creating: ./clangd_23.1.0/lib/clang/23/include/zos_wrappers/\n  inflating: ./clangd_23.1.0/lib/clang/23/include/zos_wrappers/builtins.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/zos_wrappers/grp.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/zos_wrappers/locale.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/zos_wrappers/math.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/zos_wrappers/poll.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/zos_wrappers/stdlib.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/zos_wrappers/string.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/zos_wrappers/time.h  \n  inflating: ./clangd_23.1.0/lib/clang/23/include/zos_wrappers/variant.h  \n   creating: ./clangd_23.1.0/lib/clang/23/lib/\n   creating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/\n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/clang_rt.builtins.sources.txt  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/clang_rt.crtbegin.o  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/clang_rt.crtend.o  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.asan-preinit.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.asan.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.asan.a.syms  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.asan.so  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.asan_cxx.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.asan_cxx.a.syms  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.asan_static.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.builtins.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.cfi.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.cfi_diag.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.ctx_profile.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.dd.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.dfsan.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.dfsan.a.syms  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.dyndd.so  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.fuzzer.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.fuzzer_interceptors.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.fuzzer_no_main.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.gwp_asan.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.hwasan-preinit.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.hwasan.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.hwasan.a.syms  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.hwasan.so  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.hwasan_aliases.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.hwasan_aliases.a.syms  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.hwasan_aliases.so  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.hwasan_aliases_cxx.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.hwasan_aliases_cxx.a.syms  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.hwasan_cxx.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.hwasan_cxx.a.syms  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.lsan.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.memprof-preinit.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.memprof.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.memprof.a.syms  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.memprof.so  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.memprof_cxx.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.memprof_cxx.a.syms  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.msan.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.msan.a.syms  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.msan_cxx.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.msan_cxx.a.syms  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.nsan.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.nsan.so  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.profile.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.profile_rocm.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.rtsan.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.safestack.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.scudo_standalone.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.scudo_standalone.so  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.scudo_standalone_cxx.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.stats.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.stats_client.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.tsan.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.tsan.a.syms  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.tsan.so  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.tsan_cxx.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.tsan_cxx.a.syms  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.tysan.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_loop_detect.a  \n extracting: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_loop_detect.a.syms  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_minimal.a  \n extracting: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_minimal.a.syms  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_minimal.so  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_standalone.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_standalone.a.syms  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_standalone.so  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_standalone_cxx.a  \n extracting: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.ubsan_standalone_cxx.a.syms  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.xray-basic.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.xray-dso.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.xray-fdr.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.xray-profiling.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/libclang_rt.xray.a  \n  inflating: ./clangd_23.1.0/lib/clang/23/lib/x86_64-unknown-linux-gnu/liborc_rt.a  \n   creating: ./clangd_23.1.0/lib/clang/23/share/\n  inflating: ./clangd_23.1.0/lib/clang/23/share/asan_ignorelist.txt  \n  inflating: ./clangd_23.1.0/lib/clang/23/share/cfi_ignorelist.txt  \n  inflating: ./clangd_23.1.0/lib/clang/23/share/dfsan_abilist.txt  \n  inflating: ./clangd_23.1.0/lib/clang/23/share/hwasan_ignorelist.txt  \n  inflating: ./clangd_23.1.0/lib/clang/23/share/msan_ignorelist.txt  \nDownloading LSP configuration schema from \"https://raw.githubusercontent.com/clangd/vscode-clangd/master/package.json\"…",
+    "astro-search3.log": "",
+    "astro-search2.log": "",
+    "astro-search.log": " blink.cmp  Downloading pre-built binary blink.cmp  Downloaded pre-built binary successfully",
+    "zsh-loaded.log": "p10k: function\n_zsh_autosuggest_start: function\n_zsh_highlight: function\nmigrated_alias\ntypeset ZSH_THEME=powerlevel10k/powerlevel10k\ntypeset -a plugins=( git zsh-autosuggestions zsh-syntax-highlighting )\n",
+    "clone-syntax.log": "Cloning into '/tmp/textbook-extra-tools/omz/custom/plugins/zsh-syntax-highlighting'...\n",
+    "clone-autosuggestions.log": "Cloning into '/tmp/textbook-extra-tools/omz/custom/plugins/zsh-autosuggestions'...\n",
+    "clone-p10k.log": "Cloning into '/tmp/textbook-extra-tools/omz/custom/themes/powerlevel10k'...\n",
+    "omz-install.log": "Cloning Oh My Zsh...\nbranch 'master' set up to track 'origin/master'.\n/tmp/textbook-extra-tools\n\nLooking for an existing zsh config...\nUsing the Oh My Zsh template file and adding it to /tmp/textbook-extra-tools/zsh/.zshrc.\n\n         __                                     __   \n  ____  / /_     ____ ___  __  __   ____  _____/ /_  \n / __ \\/ __ \\   / __ `__ \\/ / / /  /_  / / ___/ __ \\ \n/ /_/ / / / /  / / / / / / /_/ /    / /_(__  ) / / / \n\\____/_/ /_/  /_/ /_/ /_/\\__, /    /___/____/_/ /_/  \n                        /____/                       ....is now installed!\n\n\nBefore you scream Oh My Zsh! look over the `.zshrc` file to select plugins, themes, and options.\n\n• Follow along on X (https://x.com/ohmyzsh) or Bluesky (https://bsky.app/profile/ohmyz.sh)\n• Questions or ideas? Join the community on https://discord.gg/ohmyzsh\n• Help support the project: sponsor us on https://opencollective.com/ohmyzsh,\n  or grab stickers, shirts, and swag from https://commitgoods.com/ohmyzsh\n\nRun zsh to try it out.\nFrom https://github.com/ohmyzsh/ohmyzsh\n * [new branch]      add-docker-compose-config -> origin/add-docker-compose-config\n * [new branch]      copilot/docker-plugin-load-fix -> origin/copilot/docker-plugin-load-fix\n * [new branch]      copilot/fix-per-directory-history-regression -> origin/copilot/fix-per-directory-history-regression\n * [new branch]      feat/opencode-plugin -> origin/feat/opencode-plugin\n * [new branch]      feat/theme-browser-local -> origin/feat/theme-browser-local\n * [new branch]      fix-gh-completion-cache-on-failure -> origin/fix-gh-completion-cache-on-failure\n * [new branch]      fix/installer-backup-history -> origin/fix/installer-backup-history\n * [new branch]      master               -> origin/master\n * [new branch]      perf/git-plugin-cache-git-version -> origin/perf/git-plugin-cache-git-version\n * [new branch]      perf/lib-autoload-cli-diagnostics -> origin/perf/lib-autoload-cli-diagnostics\n * [new branch]      perf/lib-lazy-vcs-info-patch -> origin/perf/lib-lazy-vcs-info-patch\n * [new branch]      perf/termsupport-memoize-cwd -> origin/perf/termsupport-memoize-cwd\n * [new branch]      task/rr-14045-omz-plugin-create -> origin/task/rr-14045-omz-plugin-create\nAlready on 'master'\n",
+    "nvim-version.log": "NVIM v0.12.5\nBuild type: Release\nLuaJIT 2.1.1774638290\nRun \"nvim -V1 -v\" for more info\n",
+    "cowsay-after.log": "dpkg-query: no packages found matching cowsay\n",
+    "cowsay-remove.log": "Reading package lists...\nBuilding dependency tree...\nReading state information...\nThe following package was automatically installed and is no longer required:\n  libtext-charwidth-perl\nUse 'sudo apt autoremove' to remove it.\nThe following packages will be REMOVED:\n  cowsay\n0 upgraded, 0 newly installed, 1 to remove and 7 not upgraded.\nAfter this operation, 93.2 kB disk space will be freed.\n(Reading database ... \n(Reading database ... 5%\n(Reading database ... 10%\n(Reading database ... 15%\n(Reading database ... 20%\n(Reading database ... 25%\n(Reading database ... 30%\n(Reading database ... 35%\n(Reading database ... 40%\n(Reading database ... 45%\n(Reading database ... 50%\n(Reading database ... 55%\n(Reading database ... 60%\n(Reading database ... 65%\n(Reading database ... 70%\n(Reading database ... 75%\n(Reading database ... 80%\n(Reading database ... 85%\n(Reading database ... 90%\n(Reading database ... 95%\n(Reading database ... 100%\n(Reading database ... 167809 files and directories currently installed.)\nRemoving cowsay (3.03+dfsg2-8) ...\nProcessing triggers for man-db (2.12.0-4build2) ...\n\nWARNING: apt does not have a stable CLI interface. Use with caution in scripts.\n\n",
+    "cowsay-run.log": " ________________\n< hello textbook >\n ----------------\n        \\   ^__^\n         \\  (oo)\\_______\n            (__)\\       )\\/\\\n                ||----w |\n                ||     ||\n",
+    "tree-run.log": "/tmp/textbook-extra-tools/sample\n└── hello.txt\n\n1 directory, 1 file\n",
+    "apt-install-tools.log": "Reading package lists...\nBuilding dependency tree...\nReading state information...\ntree is already the newest version (2.1.1-2ubuntu3.24.04.2).\ngcc is already the newest version (4:13.2.0-7ubuntu1).\ngcc set to manually installed.\nThe following additional packages will be installed:\n  libtext-charwidth-perl\nSuggested packages:\n  filters cowsay-off\nThe following NEW packages will be installed:\n  cowsay libtext-charwidth-perl ripgrep\n0 upgraded, 3 newly installed, 0 to remove and 7 not upgraded.\nNeed to get 1579 kB of archives.\nAfter this operation, 5470 kB of additional disk space will be used.\nGet:1 http://archive.ubuntu.com/ubuntu noble/main amd64 libtext-charwidth-perl amd64 0.04-11build3 [9358 B]\nGet:2 http://archive.ubuntu.com/ubuntu noble/universe amd64 cowsay all 3.03+dfsg2-8 [18.6 kB]\nGet:3 http://archive.ubuntu.com/ubuntu noble/universe amd64 ripgrep amd64 14.1.0-1 [1551 kB]\nFetched 1579 kB in 2s (976 kB/s)\nSelecting previously unselected package libtext-charwidth-perl:amd64.\n(Reading database ... \n(Reading database ... 5%\n(Reading database ... 10%\n(Reading database ... 15%\n(Reading database ... 20%\n(Reading database ... 25%\n(Reading database ... 30%\n(Reading database ... 35%\n(Reading database ... 40%\n(Reading database ... 45%\n(Reading database ... 50%\n(Reading database ... 55%\n(Reading database ... 60%\n(Reading database ... 65%\n(Reading database ... 70%\n(Reading database ... 75%\n(Reading database ... 80%\n(Reading database ... 85%\n(Reading database ... 90%\n(Reading database ... 95%\n(Reading database ... 100%\n(Reading database ... 167733 files and directories currently installed.)\nPreparing to unpack .../libtext-charwidth-perl_0.04-11build3_amd64.deb ...\nUnpacking libtext-charwidth-perl:amd64 (0.04-11build3) ...\nSelecting previously unselected package cowsay.\nPreparing to unpack .../cowsay_3.03+dfsg2-8_all.deb ...\nUnpacking cowsay (3.03+dfsg2-8) ...\nSelecting previously unselected package ripgrep.\nPreparing to unpack .../ripgrep_14.1.0-1_amd64.deb ...\nUnpacking ripgrep (14.1.0-1) ...\nSetting up libtext-charwidth-perl:amd64 (0.04-11build3) ...\nSetting up ripgrep (14.1.0-1) ...\nSetting up cowsay (3.03+dfsg2-8) ...\nProcessing triggers for man-db (2.12.0-4build2) ...\n\nWARNING: apt does not have a stable CLI interface. Use with caution in scripts.\n\ndpkg-preconfigure: unable to re-open stdin: No such file or directory\n",
+    "apt-search-cowsay.log": "Sorting...\nFull Text Search...\ncowsay/noble 3.03+dfsg2-8 all\n  configurable talking cow\n\n\nWARNING: apt does not have a stable CLI interface. Use with caution in scripts.\n\n",
+    "apt-update.log": "Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease\nGet:2 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]\nGet:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]\nHit:4 http://packages.ros.org/ros2/ubuntu noble InRelease\nHit:5 https://ppa.launchpadcontent.net/zhangsongcui3371/fastfetch/ubuntu noble InRelease\nHit:6 https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64  InRelease\nGet:7 http://security.ubuntu.com/ubuntu noble-security/main amd64 Components [58.6 kB]\nGet:8 http://archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]\nGet:9 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Components [97.6 kB]\nGet:10 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Components [242 kB]\nGet:11 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Components [536 kB]\nGet:12 http://archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Components [888 B]\nGet:13 http://archive.ubuntu.com/ubuntu noble-backports/main amd64 Components [6366 B]\nGet:14 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Components [13.6 kB]\nFetched 1334 kB in 2s (576 kB/s)\nReading package lists...\nBuilding dependency tree...\nReading state information...\n7 packages can be upgraded. Run 'apt list --upgradable' to see them.\n\nWARNING: apt does not have a stable CLI interface. Use with caution in scripts.\n\n",
+    "cowsay-before.log": "dpkg-query: no packages found matching cowsay\n"
+  },
+  "files": {
+    "install-ohmyzsh.sh": "5574b96e94dbcb769f0d1592fa83aeb6ca2caf41c6ae5d76fcc7f04c524b4f55",
+    "verify-astro.lua": "9809c1cd5f99089f2bdf544ac23b55428893a4dc85d42d9a435f758d97d2b7b3",
+    "verify-clangd.lua": "1b4d53480c63efb49b45a76c71bbdde73c83536802efaa5c2d084cf852b27b19",
+    ".zshrc": "7cb2a5dfc5269b04e4283bc22f77ad6c6485d3aeb2f923fe62f9a5a575b5c6b5",
+    ".p10k.zsh": "c78678edd7cc9fd66c970dfacef54e7391d27b8e89fc0b4833f7aaf8711aa421"
+  },
+  "git_sources": {
+    "ohmyzsh": "83a0ec79ee3b1f64c6ae2e80dcb1fb27a55e5952",
+    "p10k": "d05a1b00f9a61f9578bf9dc19b8451942dde8734",
+    "autosuggestions": "85919cd1ffa7d2d5412f6d3fe437ebdbeeec4fc5",
+    "syntax-highlighting": "0bfcb582e71d3abe604ce67bc0fe5a21f377507e",
+    "AstroNvim-template": "49a7161b776f8bc6c23508819ea1ad4e7b359bee",
+    "AstroNvim": "aa0545fc8357009fc8a67e6cd93e7f8544e3aba9"
+  },
+  "boundaries": [
+    "临时ZDOTDIR与XDG目录安装；未改登录shell或用户现有配置",
+    "Neovim按键/选择器/缓冲区真实执行；不声称用户终端字体或原生GUI已验证",
+    "既有Neovim v0.12.5复用，没有重装/opt；cowsay本次新装后卸载"
+  ]
+}
