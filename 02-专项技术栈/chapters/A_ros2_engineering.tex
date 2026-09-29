@@ -366,7 +366,15 @@ source ~/ros2_ws/install/setup.bash
 clion ~/ros2_ws/src/training_tools
 \end{tbash}
 \end{minipage}\par\smallskip
-没有该命令时，使用安装目录内的实际启动脚本路径。如果 ROS2 安装在 Distrobox 中，也要让 IDE 的 CMake、编译器、调试器和程序运行使用容器内的工具链；仅给宿主 IDE 加一个 ROS 环境变量，不能让它自动获得容器中的库。CLion 的 Docker/Podman 工具链配置以你安装版本的界面为准，先确认容器内的终端命令能运行，再接入 IDE。打开包中的 CMakeLists.txt，在 CMake 配置中使用独立目录 \texttt{cmake-build-debug}、Debug 构建类型和 \texttt{-DBUILD\_TESTING=OFF}。选择 heartbeat 目标，运行参数填 \texttt{--ros-args -p text:=from\_ide}，在发布回调处加断点。继续执行后，用已加载相同环境的终端观察 \texttt{/status}。
+没有该命令时，使用安装目录内的实际启动脚本路径。如果 ROS2 安装在 Distrobox 中，也要让 IDE 的 CMake、编译器、调试器和程序运行使用容器内的工具链；仅给宿主 IDE 加一个 ROS 环境变量，不能让它自动获得容器中的库。CLion 的 Docker/Podman 工具链配置以你安装版本的界面为准，先确认容器内的终端命令能运行，再接入 IDE。打开包中的 CMakeLists.txt，在 CMake 配置中使用独立目录 \texttt{cmake-build-debug}、Debug 构建类型和 \texttt{-DBUILD\_TESTING=OFF}。选择 heartbeat 目标，运行参数填 \texttt{--ros-args -p text:=from\_ide}，在发布回调处加断点并启动调试。
+
+这时候，我们先看图~\ref{fig:ros2-clion-callback}：箭头停在 \texttt{pub\_->publish(msg)}，下方的 \texttt{text} 和展开后的 \texttt{msg.data} 都是 \texttt{from\_ide}。这说明运行参数已经覆盖了源码中的默认值 \texttt{ready}，不过当前这一条消息还没有发布，要执行箭头所在的语句才会发出去。取消或暂时禁用这个断点，再继续执行，然后在已加载相同环境的终端运行 \texttt{ros2 topic echo /status}，应持续看到 \texttt{from\_ide}。如果保留断点，定时器下一次调用又会停下来，可别把调试暂停误当成节点断线了。
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth,trim=100bp 180bp 400bp 300bp,clip]{images/ros2_clion_revised.png}
+\caption{Jazzy 容器内的真实 CLion 调试：发布回调暂停，消息文本已由运行参数覆盖}
+\label{fig:ros2-clion-callback}
+\end{figure}
 \end{example}
 
 CLion 的 Build 只负责所选构建目标。设置 \texttt{CMAKE\_INSTALL\_PREFIX} 仅改变安装目的地，不会自动执行安装。需要从 \texttt{ros2 run} 启动修改后的代码时，应由 colcon 重建并安装，或明确执行 IDE 的 install 目标；同时确认运行时加载的是该安装前缀。调试 IDE 构建目录中的目标时，则直接使用该目标。
@@ -382,7 +390,7 @@ colcon build --packages-select training_tools --cmake-args -DCMAKE_EXPORT_COMPIL
 test -f build/training_tools/compile_commands.json
 \end{tbash}
 \end{minipage}\par\smallskip
-在 CLion 中以编译数据库项目打开这个 JSON，核对 heartbeat.cpp 的包含路径。它只涵盖该包；修改项目根目录不会自动合并其他包的编译数据库。接口包须先构建，生成的消息头文件才存在。需要整个工作空间索引时，应显式收集各包的数据库并按工具支持方式合并。
+在 CLion 的 File $\rightarrow$ Open 中选择这个 JSON，再选 Open as Project，以编译数据库项目打开，核对 heartbeat.cpp 的包含路径。你可以在 \texttt{rclcpp/rclcpp.hpp} 上跳转到实际头文件，确认它来自当前发行版的安装目录。它只涵盖该包；修改项目根目录不会自动合并其他包的编译数据库。接口包须先构建，生成的消息头文件才存在。需要整个工作空间索引时，应显式收集各包的数据库并按工具支持方式合并。
 \end{example}
 
 \begin{conclusion}
@@ -395,6 +403,5 @@ test -f build/training_tools/compile_commands.json
 \end{conclusion}
 \begin{exercise}
 \label{ex:v2-ros-ide}
-在 IDE 中把默认文本改为 \texttt{from\_debug} 并构建；分别从 IDE 和旧安装目录运行。解释为何可能看到不同文本，给出让 \texttt{ros2 run} 使用新代码的步骤。
+先停止上面的节点，清除运行配置中的 \texttt{-p text:=from\_ide} 等文本覆盖，再在 IDE 中把默认文本改为 \texttt{from\_debug} 并构建；依次从 IDE 和旧安装目录运行，每次观察后停止当前发布者，避免混在一起。解释为何可能看到不同文本，给出让 \texttt{ros2 run} 使用新代码的步骤。
 \end{exercise}
-

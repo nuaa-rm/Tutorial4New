@@ -27,13 +27,13 @@
 | 11 本章验收 | 通过 | 5 项现场操作检查不同输入、增加接口字段、图形观察、指定 Launch 参数与调试，区别于知识题。 |
 | 12 答案定位 | 通过 | answers.tex 的 12+10 题解通过 ref 定位，按正文顺序排列；开放实践有命令、输出或判断依据。 |
 | 13 作者语言习惯 | 通过 | 保留原来的你/我们、首先/然后/不过、操作中的解释与轻松提醒；修正技术错误，不照抄错字或单位错误。 |
-| 14 图片实际检查 | 通过 | 实际查看原版本截图、软件分层图和节点图；重绘两张青色中文矢量图，新 rqt 截图来自真实插件运行。独立图和正文尺寸均实际查看。 |
-| 15 图片标记与引用 | 通过 | 检查后使用 ros2_arch_revised.pdf、ros2_node_revised.pdf、ros2_rqt_revised.png，正文与生成脚本的发布路径一致；旧图保留。 |
+| 14 图片实际检查 | 通过 | 实际查看原版本截图、软件分层图和节点图；重绘两张青色中文矢量图，rqt 和新增 CLion 回调截图来自真实窗口。原图与正文实际尺寸均查看，CLion 使用 Maple Mono NF CN。 |
+| 15 图片标记与引用 | 通过 | 检查后使用 ros2_arch_revised.pdf、ros2_node_revised.pdf、ros2_rqt_revised.png 和 ros2_clion_revised.png，正文与生成脚本的发布路径一致；旧图保留。 |
 | 16 文件组织 | 通过 | 原 appendix_ros2.tex 改为 A_ros2_project.tex 并移到节点讲解后；完整工程与工程机制两部分职责清楚，项目按消息包/节点包组织。 |
-| 17 包含与引用 | 通过 | main→core→project→engineering→review 顺序明确；README、OpenCV 调用说明同步。结构检查 29 个包含文件、91 个标签、45 个被引用标签无失效/重复/循环。 |
+| 17 包含与引用 | 通过 | main→core→project→engineering→review 顺序明确；README、OpenCV 调用说明同步。当前结构检查 29 个包含文件、314 个标签、261 个被引用标签无失效/重复/循环。 |
 | 18 源码与格式 | 通过 | 短命令和配置整体排版，长实现按函数边界展示全部内容；图注、表格、标题映射和行号沿用本卷，章末题解编号不再带列表尾点。 |
-| 19 实际运行 | 未完成 | Jazzy 的构建、通信、变体、Launch、日志、测试、真实 rqt 插件及 GDB 回调断点均通过；尚缺 CLion 图形断点和真实第二主机上的发现范围/恢复测试。Humble 未实测，只有版本文档核对。不能用同机不同域或 GDB 替代这两项。 |
-| 20 编译与 PDF | 通过 | 从卷入口 XeLaTeX 编译至引用稳定，无缺文件、未定义引用、重复标签或越界。最终 179 页；实际检查目录物理页 4–5、正文 7–37、题解 162–165 及相邻章入口。没有修改共享模板。 |
+| 19 实际运行 | 未完成 | Jazzy 的构建、通信、变体、Launch、日志、测试、真实 rqt 插件及 GDB 回调断点均通过；新增 CLion 实际构建/运行/回调断点、参数与默认值变体、colcon 安装对照、编译数据库导入/源码编译/头文件跳转完成；外部库头文件的 clangd 诊断限制见下文。真实第二主机上的发现范围/恢复仍未完成，Humble 未实测。不能用同机不同域替代第二主机。 |
+| 20 编译与 PDF | 通过 | 从卷入口 XeLaTeX 编译至引用稳定，无缺文件、未定义引用、重复标签或越界。最初全卷 179 页的检查保留；各章整理后的当前全卷为 270 页。此次新增图后两次编译稳定，实际查看物理页 4–5、35–39、246–248 及图所在页 36。没有修改共享模板。 |
 
 ## 核心能力覆盖
 
@@ -50,7 +50,7 @@
 | ament/colcon/rosdep | ament：修改测试阈值，检查依赖、测试结果与安装资源。 |
 | Launch | launch：blue 与条件观察进程，修正固定 red 路径，解释参数和完整话题。 |
 | 日志 | log：1 秒限流与 5 Hz 消息、WARN 下日志减少、独立日志目录。 |
-| IDE 与产物 | ide：独立构建、断点、旧安装与重新构建/加载；CLI 已验证，CLion GUI 待补。 |
+| IDE 与产物 | ide：独立构建、断点、旧安装与重新构建/加载；CLI 与 CLion GUI 均实际验证；第二主机待补。 |
 
 ## 运行证据与环境边界
 
@@ -78,3 +78,18 @@
 `chapters/appendix_ros2.tex` → `chapters/A_ros2_project.tex`，由章末移到节点和消息旁边。全部活动调用方已更新；OpenCV 中旧“附录”提示改成引用实际节。图生成脚本默认候选路径，实际查看后才发布 revised。短代码使用独立段落的整体代码块，长实现保留完整行号范围；没有以删代码或缩小到不可读的字号解决分页。
 
 编译保留模板已有 Fandol 粗体/斜体替代提示，PDF 实际检查可读。卷一主 CMake 引用未变化，共享模板未变化；结构脚本补上 lstinputlisting 选项标签识别后，复查卷一第三章与卷二第一章路径和题解定位均通过。下一章继续按独立提交整理，未完成环境测试持续记录。
+
+## CLion 图形补测（2026-09-29）
+
+证据见 [clion-gui.json](evidence/volume-2-chapter-1-clion-gui.json)。使用与卷一相同的官方 CLion 2026.2.3 安装包和正常试用配置，在 ubuntu2404 内加载 Jazzy 与临时工作空间后启动；没有重置试用或修改个人 IDE 配置。测试源码为随书 training_tools 的临时副本。
+
+- 实际 GUI 设置 Debug、独立 cmake-build-debug 和 `-DBUILD_TESTING=OFF`，缓存与界面相符，Build 完成。运行参数 `--ros-args -p text:=from_ide`；调试在 heartbeat.cpp 第 16 行发布回调暂停，text 与展开后的 msg.data 均为 from_ide。取消断点并继续后，独立 DDS 订阅收到三条 from_ide。
+- GUI 清除参数覆盖，把默认 ready 改为 from_debug，保存、构建和运行后收到三条 from_debug；旧安装程序仍发三条 ready。随后 colcon 重建，实际 ros2 run 发三条 from_debug。GUI 恢复源码后与仓库字节一致，IDE 和重建后的安装程序都发 ready。每一阶段停止上一发布者。
+- File → Open 实际选择 colcon 的 compile_commands.json，再点击 Open as Project；Build 显示 successfully imported。Ctrl+B 从源码跳转至 `/opt/ros/jazzy/include/rclcpp/rclcpp/rclcpp.hpp`，源码 Recompile 完成。JSON 中包含真实 Jazzy 的 rclcpp/std_msgs 等 include 路径。
+- **索引限制保留**：外部 rclcpp.hpp 中出现 15 条 clangd 的子头文件 file not found 诊断，源码本身只有一条警告、实际编译成功。重新载入数据库、改变工程根目录、关闭重开头文件均未消除。临时 XDG 中尝试的 clangd 数据库配置也无界面效果，随后停用；没有禁用诊断、改系统头文件或把这项问题写成已修好。导入/导航/源码编译实测不等于所有库头文件诊断正常。
+- 截图控制器最初把以连字符开头的 CMake 参数当作 xdotool 选项而退出；增加 `--` 后恢复同一 IDE 配置并完成测试。File chooser 的逐键路径输入触发树搜索，改用自身 Xvfb 剪贴板一次粘贴后正确选中文件。首版订阅器只停止 ros2 run 包装进程，发现残留的临时 heartbeat 后核对 exe 并终止；修正为停止自身进程组，后续恢复测试无残留。失败与恢复均保存在证据中。
+- 读取已配置的 SSH 别名 orin，以 BatchMode 和 5 秒超时尝试只读检查，退出 255：nvidia 主机名无法解析。没有获得第二台物理主机的 ROS 验证结果，没有运行机器人或扫描未知地址。
+
+新增真实图 `images/ros2_clion_candidate.png` → `images/ros2_clion_revised.png`：编辑器与控制台为 Maple Mono NF CN，原始像素不改写，只以 LaTeX trim 聚焦回调与变量。先实际查看候选图及 PDF 页 35–38、246–247，再改为 revised；改名后的目录、正文、相邻章与题解再次查看。没有改名或移动任何 tex 文件、项目源码或共享模板。
+
+补测结束后实际退出 IDE 并停止自身 Xvfb；核对临时安装目录的 IDE/clangd、临时工作空间 heartbeat 和本次 Xvfb 匹配进程为空。

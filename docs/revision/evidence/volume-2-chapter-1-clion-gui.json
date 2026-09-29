@@ -1,0 +1,1208 @@
+{
+  "recorded_at": "2026-09-29T06:07:06.263806+00:00",
+  "volume": 2,
+  "chapter": 1,
+  "purpose": "actual CLion GUI build/run/debug/parameter/stale-install/compilation-database tests; physical second host remains unverified",
+  "package": {
+    "version": "2026.2.3",
+    "build": "262.10968.117",
+    "bytes": 1883839065,
+    "sha256": "dbb7d298392bbe471153af98f6f3393173da897eaff1c1c79f2eade6e26d3860",
+    "official_checksum_matches": true
+  },
+  "toolchain": {
+    "font": {
+      "argv": [
+        "fc-match",
+        "Maple Mono NF CN"
+      ],
+      "returncode": 0,
+      "stdout": "MapleMono-NF-CN-Regular.ttf: \"Maple Mono NF CN\" \"Regular\"\n",
+      "stderr": ""
+    },
+    "gcc": {
+      "argv": [
+        "/usr/bin/c++",
+        "--version"
+      ],
+      "returncode": 0,
+      "stdout": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+      "stderr": ""
+    },
+    "gdb": {
+      "argv": [
+        "/tmp/textbook-clion-app/clion-2026.2.3/bin/gdb/linux/x64/bin/gdb",
+        "--version"
+      ],
+      "returncode": 0,
+      "stdout": "GNU gdb (GDB; JetBrains IDE bundle; build 243) 17.1\nCopyright (C) 2025 Free Software Foundation, Inc.\nLicense GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\nThis is free software: you are free to change and redistribute it.\nThere is NO WARRANTY, to the extent permitted by law.\n",
+      "stderr": ""
+    },
+    "cmake": {
+      "argv": [
+        "/tmp/textbook-clion-app/clion-2026.2.3/bin/cmake/linux/x64/bin/cmake",
+        "--version"
+      ],
+      "returncode": 0,
+      "stdout": "cmake version 4.3.1\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).\n",
+      "stderr": ""
+    },
+    "ninja": {
+      "argv": [
+        "/tmp/textbook-clion-app/clion-2026.2.3/bin/ninja/linux/x64/ninja",
+        "--version"
+      ],
+      "returncode": 0,
+      "stdout": "1.13.2\n",
+      "stderr": ""
+    }
+  },
+  "environment": {
+    "container": "ubuntu2404",
+    "os": "Ubuntu 24.04.5",
+    "ros": "Jazzy",
+    "display": ":1 own Xvfb",
+    "font": "Maple Mono NF CN for editor, console and terminal",
+    "source_project": "/tmp/textbook-clion-gui/ros2_ws/src/training_tools",
+    "install": "/tmp/textbook-clion-gui/ros2_ws/install",
+    "ROS_DOMAIN_ID": 191,
+    "ROS_AUTOMATIC_DISCOVERY_RANGE": "LOCALHOST",
+    "config_scope": "same temporary config as volume1; normal trial retained; no personal IDE configuration edits"
+  },
+  "controller_source": "from pathlib import Path\nimport os,json,subprocess,signal,time,sys,select\nroot=Path('/tmp/textbook-clion-gui')\napp=Path('/tmp/textbook-clion-app/clion-2026.2.3')\nprops=root/'isolated.properties'\nprops.write_text('\\n'.join(f'idea.{k}.path={root/k}' for k in ['config','system','plugins','log'])+'\\n')\nvm=root/'clion64.vmoptions'\nvm.write_text((app/'bin/clion64.vmoptions').read_text().replace('-Dawt.toolkit.name=auto','-Dawt.toolkit.name=XToolkit'))\nfd_read,fd_write=os.pipe()\nxvfb=subprocess.Popen(['Xvfb','-displayfd',str(fd_write),'-screen','0','1600x1000x24'],pass_fds=(fd_write,),start_new_session=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)\nos.close(fd_write)\nif not select.select([fd_read],[],[],10)[0]:raise TimeoutError('Xvfb startup')\ndisplay=os.read(fd_read,100).decode().strip();os.close(fd_read)\nenv=dict(os.environ,DISPLAY=':'+display,QT_QPA_PLATFORM='xcb',XDG_CONFIG_HOME=str(root/'xdg-config'),XDG_CACHE_HOME=str(root/'xdg-cache'),XDG_DATA_HOME=str(root/'xdg-data'),XDG_STATE_HOME=str(root/'xdg-state'),CLION_PROPERTIES=str(props),CLION_VM_OPTIONS=str(vm),XDG_SESSION_TYPE='x11',ROS_DOMAIN_ID='191',ROS_AUTOMATIC_DISCOVERY_RANGE='LOCALHOST',ROS_LOG_DIR=str(root/'ros-logs'))\nenv.pop('WAYLAND_DISPLAY',None)\nlog=(root/'clion-stdout.txt').open('w')\nactions=(root/'actions.jsonl').open('a')\nide=subprocess.Popen(['dbus-run-session','--',str(app/'bin/clion.sh'),str(root/'ros2_ws/src/training_tools')],env=env,start_new_session=True,stdout=log,stderr=subprocess.STDOUT)\ndef run(argv):return subprocess.run(argv,env=env,check=True,capture_output=True,text=True).stdout\ndef shot(name):\n run(['xwd','-root','-silent','-out',str(root/(name+'.xwd'))]);print(json.dumps({'snapshot':name,'path':str(root/(name+'.xwd'))}),flush=True)\ntry:\n time.sleep(12);print(json.dumps({'ready':True,'display':display,'folder':str(root),'launcher_status':ide.poll()}),flush=True);shot('ros-startup')\n for line in sys.stdin:\n  item=json.loads(line);actions.write(json.dumps(item)+'\\n');actions.flush()\n  if item.get('quit'):break\n  if 'keys' in item:run(['xdotool','key',*item['keys'].split()])\n  if 'text' in item:run(['xdotool','type','--clearmodifiers','--',item['text']])\n  if 'click' in item:\n   x,y=item['click'];run(['xdotool','mousemove',str(x),str(y),'click',str(item.get('button',1))])\n  time.sleep(item.get('wait',1));shot(item['name'])\nfinally:\n for proc in [ide,xvfb]:\n  if proc.poll() is None:\n   os.killpg(proc.pid,signal.SIGTERM)\n   try:proc.wait(timeout=8)\n   except subprocess.TimeoutExpired:os.killpg(proc.pid,signal.SIGKILL);proc.wait()\n actions.close();log.close()\n",
+  "subscriber_source": "from pathlib import Path\nimport json,os,sys,subprocess,time,hashlib,signal\nimport rclpy\nfrom std_msgs.msg import String\nroot=Path('/tmp/textbook-clion-gui');stage=sys.argv[1]\nproc=None\nif len(sys.argv)>2:\n    proc=subprocess.Popen(sys.argv[2:],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,start_new_session=True)\nrclpy.init(); node=rclpy.create_node('textbook_probe_'+stage);values=[]\nsub=node.create_subscription(String,'/status',lambda msg:values.append(msg.data),10)\nstart=time.monotonic()\nwhile len(values)<3 and time.monotonic()-start<8:rclpy.spin_once(node,timeout_sec=.2)\nnode.destroy_node();rclpy.shutdown()\nobj={'stage':stage,'elapsed':time.monotonic()-start,'values':values,'domain':os.environ.get('ROS_DOMAIN_ID'),'range':os.environ.get('ROS_AUTOMATIC_DISCOVERY_RANGE')}\nif proc:\n    os.killpg(proc.pid,signal.SIGTERM)\n    try:stdout,stderr=proc.communicate(timeout=3)\n    except subprocess.TimeoutExpired:os.killpg(proc.pid,signal.SIGKILL);stdout,stderr=proc.communicate()\n    obj.update(argv=sys.argv[2:],returncode=proc.returncode,stdout=stdout,stderr=stderr)\nwith (root/'ros-probes.jsonl').open('a') as f:f.write(json.dumps(obj)+'\\n')\nprint(json.dumps(obj))\nif len(values)<3:sys.exit(1)\n",
+  "raw_actions": [
+    {
+      "keys": "ctrl+shift+a",
+      "name": "ros-open-action"
+    },
+    {
+      "text": "Open",
+      "name": "ros-open-action-search",
+      "wait": 1
+    },
+    {
+      "keys": "Return",
+      "name": "ros-open-dialog",
+      "wait": 1
+    },
+    {
+      "keys": "ctrl+l",
+      "name": "ros-open-path-field"
+    },
+    {
+      "text": "/tmp/textbook-clion-gui/ros2_ws/src/training_tools",
+      "name": "ros-open-path-type"
+    },
+    {
+      "keys": "Return",
+      "name": "ros-open-path-confirm",
+      "wait": 1
+    },
+    {
+      "click": [
+        436,
+        296
+      ],
+      "name": "ros-path-breadcrumb-click"
+    },
+    {
+      "text": "/tmp/textbook-clion-gui/ros2_ws/src/training_tools",
+      "name": "ros-path-breadcrumb-type",
+      "wait": 3
+    },
+    {
+      "keys": "Escape",
+      "name": "ros-clear-tree-search"
+    },
+    {
+      "click": [
+        594,
+        295
+      ],
+      "name": "ros-focus-real-path-editor"
+    },
+    {
+      "keys": "ctrl+a",
+      "name": "ros-select-real-path"
+    },
+    {
+      "text": "/tmp/textbook-clion-gui/ros2_ws/src/training_tools",
+      "name": "ros-real-path",
+      "wait": 2
+    },
+    {
+      "click": [
+        1010,
+        724
+      ],
+      "name": "ros-file-dialog-cancel"
+    },
+    {
+      "name": "ros-project-opened",
+      "wait": 3
+    },
+    {
+      "click": [
+        554,
+        529
+      ],
+      "name": "ros-open-this-window",
+      "wait": 3
+    },
+    {
+      "click": [
+        605,
+        536
+      ],
+      "name": "ros-trust-only-project",
+      "wait": 4
+    },
+    {
+      "keys": "ctrl+alt+s",
+      "name": "ros-settings-open"
+    },
+    {
+      "click": [
+        425,
+        174
+      ],
+      "name": "ros-cmake-search-field"
+    },
+    {
+      "keys": "ctrl+a",
+      "name": "ros-cmake-search-select"
+    },
+    {
+      "text": "cmake",
+      "name": "ros-cmake-search",
+      "wait": 1
+    },
+    {
+      "click": [
+        234,
+        604
+      ],
+      "name": "ros-cmake-profile",
+      "wait": 1
+    },
+    {
+      "click": [
+        794,
+        546
+      ],
+      "name": "ros-cmake-options-field"
+    },
+    {
+      "keys": "ctrl+a",
+      "name": "ros-cmake-options-select"
+    },
+    {
+      "text": "-DBUILD_TESTING=OFF",
+      "name": "ros-cmake-testing-off"
+    },
+    {
+      "keys": "ctrl+alt+s",
+      "name": "ros-settings-reopened",
+      "wait": 1
+    },
+    {
+      "click": [
+        420,
+        174
+      ],
+      "name": "ros-cmake-search-focus",
+      "wait": 1
+    },
+    {
+      "text": "cmake",
+      "name": "ros-cmake-search",
+      "wait": 2
+    },
+    {
+      "click": [
+        385,
+        634
+      ],
+      "name": "ros-cmake-settings",
+      "wait": 2
+    },
+    {
+      "click": [
+        965,
+        576
+      ],
+      "keys": "ctrl+a",
+      "name": "ros-cmake-options-focus",
+      "wait": 1
+    },
+    {
+      "text": "-DBUILD_TESTING=OFF",
+      "name": "ros-cmake-options",
+      "wait": 1
+    },
+    {
+      "click": [
+        1073,
+        825
+      ],
+      "name": "ros-cmake-applied",
+      "wait": 6
+    },
+    {
+      "keys": "ctrl+shift+n",
+      "name": "ros-open-source-search",
+      "wait": 1
+    },
+    {
+      "text": "heartbeat.cpp",
+      "name": "ros-open-source-result",
+      "wait": 1
+    },
+    {
+      "keys": "Return",
+      "name": "ros-source",
+      "wait": 1
+    },
+    {
+      "click": [
+        1212,
+        40
+      ],
+      "name": "ros-ide-build",
+      "wait": 6
+    },
+    {
+      "click": [
+        1177,
+        41
+      ],
+      "name": "ros-target-menu",
+      "wait": 1
+    },
+    {
+      "click": [
+        1180,
+        195
+      ],
+      "name": "ros-run-configuration",
+      "wait": 1
+    },
+    {
+      "keys": "Escape ctrl+alt+shift+r",
+      "name": "ros-config-dialog",
+      "wait": 1
+    },
+    {
+      "keys": "ctrl+shift+a",
+      "name": "ros-action-search",
+      "wait": 1
+    },
+    {
+      "text": "Edit Configurations",
+      "name": "ros-edit-config-search",
+      "wait": 1
+    },
+    {
+      "keys": "Return",
+      "name": "ros-run-config-dialog",
+      "wait": 2
+    },
+    {
+      "click": [
+        948,
+        342
+      ],
+      "name": "ros-arguments-focus",
+      "wait": 0.5
+    },
+    {
+      "text": "--ros-args -p text:=from_ide",
+      "name": "ros-arguments",
+      "wait": 1
+    },
+    {
+      "click": [
+        1010,
+        800
+      ],
+      "name": "ros-run-config-applied",
+      "wait": 1
+    },
+    {
+      "click": [
+        642,
+        522
+      ],
+      "name": "ros-callback-breakpoint",
+      "wait": 1
+    },
+    {
+      "click": [
+        1278,
+        40
+      ],
+      "name": "ros-callback-debug",
+      "wait": 6
+    },
+    {
+      "keys": "alt+1",
+      "name": "ros-callback-compact",
+      "wait": 1
+    },
+    {
+      "click": [
+        118,
+        82
+      ],
+      "name": "ros-callback-readable",
+      "wait": 1
+    },
+    {
+      "click": [
+        424,
+        747
+      ],
+      "name": "ros-callback-message",
+      "wait": 1
+    },
+    {
+      "click": [
+        157,
+        522
+      ],
+      "name": "ros-breakpoint-removed",
+      "wait": 1
+    },
+    {
+      "keys": "F9",
+      "name": "ros-debug-continued",
+      "wait": 1
+    },
+    {
+      "click": [
+        1013,
+        40
+      ],
+      "name": "ros-debug-stop",
+      "wait": 2
+    },
+    {
+      "keys": "ctrl+shift+a",
+      "name": "ros-config-override-search",
+      "wait": 0.5
+    },
+    {
+      "text": "Edit Configurations",
+      "name": "ros-config-override-result",
+      "wait": 1
+    },
+    {
+      "keys": "Return",
+      "name": "ros-config-override-dialog",
+      "wait": 1
+    },
+    {
+      "click": [
+        984,
+        342
+      ],
+      "name": "ros-clear-args-focus",
+      "wait": 0.5
+    },
+    {
+      "keys": "ctrl+a BackSpace",
+      "name": "ros-clear-args",
+      "wait": 1
+    },
+    {
+      "click": [
+        1025,
+        800
+      ],
+      "name": "ros-clear-args-applied",
+      "wait": 1
+    },
+    {
+      "click": [
+        737,
+        360
+      ],
+      "name": "ros-edit-default-focus",
+      "wait": 0.5
+    },
+    {
+      "keys": "Home Home shift+End",
+      "name": "ros-edit-default-selected",
+      "wait": 0.5
+    },
+    {
+      "text": "    const auto text = declare_parameter<std::string>(\"text\", \"from_debug\");",
+      "name": "ros-edit-default",
+      "wait": 1
+    },
+    {
+      "keys": "ctrl+s",
+      "name": "ros-edit-default-saved",
+      "wait": 1
+    },
+    {
+      "click": [
+        911,
+        40
+      ],
+      "name": "ros-edit-default-build",
+      "wait": 5
+    },
+    {
+      "click": [
+        945,
+        40
+      ],
+      "name": "ros-edit-default-run",
+      "wait": 3
+    },
+    {
+      "click": [
+        1013,
+        40
+      ],
+      "name": "ros-default-stop",
+      "wait": 2
+    },
+    {
+      "click": [
+        693,
+        360
+      ],
+      "name": "ros-restore-focus",
+      "wait": 0.5
+    },
+    {
+      "keys": "Home Home shift+End",
+      "name": "ros-restore-selected",
+      "wait": 0.5
+    },
+    {
+      "text": "    const auto text = declare_parameter<std::string>(\"text\", \"ready\");",
+      "name": "ros-restore-default",
+      "wait": 1
+    },
+    {
+      "keys": "ctrl+s",
+      "name": "ros-restore-saved",
+      "wait": 1
+    },
+    {
+      "click": [
+        945,
+        40
+      ],
+      "name": "ros-restored-run",
+      "wait": 5
+    },
+    {
+      "click": [
+        1013,
+        40
+      ],
+      "name": "ros-restored-stop",
+      "wait": 2
+    },
+    {
+      "keys": "ctrl+shift+a",
+      "name": "ros-compdb-open-search",
+      "wait": 1
+    },
+    {
+      "text": "Open",
+      "name": "ros-compdb-open-result",
+      "wait": 1
+    },
+    {
+      "keys": "Return",
+      "name": "ros-compdb-filechooser",
+      "wait": 1
+    },
+    {
+      "keys": "ctrl+l",
+      "name": "ros-compdb-path-editor",
+      "wait": 1
+    },
+    {
+      "click": [
+        980,
+        295
+      ],
+      "name": "ros-compdb-path-click",
+      "wait": 1
+    },
+    {
+      "keys": "ctrl+a",
+      "name": "ros-compdb-path-selected",
+      "wait": 0.5
+    },
+    {
+      "text": "/tmp/textbook-clion-gui/ros2_ws/build/training_tools/compile_commands.json",
+      "name": "ros-compdb-path-filled",
+      "wait": 1
+    },
+    {
+      "keys": "Escape",
+      "name": "ros-compdb-search-dismissed",
+      "wait": 0.5
+    },
+    {
+      "click": [
+        980,
+        295
+      ],
+      "name": "ros-compdb-paste-focus",
+      "wait": 0.5
+    },
+    {
+      "keys": "ctrl+a",
+      "name": "ros-compdb-paste-selected",
+      "wait": 0.5
+    },
+    {
+      "keys": "ctrl+v",
+      "name": "ros-compdb-path-pasted",
+      "wait": 1
+    },
+    {
+      "keys": "Return",
+      "name": "ros-compdb-path-confirmed",
+      "wait": 2
+    },
+    {
+      "click": [
+        928,
+        724
+      ],
+      "name": "ros-compdb-open-as-project",
+      "wait": 1
+    },
+    {
+      "click": [
+        555,
+        511
+      ],
+      "name": "ros-compdb-project-confirmed",
+      "wait": 1
+    },
+    {
+      "click": [
+        555,
+        529
+      ],
+      "name": "ros-compdb-this-window",
+      "wait": 2
+    },
+    {
+      "click": [
+        605,
+        536
+      ],
+      "name": "ros-compdb-trusted",
+      "wait": 5
+    },
+    {
+      "keys": "ctrl+shift+n",
+      "name": "ros-compdb-source-search",
+      "wait": 0.5
+    },
+    {
+      "text": "heartbeat.cpp",
+      "name": "ros-compdb-source-result",
+      "wait": 1
+    },
+    {
+      "keys": "Return",
+      "name": "ros-compdb-source-open",
+      "wait": 1
+    },
+    {
+      "click": [
+        772,
+        198
+      ],
+      "name": "ros-compdb-header-focus",
+      "wait": 2
+    },
+    {
+      "keys": "ctrl+b",
+      "name": "ros-compdb-header-resolved",
+      "wait": 2
+    },
+    {
+      "click": [
+        1095,
+        117
+      ],
+      "name": "ros-compdb-header-inspections",
+      "wait": 1
+    },
+    {
+      "keys": "Escape ctrl+alt+Left ctrl+shift+o",
+      "name": "ros-compdb-reloaded",
+      "wait": 3
+    },
+    {
+      "keys": "ctrl+shift+F9",
+      "name": "ros-compdb-recompile",
+      "wait": 3
+    },
+    {
+      "click": [
+        573,
+        83
+      ],
+      "name": "ros-compdb-source-current",
+      "wait": 1
+    },
+    {
+      "keys": "ctrl+shift+o",
+      "name": "ros-compdb-source-reload",
+      "wait": 2
+    },
+    {
+      "keys": "ctrl+shift+F9",
+      "name": "ros-compdb-source-recompile",
+      "wait": 3
+    },
+    {
+      "keys": "ctrl+shift+a",
+      "name": "ros-compdb-root-search",
+      "wait": 0.5
+    },
+    {
+      "text": "Change Project Root",
+      "name": "ros-compdb-root-result",
+      "wait": 1
+    },
+    {
+      "keys": "Return",
+      "name": "ros-compdb-root-dialog",
+      "wait": 1
+    },
+    {
+      "click": [
+        980,
+        295
+      ],
+      "name": "ros-compdb-root-path-focus",
+      "wait": 0.5
+    },
+    {
+      "keys": "ctrl+a",
+      "name": "ros-compdb-root-selected",
+      "wait": 0.5
+    },
+    {
+      "keys": "ctrl+v Return",
+      "name": "ros-compdb-root-path",
+      "wait": 1
+    },
+    {
+      "click": [
+        928,
+        724
+      ],
+      "name": "ros-compdb-root-applied",
+      "wait": 4
+    },
+    {
+      "click": [
+        707,
+        83
+      ],
+      "name": "ros-compdb-header-after-root",
+      "wait": 2
+    },
+    {
+      "click": [
+        764,
+        83
+      ],
+      "name": "ros-compdb-header-closed",
+      "wait": 1
+    },
+    {
+      "click": [
+        772,
+        198
+      ],
+      "name": "ros-compdb-header-reopen-focus",
+      "wait": 1
+    },
+    {
+      "keys": "ctrl+b",
+      "name": "ros-compdb-header-reopened",
+      "wait": 3
+    },
+    {
+      "click": [
+        764,
+        83
+      ],
+      "name": "ros-clangd-header-closed",
+      "wait": 1
+    },
+    {
+      "click": [
+        772,
+        198
+      ],
+      "name": "ros-clangd-header-focus",
+      "wait": 1
+    },
+    {
+      "keys": "ctrl+b",
+      "name": "ros-clangd-header-configured",
+      "wait": 4
+    },
+    {
+      "click": [
+        575,
+        83
+      ],
+      "name": "ros-compdb-final-source",
+      "wait": 1
+    },
+    {
+      "keys": "ctrl+shift+a",
+      "name": "ros-exit-search",
+      "wait": 0.5
+    },
+    {
+      "text": "Exit",
+      "name": "ros-exit-result",
+      "wait": 1
+    },
+    {
+      "keys": "Down Down Down Return",
+      "name": "ros-exit-confirmation",
+      "wait": 1
+    },
+    {
+      "click": [
+        680,
+        521
+      ],
+      "name": "ros-exit-completed",
+      "wait": 4
+    }
+  ],
+  "font_config": {
+    "config/options/editor-font.xml": "<application>\n  <component name=\"DefaultFont\">\n    <option name=\"VERSION\" value=\"1\" />\n    <option name=\"FONT_SIZE\" value=\"16\" />\n    <option name=\"FONT_SIZE_2D\" value=\"16.0\" />\n    <option name=\"FONT_FAMILY\" value=\"Maple Mono NF CN\" />\n  </component>\n</application>",
+    "config/options/terminal-font.xml": "<application>\n  <component name=\"TerminalFontOptions\">\n    <option name=\"VERSION\" value=\"1\" />\n    <option name=\"FONT_SIZE\" value=\"16\" />\n    <option name=\"FONT_SIZE_2D\" value=\"16.0\" />\n    <option name=\"FONT_FAMILY\" value=\"Maple Mono NF CN\" />\n  </component>\n</application>",
+    "config/colors/_@user_Islands Dark.icls": "<scheme name=\"_@user_Islands Dark\" version=\"142\" parent_scheme=\"Darcula\">\n  <option name=\"FONT_SCALE\" value=\"1.0\" />\n  <metaInfo>\n    <property name=\"ide\">CLion</property>\n    <property name=\"ideVersion\">2026.2.3.0.0</property>\n    <property name=\"originalScheme\">Islands Dark</property>\n    <property name=\"partialSave\">true</property>\n    <property name=\"pluginId\">com.intellij</property>\n  </metaInfo>\n  <option name=\"CONSOLE_FONT_NAME\" value=\"Maple Mono NF CN\" />\n  <option name=\"CONSOLE_LINE_SPACING\" value=\"1.2\" />\n</scheme>"
+  },
+  "cmake_cache_selection": [
+    "BUILD_TESTING:BOOL=OFF",
+    "CMAKE_BUILD_TYPE:STRING=Debug",
+    "CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++",
+    "CMAKE_INSTALL_PREFIX:PATH=/usr/local",
+    "CMAKE_MAKE_PROGRAM:UNINITIALIZED=/tmp/textbook-clion-app/clion-2026.2.3/bin/ninja/linux/x64/ninja",
+    "CMAKE_GENERATOR:INTERNAL=Ninja"
+  ],
+  "project_config": {
+    "ros2_ws/src/training_tools/.idea/workspace.xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<project version=\"4\">\n  <component name=\"AutoImportSettings\">\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\n  </component>\n  <component name=\"BackendCodeEditorMiscSettings\">\n    <option name=\"/Default/Housekeeping/FeatureSuggestion/FeatureSuggestionManager/DisabledSuggesters/=SwitchToGoToActionSuggester/@EntryIndexedValue\" value=\"true\" type=\"bool\" />\n  </component>\n  <component name=\"CMakePresetLoader\">{\n  &quot;useNewFormat&quot;: true\n}</component>\n  <component name=\"CMakeProjectFlavorService\">\n    <option name=\"flavorId\" value=\"CMakePlainProjectFlavor\" />\n  </component>\n  <component name=\"CMakeReloadState\">\n    <option name=\"reloaded\" value=\"true\" />\n  </component>\n  <component name=\"CMakeRunConfigurationManager\">\n    <generated>\n      <config projectName=\"training_tools\" targetName=\"heartbeat\" />\n      <config projectName=\"training_tools\" targetName=\"training_tools_uninstall\" />\n      <config projectName=\"training_tools\" targetName=\"uninstall\" />\n    </generated>\n  </component>\n  <component name=\"CMakeSettings\">\n    <configurations>\n      <configuration PROFILE_NAME=\"Debug\" ENABLED=\"true\" CONFIG_NAME=\"Debug\" GENERATION_OPTIONS=\"-DBUILD_TESTING=OFF\" />\n    </configurations>\n  </component>\n  <component name=\"ChangeListManager\">\n    <list default=\"true\" id=\"2fcefc90-9540-49f5-b58c-8e03346461f3\" name=\"Changes\" comment=\"\" />\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\n  </component>\n  <component name=\"ClangdSettings\">\n    <option name=\"formatViaClangd\" value=\"false\" />\n  </component>\n  <component name=\"ExecutionTargetManager\" SELECTED_TARGET=\"CMakeBuildProfile:Debug\" />\n  <component name=\"HighlightingSettingsPerFile\">\n    <setting file=\"mock:///dummy.cpp\" root0=\"SKIP_HIGHLIGHTING\" />\n  </component>\n  <component name=\"MacroExpansionManager\">\n    <option name=\"directoryName\" value=\"Fm1ZW711\" />\n  </component>\n  <component name=\"ProjectApplicationVersion\">\n    <option name=\"ide\" value=\"CLion\" />\n    <option name=\"majorVersion\" value=\"2026\" />\n    <option name=\"minorVersion\" value=\"2.3\" />\n    <option name=\"productBranch\" value=\"Classic\" />\n  </component>\n  <component name=\"ProjectColorInfo\">{\n  &quot;associatedIndex&quot;: 5,\n  &quot;fromUser&quot;: false\n}</component>\n  <component name=\"ProjectId\" id=\"3JzN472GIK7nNoB9bIlqRd2i2RQ\" />\n  <component name=\"ProjectViewState\">\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\n    <option name=\"showLibraryContents\" value=\"true\" />\n  </component>\n  <component name=\"PropertiesComponent\"><![CDATA[{\n  \"keyToString\": {\n    \"CMake Application.heartbeat.executor\": \"Run\",\n    \"CidrDebugProfileConversion\": \"true\",\n    \"ModuleVcsDetector.initialDetectionPerformed\": \"true\",\n    \"RunOnceActivity.RadMigrateCodeStyle\": \"true\",\n    \"RunOnceActivity.ShowReadmeOnStart\": \"true\",\n    \"RunOnceActivity.cidr.known.project.marker\": \"true\",\n    \"RunOnceActivity.readMode.enableVisualFormatting\": \"true\",\n    \"RunOnceActivity.typescript.service.memoryLimit.init\": \"true\",\n    \"cf.first.check.clang-format\": \"false\",\n    \"cidr.known.project.marker\": \"true\",\n    \"codeWithMe.voiceChat.enabledByDefault\": \"false\",\n    \"ctest.advertisement.all.test.configuration.is.created\": \"true\",\n    \"last_opened_file_path\": \"/tmp/textbook-clion-gui/ros2_ws/build/training_tools/compile_commands.json\",\n    \"python.packages.toolwindow.project.migrated.to.right.top.v2\": \"true\",\n    \"settings.editor.selected.configurable\": \"CMakeSettings\"\n  }\n}]]></component>\n  <component name=\"RunManager\" selected=\"CMake Application.heartbeat\">\n    <configuration default=\"true\" type=\"CMakeRunConfiguration\" factoryName=\"Application\" REDIRECT_INPUT=\"false\" ELEVATE=\"false\" USE_EXTERNAL_CONSOLE=\"false\" EMULATE_TERMINAL=\"false\" PASS_PARENT_ENVS_2=\"true\">\n      <method v=\"2\">\n        <option name=\"com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask\" enabled=\"true\" />\n      </method>\n    </configuration>\n    <configuration name=\"heartbeat\" type=\"CMakeRunConfiguration\" factoryName=\"Application\" REDIRECT_INPUT=\"false\" ELEVATE=\"false\" USE_EXTERNAL_CONSOLE=\"false\" EMULATE_TERMINAL=\"false\" PASS_PARENT_ENVS_2=\"true\" PROJECT_NAME=\"training_tools\" TARGET_NAME=\"heartbeat\" CONFIG_NAME=\"Debug\" RUN_TARGET_PROJECT_NAME=\"training_tools\" RUN_TARGET_NAME=\"heartbeat\">\n      <method v=\"2\">\n        <option name=\"com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask\" enabled=\"true\" />\n      </method>\n    </configuration>\n    <configuration name=\"training_tools_uninstall\" type=\"CMakeRunConfiguration\" factoryName=\"Application\" REDIRECT_INPUT=\"false\" ELEVATE=\"false\" USE_EXTERNAL_CONSOLE=\"false\" EMULATE_TERMINAL=\"false\" PASS_PARENT_ENVS_2=\"true\" PROJECT_NAME=\"training_tools\" TARGET_NAME=\"training_tools_uninstall\" CONFIG_NAME=\"Debug\">\n      <method v=\"2\">\n        <option name=\"com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask\" enabled=\"true\" />\n      </method>\n    </configuration>\n    <configuration name=\"uninstall\" type=\"CMakeRunConfiguration\" factoryName=\"Application\" REDIRECT_INPUT=\"false\" ELEVATE=\"false\" USE_EXTERNAL_CONSOLE=\"false\" EMULATE_TERMINAL=\"false\" PASS_PARENT_ENVS_2=\"true\" PROJECT_NAME=\"training_tools\" TARGET_NAME=\"uninstall\" CONFIG_NAME=\"Debug\">\n      <method v=\"2\">\n        <option name=\"com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask\" enabled=\"true\" />\n      </method>\n    </configuration>\n    <configuration name=\"All CTest\" type=\"CTestRunConfiguration\" factoryName=\"CTestRun\" PROGRAM_PARAMS=\"--extra-verbose\" REDIRECT_INPUT=\"false\" ELEVATE=\"false\" USE_EXTERNAL_CONSOLE=\"false\" EMULATE_TERMINAL=\"false\" WORKING_DIR=\"file://$CMakeCurrentLocalGenerationDir$\" PASS_PARENT_ENVS_2=\"true\" RUN_PATH=\"$CTestCurrentExecutableName$\" EXPLICIT_BUILD_TARGET_NAME=\"all\" TEST_MODE=\"SUITE_TEST\">\n      <method v=\"2\">\n        <option name=\"com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask\" enabled=\"true\" />\n        <option name=\"BeforeTestRunTask\" enabled=\"true\" />\n      </method>\n    </configuration>\n    <list>\n      <item itemvalue=\"CMake Application.heartbeat\" />\n      <item itemvalue=\"CMake Application.training_tools_uninstall\" />\n      <item itemvalue=\"CMake Application.uninstall\" />\n      <item itemvalue=\"CTest Application.All CTest\" />\n    </list>\n  </component>\n  <component name=\"SelectedDebugProfileService\"><![CDATA[{\n  \"profileIdByStamp\": [\n    {\n      \"first\": {\n        \"##RUN_CONFIGURATION##\": \"CMake Application.heartbeat\",\n        \"cmake\": \"CMakeBuildProfile:Debug\"\n      },\n      \"second\": \"8286e667-5b2a-4688-8217-7364b1765ddc\"\n    }\n  ],\n  \"modificationCount\": 7\n}]]></component>\n  <component name=\"TaskManager\">\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\n      <changelist id=\"2fcefc90-9540-49f5-b58c-8e03346461f3\" name=\"Changes\" comment=\"\" />\n      <created>1790659742573</created>\n      <option name=\"number\" value=\"Default\" />\n      <option name=\"presentableId\" value=\"Default\" />\n      <updated>1790659742573</updated>\n    </task>\n    <servers />\n  </component>\n  <component name=\"TypeScriptGeneratedFilesManager\">\n    <option name=\"version\" value=\"3\" />\n  </component>\n  <component name=\"VCPKGProject\">\n    <isAutomaticCheckingOnLaunch value=\"false\" />\n    <isAutomaticFoundErrors value=\"true\" />\n    <isAutomaticReloadCMake value=\"true\" />\n    <isAutomaticBootstrapAfterUpdate value=\"false\" />\n  </component>\n  <component name=\"XSLT-Support.FileAssociations.UIState\">\n    <expand />\n    <select />\n  </component>\n</project>",
+    "ros2_ws/build/training_tools/.idea/misc.xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<project version=\"4\">\n  <component name=\"CompDBSettings\">\n    <option name=\"linkedExternalProjectsSettings\">\n      <CompDBProjectSettings>\n        <option name=\"externalProjectPath\" value=\"$PROJECT_DIR$\" />\n        <option name=\"modules\">\n          <set>\n            <option value=\"$PROJECT_DIR$\" />\n          </set>\n        </option>\n      </CompDBProjectSettings>\n    </option>\n  </component>\n  <component name=\"CompDBWorkspace\" PROJECT_DIR=\"$PROJECT_DIR$\">\n    <contentRoot DIR=\"$PROJECT_DIR$/../..\" />\n  </component>\n  <component name=\"ExternalStorageConfigurationManager\" enabled=\"true\" />\n</project>"
+  },
+  "colcon_stdout": {
+    "initial-colcon.txt": "Starting >>> training_tools\nFinished <<< training_tools [4.15s]\n\nSummary: 1 package finished [4.24s]\n",
+    "colcon-after-edit.txt": "Starting >>> training_tools\nFinished <<< training_tools [3.15s]\n\nSummary: 1 package finished [3.25s]\n",
+    "colcon-restored.txt": "Starting >>> training_tools\nFinished <<< training_tools [3.44s]\n\nSummary: 1 package finished [3.54s]\n"
+  },
+  "compile_commands": [
+    {
+      "directory": "/tmp/textbook-clion-gui/ros2_ws/build/training_tools",
+      "command": "/usr/bin/c++ -DDEFAULT_RMW_IMPLEMENTATION=rmw_fastrtps_cpp -DFASTCDR_DYN_LINK -isystem /opt/ros/jazzy/include/rclcpp -isystem /opt/ros/jazzy/include/std_msgs -isystem /opt/ros/jazzy/include/builtin_interfaces -isystem /opt/ros/jazzy/include/rosidl_runtime_c -isystem /opt/ros/jazzy/include/rcutils -isystem /opt/ros/jazzy/include/rosidl_typesupport_interface -isystem /opt/ros/jazzy/include/fastcdr -isystem /opt/ros/jazzy/include/rosidl_runtime_cpp -isystem /opt/ros/jazzy/include/rosidl_typesupport_fastrtps_cpp -isystem /opt/ros/jazzy/include/rmw -isystem /opt/ros/jazzy/include/rosidl_dynamic_typesupport -isystem /opt/ros/jazzy/include/rosidl_typesupport_fastrtps_c -isystem /opt/ros/jazzy/include/rosidl_typesupport_introspection_c -isystem /opt/ros/jazzy/include/rosidl_typesupport_introspection_cpp -isystem /opt/ros/jazzy/include/libstatistics_collector -isystem /opt/ros/jazzy/include/rcl -isystem /opt/ros/jazzy/include/rcl_interfaces -isystem /opt/ros/jazzy/include/service_msgs -isystem /opt/ros/jazzy/include/rcl_logging_interface -isystem /opt/ros/jazzy/include/rcl_yaml_param_parser -isystem /opt/ros/jazzy/include/type_description_interfaces -isystem /opt/ros/jazzy/include/rcpputils -isystem /opt/ros/jazzy/include/statistics_msgs -isystem /opt/ros/jazzy/include/rosgraph_msgs -isystem /opt/ros/jazzy/include/rosidl_typesupport_cpp -isystem /opt/ros/jazzy/include/rosidl_typesupport_c -isystem /opt/ros/jazzy/include/tracetools -g -o CMakeFiles/heartbeat.dir/src/heartbeat.cpp.o -c /tmp/textbook-clion-gui/ros2_ws/src/training_tools/src/heartbeat.cpp",
+      "file": "/tmp/textbook-clion-gui/ros2_ws/src/training_tools/src/heartbeat.cpp",
+      "output": "CMakeFiles/heartbeat.dir/src/heartbeat.cpp.o"
+    }
+  ],
+  "DDS_observations": [
+    {
+      "stage": "ide_parameter",
+      "elapsed": 0.523346264999418,
+      "values": [
+        "from_ide",
+        "from_ide",
+        "from_ide"
+      ],
+      "domain": "191",
+      "range": "LOCALHOST"
+    },
+    {
+      "stage": "old_install_before_edit",
+      "elapsed": 0.47315296799934004,
+      "values": [
+        "ready",
+        "ready",
+        "ready"
+      ],
+      "domain": "191",
+      "range": "LOCALHOST",
+      "argv": [
+        "/tmp/textbook-clion-gui/ros2_ws/install/training_tools/lib/training_tools/heartbeat"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "[INFO] [1790660634.257301233] [heartbeat]: first heartbeat\n[INFO] [1790660634.257359374] [heartbeat]: heartbeat alive\n[INFO] [1790660634.659776306] [rclcpp]: signal_handler(SIGINT/SIGTERM)\n"
+    },
+    {
+      "stage": "ide_default",
+      "elapsed": 0.5797914219947415,
+      "values": [
+        "from_debug",
+        "from_debug",
+        "from_debug"
+      ],
+      "domain": "191",
+      "range": "LOCALHOST"
+    },
+    {
+      "stage": "old_install_after_edit",
+      "elapsed": 0.4759542550018523,
+      "values": [
+        "ready",
+        "ready",
+        "ready"
+      ],
+      "domain": "191",
+      "range": "LOCALHOST",
+      "argv": [
+        "/tmp/textbook-clion-gui/ros2_ws/install/training_tools/lib/training_tools/heartbeat"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "[INFO] [1790660742.971933007] [heartbeat]: first heartbeat\n[INFO] [1790660742.971994035] [heartbeat]: heartbeat alive\n[INFO] [1790660743.375987710] [rclcpp]: signal_handler(SIGINT/SIGTERM)\n"
+    },
+    {
+      "stage": "installed_after_colcon",
+      "elapsed": 0.6191028949979227,
+      "values": [
+        "from_debug",
+        "from_debug",
+        "from_debug"
+      ],
+      "domain": "191",
+      "range": "LOCALHOST",
+      "argv": [
+        "ros2",
+        "run",
+        "training_tools",
+        "heartbeat"
+      ],
+      "returncode": -15,
+      "stdout": "",
+      "stderr": "[INFO] [1790660747.501019522] [heartbeat]: first heartbeat\n[INFO] [1790660747.501093214] [heartbeat]: heartbeat alive\n[INFO] [1790660749.700995148] [heartbeat]: heartbeat alive\n[INFO] [1790660751.900955908] [heartbeat]: heartbeat alive\n[INFO] [1790660753.900956598] [heartbeat]: heartbeat alive\n[INFO] [1790660755.900971806] [heartbeat]: heartbeat alive\n[INFO] [1790660757.900993613] [heartbeat]: heartbeat alive\n[INFO] [1790660759.901000811] [heartbeat]: heartbeat alive\n[INFO] [1790660761.901010406] [heartbeat]: heartbeat alive\n[INFO] [1790660764.100958127] [heartbeat]: heartbeat alive\n[INFO] [1790660766.100958802] [heartbeat]: heartbeat alive\n[INFO] [1790660768.100959253] [heartbeat]: heartbeat alive\n[INFO] [1790660770.100960616] [heartbeat]: heartbeat alive\n[INFO] [1790660772.100999582] [heartbeat]: heartbeat alive\n[INFO] [1790660774.301086533] [heartbeat]: heartbeat alive\n[INFO] [1790660776.500989572] [heartbeat]: heartbeat alive\n[INFO] [1790660778.700975913] [heartbeat]: heartbeat alive\n[INFO] [1790660780.700987090] [heartbeat]: heartbeat alive\n[INFO] [1790660782.900960359] [heartbeat]: heartbeat alive\n[INFO] [1790660784.901099846] [heartbeat]: heartbeat alive\n[INFO] [1790660787.100959390] [heartbeat]: heartbeat alive\n[INFO] [1790660789.100996355] [heartbeat]: heartbeat alive\n[INFO] [1790660791.301019652] [heartbeat]: heartbeat alive\n[INFO] [1790660793.301087413] [heartbeat]: heartbeat alive\n[INFO] [1790660795.500961168] [heartbeat]: heartbeat alive\n[INFO] [1790660797.294242329] [rclcpp]: signal_handler(SIGINT/SIGTERM)\n"
+    },
+    {
+      "stage": "ide_restored",
+      "elapsed": 0.5058309970045229,
+      "values": [
+        "ready",
+        "ready",
+        "ready"
+      ],
+      "domain": "191",
+      "range": "LOCALHOST"
+    },
+    {
+      "stage": "installed_restored",
+      "elapsed": 0.6123858229984762,
+      "values": [
+        "ready",
+        "ready",
+        "ready"
+      ],
+      "domain": "191",
+      "range": "LOCALHOST",
+      "argv": [
+        "ros2",
+        "run",
+        "training_tools",
+        "heartbeat"
+      ],
+      "returncode": -15,
+      "stdout": "",
+      "stderr": "[INFO] [1790660927.780974995] [heartbeat]: first heartbeat\n[INFO] [1790660927.781036981] [heartbeat]: heartbeat alive\n[INFO] [1790660928.184940571] [rclcpp]: signal_handler(SIGINT/SIGTERM)\n"
+    }
+  ],
+  "source_restored": {
+    "byte_equal": true,
+    "sha256": "bb7ad115b1a15fc8035b638ab97f5eba104d216cd3f39c688cbd369b9beb5972",
+    "variant_sha256": "4e1c7df683b270f48a3740e34ffa02def9b648f65480019881966477679e3119",
+    "only_variant": "ready -> from_debug via actual GUI, verified against original replacement"
+  },
+  "screenshots": [
+    {
+      "name": "ros-cmake-options",
+      "file": "docs/revision/evidence/volume-2-chapter-1-clion-assets/ros-cmake-options.png",
+      "sha256": "1c8b5e13768681c084bb595286c22fb5d270f677080bc175679e0cb04e717784",
+      "original_size": [
+        1600,
+        1000
+      ],
+      "method": "xwd raw desktop capture converted to PNG; no pixel repainting"
+    },
+    {
+      "name": "ros-ide-build",
+      "file": "docs/revision/evidence/volume-2-chapter-1-clion-assets/ros-ide-build.png",
+      "sha256": "d02712b297ec138c8c724b4d0eef9beb9c560aa86165481db6bffef1822e6a75",
+      "original_size": [
+        1600,
+        1000
+      ],
+      "method": "xwd raw desktop capture converted to PNG; no pixel repainting"
+    },
+    {
+      "name": "ros-arguments",
+      "file": "docs/revision/evidence/volume-2-chapter-1-clion-assets/ros-arguments.png",
+      "sha256": "9a5b1de756599821091c5e234b6bfd28f96e3e4b9a0920dcee1ee64395d73ce7",
+      "original_size": [
+        1600,
+        1000
+      ],
+      "method": "xwd raw desktop capture converted to PNG; no pixel repainting"
+    },
+    {
+      "name": "ros-callback-debug",
+      "file": "docs/revision/evidence/volume-2-chapter-1-clion-assets/ros-callback-debug.png",
+      "sha256": "1efa6bdf06697fc1f442e3bd8db62246778bf86bfe721a2b3a2b608601d2b3f8",
+      "original_size": [
+        1600,
+        1000
+      ],
+      "method": "xwd raw desktop capture converted to PNG; no pixel repainting"
+    },
+    {
+      "name": "ros-callback-message",
+      "file": "docs/revision/evidence/volume-2-chapter-1-clion-assets/ros-callback-message.png",
+      "sha256": "81d6b480304164a2dc949de48d374eaeb6a56a61c5f55efbe0b052624f858d77",
+      "original_size": [
+        1600,
+        1000
+      ],
+      "method": "xwd raw desktop capture converted to PNG; no pixel repainting"
+    },
+    {
+      "name": "ros-edit-default-build",
+      "file": "docs/revision/evidence/volume-2-chapter-1-clion-assets/ros-edit-default-build.png",
+      "sha256": "be69dd49b31ea7a1d06a53421cb19c05aaa95fa6bb44fa26e719cd04ea100fee",
+      "original_size": [
+        1600,
+        1000
+      ],
+      "method": "xwd raw desktop capture converted to PNG; no pixel repainting"
+    },
+    {
+      "name": "ros-edit-default-run",
+      "file": "docs/revision/evidence/volume-2-chapter-1-clion-assets/ros-edit-default-run.png",
+      "sha256": "90dd393156cfaac80c9f754ad46782a51fe554e495ac754eeecd6bb757f2d318",
+      "original_size": [
+        1600,
+        1000
+      ],
+      "method": "xwd raw desktop capture converted to PNG; no pixel repainting"
+    },
+    {
+      "name": "ros-clear-args",
+      "file": "docs/revision/evidence/volume-2-chapter-1-clion-assets/ros-clear-args.png",
+      "sha256": "403ecaff7e28549799be5ac26ab939360f7b0ccaa42d9f4c946fde79ff87f060",
+      "original_size": [
+        1600,
+        1000
+      ],
+      "method": "xwd raw desktop capture converted to PNG; no pixel repainting"
+    },
+    {
+      "name": "ros-restored-run",
+      "file": "docs/revision/evidence/volume-2-chapter-1-clion-assets/ros-restored-run.png",
+      "sha256": "435de231383c70586e8f065aa40196d661c94bb9938f3b4bf5059bfc94fd9c91",
+      "original_size": [
+        1600,
+        1000
+      ],
+      "method": "xwd raw desktop capture converted to PNG; no pixel repainting"
+    },
+    {
+      "name": "ros-compdb-open-as-project",
+      "file": "docs/revision/evidence/volume-2-chapter-1-clion-assets/ros-compdb-open-as-project.png",
+      "sha256": "9025e5409cbe8108de906e33777b5d2160bfee00b8aab505150dbb779bae9fa9",
+      "original_size": [
+        1600,
+        1000
+      ],
+      "method": "xwd raw desktop capture converted to PNG; no pixel repainting"
+    },
+    {
+      "name": "ros-compdb-trusted",
+      "file": "docs/revision/evidence/volume-2-chapter-1-clion-assets/ros-compdb-trusted.png",
+      "sha256": "40f547657519618f346af0fc867f3e759ea7b5a47e9845c260359233ad36ffd0",
+      "original_size": [
+        1600,
+        1000
+      ],
+      "method": "xwd raw desktop capture converted to PNG; no pixel repainting"
+    },
+    {
+      "name": "ros-compdb-header-resolved",
+      "file": "docs/revision/evidence/volume-2-chapter-1-clion-assets/ros-compdb-header-resolved.png",
+      "sha256": "58bf24d107ebf4c53cc37791f5920579ade1a90ce18c0078afe19b0b8073f4d5",
+      "original_size": [
+        1600,
+        1000
+      ],
+      "method": "xwd raw desktop capture converted to PNG; no pixel repainting"
+    },
+    {
+      "name": "ros-compdb-header-inspections",
+      "file": "docs/revision/evidence/volume-2-chapter-1-clion-assets/ros-compdb-header-inspections.png",
+      "sha256": "e52d6927353fff5316c0bd02ab00487a329f5c5c894b5ef260a1152b85e1c89a",
+      "original_size": [
+        1600,
+        1000
+      ],
+      "method": "xwd raw desktop capture converted to PNG; no pixel repainting"
+    },
+    {
+      "name": "ros-compdb-source-recompile",
+      "file": "docs/revision/evidence/volume-2-chapter-1-clion-assets/ros-compdb-source-recompile.png",
+      "sha256": "f2885771e88d40d587de23e6b2d7fec1728442d609d104c6a4b752a819a820cc",
+      "original_size": [
+        1600,
+        1000
+      ],
+      "method": "xwd raw desktop capture converted to PNG; no pixel repainting"
+    },
+    {
+      "name": "ros-compdb-header-after-root",
+      "file": "docs/revision/evidence/volume-2-chapter-1-clion-assets/ros-compdb-header-after-root.png",
+      "sha256": "e3ee1b317f168aaf4c82a4ae2239ea7abc4be6d300e8eaa63ccbc93db0092057",
+      "original_size": [
+        1600,
+        1000
+      ],
+      "method": "xwd raw desktop capture converted to PNG; no pixel repainting"
+    },
+    {
+      "name": "ros-clangd-header-configured",
+      "file": "docs/revision/evidence/volume-2-chapter-1-clion-assets/ros-clangd-header-configured.png",
+      "sha256": "39c6c999e917186c7e7cd9fcbe3d8b0eda0918bf7a7b85cafa7191bdfa45992e",
+      "original_size": [
+        1600,
+        1000
+      ],
+      "method": "xwd raw desktop capture converted to PNG; no pixel repainting"
+    },
+    {
+      "name": "ros-compdb-final-source",
+      "file": "docs/revision/evidence/volume-2-chapter-1-clion-assets/ros-compdb-final-source.png",
+      "sha256": "22970b727d3ba0d77739259cf3fa74d48e6cf53bb9e5c4e2003659cd70458ef5",
+      "original_size": [
+        1600,
+        1000
+      ],
+      "method": "xwd raw desktop capture converted to PNG; no pixel repainting"
+    }
+  ],
+  "observations": [
+    "Actual GUI: Debug / Ninja / BUILD_TESTING=OFF, Build finished; no install target executed with default /usr/local prefix.",
+    "Actual callback breakpoint at heartbeat.cpp:16, Thread PID1222246, lambda current frame; text and msg.data both from_ide. Breakpoint removed before continuing; 3 actual DDS messages observed.",
+    "GUI argument override removed before source default changed; Build/Run from_debug; old install still ready; colcon rebuild then actual ros2 run from_debug.",
+    "GUI restored source byte-identically, IDE ready; colcon restored install, ros2 run ready. All previous publishers stopped before the next stage.",
+    "Compilation database opened by actual File Open / Open as Project / This Window / Trust only project; successfully imported. Ctrl+B resolved Jazzy header; source Recompile finished with real include flags.",
+    "External rclcpp.hpp retained 15 clangd file-not-found diagnostics for child headers. Source displayed one warning and compiled successfully. Reload/root change/close-reopen did not clear header diagnostics; not claiming all indexing diagnostics clean.",
+    "Own temporary XDG clangd CompilationDatabase fragment had no GUI effect and was renamed config-test-inactive.yaml. No diagnostics suppression or system header changes."
+  ],
+  "failures_and_recovery": [
+    {
+      "component": "capture controller",
+      "failure": "xdotool type interpreted leading -DBUILD_TESTING as option and controller ended; own IDE/Xvfb cleaned up",
+      "recovery": "added -- before text; restarted existing trial/config, successfully applied CMake option"
+    },
+    {
+      "component": "file chooser automation",
+      "failure": "per-key path input caused slash navigation and tree search instead of full path selection",
+      "recovery": "clicked blank breadcrumb area; own Xvfb Qt clipboard pasted entire path atomically, Return selected correct JSON"
+    },
+    {
+      "component": "subscriber cleanup",
+      "failure": "initial ros2 run wrapper termination left own heartbeat child holding output pipe",
+      "recovery": "verified /proc/1230325/exe exact temporary installed heartbeat, sent SIGTERM; changed probe to terminate own process group, later restored run finished without lingering child"
+    }
+  ],
+  "second_host_attempt": {
+    "alias": "orin",
+    "configured_hostname": "nvidia",
+    "mode": "read-only SSH BatchMode, ConnectTimeout5; remote OS/ROS directory query only",
+    "returncode": 255,
+    "stderr": "ssh: Could not resolve hostname nvidia: Name or service not known",
+    "limit": "no second physical host communication/discovery experiment; no robot command or unknown-address scan"
+  },
+  "official_sources": [
+    "https://www.jetbrains.com/help/clion/compilation-database.html",
+    "https://clangd.llvm.org/config"
+  ],
+  "PDF_QA": {
+    "pdf": "02-专项技术栈/main.pdf",
+    "pages": 270,
+    "sha256": "80684b0a3fa641599b3898ac521f45b917679931cbd14788be3e2f4a8e0ea665",
+    "candidate_viewed": [
+      35,
+      36,
+      37,
+      38,
+      246,
+      247
+    ],
+    "final_viewed": [
+      4,
+      5,
+      35,
+      36,
+      37,
+      38,
+      39,
+      246,
+      247,
+      248
+    ],
+    "full_candidate_figure_page_viewed": 36,
+    "final_compiles": [
+      0,
+      0
+    ],
+    "bad_log_lines": []
+  },
+  "body_figure": {
+    "original": "new actual GUI screenshot",
+    "candidate": "02-专项技术栈/images/ros2_clion_candidate.png",
+    "final": "02-专项技术栈/images/ros2_clion_revised.png",
+    "sha256": "30fdb43ae55cf540c391daf139568b35b7887479e70891b1811ca7cf9612b7cf",
+    "latex_trim_bp": [
+      100,
+      180,
+      400,
+      300
+    ],
+    "width": "0.9 textwidth",
+    "pixel_edits": false
+  },
+  "limits": [
+    "Physical second host experiment still unfinished.",
+    "Humble and host/native desktop integration not tested.",
+    "External ROS library header clangd diagnostics remain unresolved; no claim of diagnostic-free library indexing."
+  ],
+  "cleanup": {
+    "recorded_at": "2026-09-29T06:07:06.299666+00:00",
+    "matching_processes": [],
+    "controller_exit_code": 0,
+    "GUI_exit": "actual Exit / Confirm Exit; own controller quit then Xvfb stopped"
+  }
+}
