@@ -1,0 +1,608 @@
+{
+  "python": "3.12.3",
+  "opencv": "4.6.0",
+  "numpy": "1.26.4",
+  "files": {
+    "sources.json": "73ce819f8c7aa77b9d62906f9dd3ec0b4b3d588c5eebe2522e32aa8d9eb6dbd9",
+    "plane.py": "0446c2df72185fb3ae76db456f5232d4e8959e91d89986ee8ba8f58713c976fa",
+    "README.md": "5b4ecb763fff44e0242ab02ac1ba27f96df80ee7f2a48240bcb55871eed72e02",
+    "choose.py": "4627c44bf7a1a2e4c527267624653b91d7a36743015c376860f442242b99483b"
+  },
+  "records": [
+    {
+      "name": "实际选源 default",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/radar-fusion-demo/choose.py"
+        ],
+        "output": {
+          "valid": true,
+          "source": "vision",
+          "xy_m": [
+            3.0,
+            2.0
+          ],
+          "sample_ms": 950,
+          "checks": {
+            "radio": "future or expired",
+            "vision": "ok"
+          }
+        }
+      }
+    },
+    {
+      "name": "实际选源 radio",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/radar-fusion-demo/choose.py",
+          "--radio-age",
+          "50",
+          "--vision-age",
+          "40"
+        ],
+        "output": {
+          "valid": true,
+          "source": "radio",
+          "xy_m": [
+            3.2,
+            2.1
+          ],
+          "sample_ms": 950,
+          "checks": {
+            "radio": "ok",
+            "vision": "ok"
+          }
+        }
+      }
+    },
+    {
+      "name": "实际选源 expired",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/radar-fusion-demo/choose.py",
+          "--radio-age",
+          "120",
+          "--vision-age",
+          "40"
+        ],
+        "output": {
+          "valid": true,
+          "source": "vision",
+          "xy_m": [
+            3.0,
+            2.0
+          ],
+          "sample_ms": 960,
+          "checks": {
+            "radio": "future or expired",
+            "vision": "ok"
+          }
+        }
+      }
+    },
+    {
+      "name": "实际选源 invalid",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/radar-fusion-demo/choose.py",
+          "--radio-age",
+          "50",
+          "--vision-age",
+          "40",
+          "--radio-invalid"
+        ],
+        "output": {
+          "valid": true,
+          "source": "vision",
+          "xy_m": [
+            3.0,
+            2.0
+          ],
+          "sample_ms": 960,
+          "checks": {
+            "radio": "invalid or poor quality",
+            "vision": "ok"
+          }
+        }
+      }
+    },
+    {
+      "name": "实际选源 both-expired",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/radar-fusion-demo/choose.py",
+          "--radio-age",
+          "120",
+          "--vision-age",
+          "160"
+        ],
+        "output": {
+          "valid": false,
+          "source": null,
+          "xy_m": null,
+          "checks": {
+            "radio": "future or expired",
+            "vision": "future or expired"
+          }
+        }
+      }
+    },
+    {
+      "name": "实际选源 boundary",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/radar-fusion-demo/choose.py",
+          "--radio-age",
+          "100"
+        ],
+        "output": {
+          "valid": true,
+          "source": "radio",
+          "xy_m": [
+            3.2,
+            2.1
+          ],
+          "sample_ms": 900,
+          "checks": {
+            "radio": "ok",
+            "vision": "ok"
+          }
+        }
+      }
+    },
+    {
+      "name": "实际选源 past-boundary",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/radar-fusion-demo/choose.py",
+          "--radio-age",
+          "101"
+        ],
+        "output": {
+          "valid": true,
+          "source": "vision",
+          "xy_m": [
+            3.0,
+            2.0
+          ],
+          "sample_ms": 950,
+          "checks": {
+            "radio": "future or expired",
+            "vision": "ok"
+          }
+        }
+      }
+    },
+    {
+      "name": "实际选源 future",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/radar-fusion-demo/choose.py",
+          "--radio-age",
+          "-1"
+        ],
+        "output": {
+          "valid": true,
+          "source": "vision",
+          "xy_m": [
+            3.0,
+            2.0
+          ],
+          "sample_ms": 950,
+          "checks": {
+            "radio": "future or expired",
+            "vision": "ok"
+          }
+        }
+      }
+    },
+    {
+      "name": "实际选源 wrong-frame",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/radar-fusion-demo/choose.py",
+          "--radio-age",
+          "50",
+          "--radio-frame",
+          "camera"
+        ],
+        "output": {
+          "valid": true,
+          "source": "vision",
+          "xy_m": [
+            3.0,
+            2.0
+          ],
+          "sample_ms": 950,
+          "checks": {
+            "radio": "mismatch: frame",
+            "vision": "ok"
+          }
+        }
+      }
+    },
+    {
+      "name": "不合格消息回退 target",
+      "status": "PASS",
+      "details": {
+        "input_change": "8",
+        "output": {
+          "valid": true,
+          "source": "vision",
+          "xy_m": [
+            3.0,
+            2.0
+          ],
+          "sample_ms": 950,
+          "checks": {
+            "radio": "mismatch: target",
+            "vision": "ok"
+          }
+        }
+      }
+    },
+    {
+      "name": "不合格消息回退 unit",
+      "status": "PASS",
+      "details": {
+        "input_change": "'cm'",
+        "output": {
+          "valid": true,
+          "source": "vision",
+          "xy_m": [
+            3.0,
+            2.0
+          ],
+          "sample_ms": 950,
+          "checks": {
+            "radio": "mismatch: unit",
+            "vision": "ok"
+          }
+        }
+      }
+    },
+    {
+      "name": "不合格消息回退 clock",
+      "status": "PASS",
+      "details": {
+        "input_change": "'other_clock'",
+        "output": {
+          "valid": true,
+          "source": "vision",
+          "xy_m": [
+            3.0,
+            2.0
+          ],
+          "sample_ms": 950,
+          "checks": {
+            "radio": "mismatch: clock",
+            "vision": "ok"
+          }
+        }
+      }
+    },
+    {
+      "name": "不合格消息回退 quality_ok",
+      "status": "PASS",
+      "details": {
+        "input_change": "False",
+        "output": {
+          "valid": true,
+          "source": "vision",
+          "xy_m": [
+            3.0,
+            2.0
+          ],
+          "sample_ms": 950,
+          "checks": {
+            "radio": "invalid or poor quality",
+            "vision": "ok"
+          }
+        }
+      }
+    },
+    {
+      "name": "不合格消息回退 xy",
+      "status": "PASS",
+      "details": {
+        "input_change": "[nan, 2]",
+        "output": {
+          "valid": true,
+          "source": "vision",
+          "xy_m": [
+            3.0,
+            2.0
+          ],
+          "sample_ms": 950,
+          "checks": {
+            "radio": "bad coordinates",
+            "vision": "ok"
+          }
+        }
+      }
+    },
+    {
+      "name": "不合格消息回退 xy",
+      "status": "PASS",
+      "details": {
+        "input_change": "[True, 2]",
+        "output": {
+          "valid": true,
+          "source": "vision",
+          "xy_m": [
+            3.0,
+            2.0
+          ],
+          "sample_ms": 950,
+          "checks": {
+            "radio": "bad coordinates",
+            "vision": "ok"
+          }
+        }
+      }
+    },
+    {
+      "name": "不合格消息回退 xy",
+      "status": "PASS",
+      "details": {
+        "input_change": "[3]",
+        "output": {
+          "valid": true,
+          "source": "vision",
+          "xy_m": [
+            3.0,
+            2.0
+          ],
+          "sample_ms": 950,
+          "checks": {
+            "radio": "bad coordinates",
+            "vision": "ok"
+          }
+        }
+      }
+    },
+    {
+      "name": "不合格消息回退 sample_ms",
+      "status": "PASS",
+      "details": {
+        "input_change": "True",
+        "output": {
+          "valid": true,
+          "source": "vision",
+          "xy_m": [
+            3.0,
+            2.0
+          ],
+          "sample_ms": 950,
+          "checks": {
+            "radio": "bad timestamp",
+            "vision": "ok"
+          }
+        }
+      }
+    },
+    {
+      "name": "断开与两源失效",
+      "status": "PASS",
+      "details": {
+        "output": {
+          "valid": false,
+          "source": null,
+          "xy_m": null,
+          "checks": {
+            "radio": "invalid or poor quality",
+            "vision": "invalid or poor quality"
+          }
+        }
+      }
+    },
+    {
+      "name": "实际高度变式/独立射线 0.0",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/radar-fusion-demo/plane.py",
+          "--height",
+          "0.0"
+        ],
+        "output": {
+          "height_m": 0.0,
+          "pixel": [
+            440.0,
+            180.0
+          ],
+          "ground_mapping_m": [
+            3.0,
+            2.0
+          ],
+          "true_ground_projection_m": [
+            3.0,
+            2.0
+          ],
+          "error_m": 0.0
+        },
+        "independent_mapping_m": [
+          3.0,
+          2.0
+        ]
+      }
+    },
+    {
+      "name": "实际高度变式/独立射线 0.5",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/radar-fusion-demo/plane.py",
+          "--height",
+          "0.5"
+        ],
+        "output": {
+          "height_m": 0.5,
+          "pixel": [
+            453.3333435058594,
+            173.3333282470703
+          ],
+          "ground_mapping_m": [
+            3.1111111640930176,
+            2.055555582046509
+          ],
+          "true_ground_projection_m": [
+            3.0,
+            2.0
+          ],
+          "error_m": 0.12422605798556054
+        },
+        "independent_mapping_m": [
+          3.111111111111111,
+          2.0555555555555554
+        ]
+      }
+    },
+    {
+      "name": "实际高度变式/独立射线 1.0",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/radar-fusion-demo/plane.py",
+          "--height",
+          "1.0"
+        ],
+        "output": {
+          "height_m": 1.0,
+          "pixel": [
+            470.0,
+            165.0
+          ],
+          "ground_mapping_m": [
+            3.25,
+            2.125
+          ],
+          "true_ground_projection_m": [
+            3.0,
+            2.0
+          ],
+          "error_m": 0.2795084971874737
+        },
+        "independent_mapping_m": [
+          3.25,
+          2.125
+        ]
+      }
+    },
+    {
+      "name": "实际高度变式/独立射线 2.0",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/radar-fusion-demo/plane.py",
+          "--height",
+          "2.0"
+        ],
+        "output": {
+          "height_m": 2.0,
+          "pixel": [
+            520.0,
+            140.0
+          ],
+          "ground_mapping_m": [
+            3.6666667461395264,
+            2.3333332538604736
+          ],
+          "true_ground_projection_m": [
+            3.0,
+            2.0
+          ],
+          "error_m": 0.7453560280412809
+        },
+        "independent_mapping_m": [
+          3.666666666666667,
+          2.3333333333333335
+        ]
+      }
+    },
+    {
+      "name": "无效几何输入拒绝",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/radar-fusion-demo/plane.py",
+          "--height",
+          "5"
+        ],
+        "stderr": "usage: plane.py [-h] [--height HEIGHT]\nplane.py: error: 教学高度须满足 0 <= height < 5 m\n"
+      }
+    },
+    {
+      "name": "无效几何输入拒绝",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/radar-fusion-demo/plane.py",
+          "--height",
+          "-1"
+        ],
+        "stderr": "usage: plane.py [-h] [--height HEIGHT]\nplane.py: error: 教学高度须满足 0 <= height < 5 m\n"
+      }
+    },
+    {
+      "name": "无效几何输入拒绝",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/radar-fusion-demo/plane.py",
+          "--height",
+          "nan"
+        ],
+        "stderr": "usage: plane.py [-h] [--height HEIGHT]\nplane.py: error: 教学高度须满足 0 <= height < 5 m\n"
+      }
+    },
+    {
+      "name": "纸面输入输出与故障取证",
+      "status": "PASS",
+      "details": {
+        "roles": {
+          "high_camera": "全场目标信息→队友/决策",
+          "vehicle_lidar": "环境量测→本车定位/障碍感知"
+        },
+        "coordinate_queue": "旧坐标覆盖，采样时间保持原值",
+        "event_queue": "按协议有序保留/确认/去重，不用最新值覆盖",
+        "old_position_checks": [
+          "采样→选源→发送→接收各保存时刻",
+          "跨机器先核对时钟约定",
+          "发现发送积压后查卷二多机通信"
+        ],
+        "boundary": "教学纸面产物，未读取真实裁判、射频或车辆反馈"
+      }
+    }
+  ],
+  "boundaries": [
+    "人工相机投影和人工消息，不是实机标定/射频或广播链路",
+    "配置可信，质量与有效性由上游提供；程序不验证真实识别/校验",
+    "真实设备和适用赛季协议验证未完成"
+  ]
+}

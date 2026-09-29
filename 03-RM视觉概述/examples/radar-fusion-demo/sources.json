@@ -1,0 +1,12 @@
+{
+  "target": 7, "frame": "field", "unit": "m", "clock": "demo_clock",
+  "now_ms": 1000, "limits_ms": {"radio": 100, "vision": 150},
+  "radio": {
+    "target": 7, "frame": "field", "unit": "m", "clock": "demo_clock",
+    "sample_ms": 850, "valid": true, "quality_ok": true, "xy": [3.2, 2.1]
+  },
+  "vision": {
+    "target": 7, "frame": "field", "unit": "m", "clock": "demo_clock",
+    "sample_ms": 950, "valid": true, "quality_ok": true, "xy": [3.0, 2.0]
+  }
+}

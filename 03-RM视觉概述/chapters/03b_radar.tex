@@ -1,16 +1,11 @@
 \subsubsection{雷达站是什么}
 
-\textbf{雷达}方向：利用场地高处视角与算力，识别全场目标等信息，经裁判系统向队友共享。
-它与导航章中的\textbf{激光雷达（LiDAR）}不是同一概念。
+前面我们一直站在车上看问题：自瞄关心眼前的目标，导航关心自己怎么走。不过，队友还会问“另一边现在有谁？”这时候就需要一个能观察全场、把目标信息送给队友的岗位，这就是本书的\textbf{雷达方向}。你可以先把它想成队伍的高处观察员：看见只是第一步，还得说清目标是谁、在哪、是什么时候看见的。
 
-与自瞄的核心差异：
-\begin{itemize}
-    \item 自瞄：单车、近距、云台闭环、持续跟瞄；
-    \item 雷达：全场、多目标、俯视几何、\textbf{广播}为主，不直接拧本车云台。
-\end{itemize}
+这里的雷达站与导航章中的\textbf{激光雷达（LiDAR）}不是一回事。后者是量测距离的传感器，能帮助本车定位或感知障碍；前者按全场感知与共享信息的任务来组织软件。自瞄的结果进入本车云台执行链路，雷达站的结果则交给队友或决策，通常不会直接拧某台车的云台。具体比赛的器材和职责仍要看适用规则。
 
-\begin{example}[区分站与传感器]
-写下“高台相机识别目标并共享坐标”和“车载 LiDAR 量测墙面帮助定位”，圈出最终输出：前者是全场目标信息，后者服务本车位姿。检查：名称含“雷达”并不能说明承担同一种比赛任务。
+\begin{example}[看输出，而不是猜名字]
+在纸上写下两套系统：高台相机识别多台机器人，再共享它们的场地坐标；车载 LiDAR 量测墙面，结合地图估计本车位置。首先圈出各自观察的对象，然后在末端写出接收结果的人或模块。你会发现，即使两边名字里都有“雷达”，它们回答的问题也不同。
 \end{example}
 
 \begin{exercise}
@@ -20,36 +15,19 @@
 
 \subsubsection{典型软件架构（概述）}
 
-可把软件拆成以下教学架构；其中无线电与反制均为可选示意，不代表每个赛季都有相同任务或权限：
-\begin{enumerate}
-    \item \textbf{地面视觉}：工业相机 → 检测/跟踪 → 场地图坐标 → 融合 → 裁判串口；
-    \item \textbf{无线电（可选）}：软件定义无线电（Software Defined Radio，SDR）按适用协议接收与解析信息，经本机 TCP 交给视觉；
-    \item \textbf{反制（可选）}：长焦检测与云台，和地面端用独立串口同步次数。
-\end{enumerate}
+首先沿视觉主路走一遍。工业相机给出图像，检测和跟踪告诉我们目标是谁、像素在哪；接着把适用的图像点换成场地坐标，再检查身份、质量与时效，最后按裁判系统的适用协议封装和共享。这几段之间要传的不只是两个数字，否则下游连“这是谁的坐标”都得靠猜。
 
-通信模式见卷二「多机通信」；SDR 与解析见卷二「SDR 与电磁波解析」。本卷只要求能画数据流并说出职责边界。
-
-数据流可记为：工业相机经识别跟踪得到场地图坐标；可选的 SDR 解码坐标按新鲜度与视觉融合后，经裁判系统广播；反制计数为可选旁路。
+如果队伍采用适用规则允许的无线电方案，可以增加一条\textbf{可选旁路}：软件定义无线电（Software Defined Radio，SDR）接收并解析信息，经本机 TCP 把坐标交给选源模块。部分架构还会把长焦检测、云台与次数同步放在另一条反制支路。这些都是架构示意，不能据此认为当前赛季一定有相同任务或权限。具体通信和解析工程回卷二多机通信、SDR 章；功能边界先到\href{https://bbs.robomaster.com/wiki/20204847}{RoboMaster 官方资料入口}核对参赛赛季、赛事与规则版本。
 
 \begin{figure}[H]
 \centering
-\resizebox{0.9\textwidth}{!}{%
-\begin{tikzpicture}[box/.style={draw=cyan!60!black,rounded corners,align=center,
-  minimum height=11mm,text width=27mm,fill=cyan!5},>=stealth]
-\node[box] (vision) at (0,1) {视觉检测与映射\\场地系坐标};
-\node[box,dashed] (radio) at (0,-1) {可选无线电解析\\有效坐标};
-\node[box] (fusion) at (4.2,0) {身份、质量与时效\\检查后选源};
-\node[box] (send) at (8.4,0) {协议封装与广播\\坐标或无效状态};
-\draw[->,thick] (vision.east) -- (fusion.west);
-\draw[->,thick,dashed] (radio.east) -- (fusion.west);
-\draw[->,thick] (fusion) -- (send);
-\end{tikzpicture}}
-\caption{雷达站坐标主路；需按序处理的事件不与最新坐标共用覆盖队列}
+\includegraphics[width=0.94\textwidth]{radar_chain_revised.pdf}
+\caption{坐标主路与可选旁路。坐标选源和有序事件处理承担不同职责}
 \label{fig:v3-radar-chain}
 \end{figure}
 
 \begin{example}[把旁路从主路分开]
-画出视觉进程 → 融合 → 广播三框，再从可选无线电进程画箭头接到融合。用手遮住无线电框，检查主路是否仍能输入视觉坐标；再给非坐标事件单画一条有序处理支路。检查：可选模块故障不应在设计上阻塞仍有效的坐标主路。
+照图\ref{fig:v3-radar-chain}画出视觉、选源、广播三段，然后用手遮住无线电框。视觉坐标只要仍合格，主路就应继续工作；不能因为一个可选进程退出，所有人都站着等它。再单画计数或任务事件的支路，写出确认或去重的位置。完成后检查：最新坐标会覆盖旧状态，但事件支路不会因此丢掉一次已经发生的事实。
 \end{example}
 
 \begin{exercise}
@@ -57,69 +35,134 @@
 为何坐标可以只保留最新值，反制计数或任务事件却不能随意覆盖？
 \end{exercise}
 
-\subsubsection{俯视定位 vs 车载 PnP}
+\subsubsection{俯视定位与车载 PnP}
 
-雷达可用场地图关键点与单应变换（Homography）或区域映射，把适用平面上的图像点映射到场地坐标；有高度差时需分区域、补充高度信息或使用三维方法验证，不能把任意车顶像素都当作地面点。
-自瞄常用装甲板模型 + PnP 求相对位姿。二者标定物、误差来源与调参方式都不同，不要混用术语。
+现在检测框已经有了，怎样告诉队友目标在场地哪儿？一种办法是先找场地平面上的对应点，用\textbf{单应变换（Homography）}把图像点映射到该平面。这里最容易漏掉的恰好是“同一平面”：地面标定很好，不代表把车顶框中心塞进去也会得到车正下方的位置。射线确实能落到地上，不过落点可能已经偏了。
 
-检测上常见级联：车辆检测 → 装甲/灯条 → 数字分类；再接多目标跟踪。细节回卷二 B/C。
+我们用卷内的 \path{examples/radar-fusion-demo} 看一遍这个过程。项目只有两个程序和一份消息配置：\texttt{plane.py} 演示高度偏差，\texttt{choose.py} 读取 \texttt{sources.json} 演示时效与回退，后两者在下一节展开。映射程序需要 NumPy、OpenCV；你可以复用卷二的环境，Ubuntu 缺包时安装 \texttt{python3-numpy} 与 \texttt{python3-opencv}。
 
-\begin{example}[验证平面假设]
-在教学场地图上标出四个任意三点不共线的地面角点，声明它们是图像与场地的对应点。再选一个未参与标定的地面点检查映射误差。把验证点移到高台上后，标注“高度不在同一平面，原映射不保证有效”。检查：映射适用范围必须写在配置旁。
+\begin{example}[把地面点抬高一米]
+教学相机中心在场地 $(2,1.5,5)$m，竖直向下看，焦距为600像素，主点为$(320,240)$，没有畸变。我们用四个地面角点确定图像到地面的映射，再拿\emph{未参与拟合}的$(3,2)$m点验证。下面是完整的\texttt{plane.py}：
+
+\par\vspace{6pt}
+\noindent\begin{minipage}[t]{\linewidth}
+\lstinputlisting[language=Python,basicstyle=\ttfamily\small,frame=single,breaklines=true,aboveskip=0pt,belowskip=0pt,numbers=none,firstline=1,lastline=23]{examples/radar-fusion-demo/plane.py}
+\end{minipage}\par\vspace{6pt}
+
+首先，四对点分别对应一块 $4\times3$m 地面矩形的四角；然后 \texttt{getPerspectiveTransform} 求出图像到地面的矩阵。接下来改变点的高度，按固定相机投影计算像素，再让地面映射解释这个像素。你看到的误差就是最后一个步骤用了错误的平面前提。
+
+\par\vspace{6pt}
+\noindent\begin{minipage}[t]{\linewidth}
+\lstinputlisting[language=Python,basicstyle=\ttfamily\small,frame=single,breaklines=true,aboveskip=0pt,belowskip=0pt,numbers=none,firstline=26]{examples/radar-fusion-demo/plane.py}
+\end{minipage}\par\vspace{6pt}
+
+在项目目录执行；\texttt{--height} 是教学点的高度，单位为米，必须有限且在 $[0,5)$ 内：
+\begin{tbash}
+cd examples/radar-fusion-demo
+python3 plane.py --height 0
+python3 plane.py --height 1
+\end{tbash}
+高度0时，像素$(440,180)$映射回$(3,2)$m，误差为0；高度1时，像素变成$(470,165)$，地面映射给出$(3.25,2.125)$m，偏差约0.280m。这是理想模型的实跑结果，不是现场相机的标定精度。
 \end{example}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.66\textwidth]{radar_plane_revised.pdf}
+\caption{教学相机的侧面截面：高处点的视线落地位置不等于它正下方的位置}
+\label{fig:v3-radar-plane}
+\end{figure}
+
+这时候再回来看自瞄的 PnP，就容易区分了。自瞄拿已知装甲板的三维模型点、图像对应点和相机参数，求物体相对相机的位姿；这里拿地面对应点建立平面映射。二者需要的输入不同，不能因为都输出了“坐标”就交换着用。现场有台阶、坡面或目标高度变化时，你需要有意义的接地点、分区域的平面模型，或补充高度和三维几何，并用独立点验证适用范围。检测上还可能先找车辆，再找装甲或灯条、识别数字，最后接多目标跟踪；这些实现回卷二 OpenCV、深度学习和几何章。
+
+\begin{conclusion}
+地面单应只回答“这个像素的射线在指定平面上落在哪”。PnP回答的是已知模型相对相机的位姿。先确认自己要的几何量和输入前提，再选方法。高度改变造成的偏差，不能只靠把检测框画得更稳来解决。对应平面与相机运动的条件可查\href{https://docs.opencv.org/4.x/d9/dab/tutorial_homography.html}{OpenCV 单应变换教程}。
+\end{conclusion}
 
 \begin{exercise}
 \label{v3-ex-radar-3}
-直接把车顶检测框中心用地面单应映射到场地，为什么可能产生偏差？
+直接把车顶检测框中心用地面单应映射到场地，为什么可能产生偏差？把程序高度改成0.5m，保存像素、映射结果和误差，检查偏差是否还存在。
 \end{exercise}
 
 \subsubsection{融合与时效}
 
-若存在无线电坐标，可采用一种教学策略：先检查身份、坐标系、质量与时效，再让\textbf{合格且新鲜的无线电优先}；否则回退有效视觉或显式标记无效。这不是所有系统通用的优先级。
-非坐标事件可走独立处理通道，避免阻塞坐标。坐标可采用只保留最新值（latest-value）的方式；计数增量、事件或需确认的消息不能直接套用覆盖策略。
+位置算出来以后，还有一个问题：它是\emph{现在还能用的位置}吗？队友收到一串很精确的旧坐标，也只能精确地知道目标刚才在哪。我们先用一种简单教学策略：身份、坐标、质量和时钟都合格时，年龄不超过100ms的无线电优先；否则回退年龄不超过150ms的视觉；两边都不合格，就明确输出无效。这些优先级和阈值是演练用的，实际值要结合链路和任务验证。
 
-对队友有用的是「对的坐标系 + 可接受延迟」；错系、堵包、过期坐标比「偶尔缺一帧」更具破坏性。
+项目把公共约定和两条人工消息放在\texttt{sources.json}。两源都使用场地坐标、米和同一个演示时钟，当前时刻是1000ms。\texttt{valid}与\texttt{quality\_ok}表示上游提供的有效性与质量结论，本程序不会替上游做真实识别或射频校验。配置的完整内容如下：
 
-\begin{example}[按有效性与时效选源]
-教学策略：同一目标、同一坐标系且质量合格时，无线电年龄不超过 100 ms 则优先；否则选择年龄不超过 150 ms 的视觉；二者均不合格就输出无效。当前时刻 1000 ms，无线电采样于 850 ms，视觉采样于 950 ms，年龄分别为 150、50 ms，应选视觉。这些阈值仅用于演练。
+\par\vspace{6pt}
+\noindent\begin{minipage}[t]{\linewidth}
+\lstinputlisting[basicstyle=\ttfamily\small,frame=single,breaklines=true,aboveskip=0pt,belowskip=0pt,numbers=none]{examples/radar-fusion-demo/sources.json}
+\end{minipage}\par\vspace{6pt}
+
+
+首先检查每条消息，而不是先看哪一源“级别更高”。这里也拒绝非有限坐标和未来时间戳，否则一个 NaN 或负年龄就可能混进有效输出。
+
+\par\vspace{6pt}
+\noindent\begin{minipage}[t]{\linewidth}
+\lstinputlisting[language=Python,basicstyle=\ttfamily\small,frame=single,breaklines=true,aboveskip=0pt,belowskip=0pt,numbers=none,firstline=1,lastline=25]{examples/radar-fusion-demo/choose.py}
+\end{minipage}\par\vspace{6pt}
+
+接着按顺序选第一个合格源。这个例子做的是\emph{选源}，没有把两套测量按协方差加权；不能把变量叫作“融合”，就默认已经消除了它们的误差。命令行部分只改人工消息，再调用同一个选源函数，完整余下代码如下：
+
+\par\vspace{6pt}
+\noindent\begin{minipage}[t]{\linewidth}
+\lstinputlisting[language=Python,basicstyle=\ttfamily\small,frame=single,breaklines=true,aboveskip=0pt,belowskip=0pt,numbers=none,firstline=28]{examples/radar-fusion-demo/choose.py}
+\end{minipage}\par\vspace{6pt}
+
+
+\begin{example}[看清回退和边界]
+仍在项目目录运行下面的命令。年龄参数单位为毫秒，\texttt{--radio-invalid}模拟上游报告失效，\texttt{--radio-frame}模拟坐标系不一致：
+\begin{tbash}
+python3 choose.py
+python3 choose.py --radio-age 50 --vision-age 40
+python3 choose.py --radio-age 120 --vision-age 40
+python3 choose.py --radio-age 50 --vision-age 40 --radio-invalid
+python3 choose.py --radio-age 120 --vision-age 160
+python3 choose.py --radio-age 100
+python3 choose.py --radio-age 50 --radio-frame camera
+\end{tbash}
+默认消息的年龄是150/50ms，因此输出\texttt{vision}。接下来的四种情况依次输出无线电、视觉、视觉、无效；恰好100ms仍在无线电边界内，坐标系为相机的无线电则被拒绝。输出的\texttt{checks}保留每源检查结果，无效时\texttt{xy\_m}是\texttt{null}，不会继续伪装成一个新位置。
 \end{example}
 
 \begin{note}
-本章不提供当年比赛的功能授权、频率或协议常量。无线电、反制与裁判广播须由负责人核对参赛赛季官方规则与协议后采用。平面映射前提见 OpenCV 官方说明：\url{https://docs.opencv.org/4.x/d9/dab/tutorial_homography.html}。
+真实机器上的采样时间必须来自可比较的时钟，或先按已知关系换算。接收时刻不能冒充采样时刻，否则积压的旧帧每收到一次就“返老还童”。本程序只演示已统一的人工时钟，不证明两台主机已经同步，也不接射频或裁判串口。
 \end{note}
 
 \begin{conclusion}
-\begin{itemize}
-  \item 先确认同一目标与坐标，再检查质量与年龄，最后选源。
-  \item 接收时刻不等于采样时刻。
-  \item 两源均无效时明确报告失效。
-\end{itemize}
+先确认同一目标、坐标系、单位和时钟，再检查质量与观测年龄，最后才比较优先级。坐标可只保留最新值，计数增量或事件则需要独立的有序处理和协议约定。可选源退出时应使它失效，继续尝试合格视觉；两边都失效就报告缺失，不能把最后一次成功值无限续期。
 \end{conclusion}
 
 \begin{exercise}
 \label{v3-ex-radar-4}
-沿用示例策略，当前 1000 ms，无线电采样 930 ms 但校验失败，视觉采样 960 ms 且有效，选谁？若视觉也过期呢？
+沿用示例策略，当前1000ms，无线电采样930ms但校验失败，视觉采样960ms且有效，选谁？若视觉也过期呢？
+\end{exercise}
+
+\begin{exercise}
+\label{v3-ex-radar-6}
+分别让无线电年龄为100、101和$-1$ms，保持视觉有效，保存输出和拒绝原因。解释为什么最后一种情况不能因为“比100小”就通过。
 \end{exercise}
 
 \subsubsection{技能映射}
 
+最后，我们沿着刚才的数据流回卷二找工具。识别错了先看图像与模型，映射偏了先看几何前提，位置旧了则沿采样、选源、队列和消费端查时间。先找最早能看见异常的地方，你会少调很多无辜的参数。
+
 \begin{center}
 \begin{tabular}{@{}p{0.30\textwidth}p{0.62\textwidth}@{}}
 \toprule[1.5pt]
-能力 & 卷二 \\
+眼前要处理的环节 & 卷二入口 \\
 \midrule[1pt]
-节点与工程 & ROS2 \\
-TCP/串口/裁判帧 & 多机通信 \\
-SDR/IQ/状态机 & SDR 与电磁波解析 \\
+节点与工程组织 & ROS2 \\
+TCP、串口与协议帧 & 多机通信 \\
+可选SDR与IQ解析 & SDR 与电磁波解析 \\
 检测与跟踪 & OpenCV、深度学习 \\
-相机与标定 & 相机成像 \\
+相机、标定与几何 & 相机成像、几何视觉 \\
 部署加速 & CUDA \\
 \bottomrule[1.5pt]
 \end{tabular}
 \end{center}
 
 \begin{example}[沿故障查专项]
-教学问题是“识别框稳定，队友收到的位置总是很旧”。先沿发送队列、融合取值、接收消费画检查点，再到卷二多机通信查最新值与故障隔离。检查：此时优先补通信知识，比立即换检测模型更直接。
+现在的问题是“框很稳，队友收到的位置却很旧”。先在纸上给采样、选源、发送和接收各留一个时间记录位置，再写出比较这些时间所需的时钟前提。如果发送端正逐条补发一长串旧坐标，就到卷二多机通信的小项目查看最新值策略；如果源的采样时间已经旧了，问题更早发生。先拿证据缩小范围，再决定改哪一段。
 \end{example}
 
 \begin{exercise}
