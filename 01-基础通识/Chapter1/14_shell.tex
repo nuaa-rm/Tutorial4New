@@ -6,15 +6,15 @@
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.85\textwidth]{shell_revised.pdf}
-\caption{Shell 与普通应用都在用户空间，通过系统调用使用内核；箭头表示交互路径}
+\caption{Shell，普通应用，用户空间，系统调用，内核，硬件之间的关系}
 \label{fig:shell}
 \end{figure}
-Ubuntu 默认交互 Shell 通常是 Bash，其他系统也可能使用 zsh 或 fish。环境变量 \texttt{SHELL} 通常记录登录 Shell，不保证等于当前正在运行的 Shell。本节所有脚本明确用 Bash，先在终端输入 \texttt{bash} 即可进入；结束后用 \texttt{exit} 返回。
+Ubuntu 默认交互 Shell 通常是 Bash，其他系统也可能使用 zsh 或 fish。本节所有脚本明确用 Bash，如果你先把后面的zsh美化（见第\ref{sec:zsh-customize}节）装了（看来是很心急想美化系统了），在终端输入 \texttt{bash} 即可暂时又进入Bash；结束后用 \texttt{exit} 返回。
 
 \subsubsection{简单的 Shell 脚本}
 \Needspace{8\baselineskip}
 \begin{example}[把三个操作保存为脚本]
-如果每次准备一个目录，都要重复输入 mkdir、touch、ls，我们就可以把这些操作写进脚本，下次一次运行。首先在独立的练习目录里创建 \texttt{test.sh}，把下面的完整内容保存进去：
+假如我们经常需要创建一个叫mydir的目录，并且在里面创建一个叫a.txt的文件，然后检查目录情况，我们就可以把这些操作写进脚本，下次一次运行。首先在独立的练习目录里创建 \texttt{test.sh}，把下面的完整内容保存进去：
 
 
 \Needspace{9\baselineskip}
@@ -27,7 +27,7 @@ ls mydir
 \end{tbash}
 
 
-第一行叫 shebang，直接执行脚本时，它告诉系统使用 Bash。\texttt{set -e} 则让这里的简单命令失败时停下来，免得前面的目录没建好，后面还继续操作；复杂条件里的行为需要另查手册。脚本里的相对路径以启动时的工作目录为准，所以我们先在保存脚本的目录执行：
+第一行叫 shebang，直接执行脚本时，它告诉系统使用 Bash。\texttt{set -e} 则让这里的简单命令失败时停下来，免得前面的目录没建好，后面还继续操作；如果你对这行命令的其他条件下的行为感兴趣，可以另查手册。脚本里的相对路径以启动时的工作目录为准，所以我们先在保存脚本的目录执行：
 
 
 \Needspace{7\baselineskip}
@@ -41,7 +41,7 @@ bash test.sh
 两次都应该列出 \texttt{a.txt}，不过它们进入脚本的方式不一样。第一种直接执行文件，所以需要执行权限，并由 shebang 选择解释器；第二种是我们明确请 Bash 读取这个文件，只需要可读，不需要执行位。这里也别顺手换成 \texttt{sh test.sh}，Ubuntu 的 sh 通常是 dash，并不能接受所有 Bash 语法。看着都叫 Shell，写法却不一定通用。
 \end{example}
 \begin{exercise}\label{ex:v1-shell-script}
-另写 \texttt{prepare.sh} 完成创建 mydir、创建 a.txt、列出文件。分别直接执行和作为 Bash 参数运行，检查执行权限和结果；再从另一个目录启动，记录文件建在哪里并解释原因。
+另写 \texttt{prepare.sh} 完成创建 hello 目录、进入其中、创建 hello.txt、向文件写入 \texttt{Hello, World!}。分别直接执行和作为 Bash 参数运行，检查执行权限和结果；再从另一个目录启动，记录文件建在哪里并解释原因。
 \end{exercise}
 
 \subsubsection{Bash 配置与别名}
@@ -62,7 +62,7 @@ bash test.sh
 \end{center}
 \Needspace{8\baselineskip}
 \begin{example}[设置别名，再清理当前会话]
-先保存自己的 \texttt{.bashrc} 备份，只新增 \texttt{alias cls='clear'}，在 Bash 终端执行：
+先保存自己的 \texttt{.bashrc} 备份，只新增 \texttt{alias cls='clear'}，然后在 Bash 终端执行：
 
 
 \Needspace{7\baselineskip}
@@ -83,7 +83,7 @@ cls
 
 \subsubsection{环境变量与父子进程}
 \label{sec:shell-environment}
-你可能已经发现，输入 ls 就能运行它，但自己刚编译的程序通常要写成 \texttt{./程序}。这是因为 PATH 保存着一组用冒号分隔的命令搜索目录：输入不带斜杠的外部命令名时，Shell 会到这些目录里找。想看看实际找到了谁，可以用 \texttt{command -v 命令名}；\texttt{./程序} 则明确指定当前目录里的文件，不依靠 PATH 搜索。HOME 记录当前用户的家目录，这些系统变量都各有用途，我们不要为了做实验随便改写。
+你可能已经发现，输入 ls 就能运行它，但自己刚编译的程序通常要写成 \texttt{./程序}。这是因为 PATH 保存着一组用冒号分隔的命令搜索目录：输入不带斜杠的外部命令名时，Shell 会到这些目录里找。想看看实际找到了谁，可以用 \texttt{command -v 命令名}；\texttt{./程序} 则明确指定当前目录里的文件，不依靠 PATH 搜索。HOME 记录当前用户的家目录，这些系统变量都各有用途，我们不要为了好玩随便改写。
 
 接下来看看一个容易配错的地方：在当前 Shell 里定义了变量，为什么另一个程序却看不到？普通赋值 \texttt{名称=值} 定义的是 Shell 变量，加上 \texttt{export 名称=值}，才把它标为环境的一部分，让随后启动的子进程继承。\textbf{已经导出的变量再次赋值，仍然保持导出状态}，所以拿平时已经导出的 PATH 做“有没有 export”的对比，很容易得出错误结论。下面我们换两个新的教学变量，亲眼看看它们怎样传递。
 \Needspace{8\baselineskip}
@@ -124,12 +124,12 @@ parent after child: exported=camera
 最后一行仍然是 camera。子进程拿到的是启动时继承的环境，后来在自己这里改了，并不会反过来改掉父进程。于是你就能解释了：为什么在脚本里 export 了一个变量，脚本结束以后，原来的终端却没有跟着变。
 \end{example}
 \begin{exercise}\label{ex:v1-shell-inheritance}
-先给 RM\_LOCAL 加 export，运行并解释子进程输出。恢复后再把 \texttt{bash child.sh} 改成 \texttt{source child.sh}，预测最后一行并验证；每次只改一项，最后恢复源码。
+先给 RM\_LOCAL 加 export，运行并解释子进程输出。恢复后再把 \texttt{bash child.sh} 改成 \texttt{source child.sh}，预测最后一行并验证。
 \end{exercise}
 
 \Needspace{8\baselineskip}
 \begin{example}[临时追加命令搜索路径]
-在 Bash 中保存 PATH 后追加，不覆盖原来的搜索路径：
+在 Bash 中保存 PATH 后追加，不要直接覆盖原来的搜索路径：
 
 
 \Needspace{9\baselineskip}
@@ -145,10 +145,10 @@ export PATH="$original_path"
 这里的 mybin 可以暂时不存在，我们先看原来的目录是不是都还在，\texttt{command -v bash} 还能不能找到 Bash。最后一行会恢复原值，所以这次实验不会留下永久配置。如果以后真要长期使用，再把追加行写进对应的用户配置中。不过别反复 source 一条不带去重的追加命令，不然 PATH 会越接越长。桌面应用也不一定读取 .bashrc，配置能传给谁，还要看它由哪个进程启动。
 \end{example}
 \begin{note}
-\texttt{export PATH=/opt/app/bin} 会覆盖原搜索路径，使很多外部命令找不到。当前会话可用保存值恢复；若写进配置，先用绝对路径启动编辑器修正新增行，再从正常入口重开终端。仍可用 Bash 内建的 \texttt{printf}、\texttt{export} 检查与修复，不为这个错误重装系统。
+如果直接写成 \texttt{export PATH="\$HOME/mybin"} 会覆盖原搜索路径，使很多外部命令找不到。若你不小心写进配置，先用绝对路径启动编辑器修正新增行，再从正常入口重开终端。仍可用 Bash 内建的 \texttt{printf}、\texttt{export} 检查与修复，不要看到命令在终端中都找不到了就重装系统。
 \end{note}
 \begin{exercise}\label{ex:v1-shell-path}
-保存并临时追加自己的 mybin 目录。从当前终端启动子 Bash，再从桌面启动器打开独立终端，分别查看 PATH，解释差别，最后恢复原值。不要改 HOME、SHELL 等系统变量。
+保存并临时追加自己的 mybin 目录。从当前终端启动子 Bash，再从桌面启动器打开独立终端，分别查看 PATH，解释差别，最后恢复原值。
 \end{exercise}
 \begin{conclusion}
 脚本直接运行与 \texttt{bash 文件} 都启动子进程；\texttt{source 文件} 在当前 Shell 执行。export 让新子进程继承变量，但子进程不能反向改变父进程。配置文件提供持久命令，实际读取条件与父进程决定哪些程序能看见它，不能概括成“所有新终端都生效”。
@@ -298,7 +298,7 @@ Tab 补全 & 基础补全 & 支持命令参数、选项的智能补全\\
 \end{tabular}
 \end{center}
 
-两者有语法与默认行为差异，不把一份 Bash 配置整体当作 zsh 脚本使用；带 \texttt{\#!/bin/bash} 行首的脚本仍由 bash 执行，更换交互式 shell 不影响已有脚本的运行。
+两者有语法与默认行为差异，无法将 Bash 配置整体当作 zsh 脚本使用；带 \texttt{\#!/bin/bash} 行首的脚本仍由 bash 执行，更换交互式 shell 也不会影响已有脚本的运行。
 \end{conclusion}
 
 \begin{note}

@@ -175,9 +175,10 @@ apt list --installed | grep '^[^/]*python[^/]*/' | wc -l
 \begin{tbash}
 #!/usr/bin/env bash
 set -e
-mkdir -p mydir
-touch mydir/a.txt
-ls mydir
+mkdir -p hello
+cd hello
+touch hello.txt
+echo "Hello, World!" > hello.txt
 \end{tbash}
 
 在同一目录分别运行：
@@ -188,8 +189,8 @@ chmod +x prepare.sh
 bash prepare.sh
 \end{tbash}
 
-两次都应列出 \texttt{a.txt}。第一种需要执行权限，由首行指定解释器；第二种由你显式调用 Bash，脚本需要可读，但不要求执行权限。
-脚本中的相对路径以运行时的工作目录为准；从另一目录执行原路径的脚本，会在那里创建 mydir，除非脚本自己先 cd。
+两次都应进入 hello 目录并创建出 \texttt{hello.txt}，并且内部写有\texttt{Hello, World!}。第一种需要执行权限，由首行指定解释器；第二种由你显式调用 Bash，脚本需要可读，但不要求执行权限。
+脚本中的相对路径以运行时的工作目录为准；从另一目录执行原路径的脚本，会在另一目录那里创建 hello，除非脚本自己先 cd。
 \end{solution}
 
 \paragraph*{随堂练习~\ref{ex:v1-shell-alias}：别名的生效和清理}
@@ -208,7 +209,7 @@ cls
 
 \paragraph*{随堂练习~\ref{ex:v1-shell-inheritance}：export 与 source}
 \begin{solution}
-给 RM\_LOCAL 加 export 后，child 的 local=armor，父进程最后仍为 camera。恢复后将 bash child.sh 改为 source child.sh，文件在当前 Shell 执行，能看到 RM\_LOCAL=armor，且最后父脚本输出 exported=radar。每个对照实验只改一项，结束恢复源码；不要据此改写 HOME 或 PATH 来制造同样现象。
+给 RM\_LOCAL 加 export 后，child 的 local=armor，父进程最后仍为 camera。恢复后将 bash child.sh 改为 source child.sh，文件在当前 Shell 执行，能看到 RM\_LOCAL=armor，且最后父脚本输出 exported=radar。每个对照实验只改一项，结束恢复源码。
 \end{solution}
 \paragraph*{随堂练习~\ref{ex:v1-shell-path}：PATH 的作用范围}
 \begin{solution}
