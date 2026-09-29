@@ -1,0 +1,233 @@
+{
+  "python": "3.12.3",
+  "files": {
+    "run.py": "8f4461cf67f61e11dfc7f4d8fc1de53a2351ca6101a0959dc0aef376b3fb39ef",
+    "README.md": "7ea914e03b7c0c1dba0bc229aec06438d095c561cea0947b782987325ff50801"
+  },
+  "records": [
+    {
+      "name": "独立进程 baseline",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/experiment-record-demo/run.py",
+          "--radio-limit",
+          "100",
+          "--record",
+          "/tmp/textbook-v3-engineering-final2/baseline.json"
+        ],
+        "stdout": {
+          "file": "/tmp/textbook-v3-engineering-final2/baseline.json",
+          "passed": true,
+          "source": "vision",
+          "age_ms": 50
+        },
+        "raw_record": {
+          "input_sha256": "73ce819f8c7aa77b9d62906f9dd3ec0b4b3d588c5eebe2522e32aa8d9eb6dbd9",
+          "source_sha256": {
+            "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/experiment-record-demo/run.py": "8f4461cf67f61e11dfc7f4d8fc1de53a2351ca6101a0959dc0aef376b3fb39ef",
+            "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/radar-fusion-demo/choose.py": "4627c44bf7a1a2e4c527267624653b91d7a36743015c376860f442242b99483b",
+            "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/radar-fusion-demo/sources.json": "73ce819f8c7aa77b9d62906f9dd3ec0b4b3d588c5eebe2522e32aa8d9eb6dbd9"
+          },
+          "hypothesis": "放宽无线电限龄能切回无线电，同时满足任务时效",
+          "variable": {
+            "radio_limit_ms": 100
+          },
+          "fixed": {
+            "now_ms": 1000,
+            "vision_limit_ms": 150,
+            "required_max_age_ms": 100
+          },
+          "observations": {
+            "valid": true,
+            "source": "vision",
+            "xy_m": [
+              3.0,
+              2.0
+            ],
+            "sample_ms": 950,
+            "checks": {
+              "radio": "future or expired",
+              "vision": "ok"
+            }
+          },
+          "selected_age_ms": 50,
+          "passed": true,
+          "boundary": "人工消息/软件选源，未验证真实通信与实车"
+        },
+        "record_sha256": "1413e053e5b0aa8ca429e50eb4fe0221b949205bcf4a4e4f1d57c70ea98ef752"
+      }
+    },
+    {
+      "name": "独立进程 trial",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/experiment-record-demo/run.py",
+          "--radio-limit",
+          "200",
+          "--record",
+          "/tmp/textbook-v3-engineering-final2/trial.json"
+        ],
+        "stdout": {
+          "file": "/tmp/textbook-v3-engineering-final2/trial.json",
+          "passed": false,
+          "source": "radio",
+          "age_ms": 150
+        },
+        "raw_record": {
+          "input_sha256": "73ce819f8c7aa77b9d62906f9dd3ec0b4b3d588c5eebe2522e32aa8d9eb6dbd9",
+          "source_sha256": {
+            "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/experiment-record-demo/run.py": "8f4461cf67f61e11dfc7f4d8fc1de53a2351ca6101a0959dc0aef376b3fb39ef",
+            "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/radar-fusion-demo/choose.py": "4627c44bf7a1a2e4c527267624653b91d7a36743015c376860f442242b99483b",
+            "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/radar-fusion-demo/sources.json": "73ce819f8c7aa77b9d62906f9dd3ec0b4b3d588c5eebe2522e32aa8d9eb6dbd9"
+          },
+          "hypothesis": "放宽无线电限龄能切回无线电，同时满足任务时效",
+          "variable": {
+            "radio_limit_ms": 200
+          },
+          "fixed": {
+            "now_ms": 1000,
+            "vision_limit_ms": 150,
+            "required_max_age_ms": 100
+          },
+          "observations": {
+            "valid": true,
+            "source": "radio",
+            "xy_m": [
+              3.2,
+              2.1
+            ],
+            "sample_ms": 850,
+            "checks": {
+              "radio": "ok",
+              "vision": "ok"
+            }
+          },
+          "selected_age_ms": 150,
+          "passed": false,
+          "boundary": "人工消息/软件选源，未验证真实通信与实车"
+        },
+        "record_sha256": "f3ccad865f59d84b8a06d1508d93f80f98f74edbe5e9e0d50189ba22386be58f"
+      }
+    },
+    {
+      "name": "独立进程 rollback",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/experiment-record-demo/run.py",
+          "--radio-limit",
+          "100",
+          "--record",
+          "/tmp/textbook-v3-engineering-final2/rollback.json"
+        ],
+        "stdout": {
+          "file": "/tmp/textbook-v3-engineering-final2/rollback.json",
+          "passed": true,
+          "source": "vision",
+          "age_ms": 50
+        },
+        "raw_record": {
+          "input_sha256": "73ce819f8c7aa77b9d62906f9dd3ec0b4b3d588c5eebe2522e32aa8d9eb6dbd9",
+          "source_sha256": {
+            "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/experiment-record-demo/run.py": "8f4461cf67f61e11dfc7f4d8fc1de53a2351ca6101a0959dc0aef376b3fb39ef",
+            "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/radar-fusion-demo/choose.py": "4627c44bf7a1a2e4c527267624653b91d7a36743015c376860f442242b99483b",
+            "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/radar-fusion-demo/sources.json": "73ce819f8c7aa77b9d62906f9dd3ec0b4b3d588c5eebe2522e32aa8d9eb6dbd9"
+          },
+          "hypothesis": "放宽无线电限龄能切回无线电，同时满足任务时效",
+          "variable": {
+            "radio_limit_ms": 100
+          },
+          "fixed": {
+            "now_ms": 1000,
+            "vision_limit_ms": 150,
+            "required_max_age_ms": 100
+          },
+          "observations": {
+            "valid": true,
+            "source": "vision",
+            "xy_m": [
+              3.0,
+              2.0
+            ],
+            "sample_ms": 950,
+            "checks": {
+              "radio": "future or expired",
+              "vision": "ok"
+            }
+          },
+          "selected_age_ms": 50,
+          "passed": true,
+          "boundary": "人工消息/软件选源，未验证真实通信与实车"
+        },
+        "record_sha256": "1413e053e5b0aa8ca429e50eb4fe0221b949205bcf4a4e4f1d57c70ea98ef752"
+      }
+    },
+    {
+      "name": "单变量与回滚独立核对",
+      "status": "PASS",
+      "details": {
+        "variable_changes": [
+          100,
+          200,
+          100
+        ],
+        "same_input": true,
+        "same_sources": true,
+        "same_fixed_criterion": true,
+        "baseline_equals_rollback": true,
+        "boundary": "脚本独立计算，不是第二个人签认"
+      }
+    },
+    {
+      "name": "无效试验参数拒绝",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/experiment-record-demo/run.py",
+          "--radio-limit",
+          "-1",
+          "--record",
+          "/tmp/textbook-v3-engineering-final2/invalid.json"
+        ],
+        "stderr": "usage: run.py [-h] [--radio-limit RADIO_LIMIT] --record RECORD\nrun.py: error: 无线电限龄不能为负\n"
+      }
+    },
+    {
+      "name": "填写失败与下一步记录",
+      "status": "PASS",
+      "details": {
+        "conclusion": "放宽后确实选中无线电，但年龄150ms违反固定100ms条件，试验失败；回滚后视觉50ms且源/输入一致。",
+        "earliest_observation": "无线电采样时刻850与当前1000；选源前已经150ms",
+        "next": "现场尚未测量；保持原配置，不据此放宽赛场参数",
+        "roles": {
+          "复核人": "待真实同学复核",
+          "版本/输入/判据": "记录原始JSON与SHA，不填写虚构签认"
+        }
+      }
+    },
+    {
+      "name": "开放任务计划产物",
+      "status": "PASS",
+      "details": {
+        "direction": "雷达坐标变旧",
+        "hypothesis": "发送队列积压",
+        "earliest": "入队与发出时刻/队列长度",
+        "single_variable": "仅坐标改为保留最新值，事件通道保持独立",
+        "same_input": "实际原录包/版本待提供",
+        "criterion": "先约定可接受年龄与有效目标损失，再同输入对照",
+        "rollback": "错误覆盖事件或时效/有效性恶化即恢复基线",
+        "status": "计划，尚未执行真实链路"
+      }
+    }
+  ],
+  "boundaries": [
+    "人工消息的软件实验，不是实车/靶场/对抗验证",
+    "本次按用户要求自行安排分进程运行与独立脚本复核；未伪造第二人签认，学员双人现场验收仍保留"
+  ]
+}

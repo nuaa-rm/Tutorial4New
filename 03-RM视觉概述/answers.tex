@@ -348,6 +348,11 @@ CUDA 是 GPU 计算工具，可用于自瞄、雷达等任务的加速。方向�
 写明仿真场景、版本和已通过的指标，同时明确实车表现未验证；下一步安排受控实测，覆盖光照、振动和延迟等实际条件。
 \end{solution}
 
+\paragraph*{随堂练习 \ref{v3-ex-engineering-5}}
+\begin{solution}
+valid只表示在试验放宽的选源条件下合格，仍需接受预先固定的任务判据：无线电150ms超过100ms，所以passed=false。回滚应重新选视觉50ms、passed=true，并与基线的input/source散列及fixed条件一致；不只看最终一个布尔值。
+\end{solution}
+
 \paragraph*{随堂练习 \ref{v3-ex-engineering-2}}
 \begin{solution}
 将重写放到学习分支和后续计划；临场使用已验证组件。若现有模块存在阻断问题，先复现、做最小修复并验证，写明回滚方案，不能只靠学习收益决定上线。
