@@ -1,9 +1,33 @@
-\subsubsection{原则：原理在卷二，本章是 检查清单}
+\subsubsection{先留下能复查的记录}
 
-曝光三角、卷帘快门、噪声等原理见卷二「相机与成像」。本章只列赛场上最常踩坑的实践要点。
+我们把后面的检测、解算和控制都接好了，画面却一会儿太亮、一会儿拖影，这时候再调滤波就有点委屈它了。首先回到相机，确认送进来的到底是什么图像。本章接着卷二相机章讲现场检查，不再展开曝光三角、标定和SDK原理；我们的目标是留下另一位同学能复查的证据。
 
-\begin{example}[建立一次检查记录]
-准备一张表，写入日期、相机序列号、镜头、分辨率、曝光、增益、触发方式与标定文件。没有设备时填写“未核对”并注明需查的配置来源。检查：这张表应让另一位同学知道哪些条件已确认，而不是只留下“相机正常”。
+“海康相机，默认参数”听起来交代了设备，其实还差不少。你需要记录具体型号与序列号、镜头、分辨率、曝光、增益、触发方式和标定文件，并注明这些值从哪里读到。没有设备就写“未核对”，保留下一步查阅来源；不能把默认值当成这次采集的事实。原始图像也要保存，聊天软件压缩过的截图可能已经丢掉了你想查的细节。
+
+我们在卷内 \path{examples/front-check-demo} 放一个小检查工程：\texttt{check\_image.py}记录本地图片，\texttt{make\_frames.py}生成对照教学图，\texttt{timing.py}读取\texttt{times.csv}区分帧率和延迟。三个程序都用Python；图像部分需要NumPy、OpenCV，Ubuntu可复用卷二环境或安装\texttt{python3-numpy}、\texttt{python3-opencv}。
+
+\begin{example}[先记录图片里确实有的信息]
+下面是完整的图像检查程序。首先按原格式读文件，再确认本例能解释的格式：8位灰度或3通道BGR。这里把至少一个通道达到250的像素比例记作接近最大值的线索，不过白墙也可能很白，不能看到这个数就宣布传感器过曝。
+
+\par\vspace{6pt}
+\noindent\begin{minipage}[t]{\linewidth}
+\lstinputlisting[language=Python,basicstyle=\ttfamily\small,frame=single,breaklines=true,numbers=none,aboveskip=0pt,belowskip=0pt,firstline=1,lastline=25]{examples/front-check-demo/check_image.py}
+\end{minipage}\par\vspace{6pt}
+接着命令行接收一个图片路径，输出JSON记录。文件散列（SHA256）帮助我们确认复查的是同一个原件；序列号、曝光与采样时钟没有可靠来源，所以明确留下\texttt{null}，不从画面亮度猜参数。
+
+\par\vspace{6pt}
+\noindent\begin{minipage}[t]{\linewidth}
+\lstinputlisting[language=Python,basicstyle=\ttfamily\small,frame=single,breaklines=true,numbers=none,aboveskip=0pt,belowskip=0pt,firstline=28]{examples/front-check-demo/check_image.py}
+\end{minipage}\par\vspace{6pt}
+通用调用是\texttt{python3 check\_image.py 图片路径}。下一节会生成随书图像，你也可以先在项目目录把路径换成自己的8位样图，保存一次记录：
+\par\vspace{6pt}
+\noindent\begin{minipage}[t]{\linewidth}
+\begin{tbash}
+cd examples/front-check-demo
+python3 check_image.py /你的样图路径/frame.png > image-record.json
+\end{tbash}
+\end{minipage}\par\vspace{6pt}
+检查输出的尺寸、通道和未知项，再补写你观察的是哪个区域、出现了什么现象。这样，别人拿到记录后能找到原件，而不是只看到一句“相机正常”。
 \end{example}
 
 \begin{exercise}
@@ -11,83 +35,121 @@
 检查表中只写“海康相机，默认参数”，为什么不能复现实验？列出四项缺失信息。
 \end{exercise}
 
-\subsubsection{卷帘 vs 全局}
+\subsubsection{卷帘与全局：先区分两种现象}
 
-\begin{itemize}
-    \item \textbf{卷帘快门（Rolling Shutter）}：高速相对运动时易倾斜、撕裂，影响角点与检测稳定性；
-    \item \textbf{全局快门（Global Shutter）}：运动场景更稳，成本与选型受限。
-\end{itemize}
-自瞄对抗、云台快速扫场时，快门类型与曝光时间必须一起评估：曝光过长同样拖影。
+接下来看看快门。\textbf{卷帘快门（Rolling Shutter）}的不同行在不同时间曝光，目标或相机快速运动时，原来竖直的结构可能变斜。\textbf{全局快门（Global Shutter）}让各行同时开始和结束曝光，主要减少这一类行间时序差异。不过，整个曝光期间目标仍会移动，所以全局快门也可能有拖影，不能给它发一张“永不模糊”的免死金牌。不同型号的具体时序可查\href{https://docs.baslerweb.com/electronic-shutter-types}{Basler电子快门说明}，选型以实际型号手册为准。
 
-\begin{example}[分开观察畸变与拖影]
-在已有的快速扫场图像中，分别检查竖直边缘是否整体倾斜、单个灯条边缘是否沿运动方向拉长。前者提示逐行曝光时序效应，后者提示曝光期间运动模糊。记录现象，再用固定其他条件、缩短曝光的对照图检查拖影是否减轻。没有对照图时，只记录候选原因。
+我们暂时把真实场景的噪声和光照放开，用一个理想移动竖条只观察这两种机制。它宽8像素，以每毫秒4像素的速度向右移动。下面的程序对每行取32个曝光时刻，把不同位置的竖条平均成一幅图；\texttt{row\_span\_ms}控制首尾行开始曝光的时间差。
+
+\begin{example}[一次改变行间时序，再改变曝光区间]
+这是完整的\texttt{make\_frames.py}。先生成全局1ms，再保持1ms但改成行间跨度8ms，最后保持全局而改成6ms。输出路径可用\texttt{--output 目录}指定，默认是本项目的\texttt{out}：
+
+\par\vspace{6pt}
+\noindent\begin{minipage}[t]{\linewidth}
+\lstinputlisting[language=Python,basicstyle=\ttfamily\small,frame=single,breaklines=true,numbers=none,aboveskip=0pt,belowskip=0pt,firstline=1,lastline=16]{examples/front-check-demo/make_frames.py}
+\end{minipage}\par\vspace{6pt}
+这个函数返回生成的灰度图。接下来主函数依次传入三组曝光与行间跨度，保存对应文件，让我们只比较刚才改变的条件：
+
+\par\vspace{6pt}
+\noindent\begin{minipage}[t]{\linewidth}
+\lstinputlisting[language=Python,basicstyle=\ttfamily\small,frame=single,breaklines=true,numbers=none,aboveskip=0pt,belowskip=0pt,firstline=19]{examples/front-check-demo/make_frames.py}
+\end{minipage}\par\vspace{6pt}
+在项目目录运行并记录第一张图：
+\begin{tbash}
+python3 make_frames.py --output out
+python3 check_image.py out/global_short.png > out/image-record.json
+\end{tbash}
+三张图都是$160\times64$的8位灰度图。全局短曝光的竖条仍竖直；逐行图首尾行的条中心相差32像素；全局长曝光没有这类倾斜，但第一行非背景区域从11像素展宽到31像素。看图\ref{fig:v3-front-motion}时，分别盯住条的方向和宽度，不要把两种现象都叫成“糊了”。
 \end{example}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.94\textwidth]{front_motion_revised.pdf}
+\caption{实际运行生成的三张教学图：行间时序改变方向，曝光期间运动使边缘展宽}
+\label{fig:v3-front-motion}
+\end{figure}
+
+\begin{note}
+这里按曝光时刻取平均，并固定图像亮度尺度，只演示运动与时序，不模拟长曝光的光子数量、真实增益或传感器全部噪声。它们不是实拍，也不能用来证明某台相机的实际性能。真实图像中倾斜或拖影只是取证线索，还要核对运动、曝光和设备时序。
+\end{note}
 
 \begin{exercise}
 \label{v3-ex-camera-2}
-全局快门图像仍有明显拖影，能否据此判定相机实际是卷帘快门？
+全局快门图像仍有明显拖影，能否据此判定相机实际是卷帘快门？指出上述对照中能支持你解释的两张图。
 \end{exercise}
 
-\subsubsection{分辨率、帧率与「商家高清」}
+\subsubsection{分辨率、帧率与“商家高清”}
 
-\begin{itemize}
-    \item 宣传「高清」不等于赛场可用分辨率；
-    \item 帧率常与分辨率绑定：高帧可能对应较低分辨率；
-    \item 端到端延迟应覆盖约定采样时刻到执行生效之间的读出、传输、排队、处理和执行等待；各阶段可能重叠，应以逐帧时间戳实测，不能用帧率的倒数代替。提高分辨率可能增加处理负担。
-\end{itemize}
-选型时写清：目标分辨率、最低可接受帧率、接口（USB3/GigE）、黑白/彩色、触发方式。
+看到宣传页写着“高清、高帧率”，先别急着替它上场。你要的是在目标距离下还能看清装甲、在目标速度下不过分拖影、结果到执行端时还来得及用。标称最高帧率可能对应较小分辨率或特定采集模式，接口带宽和后端处理也会限制实际吞吐；需要核对目标分辨率、实际帧流、接口、像素格式和触发方式。
 
-\begin{example}[用时间戳区分两个指标]
-教学样本的连续采样时刻为 0、10、20 ms，对应结果输出时刻为 35、45、55 ms。采样间隔 10 ms，对应 100 帧每秒；逐帧延迟为 35 ms。检查：流水线可每 10 ms 出一帧结果，但每个结果仍反映 35 ms 前的观测。
+这里尤其要分清帧率和延迟：帧率看一段时间里来了多少次观测，延迟看\emph{同一次观测}从采样走到指定终点用了多久。流水线可以每10ms输出一帧，但输出的内容仍然是35ms之前采到的。我们把原来的教学时刻补上执行列，看看终点改变后会发生什么：
+
+\par\vspace{6pt}
+\noindent\begin{minipage}[t]{\linewidth}
+\lstinputlisting[basicstyle=\ttfamily\small,frame=single,breaklines=true,numbers=none,aboveskip=0pt,belowskip=0pt]{examples/front-check-demo/times.csv}
+\end{minipage}\par\vspace{6pt}
+三帧在同一个人工时钟下分别于0、10、20ms采样，35、45、55ms得到结果，再于45、55、65ms执行。完整的\texttt{timing.py}先检查身份和时间约定，随后才做减法：
+
+\par\vspace{6pt}
+\noindent\begin{minipage}[t]{\linewidth}
+\lstinputlisting[language=Python,basicstyle=\ttfamily\small,frame=single,breaklines=true,numbers=none,aboveskip=0pt,belowskip=0pt,firstline=1,lastline=24]{examples/front-check-demo/timing.py}
+\end{minipage}\par\vspace{6pt}
+采样间隔必须递增，结果与执行也必须按帧配对。这里的帧率仅表示记录中观测到的采样频率；如果丢帧或只保存部分帧，不能把它当成传感器原生采集频率。接着命令行读取CSV，遇到非有限时间、重复帧号、错时钟或不合理先后关系就拒绝：
+
+\par\vspace{6pt}
+\noindent\begin{minipage}[t]{\linewidth}
+\lstinputlisting[language=Python,basicstyle=\ttfamily\small,frame=single,breaklines=true,numbers=none,aboveskip=0pt,belowskip=0pt,firstline=27]{examples/front-check-demo/timing.py}
+\end{minipage}\par\vspace{6pt}
+
+\begin{example}[同样100帧每秒，延迟却有两个终点]
+在项目目录执行下面的命令。参数是逐帧时刻表的路径，你改表后可以换成自己的文件名：
+\begin{tbash}
+python3 timing.py times.csv > out/time-record.json
+\end{tbash}
+输出采样帧率100，三帧结果延迟均35ms，采样到执行均45ms。图\ref{fig:v3-front-time}中先沿同一行找这三个时刻，再比较两行的采样间隔。注意这是人工时刻表实跑出的算例，不是电脑或机器人的测速；若原始记录只有接收时刻，不能替它补写一个猜出来的采样时刻。
 \end{example}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{front_time_revised.pdf}
+\caption{采样间隔10ms，结果延迟35ms，采样到执行45ms，三个指标各有终点}
+\label{fig:v3-front-time}
+\end{figure}
+
+\begin{conclusion}
+快门类型决定行间曝光的时序关系，曝光时长影响运动期间的积分；帧率描述吞吐，延迟描述一帧走到约定终点的耗时。真实端到端测量须约定采样含义、执行生效位置、帧身份和时钟；只测到算法结果就叫结果延迟，各阶段可能并行，不能拿帧率倒数或几项平均耗时相加冒充逐帧实测。
+\end{conclusion}
 
 \begin{exercise}
 \label{v3-ex-camera-3}
-采样时刻为 0、20、40 ms，结果输出为 50、70、90 ms，采样帧率和逐帧延迟分别是多少？
+采样时刻为0、20、40ms，结果输出为50、70、90ms，采样帧率和结果延迟分别是多少？如果执行时刻再晚10ms，端到端延迟是多少？复制时刻表实跑核对。
 \end{exercise}
 
-\subsubsection{曝光 / 增益 / 触发 检查清单}
+\subsubsection{曝光、增益与触发：先存配置，再做对照}
 
-上机前逐项确认：
-\begin{enumerate}
-    \item 灯条不过曝成一片、暗部仍可见结构；
-    \item 增益过高引入的噪声是否拖垮阈值/网络；
-    \item 是否已验证曝光策略；自动曝光若拉长曝光或改变灰度分布，可能影响高速运动检测，可锁定曝光或限制自动范围并作对照；
-    \item 硬件触发 / 同步是否与电控时间戳约定一致；
-    \item 镜头焦距与工作距离是否匹配装甲成像尺寸；
-    \item 内参与畸变是否在本机标定，配置是否写对序列号。
-\end{enumerate}
+现在再上机看参数，就有了观察方向。首先保存相机当前配置，记下读取时间和序列号；然后看灯条有没有白成一片、暗部有没有可用结构，再检查增益、曝光和触发的实际读值。增益变大可能同时放大噪声；自动曝光可能把图像调亮，也可能拉长曝光或改变灰度分布。是否锁定、限制范围，应该由目标运动和光照变化下的对照决定。
 
-雷达俯视与车载自瞄的工作距离、视场（FOV）不同，\textbf{禁止}共用一套未经验证的曝光参数。
-
-\begin{example}[一次只改曝光]
-用同一段场景准备两组图像，固定镜头、增益和分辨率，仅改变曝光；记录灯条是否饱和、边缘拖影和暗部可见性。选择兼顾检测与运动条件的一组，保存配置和样图。检查：没有统一的“越亮越好”；缺少设备时可对已有对照图作同样记录。
-\end{example}
+雷达俯视和车载自瞄的工作距离、视场（Field of View，FOV）不同，不能直接共用一套未经验证的曝光参数。镜头焦距与工作距离还决定装甲占多少像素，换镜头、改裁剪或分辨率后，几何配置也要一起核对。触发和同步则要查真实采样时刻与电控约定，不能仅凭“我设置过硬件触发”就认定已经同步。
 
 \begin{note}
-切换曝光、触发或采集模式前先保存配置；上机检查时保持执行器处于约定的安全状态。快门类型原理可查厂家说明：\url{https://docs.baslerweb.com/electronic-shutter-types}；实际参数名称与范围以本机型号手册为准。
+改变曝光、触发或采集模式前先导出可恢复的原配置，核对本机型号的参数范围、读回方式与保存方法；上机检查时让执行器处于约定的停止状态。没有设备时，保留这部分为未核对，随书人工图不能代替设置读取、保存与恢复。
 \end{note}
 
-\begin{conclusion}
-\begin{itemize}
-  \item 快门类型决定各行曝光的时序关系。
-  \item 曝光时长影响拖影和亮度。
-  \item 帧率表示采样吞吐，端到端延迟表示某次观测到执行的耗时。
-\end{itemize}
-\end{conclusion}
+\begin{example}[只改曝光，保留其他条件]
+准备固定目标运动与光照的场景，记录设备、镜头、增益、分辨率和触发方式。先保存基线原图和配置，再只改变曝光，读回实际值，采集对照原图与逐帧时刻。分别记录灯条区域是否接近最大值、边缘是否拖长、暗部是否可见，并核对检测和时效；最后恢复原配置并确认读回值。已经有可靠的成对图像和采集记录时，可先做图像比较；没有这些资料就只记录缺项，不能把普通两张图片当成控制了其他条件的实测。
+\end{example}
 
 \begin{exercise}
 \label{v3-ex-camera-4}
 换了焦距或裁剪区域后，除了曝光还应核对哪项几何配置？为什么？
 \end{exercise}
 
-\subsubsection{工业相机与 SDK*}
+\subsubsection{工业相机与 SDK：确认打开的是哪一台}
 
-赛场常用厂家软件开发工具包（Software Development Kit，SDK，如海康相机 SDK）按序列号打开，而不是笼统 \texttt{VideoCapture(0)}。
-驱动、权限、USB 带宽不足时会丢帧——先查系统层再查算法。
+最后再来看“查看器有图，我的程序没图”这个常见场景。工业相机通常通过厂家的软件开发工具包（Software Development Kit，SDK）按序列号枚举和打开；\texttt{VideoCapture(0)}只是在对应后端里选一个索引，不能替你保证选中了配置里的那台相机。设备占用、权限、驱动与SDK匹配、像素格式或接口资源都可能卡在检测之前，先查采集路径，再查算法。
 
-\begin{example}[确认打开的是哪台相机]
-在厂家查看器中只启动采集预览，读取序列号并与配置文件对照；保存一帧图像，记录分辨率与时间信息，再退出查看器释放设备供程序使用。检查：预览可用仅证明这一采集路径可用，正式程序仍需验证权限、像素格式和时间戳。
+\begin{example}[把查看器和正式程序分别核对]
+在本机型号的厂家查看器中只启动预览，读取序列号与配置文件对照，再保存一帧原图及分辨率、像素格式、可获得的采样时间和时钟说明。接着停止采集并退出查看器，释放设备，按卷二相机章的对应SDK程序打开同一序列号，核对它实际收到的帧与设置。记录两条路径各自的成功或报错，不把查看器成功写成正式程序已经通过。具体菜单与参数名用本机手册核对，缺设备或SDK时此例仍未完成。
 \end{example}
 
 \begin{exercise}

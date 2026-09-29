@@ -1,0 +1,314 @@
+{
+  "python": "3.12.3",
+  "opencv": "4.6.0",
+  "numpy": "1.26.4",
+  "files": {
+    "make_frames.py": "75c60875fe14f2805021f73ce68c95e190f38a1470f38c1756288a7ebcbfaa69",
+    "check_image.py": "8abaf2979b7ef62fb2e4a6ddd1542a168ab7cedbb46e3804f899b2e2b56f06b1",
+    "timing.py": "b661d9b89f0f590f61d8a03c607261a789ddeac3777e1d2a903d4100e179d007",
+    "times.csv": "edfa61da44e77bece3e3f733505ad2707cbeee40d7cf684fdd6afac4f3c255e3",
+    "README.md": "d6e9afe56b585d1f85c7b24120f875d62700ec77ff539ecfa09de47d7bb9d154"
+  },
+  "records": [
+    {
+      "name": "按正文生成图像",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/front-check-demo/make_frames.py",
+          "--output",
+          "/tmp/textbook-v3-front/out"
+        ],
+        "stdout": "/tmp/textbook-v3-front/out\n"
+      }
+    },
+    {
+      "name": "实际文件记录 global_short",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/front-check-demo/check_image.py",
+          "/tmp/textbook-v3-front/out/global_short.png"
+        ],
+        "output": {
+          "file": "/tmp/textbook-v3-front/out/global_short.png",
+          "sha256": "7b6f39f78210f837e7ddec298f7a3bf334b3105c9ec733b4a9d8c454dcfccd85",
+          "width": 160,
+          "height": 64,
+          "channels": 1,
+          "near_max_fraction": 0.0,
+          "camera_serial": null,
+          "exposure_us": null,
+          "sample_clock": null
+        },
+        "image_sha256": "7b6f39f78210f837e7ddec298f7a3bf334b3105c9ec733b4a9d8c454dcfccd85"
+      }
+    },
+    {
+      "name": "实际文件记录 rolling_short",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/front-check-demo/check_image.py",
+          "/tmp/textbook-v3-front/out/rolling_short.png"
+        ],
+        "output": {
+          "file": "/tmp/textbook-v3-front/out/rolling_short.png",
+          "sha256": "ac6ab4a1b65fb313cec6a73da3d8dbe8c6832eb5eedc1412265688ff77df63b4",
+          "width": 160,
+          "height": 64,
+          "channels": 1,
+          "near_max_fraction": 0.0,
+          "camera_serial": null,
+          "exposure_us": null,
+          "sample_clock": null
+        },
+        "image_sha256": "ac6ab4a1b65fb313cec6a73da3d8dbe8c6832eb5eedc1412265688ff77df63b4"
+      }
+    },
+    {
+      "name": "实际文件记录 global_long",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/front-check-demo/check_image.py",
+          "/tmp/textbook-v3-front/out/global_long.png"
+        ],
+        "output": {
+          "file": "/tmp/textbook-v3-front/out/global_long.png",
+          "sha256": "33e498c0d3592a68ed7b2b48261c8d0920dae1ade39099822f79318ce1e0969f",
+          "width": 160,
+          "height": 64,
+          "channels": 1,
+          "near_max_fraction": 0.0,
+          "camera_serial": null,
+          "exposure_us": null,
+          "sample_clock": null
+        },
+        "image_sha256": "33e498c0d3592a68ed7b2b48261c8d0920dae1ade39099822f79318ce1e0969f"
+      }
+    },
+    {
+      "name": "独立观测倾斜与拖影",
+      "status": "PASS",
+      "details": {
+        "rolling_row_center_shift_px": 32,
+        "first_row_nonbackground_width_px": {
+          "global_short": 11,
+          "rolling_short": 11,
+          "global_long": 31
+        },
+        "boundary": "归一化平均人工模型，非相机量测"
+      }
+    },
+    {
+      "name": "近最大值线索 white",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/front-check-demo/check_image.py",
+          "/tmp/textbook-v3-front/white.png"
+        ],
+        "output": {
+          "file": "/tmp/textbook-v3-front/white.png",
+          "sha256": "39ce0ce91c766458572f3ff29d0c78e0f3f98b1d86f542bf94d9dcd1d6220937",
+          "width": 10,
+          "height": 8,
+          "channels": 1,
+          "near_max_fraction": 1.0,
+          "camera_serial": null,
+          "exposure_us": null,
+          "sample_clock": null
+        },
+        "note": "白色/单色像素不能独立证明传感器过曝"
+      }
+    },
+    {
+      "name": "近最大值线索 color",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/front-check-demo/check_image.py",
+          "/tmp/textbook-v3-front/color.png"
+        ],
+        "output": {
+          "file": "/tmp/textbook-v3-front/color.png",
+          "sha256": "f6b4271dfb38f0b6e1df52ca393375fc2d677b4a04de1acbfa0cdff826ad00b4",
+          "width": 10,
+          "height": 8,
+          "channels": 3,
+          "near_max_fraction": 1.0,
+          "camera_serial": null,
+          "exposure_us": null,
+          "sample_clock": null
+        },
+        "note": "白色/单色像素不能独立证明传感器过曝"
+      }
+    },
+    {
+      "name": "格式拒绝 sixteen",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/front-check-demo/check_image.py",
+          "/tmp/textbook-v3-front/sixteen.png"
+        ],
+        "stderr": "usage: check_image.py [-h] image\ncheck_image.py: error: 本例仅检查8位灰度/BGR图\n"
+      }
+    },
+    {
+      "name": "格式拒绝 rgba",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/front-check-demo/check_image.py",
+          "/tmp/textbook-v3-front/rgba.png"
+        ],
+        "stderr": "usage: check_image.py [-h] image\ncheck_image.py: error: 本例不解释其他通道格式\n"
+      }
+    },
+    {
+      "name": "缺图拒绝",
+      "status": "PASS",
+      "details": {
+        "stderr": "[ WARN:0@0.045] global ./modules/imgcodecs/src/loadsave.cpp (239) findDecoder imread_('/tmp/textbook-v3-front/missing.png'): can't open/read file: check file path/integrity\nusage: check_image.py [-h] image\ncheck_image.py: error: 文件打不开\n"
+      }
+    },
+    {
+      "name": "实际人工时刻表",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/front-check-demo/timing.py",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/front-check-demo/times.csv"
+        ],
+        "output": {
+          "observed_sample_fps": 100.0,
+          "result_delay_ms": [
+            35.0,
+            35.0,
+            35.0
+          ],
+          "end_to_end_ms": [
+            45.0,
+            45.0,
+            45.0
+          ]
+        }
+      }
+    },
+    {
+      "name": "实际降帧变式",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/front-check-demo/timing.py",
+          "/tmp/textbook-v3-front/slower.csv"
+        ],
+        "output": {
+          "observed_sample_fps": 50.0,
+          "result_delay_ms": [
+            50.0,
+            50.0,
+            50.0
+          ],
+          "end_to_end_ms": [
+            60.0,
+            60.0,
+            60.0
+          ]
+        }
+      }
+    },
+    {
+      "name": "时刻/配对拒绝 future",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/front-check-demo/timing.py",
+          "/tmp/textbook-v3-front/future.csv"
+        ],
+        "stderr": "usage: timing.py [-h] csv\ntiming.py: error: 时间须有限且采样<=结果<=执行\n"
+      }
+    },
+    {
+      "name": "时刻/配对拒绝 nonfinite",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/front-check-demo/timing.py",
+          "/tmp/textbook-v3-front/nonfinite.csv"
+        ],
+        "stderr": "usage: timing.py [-h] csv\ntiming.py: error: 时间须有限且采样<=结果<=执行\n"
+      }
+    },
+    {
+      "name": "时刻/配对拒绝 duplicate-frame",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/front-check-demo/timing.py",
+          "/tmp/textbook-v3-front/duplicate-frame.csv"
+        ],
+        "stderr": "usage: timing.py [-h] csv\ntiming.py: error: 帧身份重复，不能配对\n"
+      }
+    },
+    {
+      "name": "时刻/配对拒绝 bad-clock",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/front-check-demo/timing.py",
+          "/tmp/textbook-v3-front/bad-clock.csv"
+        ],
+        "stderr": "usage: timing.py [-h] csv\ntiming.py: error: 至少两帧，且本例只接受demo_clock\n"
+      }
+    },
+    {
+      "name": "时刻/配对拒绝 unordered",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/03-RM视觉概述/examples/front-check-demo/timing.py",
+          "/tmp/textbook-v3-front/unordered.csv"
+        ],
+        "stderr": "usage: timing.py [-h] csv\ntiming.py: error: 采样时刻须递增\n"
+      }
+    },
+    {
+      "name": "现场检查记录/明确缺项",
+      "status": "PASS",
+      "details": {
+        "raw_image": "/tmp/textbook-v3-front/out/global_short.png",
+        "observation": "教学竖条，近最大值比例0；曝光期间运动导致展宽，行间时序使倾斜",
+        "unknown": [
+          "真实设备型号/序列号/镜头",
+          "实际曝光/增益/触发",
+          "内参/畸变/配置备份与恢复",
+          "真实采样时钟/执行时间"
+        ],
+        "next": "实机按序列号读配置并保存原始帧/时刻；模型不能补全这些事实",
+        "restoration": "本次仅生成临时文件，未改变设备参数"
+      }
+    }
+  ],
+  "boundaries": [
+    "图像和CSV都是人工教材样本；不是设备性能或实际执行测速",
+    "真实设备/SDK设置读取保存恢复、运动光照对照与端到端时刻未完成"
+  ]
+}
