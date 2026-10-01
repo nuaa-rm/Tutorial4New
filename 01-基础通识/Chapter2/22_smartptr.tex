@@ -1,6 +1,6 @@
-动态内存若使用 \texttt{new}/\texttt{delete} 手动管理，易因遗漏释放导致内存泄漏；在对象生命周期复杂、函数嵌套较深时尤甚。C++11 引入智能指针，在对象析构时自动释放所管理的堆内存。常用类型包括 \texttt{unique\_ptr}、\texttt{shared\_ptr} 与 \texttt{weak\_ptr}。
+动态内存若使用 \texttt{new}/\texttt{delete} 手动管理，易因遗漏释放导致内存泄漏；在对象生命周期复杂、函数嵌套较深时尤甚，相信你曾经也写出过忘记释放内存的代码，一定深有体会。好在 C++11 引入了智能指针，可以在对象析构时自动释放所管理的堆内存。常用类型包括 \texttt{unique\_ptr}、\texttt{shared\_ptr} 与 \texttt{weak\_ptr}。
 
-想观察对象什么时候销毁，光看指针的地址不够。我们把构造与析构提示留在共用类里，再分别比较几种所有权。项目放在 \path{examples/smart-pointer-demo}，文件组成如下。每个 cpp 都有自己的 main，分别编译；objects.hpp 是共用类定义。不要把它们拼成一个文件。
+想观察对象什么时候销毁，光看指针的地址不够。我们把构造与析构提示留在共用类里，再分别比较几种所有权。项目放在 \path{examples/smart-pointer-demo}，文件组成如下。
 \begin{lstlisting}[language={}]
 smart-pointer-demo/
   README.md
@@ -10,7 +10,6 @@ smart-pointer-demo/
   unique.cpp
   weak.cpp
 \end{lstlisting}
-编译命令里，-std 指定 C++ 标准，-Wall/-Wextra 打开常用警告，-pthread 配置线程编译与链接；-o 指定临时输出文件。先进入项目目录，后面的源码名按当前示例替换。
 
 下文示例中的类型 \texttt{A}、\texttt{B} 定义如下。
 
@@ -25,7 +24,7 @@ smart-pointer-demo/
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/smart-pointer-demo/unique.cpp}
 
 
-从本卷目录进入 \path{examples/smart-pointer-demo}，保存的源码就是 \texttt{unique.cpp}。
+从本卷目录进入 \path{examples/smart-pointer-demo}，源码保存在 \texttt{unique.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread unique.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
@@ -35,7 +34,7 @@ g++ -std=c++17 -Wall -Wextra -pthread unique.cpp -o /tmp/cpp-demo
 
 \begin{note}
 创建智能指针优先使用 \texttt{std::make\_unique} / \texttt{std::make\_shared}，而不是先 \texttt{new} 再交给智能指针接管。
-前者把创建与所有权管理放在一起；\texttt{make\_shared} 通常还能合并对象与控制块的分配。手动 \texttt{new} 出来的原始指针一旦被两个智能指针同时接管，可能被重复释放，造成未定义行为；不保证每次都立刻崩溃。
+前者把创建与所有权管理放在一起；\texttt{make\_shared} 通常还能合并对象与控制块的分配。手动 \texttt{new} 出来的原始指针一旦被两个智能指针同时接管，可能被重复释放，造成未定义行为，甚至可能立刻崩溃。
 \end{note}
 
 \begin{exercise}\label{ex:v1-cpp-unique}
@@ -53,7 +52,7 @@ g++ -std=c++17 -Wall -Wextra -pthread unique.cpp -o /tmp/cpp-demo
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/smart-pointer-demo/shared.cpp}
 
 
-从本卷目录进入 \path{examples/smart-pointer-demo}，保存的源码就是 \texttt{shared.cpp}。
+从本卷目录进入 \path{examples/smart-pointer-demo}，源码保存在 \texttt{shared.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread shared.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
@@ -71,15 +70,15 @@ g++ -std=c++17 -Wall -Wextra -pthread shared.cpp -o /tmp/cpp-demo
 
 \Needspace{9\baselineskip}
 \begin{example}
-循环引用演示（项目用 \texttt{STRONG\_CYCLE} 选择强引用写法，不必修改共用头文件）：
+循环引用演示：
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/smart-pointer-demo/cycle.cpp}
 
-从本卷目录进入 \path{examples/smart-pointer-demo}，保存的源码就是 \texttt{cycle.cpp}。
+从本卷目录进入 \path{examples/smart-pointer-demo}，源码保存在 \texttt{cycle.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread cycle.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
 \end{tbash}
-第一段两个对象正常析构；第二段计数都为 2，却没有析构提示，这是故意保留的小规模泄漏示范，仅在临时练习程序中运行。
+第一段两个对象正常析构；第二段计数都为 2，却没有析构提示。
 \end{example}
 
 此时应将一侧改为 \texttt{weak\_ptr}（正如本节开头 B 类中的写法）。\texttt{weak\_ptr} 不增加引用计数，也不直接解引用资源；需要访问时通过 \texttt{lock()} 升级为 \texttt{shared\_ptr}，并检查返回值是否为空。
@@ -90,7 +89,7 @@ g++ -std=c++17 -Wall -Wextra -pthread cycle.cpp -o /tmp/cpp-demo
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/smart-pointer-demo/weak.cpp}
 
 
-从本卷目录进入 \path{examples/smart-pointer-demo}，保存的源码就是 \texttt{weak.cpp}。
+从本卷目录进入 \path{examples/smart-pointer-demo}，源码保存在 \texttt{weak.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread weak.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
@@ -98,7 +97,7 @@ g++ -std=c++17 -Wall -Wextra -pthread weak.cpp -o /tmp/cpp-demo
 强引用计数分别为 1、2，临时 lock 后又 reset，离开作用域两个对象都会析构。
 \end{example}
 
-在多线程环境下，lock() 成功取得共享所有权后，对象在这份所有权存在期间不会被销毁；它不会替对象的数据读写加锁。相关同步问题见多线程章节。
+在多线程环境下，lock() 成功取得共享所有权后，对象在这份所有权存在期间不会被销毁；但它不会替对象的数据读写加锁。相关同步问题我们在后续多线程章节讨论。
 
 \begin{exercise}\label{ex:v1-cpp-weak}
 
@@ -135,8 +134,5 @@ g++ -std=c++17 -Wall -Wextra -pthread weak.cpp -o /tmp/cpp-demo
 \end{itemize}
 
 \begin{note}
-对于动态环，标准库\textbf{没有}通用的解决方案：\texttt{weak\_ptr} 只能破解你预先知道存在的那条边，
-对运行时关系也应先规定所有权方向，不能把所有连接都默认写成 \texttt{shared\_ptr}。
-工程上的应对办法是在设计阶段就规定好所有权方向（比如父子结构中父持有子、子用 \texttt{weak\_ptr} 回指父），
-并通过代码评审和内存检测工具（如 AddressSanitizer 的泄漏检查）来兜底。
+对于无法通过所有权设计保证至少一条边是非拥有关系的动态环，标准库\textbf{没有}通用的解决方案：\texttt{weak\_ptr} 只能破解你预先知道存在的那条边。如果设计上确实无法避免动态环，需要考虑自己实现其他生命周期管理策略，例如中央所有者、Arena/Region，或者真正的垃圾回收。
 \end{note}
