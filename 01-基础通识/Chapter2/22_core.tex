@@ -21,7 +21,7 @@
     \item 函数体：函数体定义了lambda表达式的主体，可以是一条表达式或多条语句。
 \end{enumerate}
 
-刚才的函数都起了名字，接下来会遇到“把一段行为交给另一个函数”的写法。我们把排序、捕获与移动分成独立程序，一次只看一个区别。项目放在 \path{examples/lambda-move-demo}，文件组成如下。每个 cpp 都有自己的 main，分别编译；不要把它们拼成一个文件。
+刚才的函数都起了名字，接下来会遇到“把一段行为交给另一个函数”的写法。我们把排序、捕获与移动分成独立程序，一次只看一个区别。项目放在 \path{examples/lambda-move-demo}，文件组成如下。与前一节的类的项目代码类似，每个 cpp 都有自己的 main，需要分别编译。
 \begin{lstlisting}[language={}]
 lambda-move-demo/
   README.md
@@ -35,7 +35,6 @@ lambda-move-demo/
   rvalue-reference.cpp
   sort.cpp
 \end{lstlisting}
-编译命令里，-std 指定 C++ 标准，-Wall/-Wextra 打开常用警告，-pthread 配置线程编译与链接；-o 指定临时输出文件。先进入项目目录，后面的源码名按当前示例替换。
 
 \Needspace{9\baselineskip}
 \begin{example}
@@ -43,12 +42,12 @@ lambda-move-demo/
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/lambda-move-demo/sort.cpp}
 
 
-从本卷目录进入 \path{examples/lambda-move-demo}，保存的源码就是 \texttt{sort.cpp}。
+从本卷目录进入 \path{examples/lambda-move-demo}，源码保存在 \texttt{sort.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread sort.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
 \end{tbash}
-先输出和 3，再看到 id 依次为 7、4、2、1、-1；比较器决定了降序规则。
+先输出和 3，再看到 id 依次为 7、4、2、1、-1。
 \end{example}
 
 \textbf{捕获列表：}可以捕获外部作用域中的变量，包括this指针。捕获的方式包括两种，即值捕获和引用捕获。
@@ -74,7 +73,7 @@ mutable 与值捕获：
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/lambda-move-demo/mutable.cpp}
 
 
-从本卷目录进入 \path{examples/lambda-move-demo}，保存的源码就是 \texttt{mutable.cpp}。
+从本卷目录进入 \path{examples/lambda-move-demo}，源码保存在 \texttt{mutable.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread mutable.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
@@ -84,7 +83,7 @@ g++ -std=c++17 -Wall -Wextra -pthread mutable.cpp -o /tmp/cpp-demo
 
 使用lambda表达式可以简化代码，提高可读性。由于捕获列表的存在，使得lambda表达式可以访问外部作用域的变量，
 相比于普通函数，lambda表达式更加灵活。
-lambda表达式的本质是一个\textbf{匿名的函数对象}（闭包），可以用 \texttt{auto} 或 \texttt{std::function} 承接；
+lambda表达式的本质是一个\textbf{匿名的函数对象}（闭包），可以用 \texttt{auto} 或 \texttt{std::function} 承接, 注意它的类型并不直接是\texttt{std::function}，这里有隐式类型转换；
 没有任何捕获的 lambda 还可以隐式转换为函数指针，作为函数参数进行传递。
 
 \Needspace{9\baselineskip}
@@ -93,12 +92,12 @@ lambda表达式的本质是一个\textbf{匿名的函数对象}（闭包），�
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/lambda-move-demo/function.cpp}
 
 
-从本卷目录进入 \path{examples/lambda-move-demo}，保存的源码就是 \texttt{function.cpp}。
+从本卷目录进入 \path{examples/lambda-move-demo}，源码保存在 \texttt{function.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread function.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
 \end{tbash}
-输出 3 1；两种变量都能保存可调用对象，auto 并不是“自动推导函数的返回值”。
+输出 3 1；两种变量都能保存可调用对象。
 \end{example}
 
 在C++14和C++17中，lambda表达式增加了一些新的用法，使用这些新的特性可以简化代码，更加灵活地解决实际问题。
@@ -186,7 +185,7 @@ int& ref = var;
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/lambda-move-demo/reference.cpp}
 
 
-从本卷目录进入 \path{examples/lambda-move-demo}，保存的源码就是 \texttt{reference.cpp}。
+从本卷目录进入 \path{examples/lambda-move-demo}，源码保存在 \texttt{reference.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread reference.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
@@ -203,7 +202,7 @@ g++ -std=c++17 -Wall -Wextra -pthread reference.cpp -o /tmp/cpp-demo
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/lambda-move-demo/rvalue-reference.cpp}
 
 
-从本卷目录进入 \path{examples/lambda-move-demo}，保存的源码就是 \texttt{rvalue-reference.cpp}。
+从本卷目录进入 \path{examples/lambda-move-demo}，源码保存在 \texttt{rvalue-reference.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread rvalue-reference.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
@@ -216,9 +215,13 @@ c 从 10 变为 20，地址由本次运行决定；这个修改本身没有发�
 原因在于两点：一是这里直接用临时值初始化局部右值引用，临时对象的寿命被延长到了这个引用的作用域结束；
 二是\textbf{有名字的右值引用本身会被当作左值来使用}——既然有名字，就能取地址、能修改，用起来和普通左值引用没有区别。
 
-那右值引用存在的意义是什么？设想一个超级大的对象：传出函数时，我们希望把它的资源交给新对象，避免不必要的复制。实际返回还可能经过返回值优化，不能把所有返回都算成复制。
-右值引用让我们可以直接"接管"临时对象的内存，避免这次拷贝——具体能否转移、怎样转移，由类型的移动构造或移动赋值实现决定。仅仅绑定右值引用，并不会替你搬数据。
+那右值引用存在的意义是什么？设想一个超级大的对象：我们希望把它的资源交给新对象，旧对象可以不需要原来的资源，避免不必要的复制。
+右值引用让我们可以直接"接管"临时对象的内存，避免这次复制。
 这就是移动构造函数存在的理由，马上就能在下面的例子里看到。
+
+\begin{note}
+    具体能否转移、怎样转移，由类型的移动构造或移动赋值实现决定。仅仅绑定右值引用，并不会替你搬数据。
+\end{note}
 
 \Needspace{9\baselineskip}
 \begin{example}
@@ -226,14 +229,18 @@ c 从 10 变为 20，地址由本次运行决定；这个修改本身没有发�
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/lambda-move-demo/move-construction.cpp}
 
 
-从本卷目录进入 \path{examples/lambda-move-demo}，保存的源码就是 \texttt{move-construction.cpp}。
+从本卷目录进入 \path{examples/lambda-move-demo}，源码保存在 \texttt{move-construction.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread move-construction.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
 \end{tbash}
 对照上面的执行顺序检查构造、赋值和析构记录。
 \end{example}
-这时候回头看 a5 和 a6：a5 只是给 a1 多取了一个别名，没有调用移动构造；a6 才创建新对象并调用移动构造。移动后的字符串仍有效，但内容不保证一定为空，不要把某次输出当成固定规则。
+这时候回头看 a5 和 a6：a5 只是给 a1 多取了一个别名，没有调用移动构造；a6 才创建新对象并调用移动构造。移动后的原对象仍有效，依然合法，下来也可以正常使用。对于这里的字符串，假如移动后内容是空，那么获取size就一定是0，这代表合法。当然这里其实内容处于什么都有可能的情况，即使保持原来的值也是满足标准库的。
+
+\begin{note}
+标准库中有些对象的移动后结果是有明确定义的：对于unique\_ptr和shared\_ptr，移动后原对象变为nullptr，不能再通过它访问原来的对象。这些智能指针的移动构造我们在后续的章节中会详细介绍, 到时候可以更能体会到右值引用中的资源管理概念。
+\end{note}
 
 \textbf{移动语义：}
 首先了解一个std中的函数move，它的作用是将参数类型强制转换为右值，不管参数原来是左值还是右值。
@@ -243,7 +250,7 @@ g++ -std=c++17 -Wall -Wextra -pthread move-construction.cpp -o /tmp/cpp-demo
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/lambda-move-demo/move-overloads.cpp}
 
 
-从本卷目录进入 \path{examples/lambda-move-demo}，保存的源码就是 \texttt{move-overloads.cpp}。
+从本卷目录进入 \path{examples/lambda-move-demo}，源码保存在 \texttt{move-overloads.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread move-overloads.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
@@ -252,8 +259,8 @@ g++ -std=c++17 -Wall -Wextra -pthread move-overloads.cpp -o /tmp/cpp-demo
 \end{example}
 如代码所见，当我们使用std::move()时，编译器将左值转换为右值。
 
-再介绍一种利用模板实现完美转发的方式。在模板中，T\&\&可以接收左值和右值，要利用到forward<>()函数，它会保留引用的类型，并将其转发给另一个函数，
-因为有名字的参数 t 在函数体中是左值表达式，直接传 t 会选择左值重载。这里的 T 必须是被推导的模板参数；并非所有 T\&\& 都是转发引用。
+再介绍一种利用模板实现完美转发的方式。完美转发保留了值的类型。在模板中，T\&\&可以接收左值和右值，要利用到\texttt{forward<>()}函数，它会保留引用的类型，并将其转发给另一个函数，
+因为有名字的参数 t 在函数体中是左值表达式，直接传 t 会选择左值重载。这里的 T 必须是被推导的模板参数。
 
 \Needspace{9\baselineskip}
 \begin{example}
@@ -261,7 +268,7 @@ g++ -std=c++17 -Wall -Wextra -pthread move-overloads.cpp -o /tmp/cpp-demo
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/lambda-move-demo/forward.cpp}
 
 
-从本卷目录进入 \path{examples/lambda-move-demo}，保存的源码就是 \texttt{forward.cpp}。
+从本卷目录进入 \path{examples/lambda-move-demo}，源码保存在 \texttt{forward.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread forward.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo

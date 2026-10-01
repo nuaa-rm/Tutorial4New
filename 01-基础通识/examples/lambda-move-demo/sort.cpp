@@ -3,10 +3,10 @@
 #include<utility>
 
 template<class T>
-void sort(T* array,int n,std::function<bool(T&,T&)> compare){
+void sort(T* array,int n,std::function<bool(T&,T&)> less){ //升序排序
     for(int i=0;i<n;i++){
-        for(int j=i;j<n;j++){
-            if(!compare(array[i],array[j])){    //为false时，交换（按照指标降序）
+        for(int j=i+1;j<n;j++){
+            if(less(array[j],array[i])){
                 std::swap(array[i],array[j]);
             }
         }
@@ -27,7 +27,7 @@ int main() {
 
     Block blocks[5]={{'a',2},{'d',4},{'q',1},{'t',7},{'s',-1}};
     sort<Block>(blocks,5,[](Block& a1,Block& a2){//lambda表达式作为参数传递
-        return a1.id > a2.id;
+        return a1.id > a2.id; //在本应传入小于关系用来升序排序的函数传入大于关系，用来降序排序
     });
     for(int i=0;i<5;i++){
         std::cout << "ch:" << blocks[i].ch << "  id:" << blocks[i].id << std::endl;
