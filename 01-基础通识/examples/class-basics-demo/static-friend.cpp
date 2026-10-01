@@ -24,6 +24,9 @@ int main() {
     ClassName obj1, obj2;
     std::cout << obj1.dataMember << std::endl;  //输出10
     std::cout << obj2.dataMember << std::endl;  //还是10，两个对象共享同一份
+    obj1.dataMember = 20;                        //修改静态数据成员
+    std::cout << obj1.dataMember << std::endl;  //输出20
+    std::cout << obj2.dataMember << std::endl;  //obj2也输出20，说明静态数据成员被类的所有对象共享
     FriendFunction(obj1);
     return 0;
 }

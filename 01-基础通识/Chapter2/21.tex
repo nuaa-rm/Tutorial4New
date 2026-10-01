@@ -9,7 +9,7 @@
 类可以包含数据成员、成员函数、构造函数、析构函数等，其中能从外部访问的成员构成了类的接口，私有成员则留给类自己管理。
 类可以派生出新的类，从而实现代码的重用和扩展。
 
-类的语法看起来零碎，我们先用小程序把成员声明、创建对象和调用连起来。项目放在 \path{examples/class-basics-demo}，文件组成如下。每个 cpp 都有自己的 main，分别编译；不要把它们拼成一个文件。
+类的语法看起来零碎，我们先用一些小程序把成员声明、创建对象和调用连起来讲解。项目放在 \path{examples/class-basics-demo}，文件组成如下。每个 cpp 都有自己的 main，所以需要分开编译。
 \begin{lstlisting}[language={}]
 class-basics-demo/
   README.md
@@ -19,24 +19,26 @@ class-basics-demo/
   designated.cpp
   function-template.cpp
   inheritance.cpp
+  move-constructor.cpp
   operators.cpp
   overload.cpp
   skeleton.cpp
   static-friend.cpp
 \end{lstlisting}
-编译命令里，-std 指定 C++ 标准，-Wall/-Wextra 打开常用警告，-pthread 配置线程编译与链接；-o 指定临时输出文件。先进入项目目录，后面的源码名按当前示例替换。
 
 \Needspace{9\baselineskip}
 \begin{example}
-类的基本结构（先认识成员，再创建对象调用）：
+类的基本结构：
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/class-basics-demo/skeleton.cpp}
 
-从本卷目录进入 \path{examples/class-basics-demo}，保存的源码就是 \texttt{skeleton.cpp}。
+从本卷目录进入 \path{examples/class-basics-demo}，源码保存在 \texttt{skeleton.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread skeleton.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
 \end{tbash}
-这里输出 1，说明对象已经构造，公有成员函数可以使用私有数据。
+这里的编译命令里，-std 指定 C++ 标准，-Wall/-Wextra 表示打开常用警告，-pthread 表示配置线程编译与链接；-o 指定输出文件。
+
+这个程序的预期输出是 1，说明对象已经构造，公有成员函数可以使用私有数据。
 \end{example}
 
 \begin{enumerate}
@@ -50,9 +52,9 @@ g++ -std=c++17 -Wall -Wextra -pthread skeleton.cpp -o /tmp/cpp-demo
         \toprule[1.5pt]
         修饰限定符 & 作用 \\
         \midrule[1pt]
-        private & 该类的成员和友元可以访问 \\
-        public & 可以被类外的其他函数或派生类中函数调用 \\
-        protected & 该类的成员、友元与派生类按规则访问 \\
+        private & 只能被类的成员和友元可访问，无关乎成员在相同还是不同实例 \\
+        public & 可以在任意位置访问 \\
+        protected & 只能被该类的成员和友元或者派生自该类的任何类的成员和友元所访问\\
         \bottomrule[1.5pt]
     \end{tabular}
 \end{center}
@@ -77,12 +79,12 @@ g++ -std=c++17 -Wall -Wextra -pthread skeleton.cpp -o /tmp/cpp-demo
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/class-basics-demo/designated.cpp}
 
 
-从本卷目录进入 \path{examples/class-basics-demo}，保存的源码就是 \texttt{designated.cpp}。
+从本卷目录进入 \path{examples/class-basics-demo}，源码保存在 \texttt{designated.cpp}。
 \begin{tbash}
 g++ -std=c++20 -Wall -Wextra -pthread designated.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
 \end{tbash}
-这里输出 1 3。把 .a、.b 的顺序调换后，C++20 编译应失败，名字不能替代顺序规则。
+这个程序的预期输出是 1 3。把 .a、.b 的顺序调换后，编译会失败。
 \end{example}
 
 \begin{exercise}\label{ex:v1-cpp-point}
@@ -109,22 +111,22 @@ g++ -std=c++20 -Wall -Wextra -pthread designated.cpp -o /tmp/cpp-demo
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/class-basics-demo/static-friend.cpp}
 
 
-从本卷目录进入 \path{examples/class-basics-demo}，保存的源码就是 \texttt{static-friend.cpp}。
+从本卷目录进入 \path{examples/class-basics-demo}，源码保存在 \texttt{static-friend.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread static-friend.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
 \end{tbash}
-两行都是 10，最后友元读到 42；两个对象访问的是同一份静态数据。
+两行都是 10, 下来两行都是 20，最后友元读到 42；两个对象访问的是同一份静态数据。
 \end{example}
 
 \begin{note}
 友元函数不属于类，但它是类主动授予的访问接口，流插入运算符就经常这样写。
-这就像给需要帮忙的人配一把钥匙：有明确用途可以给，不要为了省事把所有函数都声明成友元。
+这就像给需要帮忙的人配一把钥匙：有明确用途可以给，不要为了省事把所有函数都声明成友元，如果你的代码里有特别多的友元函数，一般说明你的代码设计上存在问题。
 \end{note}
 
 \begin{exercise}\label{ex:v1-cpp-count}
 
-为 \texttt{Point} 类添加一个静态数据成员 \texttt{count}，在构造函数中令其加一、析构函数中令其减一，
+为练习\ref{ex:v1-cpp-point}中的 \texttt{Point} 类添加一个静态数据成员 \texttt{count}，在构造函数中令其加一、析构函数中令其减一，
 在 \texttt{main} 中分不同作用域创建若干对象，打印 \texttt{count} 观察对象数量的变化。再在 static-friend.cpp 中调用静态成员函数，说明它为什么没有 this；指出 FriendFunction 访问私有成员的授权来自哪里。
 \end{exercise}
 
@@ -144,7 +146,7 @@ g++ -std=c++17 -Wall -Wextra -pthread static-friend.cpp -o /tmp/cpp-demo
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/class-basics-demo/overload.cpp}
 
 
-从本卷目录进入 \path{examples/class-basics-demo}，保存的源码就是 \texttt{overload.cpp}。
+从本卷目录进入 \path{examples/class-basics-demo}，源码保存在 \texttt{overload.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread overload.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
@@ -171,36 +173,40 @@ g++ -std=c++17 -Wall -Wextra -pthread overload.cpp -o /tmp/cpp-demo
 \begin{enumerate}
     \item 默认构造：默认构造函数是指可以不提供实参就调用的构造函数（没有参数，或所有参数都有默认值），它会创建一个对象，并对其进行初始化。
     \item 含参构造：含参构造函数是指有参数的构造函数，可以根据参数的值对对象进行初始化。
-    \item 拷贝构造：拷贝构造函数是指将一个对象拷贝到另一个对象时，会调用拷贝构造函数。
+    \item 复制构造：又称拷贝构造，复制构造函数是提供一个相同类类型实参就能调用，并且在不修改实参的情况下复制该实参的内容的构造函数。它的典型参数是 \texttt{const ClassName\&}（左值引用）。
+    \item 移动构造：用一个即将不再使用的对象初始化新对象时，可以通过移动构造函数接收其资源，避免不必要的复制。它的典型参数是 \texttt{ClassName\&\&}（右值引用）。
 \end{enumerate}
 
 \Needspace{9\baselineskip}
 \begin{example}
-三种构造函数的调用时机，注意每一次的输出：
+四种构造函数的调用时机，注意每一次的输出：
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/class-basics-demo/constructors.cpp}
 
 
-从本卷目录进入 \path{examples/class-basics-demo}，保存的源码就是 \texttt{constructors.cpp}。
+从本卷目录进入 \path{examples/class-basics-demo}，源码保存在 \texttt{constructors.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread constructors.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
 \end{tbash}
-依次看到默认、含参、拷贝构造的提示；最后三个 member 分别为 10、2、10。
+依次看到默认、含参、复制、移动构造的提示；类内成员的值分别是 “Default”、“Modified”、“Hello World”、“Modified”、“Modified”、空（最后一项只能说可能是空）。
 \end{example}
+
+如果原对象后面还要保持原值，就像上面的 \texttt{obj3(obj1)} 一样使用复制；如果允许新对象接收其资源，可以考虑移动。\texttt{std::move} 本身只改变表达式的值类别，不会直接搬走数据；右值引用和移动语义将在下一节展开。
 
 有一些tips可以快速设置构造函数：
 \begin{tcode}
 ClassName() = default;              //默认构造函数,使用默认的方式
-ClassName(const ClassName& obj) = delete; //禁止拷贝，不等于实现了单例
+ClassName(const ClassName& obj) = delete; //禁止使用复制构造
 \end{tcode}
 
+\Needspace{6\baselineskip}
 \begin{exercise}
 \label{ex:v1-cpp-constructors}
-在 constructors.cpp 中依次执行构造新对象、拷贝构造新对象，并解释它们与给已有对象赋值的区别。把拷贝构造设为 delete，再只编译，指出哪一行不能继续使用；不要把“不允许拷贝”解释成“只能创建一个对象”。
+在 constructors.cpp 中依次执行构造新对象、复制构造新对象，并解释它们与给已有对象赋值的区别。把复制构造设为 delete，再只编译，指出哪一行不能继续使用；注意不要把“不允许复制”当成“只能创建一个对象”。
 \end{exercise}
 
 \begin{conclusion}
-先分清“创建新对象”与“给已有对象赋值”：构造和拷贝构造做前者，赋值运算符做后者。重载靠参数区分，默认构造是可以无实参调用；delete 禁止的是指定操作，不是限制对象数量。静态成员属于类，this 指向具体对象，友元则来自类的主动授权。
+先分清“创建新对象”与“给已有对象赋值”：默认、含参、复制和移动构造做前者，赋值运算符做后者。移动构造可以接收即将不再使用的对象的资源，但 \texttt{std::move} 本身不搬数据，移动后不要假定原值。重载靠参数区分，默认构造是可以无实参就调用的构造函数；delete 禁止的是指定操作，不是限制对象数量。静态成员属于类，友元则来自类的主动授权。
 \end{conclusion}
 
 \subsubsection{运算符重载与 this 指针}
@@ -220,12 +226,12 @@ ClassName(const ClassName& obj) = delete; //禁止拷贝，不等于实现了单
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/class-basics-demo/operators.cpp}
 
 
-从本卷目录进入 \path{examples/class-basics-demo}，保存的源码就是 \texttt{operators.cpp}。
+从本卷目录进入 \path{examples/class-basics-demo}，源码保存在 \texttt{operators.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread operators.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
 \end{tbash}
-输出 a:2 b:4；加法返回新对象，obj1 本身仍为 1、2。
+预期输出 a:2 b:4；加法返回新对象，obj1 本身仍为 1、2。
 \end{example}
 
 \textbf{\texttt{this}指针}是一个隐式指针，指向当前调用成员函数的对象，不是指向类这个类型。
@@ -234,7 +240,7 @@ g++ -std=c++17 -Wall -Wextra -pthread operators.cpp -o /tmp/cpp-demo
 
 \begin{exercise}\label{ex:v1-cpp-operators}
 
-为 \texttt{Point} 类重载 \texttt{+} 运算符（对应坐标相加）和 \texttt{<<} 运算符（以 \texttt{(x, y)} 格式输出），
+为练习\ref{ex:v1-cpp-point}中的 \texttt{Point} 类重载 \texttt{+} 运算符（对应坐标相加）和 \texttt{<<} 运算符（以 \texttt{(x, y)} 格式输出），
 在 \texttt{main} 中验证 \texttt{Point(1,2) + Point(3,4)} 的输出。
 \end{exercise}
 
@@ -245,10 +251,10 @@ g++ -std=c++17 -Wall -Wextra -pthread operators.cpp -o /tmp/cpp-demo
     \centering
     \includegraphics[width=0.7\textwidth]{inheritance_revised.pdf}
     \caption{类的继承} % 图片标题
-    \label{fig:A111} % 图片标签，用于引用
+    \label{fig:inheritance} % 图片标签，用于引用
 \end{figure}
 
-如图\ref{fig:A111}所示，派生类从基类中继承了数据成员和成员函数，并可以添加新的成员。
+如图\ref{fig:inheritance}所示，派生类从基类中继承了数据成员和成员函数，并可以添加新的成员。
 派生类可以重写基类中的成员虚函数，从而实现新的功能。
 派生类可以重载基类中的运算符，从而实现新的运算。
 
@@ -258,10 +264,10 @@ g++ -std=c++17 -Wall -Wextra -pthread operators.cpp -o /tmp/cpp-demo
 \begin{center}
     \begin{tabular}{cccc}
         \toprule[1.5pt]
-        访问位置 & public 成员 & private 成员 & protected 成员 \\
+        访问位置 & public 成员 & protected 成员 & private 成员\\
         \midrule[1pt]
         同一个类 & yes & yes & yes \\
-        派生类 & yes & no & yes \\
+        派生类 & yes & yes & no \\
         类外部 & yes & no & no \\
         \bottomrule[1.5pt]
     \end{tabular}
@@ -275,12 +281,12 @@ g++ -std=c++17 -Wall -Wextra -pthread operators.cpp -o /tmp/cpp-demo
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/class-basics-demo/inheritance.cpp}
 
 
-从本卷目录进入 \path{examples/class-basics-demo}，保存的源码就是 \texttt{inheritance.cpp}。
+从本卷目录进入 \path{examples/class-basics-demo}，源码保存在 \texttt{inheritance.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread inheritance.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
 \end{tbash}
-先看到基类、再看到派生类的构造提示；下一道练习会通过基类指针调用面积函数。
+这里我们只输出基类、再看到派生类的构造提示。调用的面积函数的变化留作下一道练习。
 \end{example}
 
 \begin{note}
@@ -298,8 +304,11 @@ g++ -std=c++17 -Wall -Wextra -pthread inheritance.cpp -o /tmp/cpp-demo
 \begin{itemize}
 \item 重载 overload：同一作用域内的同名函数，参数列表不同，编译期由编译器选择版本，与继承无关；
 \item 重写 override：派生类重新实现基类的 \texttt{virtual} 函数，函数签名必须相同，通过基类指针或引用调用时，根据对象实际类型决定调用哪个版本（多态），建议显式标注 \texttt{override} 让编译器帮忙检查；
-\item 纯虚函数 \texttt{= 0}：基类只给接口不给实现，仍有纯虚函数没有最终实现的类是抽象类，不能实例化。纯虚函数也能在类外提供定义，这里先只把它作为接口使用。
 \end{itemize}
+\end{conclusion}
+
+\begin{conclusion}
+纯虚函数 \texttt{= 0}：基类只给接口不给实现，仍有纯虚函数没有最终实现的类是抽象类，不能实例化。
 \end{conclusion}
 
 \begin{exercise}\label{ex:v1-cpp-inheritance}
@@ -332,7 +341,7 @@ T function(T a){
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/class-basics-demo/function-template.cpp}
 
 
-从本卷目录进入 \path{examples/class-basics-demo}，保存的源码就是 \texttt{function-template.cpp}。
+从本卷目录进入 \path{examples/class-basics-demo}，源码保存在 \texttt{function-template.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread function-template.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
@@ -344,7 +353,7 @@ g++ -std=c++17 -Wall -Wextra -pthread function-template.cpp -o /tmp/cpp-demo
 \begin{enumerate}
     \item 代码重用性高：可以定义一个通用的函数，然后根据需要实例化不同的类型，实现代码的重用。
     \item 类型安全：不符合类型要求的用法通常能在编译时发现，而不是等运行时猜数据是什么。
-    \item 效率高：编译器可以针对具体类型优化；实际速度仍要看算法与使用方式。
+    \item 效率高：编译器可以针对具体类型优化。
 \end{enumerate}
 
 \textbf{类模板}：
@@ -357,7 +366,7 @@ g++ -std=c++17 -Wall -Wextra -pthread function-template.cpp -o /tmp/cpp-demo
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/class-basics-demo/class-template.cpp}
 
 
-从本卷目录进入 \path{examples/class-basics-demo}，保存的源码就是 \texttt{class-template.cpp}。
+从本卷目录进入 \path{examples/class-basics-demo}，源码保存在 \texttt{class-template.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread class-template.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
@@ -373,7 +382,7 @@ g++ -std=c++17 -Wall -Wextra -pthread class-template.cpp -o /tmp/cpp-demo
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/class-basics-demo/constant-template.cpp}
 
 
-从本卷目录进入 \path{examples/class-basics-demo}，保存的源码就是 \texttt{constant-template.cpp}。
+从本卷目录进入 \path{examples/class-basics-demo}，源码保存在 \texttt{constant-template.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread constant-template.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
@@ -404,11 +413,11 @@ g++ -std=c++17 -Wall -Wextra -pthread constant-template.cpp -o /tmp/cpp-demo
 \begin{note}
 对变参模板感兴趣的同学可以自行探讨：
 
-\url{https://blog.csdn.net/fl2011sx/article/details/128077440}
+\url{https://zh.cppreference.com/cpp/language/pack}
 \end{note}
 
 \begin{exercise}\label{ex:v1-cpp-template}
 
 编写函数模板 \texttt{myMax}，返回两个同类型参数中较大的一个，分别用 \texttt{int}、\texttt{double} 测试，
-并尝试用 \texttt{myMax(1, 2.5)} 调用，观察编译器的报错信息，思考为什么。再运行 class-template.cpp 与 constant-template.cpp，分别指出类型参数与非类型参数；不能把运行时读入的整数直接当成编译期 N。
+并尝试用 \texttt{myMax(1, 2.5)} 调用，观察编译器的报错信息，思考为什么。再运行 class-template.cpp 与 constant-template.cpp，分别指出类型参数与非类型参数。
 \end{exercise}

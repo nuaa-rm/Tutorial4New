@@ -621,7 +621,7 @@ int main() {
 \begin{solution}
 例如调用 CalSum(2,3) 与 CalSum(2.5,3.5)，分别得到整数 5 与 double 的 6。只改变返回类型而保持相同参数列表，声明冲突；并不是等接收结果时再选择版本。
 \end{solution}
-\paragraph*{随堂练习 \ref{ex:v1-cpp-constructors}：构造、拷贝与赋值}
+\paragraph*{随堂练习 \ref{ex:v1-cpp-constructors}：构造、拷贝、移动与赋值}
 \begin{solution}
 原例 obj1 是默认构造，obj2 是含参构造，obj3 是拷贝构造。给已存在的 obj1.member 赋值不会重新构造 obj1。若给已有对象写 obj2=obj1，会调用赋值运算符。删除拷贝构造后 obj3(obj1) 编译失败，但仍可以分别构造多个对象。
 \end{solution}
