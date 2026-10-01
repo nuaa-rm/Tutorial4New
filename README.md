@@ -6,7 +6,7 @@
 
 ![三卷教材封面](assets/covers/series-preview.png)
 
-**快速入口：** [三卷内容](#三卷内容) · [怎样开始学习](#怎样开始学习) · [编译 PDF](#编译-pdf) · [随书示例](#随书示例) · [当前进度](#当前进度) · [后续 TODO](#后续-todo) · [参与维护](#参与维护)
+**快速入口：** [三卷内容](#三卷内容) · [怎样开始学习](#怎样开始学习) · [编译 PDF](#编译-pdf) · [一键导出三卷](#一键编译并导出三卷) · [随书示例](#随书示例) · [当前进度](#当前进度) · [后续 TODO](#后续-todo) · [参与维护](#参与维护)
 
 ## 三卷内容
 
@@ -96,12 +96,59 @@ latexmk -xelatex -interaction=nonstopmode -halt-on-error main.tex
 
 根目录的 `main.tex` 是旧合订本的提示入口。三卷分别编译，各卷的 PDF 和 LaTeX 中间文件按 [.gitignore](.gitignore) 的规则保留在本地。
 
+### 一键编译并导出三卷
+
+安装 Python 3 和上述 XeLaTeX 环境后，在仓库根目录运行：
+
+```bash
+python3 scripts/export_volumes.py
+```
+
+[导出脚本](scripts/export_volumes.py) 会逐卷编译至少两次，直到目录和交叉引用稳定，再把 PDF 按卷目录名命名，并完整复制各卷的 `examples/`。结果如下：
+
+```text
+导出/
+├── 01-基础通识/
+│   ├── 01-基础通识.pdf
+│   └── examples/
+├── 02-专项技术栈/
+│   ├── 02-专项技术栈.pdf
+│   └── examples/
+└── 03-RM视觉概述/
+    ├── 03-RM视觉概述.pdf
+    └── examples/
+```
+
+修改教材后，重新编译并替换已有导出结果：
+
+```bash
+python3 scripts/export_volumes.py --overwrite
+```
+
+这会替换三个旧卷目录，包括其中的 `examples/`，请把自己的练习改动保存在其他位置。省略 `--overwrite` 时，遇到已有卷目录会提示错误并停止。
+
+指定其他导出位置：
+
+```bash
+python3 scripts/export_volumes.py --output "$HOME/Downloads/教材导出"
+# 同一位置已有导出结果时，加上 --overwrite
+python3 scripts/export_volumes.py --output "$HOME/Downloads/教材导出" --overwrite
+```
+
+相对路径以当前工作目录为准。脚本可以从任意工作目录通过其完整路径调用，默认仍导出到本仓库的 `导出/`。导出目录不能与三卷源目录重叠。
+
+看到终端打印“导出完成”后，可将整个 `导出/` 文件夹分享给读者，或分别分享某一卷的文件夹。每卷 PDF 和 `examples/` 应一起保留；运行示例所需的软件依赖和操作步骤，见各示例目录中的 README。
+
+编译中间文件在临时目录中生成，结束后自动清理；任意一卷编译或复制失败时，不替换已有导出结果，终端会显示错误。`导出/` 已加入 Git 忽略规则。
+
 | 遇到的问题 | 先检查什么 |
 | --- | --- |
 | 找不到宏包、字体或 `.cls` | TeX 环境是否完整，仓库的共享模板和字体是否保留；先处理日志中的第一个错误 |
 | 找不到图片或相对路径 | 是否在对应卷目录编译，图片是否位于本卷 `images/` 或正文指定的位置 |
 | 卷二、卷三找不到 ElegantBook | 本卷 `elegantbook.cls` 是指向共享模板的符号链接，检查下载或复制时是否保留链接 |
 | 目录或引用显示旧内容 / `??` | 确认本次编译成功，再重新编译；仍未消除时检查标签和引用 |
+| 导出脚本提示卷目录已存在 | 确认旧导出目录中没有需要保留的练习改动，再加 `--overwrite`；也可以换一个 `--output` 位置 |
+| 导出脚本提示找不到 `xelatex` | 确认已安装 XeLaTeX，且当前终端能运行 `xelatex --version` |
 
 ## 随书示例
 
@@ -148,6 +195,9 @@ Tutorial4New/
 ├── fonts/                       # 项目字体
 ├── assets/covers/               # 封面插画、预览与复用说明
 ├── docs/revision/               # 全书及逐章修订记录、运行证据
+├── scripts/
+│   └── export_volumes.py        # 一键编译三卷并复制随书示例
+├── 导出/                        # 脚本生成的三卷分享目录，Git 忽略
 └── .agents/skills/textbook-chapter/
     └── SKILL.md                 # 章节编写与验收规范
 ```

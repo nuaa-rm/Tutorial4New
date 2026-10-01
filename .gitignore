@@ -40,6 +40,8 @@ main.pdf
 
 # Local scratch / clones
 _refs/
+导出/
+.textbook-export-*/
 
 # 不上传：旧合订本归档、参考文献大附件
 _legacy/
