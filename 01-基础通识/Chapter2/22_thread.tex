@@ -10,7 +10,7 @@
     \item \textbf{非阻塞尝试}：线程先尝试获取资源，失败后立即返回或执行其他工作。原子操作和 \texttt{try\_lock} 常用于这种场景。
 \end{itemize}
 
-如果多个线程同时读写同一对象，且至少有一个线程写入，却没有合适的同步，就会产生数据竞争（data race）。在 C++ 中，数据竞争会导致未定义行为，不能简单理解为“结果偶尔不准”。
+如果多个线程同时读写同一对象，且至少有一个线程写入，却没有合适的同步，就会产生数据竞争（data race）。在 C++ 中，数据竞争会导致未定义行为，不仅仅是“结果偶尔不准”。
 
 \begin{conclusion}
 并发程序的基本思路可以概括为：独立的工作并行执行，共享的数据明确保护，线程的启动、等待和退出形成完整闭环。后文将依次介绍互斥锁、共享锁、原子变量、条件变量和异步结果传递。
@@ -25,7 +25,7 @@ std::thread 线程对象(可调用对象, 参数...);
 
 参数按值复制或移动到新线程。需要在线程中修改原对象时，应显式使用 \texttt{std::ref} 传递引用。
 
-线程一多，输出先后就不一定了。我们先从两个线程开始，再逐步把共享数据、等待和退出安排清楚。项目放在 \path{examples/thread-coordination-demo}，文件组成如下。每个 cpp 都有自己的 main，分别编译；不要把它们拼成一个文件。
+线程一多，输出先后就不一定了。我们先从两个线程开始，再逐步把共享数据、等待和退出安排清楚。项目放在 \path{examples/thread-coordination-demo}，文件组成如下。
 \begin{lstlisting}[language={}]
 thread-coordination-demo/
   README.md
@@ -42,7 +42,6 @@ thread-coordination-demo/
   readers-writers.cpp
   shared-lock.cpp
 \end{lstlisting}
-编译命令里，-std 指定 C++ 标准，-Wall/-Wextra 打开常用警告，-pthread 配置线程编译与链接；-o 指定临时输出文件。先进入项目目录，后面的源码名按当前示例替换。
 
 \Needspace{9\baselineskip}
 \begin{example}
@@ -50,7 +49,7 @@ thread-coordination-demo/
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/thread-coordination-demo/lifecycle.cpp}
 
 
-从本卷目录进入 \path{examples/thread-coordination-demo}，保存的源码就是 \texttt{lifecycle.cpp}。
+从本卷目录进入 \path{examples/thread-coordination-demo}，源码保存在 \texttt{lifecycle.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread lifecycle.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
@@ -58,7 +57,7 @@ g++ -std=c++17 -Wall -Wextra -pthread lifecycle.cpp -o /tmp/cpp-demo
 first 按序打印 1 2 3，等待两个线程结束后输出 value = 1。
 \end{example}
 
-\texttt{join()} 会阻塞当前线程，直到目标线程结束；\texttt{detach()} 会把线程与 \texttt{std::thread} 对象分离。分离后的线程仍可能访问原来的数据，因此初学阶段应优先使用 \texttt{join()}。
+\texttt{join()} 会阻塞当前线程，直到目标线程结束；\texttt{detach()} 会把线程与 \texttt{std::thread} 对象分离。
 
 \begin{note}
 \texttt{std::thread} 对象析构时，如果仍然处于可连接状态，程序会调用 \texttt{std::terminate()}。每个线程都必须明确 \texttt{join()} 或 \texttt{detach()}；还要避免在线程函数中引用已经销毁的局部变量。
@@ -80,7 +79,7 @@ first 按序打印 1 2 3，等待两个线程结束后输出 value = 1。
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/thread-coordination-demo/mutex.cpp}
 
 
-从本卷目录进入 \path{examples/thread-coordination-demo}，保存的源码就是 \texttt{mutex.cpp}。
+从本卷目录进入 \path{examples/thread-coordination-demo}，源码保存在 \texttt{mutex.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread mutex.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
@@ -88,7 +87,9 @@ g++ -std=c++17 -Wall -Wextra -pthread mutex.cpp -o /tmp/cpp-demo
 输出 200000，两个线程的整个自增操作都在锁内。
 \end{example}
 
-\texttt{std::lock\_guard} 是 RAII（资源获取即初始化）锁。构造时加锁，离开作用域时自动解锁，即使临界区中途抛出异常也能释放锁。RAII 的英文是 Resource Acquisition Is Initialization，后面的智能资源管理也用同样的思路。需要手动解锁、延迟加锁或转移锁所有权时，可以使用 \texttt{std::unique\_lock}。
+\texttt{std::lock\_guard} 是 RAII\footnote{
+    RAII 是 Resource Acquisition Is Initialization 的缩写，意为“资源获取即初始化”，是一种 C++ 编程习惯。它的核心思想是：把资源的获取和释放绑定到对象的生命周期上，构造时获取资源，析构时释放资源，从而避免忘记释放资源或异常导致的泄漏。
+}锁。构造时加锁，离开作用域时自动解锁，即使临界区中途抛出异常也能释放锁。需要手动解锁、延迟加锁或转移锁所有权时，可以使用 \texttt{std::unique\_lock}。
 
 \begin{tcode}
 std::unique_lock<std::mutex> lock(mtx);  // 默认立即加锁
@@ -123,22 +124,18 @@ lock.lock();                             // 也可以再次加锁
 
 多个读者可以并行读取；只要有一个写者进入，其他读者和写者都必须等待。共享锁只能保护“读操作确实不会修改数据”的代码。
 
-\begin{note}
-\texttt{std::shared\_mutex} 和 \texttt{std::scoped\_lock} 需要 C++17 或更新的标准。编译示例时可使用 \texttt{g++ -std=c++17}；如果项目仍使用 C++11，应先用普通 \texttt{std::mutex} 实现等价逻辑。
-\end{note}
-
 \Needspace{35\baselineskip}
 \begin{example}
 用共享锁保护读多写少的配置表：
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/thread-coordination-demo/shared-lock.cpp}
 
 
-从本卷目录进入 \path{examples/thread-coordination-demo}，保存的源码就是 \texttt{shared-lock.cpp}。
+从本卷目录进入 \path{examples/thread-coordination-demo}，源码保存在 \texttt{shared-lock.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread shared-lock.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
 \end{tbash}
-读者可能读到 10 或 12，写入与读取不会同时进入；多次流插入仍可能交错，输出次序不是锁相容性的证据。
+读者可能读到 10 或 12。
 \end{example}
 
 \begin{conclusion}
@@ -158,7 +155,7 @@ g++ -std=c++17 -Wall -Wextra -pthread shared-lock.cpp -o /tmp/cpp-demo
 \subsubsection{原子变量}
 原子变量（atomic variable）适合表示一个简单的共享状态，例如计数器、标志位或索引。\texttt{std::atomic<T>} 保证对该对象的单次读写或指定的原子操作不会被其他线程看到“做到一半”的状态。
 
-原子变量不是“万能同步工具”。两个原子变量之间的联合不变量仍可能被其他线程观察到中间状态；一组复杂数据结构也不能仅靠把某个整数改成原子类型来保护。
+原子变量不是“万能同步工具”。两个原子变量之间的联合不变量\footnote{联合不变量是指多个变量之间需要共同满足的条件，例如两个变量的和始终保持为10}仍可能被其他线程观察到中间状态；一组复杂数据结构也不能仅靠把某个整数改成原子类型来保护。
 
 \Needspace{9\baselineskip}
 \begin{example}
@@ -166,12 +163,12 @@ g++ -std=c++17 -Wall -Wextra -pthread shared-lock.cpp -o /tmp/cpp-demo
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/thread-coordination-demo/atomic.cpp}
 
 
-从本卷目录进入 \path{examples/thread-coordination-demo}，保存的源码就是 \texttt{atomic.cpp}。
+从本卷目录进入 \path{examples/thread-coordination-demo}，源码保存在 \texttt{atomic.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread atomic.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
 \end{tbash}
-看到停止提示与 counter = 200000；yield 是轮询让步，不等于条件变量的休眠等待。
+看到停止提示与 counter = 200000；yield 是轮询让步，表示向调度器请求让出 CPU。
 \end{example}
 
 常用操作包括 \texttt{load()}、\texttt{store()}、\texttt{fetch\_add()} 和 \texttt{exchange()}。直接使用自增运算符也可以执行原子自增。若需要多个共享对象保持整体一致，应回到互斥锁或更高层的并发结构。
@@ -185,14 +182,10 @@ g++ -std=c++17 -Wall -Wextra -pthread atomic.cpp -o /tmp/cpp-demo
 使用 \texttt{std::atomic<int>} 实现一个线程安全的任务编号分配器，让四个线程各领取 100 个不重复编号，并验证最终编号数量。
 \end{exercise}
 
-\begin{conclusion}
-原子变量和条件变量解决的是两类不同的问题：原子变量适合完成一个简单状态的无竞争读写；条件变量适合让线程在\textbf{某个受锁保护的条件}不成立时休眠等待。原子变量不会自动把线程挂起，条件变量也不能代替锁来保护复杂数据。
-\end{conclusion}
-
 \subsubsection{条件变量}
 条件变量（condition variable）解决的问题是：线程需要等待某个共享状态成立，但又不应该一直轮询占用 CPU。例如，消费者要等待队列非空，工作线程要等待“停止”或“有新任务”。
 
-条件变量必须和互斥锁、共享状态一起使用。等待流程是：先获得锁，调用带谓词的 \texttt{wait}；被唤醒后重新检查谓词，条件满足才继续执行。
+条件变量必须和互斥锁、共享状态一起使用。等待流程是：先获得锁，调用带谓词\footnote{谓词是返回布尔值的函数或 lambda 表达式}的 \texttt{wait}；被唤醒后重新检查谓词，条件满足才继续执行。
 
 \begin{tcode}
 std::condition_variable cv;
@@ -206,7 +199,11 @@ cv.notify_one();       // 唤醒一个等待线程
 cv.notify_all();       // 唤醒所有等待线程
 \end{tcode}
 
-\texttt{wait} 在等待期间会暂时释放互斥锁，被唤醒后重新加锁再返回。必须使用谓词版本，因为可能出现虚假唤醒，而且其他线程被唤醒后可能已经先一步改变了共享状态。
+\texttt{wait} 在等待期间会暂时释放互斥锁，被唤醒后重新加锁再返回。必须使用谓词版本，因为可能出现虚假唤醒\footnote{条件没满足进程却醒来}，而且其他线程被唤醒后可能已经先一步改变了共享状态。
+
+\begin{conclusion}
+原子变量和条件变量解决的是两类不同的问题：原子变量适合完成一个简单状态的无竞争读写；条件变量适合让线程在\textbf{某个受锁保护的条件}不成立时休眠等待。原子变量不会自动把线程挂起，条件变量也不能代替锁来保护复杂数据。
+\end{conclusion}
 
 \Needspace{9\baselineskip}
 \begin{example}
@@ -214,7 +211,7 @@ cv.notify_all();       // 唤醒所有等待线程
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/thread-coordination-demo/condition.cpp}
 
 
-从本卷目录进入 \path{examples/thread-coordination-demo}，保存的源码就是 \texttt{condition.cpp}。
+从本卷目录进入 \path{examples/thread-coordination-demo}，源码保存在 \texttt{condition.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread condition.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
@@ -240,7 +237,7 @@ g++ -std=c++17 -Wall -Wextra -pthread condition.cpp -o /tmp/cpp-demo
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/thread-coordination-demo/promise.cpp}
 
 
-从本卷目录进入 \path{examples/thread-coordination-demo}，保存的源码就是 \texttt{promise.cpp}。
+从本卷目录进入 \path{examples/thread-coordination-demo}，源码保存在 \texttt{promise.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread promise.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
@@ -256,7 +253,7 @@ g++ -std=c++17 -Wall -Wextra -pthread promise.cpp -o /tmp/cpp-demo
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/thread-coordination-demo/async.cpp}
 
 
-从本卷目录进入 \path{examples/thread-coordination-demo}，保存的源码就是 \texttt{async.cpp}。
+从本卷目录进入 \path{examples/thread-coordination-demo}，源码保存在 \texttt{async.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread async.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
@@ -284,7 +281,7 @@ g++ -std=c++17 -Wall -Wextra -pthread async.cpp -o /tmp/cpp-demo
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/thread-coordination-demo/pool.cpp}
 
 
-从本卷目录进入 \path{examples/thread-coordination-demo}，保存的源码就是 \texttt{pool.cpp}。
+从本卷目录进入 \path{examples/thread-coordination-demo}，源码保存在 \texttt{pool.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread pool.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
@@ -313,7 +310,7 @@ g++ -std=c++17 -Wall -Wextra -pthread pool.cpp -o /tmp/cpp-demo
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/thread-coordination-demo/bounded-queue.cpp}
 
 
-从本卷目录进入 \path{examples/thread-coordination-demo}，保存的源码就是 \texttt{bounded-queue.cpp}。
+从本卷目录进入 \path{examples/thread-coordination-demo}，源码保存在 \texttt{bounded-queue.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread bounded-queue.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
@@ -355,7 +352,7 @@ g++ -std=c++17 -Wall -Wextra -pthread readers-writers.cpp -o /tmp/cpp-demo
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/thread-coordination-demo/philosophers.cpp}
 
 
-从本卷目录进入 \path{examples/thread-coordination-demo}，保存的源码就是 \texttt{philosophers.cpp}。
+从本卷目录进入 \path{examples/thread-coordination-demo}，源码保存在 \texttt{philosophers.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread philosophers.cpp -o /tmp/cpp-demo
 /tmp/cpp-demo
@@ -382,15 +379,15 @@ g++ -std=c++17 -Wall -Wextra -pthread philosophers.cpp -o /tmp/cpp-demo
 \lstinputlisting[language=C++,numbers=left,numberstyle={\color{gray}\tiny}]{examples/thread-coordination-demo/deadlock.cpp}
 
 
-从本卷目录进入 \path{examples/thread-coordination-demo}，保存的源码就是 \texttt{deadlock.cpp}。
+从本卷目录进入 \path{examples/thread-coordination-demo}，源码保存在 \texttt{deadlock.cpp}。
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra -pthread deadlock.cpp -o /tmp/cpp-demo
 timeout 2s /tmp/cpp-demo
 \end{tbash}
-可能正常退出，也可能被 timeout 以状态 124 停止。没有卡死只说明本次没碰到那个交错顺序，不能证明正确。
+可能正常退出，也可能被 timeout 以状态 124 停止。
 \end{example}
 
-这是可能死锁的错误示范，只在独立练习程序中用 timeout 限时观察，不能把它放进实际工程。上例可能卡死：线程一持有 \texttt{first} 等待 \texttt{second}，线程二持有 \texttt{second} 等待 \texttt{first}。下面改用 \texttt{std::scoped\_lock}，由标准库执行避免死锁的多锁获取算法。它只处理这一组锁，不会自动消除程序里其他资源形成的等待环。
+这是可能死锁的错误示范：线程一持有 \texttt{first} 等待 \texttt{second}，线程二持有 \texttt{second} 等待 \texttt{first}。下面改用 \texttt{std::scoped\_lock}，由标准库执行避免死锁的多锁获取算法。
 
 \begin{tcode}
 void safe_update() {
@@ -423,7 +420,7 @@ void safe_update() {
 
 \begin{enumerate}
     \item 给线程安全队列增加两个消费者，验证每个数据只被一个消费者取出。
-    \item 写出哲学家进餐问题中的四个死锁条件，并指出 \texttt{std::scoped\_lock} 如何避免中间等待。
+    \item 写出四个死锁条件，并指出 \texttt{std::scoped\_lock} 如何避免中间等待。
     \item 构造一个“读者长期占用、写者迟迟不能进入”的场景，并思考如何改善写者饥饿。
 \end{enumerate}
 \end{exercise}
