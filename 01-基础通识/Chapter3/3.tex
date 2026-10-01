@@ -1,7 +1,7 @@
 上一章，我们写了不少 C++ 代码。这一章，一起看看这些代码怎样变成能运行的程序。
 先手动走一遍编译过程，再交给 CMake 管理。以后终端刷出一屏报错，你就能先判断卡在哪一步，不用一上来就怀疑人生。
 
-下面的命令按 Ubuntu 的 Bash 写法给出，Ubuntu 22.04 和 24.04 都能使用；本轮在 24.04 的 GCC 13、CMake 3.28 与 OpenCV 4.6 上验证。每个示例都会写清楚：在哪个目录操作、要建哪些文件、跑完应该看到什么。
+下面的命令按 Ubuntu 的 Bash 写法给出。每个示例都会写清楚：在哪个目录操作、要建哪些文件、跑完应该看到什么。
 打开终端，跟着做就行。
 
 这一章的完整文件已经放在本卷的 \path{examples/build-pipeline-demo}。你可以跟着正文从空目录写一遍，也可以先复制工程再对照文件。建议复制到练习目录后再改，别把教材里的原版和自己的实验混到一起。项目分成四步：先看编译产物，再配置单文件程序，接着把函数拆成库，最后接入 OpenCV。
@@ -60,17 +60,12 @@ C++ 从源文件到可执行文件，通常经历以下四步：
 \midrule[1pt]
 \texttt{\_\_FILE\_\_} & 当前源文件名。\\
 \texttt{\_\_LINE\_\_} & 当前源文件行号。\\
-\texttt{\_\_DATE\_\_}、\texttt{\_\_TIME\_\_} & 源文件被翻译时的日期与时间，不是程序运行时间。\\
+\texttt{\_\_DATE\_\_}、\texttt{\_\_TIME\_\_} & 源文件被翻译时的日期与时间。\\
 \texttt{\_\_cplusplus} & 使用的 C++ 标准版本值；C++17 对应 \texttt{201703L}。\\
 \texttt{\_\_func\_\_} & 函数体内可用的标准预定义变量，表示函数名；它不是宏。\\
 \bottomrule[1.5pt]
 \end{tabular}
 \end{center}
-
-\begin{note}
-\texttt{\_\_FUNCTION\_\_} 是常见编译器扩展，入门代码优先用 \texttt{\_\_func\_\_}。
-\texttt{\_\_STDC\_VERSION\_\_} 表示 C 语言标准版本，不是 C++ 编译器版本；查看 GCC 版本可运行 \texttt{g++ --version}。
-\end{note}
 
 \textbf{编译与汇编：检查代码，再生成机器指令}
 
@@ -132,9 +127,85 @@ g++ -c hello.s -o hello.o
 g++ hello.o -o hello
 ./hello
 \end{tbash}
-预期输出两行：\texttt{armor=3} 和 \texttt{function=main}。
-再用编辑器打开 \texttt{hello.ii}，搜索 \texttt{armor=}。你会看到这里的 \texttt{ARMOR\_ID} 已经变成了 \texttt{3}。
+
+相信你一眼就知道程序的输出：\texttt{armor=3} 和 \texttt{function=main}。但这不是我们的重点。接下来，不妨看看前面的几个文件里究竟发生了什么。
+
+先用编辑器打开 \texttt{hello.ii}，搜索 \texttt{armor=}。你会看到这里的 \texttt{ARMOR\_ID} 已经变成了 \texttt{3}。
 文件比原来长很多是正常的，头文件内容也被展开进来了。不用从第一页读到最后一页，我们只找刚才那一行。
+
+下来打开 \texttt{hello.s} 看一看。和刚才体积巨大的
+\texttt{hello.ii} 不同，这时文件中的内容已经不再是 C++ 代码，
+而是编译器生成的\textbf{汇编代码}。
+
+可以尝试搜索 \texttt{main}，你会找到 \texttt{main} 函数所对应的
+汇编代码；再搜索 \texttt{armor=}、\texttt{function=} 和
+\texttt{main}，还可以在数据区域附近找到程序中使用的一些字符串。
+
+这时你会发现，原来的 \texttt{ARMOR\_ID} 已经彻底消失了，
+而 C++ 中的一条条语句也已经被翻译成了汇编指令。
+也就是说，编译阶段所做的事情，并不只是简单地``改一种写法''，
+而是在把 C++ 这种高级语言逐渐翻译成更加接近处理器的形式。
+
+\texttt{hello.o} 就不太适合直接使用文本编辑器打开了，
+因为它已经是一个\textbf{二进制目标文件（object file）}。
+不过，这并不意味着它是一个完全无法观察的``黑盒''。
+我们仍然可以借助一些工具把它拆开看看：
+
+\begin{lstlisting}[language=bash]
+file hello.o
+nm -C hello.o | less
+strings hello.o | grep -E 'armor|function|main'
+objdump -d -C hello.o | less
+\end{lstlisting}
+
+其中，\texttt{file} 可以告诉我们这个文件究竟是什么类型；
+\texttt{nm} 可以查看目标文件中的\textbf{符号（symbol）}，
+例如 \texttt{main}，以及程序所引用的一些 C++ 标准库符号；
+\texttt{strings} 则会尝试从二进制文件中寻找可以打印的字符串，
+所以我们甚至可能再次找到 \texttt{armor=}、\texttt{function=}
+以及 \texttt{main}。
+
+而 \texttt{objdump} 则更加有趣：
+
+\begin{lstlisting}[language=bash]
+objdump -d -C hello.o | less
+\end{lstlisting}
+
+它可以把目标文件中的机器指令重新\textbf{反汇编}
+（disassemble）成人类相对容易阅读的汇编形式。
+
+需要注意的是，此时的 \texttt{hello.o} 仍然只是一个目标文件，
+还没有经历最后的\textbf{链接（link）}阶段。
+因此，它里面可能仍然存在一些尚未确定最终地址的外部符号。
+例如，对 C++ 标准库函数的调用，此时还不一定已经知道最终应该跳到
+内存中的哪个具体位置。
+
+最后，再来研究链接之后产生的 \texttt{hello}：
+
+\begin{lstlisting}[language=bash]
+file hello
+readelf -h hello
+nm -C hello | grep main
+strings hello | grep -E 'armor|function|main'
+objdump -d -C hello | less
+ldd hello
+\end{lstlisting}
+
+它同样是一个二进制文件，但已经和 \texttt{hello.o} 有了本质区别：
+\texttt{hello.o} 是等待参与链接的目标文件，而 \texttt{hello}
+已经是链接器生成的\textbf{可执行文件}。
+
+其中，\texttt{readelf -h} 可以查看 ELF 文件的文件头信息；
+\texttt{nm} 可以继续寻找其中的符号；
+\texttt{objdump} 可以观察最终生成的机器代码；
+而 \texttt{ldd} 则可以看看这个程序运行时还需要加载哪些动态库。
+
+到这里，我们就真正亲眼走完了一遍完整的编译流程。这四个阶段并不是四个彼此孤立的步骤。
+从 \texttt{hello.cpp} 到 \texttt{hello}，
+我们实际上是在观察同一份程序如何一步一步从
+\textbf{人类容易书写和理解的 C++ 代码}，
+逐渐转变为\textbf{处理器能够执行的机器指令}。
+
 平时构建时，把这四步交给一条命令就行：
 \begin{tbash}
 g++ -std=c++17 -Wall -Wextra hello.cpp -o hello
@@ -301,7 +372,7 @@ CMake 把一个可执行程序或一个库称为目标（Target），后面的�
 \Needspace{10\baselineskip}
 \begin{example}[为装甲板程序准备三个文件]
 \label{ex:armor-sources}
-来写一个给装甲板打分的小程序。从这里到安装一节，我们一直用这个 \texttt{armor-demo} 工程，不用每节重新建一套文件。先建目录：
+来写一个给装甲板打分的小程序。从这里到安装一节，我们一直用这个 \texttt{armor-demo} 工程。先建目录：
 \begin{tbash}
 mkdir -p ~/rm-build-lab/armor-demo/include
 mkdir -p ~/rm-build-lab/armor-demo/src
@@ -325,17 +396,6 @@ g++ -std=c++17 -I include src/main.cpp src/armor.cpp -o armor_manual
 预期输出 \texttt{score=30}。其中 \texttt{-I include} 让两个源文件都能找到 \texttt{armor.hpp}。
 接下来会为它创建完整的 CMake 构建描述。
 \end{example}
-
-头文件通常不用单独编译，但编译器必须找得到它。
-你列出要编译的源文件，CMake 据此安排构建。编译器再按包含规则查找头文件，并记录文件之间的依赖，供后续增量构建使用。
-所以，源文件列表和头文件路径都要写清楚。
-
-\begin{note}
-旧工程可能用 \texttt{file(GLOB\_RECURSE 变量 路径模式)} 递归收集源文件。
-我们先把源文件一个个列出来。以后加文件，就顺手改一次列表，检查起来也方便。
-用通配符时，要小心把其他程序的 \texttt{main.cpp} 也收进来。两个入口争当主角，链接器可不会帮你选。
-\texttt{include\_directories} 设置头文件搜索路径，\texttt{link\_directories} 设置库搜索路径；二者都不等于“把实现链接进程序”。
-\end{note}
 
 \begin{exercise}\label{ex:v1-build-missing-files}
 做两次小型排错练习，每次都从完整命令开始：第一次去掉 \texttt{-I include}，第二次去掉 \texttt{src/armor.cpp}。
@@ -376,13 +436,30 @@ g++ -std=c++17 -I include src/main.cpp src/armor.cpp -o armor_manual
 其他选项可查阅编译器手册；这条 CMake 命令的参数可用
 \texttt{cmake --help-command target\_compile\_options} 查询。
 
+以及 \texttt{target\_include\_directories}，它为指定目标添加头文件搜索路径。
+通用形式为：
+\begin{quote}
+\texttt{target\_include\_directories(目标 作用域 路径...)}
+\end{quote}
+
+头文件通常不用单独编译，但编译器必须找得到它。
+你列出要编译的源文件，CMake 据此安排构建。编译器再按包含规则查找头文件，并记录文件之间的依赖，供后续增量构建使用。
+所以，源文件列表和头文件路径都要写清楚。
+
+\begin{note}
+旧工程可能用 \texttt{file(GLOB\_RECURSE 变量 路径模式)} 递归收集源文件。
+我们先把源文件一个个列出来。以后加文件，就顺手改一次列表，检查起来也方便。
+用通配符时，要小心把其他程序的 \texttt{main.cpp} 也收进来。两个入口争当主角，链接器可不会帮你选。
+\texttt{include\_directories} 设置头文件搜索路径，\texttt{link\_directories} 设置库搜索路径；二者都不等于“把实现链接进程序”。
+\end{note}
+
 \Needspace{10\baselineskip}
 \begin{example}[一次构建两个源文件]
 在示例~\ref{ex:armor-sources}~的 \texttt{armor-demo} 根目录创建 \texttt{CMakeLists.txt}：
 \lstinputlisting[language=cmake,numbers=left,numberstyle={\color{gray}\tiny}]{examples/build-pipeline-demo/armor-demo/cmake/Multifile.cmake}
 
 \texttt{CMAKE\_CURRENT\_SOURCE\_DIR} 是当前处理的源码目录。
-警告选项只加给当前目标；开关只演示条件编译，\textbf{并不真的保存文件}。
+警告选项只加给当前目标；这里的开关只演示条件编译，并没有真的保存输出文件。
 \begin{tbash}
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 cmake --build build --parallel 2
@@ -522,7 +599,7 @@ cmake --install build-lib --prefix "$PWD/stage"
 
 \textbf{目录设置与目标设置}
 
-读旧工程时，你可能会遇到 \texttt{include\_directories}。它会影响当前目录及相关子目录、目标的包含目录设置，不能简单理解成“整个工程都生效”。
+读旧工程时，你可能会遇到 \texttt{include\_directories}。它会影响当前目录及相关子目录、目标的包含目录设置。
 我们先用 \texttt{target\_include\_directories} 这类命令：哪个目标需要，就给哪个目标设置。
 这里的 \texttt{PRIVATE}、\texttt{PUBLIC}、\texttt{INTERFACE} 决定谁会用到这些配置。名字可能眼熟，但它们和 C++ 类的访问权限是两回事。
 
@@ -582,7 +659,7 @@ print_var(NOT_DEFINED_YET)
 
 \textbf{按失败阶段排查}
 
-先别和满屏红字对线，我们从第一处错误看起。
+如果你遇到了报错，先别和满屏红字对线，我们从第一处错误看起。
 后面的“构建失败”往往只是前面出错后的结果。先判断它发生在哪个阶段，再按下面的方向查，通常比盲目改配置省事。
 \begin{center}
 \begin{tabular}{p{0.39\textwidth}p{0.51\textwidth}}
@@ -650,7 +727,7 @@ cmake --build build --parallel 2
 
 \textbf{阅读原有 ROS2 工程片段（选读）}
 
-最后看一眼实际工程，就当是卷二的预告片。先进入卷二目录\texttt{../02-专项技术栈}，再打开随书项目\path{examples/ros2/training_tools}，不用再凭一段构建描述猜那些源文件藏在哪里。它的目录如下：
+最后看一眼实际工程，就当是卷二的预告片。先进入卷二目录\texttt{../02-专项技术栈}，再打开随书项目\path{examples/ros2/training_tools}。它的目录如下：
 \begin{lstlisting}[language={}]
 training_tools/
   CMakeLists.txt
@@ -666,11 +743,11 @@ training_tools/
 
 这里的 \texttt{heartbeat} 是节点程序，\texttt{src/heartbeat.cpp} 是它的源文件。rclcpp 与 std\_msgs 提供节点和消息接口，\texttt{ament\_target\_dependencies} 帮这个目标接上 ROS2 依赖。普通 CMake 目标创建仍然在场；\texttt{ament\_package} 再按 ROS2 约定整理包的安装与导出信息。测试目标由 BUILD\_TESTING 控制，Launch 和参数文件则被安装到包的共享目录。
 
-你现在只需对照刚才学过的几个步骤，指出“查找依赖 → 创建目标 → 接入依赖 → 安装”的位置。节点源码、包清单、测试与启动文件会在卷二逐个展开，先别急着在这里背完另一套 API。
+你现在只需对照刚才学过的几个步骤，指出“查找依赖 → 创建目标 → 接入依赖 → 安装”的位置。节点源码、包清单、测试与启动文件会在卷二逐个展开，不用急着在这里背完另一套 API。
 
-如果已经有 ROS2 环境，可以将整个项目复制到一个新工作空间的 src 目录，然后构建它。这份工程在 Jazzy 上已核验；Ubuntu 22.04 的 Humble 环境把第一行的 jazzy 换成 humble。没有 ROS2 环境就先读构建文件，安装方法在卷二第一章。
+如果已经有 ROS2 环境，可以将整个项目复制到一个新工作空间的 src 目录，然后构建它。没有 ROS2 环境就先读构建文件，安装方法在卷二第一章。
 \begin{tbash}
-source /opt/ros/jazzy/setup.bash
+source /opt/ros/humble/setup.bash
 cd ~/ros2_ws
 colcon build --packages-select training_tools --cmake-args -DBUILD_TESTING=ON
 source install/setup.bash
