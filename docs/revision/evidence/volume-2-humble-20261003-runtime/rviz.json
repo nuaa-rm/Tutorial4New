@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "running": true,
+  "graphics_context": "[INFO] [1791027619.120012979] [rviz2]: Stereo is NOT SUPPORTED\n[INFO] [1791027619.120079368] [rviz2]: OpenGl version: 4.5 (GLSL 4.5)\n[INFO] [1791027619.160583752] [rviz2]: Stereo is NOT SUPPORTED\n",
+  "display": "isolated Xvfb with software rendering; NVIDIA hardware OpenGL verified separately",
+  "screenshot": "rviz.png"
+}

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Ubuntu/Jazzy 实测：数值、棋盘格求解、服务持久化和真实 image_proc。"""
+"""在 Ubuntu/Humble 中核验数值、棋盘格求解、服务持久化和 image_proc。"""
 import argparse
 import hashlib
 import json
@@ -17,6 +17,8 @@ cli.add_argument('--project', type=Path, required=True)
 cli.add_argument('--work', type=Path, required=True)
 cli.add_argument('--evidence', type=Path, required=True)
 args = cli.parse_args()
+if os.environ.get('ROS_DISTRO') != 'humble':
+    raise SystemExit('请先 source /opt/ros/humble/setup.bash')
 project = args.project.resolve(); args.work.mkdir(parents=True, exist_ok=True)
 records = []
 
@@ -89,9 +91,9 @@ from rclpy.node import Node
 from sensor_msgs.msg import CameraInfo, Image
 from sensor_msgs.srv import SetCameraInfo
 from rclpy.qos import qos_profile_sensor_data
-env = dict(os.environ, ROS_DOMAIN_ID='186', ROS_AUTOMATIC_DISCOVERY_RANGE='LOCALHOST',
+env = dict(os.environ, ROS_DOMAIN_ID='186', ROS_LOCALHOST_ONLY='1',
            ROS_LOG_DIR=str(args.work/'ros-logs'))
-os.environ.update({key: env[key] for key in ('ROS_DOMAIN_ID','ROS_AUTOMATIC_DISCOVERY_RANGE','ROS_LOG_DIR')})
+os.environ.update({key: env[key] for key in ('ROS_DOMAIN_ID','ROS_LOCALHOST_ONLY','ROS_LOG_DIR')})
 processes = []; logs = []
 def start(command, name):
     log = (args.work/(name+'.txt')).open('w'); logs.append(log)

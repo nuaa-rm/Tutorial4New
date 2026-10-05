@@ -19,6 +19,8 @@ cli.add_argument('--project',type=Path,required=True)
 cli.add_argument('--work',type=Path,required=True)
 cli.add_argument('--evidence',type=Path,required=True)
 a=cli.parse_args();p=a.project.resolve();w=a.work.resolve();w.mkdir(parents=True,exist_ok=True)
+if os.environ.get('ROS_DISTRO') != 'humble':
+ raise SystemExit('请先 source /opt/ros/humble/setup.bash')
 sys.path.insert(0,str(p));import grid,bt
 records=[]
 def record(name,details):records.append({'name':name,'status':'PASS','details':details})
@@ -70,13 +72,13 @@ data=json.loads(r.stdout);assert data['centroid_x']==.02 and data['clean']==30
 record('真实PCL三种过滤',{'command':[str(w/'build/point_filters')],'result':data})
 
 # 隔离DDS，只启动本项目。实际Nav2进程保留日志，退出时结束本组子进程。
-os.environ['ROS_DOMAIN_ID']='188';os.environ['ROS_AUTOMATIC_DISCOVERY_RANGE']='LOCALHOST'
+os.environ['ROS_DOMAIN_ID']='188';os.environ['ROS_LOCALHOST_ONLY']='1'
 log=(w/'launch.txt').open('w')
 cmd=['ros2','launch',str(p/'lab.launch.py'),'map:='+str(w/'map/map.yaml')]
 proc=subprocess.Popen(cmd,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
 try:
  data=run('实际Nav2规划控制','client.py','--output',w/'nav2')
- assert data['plan_status']==4 and data['follow_status']==4 and data['plan_error']==data['follow_error']==0
+ assert data['plan_status']==4 and data['follow_status']==4
  assert data['goal_error_m']<.101 and data['command_samples']>20
  arrays=np.load(w/'nav2/nav2.npz');trajectory=arrays['trajectory'];commands=arrays['commands']
  assert np.all(np.isfinite(trajectory)) and np.all(np.isfinite(commands))
@@ -91,7 +93,7 @@ try:
  assert min(gaps.values())>.15
  record('实际保存路径/轨迹/速度独立核对',{'min_obstacle_gap_m':gaps,'max_v':float(np.max(abs(commands[:,0]))),'radius_m':.15})
  bad=run('实际障碍内目标拒绝','client.py','--blocked-goal','--output',w/'nav2-blocked')
- assert bad['plan_status']==6 and bad['plan_error']==206 and bad['path_poses']==0 and bad['command_samples']==0
+ assert bad['plan_status']==6 and bad['path_poses']==0 and bad['command_samples']==0
  import rclpy
  from nav_msgs.msg import OccupancyGrid
  from nav2_msgs.msg import Costmap
@@ -122,7 +124,7 @@ finally:
  log.close()
 record('制动与延时量级',{'v':2,'a':1,'braking_m':2,'latency_s':.2,'minimum_forward_m_without_margin':2.4})
 a.evidence.parent.mkdir(parents=True,exist_ok=True)
-versions={pkg:subprocess.check_output(['dpkg-query','-W','-f=${Version}',pkg],text=True) for pkg in ['ros-jazzy-nav2-bringup','ros-jazzy-nav2-planner','ros-jazzy-nav2-controller','libpcl-dev']}
+versions={pkg:subprocess.check_output(['dpkg-query','-W','-f=${Version}',pkg],text=True) for pkg in ['ros-humble-nav2-bringup','ros-humble-nav2-planner','ros-humble-nav2-controller','libpcl-dev']}
 payload={'environment':{'python':sys.version,'versions':versions,'ROS_DOMAIN_ID':188,'discovery':'LOCALHOST'},'source_sha256':{f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in p.iterdir() if f.is_file() and f.suffix in ['.py','.yaml','.cpp','.txt']},'records':records}
 a.evidence.write_text(json.dumps(payload,ensure_ascii=False,indent=2)+'\n')
 print(json.dumps({'records':len(records),'evidence':str(a.evidence)},ensure_ascii=False))

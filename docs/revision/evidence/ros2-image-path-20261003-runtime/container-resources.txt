@@ -1,0 +1,6 @@
+ROS=humble
+Filesystem      Size  Used Avail Use% Mounted on
+tmpfs            32G   15M   32G   1% /dev/shm
+crw-rw-rw- 1 nobody nogroup 195,   0 Oct  3 18:21 /dev/nvidia0
+crw-rw-rw- 1 nobody nogroup 195, 255 Oct  3 18:21 /dev/nvidiactl
+NVIDIA GeForce RTX 3070 Ti Laptop GPU, 615.71.09

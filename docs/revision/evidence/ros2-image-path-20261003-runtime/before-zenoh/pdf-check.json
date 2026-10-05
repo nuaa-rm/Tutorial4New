@@ -1,0 +1,24 @@
+{
+  "pages": 290,
+  "changed_physical_pages": [
+    40,
+    53,
+    54,
+    56,
+    265
+  ],
+  "overfull": false,
+  "unresolved_references": false,
+  "duplicate_labels": false,
+  "compilation_passes": 3,
+  "checked_physical_pages": [
+    40,
+    53,
+    54,
+    56,
+    265
+  ],
+  "visual_review_passed": true,
+  "comparison_pdf": "/tmp/tutorial4new-ros-image-size-20261003/previous-main.pdf",
+  "unchanged_page_text_verified": true
+}

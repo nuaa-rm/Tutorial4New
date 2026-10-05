@@ -45,13 +45,13 @@
 \subsubsection{准备一个可以反复检查的小实验}
 本章完整项目在本卷 \path{examples/camera/calibration-lab-demo}。我们先用小数组算成像参数，再生成明确的模拟棋盘格，接着检测、标定、验证，最后接到 ROS 的保存和校正链路。模拟实验能排查单位与接口，却不能代替曝光、焦点和硬件同步的实拍验收。
 \begin{example}[安装依赖并进入项目]
-在 Ubuntu 24.04 / Jazzy 容器里使用系统 Python，避免把另一个虚拟环境的 cv2 混进 ROS。普通数值部分需要 NumPy、OpenCV 和 PyYAML；图形标定稍后再安装 ROS 包。
+在 Ubuntu 22.04 / Humble 环境里使用系统 Python，避免把另一个虚拟环境的 cv2 混进 ROS。普通数值部分需要 NumPy、OpenCV 和 PyYAML；图形标定稍后再安装 ROS 包。
 \begin{tbash}
 sudo apt install python3-numpy python3-opencv python3-yaml
 cd /你的教材目录/02-专项技术栈/examples/camera/calibration-lab-demo
 python3 -c "import cv2,numpy,yaml; print(cv2.__version__,numpy.__version__)"
 \end{tbash}
-把路径换成实际位置，后面的短命令都从这个项目目录执行。本次为 OpenCV 4.6.0 / NumPy 1.26.4。目录如下，输出放到 data/out，不覆盖教材源文件：
+把路径换成实际位置，后面的短命令都从这个项目目录执行。记录命令输出的 OpenCV 和 NumPy 版本，后续实验使用同一个系统解释器。目录如下，输出放到 data/out，不覆盖教材源文件：
 \begin{tbash}
 calibration-lab-demo/
   optics.py            # 曝光、景深和单位计算
@@ -107,7 +107,7 @@ RGB 每像素有红绿蓝三通道，OpenCV 常用 BGR 顺序。无填充的 640
 
 Gamma 是非线性亮度映射。本例约定 $y=x^{1/\gamma}$，$x=I/255$；gamma=2.2 提亮暗部，gamma=1 不变，小于 1 则压暗。另一些相机参数直接用指数，方向可能相反，先查文档。它不会恢复已经过曝或量化丢掉的细节，简单幂律也不等于完整 sRGB 编码。
 \begin{example}[核对 Bayer 与查找表]
-程序先造 8×6 RGGB：R=200、G=100、B=50，用明确的 RGGB 转 BGR 接口核对中心；随后建立 256 项查找表（Look-Up Table，LUT），用 cv2.LUT 处理坡道。构表只做 256 次幂运算，不对每帧每像素重复求幂。
+程序先造 8×6 RGGB：R=200、G=100、B=50，用 OpenCV 4.5 的 \texttt{COLOR\_BayerBG2BGR} 核对中心；这个两字母名称对应本例的 RGGB 排列，不能只看名字猜通道顺序。随后建立 256 项查找表（Look-Up Table，LUT），用 cv2.LUT 处理坡道。构表只做 256 次幂运算，不对每帧每像素重复求幂。
 \end{example}
 \lstinputlisting[numbers=left,language=Python,basicstyle=\footnotesize\ttfamily,caption={format\_gamma.py}]{examples/camera/calibration-lab-demo/format_gamma.py}
 \begin{tbash}
@@ -232,4 +232,3 @@ print(speed_m_s*dt_s, speed_px_s*dt_ms/1000)
 \begin{exercise}\label{ex:v2-camera-hdr}
 算出上述 HDR 错位，解释重影与过曝的不同；列出实际同步验证要记录的时钟来源、曝光时刻和接收时刻。
 \end{exercise}
-

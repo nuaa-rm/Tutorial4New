@@ -19,7 +19,7 @@
 
 ## 准备与最短运行
 
-Ubuntu24.04/Jazzy 中使用 Python3.12，NumPy1.26.4、SciPy1.11.4、Matplotlib3.6.3、OSQP1.0.4 实测。Jazzy 不是项目依赖，ROS 环境可共用。将下面教材路径换成自己的，在项目目录执行：
+Ubuntu24.04 中使用 Python3.12，NumPy1.26.4、SciPy1.11.4、Matplotlib3.6.3、OSQP1.0.4 实测。项目不依赖 ROS。将下面教材路径换成自己的，在项目目录执行：
 
 ~~~bash
 sudo apt install python3-venv python3-numpy python3-scipy python3-matplotlib

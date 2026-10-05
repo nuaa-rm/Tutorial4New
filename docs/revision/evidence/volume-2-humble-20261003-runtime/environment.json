@@ -1,0 +1,30 @@
+{
+  "os_release": "PRETTY_NAME=\"Ubuntu 22.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"22.04\"\nVERSION=\"22.04.5 LTS (Jammy Jellyfish)\"\nVERSION_CODENAME=jammy\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=jammy\n",
+  "python": "3.10.12 (main, Aug 31 2026, 10:18:17) [GCC 11.4.0]",
+  "ros_distro": "humble",
+  "opencv": "4.5.4",
+  "numpy": "1.21.5",
+  "scipy": "1.8.0",
+  "packages": {
+    "ros2-apt-source": "1.3.0~jammy",
+    "ros-humble-desktop": "0.10.0-1jammy.20260908.101832",
+    "ros-dev-tools": "1.0.3",
+    "ros-humble-rclcpp": "16.0.21-1jammy.20260907.213403",
+    "ros-humble-rclpy": "3.3.22-1jammy.20260907.213431",
+    "ros-humble-cv-bridge": "3.2.1-1jammy.20260907.220118",
+    "ros-humble-camera-calibration": "3.0.9-1jammy.20260907.224853",
+    "ros-humble-image-proc": "3.0.9-1jammy.20260907.225649",
+    "ros-humble-nav2-planner": "1.1.20-1jammy.20260908.005526",
+    "ros-humble-nav2-controller": "1.1.20-1jammy.20260908.005456",
+    "ros-humble-nav2-bringup": "1.1.20-1jammy.20260908.021125",
+    "ros-humble-rmw-cyclonedds-cpp": "1.3.5-1jammy.20260907.205235",
+    "libopencv-dev": "4.5.4+dfsg-9ubuntu4",
+    "libpcl-dev": "1.12.1+dfsg-3build1",
+    "gdb": "12.1-0ubuntu1~22.04.2",
+    "qt5-gtk-platformtheme": "5.15.3+dfsg-2ubuntu0.2",
+    "qtwayland5": "5.15.3-1",
+    "adwaita-icon-theme": "41.0-1ubuntu1"
+  },
+  "container": "ubuntu2204",
+  "platform": "x86_64"
+}

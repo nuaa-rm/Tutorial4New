@@ -1,0 +1,21 @@
+{
+  "ros_distro": "humble",
+  "uname": [
+    "Linux",
+    "mijiao-arch",
+    "7.2.8-arch1-2",
+    "#1 SMP PREEMPT_DYNAMIC Thu, 01 Oct 2026 17:24:20 +0000",
+    "x86_64"
+  ],
+  "default_profiles_in_cwd": false,
+  "clock": "Linux CLOCK_MONOTONIC via C++ steady_clock; same host only",
+  "payload_bytes": 4665600,
+  "latency": "after allocation/fill, before publish -> callback entry; excludes processing",
+  "cpu": "launch and live child processes, includes discovery/load/drain; not steady-state %",
+  "rss": "sum of process RSS, shared pages counted repeatedly; includes owned Zenoh router",
+  "zenoh_router": "owned loopback router for each Zenoh case; included in CPU/RSS totals",
+  "zenoh_port": 17447,
+  "zenoh_shm": false,
+  "synthetic": true,
+  "hardware_camera": false
+}

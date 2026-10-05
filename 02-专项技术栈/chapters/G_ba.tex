@@ -21,7 +21,7 @@ Z\begin{bmatrix}u\\v\\1\end{bmatrix}=K\Pi T_{cw}P_h.
 这里的尺寸分别是$3\times3$、$3\times4$、$4\times4$、$4\times1$，结果为$3\times1$。不能省掉$\Pi$又把$K T$当普通矩阵乘法，也不能把未知深度乘过的三维齐次差当作像素重投影残差。
 
 \begin{example}[先搭一个可以逐项核对的项目]
-完整项目在本卷\path{examples/geometry/pose-lab-demo}。它使用NumPy、OpenCV和SciPy，不依赖ROS；在你的Ubuntu24.04/Jazzy容器中已有的包可以直接复用：
+完整项目在本卷\path{examples/geometry/pose-lab-demo}。它使用NumPy、OpenCV和SciPy，不依赖ROS；已有的数值计算依赖可以直接复用：
 \begin{tbash}
 sudo apt install python3-numpy python3-opencv python3-scipy python3-matplotlib
 cd /你的教材目录/02-专项技术栈/examples/geometry/pose-lab-demo

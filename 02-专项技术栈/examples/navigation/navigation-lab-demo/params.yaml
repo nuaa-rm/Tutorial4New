@@ -5,15 +5,14 @@ planner_server:
   ros__parameters:
     planner_plugins: [GridBased]
     GridBased:
-      plugin: nav2_navfn_planner::NavfnPlanner
+      plugin: nav2_navfn_planner/NavfnPlanner
       use_astar: true
       allow_unknown: false
       tolerance: 0.0
 controller_server:
   ros__parameters:
     controller_frequency: 20.0
-    enable_stamped_cmd_vel: false
-    progress_checker_plugins: [progress]
+    progress_checker_plugin: progress
     goal_checker_plugins: [goal]
     controller_plugins: [FollowPath]
     progress:

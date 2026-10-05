@@ -24,7 +24,7 @@
 \date{\today}
 \version{2026.08}
 \TextbookVolume{2}
-\extrainfo{三方向：自瞄 / 雷达 / 导航。OpenCV、深度学习等为共用技能，按方向组合选修。}
+\extrainfo{四方向：自瞄 / 导航 / 决策 / 雷达。OpenCV、深度学习等为共用技能，按方向组合选修。}
 
 \begin{document}
 
@@ -33,19 +33,8 @@
 \frontmatter
 
 \chapter*{编者说明}
-本卷是视觉组主技能书。组内三个方向为\textbf{自瞄}、\textbf{雷达}、\textbf{导航}；
-OpenCV、深度学习、CUDA 等为共用技能，按方向组合选修，不要求一次学完。
-\textbf{前置条件}：通过卷一通识考核，具备 Linux、现代 C++ 与 CMake 基础。
-标 $*$ 的小节为选修。
-正文中的短调用片段用于解释接口；带编号示例给出操作步骤和预期结果。
-Python 数值实验使用 Python 3，涉及 NumPy、OpenCV 或 PyTorch 的示例会注明依赖；硬件实验需在对应设备上验收。
-
-\noindent\textbf{推荐选课（示意）：}
-\begin{itemize}
-    \item \textbf{自瞄}：ROS2 + OpenCV + 深度学习 + 相机 + 滤波 + BA + MPC（CUDA 建议）
-    \item \textbf{雷达}：ROS2 + 多机通信 + SDR/电磁波解析 + OpenCV + 深度学习 + 相机（CUDA / 滤波建议）
-    \item \textbf{导航}：ROS2 + 导航章（相机 / 滤波 / 多机通信建议）；赛场建图见卷三
-\end{itemize}
+\addcontentsline{toc}{chapter}{编者说明}
+\input{preface/editors_note.tex}
 
 \tableofcontents
 
@@ -55,9 +44,9 @@ Python 数值实验使用 Python 3，涉及 NumPy、OpenCV 或 PyTorch 的示例
 \chapter{ROS2 基础}
 
 \begin{introduction}
-  \item 学习目标：创建功能包并验证节点通信；编写 Launch；检查依赖、环境和日志；完成 IDE 调试。
-  \item 建议学时：基础约 1 周，工程实践另用 2--3 天。
-  \item 本卷边界：先修卷一 Linux、C++ 与 CMake；命令以 Ubuntu 24.04 与 Jazzy 为主，同时说明 Humble 22.04 的差异；实车集成见卷三。
+  \item 学习目标：创建功能包并验证节点通信；编写 Launch；检查依赖、环境和日志；完成 IDE 调试；比较大图像的 RMW 与组件布局，探测借出能力。
+  \item 建议学时：基础约 1 周，工程实践另用 2--3 天，大图像链路实验另用半天至 1 天。
+  \item 本卷边界：先修卷一 Linux、C++ 与 CMake；本卷 ROS2 内容、命令与代码以 Ubuntu 22.04 和 Humble 为主；实车集成见卷三。
 \end{introduction}
 
 \section{节点、接口与工程实践}
@@ -67,6 +56,9 @@ Python 数值实验使用 Python 3，涉及 NumPy、OpenCV 或 PyTorch 的示例
 
 \section{构建、启动与排障}
 \input{chapters/A_ros2_engineering.tex}
+
+\section{大图像链路：中间件与内存}
+\input{chapters/A_ros2_image_path.tex}
 
 \input{chapters/A_ros2_review.tex}
 
@@ -209,7 +201,7 @@ Python 数值实验使用 Python 3，涉及 NumPy、OpenCV 或 PyTorch 的示例
 \chapter{导航与 SLAM 初步}
 
 \begin{introduction}
-  \item 学习目标：查询与合成 TF；生成栅格地图并运行点云过滤、最短路与有限恢复；在 Jazzy 中调用 Nav2 规划和控制，保存软件闭环结果。
+  \item 学习目标：查询与合成 TF；生成栅格地图并运行点云过滤、最短路与有限恢复；在 Humble 中调用 Nav2 规划和控制，保存软件闭环结果。
   \item 建议学时：约 1 周。
   \item 本卷边界：本章学习 Nav2 接口与离线算法；赛场建图流程、实车导航和任务组织见卷三。
 \end{introduction}
@@ -222,7 +214,7 @@ Python 数值实验使用 Python 3，涉及 NumPy、OpenCV 或 PyTorch 的示例
 
 \chapter*{卷二小结}
 \addcontentsline{toc}{chapter}{卷二小结}
-本卷覆盖自瞄、雷达、导航三个方向所需的主要专项技能（含共用的图像、学习与 CUDA）。
+本卷为自瞄、导航、决策和雷达四个方向提供专项技术基础（含共用的图像处理、深度学习与 CUDA）。
 赛场链路、工程准则与任务级案例见 \textbf{卷三 · RM 视觉概述}。
 
 % 统一题解放在卷二全文末尾，题目仍保留在原章。

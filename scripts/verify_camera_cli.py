@@ -15,14 +15,17 @@ cli.add_argument('--yaml',type=Path,required=True)
 cli.add_argument('--output',type=Path,required=True)
 cli.add_argument('--stereo',action='store_true')
 args=cli.parse_args();args.output.mkdir(parents=True,exist_ok=True)
+if os.environ.get('ROS_DISTRO') != 'humble':
+    raise SystemExit('请先 source /opt/ros/humble/setup.bash')
 processes=[];logs=[];results=[]
 rfd,wfd=os.pipe()
 xvfb=subprocess.Popen(['Xvfb','-displayfd',str(wfd),'-screen','0','1600x1000x24'],
                      pass_fds=(wfd,),start_new_session=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
 processes.append(xvfb);os.close(wfd)
 display=os.read(rfd,100).decode().strip();os.close(rfd)
-env=dict(os.environ,DISPLAY=':'+display,QT_QPA_PLATFORM='xcb',ROS_DOMAIN_ID='190' if args.stereo else '187',PYTHONUNBUFFERED='1',
-         ROS_AUTOMATIC_DISCOVERY_RANGE='LOCALHOST',ROS_LOG_DIR=str(args.output/'logs'))
+env=dict(os.environ,DISPLAY=':'+display,QT_QPA_PLATFORM='xcb',GDK_BACKEND='x11',ROS_DOMAIN_ID='190' if args.stereo else '187',PYTHONUNBUFFERED='1',
+         ROS_LOCALHOST_ONLY='1',ROS_LOG_DIR=str(args.output/'logs'))
+env.pop('WAYLAND_DISPLAY',None)
 def start(command,name):
     log=(args.output/(name+'.txt')).open('w');logs.append(log)
     proc=subprocess.Popen(command,env=env,start_new_session=True,stdout=log,stderr=subprocess.STDOUT)

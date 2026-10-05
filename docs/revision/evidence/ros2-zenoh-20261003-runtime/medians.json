@@ -1,0 +1,39 @@
+[
+  {
+    "send_hz": 250.051,
+    "receive_hz": 250.328,
+    "delivery_ratio": 1.0,
+    "p95_ms": 3.24309,
+    "rmw": "Zenoh",
+    "mode": "separate",
+    "shm": false
+  },
+  {
+    "send_hz": 250.042,
+    "receive_hz": 250.153,
+    "delivery_ratio": 1.0,
+    "p95_ms": 0.912899,
+    "rmw": "Zenoh",
+    "mode": "same",
+    "shm": false
+  },
+  {
+    "send_hz": 250.03,
+    "receive_hz": 250.03,
+    "delivery_ratio": 1.0,
+    "p95_ms": 0.029172,
+    "rmw": "Zenoh",
+    "mode": "intra",
+    "shm": false
+  },
+  {
+    "send_hz": 250.027,
+    "receive_hz": 250.448,
+    "delivery_ratio": 1.0,
+    "p95_ms": 1.82163,
+    "rmw": "Zenoh",
+    "mode": "separate",
+    "shm": true,
+    "pool_mib": 6
+  }
+]

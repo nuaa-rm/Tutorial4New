@@ -14,8 +14,9 @@ DIAGRAMS = {
 \node[box,minimum width=5cm] (py) at (3,3.2) {rclpy：Python 客户端库\\其他语言也可有客户端库};
 \node[box,minimum width=11cm] (rcl) at (0,1.4) {rcl：公共客户端基础\\名称、时间、服务等基础机制};
 \node[box,minimum width=11cm] (rmw) at (0,-0.4) {rmw：中间件接口\\发布 / 订阅、QoS、发现与通信图事件};
-\node[box,minimum width=5cm] (fast) at (-3,-2.2) {Fast DDS\\对应 rmw\_fastrtps\_cpp};
-\node[box,minimum width=5cm] (cyclone) at (3,-2.2) {Cyclone DDS\\对应 rmw\_cyclonedds\_cpp};
+\node[box,minimum width=3.4cm] (fast) at (-3.8,-2.2) {Fast DDS\\\texttt{rmw\_fastrtps\_cpp}};
+\node[box,minimum width=3.4cm] (cyclone) at (0,-2.2) {Cyclone DDS\\\texttt{rmw\_cyclonedds\_cpp}};
+\node[box,minimum width=3.4cm] (zenoh) at (3.8,-2.2) {Zenoh\\\texttt{rmw\_zenoh\_cpp}};
 \draw[flow] (app.south) -- (cpp.north);
 \draw[flow] (app.south) -- (py.north);
 \draw[flow] (cpp.south) -- (rcl.north);
@@ -23,7 +24,8 @@ DIAGRAMS = {
 \draw[flow] (rcl) -- (rmw);
 \draw[flow] (rmw.south) -- (fast.north);
 \draw[flow] (rmw.south) -- (cyclone.north);
-\node at (0,-3.5) {图中列出本章使用的 DDS 实现；ROS2 还支持其他中间件};
+\draw[flow] (rmw.south) -- (zenoh.north);
+\node[align=center] at (0,-3.5) {图中列出本章比较的中间件；ROS2 还支持其他实现\\Fast DDS 与 Cyclone DDS 基于 DDS；Zenoh 不属于 DDS 实现};
 ''',
     'ros2_node': r'''
 \node[box,minimum width=3.4cm,minimum height=2.6cm] (camera) at (-4.6,2.8) {节点 A\\图像发布者\\参数服务端};

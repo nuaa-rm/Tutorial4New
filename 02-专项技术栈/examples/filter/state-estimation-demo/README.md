@@ -2,7 +2,7 @@
 
 这一章先让同一个阶跃经过低通和尾部均值，再用含真值的运动轨迹比较 KF、EKF 与 UKF。你可以改参数，看误差与响应怎样一起变化；所有数据都是明确生成的模拟量，没有接实车。
 
-在 Ubuntu 24.04 / ROS 2 Jazzy 的 Distrobox 中已用 Python 3.12.3、NumPy 1.26.4 和 Matplotlib 3.6.3 实际运行。项目本身不依赖 ROS。
+在 Ubuntu 24.04 的 Distrobox 中已用 Python 3.12.3、NumPy 1.26.4 和 Matplotlib 3.6.3 实际运行。项目本身不依赖 ROS。
 
 先安装依赖，然后进入这个 README 所在目录。下面的路径要换成自己的教材目录：
 

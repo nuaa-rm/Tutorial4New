@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "gpu": "NVIDIA GeForce RTX 3070 Ti Laptop GPU",
+  "device_count": 1,
+  "cuda_driver_api": 13040,
+  "gpu_memory_roundtrip_bytes": 1024,
+  "nvidia_smi": "NVIDIA GeForce RTX 3070 Ti Laptop GPU, 615.71.09"
+}

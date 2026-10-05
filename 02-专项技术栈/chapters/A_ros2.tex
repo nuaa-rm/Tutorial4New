@@ -9,25 +9,24 @@ ROS2（Robot Operating System 2）是运行在 Linux 等操作系统之上的机
 它用节点组织功能，用话题、服务与动作连接模块；底层通信通常由 DDS（Data Distribution Service，数据分发服务）实现。
 它不会替你消除所有并发问题。执行器决定回调怎样被调度，多个回调访问共享数据时，仍需考虑同步和对象生命周期。
 \paragraph*{ROS2的版本}
-和 Ubuntu 一样，ROS2 也有不同的发行版。你可能在队内旧工程里看到 Humble，在自己的新环境里看到 Jazzy，不必因为名字不一样就从头再学一次。本章的节点、消息和构建方法两边都可以使用，不过安装包名、环境脚本和发现范围设置要跟着版本走。
+和 Ubuntu 一样，ROS2 也有不同的发行版。本卷统一以 Humble Hawksbill 为主，配套系统是 Ubuntu 22.04。先把节点、消息和构建方法在同一套环境中练熟，接手其他版本的工程时，再核对安装包名、头文件和配置接口。
 \begin{center}
 \begin{tabular}{lll}
 \toprule[1.5pt]
 ROS2 发行版 & 对应 Ubuntu & 环境脚本 \\
 \midrule[1pt]
 Humble Hawksbill & 22.04 & \path{/opt/ros/humble/setup.bash} \\
-Jazzy Jalisco & 24.04 & \path{/opt/ros/jazzy/setup.bash} \\
 \bottomrule[1.5pt]
 \end{tabular}
 \end{center}
-下面的命令默认写 Jazzy，实际示例也在 Ubuntu 24.04 的 Jazzy 环境中验证。你使用 Humble 时，把包名里的 jazzy 和脚本路径里的 jazzy 改成 humble；遇到不能直接替换的设置，我们会在旁边单独说明。不要在一个终端里同时加载两个发行版，免得头文件和运行库各唱各的。
+下面的安装包名、环境路径和示例配置都按 Humble 编写。不要在一个终端里同时加载两个发行版，免得头文件和运行库各唱各的。
 
 \paragraph*{ROS2的安装}
 如果你已经能运行 ROS2，可以先跳到下面的查询命令，确认当前终端加载了哪个版本。如果还没有安装，先按对应的官方安装页完成系统检查和软件源配置，再安装软件包。
 \begin{note}
-Ubuntu 24.04 使用 Jazzy 安装页：\url{https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html}；Ubuntu 22.04 使用 Humble 安装页：\url{https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debs.html}。不要混入其他 Ubuntu 版本的软件源。第三方一键安装脚本会修改软件源和系统配置，先下载并检查内容，再决定是否执行。
+Ubuntu 22.04 使用 Humble 官方安装页：\url{https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debs.html}。先按安装页确认语言环境、更新系统并配置软件源，不要混入其他 Ubuntu 版本的软件源。第三方一键安装脚本会修改软件源和系统配置，先下载并检查内容，再决定是否执行。
 
-如果你和我们一样在 Distrobox 中运行 ROS2，先进入容器再执行本章命令，例如 \texttt{distrobox enter ubuntu2404}。这里的容器名是本次验证环境的名字，换成你自己的；编译器、ROS 软件包和运行节点都应来自容器内部。容器中的程序可以访问共享的项目目录，但宿主机能看见源码，并不代表宿主机也安装了这些依赖。
+如果你在 Distrobox 中运行 ROS2，先进入已安装 Humble 的 Ubuntu 22.04 容器再执行本章命令，例如 \texttt{distrobox enter ubuntu2204}。这里的容器名换成你自己的；编译器、ROS 软件包和运行节点都应来自容器内部。容器中的程序可以访问共享的项目目录，但宿主机能看见源码，并不代表宿主机也安装了这些依赖。
 \end{note}
 命令通用形式为 \texttt{ros2 COMMAND [OPTIONS]}。COMMAND 是要做的事情，包名、程序名和话题名则换成你实际使用的名字。
 \begin{center}
@@ -45,12 +44,12 @@ Ubuntu 24.04 使用 Jazzy 安装页：\url{https://docs.ros.org/en/jazzy/Install
 \end{center}
 其余选项用 \texttt{ros2 COMMAND --help} 查询；Shell 命令参数见 man 手册。
 \begin{example}
-在已配置官方软件源的 Ubuntu 24.04 终端安装并验证环境（已有这些软件时不用重装）：
+在已配置官方软件源并更新系统的 Ubuntu 22.04 终端安装并验证环境（已有这些软件时不用重装）：
 \par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{tbash}
 sudo apt update
-sudo apt install ros-jazzy-desktop ros-dev-tools
-source /opt/ros/jazzy/setup.bash
+sudo apt install ros-humble-desktop ros-dev-tools
+source /opt/ros/humble/setup.bash
 printenv ROS_VERSION ROS_DISTRO
 ros2 pkg executables demo_nodes_cpp
 \end{tbash}
@@ -74,14 +73,15 @@ ROS2的系统架构如下图所示：
 常见术语的含义：
 \begin{itemize}
     \item \textbf{rclcpp}: ROS Client Library for C++，它是ROS2的C++客户端库，负责ROS2节点的创建、通信、生命周期管理等，我们使用的主要是这个库。
-    \item \textbf{rmw}: ROS Middleware，它是ROS2的中间件，负责底层通信的实现。
+    \item \textbf{rmw}: ROS Middleware，它是ROS2的中间件接口，把上层的通信操作交给具体的中间件实现。
     \item \textbf{QoS}: Quality of Service，它是通信策略的集合，包含历史深度、可靠性、持久性等；不会凭空保证处理速度或网络带宽。
-    \item \textbf{DDS}: Data Distribution Service，它是ROS2的分布式数据服务，用来实现ROS2节点之间的通信。
+    \item \textbf{DDS}: Data Distribution Service，它是一种发布/订阅通信标准，Fast DDS 与 Cyclone DDS 是它的实现。ROS2 也可以通过 rmw 使用 Zenoh 等其他中间件。
 \end{itemize}
 \paragraph*{ROS2的节点与组件}
 \textbf{ROS2的基本思想是分布式的、模块化的。}
 
 节点（Node）是组织功能的逻辑单元。组件（Component）是可动态装载的节点实现，组件容器可在同一进程内装载多个节点。
+先把下面的节点收发跑通；当图像变大、复制与调度开始影响延迟时，再按第\ref{sec:ros2-image-components}节把相邻节点组合起来。
 
 我们可以用这个图来直观地理解ROS2的\textbf{节点}：
 \begin{figure}[htbp]
@@ -92,7 +92,7 @@ ROS2的系统架构如下图所示：
 \end{figure}
 
 \begin{note}
-如果想看节点与话题的动态关系，可以跟着官方节点教程操作：\url{https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Nodes/Understanding-ROS2-Nodes.html}。
+如果想看节点与话题的动态关系，可以跟着官方节点教程操作：\url{https://docs.ros.org/en/humble/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Nodes/Understanding-ROS2-Nodes.html}。
 \end{note}
 
 
@@ -404,7 +404,7 @@ Transform、TransformStamped是传输坐标系变换关系的消息类型。
 完成本章完整工程后，查看接口定义并只接收一次定时器消息：
 \par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{tbash}
-source /opt/ros/jazzy/setup.bash
+source /opt/ros/humble/setup.bash
 source ~/ros2_ws/install/setup.bash
 ros2 interface show my_msgs/msg/My
 ros2 interface show geometry_msgs/msg/Vector3
@@ -415,13 +415,13 @@ ros2 topic echo /timer_ --once
 \end{minipage}\par\smallskip
 先对照 Vector3 与 Point 的注释，再看看 Image 除了像素数据还有哪些描述字段。Header 的 frame\_id 只是坐标系标识，写一个名字不会替你完成坐标变换；后面使用 tf2 时才会把坐标系之间的关系连起来。
 \begin{note}
-本次 Jazzy 环境的 ros2interface 0.32.12 查询 Image 时，实际误选了同包的 CompressedImage 文件。如果你也看到压缩格式字段，而不是 height、width、encoding，不要照着它理解 Image；直接检查包中对应的消息文件：
+Image 包含 height、width、encoding、step 和 data 等字段，CompressedImage 则描述压缩格式和压缩后的数据，别把它们混在一起。需要核对原始定义时，可以直接查看包中的消息文件：
 \par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{tbash}
 cat "$(ros2 pkg prefix --share sensor_msgs)/msg/Image.msg"
 \end{tbash}
 \end{minipage}\par\smallskip
-这是该版本查询工具的文件名匹配问题，实际 C++ 的 \texttt{sensor\_msgs::msg::Image} 类型并未变成 CompressedImage。
+这里查看的是 \texttt{sensor\_msgs::msg::Image} 的消息定义；它与压缩图像接口是两个不同的类型。
 \end{note}
 \end{example}
 

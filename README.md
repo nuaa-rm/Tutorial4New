@@ -163,7 +163,7 @@ python3 scripts/export_volumes.py --output "$HOME/Downloads/教材导出" --over
 | 地图、TF、Nav2 与恢复 | [navigation-lab-demo](02-专项技术栈/examples/navigation/navigation-lab-demo/README.md) |
 | 接口中的单位、坐标和时间约定 | [interface-card-demo](03-RM视觉概述/examples/interface-card-demo/README.md) |
 
-**当前卷二的主要验证环境是 Distrobox `ubuntu2404` 中的 Ubuntu 24.04.5 / ROS 2 Jazzy。** 使用这个环境时，先进入容器，再按示例 README 加载 ROS 环境、安装依赖和构建。卷一双系统安装教程仍以 Ubuntu 22.04 为例；卷二涉及 Humble / Jazzy 差异时按正文分别处理，Jazzy 的运行记录不能代替 Humble 实测。
+**卷二涉及 ROS2 的正文、命令和示例以 Ubuntu 22.04 / ROS2 Humble 为主。** Distrobox 用户先进入已安装 Humble 的 Ubuntu 22.04 容器，再按示例 README 加载环境、安装依赖和构建。本机通信实验使用 `ROS_LOCALHOST_ONLY=1`；Nav2 与 cv_bridge 按 Humble 的接口编写。修订检查见 [卷二 Humble 调整记录](docs/revision/volume-2-humble-20261003.md)。
 
 教学数据、软件回环和离线回放用于把概念跑清楚。相机读回、板端协议、跨物理主机通信和实车动作，仍需在对应设备上完成章末验收。
 

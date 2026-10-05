@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""OpenCV 逐程序、关键参数、中间图、独立窗口与 Jazzy 图像回调实测。"""
+"""核验 OpenCV 程序、关键参数、中间图、独立窗口与 Humble 图像回调。"""
 import argparse
 import json
 import os
@@ -37,7 +37,8 @@ def run(name,command,cwd,env,expected=0):
 
 
 def gui_worker(mode,binary,sample,screenshot):
-    env=os.environ.copy();env.pop('WAYLAND_DISPLAY',None);env['QT_QPA_PLATFORM']='xcb'
+    env=os.environ.copy();env.pop('WAYLAND_DISPLAY',None)
+    env.update(QT_QPA_PLATFORM='xcb',GDK_BACKEND='x11')
     command=([binary,sample] if mode!='ros' else
              ['ros2','run','image_tools','showimage','--ros-args','-r','image:=/image_out'])
     process=subprocess.Popen(command,env=env,stdout=subprocess.PIPE,stderr=subprocess.PIPE,
@@ -52,8 +53,10 @@ def gui_worker(mode,binary,sample,screenshot):
         assert window,'未发现窗口'
         time.sleep(.08)
         subprocess.run(['xwd','-silent','-id',window,'-out',screenshot],check=True)
-        if mode=='viewer':subprocess.run(['xdotool','keydown','--window',window,'s'],check=True)
-        elif mode=='video-escape':subprocess.run(['xdotool','keydown','--window',window,'Escape'],check=True)
+        if mode in ['viewer','video-escape']:
+            subprocess.run(['xdotool','windowfocus','--sync',window],check=True)
+            subprocess.run(['xdotool','key','--clearmodifiers',
+                            's' if mode=='viewer' else 'Escape'],check=True)
         elif mode=='ros':stop(process)
         output,error=process.communicate(timeout=6)
         print(output,end='');print(error,end='',file=sys.stderr)
@@ -68,9 +71,9 @@ def main():
     cli.add_argument('--assets-dir',type=Path,required=True)
     args=cli.parse_args();args.output=args.output.resolve();args.assets_dir=args.assets_dir.resolve()
     args.assets_dir.mkdir(parents=True,exist_ok=True)
-    env=os.environ.copy();assert env.get('ROS_DISTRO')=='jazzy'
-    env.update(ROS_DOMAIN_ID='81',ROS_AUTOMATIC_DISCOVERY_RANGE='LOCALHOST',RCUTILS_COLORIZED_OUTPUT='0')
-    for key in ['ROS_LOCALHOST_ONLY','ROS_STATIC_PEERS','RMW_IMPLEMENTATION']:env.pop(key,None)
+    env=os.environ.copy();assert env.get('ROS_DISTRO')=='humble'
+    env.update(ROS_DOMAIN_ID='81',ROS_LOCALHOST_ONLY='1',RCUTILS_COLORIZED_OUTPUT='0')
+    for key in ['ROS_AUTOMATIC_DISCOVERY_RANGE','ROS_STATIC_PEERS','RMW_IMPLEMENTATION']:env.pop(key,None)
     import cv2
     import numpy as np
     with tempfile.TemporaryDirectory(prefix='opencv-textbook-') as temp:
@@ -80,7 +83,7 @@ def main():
         run('build',['cmake','--build',str(root/'build'),'--parallel','4'],root,env)
         bins=root/'build'
         def demo(name,arguments=(),expected=0):return run(name,[str(bins/(name+'_demo')),*arguments],out,env,expected)
-        checks={'version':'4.6.0','mat':'9 1','io':'32 48','hsv':'2','threshold':'Otsu=50 非零=400 adaptive非零=720',
+        checks={'version':cv2.__version__,'mat':'9 1','io':'32 48','hsv':'2','threshold':'Otsu=50 非零=400 adaptive非零=720',
                 'filter':'28,64,255','morphology':'26 25','contour':'1 171 200','resize':'40 20'}
         for name,expected in checks.items():assert expected in demo(name)
         assert int(demo('features').strip())>0
@@ -181,7 +184,7 @@ node.destroy_node();rclpy.shutdown()'''],root,env)
             stop(node);log.seek(0);records.append({'step':'bridge-node-log','returncode':node.returncode,'output':log.read()});log.close()
             run('stop-own-domain-daemon',['ros2','daemon','stop'],root,env)
     args.output.parent.mkdir(parents=True,exist_ok=True)
-    args.output.write_text(json.dumps({'scope':'OpenCV4.6/Jazzy；真实独立窗口与视频文件，相机硬件未验证','records':records},ensure_ascii=False,indent=2)+'\n')
+    args.output.write_text(json.dumps({'scope':'OpenCV/Humble；真实独立窗口与视频文件，相机硬件未验证','ROS_DISTRO':env['ROS_DISTRO'],'opencv_python':cv2.__version__,'records':records},ensure_ascii=False,indent=2)+'\n')
     print('完成',len(records),'条记录')
 
 

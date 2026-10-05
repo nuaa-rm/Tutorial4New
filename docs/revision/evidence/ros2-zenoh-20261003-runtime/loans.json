@@ -1,0 +1,16 @@
+[
+  {
+    "shm": false,
+    "pool_mib": 6,
+    "returncode": 0,
+    "stdout": "LOAN {\"float64\":0,\"image\":0}\n",
+    "stderr": "[INFO] [1791031701.567633576] [rclcpp]: Currently used middleware can't loan messages. Local allocator will be used.\n"
+  },
+  {
+    "shm": true,
+    "pool_mib": 6,
+    "returncode": 0,
+    "stdout": "LOAN {\"float64\":0,\"image\":0}\n",
+    "stderr": "[INFO] [1791031701.788358804] [rclcpp]: Currently used middleware can't loan messages. Local allocator will be used.\n"
+  }
+]

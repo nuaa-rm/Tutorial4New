@@ -1,0 +1,759 @@
+{
+  "environment": {
+    "python": "3.10.12 (main, Aug 31 2026, 10:18:17) [GCC 11.4.0]",
+    "versions": {
+      "ros-humble-nav2-bringup": "1.1.20-1jammy.20260908.021125",
+      "ros-humble-nav2-planner": "1.1.20-1jammy.20260908.005526",
+      "ros-humble-nav2-controller": "1.1.20-1jammy.20260908.005456",
+      "libpcl-dev": "1.12.1+dfsg-3build1"
+    },
+    "ROS_DOMAIN_ID": 188,
+    "discovery": "LOCALHOST"
+  },
+  "source_sha256": {
+    "grid.py": "794ccadc8a2821a3712c87bc4fe714d7bc7addea987afc1da670c2ef0c595201",
+    "point_filters.cpp": "939a4b98416ab4827d4825a1d3dab2085cb492015dba185b1008b0cbefb4e647",
+    "CMakeLists.txt": "e8f55e204b50b6a06741dc82fee902a9825fd258c1622b627917f43dbf20d934",
+    "bt.py": "bb2187cc6de70557c4cde8d1b939041117f744118d9e72144a50fd23ef39ffaf",
+    "tf_demo.py": "adac174ec3a26cfb412f9ceb5206b1e499632c3399e05c2a1785b585ccb554d3",
+    "sim.py": "00304b23669d6891ecb04ad81b86be230f56813246d49ccd1241ea10630e9e6c",
+    "lab.launch.py": "869cd45bc6c8b4908ea0ef1c78f09000aac36ddd0b248bcab1523a7eee8eb570",
+    "params.yaml": "4b1e04af9dd37257c21721f02e68b528b4d2b5601b182154ce001dc124d8a985",
+    "client.py": "0f9e21a5bae8d266bd1c47d58d77a923d3621e3ad31f82bbe0c24a69a6968aaf",
+    "localization.py": "fab01fc596bd6d7025719ffa6b0b9eacab46b92b5164c26dbd23218ce3436de3",
+    "plot.py": "b9373478723886b80d6a95e73b1edf3dbadbca02e0d5e5102eae2d5531791a26"
+  },
+  "records": [
+    {
+      "name": "地图/栅格 map",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/grid.py",
+          "--output",
+          "/tmp/tutorial4new-humble-runtime-20261003/navigation/map"
+        ],
+        "result": {
+          "dijkstra": {
+            "cost": 70,
+            "expanded": 1304,
+            "cells": 71
+          },
+          "astar": {
+            "cost": 70,
+            "expanded": 914,
+            "cells": 71
+          }
+        }
+      }
+    },
+    {
+      "name": "地图/栅格 blocked",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/grid.py",
+          "--output",
+          "/tmp/tutorial4new-humble-runtime-20261003/navigation/blocked",
+          "--blocked"
+        ],
+        "result": {
+          "dijkstra": {
+            "cost": null,
+            "expanded": 664,
+            "cells": 0
+          },
+          "astar": {
+            "cost": null,
+            "expanded": 664,
+            "cells": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "地图/栅格 wide",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/grid.py",
+          "--output",
+          "/tmp/tutorial4new-humble-runtime-20261003/navigation/wide",
+          "--margin",
+          "0.6"
+        ],
+        "result": {
+          "dijkstra": {
+            "cost": null,
+            "expanded": 0,
+            "cells": 0
+          },
+          "astar": {
+            "cost": null,
+            "expanded": 0,
+            "cells": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "地图/栅格 invalid",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/grid.py",
+          "--output",
+          "/tmp/tutorial4new-humble-runtime-20261003/navigation/invalid",
+          "--margin",
+          "-1"
+        ],
+        "result": {
+          "exit": 2,
+          "stderr": "usage: grid.py [-h] [--margin MARGIN] [--blocked] [--output OUTPUT]\ngrid.py: error: margin必须有限且非负\n"
+        }
+      }
+    },
+    {
+      "name": "地图/栅格 nan",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/grid.py",
+          "--output",
+          "/tmp/tutorial4new-humble-runtime-20261003/navigation/nan",
+          "--margin",
+          "nan"
+        ],
+        "result": {
+          "exit": 2,
+          "stderr": "usage: grid.py [-h] [--margin MARGIN] [--blocked] [--output OUTPUT]\ngrid.py: error: margin必须有限且非负\n"
+        }
+      }
+    },
+    {
+      "name": "独立栅格核对 dijkstra",
+      "status": "PASS",
+      "details": {
+        "cost": 70,
+        "expanded": 1304,
+        "min_clearance": 0.36055512754639896
+      }
+    },
+    {
+      "name": "独立栅格核对 astar",
+      "status": "PASS",
+      "details": {
+        "cost": 70,
+        "expanded": 914,
+        "min_clearance": 0.36055512754639896
+      }
+    },
+    {
+      "name": "不可通行起终点拒绝",
+      "status": "PASS",
+      "details": {
+        "margin": 3,
+        "path": []
+      }
+    },
+    {
+      "name": "PGM上下翻转与YAML",
+      "status": "PASS",
+      "details": {
+        "image_row0_map_y": 39,
+        "shape": [
+          60,
+          40
+        ],
+        "metadata": {
+          "image": "map.pgm",
+          "mode": "trinary",
+          "resolution": 0.1,
+          "origin": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "negate": 0,
+          "occupied_thresh": 0.65,
+          "free_thresh": 0.25
+        }
+      }
+    },
+    {
+      "name": "格心 (0, 0, 0)",
+      "status": "PASS",
+      "details": {
+        "ij": [
+          10,
+          20
+        ],
+        "resolution": 0.05,
+        "xy": [
+          0.525,
+          1.0250000000000001
+        ]
+      }
+    },
+    {
+      "name": "格心 (-2, -1, 0)",
+      "status": "PASS",
+      "details": {
+        "ij": [
+          10,
+          20
+        ],
+        "resolution": 0.05,
+        "xy": [
+          -1.475,
+          0.025000000000000133
+        ]
+      }
+    },
+    {
+      "name": "格心 (1, 2, 0)",
+      "status": "PASS",
+      "details": {
+        "ij": [
+          2,
+          3
+        ],
+        "resolution": 0.1,
+        "xy": [
+          1.25,
+          2.35
+        ]
+      }
+    },
+    {
+      "name": "格心 (1, 2, 1.5707963267948966)",
+      "status": "PASS",
+      "details": {
+        "ij": [
+          2,
+          3
+        ],
+        "resolution": 0.1,
+        "xy": [
+          0.6499999999999999,
+          2.25
+        ]
+      }
+    },
+    {
+      "name": "三顶点 [1, 2, 5]",
+      "status": "PASS",
+      "details": {
+        "path": [
+          "A",
+          "B",
+          "C"
+        ],
+        "cost": 3
+      }
+    },
+    {
+      "name": "三顶点 [1, 2, 2]",
+      "status": "PASS",
+      "details": {
+        "path": [
+          "A",
+          "C"
+        ],
+        "cost": 2
+      }
+    },
+    {
+      "name": "三顶点 [2, 2, 5]",
+      "status": "PASS",
+      "details": {
+        "path": [
+          "A",
+          "B",
+          "C"
+        ],
+        "cost": 4
+      }
+    },
+    {
+      "name": "三顶点 [4, 4, 5]",
+      "status": "PASS",
+      "details": {
+        "path": [
+          "A",
+          "C"
+        ],
+        "cost": 5
+      }
+    },
+    {
+      "name": "负边权拒绝",
+      "status": "PASS",
+      "details": {
+        "weight": -1
+      }
+    },
+    {
+      "name": "恢复 success",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/bt.py"
+        ],
+        "result": {
+          "status": "Success",
+          "retries": 2,
+          "ticks": 4,
+          "log": [
+            [
+              "navigate",
+              "Failure"
+            ],
+            [
+              "clear",
+              "Success"
+            ],
+            [
+              "navigate",
+              "Failure"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Success"
+            ],
+            [
+              "navigate",
+              "Success"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "恢复 fail",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/bt.py",
+          "--fail"
+        ],
+        "result": {
+          "status": "Failure",
+          "retries": 2,
+          "ticks": 4,
+          "log": [
+            [
+              "navigate",
+              "Failure"
+            ],
+            [
+              "clear",
+              "Success"
+            ],
+            [
+              "navigate",
+              "Failure"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Success"
+            ],
+            [
+              "navigate",
+              "Failure"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "恢复 stuck",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/bt.py",
+          "--stuck"
+        ],
+        "result": {
+          "status": "Timeout",
+          "retries": 1,
+          "ticks": 10,
+          "log": [
+            [
+              "navigate",
+              "Failure"
+            ],
+            [
+              "clear",
+              "Success"
+            ],
+            [
+              "navigate",
+              "Failure"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Running"
+            ],
+            [
+              "wait",
+              "Running"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "name": "控制节点 [False, ['Running', 'Success']]",
+      "status": "PASS",
+      "details": {
+        "status": "Running",
+        "log": [
+          [
+            "0",
+            "Running"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "控制节点 [False, ['Failure', 'Success']]",
+      "status": "PASS",
+      "details": {
+        "status": "Success",
+        "log": [
+          [
+            "0",
+            "Failure"
+          ],
+          [
+            "1",
+            "Success"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "控制节点 [False, ['Failure', 'Failure']]",
+      "status": "PASS",
+      "details": {
+        "status": "Failure",
+        "log": [
+          [
+            "0",
+            "Failure"
+          ],
+          [
+            "1",
+            "Failure"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "控制节点 [True, ['Running', 'Success']]",
+      "status": "PASS",
+      "details": {
+        "status": "Running",
+        "log": [
+          [
+            "0",
+            "Running"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "控制节点 [True, ['Success', 'Success']]",
+      "status": "PASS",
+      "details": {
+        "status": "Success",
+        "log": [
+          [
+            "0",
+            "Success"
+          ],
+          [
+            "1",
+            "Success"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "控制节点 [True, ['Failure', 'Success']]",
+      "status": "PASS",
+      "details": {
+        "status": "Failure",
+        "log": [
+          [
+            "0",
+            "Failure"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "定位修正和长墙退化",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/localization.py"
+        ],
+        "result": {
+          "map_odom_xy": [
+            0.2999999999999998,
+            0.0
+          ],
+          "corrected_xy": [
+            0.20000000000000018,
+            0.0
+          ],
+          "odom_base_unchanged": [
+            2.0,
+            0.5
+          ],
+          "wall_eigenvalues": [
+            0.0,
+            2.0
+          ],
+          "wall_shift_x_residual": [
+            0.0,
+            0.0
+          ]
+        }
+      }
+    },
+    {
+      "name": "真实tf2合成与缺失",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/tf_demo.py"
+        ],
+        "result": {
+          "xy": [
+            1.0000000000000004,
+            4.0
+          ],
+          "missing": "LookupException"
+        }
+      }
+    },
+    {
+      "name": "PCL构建 cmake",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "cmake",
+          "-S",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo",
+          "-B",
+          "/tmp/tutorial4new-humble-runtime-20261003/navigation/build"
+        ],
+        "exit": 0
+      }
+    },
+    {
+      "name": "PCL构建 cmake",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "cmake",
+          "--build",
+          "/tmp/tutorial4new-humble-runtime-20261003/navigation/build",
+          "-j4"
+        ],
+        "exit": 0
+      }
+    },
+    {
+      "name": "真实PCL三种过滤",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/tmp/tutorial4new-humble-runtime-20261003/navigation/build/point_filters"
+        ],
+        "result": {
+          "centroid_x": 0.02,
+          "input": 32,
+          "height": 31,
+          "clean": 30
+        }
+      }
+    },
+    {
+      "name": "实际Nav2规划控制",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/client.py",
+          "--output",
+          "/tmp/tutorial4new-humble-runtime-20261003/navigation/nav2"
+        ],
+        "result": {
+          "plan_status": 4,
+          "path_poses": 123,
+          "follow_status": 4,
+          "odom_samples": 251,
+          "command_samples": 241,
+          "final_xy": [
+            4.979162088470303,
+            2.9799446700400094
+          ],
+          "goal_error_m": 0.09962810329265696
+        }
+      }
+    },
+    {
+      "name": "实际保存路径/轨迹/速度独立核对",
+      "status": "PASS",
+      "details": {
+        "min_obstacle_gap_m": {
+          "path": 0.36635370949437773,
+          "trajectory": 0.4044880337574509
+        },
+        "max_v": 0.6,
+        "radius_m": 0.15
+      }
+    },
+    {
+      "name": "实际障碍内目标拒绝",
+      "status": "PASS",
+      "details": {
+        "command": [
+          "/usr/bin/python3",
+          "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/examples/navigation/navigation-lab-demo/client.py",
+          "--blocked-goal",
+          "--output",
+          "/tmp/tutorial4new-humble-runtime-20261003/navigation/nav2-blocked"
+        ],
+        "result": {
+          "plan_status": 6,
+          "path_poses": 0,
+          "odom_samples": 6,
+          "command_samples": 0,
+          "final_xy": [
+            4.979162088470303,
+            2.9799446700400094
+          ],
+          "goal_error_m": 2.2084777854390913
+        }
+      }
+    },
+    {
+      "name": "实际map_server地图",
+      "status": "PASS",
+      "details": {
+        "frame": "map",
+        "resolution": 0.10000000149011612,
+        "shape": [
+          60,
+          40
+        ],
+        "values": [
+          0,
+          100
+        ]
+      }
+    },
+    {
+      "name": "实际全局代价地图",
+      "status": "PASS",
+      "details": {
+        "frame": "map",
+        "shape": [
+          60,
+          40
+        ],
+        "raw_values": [
+          0,
+          121,
+          136,
+          156,
+          164,
+          172,
+          206,
+          221,
+          253,
+          254
+        ]
+      }
+    },
+    {
+      "name": "实际广播TF链",
+      "status": "PASS",
+      "details": {
+        "map_to_base_xy": [
+          4.979162088470303,
+          2.9799446700400094
+        ]
+      }
+    },
+    {
+      "name": "实际广播树缺失分支",
+      "status": "PASS",
+      "details": {
+        "error": "LookupException"
+      }
+    },
+    {
+      "name": "制动与延时量级",
+      "status": "PASS",
+      "details": {
+        "v": 2,
+        "a": 1,
+        "braking_m": 2,
+        "latency_s": 0.2,
+        "minimum_forward_m_without_margin": 2.4
+      }
+    }
+  ]
+}

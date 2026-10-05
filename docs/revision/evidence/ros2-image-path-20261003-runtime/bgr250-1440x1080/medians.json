@@ -1,0 +1,86 @@
+[
+  {
+    "rmw": "Fast DDS",
+    "mode": "separate",
+    "send_hz": 250.026,
+    "receive_hz": 87.4663,
+    "delivery_ratio": 0.347,
+    "p95_ms": 2.44508,
+    "p99_ms": 2.72727,
+    "received": [
+      347,
+      359,
+      181
+    ]
+  },
+  {
+    "rmw": "Fast DDS",
+    "mode": "same",
+    "send_hz": 250.021,
+    "receive_hz": 250.157,
+    "delivery_ratio": 1.0,
+    "p95_ms": 0.968265,
+    "p99_ms": 1.73032,
+    "received": [
+      1000,
+      1000,
+      1000
+    ]
+  },
+  {
+    "rmw": "Fast DDS",
+    "mode": "intra",
+    "send_hz": 250.043,
+    "receive_hz": 250.042,
+    "delivery_ratio": 1.0,
+    "p95_ms": 0.042341,
+    "p99_ms": 0.048608,
+    "received": [
+      1000,
+      1000,
+      1000
+    ]
+  },
+  {
+    "rmw": "Cyclone DDS",
+    "mode": "separate",
+    "send_hz": 250.026,
+    "receive_hz": 249.573,
+    "delivery_ratio": 0.997,
+    "p95_ms": 3.5804,
+    "p99_ms": 3.99187,
+    "received": [
+      997,
+      997,
+      998
+    ]
+  },
+  {
+    "rmw": "Cyclone DDS",
+    "mode": "same",
+    "send_hz": 250.058,
+    "receive_hz": 250.191,
+    "delivery_ratio": 1.0,
+    "p95_ms": 0.9589,
+    "p99_ms": 1.68738,
+    "received": [
+      1000,
+      1000,
+      1000
+    ]
+  },
+  {
+    "rmw": "Cyclone DDS",
+    "mode": "intra",
+    "send_hz": 250.041,
+    "receive_hz": 250.04,
+    "delivery_ratio": 1.0,
+    "p95_ms": 0.031126,
+    "p99_ms": 0.039506,
+    "received": [
+      1000,
+      1000,
+      1000
+    ]
+  }
+]

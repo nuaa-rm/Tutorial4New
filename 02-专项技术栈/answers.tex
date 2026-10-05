@@ -88,7 +88,7 @@ ros2 topic pub --once /receive std_msgs/msg/String "{data: armor_found}"
 
 \paragraph*{随堂练习 \ref{ex:v2-ros-domain}}
 \begin{solution}
-域不同的两个节点不能按普通 DDS 发现互相通信；统一为 42 后应恢复收发。两端都先停止节点，再设置相同的 \texttt{ROS\_DOMAIN\_ID} 和发现范围，执行 \texttt{ros2 daemon stop} 并重新启动。恢复默认实验环境时停止节点、unset \texttt{ROS\_DOMAIN\_ID}、\texttt{ROS\_LOCALHOST\_ONLY}、\nolinkurl{ROS_AUTOMATIC_DISCOVERY_RANGE} 和 \texttt{ROS\_STATIC\_PEERS}，停止 daemon 后重新运行；持久写入启动文件的设置也需删除或更改。域隔离实验须排除同名遗留发布者。
+域不同的两个节点不能按普通 DDS 发现互相通信；统一为 42 后应恢复收发。两端都先停止节点，再设置相同的 \texttt{ROS\_DOMAIN\_ID} 和发现范围，执行 \texttt{ros2 daemon stop} 并重新启动。恢复默认实验环境时停止节点、unset \texttt{ROS\_DOMAIN\_ID}、\texttt{ROS\_LOCALHOST\_ONLY}，停止 daemon 后重新运行；持久写入启动文件的设置也需删除或更改。域隔离实验须排除同名遗留发布者。
 \end{solution}
 
 \paragraph*{随堂练习 \ref{ex:v2-ros-ament}}
@@ -136,7 +136,7 @@ ros2 launch training_tools team.launch.py robot:=blue watch:=false
 
 \paragraph*{随堂练习 \ref{ex:v2-ros-header-context}}
 \begin{solution}
-Jazzy 本例数据库里有 \texttt{-isystem} 和 \nolinkurl{/opt/ros/jazzy/include/rclcpp}，后接 \nolinkurl{rclcpp/rclcpp.hpp} 就是实际的完整路径。片段中的 include 路径与宏应来自所选 heartbeat.cpp 的条目，PathMatch 应只匹配指定头文件；例如本例还保留 \nolinkurl{DEFAULT_RMW_IMPLEMENTATION} 和 \nolinkurl{FASTCDR_DYN_LINK}。不存在的源码路径不能唯一匹配数据库，脚本应退出并提示核对路径，标准输出为空。GUI 有参数缺失时，启用前后的实际解析命令应能看出这些路径被补上，Problems 中相应的 file not found 消失；若原本已有完整参数，则不需要追加这段配置，也不能把其他原因导致的诊断当作同一种问题。
+从本机数据库条目中核对 \texttt{-I} 或 \texttt{-isystem}；例如 include 根目录为 \nolinkurl{/opt/ros/humble/include/rclcpp} 时，后接 \nolinkurl{rclcpp/rclcpp.hpp} 就是完整路径。片段中的 include 路径与宏应来自所选 heartbeat.cpp 的条目，PathMatch 应只匹配指定头文件；例如本例还保留 \nolinkurl{DEFAULT_RMW_IMPLEMENTATION} 和 \nolinkurl{FASTCDR_DYN_LINK}。不存在的源码路径不能唯一匹配数据库，脚本应退出并提示核对路径，标准输出为空。GUI 有参数缺失时，启用前后的实际解析命令应能看出这些路径被补上，Problems 中相应的 file not found 消失；若原本已有完整参数，则不需要追加这段配置，也不能把其他原因导致的诊断当作同一种问题。
 \end{solution}
 
 \paragraph*{随堂练习 \ref{ex:v2-ros-ide}}
@@ -144,13 +144,46 @@ Jazzy 本例数据库里有 \texttt{-isystem} 和 \nolinkurl{/opt/ros/jazzy/incl
 IDE 默认运行独立构建目录中的目标，\texttt{ros2 run} 根据已加载环境运行安装目录中的目标。仅执行 IDE Build 时，安装目录可能仍是旧程序。先去掉运行配置中的 \texttt{-p text:=from\_ide} 等文本覆盖，才能观察修改后的默认值；否则参数会掩盖源码默认值的变化。停止旧进程，然后执行：
 \begin{tbash}
 cd ~/ros2_ws
-source /opt/ros/jazzy/setup.bash
+source /opt/ros/humble/setup.bash
 colcon build --packages-select training_tools
 source install/setup.bash
 ros2 pkg prefix training_tools
 ros2 run training_tools heartbeat
 \end{tbash}
 确认包路径属于当前工作空间，观察 /status 应得到 from\_debug。若仍是旧值，检查是否有其他发布者、参数覆盖、同名覆盖包，以及实际改动的源码路径。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-ros-image-budget}}
+\begin{solution}
+Bayer8 为 $1440\times1080\times250=388\,800\,000\,\mathrm{B/s}$，即 388.8 MB/s；BGR8 乘以 3，为 1166.4 MB/s。两次完整复制各读写一遍，估算新增 $2\times2\times1.1664=4.6656\,\mathrm{GB/s}$ 读写量，实际总线流量受缓存、DMA 和实现影响。8 ms 串行阶段理想只能处理 125 Hz，队列加深不能长期保住全部 250 Hz 输入；它可能让图像变旧。至少同时记录接收比例与图像年龄/延迟，并确认 Source 的实际发送频率，不能只看目标定时器设置。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-ros-rmw-choice}}
+\begin{solution}
+在加载 Humble 与 image\_path\_demo 的工作空间里，先停旧节点与额外订阅者，再运行：
+\begin{tbash}
+python3 src/image_path_demo/compare.py --output /tmp/rmw-small-answer
+\end{tbash}
+再执行正文的 Zenoh 小输入命令。从对应 results.json 选三个 separate 行，记录 send\_hz、delivery\_ratio 与 p95\_ms。默认相同条件为 64×48 BGR8、25 Hz、100 帧、best\_effort、深度 5、两个单线程容器、相同域与本机范围、没有模拟工作及外部订阅者；只改变 RMW 及其必需的发现基础设施。Zenoh 默认使用路由器协助发现，同机 peer 可直接交换数据；不能认定所有像素都经由路由器转发。自动记录器管理自己的路由器，手动实验则先正常关闭节点再关闭自己的路由器。Zenoh 的路由器也计入资源；既有 DDS XML 不能当作 Zenoh 配置。结论仅覆盖这轮输入。实际选型还要重复、改变顺序，并补测大图像、相机 SDK、转换与算法耗时、录制/显示支路、需要的网络及故障恢复。某一项获胜不能代替这些验证。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-ros-components}}
+\begin{solution}
+三轮分别使用 mode:=intra、same、separate，SOURCE\_DONE 后正常 Ctrl+C 保存统计；另一终端用 ros2 component list 记录容器。intra 与 same 都有一个进程，separate 的两个组件在两个进程。intra 的两端选项和 UniquePtr 接口建立所有权交接路径，同一帧数据地址应相同；same 可能分配器复用刚释放的地址，不能仅凭数值相同判定；跨进程虚拟地址没有这种比较意义。没有外部订阅者的一对一条件也要保留。同一 Distrobox 只说明运行环境相同，两个独立进程不满足 rclcpp 进程内通信条件；组件布局与系统容器是不同维度。
+
+用 df -h /dev/shm 记录实际共享内存挂载与容量，从部署配置核对网络、IPC 模式和共享路径。NVIDIA 环境可查设备文件及 nvidia-smi；设备可见仅证明环境集成，不证明 CPU/GPU 图像传输或推理零拷贝。本例没有验证 SDK/DMA、颜色转换、GPU 输入/输出和真实识别的边界；非 NVIDIA 平台按实际设备检查。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-ros-loans}}
+\begin{solution}
+按第\ref{sec:ros2-loaned-messages}节四条命令保存版本、配置与原始 LOAN 输出。本章所测 Humble 下，默认 Fast DDS 为 0/0；启用显式 Data Sharing 后为 1/0，此轮 Float64 真正向中间件借出；Cyclone DDS 和显式禁用轮为 0/0；追加的 Zenoh 0.1.9 在共享内存关闭/开启时也均为 0/0，发布调用使用本地分配回退。Zenoh 的传输优化不能代替借出接口证据。Image 的动态字符串与像素数组不满足这里的 plain 固定布局条件。API 在不能借出时使用本地分配器，所以运行成功仍可能是回退。记录只验证发布端能力与发布调用，还缺接收端借出、共享样本交付、消息布局和样本有效期等证据。发布后借出对象的控制权已交出，不能继续读写 loan.get()；没有发布也要按接口管理和归还。若版本导致输出不同，应保留真实结果并查实现，不能写死。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-ros-image-slow}}
+\begin{solution}
+在同一环境中重复正文慢处理命令，分别用 depth 5 与 100，两个全新的输出目录，其他条件相同：250 Hz、500 帧、小图像、separate、Fast DDS、8 ms 模拟工作、默认两秒排空。记录 send\_hz、delivery\_ratio、p95\_ms 与排空设置；加深历史可能提高有限窗口的接收比例，也可能增加旧图像等待，具体数值以实测为准。该串行阶段长期能力仍不超过理想 125 Hz。若改排空时间，必须明确记录，不能比较不同口径而不说明。
+
+一种可行方案是相机、必要预处理与识别组成同一组件进程，启用进程内通信并明确唯一所有权；控制与监控按故障隔离需求独立部署。显示支路由专门组件缩小并降频后发出，记录节点按带宽/存储预算部署。主链路使用较小历史并按实时需求选择交付策略；RMW 用重复实测选，不把某个品牌固定视为更快。算法阶段超预算时，减负、降采样或验证并行处理，不能只加深队列。
 \end{solution}
 
 \subsubsection*{章末习题}
@@ -205,13 +238,33 @@ ros2 run training_tools heartbeat
 先确认修改的源码属于哪个包、IDE 实际运行哪个构建目标，再确认新目标是否已安装，最后检查当前终端加载的前缀及启动参数。设置 CMAKE\_INSTALL\_PREFIX 不等于执行安装。停止旧节点后可用以下命令统一结果：
 \begin{tbash}
 cd ~/ros2_ws
-source /opt/ros/jazzy/setup.bash
+source /opt/ros/humble/setup.bash
 colcon build --packages-select training_tools
 source install/setup.bash
 ros2 pkg prefix training_tools
 ros2 run training_tools heartbeat
 \end{tbash}
 若有多个覆盖工作空间，使用只加载系统环境和目标工作空间的新终端复核；同时去掉覆盖默认文本的参数，检查话题上是否还有旧发布者。
+\end{solution}
+
+\paragraph*{第一章章末第 \ref{prob:v2-ros-11} 题}
+\begin{solution}
+BGR8 为 1166.4 MB/s，即 9.3312 Gbit/s 的纯像素。每新增一次完整复制，估算读写量 2.3328 GB/s；这不是内存总线实测值。8 ms 串行处理理想能力 125 Hz，小于输入 250 Hz，有限队列只能缓冲，不能提升长期吞吐。
+\end{solution}
+
+\paragraph*{第一章章末第 \ref{prob:v2-ros-12} 题}
+\begin{solution}
+不能。不同组件容器进程仍有进程边界，即使同在一个 Distrobox。合并后还需两端接收并使用 NodeOptions、开启进程内通信、使用合适的所有权接口及兼容 QoS，并检查其他订阅者。组件同进程共享崩溃边界；单线程耗时回调会影响其他组件，多线程则需安排回调组与共享数据。可以保持控制与监控独立，图像近邻组件组合部署。
+\end{solution}
+
+\paragraph*{第一章章末第 \ref{prob:v2-ros-13} 题}
+\begin{solution}
+Float64 返回 true 表示这个发布者在当前类型与配置下支持中间件借出；发布调用成功不证明接收端借出。Image false 表示当前不能走相同借出路径，API 成功可能来自本地分配回退。完整跨进程图像零拷贝还需合适类型支持、共享样本交付、两端借出、内存池与样本生命周期、实际路径验证；SHM 可用或收到一个值都不足以替代这些证据。
+\end{solution}
+
+\paragraph*{第一章章末第 \ref{prob:v2-ros-14} 题}
+\begin{solution}
+P95 只计算已收到的样本，40\% 接收比例可能把大量帧丢掉后才显得延迟低；99\% 的结果虽然延迟更大，却交付了更多帧。先按实时性与完整性需求给阈值，再一起评估。下一轮固定尺寸、格式、QoS、进程布局、订阅者、版本与网络，多次重复并调整顺序，记录实际采集/发送/接收/处理频率、接收比例、采样至回调及识别完成的延迟分位数，另记 CPU、内存与异常。实车跨时钟计时先解决同步，合成结果不代替物理相机验证。
 \end{solution}
 
 \section*{第二章：多机通信方法}
@@ -1228,7 +1281,7 @@ A→C 代价 2，直接边更便宜。四邻接图存在多条同为 70 的路�
 
 \paragraph*{随堂练习 \ref{ex:nav-run}}
 \begin{solution}
-默认插件分别为 NavfnPlanner 和 RegulatedPurePursuitController，完整类名见本章配置；cmd\_vel 为 geometry\_msgs/msg/Twist；本次路径 123 点，状态均为 4、错误码为 0，位置误差约 0.10 m。障碍内目标返回状态 6（Aborted）、规划错误码 206（GOAL\_OCCUPIED）、路径 0 点，没有调用 FollowPath。保留自己的 result 与启动日志，样本数随运行调度变化，不照抄教材的计数。
+默认插件分别为 NavfnPlanner 和 RegulatedPurePursuitController，完整类名见本章配置；cmd\_vel 为 geometry\_msgs/msg/Twist；正常完成时，规划和跟踪状态均为 4（Succeeded），位置误差应在配置的 0.1 m 容差附近；路径点数以实际结果为准。障碍内目标应返回状态 6（Aborted）、路径 0 点，不调用 FollowPath。Humble 的这两个 action 结果没有 error\_code 字段，障碍占用等具体原因从规划器日志判断。保留自己的 result 与启动日志，样本数随运行调度变化，不照抄教材的计数。
 \end{solution}
 
 \paragraph*{随堂练习 \ref{ex:nav-plot}}

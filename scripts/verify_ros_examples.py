@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""在已加载 ROS2 Jazzy 的环境中核验教学项目；所有构建和修改只发生在临时副本。"""
+"""在已加载 ROS2 Humble 的环境中核验教学项目；所有构建和修改只发生在临时副本。"""
 import argparse
 import json
 import os
@@ -57,9 +57,9 @@ def main():
     parser.add_argument('--output',type=Path,required=True)
     args=parser.parse_args()
     base=os.environ.copy()
-    assert base.get('ROS_DISTRO')=='jazzy','请先 source /opt/ros/jazzy/setup.bash'
-    base.update(ROS_DOMAIN_ID='76',ROS_AUTOMATIC_DISCOVERY_RANGE='LOCALHOST',RCUTILS_COLORIZED_OUTPUT='0',PYTHONUNBUFFERED='1')
-    for key in ['ROS_LOCALHOST_ONLY','ROS_STATIC_PEERS','RMW_IMPLEMENTATION']:base.pop(key,None)
+    assert base.get('ROS_DISTRO')=='humble','请先 source /opt/ros/humble/setup.bash'
+    base.update(ROS_DOMAIN_ID='76',ROS_LOCALHOST_ONLY='1',RCUTILS_COLORIZED_OUTPUT='0',PYTHONUNBUFFERED='1')
+    for key in ['ROS_AUTOMATIC_DISCOVERY_RANGE','ROS_STATIC_PEERS','RMW_IMPLEMENTATION']:base.pop(key,None)
     try:
         with tempfile.TemporaryDirectory(prefix='ros-textbook-') as temp:
             folder=Path(temp)
@@ -111,8 +111,8 @@ def main():
                 run(['ros2','topic','info','/qos_demo','--verbose'],folder,env)
                 logged(proc,log,'QoS '+offered+' -> '+requested)
             # Ordinary demo interfaces, two local domains, and Cyclone.
-            talker=Path('/opt/ros/jazzy/lib/demo_nodes_cpp/talker')
-            listener=Path('/opt/ros/jazzy/lib/demo_nodes_cpp/listener')
+            talker=Path('/opt/ros/humble/lib/demo_nodes_cpp/talker')
+            listener=Path('/opt/ros/humble/lib/demo_nodes_cpp/listener')
             proc,log=background([str(talker)],folder,env)
             different=env|{'ROS_DOMAIN_ID':'77'}
             assert 'I heard:' not in run([str(listener)],folder,different,expected=124,timeout=3)
@@ -124,7 +124,7 @@ def main():
             proc,log=background([str(talker)],folder,cyclone)
             assert 'I heard:' in run([str(listener)],folder,cyclone,expected=124,timeout=4)
             logged(proc,log,'Cyclone talker')
-            server=Path('/opt/ros/jazzy/lib/demo_nodes_cpp/add_two_ints_server')
+            server=Path('/opt/ros/humble/lib/demo_nodes_cpp/add_two_ints_server')
             proc,log=background([str(server)],folder,env)
             run(['ros2','service','list','-t'],folder,env)
             run(['ros2','interface','show','example_interfaces/srv/AddTwoInts'],folder,env)

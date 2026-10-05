@@ -1,13 +1,15 @@
 # ROS2 工程实践示例
 
-这两个小工程对应卷二第一章。命令以 Ubuntu 24.04 + ROS2 Jazzy 为主；Humble 22.04 把包名和环境路径中的 jazzy 换成 humble，发现范围配置按正文分别设置。本次运行验证使用 Distrobox `ubuntu2404` 中的 Jazzy，未把结果外推为 Humble 实测。
+这些小工程对应卷二第一章。命令、代码和配置以 Ubuntu 22.04 + ROS2 Humble 为主；本机通信实验使用 `ROS_LOCALHOST_ONLY=1`。
 
 先用 `basic-interfaces-demo` 把自定义消息、定时器和字符串收发跑通，再用 `training_tools` 练习依赖、测试、参数、Launch 与日志。前一个项目自带 README，两个包需要一起复制到新工作空间的 src 中；已有同名包时另建工作空间。
+
+大图像链路接着使用 [image-path-demo](image-path-demo/README.md)：先用小输入确认 Fast DDS、Cyclone DDS、Zenoh 与三种组件布局，再把合成负载升到 1440×1080@250 Hz；另用借出探测区分 Fast DDS 的显式配置、普通 Image 和本地分配回退。它有独立工作空间和运行说明，合成数据测试不替代实际相机与算法验收。
 
 `training_tools` 与正文的手动 ament 版本逐文件一致。复制到自己的 `~/ros2_ws/src/` 后，在容器内部或对应 Ubuntu 环境执行：
 
 ```bash
-source /opt/ros/jazzy/setup.bash
+source /opt/ros/humble/setup.bash
 cd ~/ros2_ws
 rosdep install --from-paths src --ignore-src -r -y
 colcon build --packages-select training_tools --cmake-args -DBUILD_TESTING=ON
@@ -31,13 +33,13 @@ rosdep 尚未初始化时，先执行一次 `sudo rosdep init`，再用普通用
 python3 /实际教材路径/02-专项技术栈/examples/ros2/header_flags.py \
   build/training_tools/compile_commands.json \
   src/training_tools/src/heartbeat.cpp \
-  /opt/ros/jazzy/include/rclcpp/rclcpp/rclcpp.hpp \
+  /opt/ros/humble/include/rclcpp/rclcpp/rclcpp.hpp \
   > /tmp/ros-header-flags.json
 cat /tmp/ros-header-flags.json
 ```
 
 仅需 Python 3 标准库和已生成的数据库。选择的源码必须唯一对应一条命令；多个配置的条目须先选择正确的数据库。本例处理 GCC/Clang 的 `-I`、`-isystem`、`-iquote`、`-D`、`-U` 和 `-std=`，相对 include 路径以数据库的 directory 为基准。包装编译器、响应文件或其他工具链选项需另行展开核对，不把这个小例子当作任意工程的通用转换器。更多需要同一解析上下文的头文件可作为额外参数，但不同上下文应分别生成。输出中应含当前 ROS 的实际 include 路径和宏；不存在的源码参数应退出，标准输出为空。
 
-核对片段后，按正文的方法备份已有用户配置并追加。库头文件位于工程之外，所以工作空间的 `.clangd` 不会作用于它。IDE 与安装片段的终端须使用相同的 XDG_CONFIG_HOME。本次在隔离配置中确认 rclcpp.hpp 的 15 条错误消失，停用/恢复片段分别为 15/0；诊断未关闭。已生成的配置依赖当前数据库，更新依赖或发行版后需要重新核对。
+核对片段后，按正文的方法备份已有用户配置并追加。库头文件位于工程之外，所以工作空间的 `.clangd` 不会作用于它。IDE 与安装片段的终端须使用相同的 XDG_CONFIG_HOME。保留诊断，比较启用、停用和恢复片段后的解析参数与错误信息。已生成的配置依赖当前数据库，更新依赖或发行版后需要重新核对。
 
-运行核验覆盖两个基础包、字段与周期变体、三种 QoS 组合、域隔离、Cyclone DDS、服务、手动/自动 ament、边界测试、Launch 参数和条件事件、日志、独立 Debug 构建与安装版本差异。真实 rqt 插件已在独立 Xvfb 显示中验证收发、节点停止和恢复；GDB 和 CLion GUI 均已命中实际发布回调。CLion 实际构建、参数覆盖、默认值修改与安装产物对照、编译数据库导入、源码编译和头文件参数补充已完成；第二台物理机器上的发现范围仍未完成验证，详见 `../../../docs/revision/volume-2-chapter-1.md`。
+自动核验入口为仓库根目录的 `scripts/verify_ros_examples.py --output /tmp/ros-runtime.json`，在加载 Humble 的终端运行。它检查基础包、字段与周期变体、QoS、域隔离、Cyclone DDS、服务、ament、测试、Launch、日志和 Debug 产物。GUI 和第二台物理机器的通信另按正文验收；修订检查见 `../../../docs/revision/volume-2-humble-20261003.md`。

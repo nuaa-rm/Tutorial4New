@@ -1,0 +1,61 @@
+[
+  {
+    "command": [
+      "ros2",
+      "topic",
+      "info",
+      "/camera/image_raw",
+      "--verbose"
+    ],
+    "exit": 0,
+    "output": "Type: sensor_msgs/msg/Image\n\nPublisher count: 1\n\nNode name: camera_replay\nNode namespace: /\nTopic type: sensor_msgs/msg/Image\nEndpoint type: PUBLISHER\nGID: 01.0f.e8.b9.5a.21.4a.9c.00.00.00.00.00.00.11.03.00.00.00.00.00.00.00.00\nQoS profile:\n  Reliability: RELIABLE\n  History (Depth): UNKNOWN\n  Durability: VOLATILE\n  Lifespan: Infinite\n  Deadline: Infinite\n  Liveliness: AUTOMATIC\n  Liveliness lease duration: Infinite\n\nSubscription count: 0\n\n"
+  },
+  {
+    "command": [
+      "ros2",
+      "service",
+      "list",
+      "-t"
+    ],
+    "exit": 0,
+    "output": "/camera/set_camera_info [sensor_msgs/srv/SetCameraInfo]\n/camera_replay/describe_parameters [rcl_interfaces/srv/DescribeParameters]\n/camera_replay/get_parameter_types [rcl_interfaces/srv/GetParameterTypes]\n/camera_replay/get_parameters [rcl_interfaces/srv/GetParameters]\n/camera_replay/list_parameters [rcl_interfaces/srv/ListParameters]\n/camera_replay/set_parameters [rcl_interfaces/srv/SetParameters]\n/camera_replay/set_parameters_atomically [rcl_interfaces/srv/SetParametersAtomically]\n"
+  },
+  {
+    "command": [
+      "ros2",
+      "topic",
+      "hz",
+      "/camera/image_raw"
+    ],
+    "exit": "observed_for_4_seconds",
+    "output": "average rate: 10.008\n\tmin: 0.099s max: 0.102s std dev: 0.00098s window: 11\naverage rate: 10.003\n\tmin: 0.098s max: 0.102s std dev: 0.00097s window: 22\n"
+  },
+  {
+    "command": [
+      "ros2",
+      "run",
+      "camera_calibration",
+      "cameracalibrator",
+      "--size",
+      "9x6",
+      "--square",
+      ".025",
+      "--camera_name",
+      "front",
+      "--k-coefficients",
+      "2",
+      "--ros-args",
+      "-r",
+      "image:=/camera/image_raw",
+      "-r",
+      "camera/set_camera_info:=/camera/set_camera_info"
+    ],
+    "window": "cli.xwd",
+    "started": true
+  },
+  {
+    "command": "rqt_image_view /camera/image_rect",
+    "window": "rqt.xwd",
+    "started": true
+  }
+]

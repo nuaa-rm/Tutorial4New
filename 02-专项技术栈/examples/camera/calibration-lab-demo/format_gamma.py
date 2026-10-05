@@ -14,7 +14,8 @@ if not np.isfinite(args.gamma) or args.gamma <= 0:
 bayer = np.empty((6, 8), np.uint8)
 bayer[0::2, 0::2] = 200; bayer[0::2, 1::2] = 100
 bayer[1::2, 0::2] = 100; bayer[1::2, 1::2] = 50
-bgr = cv2.cvtColor(bayer, cv2.COLOR_BayerRGGB2BGR)
+# OpenCV 4.5 使用两字母名称；这里的 BG2BGR 对应本数组的 RGGB 排列。
+bgr = cv2.cvtColor(bayer, cv2.COLOR_BayerBG2BGR)
 assert bgr[2, 2].tolist() == [50, 100, 200]
 lut = np.array([round(255*(i/255)**(1/args.gamma)) for i in range(256)], np.uint8)
 assert lut[0] == 0 and lut[255] == 255

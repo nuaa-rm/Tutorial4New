@@ -1,6 +1,6 @@
 # OpenCV 图像实验
 
-每个 `_demo` 是一个独立程序，便于一次只改一个概念；CMake 共用配置，不要求把十几个 main.cpp 互相覆盖。最后用 sample→pipeline 串起颜色、形态学、轮廓与绘图。仅需要 C++17、CMake 和 OpenCV 4.x；Ubuntu 24.04 实测 OpenCV 4.6.0，ROS 图像接口在旁边独立包，不混进普通图像目标。
+每个 `_demo` 是一个独立程序，便于一次只改一个概念；CMake 共用配置，不要求把十几个 main.cpp 互相覆盖。最后用 sample→pipeline 串起颜色、形态学、轮廓与绘图。仅需要 C++17、CMake 和 OpenCV 4.x；本章使用 Ubuntu 22.04 的 libopencv-dev，先用 version_demo 核对实际版本；ROS 图像接口在旁边独立包，不混进普通图像目标。
 
 进入本卷 `examples/opencv/image-lab-demo`（Distrobox 用户先 `distrobox enter ubuntu2404`），执行：
 

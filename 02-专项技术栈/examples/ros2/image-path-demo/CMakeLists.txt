@@ -1,0 +1,25 @@
+cmake_minimum_required(VERSION 3.8)
+project(image_path_demo)
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(rclcpp_components REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/Frame.msg" DEPENDENCIES sensor_msgs)
+rosidl_get_typesupport_target(typesupport ${PROJECT_NAME} rosidl_typesupport_cpp)
+add_library(image_nodes SHARED src/components.cpp)
+target_compile_features(image_nodes PUBLIC cxx_std_17)
+ament_target_dependencies(image_nodes rclcpp rclcpp_components sensor_msgs)
+target_link_libraries(image_nodes "${typesupport}")
+rclcpp_components_register_nodes(image_nodes
+  "image_path_demo::Source" "image_path_demo::Sink")
+add_executable(loan_probe src/loan_probe.cpp)
+ament_target_dependencies(loan_probe rclcpp sensor_msgs std_msgs)
+install(TARGETS image_nodes loan_probe
+  ARCHIVE DESTINATION lib LIBRARY DESTINATION lib
+  RUNTIME DESTINATION lib/${PROJECT_NAME})
+install(DIRECTORY launch config DESTINATION share/${PROJECT_NAME})
+ament_export_dependencies(rosidl_default_runtime)
+ament_package()

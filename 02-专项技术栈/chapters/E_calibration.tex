@@ -60,18 +60,18 @@ python3 validate.py --image data/validation/000.png \
 \subsubsection{ROS2 的 camera\_calibration 标定流程}
 \label{sec:ros2-camera-calibration}
 
-离线程序已经能求参数了，接下来我们把它接回 ROS。这里实际使用 Ubuntu 24.04 / ROS2 Jazzy；如果你正在用前面的 Humble 环境，先查看本机帮助和驱动接口，再把包名与环境路径换成对应发行版。本节的服务和消息思路共用，但下面记录的运行结果来自 Jazzy。
+离线程序已经能求参数了，接下来我们把它接回 ROS。本节沿用 Ubuntu 22.04 / ROS2 Humble，使用 \texttt{camera\_calibration} 求解参数，再通过 CameraInfo、保存服务与 \texttt{image\_proc} 检查部署链路。
 
 \texttt{camera\_calibration} 从图像求参数，\texttt{camera\_info\_manager} 是供驱动管理参数的库，\texttt{image\_proc} 根据图像和参数输出校正图。安装一个管理库不会自动给任意厂商驱动增加服务。为了让你还没借到相机时也能走完整条链路，我们给回放程序实现了加载、保存和发布；它不模拟硬件曝光，换真实相机时仍要按厂商文档启动驱动。
 
 \begin{example}[先准备一台能保存参数的教学相机]
-在 ubuntu2404 中加载环境并安装本节依赖：
+在 Ubuntu 22.04 / Humble 环境中加载环境并安装本节依赖：
 \begin{tbash}
 sudo apt update
-sudo apt install ros-jazzy-camera-calibration ros-jazzy-image-proc \
-  ros-jazzy-camera-info-manager ros-jazzy-camera-info-manager-py \
-  ros-jazzy-rqt-image-view
-source /opt/ros/jazzy/setup.bash
+sudo apt install ros-humble-camera-calibration ros-humble-image-proc \
+  ros-humble-camera-info-manager \
+  ros-humble-rqt-image-view
+source /opt/ros/humble/setup.bash
 ros2 run camera_calibration cameracalibrator --help
 \end{tbash}
 YAML 是相机标定文件，不是带 \texttt{ros\_\_parameters} 的节点参数文件。我们用下面的 \path{model_io.py} 写出 $K,D,R,P$ 及尺寸，并在重新加载时检查模型、焦距和有限数。写入先落到同目录临时文件，再替换目标文件，避免只写半份就被读走：
@@ -89,7 +89,7 @@ YAML 是相机标定文件，不是带 \texttt{ros\_\_parameters} 的节点参�
 \begin{tbash}
 python3 replay_ros.py --images data/train --yaml out/ros-front.yaml
 \end{tbash}
-在另一个同样加载 Jazzy 的终端，查看原图类型、频率和实际服务名：
+在另一个同样加载 Humble 的终端，查看原图类型、频率和实际服务名：
 \begin{tbash}
 ros2 topic info /camera/image_raw --verbose
 ros2 topic hz /camera/image_raw
@@ -114,18 +114,18 @@ ros2 run camera_calibration cameracalibrator \
 \end{tbash}
 \texttt{--size} 数内角点，不是方格；\texttt{--square} 单位为米；camera\_name 记录相机名称；k-coefficients=2 保持 $k_3=0$，与离线程序一致。最后两行把默认订阅和服务映射到我们的回放节点，真实驱动时改成它实际提供的名字。
 
-界面的 X、Y、Size、Skew 分别提示位置、尺寸和倾斜覆盖。回放会自动换姿态，真实采集则需要你移动标定板并停稳。CALIBRATE 可用后点击求解，再检查参数与校正预览。Jazzy 这个版本采到至少 40 个不同样本也可能开放按钮，即使覆盖条尚未全部完成，所以按钮亮了并不等于照片已经合格。
+界面的 X、Y、Size、Skew 分别提示位置、尺寸和倾斜覆盖。回放会自动换姿态，真实采集则需要你移动标定板并停稳。CALIBRATE 可用后点击求解，再检查参数与校正预览。标定器采到至少 40 个不同样本也可能开放按钮，即使覆盖条尚未全部完成，所以按钮亮了并不等于照片已经合格。
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.47\textwidth]{images/camera_sampling_revised.png}
 \hfill
 \includegraphics[width=.47\textwidth]{images/camera_calibrated_revised.png}
-\caption{在独立图形会话中实测的 Jazzy 标定器：左侧采样，右侧完成求解。输入为生成的棋盘格；界面和数值保持实际截图。}
+\caption{独立图形会话中的标定器窗口：左侧采样，右侧完成求解。输入为生成的棋盘格；界面和数值保持实际截图。}
 \label{fig:camera-ros-calibration}
 \end{figure}
-本次实际采到 40 个样本，GUI 求得 $f_x\approx560.29$、$f_y\approx565.28$ pixel，接近生成条件。不过这只能说明模拟回放链路跑通，真实镜头、板面平整度与曝光质量还要重新检验。
+图中这组参考实验采到 40 个样本，GUI 求得 $f_x\approx560.29$、$f_y\approx565.28$ pixel，接近生成条件。不过这只能说明模拟回放链路跑通，真实镜头、板面平整度与曝光质量还要重新检验。
 
-接下来点击 SAVE，把采样图与结果存进归档。当前 Jazzy 实现写到 \path{/tmp/calibrationdata.tar.gz}，再次保存会覆盖，因此先用独立目录留一份：
+接下来点击 SAVE，把采样图与结果存进归档。\texttt{camera\_calibration} 的 SAVE 写到 \path{/tmp/calibrationdata.tar.gz}，再次保存会覆盖，因此先用独立目录留一份：
 \begin{tbash}
 mkdir -p "$HOME/calibrations"
 calib_dir=$(mktemp -d "$HOME/calibrations/front.XXXXXX")
@@ -189,11 +189,11 @@ ros2 run camera_calibration cameracalibrator \
 \end{tbash}
 两侧都识别到角点后，按单目方法采样、求解与保存，检查两份 YAML、纵向残差和基线。默认以相同时间戳配对；静态、无硬件同步的教学采集可在 \texttt{--ros-args} 前加 \texttt{--approximate 0.01}，容许约 10 ms 的时间差，但它既不会让曝光同时发生，也不会补偿运动目标。
 
-我们用这组模拟图实际跑过 Jazzy 的双目窗口，依次点击 CALIBRATE、SAVE、COMMIT。点击求解前记录到 41 对样本，随后又收到一对，归档中实际保存了 42 对图和左右 YAML；写入回放的两份参数也与 GUI 输出一致。用右侧 $P$ 算出的基线为 0.12010 m，与生成时的 0.12 m 接近。你可以对照图~\ref{fig:v2-camera-stereo-gui}，先看两侧都有角点，再看右侧的纵向残差与按钮。不过采样时 Size 覆盖只有约 0.72，按钮仍然开放了；这提醒我们继续补拍不同大小和位置的板，不能把按钮当质量合格证。这里验证的是模拟图到软件存档的流程，真实装置还要另拍同步验证图、量安装距离并检查曝光时序。
+图中使用模拟图演示双目窗口，操作顺序为 CALIBRATE、SAVE、COMMIT。点击求解前记录到 41 对样本，随后又收到一对，归档中实际保存了 42 对图和左右 YAML；写入回放的两份参数也与 GUI 输出一致。用右侧 $P$ 算出的基线为 0.12010 m，与生成时的 0.12 m 接近。你可以对照图~\ref{fig:v2-camera-stereo-gui}，先看两侧都有角点，再看右侧的纵向残差与按钮。不过采样时 Size 覆盖只有约 0.72，按钮仍然开放了；这提醒我们继续补拍不同大小和位置的板，不能把按钮当质量合格证。这里验证的是模拟图到软件存档的流程，真实装置还要另拍同步验证图、量安装距离并检查曝光时序。
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.95\textwidth,trim=0 125bp 0 45bp,clip]{images/camera_stereo_revised.png}
-  \caption{模拟左右图在 Jazzy 双目标定器中的实际求解界面。右侧 epi 是当前图的纵向残差，不能代替独立验证。}
+  \caption{模拟左右图在双目标定器中的实际求解界面。右侧 epi 是当前图的纵向残差，不能代替独立验证。}
   \label{fig:v2-camera-stereo-gui}
 \end{figure}
 \end{example}
@@ -206,10 +206,10 @@ ros2 run camera_calibration cameracalibrator \
 \end{conclusion}
 
 \begin{note}
-本节命令与按钮行为按 Jazzy 的实际安装包和官方源码核对：
-\url{https://github.com/ros-perception/image_pipeline/tree/jazzy/camera_calibration}。
+\texttt{camera\_calibration} 的命令与按钮行为可以对照 Humble 分支源码：
+\url{https://github.com/ros-perception/image_pipeline/tree/humble/camera_calibration}。
 CameraInfo 字段定义见
-\url{https://github.com/ros2/common_interfaces/blob/jazzy/sensor_msgs/msg/CameraInfo.msg}；
+\url{https://github.com/ros2/common_interfaces/blob/humble/sensor_msgs/msg/CameraInfo.msg}；
 针孔模型及标定接口见
 \url{https://docs.opencv.org/4.6.0/d9/d0c/group__calib3d.html}。
 遇到发行版差异时，先用本机帮助与对应分支确认接口。

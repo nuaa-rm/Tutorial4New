@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""在独立 Xvfb 中实际点击已安装 Jazzy 标定器；不操作用户桌面。"""
+"""在独立 Xvfb 中核验已安装的 Humble 标定器；不操作用户桌面。"""
 import argparse
 import json
 import os
@@ -19,6 +19,8 @@ cli.add_argument("--output", type=Path, required=True)
 cli.add_argument("--child", action="store_true")
 cli.add_argument("--stereo", action="store_true")
 args = cli.parse_args()
+if os.environ.get('ROS_DISTRO') != 'humble':
+    raise SystemExit('请先 source /opt/ros/humble/setup.bash')
 args.output.mkdir(parents=True, exist_ok=True)
 if not args.child:
     saved = Path("/tmp/calibrationdata.tar.gz")
@@ -32,9 +34,10 @@ if not args.child:
                                 pass_fds=(wfd,), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         processes.append(xvfb); os.close(wfd)
         display = os.read(rfd, 100).decode().strip(); os.close(rfd)
-        env = dict(os.environ, DISPLAY=":"+display, QT_QPA_PLATFORM="xcb",
-                   ROS_DOMAIN_ID="189" if args.stereo else "185", ROS_AUTOMATIC_DISCOVERY_RANGE="LOCALHOST",
+        env = dict(os.environ, DISPLAY=":"+display, QT_QPA_PLATFORM="xcb", GDK_BACKEND="x11",
+                   ROS_DOMAIN_ID="189" if args.stereo else "185", ROS_LOCALHOST_ONLY="1",
                    ROS_LOG_DIR=str(folder/"ros-logs"), PYTHONUNBUFFERED="1")
+        env.pop("WAYLAND_DISPLAY", None)
         try:
             publog = (args.output/"publisher.txt").open("w")
             publisher = subprocess.Popen([sys.executable, str(args.project/"replay_ros.py"),
@@ -122,7 +125,13 @@ def driver():
         archive_path = Path("/tmp/calibrationdata.tar.gz")
         before = archive_path.stat().st_mtime_ns if archive_path.exists() else 0
         click(330)
-        until(lambda: archive_path.exists() and archive_path.stat().st_mtime_ns > before, 10)
+        def archive_ready():
+            if not archive_path.exists() or archive_path.stat().st_mtime_ns <= before:
+                return False
+            # SAVE 先创建文件，再写入；完整读取成功后才复制较大的双目存档。
+            return subprocess.run(["tar", "-tzf", str(archive_path)],
+                                  stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
+        until(archive_ready, 10)
         shutil.copy2("/tmp/calibrationdata.tar.gz", args.output/"calibrationdata.tar.gz")
         outcome["archive"] = subprocess.check_output(
             ["tar", "-tzf", str(args.output/"calibrationdata.tar.gz")]).decode().splitlines()

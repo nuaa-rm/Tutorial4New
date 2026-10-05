@@ -67,10 +67,10 @@ basic-interfaces-demo/
 \lstinputlisting[frame=single,language=XML,label=lst:xml_1,caption={my\_package/package.xml}]{examples/ros2/basic-interfaces-demo/my_package/package.xml}
 \end{minipage}\par\smallskip
 
-把两个包放进 \path{~/ros2_ws/src} 后，回到工作空间根目录构建。下面使用 Jazzy 环境；Humble 将 jazzy 改为 humble。若已有同名项目，使用你刚建的新工作空间路径。
+把两个包放进 \path{~/ros2_ws/src} 后，回到工作空间根目录构建。下面使用 Humble 环境。若已有同名项目，使用你刚建的新工作空间路径。
 \par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{tbash}
-source /opt/ros/jazzy/setup.bash
+source /opt/ros/humble/setup.bash
 cd ~/ros2_ws
 colcon build --packages-up-to my_package
 source install/setup.bash
@@ -82,7 +82,7 @@ ros2 run my_package my_node
 终端二加载同一系统与工作空间环境后观察一次消息：
 \par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{tbash}
-source /opt/ros/jazzy/setup.bash
+source /opt/ros/humble/setup.bash
 source ~/ros2_ws/install/setup.bash
 ros2 topic echo /my_msg --once
 ros2 topic echo /timer_ --once
@@ -106,7 +106,7 @@ ros2 run rqt_gui rqt_gui --standalone rqt_publisher
 ros2 run rqt_gui rqt_gui --standalone rqt_topic
 \end{tbash}
 \end{minipage}\par\smallskip
-如果缺少插件，Jazzy 用 \texttt{sudo apt install ros-jazzy-rqt-publisher ros-jazzy-rqt-topic} 安装；Humble 按章首说明替换包名。容器内运行 GUI 时，需要 Distrobox 已提供显示环境，只有 SSH 命令行而没有显示服务的终端不能直接打开窗口。
+如果缺少插件，用 \texttt{sudo apt install ros-humble-rqt-publisher ros-humble-rqt-topic} 安装。容器内运行 GUI 时，需要 Distrobox 已提供显示环境，只有 SSH 命令行而没有显示服务的终端不能直接打开窗口。
 
 在 Message Publisher 中选择话题 /receive、类型 \texttt{std\_msgs/msg/String}，添加发布者。展开 data 字段，在 expression 列填入带引号的 Python 字符串 \texttt{'armor\_found'}，再勾选发布者启用发送。在 Message Monitor 中勾选 /receive、/send、/my\_msg 与 /timer\_ 并展开字段；你应看到输入、带前缀的回复和持续变化的计数，yaw 则保持 0.25。若没有值，先确认勾选的是话题左侧的监视框，再检查环境和消息类型。
 

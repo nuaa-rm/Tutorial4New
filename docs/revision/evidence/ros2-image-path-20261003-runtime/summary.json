@@ -1,0 +1,208 @@
+{
+  "date": "2026-10-03",
+  "ros_distro": "humble",
+  "distrobox": "ubuntu2204",
+  "image_runs": 69,
+  "small_runs": 6,
+  "bgr250_runs": 18,
+  "slow_runs": 2,
+  "manual_default_runs": 1,
+  "final_recorder_runs": 1,
+  "loan_runs": 6,
+  "loan_capabilities": [
+    {
+      "float64": 0,
+      "image": 0
+    },
+    {
+      "float64": 1,
+      "image": 0
+    },
+    {
+      "float64": 0,
+      "image": 0
+    },
+    {
+      "float64": 0,
+      "image": 0
+    }
+  ],
+  "manual_default": {
+    "received": 100,
+    "receive_hz": 25.0003,
+    "p50_ms": 0.030187,
+    "p95_ms": 0.042587,
+    "p99_ms": 0.060287,
+    "pointer_matches": 100,
+    "bad_frames": 0
+  },
+  "hardware_camera_tested": false,
+  "recognition_algorithm_tested": false,
+  "cross_os_container_zero_copy_tested": false,
+  "subscriber_loan_tested": false,
+  "gpu_image_pipeline_tested": false,
+  "benchmark_recorder": "benchmark-recorder.py preserves the original 26 cases, including 18 historical cases with width/height reversed; all 18 corrected 1440x1080 cases use current compare.py, including launch-return-code and zero-received guards",
+  "checked_sources": {
+    "02-专项技术栈/main.tex": "7847a0bc22603b5ce706df5dbc314735bb7a4f5bf52705488e9230a4213b3915",
+    "02-专项技术栈/answers.tex": "4df0c4fc78c98e5462de06aa16bb7677fe034000237ea438255b67dfe0104ad3",
+    "02-专项技术栈/chapters/A_ros2.tex": "65b893a498592bb098e7b2e1befaff3fbc3dc4dcd7e851937dff43413044df92",
+    "02-专项技术栈/chapters/A_ros2_engineering.tex": "334e7e0f9856df1509ec51dde81101a8eb8a4b9aa84d7e793b6164e899d1eb8c",
+    "02-专项技术栈/chapters/A_ros2_image_path.tex": "f6aa542134ba985b6e04a62ec580e629fde37f36525b2334a37b5b063823cb72",
+    "02-专项技术栈/chapters/A_ros2_image_results.tex": "9eb490b8fcbf2db28a663f8c1fc3b0a81d45618c30bfbdd32f04b79f879b778b",
+    "02-专项技术栈/chapters/A_ros2_project.tex": "c51e5a0c6bc36ec70c7cd69dd8607000a33d1c9d902fa347e607b6024d9dedef",
+    "02-专项技术栈/chapters/A_ros2_review.tex": "557f4f22039e668ca5454bb52fb52780a908f9651c716faf5fefae6b7cecf927",
+    "02-专项技术栈/examples/ros2/image-path-demo/CMakeLists.txt": "8ebb056ff413f2cafbaeb55c46b4d6763e17b5481eb67334f00f0de47d41e22a",
+    "02-专项技术栈/examples/ros2/image-path-demo/README.md": "6d806205d601ef94f0204e2a46a481b512d8922d7b875aa40983e3c46c30f2f5",
+    "02-专项技术栈/examples/ros2/image-path-demo/compare.py": "269b5491a040a9f56b989cb017733a2a99e70ba71bfac4bb2f11b6a5375d686a",
+    "02-专项技术栈/examples/ros2/image-path-demo/config/fastdds-loan.xml": "edf2255c5a8da532147f2c24eed7e1987bae98be4ad792eadc5c8c23d04d809d",
+    "02-专项技术栈/examples/ros2/image-path-demo/launch/path.launch.py": "138b2f53be4c9238d5dce2f3df42a7345312d66dc9d420690c9fbaafbbbcb08c",
+    "02-专项技术栈/examples/ros2/image-path-demo/msg/Frame.msg": "1377a1d8849313719b1442c46ade3c9252e61afb4fc7972d15ccbb7b60d3c151",
+    "02-专项技术栈/examples/ros2/image-path-demo/package.xml": "d15eb753be4df75f976222e7514eadc9a4b9a5bba477654442780ac7b53eff4d",
+    "02-专项技术栈/examples/ros2/image-path-demo/src/components.cpp": "961ea120e67184b4313cc8dd3806b2c029058826eeca77b81aa75baa3c68d540",
+    "02-专项技术栈/examples/ros2/image-path-demo/src/loan_probe.cpp": "106b4c045e3e632f23a1111090df0072bb04f45df3ba6d9e96b3c558d08a5808",
+    "scripts/render_ros_image_path.py": "60828f2c2e3b72e4342723886a147e8de72a4269279ae18432fc18847e640e28",
+    "02-专项技术栈/images/ros2_image_paths_revised.pdf": "b5d3ba9419f1c7b4f8a9d62f08032caf5b35de21842b818677f251510a1ebd7c"
+  },
+  "pdf_sha256": "562bb49c2c6851a70f52a4779636c15ead75cc1c4e441625c61db434d0a9ad12",
+  "pdf_pages": 293,
+  "checked_pdf_pages": [
+    41,
+    42,
+    43,
+    44,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    268,
+    269,
+    270
+  ],
+  "chapter_checks": {
+    "passed": 19,
+    "incomplete": 1,
+    "not_applicable": 0
+  },
+  "active_teaching_image_runs": 51,
+  "historical_bgr250_runs": 18,
+  "bgr250_dataset": "bgr250-1440x1080/results.json",
+  "camera_width": 1440,
+  "camera_height": 1080,
+  "bgr250_medians": [
+    {
+      "rmw": "Fast DDS",
+      "mode": "separate",
+      "send_hz": 250.026,
+      "receive_hz": 87.4663,
+      "delivery_ratio": 0.347,
+      "p95_ms": 2.44508,
+      "p99_ms": 2.72727,
+      "received": [
+        347,
+        359,
+        181
+      ]
+    },
+    {
+      "rmw": "Fast DDS",
+      "mode": "same",
+      "send_hz": 250.021,
+      "receive_hz": 250.157,
+      "delivery_ratio": 1.0,
+      "p95_ms": 0.968265,
+      "p99_ms": 1.73032,
+      "received": [
+        1000,
+        1000,
+        1000
+      ]
+    },
+    {
+      "rmw": "Fast DDS",
+      "mode": "intra",
+      "send_hz": 250.043,
+      "receive_hz": 250.042,
+      "delivery_ratio": 1.0,
+      "p95_ms": 0.042341,
+      "p99_ms": 0.048608,
+      "received": [
+        1000,
+        1000,
+        1000
+      ]
+    },
+    {
+      "rmw": "Cyclone DDS",
+      "mode": "separate",
+      "send_hz": 250.026,
+      "receive_hz": 249.573,
+      "delivery_ratio": 0.997,
+      "p95_ms": 3.5804,
+      "p99_ms": 3.99187,
+      "received": [
+        997,
+        997,
+        998
+      ]
+    },
+    {
+      "rmw": "Cyclone DDS",
+      "mode": "same",
+      "send_hz": 250.058,
+      "receive_hz": 250.191,
+      "delivery_ratio": 1.0,
+      "p95_ms": 0.9589,
+      "p99_ms": 1.68738,
+      "received": [
+        1000,
+        1000,
+        1000
+      ]
+    },
+    {
+      "rmw": "Cyclone DDS",
+      "mode": "intra",
+      "send_hz": 250.041,
+      "receive_hz": 250.04,
+      "delivery_ratio": 1.0,
+      "p95_ms": 0.031126,
+      "p99_ms": 0.039506,
+      "received": [
+        1000,
+        1000,
+        1000
+      ]
+    }
+  ],
+  "previous_expansion_checked_pdf_pages": [
+    4,
+    7,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    265,
+    266,
+    267
+  ],
+  "size_correction_visual_review": true,
+  "zenoh_image_runs": 23,
+  "zenoh_loan_runs": 2,
+  "latest_extension": "../ros2-zenoh-20261003-runtime/summary.json",
+  "latest_pdf_review": "../ros2-zenoh-20261003-runtime/pdf-check.json"
+}

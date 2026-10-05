@@ -1,0 +1,250 @@
+{
+  "date": "2026-10-03",
+  "container": {
+    "name": "ubuntu2204",
+    "image": "docker.io/library/ubuntu:22.04",
+    "image_id": "e8df6c74f650ad385efe2e20103eca9b0ad50690fb3c63d49fa00762412bbf55",
+    "entrypoint": [
+      "/usr/bin/entrypoint"
+    ],
+    "command": [
+      "--verbose",
+      "--name",
+      "mijiao",
+      "--user",
+      "1000",
+      "--group",
+      "1000",
+      "--home",
+      "/home/mijiao",
+      "--init",
+      "0",
+      "--nvidia",
+      "1",
+      "--pre-init-hooks",
+      "",
+      "--additional-packages",
+      "",
+      "--",
+      ""
+    ],
+    "status": "running",
+    "created": "2026-10-03T19:14:27.32570384+08:00"
+  },
+  "environment": {
+    "os_release": "PRETTY_NAME=\"Ubuntu 22.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"22.04\"\nVERSION=\"22.04.5 LTS (Jammy Jellyfish)\"\nVERSION_CODENAME=jammy\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=jammy\n",
+    "python": "3.10.12 (main, Aug 31 2026, 10:18:17) [GCC 11.4.0]",
+    "ros_distro": "humble",
+    "opencv": "4.5.4",
+    "numpy": "1.21.5",
+    "scipy": "1.8.0",
+    "packages": {
+      "ros2-apt-source": "1.3.0~jammy",
+      "ros-humble-desktop": "0.10.0-1jammy.20260908.101832",
+      "ros-dev-tools": "1.0.3",
+      "ros-humble-rclcpp": "16.0.21-1jammy.20260907.213403",
+      "ros-humble-rclpy": "3.3.22-1jammy.20260907.213431",
+      "ros-humble-cv-bridge": "3.2.1-1jammy.20260907.220118",
+      "ros-humble-camera-calibration": "3.0.9-1jammy.20260907.224853",
+      "ros-humble-image-proc": "3.0.9-1jammy.20260907.225649",
+      "ros-humble-nav2-planner": "1.1.20-1jammy.20260908.005526",
+      "ros-humble-nav2-controller": "1.1.20-1jammy.20260908.005456",
+      "ros-humble-nav2-bringup": "1.1.20-1jammy.20260908.021125",
+      "ros-humble-rmw-cyclonedds-cpp": "1.3.5-1jammy.20260907.205235",
+      "libopencv-dev": "4.5.4+dfsg-9ubuntu4",
+      "libpcl-dev": "1.12.1+dfsg-3build1",
+      "gdb": "12.1-0ubuntu1~22.04.2",
+      "qt5-gtk-platformtheme": "5.15.3+dfsg-2ubuntu0.2",
+      "qtwayland5": "5.15.3-1",
+      "adwaita-icon-theme": "41.0-1ubuntu1"
+    },
+    "container": "ubuntu2204",
+    "platform": "x86_64"
+  },
+  "gpu": {
+    "status": "PASS",
+    "gpu": "NVIDIA GeForce RTX 3070 Ti Laptop GPU",
+    "device_count": 1,
+    "cuda_driver_api": 13040,
+    "gpu_memory_roundtrip_bytes": 1024,
+    "nvidia_smi": "NVIDIA GeForce RTX 3070 Ti Laptop GPU, 615.71.09"
+  },
+  "nvidia_opengl": {
+    "status": "PASS",
+    "renderer": "NVIDIA GeForce RTX 3070 Ti Laptop GPU/PCIe/SSE2",
+    "version": "4.6.0 NVIDIA 615.71.09",
+    "evidence": "nvidia-opengl.txt"
+  },
+  "software_suites": {
+    "ros": {
+      "status": "PASS",
+      "records": 76,
+      "evidence": "ros.json"
+    },
+    "communication": {
+      "status": "PASS",
+      "records": 30,
+      "evidence": "communication.json"
+    },
+    "opencv": {
+      "status": "PASS",
+      "records": 64,
+      "evidence": "opencv.json"
+    },
+    "camera": {
+      "status": "PASS",
+      "records": 34,
+      "evidence": "camera.json"
+    },
+    "navigation": {
+      "status": "PASS",
+      "records": 40,
+      "evidence": "navigation.json"
+    }
+  },
+  "software_records_total": 244,
+  "gui": {
+    "camera-gui": {
+      "status": "PASS",
+      "evidence": "camera-gui.json"
+    },
+    "stereo-gui": {
+      "status": "PASS",
+      "evidence": "stereo-gui.json"
+    },
+    "camera-cli": {
+      "status": "PASS",
+      "evidence": "camera-cli.json"
+    },
+    "stereo-cli": {
+      "status": "PASS",
+      "evidence": "stereo-cli.json"
+    },
+    "rqt": {
+      "status": "PASS",
+      "evidence": "rqt.log"
+    },
+    "rviz": {
+      "status": "PASS",
+      "evidence": "rviz.json"
+    }
+  },
+  "physical_hardware_verified": false,
+  "not_verified": [
+    "second-host network",
+    "physical camera",
+    "robot chassis",
+    "real sensors"
+  ],
+  "gui_test_display": "isolated Xvfb; RViz software OpenGL. NVIDIA hardware OpenGL checked separately on host display through Distrobox.",
+  "source_sha256": {
+    "02-专项技术栈/examples/camera/calibration-lab-demo/README.md": "311329d6be61e7238b82a7c0c98da3e04c79f021cb744e74f841a9080931d25f",
+    "02-专项技术栈/examples/camera/calibration-lab-demo/board.py": "a20cf477bcc43ea8621d4037444e3c40dedbd0db2321d31d326be181c9384f51",
+    "02-专项技术栈/examples/camera/calibration-lab-demo/calibrate.py": "5e80ff7f38725dc076527cb8b9ce1e3d007982b1bafd3bf37dbbe0773dc0c735",
+    "02-专项技术栈/examples/camera/calibration-lab-demo/check_ros.py": "6ce9e1e6aba66973053daa78778597b2f1047c5b9e85f95f96afd89cf173dac7",
+    "02-专项技术栈/examples/camera/calibration-lab-demo/format_gamma.py": "0da170cc42765ce5646ed4ef88d560b9e33f534672ec732aad9c92de53c585c6",
+    "02-专项技术栈/examples/camera/calibration-lab-demo/generate.py": "379abb1548a7dfaafa4ffb0febc780e63953cf79ecbb76262f05c640bf5934ac",
+    "02-专项技术栈/examples/camera/calibration-lab-demo/model_io.py": "d82545899f27e5bf34423da38ee1850195acbe9f506bf71baddcad5e82c51dcb",
+    "02-专项技术栈/examples/camera/calibration-lab-demo/noise.py": "e4e2dfcd3c28a83f157034a4cb6f17e58239dbacb2bf27b58f54289039d8b132",
+    "02-专项技术栈/examples/camera/calibration-lab-demo/optics.py": "4df3131b2d8a7500750604866e83ac92416ac64e2b0e3c4bd2086f4011b18f4c",
+    "02-专项技术栈/examples/camera/calibration-lab-demo/replay_ros.py": "0b1d52a55fbf3205f3c322ab85859885e4c4e6f58d6bab300f89379a1c2bb145",
+    "02-专项技术栈/examples/camera/calibration-lab-demo/stereo.py": "c2a245909406c1ee50dc5475bb9dc1a6af709cf43df17dc669e4bc5140b2006c",
+    "02-专项技术栈/examples/camera/calibration-lab-demo/validate.py": "b655ea95b58ede63620fbca5f3c1adc3ad748af9aa1b7ca780ab395b73fb94a7",
+    "02-专项技术栈/examples/communication/stream-link-demo/README.md": "bc3542b1de16f698ca79c05f2fef25d42c085952b79a1c59be62aea598ef2380",
+    "02-专项技术栈/examples/communication/stream-link-demo/bridge_demo.py": "d27bdeb3e6ce266b763d04b8750afc03da76bfcf1f1ba4e77ad26a0d3b508f08",
+    "02-专项技术栈/examples/communication/stream-link-demo/event_demo.py": "5550b5f44e412accd3e5ae22d2874183f10e5cf0f623713c4cc4f65607203ae2",
+    "02-专项技术栈/examples/communication/stream-link-demo/fault_demo.py": "31e3cc395f1cb41741d7e826fb944e4a9659ee1d78006c9fdd9af0785fd19c1b",
+    "02-专项技术栈/examples/communication/stream-link-demo/framing.py": "19cb92febf329f4d00240ccc9094f5a910cde52e91c159e96687b1737a4050f6",
+    "02-专项技术栈/examples/communication/stream-link-demo/latest_demo.py": "039dec927b670411d3225409b904e9b123bab860ce4bd469682fd83ddfa9af25",
+    "02-专项技术栈/examples/communication/stream-link-demo/parser_demo.py": "63a00694f5789f168a137364e866a7cd422658f48e61fba3b15086cf9116cbe7",
+    "02-专项技术栈/examples/communication/stream-link-demo/ping_demo.py": "5741b7e9506095f072792ab5c9e26961a2c3bdc638de8aada8ef89316ffdb5d0",
+    "02-专项技术栈/examples/communication/stream-link-demo/serial_demo.py": "6d0080f7774cabaa7e6f59202065c5124604187690f6941b4da1d99a964d9246",
+    "02-专项技术栈/examples/communication/stream-link-demo/state.py": "7fad02e68812f448d47627d1e666a85f1227d2194b15df21c8dccb127abc5536",
+    "02-专项技术栈/examples/communication/stream-link-demo/tcp_demo.py": "8e9fc22d66bb15ae5ec92bb2dcddeefaf710c72b0bbc90092673c2de7e19da7c",
+    "02-专项技术栈/examples/navigation/navigation-lab-demo/CMakeLists.txt": "e8f55e204b50b6a06741dc82fee902a9825fd258c1622b627917f43dbf20d934",
+    "02-专项技术栈/examples/navigation/navigation-lab-demo/README.md": "0ce9f5c04b8296b4f20a7d62fa81ac5e796faf923dd03e139c1a39536923d292",
+    "02-专项技术栈/examples/navigation/navigation-lab-demo/bt.py": "bb2187cc6de70557c4cde8d1b939041117f744118d9e72144a50fd23ef39ffaf",
+    "02-专项技术栈/examples/navigation/navigation-lab-demo/client.py": "0f9e21a5bae8d266bd1c47d58d77a923d3621e3ad31f82bbe0c24a69a6968aaf",
+    "02-专项技术栈/examples/navigation/navigation-lab-demo/grid.py": "794ccadc8a2821a3712c87bc4fe714d7bc7addea987afc1da670c2ef0c595201",
+    "02-专项技术栈/examples/navigation/navigation-lab-demo/lab.launch.py": "869cd45bc6c8b4908ea0ef1c78f09000aac36ddd0b248bcab1523a7eee8eb570",
+    "02-专项技术栈/examples/navigation/navigation-lab-demo/localization.py": "fab01fc596bd6d7025719ffa6b0b9eacab46b92b5164c26dbd23218ce3436de3",
+    "02-专项技术栈/examples/navigation/navigation-lab-demo/params.yaml": "4b1e04af9dd37257c21721f02e68b528b4d2b5601b182154ce001dc124d8a985",
+    "02-专项技术栈/examples/navigation/navigation-lab-demo/plot.py": "b9373478723886b80d6a95e73b1edf3dbadbca02e0d5e5102eae2d5531791a26",
+    "02-专项技术栈/examples/navigation/navigation-lab-demo/point_filters.cpp": "939a4b98416ab4827d4825a1d3dab2085cb492015dba185b1008b0cbefb4e647",
+    "02-专项技术栈/examples/navigation/navigation-lab-demo/sim.py": "00304b23669d6891ecb04ad81b86be230f56813246d49ccd1241ea10630e9e6c",
+    "02-专项技术栈/examples/navigation/navigation-lab-demo/tf_demo.py": "adac174ec3a26cfb412f9ceb5206b1e499632c3399e05c2a1785b585ccb554d3",
+    "02-专项技术栈/examples/opencv/image-bridge-demo/CMakeLists.txt": "db14481cac2c786d7123f4453263b95ffbf6eb8f407d4cc9d937278505f0f3db",
+    "02-专项技术栈/examples/opencv/image-bridge-demo/README.md": "c3750d883f64dc8c8f3ba9fcc701a2bf7525a500f0093a981721523cfcaaacc4",
+    "02-专项技术栈/examples/opencv/image-bridge-demo/package.xml": "b2203e885f4a99b60f8697b876356a7569edb8672f9993d504dbdca4c6d1fcdf",
+    "02-专项技术栈/examples/opencv/image-bridge-demo/src/bridge_node.cpp": "d0062c1272c396f3b66a913ce5d9e5fb3921f51dfb7a72bf6a3b845783a7fe03",
+    "02-专项技术栈/examples/opencv/image-bridge-demo/src/roundtrip.cpp": "8353fb70a1a61d83e0f06338eeb357c87f4f75181452fef13442b796c9646039",
+    "02-专项技术栈/examples/opencv/image-lab-demo/CMakeLists.txt": "9d9c492fadd31daa954a835f40db0b68783e46ebe860247d4a78d3fe84739a62",
+    "02-专项技术栈/examples/opencv/image-lab-demo/README.md": "ea8a68ee88e15b2c8e60411b57ec4ea05e6a4e2025550a9f44610a588b7c7428",
+    "02-专项技术栈/examples/opencv/image-lab-demo/src/contour_demo.cpp": "7cd1956a824c698846f75d5686a1b042a16a63bcd8a0931eac756f333e1e8de5",
+    "02-专项技术栈/examples/opencv/image-lab-demo/src/features_demo.cpp": "2812f62c4daaf87f3adc6f0ced7341ec5c4127dc7c44dee75f5ed14ecc794df6",
+    "02-专项技术栈/examples/opencv/image-lab-demo/src/filter_demo.cpp": "42647f4c500a06a18c3dae7f446ef9f93063b808bdcb0c63e32b89bfec55b5c5",
+    "02-专项技术栈/examples/opencv/image-lab-demo/src/hsv_demo.cpp": "e8336a86e5285ff1864e4badc8a6ed34e00e97777c68ddec600b444438a45178",
+    "02-专项技术栈/examples/opencv/image-lab-demo/src/io_demo.cpp": "b7c1ae8b8c46e063b2a85237ef5991dce871bcab1fda87b3e3334ce498df5523",
+    "02-专项技术栈/examples/opencv/image-lab-demo/src/mat_demo.cpp": "50e7b73959afd4240ee97c19278c36ee0f755212bdc3b0edef6896f2a26736b9",
+    "02-专项技术栈/examples/opencv/image-lab-demo/src/morphology_demo.cpp": "f394725f86dce6dc2ef404bcf9995b182093304acef94bed679fa957ca4803b7",
+    "02-专项技术栈/examples/opencv/image-lab-demo/src/pipeline_demo.cpp": "879674d6305339f290d56eae08882204ede2614ff6c5a2f24baf2692257034a3",
+    "02-专项技术栈/examples/opencv/image-lab-demo/src/resize_demo.cpp": "926debb6bdbcf8eb19d9ad867dd8026d474cc85a2dfb83745842ce9b0de3a835",
+    "02-专项技术栈/examples/opencv/image-lab-demo/src/sample_demo.cpp": "4f81ccef2b77ff12f3b5236436f97ceb1563fb40a72fd7d58bf550a26e5c5a8c",
+    "02-专项技术栈/examples/opencv/image-lab-demo/src/threshold_demo.cpp": "1df3f14462b2b8c6661f04943e296dda8126bceaed57baef817c5b56a6cc53f7",
+    "02-专项技术栈/examples/opencv/image-lab-demo/src/version_demo.cpp": "80b0191f05ef6c3f4f46490a3b5d875984bef8fc4b80fe9d9e8c50228a1acf09",
+    "02-专项技术栈/examples/opencv/image-lab-demo/src/video_demo.cpp": "0dbf58bce81ba33a90611b779309d8a5683a7d12744f209930b39dc7d9337287",
+    "02-专项技术栈/examples/opencv/image-lab-demo/src/viewer_demo.cpp": "b9f55613213951867c659ef83ebd6d29d1395739390ec6f7f09e23e68f3ae874",
+    "02-专项技术栈/examples/ros2/README.md": "9c952ea97a6a6b51faa663ff7c96e40b6c321af7da4caa44fb7171b331a11568",
+    "02-专项技术栈/examples/ros2/basic-interfaces-demo/README.md": "23d564c454ddd8dd9408a49b3371fecbcbc3b9366d1864f4ca2035da234dde68",
+    "02-专项技术栈/examples/ros2/basic-interfaces-demo/my_msgs/CMakeLists.txt": "de0efc91f8ed3eaa582c0ea24b05d6b7d5fec7149315d22cfe007a75331ae06b",
+    "02-专项技术栈/examples/ros2/basic-interfaces-demo/my_msgs/msg/My.msg": "8a9be80f4fa6840a264f997db5a053d734511258233a98b6806ab5ae70243d9e",
+    "02-专项技术栈/examples/ros2/basic-interfaces-demo/my_msgs/package.xml": "ee9f66e622e2dd5ca23ef0490fab85871e5e336e83d9fc742f0b9ab694306ab3",
+    "02-专项技术栈/examples/ros2/basic-interfaces-demo/my_package/CMakeLists.txt": "caa6bfcad7a0465031e1b8b4ac2d12242c03d8e760a19996a3d02f0aa57cacef",
+    "02-专项技术栈/examples/ros2/basic-interfaces-demo/my_package/include/my_package/my_node.h": "3769e8303e0ba768ab2a961868d585b1953cbc4df45f15158338b33af01ca4dc",
+    "02-专项技术栈/examples/ros2/basic-interfaces-demo/my_package/package.xml": "24a76f84a19e893bed4d8e16fd53539ddf2165e9c2c1ef01c2d2b21ea3f9e91f",
+    "02-专项技术栈/examples/ros2/basic-interfaces-demo/my_package/src/my_node.cpp": "4a1ce8b2e2328d000cf4386f4e0e22f90b9e98d9bfc873dd80aa189093189b34",
+    "02-专项技术栈/examples/ros2/basic-interfaces-demo/my_package/src/node_run.cpp": "c6c32a34d4452c20b23410f30dc7b6d87b9c8599799d662ecfb75d0abcb8f3be",
+    "02-专项技术栈/examples/ros2/header_flags.py": "ef6eb9831af18be72fce023efcf590d21be44123a05a721669dc0468ee156cc6",
+    "02-专项技术栈/examples/ros2/training_tools/CMakeLists.txt": "78b8bf4fd060f5ebb12b9a387af89bc09e3ce95a6d1d4551ae277705a0738279",
+    "02-专项技术栈/examples/ros2/training_tools/cmake/Auto.cmake": "5522121d359241b6d00285c6a63b8b753aa9728e443a744ace81032adc86a3a0",
+    "02-专项技术栈/examples/ros2/training_tools/config/heartbeat.yaml": "ed47bfbd08dbf95ebeb2d8fb94c175623f72c8165a9a21218afcff9523250fa9",
+    "02-专项技术栈/examples/ros2/training_tools/launch/heartbeat.launch.py": "f25658e2df3c57df20ece2dcaecdee5ff83dbbd470bc5fbb0570dc6bd6674700",
+    "02-专项技术栈/examples/ros2/training_tools/launch/team.launch.py": "e4455b5bc2b4db533166a439ccbe489d4e41b047ab92fdb4bc7a43b62fff3b32",
+    "02-专项技术栈/examples/ros2/training_tools/package.xml": "9a616cbfc50dc2343bf41bb5af27de0f32b5f9d44fef5a545c7317803a3e74cc",
+    "02-专项技术栈/examples/ros2/training_tools/src/heartbeat.cpp": "bb7ad115b1a15fc8035b638ab97f5eba104d216cd3f39c688cbd369b9beb5972",
+    "02-专项技术栈/examples/ros2/training_tools/test/test_interval.cpp": "477fdccc85ba8558c747673992b535c3884540a95c4498ed280d4c7e3d82ec91",
+    "scripts/verify_camera_cli.py": "5aff31c6844e8fe52a7cd453ff4ed6624913de1291de2ab0ab3fe9afc9f51f22",
+    "scripts/verify_camera_examples.py": "637ef670916d7c03497e61d1f9b02249b25153f59b637573c3bc1482a5741a78",
+    "scripts/verify_camera_gui.py": "6d49b015d71b643e12ac018fc7596e0f24597bc00189a9214d7c270c7fbb0bf9",
+    "scripts/verify_comm_examples.py": "c59dcb39fb197c99cfd087c1ae0f4c4733d9f80d369ed9669d1dbc8268ab8c22",
+    "scripts/verify_nav_examples.py": "5ec675cb20dbe909836e739c1c1e268208f21e65fcbb90548f122e8e1c0f60d2",
+    "scripts/verify_opencv_examples.py": "66f14f5d198eaf2346ee801be8fd2506dd2a09bb2c243b96082a52526b732de0",
+    "scripts/verify_ros_examples.py": "349ceb46ca2a74f90ef7814f40dd64fccfbc4d79c844b20d0997aae0e294df0e",
+    "scripts/verify_ros_gui.py": "7ad21fab4f92cbe6567534c440c948b05226e6a48fb910e299a55175f648c2ec"
+  },
+  "pdf": {
+    "path": "/home/mijiao/Apps/Tutorial4New/02-专项技术栈/main.pdf",
+    "sha256": "4e602b8c4aeccf94993744b5e7ba50ae55d007c56048b7ae8e59ea03f618a501",
+    "pages": 272,
+    "changed_and_visually_inspected_physical_pages": [
+      138,
+      139
+    ],
+    "unchanged_pages": "remaining 270 pages have identical extracted text to the prior reviewed Humble PDF"
+  },
+  "shell_setup": {
+    "zsh_ros": "humble",
+    "bash_ros": "humble",
+    "rmw": "default Fast DDS",
+    "qt_platform_theme": "gtk3",
+    "icon_theme": "Papirus-Dark",
+    "backup": "/home/mijiao/.zshrc.bak-ubuntu2204-20261003"
+  },
+  "installation_sources": [
+    "https://github.com/ros2/ros2_documentation/blob/humble/source/Installation/Ubuntu-Install-Debs.rst",
+    "https://github.com/ros-infrastructure/ros-apt-source",
+    "https://distrobox.it/useful_tips/#using-the-gpu-inside-the-container",
+    "https://github.com/opencv/opencv/blob/4.5.4/modules/imgproc/include/opencv2/imgproc.hpp"
+  ],
+  "temporary_logs_and_data": "/tmp/tutorial4new-humble-runtime-20261003"
+}

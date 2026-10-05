@@ -74,9 +74,9 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
     env = os.environ.copy()
-    assert env.get('ROS_DISTRO') == 'jazzy', '先加载 Jazzy 环境'
-    env.update(ROS_DOMAIN_ID='79', ROS_AUTOMATIC_DISCOVERY_RANGE='LOCALHOST', RCUTILS_COLORIZED_OUTPUT='0')
-    for key in ['ROS_LOCALHOST_ONLY', 'ROS_STATIC_PEERS', 'RMW_IMPLEMENTATION']:
+    assert env.get('ROS_DISTRO') == 'humble', '先加载 Humble 环境'
+    env.update(ROS_DOMAIN_ID='79', ROS_LOCALHOST_ONLY='1', RCUTILS_COLORIZED_OUTPUT='0')
+    for key in ['ROS_AUTOMATIC_DISCOVERY_RANGE', 'ROS_STATIC_PEERS', 'RMW_IMPLEMENTATION']:
         env.pop(key, None)
     try:
         with tempfile.TemporaryDirectory(prefix='comm-textbook-') as temp:
@@ -166,14 +166,14 @@ print('真实线程迟到清理、时效边界、优先级与拒绝旧写入通�
                 proc, log = background(['python3', 'bridge_demo.py', '--ros'], folder, env)
                 output = run(['ros2', 'topic', 'echo', '/range_m', 'std_msgs/msg/Float64', '--once'], folder, env)
                 assert 'data: ' + meters in output
-                assert 'seq=8, range_m=' + meters in finish(proc, log, 'Jazzy 实际桥接话题 ' + meters)
+                assert 'seq=8, range_m=' + meters in finish(proc, log, 'Humble 实际桥接话题 ' + meters)
             run(['ros2', 'daemon', 'stop'], folder, env)
     finally:
         for proc, log in live:
             stop(proc)
             log.close()
         args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(json.dumps({'ROS_DISTRO': 'jazzy', 'records': records}, ensure_ascii=False, indent=2)+'\n')
+        args.output.write_text(json.dumps({'ROS_DISTRO': 'humble', 'records': records}, ensure_ascii=False, indent=2)+'\n')
 
 if __name__ == '__main__':
     main()

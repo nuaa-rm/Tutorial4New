@@ -1,8 +1,8 @@
-% 工程实践：在 Jazzy 中验证，保留 Humble 的对应配置。
+% 工程实践：以 Ubuntu 22.04 / ROS2 Humble 为主。
 \subsubsection{先检查环境，再检查代码}
 \label{sec:ros2-environment}
 
-刚才节点已经跑起来了，不过你很快会遇到另一种问题：终端能运行，IDE 却说找不到包，或者明明改了源码，启动后还是昨天的输出。这时候先别急着改 C++，我们先看看程序到底用了哪套环境。系统安装称为底层工作空间（underlay），自己的安装目录称为覆盖工作空间（overlay）；先加载底层，再加载覆盖层，同名包就可能被后者覆盖。本节继续用 Bash 和 Jazzy；Humble 的脚本路径按章首说明替换。
+刚才节点已经跑起来了，不过你很快会遇到另一种问题：终端能运行，IDE 却说找不到包，或者明明改了源码，启动后还是昨天的输出。这时候先别急着改 C++，我们先看看程序到底用了哪套环境。系统安装称为底层工作空间（underlay），自己的安装目录称为覆盖工作空间（overlay）；先加载底层，再加载覆盖层，同名包就可能被后者覆盖。本节继续用 Bash 和 Humble。
 
 \begin{center}
 \begin{tabular}{p{0.40\textwidth}p{0.52\textwidth}}
@@ -14,9 +14,7 @@
 \texttt{CMAKE\_PREFIX\_PATH} & CMake 查找依赖的前缀。\\
 \nolinkurl{PYTHONPATH / LD_LIBRARY_PATH} & Python 模块与动态库搜索路径。\\
 \texttt{ROS\_DOMAIN\_ID} & 通信域编号；通信双方需要一致。\\
-\texttt{ROS\_LOCALHOST\_ONLY} & Humble 的本机通信设置，值为 1。\\
-\nolinkurl{ROS_AUTOMATIC_DISCOVERY_RANGE} & Jazzy 的自动发现范围；本机实验使用 LOCALHOST。\\
-\texttt{ROS\_STATIC\_PEERS} & Jazzy 中额外指定的发现对端；本机实验要清除。\\
+\texttt{ROS\_LOCALHOST\_ONLY} & 设为 1 时仅与本机节点通信；跨机器时取消该限制。\\
 \texttt{RMW\_IMPLEMENTATION} & 选择已经安装的中间件实现。\\
 \bottomrule[1.5pt]
 \end{tabular}
@@ -28,14 +26,14 @@
 完成前面的工作空间练习后，在新终端执行：
 \par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{tbash}
-source /opt/ros/jazzy/setup.bash
+source /opt/ros/humble/setup.bash
 source ~/ros2_ws/install/setup.bash
 printenv ROS_VERSION ROS_DISTRO AMENT_PREFIX_PATH
 ros2 pkg prefix my_package
 ros2 pkg executables my_package
 \end{tbash}
 \end{minipage}\par\smallskip
-应显示 ROS 版本 2、发行版 jazzy，以及自己工作空间中的包安装前缀。若路径指向别的工作空间，先修正加载顺序；若找不到包，检查构建是否成功、包名是否一致。
+应显示 ROS 版本 2、发行版 humble，以及自己工作空间中的包安装前缀。若路径指向别的工作空间，先修正加载顺序；若找不到包，检查构建是否成功、包名是否一致。
 \end{example}
 
 \paragraph*{在实验室中只与自己的节点通信}
@@ -45,10 +43,9 @@ ros2 pkg executables my_package
 在两个终端分别执行下面的环境设置，然后分别运行 talker 与 listener。域 42 是这次练习的分组编号，实验室已有分配时换成你的编号：
 \par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{tbash}
-source /opt/ros/jazzy/setup.bash
+source /opt/ros/humble/setup.bash
 export ROS_DOMAIN_ID=42
-unset ROS_LOCALHOST_ONLY ROS_STATIC_PEERS
-export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
+export ROS_LOCALHOST_ONLY=1
 ros2 daemon stop
 # 终端 A
 ros2 run demo_nodes_cpp talker
@@ -61,14 +58,14 @@ ros2 run demo_nodes_cpp listener
 按 Ctrl+C 停止两个节点。在两个终端分别执行下列命令，再重新启动节点，恢复默认域和普通发现范围：
 \par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{tbash}
-unset ROS_LOCALHOST_ONLY ROS_AUTOMATIC_DISCOVERY_RANGE ROS_STATIC_PEERS ROS_DOMAIN_ID
+unset ROS_LOCALHOST_ONLY ROS_DOMAIN_ID
 ros2 daemon stop
 \end{tbash}
 \end{minipage}\par\smallskip
-上面的恢复命令假定这几个变量原来没有设置。如果你原来使用别的域或显式对端，实验前记下它们的值，结束后恢复原值。启动脚本或上层服务也可能设置这些变量，仍需检查；已有进程不会因为另一终端执行 unset 就改变配置。
+上面的恢复命令假定这两个变量原来没有设置。如果你原来使用别的域或本机通信限制，实验前记下它们的值，结束后恢复原值。启动脚本或上层服务也可能设置这些变量，仍需检查；已有进程不会因为另一终端执行 unset 就改变配置。
 \end{example}
 
-如果你用 Humble，把本机实验中的两条发现范围设置换成 \texttt{export ROS\_LOCALHOST\_ONLY=1}，域编号和节点运行命令保持相同。Jazzy 中我们使用 \texttt{ROS\_AUTOMATIC\_DISCOVERY\_RANGE=LOCALHOST}，同时清除 \texttt{ROS\_STATIC\_PEERS}；显式对端可能让 LOCALHOST 设置下的节点仍连接到远端，不能只检查一个变量。这里讲的是 DDS 中间件的发现设置，其他中间件（例如 Zenoh）要按它自己的文档配置。
+Humble 的本机实验使用 \texttt{export ROS\_LOCALHOST\_ONLY=1}。跨机器通信时，两端先取消本机限制，再设置相同域编号并重启节点与 daemon；还要确认网络可达，不能只把域编号改成一样就宣布连接成功。
 
 你确认这套设置适合日常实验后，再考虑写入 \path{~/.bashrc}。修改前用 \texttt{cp -p ~/.bashrc ~/.bashrc.ros-backup} 备份，已有备份就另取名字。恢复时删除对应行，并在当前终端 unset 或打开新终端；重新加载一个“不再设置该变量”的文件，并不会主动清除终端里已经存在的值。
 
@@ -83,8 +80,8 @@ ROS2 不使用 ROS1 的 Master、\texttt{roscore} 或 11311 端口来组织通�
 在目标 Ubuntu 教学机安装软件后，在两个新终端中分别加载并设置：
 \par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{tbash}
-sudo apt install ros-jazzy-rmw-cyclonedds-cpp
-source /opt/ros/jazzy/setup.bash
+sudo apt install ros-humble-rmw-cyclonedds-cpp
+source /opt/ros/humble/setup.bash
 export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 ros2 daemon stop
 # 在一个终端运行 talker，另一个运行 listener
@@ -94,7 +91,7 @@ ros2 run demo_nodes_cpp talker
 另一个终端的最后一条改为 \nolinkurl{ros2 run demo_nodes_cpp listener}。完成后停止节点、unset 该变量并停止 daemon，可恢复环境的默认选择。
 \end{example}
 
-\texttt{CYCLONEDDS\_URI} 与 \nolinkurl{FASTRTPS_DEFAULT_PROFILES_FILE} 分别用于对应 DDS 实现的配置；不要把一家的 XML 给另一家。\texttt{ROS\_DISCOVERY\_SERVER} 用于支持它的 Fast DDS 发现服务器模式，必须先部署服务器，不能仅填写一个 IP 就实现跨网段通信。Jazzy 的发现范围及显式对端说明见 \url{https://docs.ros.org/en/jazzy/Tutorials/Advanced/Improved-Dynamic-Discovery.html}；跨机器前也要确认 Distrobox 是否使用共享宿主网络，不能仅凭容器名字推断。安全部署涉及 SROS2 密钥库及 \texttt{ROS\_SECURITY\_ENABLE}、\texttt{ROS\_SECURITY\_STRATEGY}、\texttt{ROS\_SECURITY\_KEYSTORE}，需配套证书与策略，本章不展开部署。
+\texttt{CYCLONEDDS\_URI} 与 \nolinkurl{FASTRTPS_DEFAULT_PROFILES_FILE} 分别用于对应 DDS 实现的配置；不要把一家的 XML 给另一家。\texttt{ROS\_DISCOVERY\_SERVER} 用于支持它的 Fast DDS 发现服务器模式，必须先部署服务器，不能仅填写一个 IP 就实现跨网段通信。Humble 的环境设置说明见 \url{https://docs.ros.org/en/humble/Tutorials/Beginner-CLI-Tools/Configuring-ROS2-Environment.html}；跨机器前也要确认 Distrobox 是否使用共享宿主网络，不能仅凭容器名字推断。安全部署涉及 SROS2 密钥库及 \texttt{ROS\_SECURITY\_ENABLE}、\texttt{ROS\_SECURITY\_STRATEGY}、\texttt{ROS\_SECURITY\_KEYSTORE}，需配套证书与策略，本章不展开部署。
 
 \begin{conclusion}
 \begin{itemize}
@@ -170,7 +167,7 @@ cd ~/ros2_ws/src/training_tools
 \par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{tbash}
 cd ~/ros2_ws
-source /opt/ros/jazzy/setup.bash
+source /opt/ros/humble/setup.bash
 rosdep install --from-paths src --ignore-src -r -y
 colcon build --packages-select training_tools --cmake-args -DBUILD_TESTING=OFF
 source install/setup.bash
@@ -195,7 +192,7 @@ ros2 run training_tools heartbeat
 
 文件末尾调用 \nolinkurl{ament_package()}，自动版本则调用 \nolinkurl{ament_auto_package()}，完成包索引与配置生成。
 
-组件化还需要代码中的 \nolinkurl{RCLCPP_COMPONENTS_REGISTER_NODE} 和 CMake 的 \nolinkurl{rclcpp_components_register_nodes} 注册；不能靠随意添加 XML 标签注册，也不保证自动实现零拷贝。组件容器与数据所有权优化留作进阶阅读。
+组件化还需要代码中的 \nolinkurl{RCLCPP_COMPONENTS_REGISTER_NODE} 和 CMake 的 \nolinkurl{rclcpp_components_register_nodes} 注册；不能靠随意添加 XML 标签注册，也不保证自动实现零拷贝。第\ref{sec:ros2-image-components}节会用完整的图像工程，把组件注册、Launch 布局与数据所有权接起来。
 
 \begin{example}[把参数边界变成自动检查]
 在 \nolinkurl{test/test_interval.cpp} 保存一个无硬件依赖的边界测试。这里的函数是独立教学逻辑，尚未接入 heartbeat；实际项目应测试生产代码中的同一函数。
@@ -361,7 +358,7 @@ find "$HOME/ros_logs/heartbeat_test" -type f
 先用终端成功构建 training\_tools；关闭已运行的 CLion 实例，避免启动命令把项目交给旧环境中的实例。若安装时已创建 \texttt{clion} 命令，执行：
 \par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{tbash}
-source /opt/ros/jazzy/setup.bash
+source /opt/ros/humble/setup.bash
 source ~/ros2_ws/install/setup.bash
 clion ~/ros2_ws/src/training_tools
 \end{tbash}
@@ -372,7 +369,7 @@ clion ~/ros2_ws/src/training_tools
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.9\textwidth,trim=100bp 180bp 400bp 300bp,clip]{images/ros2_clion_revised.png}
-\caption{Jazzy 容器内的真实 CLion 调试：发布回调暂停，消息文本已由运行参数覆盖}
+\caption{真实 CLion 调试窗口：发布回调暂停，消息文本已由运行参数覆盖}
 \label{fig:ros2-clion-callback}
 \end{figure}
 \end{example}
@@ -394,7 +391,7 @@ test -f build/training_tools/compile_commands.json
 \end{example}
 
 \paragraph*{源码不红，库头文件却红怎么办}
-这时候你可能会碰到一个看起来很矛盾的情况：heartbeat.cpp 能编译，跳进 rclcpp.hpp 却满屏红线，提示它自己的子头文件找不到。先别急着重装 ROS，我们要检查的是编辑器解析这个文件时用了哪些参数。头文件通常没有独立的编译记录，编辑器需要借用包含它的源码的参数；如果这一步没有借到，只有系统头文件路径，就会找不到 ROS 的头文件。本次 Jazzy 与 CLion 2026.2.3 补测正好遇到了这个情况：源码有 27 个 ROS include 路径，外部头文件的 clangd 解析命令却没有带上它们。成功编译说明编译器的配置可用，不能顺便证明编辑器的配置也正确。
+这时候你可能会碰到一个看起来很矛盾的情况：heartbeat.cpp 能编译，跳进 rclcpp.hpp 却满屏红线，提示它自己的子头文件找不到。先别急着重装 ROS，我们要检查的是编辑器解析这个文件时用了哪些参数。头文件通常没有独立的编译记录，编辑器需要借用包含它的源码的参数；如果这一步没有借到，只有系统头文件路径，就会找不到 ROS 的头文件。比较源码与外部头文件的 clangd 解析命令，确认缺少了哪些 include 路径。成功编译说明编译器的配置可用，不能顺便证明编辑器的配置也正确。
 
 \begin{example}[给指定头文件补上当前源码的解析参数]
 仅当你确认遇到了上面的参数缺失时再做这个例子。我们继续用同一个 training\_tools 工程，随书 \nolinkurl{examples/ros2/header_flags.py} 读取其编译数据库，输出一段 clangd 配置；它不执行编译命令，也不修改数据库。先把这个文件复制到 \texttt{\textasciitilde/ros2\_ws}，代码如下：
@@ -419,7 +416,7 @@ python3 header_flags.py build/training_tools/compile_commands.json \
 cat /tmp/ros-header-flags.json
 \end{tbash}
 \end{minipage}\par\smallskip
-这里的数据库和源码换成你的实际路径；头文件也以刚才跳转显示的路径为准。旧发行版的安装目录层级可能不同，不能只换发行版名字就认定路径存在。确认输出与数据库中的 include 路径相符后，放进用户配置目录。已有配置先备份，再追加为一个新片段：
+这里的数据库和源码换成你的实际路径；头文件也以刚才跳转显示的路径为准。安装目录层级可能随软件包版本变化，先用 \texttt{test -f} 确认文件存在。确认输出与数据库中的 include 路径相符后，放进用户配置目录。已有配置先备份，再追加为一个新片段：
 \par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{tbash}
 cfg_dir="${XDG_CONFIG_HOME:-$HOME/.config}/clangd"
@@ -433,13 +430,13 @@ fi
 cat /tmp/ros-header-flags.json >> "$cfg_dir/config.yaml"
 \end{tbash}
 \end{minipage}\par\smallskip
-配置放在这里，是因为库头文件位于工作空间之外，工作空间中的 \texttt{.clangd} 不会作用于它。IDE 需要使用同一个 \texttt{XDG\_CONFIG\_HOME}，默认不用额外设置；如果你用临时配置启动 IDE，就在那套临时目录里操作。随后关闭这个头文件标签，再从源码重新跳转，查看 Problems 中的诊断和实际解析参数。本次补测里，rclcpp.hpp 的 15 条找不到子头文件的错误变为零；停用片段后又出现 15 条，恢复片段后再次为零，没有关闭诊断。
+配置放在这里，是因为库头文件位于工作空间之外，工作空间中的 \texttt{.clangd} 不会作用于它。IDE 需要使用同一个 \texttt{XDG\_CONFIG\_HOME}，默认不用额外设置；如果你用临时配置启动 IDE，就在那套临时目录里操作。随后关闭这个头文件标签，再从源码重新跳转，查看 Problems 中的诊断和实际解析参数。应能看到缺少的路径被补上，相应的找不到子头文件错误消失；保留诊断，并比较停用、恢复片段后的结果。
 
 这只是把选定源码的解析条件借给选定头文件。其他包可能有不同的宏和路径，你要选它实际使用的源码重新生成；同一个头文件有多个编译上下文时也要先选定上下文。数据库、依赖或发行版变化后重新核对片段，不要把旧路径永久挂着。若仍有其他诊断，按其具体原因继续检查，不能一股脑关掉红线。
 \end{example}
 
 \begin{note}
-可以从 Find Action 搜索 Show Clangd Tool Window 查看诊断工具；需要解析命令时，搜索 Registry，把 \texttt{clion.clang.clangd.debug} 临时设为 2，关闭并重开头文件后在 IDE 日志中查看 ASTWorker 的 command，查完恢复为 0。这次补测据此比较源码与头文件的实际 include 路径。配置格式和头文件参数借用机制分别见 \href{https://clangd.llvm.org/config}{clangd 配置文档}与 \href{https://clangd.llvm.org/design/compile-commands}{编译命令说明}；不要把 clangd 进程自身的参数与它解析某个文件的编译参数混在一起。
+可以从 Find Action 搜索 Show Clangd Tool Window 查看诊断工具；需要解析命令时，搜索 Registry，把 \texttt{clion.clang.clangd.debug} 临时设为 2，关闭并重开头文件后在 IDE 日志中查看 ASTWorker 的 command，查完恢复为 0。据此比较源码与头文件的实际 include 路径。配置格式和头文件参数借用机制分别见 \href{https://clangd.llvm.org/config}{clangd 配置文档}与 \href{https://clangd.llvm.org/design/compile-commands}{编译命令说明}；不要把 clangd 进程自身的参数与它解析某个文件的编译参数混在一起。
 \end{note}
 
 \begin{exercise}

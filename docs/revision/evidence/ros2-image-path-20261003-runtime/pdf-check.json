@@ -1,0 +1,45 @@
+{
+  "pages": 293,
+  "selected_physical_pages": [
+    41,
+    42,
+    43,
+    44,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    268,
+    269,
+    270
+  ],
+  "compilation_passes": 3,
+  "layout_rechecked_pages": [
+    55,
+    56,
+    57
+  ],
+  "overfull": false,
+  "unresolved_references": false,
+  "duplicate_labels": false,
+  "visual_review_passed": true,
+  "checked_physical_pages": [
+    41,
+    42,
+    43,
+    44,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    268,
+    269,
+    270
+  ],
+  "pdf_sha256": "562bb49c2c6851a70f52a4779636c15ead75cc1c4e441625c61db434d0a9ad12",
+  "qa_directory": "../ros2-zenoh-20261003-runtime/pdf-qa"
+}

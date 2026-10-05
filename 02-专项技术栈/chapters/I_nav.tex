@@ -1,5 +1,5 @@
 \subsubsection{导航技术总览}
-\noindent\textbf{用语说明：}视觉组三个方向之一是\textbf{导航}，赛场上主要落地在哨兵等移动平台。本章的激光雷达（LiDAR）是测距传感器，与方向名“雷达站”不是一回事。
+\noindent\textbf{用语说明：}视觉组四个方向之一是\textbf{导航}，赛场上主要落地在哨兵等移动平台。本章的激光雷达（LiDAR）是测距传感器，与方向名“雷达站”不是一回事。
 
 现在，你坐在哨兵的脑袋里面，你的目标是悄悄摸到敌方基地后面偷家。
 但是没认真看规则的你忘记了地图长什么样，你打开手机，发现好心的wzx部长已经帮你存了一份\textbf{标准赛场地图[1]}。
@@ -28,21 +28,21 @@
 不过，手机“信号不好”只是帮助记忆的类比。真实机器人可能是 TF 缺失、观测过期、没有可行控制或长期不前进，处理方式各不相同，不能一律先倒车再说。我们先定位，给规划器当前位置和目标；规划器给出路径，控制器跟踪，新的障碍进入代价地图后还可能触发重规划。这几个模块一直交换最新数据，才形成导航闭环。
 
 \begin{example}\label{ex:nav-overview}
-这章的小项目在本卷的 \texttt{examples/navigation/navigation-lab-demo}。首先在 Ubuntu 24.04 的 Jazzy 环境安装依赖，再进入项目。下面的路径是仓库位置示例，换成你自己的；宿主没有 ROS 时先执行第一行进入容器。
+这章的小项目在本卷的 \texttt{examples/navigation/navigation-lab-demo}。首先在 Ubuntu 22.04 的 Humble 环境安装依赖，再进入项目。下面的路径是仓库位置示例，换成你自己的；使用 Distrobox 时，先进入已安装 Humble 的 Ubuntu 22.04 容器；示例容器名换成你自己的，原生 Ubuntu 用户跳过这一步。
 \begin{tbash}
-distrobox enter ubuntu2404
+distrobox enter ubuntu2204
 bash
-source /opt/ros/jazzy/setup.bash
+source /opt/ros/humble/setup.bash
 sudo apt-get install --no-install-recommends \
-  ros-jazzy-navigation2 ros-jazzy-nav2-bringup \
+  ros-humble-navigation2 ros-humble-nav2-bringup \
   libpcl-dev cmake g++ python3-numpy python3-scipy \
   python3-matplotlib python3-yaml fonts-wqy-zenhei
 cd /home/mijiao/Apps/Tutorial4New/02-专项技术栈/\
 examples/navigation/navigation-lab-demo
 export ROS_DOMAIN_ID=188
-export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
+export ROS_LOCALHOST_ONLY=1
 \end{tbash}
-本章实跑使用 Nav2 1.3.13、PCL 1.14.0。Humble 上概念共用，但插件名称、检查器参数与速度消息的版本差异要核对，不能直接照抄所有配置。两终端需要同一套环境与 Domain ID；188 是演示选择，若本机已有项目使用它就换一个空闲值。
+本章代码与配置使用 Humble 的 Nav2 接口，PCL 由系统的 libpcl-dev 提供。两终端需要同一套环境与 Domain ID；188 是演示选择，若本机已有项目使用它就换一个空闲值。
 
 我们用生成的小地图，让真实 Nav2 服务器规划、控制，再由软件积分速度，观察机器人是否真的沿路前进。地图、TF、最短路和恢复的代码会在相应小节依次展开，完整调用在\ref{sec:nav-real}节。
 \end{example}
@@ -133,7 +133,7 @@ python3 localization.py
 \label{fig:I_nav-4}
 \end{figure}
 
-从求解方式看，可以看到滤波与图优化两类思路，但具体系统经常组合使用。gmapping 使用粒子滤波；hector\_mapping 的核心是扫描匹配，不能一起塞进“都是滤波”的筐里。\href{https://index.ros.org/p/hector_mapping/}{hector\_mapping 的介绍}可以帮助核对这一点。Point-LIO 是激光惯性里程计的例子，\href{https://github.com/hku-mars/Point-LIO}{其原仓库}强调点时间戳、雷达与 IMU 同步、外参和 IMU 量程；原版提供的是 ROS 1 构建流程，接 Jazzy 时还要核对实际采用的移植版本。这里没有把它装上就宣布“小哨兵会定位了”，本章先把输入输出和故障原因对上。
+从求解方式看，可以看到滤波与图优化两类思路，但具体系统经常组合使用。gmapping 使用粒子滤波；hector\_mapping 的核心是扫描匹配，不能一起塞进“都是滤波”的筐里。\href{https://index.ros.org/p/hector_mapping/}{hector\_mapping 的介绍}可以帮助核对这一点。Point-LIO 是激光惯性里程计的例子，\href{https://github.com/hku-mars/Point-LIO}{其原仓库}强调点时间戳、雷达与 IMU 同步、外参和 IMU 量程；原版提供的是 ROS 1 构建流程，接 ROS2 Humble 时还要核对实际采用的移植版本。这里没有把它装上就宣布“小哨兵会定位了”，本章先把输入输出和故障原因对上。
 \begin{exercise}\label{ex:nav-fusion}
 一份雷达数据落后 IMU 0.1 s，车体以 1 m/s 平移。仅考虑这个时间差，两份数据对应的位置会相差多少？再分别给出轮子打滑、白墙缺纹理和长走廊中的一个排查方向。
 \end{exercise}
@@ -261,13 +261,13 @@ python3 grid.py --blocked --output out/blocked
 \end{figure}
 规划时没看到的移动目标可能突然挡路，只有路线还不够。回到缺德地图，你这位车手对应控制器，地图只告诉你怎么绕到目的地，你还要根据视野和车的能力决定眼下怎样转向、减速。Nav2 控制器通常输出 Twist 或 TwistStamped 速度，而不是直接替底盘算电机电流；电控执行接口还要在卷三接起来。
 
-DWA、TEB 是常见的局部规划思路，但不能看到 Nav2 就默认它们正在运行。我们在 Jazzy 1.3.13 上明确选 Navfn 规划器和调节纯追踪（Regulated Pure Pursuit，RPP）控制器。RPP 根据前方追踪点与几何关系跟踪路径，同时调节速度并检查碰撞；它不是任意动态障碍下都能自行绕路的控制器。算法与参数可对照\href{https://api.nav2.org/nav2-jazzy/html/md_nav2_regulated_pure_pursuit_controller_README.html}{Jazzy 的 RPP 说明}，实际插件以加载日志与配置为准。
+DWA、TEB 是常见的局部规划思路，但不能看到 Nav2 就默认它们正在运行。本章在 Humble 中明确选 Navfn 规划器和调节纯追踪（Regulated Pure Pursuit，RPP）控制器。RPP 根据前方追踪点与几何关系跟踪路径，同时调节速度并检查碰撞；它不是任意动态障碍下都能自行绕路的控制器。算法与参数可对照\href{https://github.com/ros-navigation/navigation2/tree/humble/nav2_regulated_pure_pursuit_controller}{Humble 的 RPP 说明}，实际插件以加载日志与配置为准。
 
 \begin{example}\label{ex:nav-real-run}
-首先看 \texttt{params.yaml}。\texttt{GridBased}、\texttt{FollowPath} 是我们给插件实例起的名字，后面的 action 请求要用相同 ID。控制频率 20 Hz；局部窗口 4×4 m；车体用半径 0.15 m 的圆；膨胀半径 0.35 m。配置固定使用 Jazzy 的 Twist 输出，没有速度平滑器、真实传感器或碰撞监控器。
-\lstinputlisting[language=bash,basicstyle=\footnotesize\ttfamily,firstline=1,lastline=37]{examples/navigation/navigation-lab-demo/params.yaml}
+首先看 \texttt{params.yaml}。\texttt{GridBased}、\texttt{FollowPath} 是我们给插件实例起的名字，后面的 action 请求要用相同 ID。控制频率 20 Hz；局部窗口 4×4 m；车体用半径 0.15 m 的圆；膨胀半径 0.35 m。配置使用 Humble 的 Twist 输出，没有速度平滑器、真实传感器或碰撞监控器。
+\lstinputlisting[language=bash,basicstyle=\footnotesize\ttfamily,firstline=1,lastline=36]{examples/navigation/navigation-lab-demo/params.yaml}
 接下来是两张代价地图的完整配置：
-\lstinputlisting[language=bash,basicstyle=\footnotesize\ttfamily,firstnumber=38,firstline=38]{examples/navigation/navigation-lab-demo/params.yaml}
+\lstinputlisting[language=bash,basicstyle=\footnotesize\ttfamily,firstnumber=37,firstline=37]{examples/navigation/navigation-lab-demo/params.yaml}
 
 然后，\texttt{sim.py} 接收实际 \texttt{cmd\_vel}，用单调时钟的实际间隔积分平面运动，发布 odom 和 TF。固定 map→odom 为单位变换，是因为软件模型没有定位漂移；它明确替代了本实验的定位输入，不能搬到真实哨兵上当定位系统。
 \lstinputlisting[language=Python,basicstyle=\footnotesize\ttfamily]{examples/navigation/navigation-lab-demo/sim.py}
@@ -276,9 +276,9 @@ DWA、TEB 是常见的局部规划思路，但不能看到 Nav2 就默认它们�
 \texttt{lab.launch.py} 把 map\_server、planner\_server、controller\_server、生命周期管理器和软件模型一起启动。生命周期管理器负责配置、激活服务器，\texttt{map} 启动参数替换地图文件位置；整个示例不需要新建 ROS 包。
 \lstinputlisting[language=Python,basicstyle=\footnotesize\ttfamily]{examples/navigation/navigation-lab-demo/lab.launch.py}
 
-最后，\texttt{client.py} 等服务器真正激活，再调用 \texttt{ComputePathToPose}，成功后才调用 \texttt{FollowPath}。它订阅并保存真实服务器输出的速度和软件 odom，超时会请求取消，失败则保留状态和错误码。
-\lstinputlisting[language=Python,basicstyle=\footnotesize\ttfamily,firstline=1,lastline=49]{examples/navigation/navigation-lab-demo/client.py}
-\lstinputlisting[language=Python,basicstyle=\footnotesize\ttfamily,firstnumber=50,firstline=50]{examples/navigation/navigation-lab-demo/client.py}
+最后，\texttt{client.py} 等服务器真正激活，再调用 \texttt{ComputePathToPose}，成功后才调用 \texttt{FollowPath}。它订阅并保存真实服务器输出的速度和软件 odom，超时会请求取消，失败则保留 action 状态。Humble 的这两个 action 结果没有 \texttt{error\_code} 字段；成功与否用状态判断，具体失败原因从启动终端日志定位。进度检查器由服务器的 \texttt{progress\_checker\_plugin} 指定，不在 FollowPath 请求中另设 ID。
+\lstinputlisting[language=Python,basicstyle=\footnotesize\ttfamily,firstline=1,lastline=50]{examples/navigation/navigation-lab-demo/client.py}
+\lstinputlisting[language=Python,basicstyle=\footnotesize\ttfamily,firstnumber=52,firstline=52]{examples/navigation/navigation-lab-demo/client.py}
 两个终端都进入项目、加载同一 ROS 环境和隔离 Domain，然后运行：
 \begin{tbash}
 # 终端一：先生成地图，launch终端保持运行
@@ -293,7 +293,7 @@ ros2 run tf2_ros tf2_echo map base_link
 \end{tbash}
 看到 \texttt{Managed nodes are active} 后地图与服务器已经激活；刚启动时短暂的“等待 TF”与一直超时不是同一种情况。客户端也会检查生命周期，避免“action 能连上，地图却还没准备好”的竞争。
 
-实跑中规划状态和跟踪状态均为 4（Succeeded），错误码为 0，路径有 123 个点，最终位置距离目标约 0.10 m，与配置的 0.1 m 位置容差对应。具体 odom/速度样本数随运行调度变化，以你保存的 \texttt{result.json} 为准。本例同时观测到 60×40 的 map 和 global costmap；map 的值是 0/100，原始 costmap 中还有 253、254 和一系列膨胀代价，能看出它们不是同一数组。
+正常完成时，规划状态和跟踪状态应均为 4（Succeeded），最终位置误差应在配置的 0.1 m 容差附近；路径点数以当前规划结果为准。具体 odom/速度样本数随运行调度变化，以你保存的 \texttt{result.json} 为准。本例应能观测到 60×40 的 map 和 global costmap；map 的值是 0/100，原始 costmap 中还有 253、254 和一系列膨胀代价，能看出它们不是同一数组。
 \end{example}
 \begin{exercise}\label{ex:nav-run}
 实际启动该闭环，保存结果，核对插件 ID、cmd\_vel 类型、路径长度和最终位置误差。然后运行 \texttt{python3 client.py --blocked-goal --output out/nav2-blocked}，目标落在障碍中；它有没有继续调用控制器？从日志指出中断位置。
@@ -310,7 +310,7 @@ python3 plot.py --map out/map --nav2 out/nav2 \
 \begin{figure}[H]
 \centering
 \includegraphics[width=.96\textwidth]{nav_paths_revised.pdf}
-\caption{实际保存数据：四邻接离线路线与 Jazzy Nav2 的规划、跟踪结果}
+\caption{一组保存数据：四邻接离线路线与 Nav2 的规划、跟踪结果}
 \label{fig:nav-paths}
 \end{figure}
 \end{example}

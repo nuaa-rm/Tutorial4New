@@ -1,0 +1,63 @@
+{
+  "date": "2026-10-03",
+  "ros_distro": "humble",
+  "rmw_zenoh_cpp": "0.1.9",
+  "zenoh_cpp_vendor": "0.1.9",
+  "image_runs": 23,
+  "loan_runs": 2,
+  "small_runs": 3,
+  "default_bgr250_runs": 9,
+  "shm_48mib_fallback_runs": 3,
+  "shm_6mib_runs": 3,
+  "dds_regression_runs": 3,
+  "default_parameter_runs": 1,
+  "diagnostic_runs": 1,
+  "corrected_camera_width": 1440,
+  "corrected_camera_height": 1080,
+  "memlock_bytes": 8388608,
+  "large_shm_segment_bytes": 6291456,
+  "source_created_sink_opened_segment_ids": [
+    "625444930"
+  ],
+  "failed_shm_provider_logs": [
+    "rmw_zenoh_cpp-separate-3.log",
+    "rmw_zenoh_cpp-separate-2.log",
+    "rmw_zenoh_cpp-separate-1.log"
+  ],
+  "all_frames_delivered": true,
+  "bad_frames": 0,
+  "hardware_camera_tested": false,
+  "all_250hz_frames_shm_traced": false,
+  "subscriber_loan_tested": false,
+  "checked_sources": {
+    "02-专项技术栈/chapters/A_ros2_image_path.tex": "f6aa542134ba985b6e04a62ec580e629fde37f36525b2334a37b5b063823cb72",
+    "02-专项技术栈/chapters/A_ros2_image_results.tex": "9eb490b8fcbf2db28a663f8c1fc3b0a81d45618c30bfbdd32f04b79f879b778b",
+    "02-专项技术栈/chapters/A_ros2_review.tex": "557f4f22039e668ca5454bb52fb52780a908f9651c716faf5fefae6b7cecf927",
+    "02-专项技术栈/answers.tex": "4df0c4fc78c98e5462de06aa16bb7677fe034000237ea438255b67dfe0104ad3",
+    "02-专项技术栈/examples/ros2/image-path-demo/compare.py": "269b5491a040a9f56b989cb017733a2a99e70ba71bfac4bb2f11b6a5375d686a",
+    "02-专项技术栈/examples/ros2/image-path-demo/README.md": "6d806205d601ef94f0204e2a46a481b512d8922d7b875aa40983e3c46c30f2f5"
+  },
+  "port_conflict_guard_passed": true,
+  "pdf_pages": 293,
+  "pdf_sha256": "562bb49c2c6851a70f52a4779636c15ead75cc1c4e441625c61db434d0a9ad12",
+  "checked_pdf_pages": [
+    41,
+    42,
+    43,
+    44,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    268,
+    269,
+    270
+  ],
+  "chapter_checks": {
+    "passed": 19,
+    "incomplete": 1,
+    "not_applicable": 0
+  }
+}

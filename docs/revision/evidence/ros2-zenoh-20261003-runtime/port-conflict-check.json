@@ -1,0 +1,6 @@
+{
+  "returncode": 1,
+  "stderr": "Traceback (most recent call last):\n  File \"/home/mijiao/Apps/Tutorial4New/02-\u4e13\u9879\u6280\u672f\u6808/examples/ros2/image-path-demo/compare.py\", line 205, in <module>\n    main()\n  File \"/home/mijiao/Apps/Tutorial4New/02-\u4e13\u9879\u6280\u672f\u6808/examples/ros2/image-path-demo/compare.py\", line 196, in main\n    rows.append(run_case(args, rmw, mode, repeat))\n  File \"/home/mijiao/Apps/Tutorial4New/02-\u4e13\u9879\u6280\u672f\u6808/examples/ros2/image-path-demo/compare.py\", line 96, in run_case\n    with zenoh_router(args, rmw, env, router_log) as router, log.open('w') as stream:\n  File \"/usr/lib/python3.10/contextlib.py\", line 135, in __enter__\n    return next(self.gen)\n  File \"/home/mijiao/Apps/Tutorial4New/02-\u4e13\u9879\u6280\u672f\u6808/examples/ros2/image-path-demo/compare.py\", line 32, in zenoh_router\n    check.bind(('127.0.0.1', args.zenoh_port))\nOSError: [Errno 98] Address already in use\n",
+  "existing_listener_untouched": true,
+  "passed": true
+}

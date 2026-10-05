@@ -1,0 +1,34 @@
+[
+  {
+    "rmw": "rmw_fastrtps_cpp",
+    "xml": false,
+    "disabled": null,
+    "returncode": 0,
+    "stdout": "LOAN {\"float64\":0,\"image\":0}\n",
+    "stderr": "[INFO] [1791029325.356654553] [rclcpp]: Currently used middleware can't loan messages. Local allocator will be used.\n"
+  },
+  {
+    "rmw": "rmw_fastrtps_cpp",
+    "xml": true,
+    "disabled": null,
+    "returncode": 0,
+    "stdout": "LOAN {\"float64\":1,\"image\":0}\n",
+    "stderr": ""
+  },
+  {
+    "rmw": "rmw_cyclonedds_cpp",
+    "xml": false,
+    "disabled": null,
+    "returncode": 0,
+    "stdout": "LOAN {\"float64\":0,\"image\":0}\n",
+    "stderr": "1791029325.787121 [88] loan_probe: selected interface \"lo\" is not multicast-capable: disabling multicast\n[INFO] [1791029325.789218476] [rclcpp]: Currently used middleware can't loan messages. Local allocator will be used.\n"
+  },
+  {
+    "rmw": "rmw_fastrtps_cpp",
+    "xml": true,
+    "disabled": "1",
+    "returncode": 0,
+    "stdout": "LOAN {\"float64\":0,\"image\":0}\n",
+    "stderr": "[INFO] [1791029325.906142159] [rclcpp]: Currently used middleware can't loan messages. Local allocator will be used.\n"
+  }
+]

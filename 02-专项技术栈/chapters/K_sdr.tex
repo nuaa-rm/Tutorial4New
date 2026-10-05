@@ -161,7 +161,7 @@ state\_demo.py 前半部分给出模拟采样率和带宽。收到匹配事件�
 \end{conclusion}
 
 \subsubsection{接上 Pluto：先只检查接收接口*}
-如果你暂时没有设备，离线部分可以先练熟。常见教学板 ADALM-PLUTO 基于 AD936x 射频收发器，主机侧用 libiio（Industrial I/O）和 Python 封装 pyadi-iio 配置并读取缓冲。ROS Jazzy 不是它们的前提；但在 Distrobox 中运行时，USB、设备网络和驱动必须在容器里也可达。
+如果你暂时没有设备，离线部分可以先练熟。常见教学板 ADALM-PLUTO 基于 AD936x 射频收发器，主机侧用 libiio（Industrial I/O）和 Python 封装 pyadi-iio 配置并读取缓冲。ROS 环境不是它们的前提；但在 Distrobox 中运行时，USB、设备网络和驱动必须在容器里也可达。
 \begin{note}
 先由实验负责人确认设备、天线、接线和接收频点，再操作设备。本例只调用接收，没有发射；若另做发射实验，必须先核对当地频谱法规、赛场规则与场地许可，不能因为网上例子的功率很小就直接照抄。
 \end{note}

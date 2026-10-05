@@ -1,0 +1,302 @@
+{
+  "date": "2026-10-03",
+  "scope": "Humble 静态接口、结构、语法、导航局部离线检查和 PDF 编译；不等同于完整 ROS 运行验证",
+  "checks": [
+    {
+      "name": "教材版本一致",
+      "status": "通过",
+      "details": "卷二正文、答案及 examples 源文件无 Jazzy 字样"
+    },
+    {
+      "name": "发现设置",
+      "status": "通过",
+      "details": "教材采用 ROS_LOCALHOST_ONLY=1"
+    },
+    {
+      "name": "Humble Navfn 插件标识",
+      "status": "通过",
+      "details": "对照 navigation2/humble/nav2_bringup/params/nav2_params.yaml"
+    },
+    {
+      "name": "Humble 进度检查器",
+      "status": "通过",
+      "details": "单个检查器；Twist 由 Humble controller_server 输出"
+    },
+    {
+      "name": "FollowPath 请求字段",
+      "status": "通过",
+      "details": [
+        "controller_id",
+        "goal_checker_id",
+        "path"
+      ]
+    },
+    {
+      "name": "Nav2 action 结果字段",
+      "status": "通过",
+      "details": [
+        "path"
+      ]
+    },
+    {
+      "name": "原示例的 Humble 不兼容字段被检出",
+      "status": "通过",
+      "details": "修改前访问了 Humble 不存在的请求与结果字段；修改后均已移除"
+    },
+    {
+      "name": "cv_bridge Humble 头文件 roundtrip.cpp",
+      "status": "通过",
+      "details": "02-专项技术栈/examples/opencv/image-bridge-demo/src/roundtrip.cpp"
+    },
+    {
+      "name": "cv_bridge Humble 头文件 bridge_node.cpp",
+      "status": "通过",
+      "details": "02-专项技术栈/examples/opencv/image-bridge-demo/src/bridge_node.cpp"
+    },
+    {
+      "name": "Python 语法",
+      "status": "通过",
+      "details": {
+        "files": 96
+      }
+    },
+    {
+      "name": "第 1 章结构与题解",
+      "status": "通过",
+      "details": [
+        "第 1 章：13 道随堂练习，10 道章末习题，1 个习题集",
+        "入口包含 30 个文件；315 个标签，262 个被引用标签"
+      ]
+    },
+    {
+      "name": "第 2 章结构与题解",
+      "status": "通过",
+      "details": [
+        "第 2 章：8 道随堂练习，9 道章末习题，1 个习题集",
+        "入口包含 30 个文件；315 个标签，262 个被引用标签"
+      ]
+    },
+    {
+      "name": "第 3 章结构与题解",
+      "status": "通过",
+      "details": [
+        "第 3 章：8 道随堂练习，9 道章末习题，1 个习题集",
+        "入口包含 30 个文件；315 个标签，262 个被引用标签"
+      ]
+    },
+    {
+      "name": "第 4 章结构与题解",
+      "status": "通过",
+      "details": [
+        "第 4 章：12 道随堂练习，10 道章末习题，1 个习题集",
+        "入口包含 30 个文件；315 个标签，262 个被引用标签"
+      ]
+    },
+    {
+      "name": "第 7 章结构与题解",
+      "status": "通过",
+      "details": [
+        "第 7 章：13 道随堂练习，10 道章末习题，1 个习题集",
+        "入口包含 30 个文件；315 个标签，262 个被引用标签"
+      ]
+    },
+    {
+      "name": "第 8 章结构与题解",
+      "status": "通过",
+      "details": [
+        "第 8 章：10 道随堂练习，10 道章末习题，1 个习题集",
+        "入口包含 30 个文件；315 个标签，262 个被引用标签"
+      ]
+    },
+    {
+      "name": "第 9 章结构与题解",
+      "status": "通过",
+      "details": [
+        "第 9 章：14 道随堂练习，10 道章末习题，1 个习题集",
+        "入口包含 30 个文件；315 个标签，262 个被引用标签"
+      ]
+    },
+    {
+      "name": "第 10 章结构与题解",
+      "status": "通过",
+      "details": [
+        "第 10 章：11 道随堂练习，10 道章末习题，1 个习题集",
+        "入口包含 30 个文件；315 个标签，262 个被引用标签"
+      ]
+    },
+    {
+      "name": "第 11 章结构与题解",
+      "status": "通过",
+      "details": [
+        "第 11 章：11 道随堂练习，10 道章末习题，1 个习题集",
+        "入口包含 30 个文件；315 个标签，262 个被引用标签"
+      ]
+    },
+    {
+      "name": "导航离线运行 bt.py []",
+      "status": "通过",
+      "details": "{\"status\": \"Success\", \"retries\": 2, \"ticks\": 4, \"log\": [[\"navigate\", \"Failure\"], [\"clear\", \"Success\"], [\"navigate\", \"Failure\"], [\"wait\", \"Running\"], [\"wait\", \"Success\"], [\"navigate\", \"Success\"]]}"
+    },
+    {
+      "name": "恢复结果 []",
+      "status": "通过",
+      "details": "Success"
+    },
+    {
+      "name": "导航离线运行 bt.py ['--fail']",
+      "status": "通过",
+      "details": "{\"status\": \"Failure\", \"retries\": 2, \"ticks\": 4, \"log\": [[\"navigate\", \"Failure\"], [\"clear\", \"Success\"], [\"navigate\", \"Failure\"], [\"wait\", \"Running\"], [\"wait\", \"Success\"], [\"navigate\", \"Failure\"]]}"
+    },
+    {
+      "name": "恢复结果 ['--fail']",
+      "status": "通过",
+      "details": "Failure"
+    },
+    {
+      "name": "导航离线运行 bt.py ['--stuck']",
+      "status": "通过",
+      "details": "{\"status\": \"Timeout\", \"retries\": 1, \"ticks\": 10, \"log\": [[\"navigate\", \"Failure\"], [\"clear\", \"Success\"], [\"navigate\", \"Failure\"], [\"wait\", \"Running\"], [\"wait\", \"Running\"], [\"wait\", \"Running\"], [\"wait\", \"Running\"], [\"wait\", \"Running\"], [\"wait\", \"Running\"], [\"wait\", \"Running\"], [\"wait\", \"Running\"], [\"wait\", \"Running\"]]}"
+    },
+    {
+      "name": "恢复结果 ['--stuck']",
+      "status": "通过",
+      "details": "Timeout"
+    },
+    {
+      "name": "导航离线运行 localization.py []",
+      "status": "通过",
+      "details": "{\"map_odom_xy\": [0.2999999999999998, 0.0], \"corrected_xy\": [0.20000000000000018, 0.0], \"odom_base_unchanged\": [2.0, 0.5], \"wall_eigenvalues\": [0.0, 2.0], \"wall_shift_x_residual\": [0.0, 0.0]}"
+    },
+    {
+      "name": "定位修正数值",
+      "status": "通过",
+      "details": {
+        "map_odom_xy": [
+          0.2999999999999998,
+          0.0
+        ],
+        "corrected_xy": [
+          0.20000000000000018,
+          0.0
+        ],
+        "odom_base_unchanged": [
+          2.0,
+          0.5
+        ],
+        "wall_eigenvalues": [
+          0.0,
+          2.0
+        ],
+        "wall_shift_x_residual": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "name": "最终编译日志",
+      "status": "通过",
+      "details": "XeLaTeX 第 3 次编译稳定；272 页"
+    }
+  ],
+  "pdf": {
+    "path": "/tmp/tutorial4new-humble-20261003/build-release/main.pdf",
+    "sha256": "18d3ee93d872a9a9e3fbb25ce960f4d1cd1a9e8ceae94465d5f74cdb6555d0cb",
+    "pages": 272,
+    "visually_inspected_physical_pages": [
+      7,
+      8,
+      15,
+      16,
+      21,
+      22,
+      23,
+      24,
+      25,
+      28,
+      35,
+      56,
+      57,
+      74,
+      87,
+      89,
+      90,
+      91,
+      92,
+      136,
+      150,
+      154,
+      155,
+      159,
+      220,
+      221,
+      222,
+      226,
+      232,
+      233,
+      236,
+      237,
+      238,
+      243,
+      244,
+      247,
+      248,
+      249,
+      250,
+      271
+    ]
+  },
+  "not_completed": [
+    "当前宿主未安装 ROS，现有容器列表没有 Humble；Humble 中的 colcon 构建、通信、cv_bridge、相机 GUI/image_proc 与 Nav2 软件闭环未重新实跑",
+    "宿主与附带 Python 缺少 SciPy，未重新运行 grid.py；其源码没有变化",
+    "真实第二主机、相机、底盘和传感器的现场验收仍需实际设备"
+  ],
+  "official_sources": [
+    "https://github.com/ros-navigation/navigation2/blob/humble/nav2_msgs/action/FollowPath.action",
+    "https://github.com/ros-navigation/navigation2/blob/humble/nav2_msgs/action/ComputePathToPose.action",
+    "https://github.com/ros-navigation/navigation2/blob/humble/nav2_bringup/params/nav2_params.yaml",
+    "https://github.com/ros-perception/vision_opencv/blob/humble/cv_bridge/include/cv_bridge/cv_bridge.h",
+    "https://github.com/ros-perception/image_pipeline/blob/humble/image_proc/launch/image_proc.launch.py",
+    "https://github.com/ros-perception/image_pipeline/blob/humble/camera_calibration/src/camera_calibration/calibrator.py",
+    "https://github.com/ros2/ros2_documentation/blob/humble/source/Installation/Ubuntu-Install-Debs.rst"
+  ],
+  "source_sha256": {
+    "02-专项技术栈/answers.tex": "e91e155ecf3e84ac9ca250ed3dab518814fbe07fa51c099a40c133e4f5998a0f",
+    "02-专项技术栈/chapters/A_ros2.tex": "463fce6d93ba7a97212dc5e59be3e0a548a62ee5e001187a99c5ef6cb49950ef",
+    "02-专项技术栈/chapters/A_ros2_engineering.tex": "46be5fe37b1383ce02d024efb4f38b28569a179a407f02df8d95e4ab894b897b",
+    "02-专项技术栈/chapters/A_ros2_project.tex": "c51e5a0c6bc36ec70c7cd69dd8607000a33d1c9d902fa347e607b6024d9dedef",
+    "02-专项技术栈/chapters/B_opencv.tex": "31ceb0bdebdaa70027f5cbb0fd5192ed506cb2ed5fec0273e67531ac42832171",
+    "02-专项技术栈/chapters/B_opencv_review.tex": "0a11aa74377a5b0de898f2b7448bb382b60f0b7bd82a9d18fb64a7cabafdd804",
+    "02-专项技术栈/chapters/E_calibration.tex": "83c8da868ece3a5e3f3c7b4ca2d8014508976295627de6b15abc11c6800da909",
+    "02-专项技术栈/chapters/E_camera.tex": "58307c4133f1e7a81618481c4ec5cbf6642793956da26f97337b8b78fad8525b",
+    "02-专项技术栈/chapters/G_ba.tex": "84985453a08532b37610a3afc7f36ab7e587df5cefed40a6befb227605039b9f",
+    "02-专项技术栈/chapters/H_mpc.tex": "fb4fe265bc796cdc0d8b450fdec0d159be389d460a04a5c18da2d427cba0fa3f",
+    "02-专项技术栈/chapters/I_nav.tex": "b18e1398652936b29950a27bee9b9d63c391b68cb733821a32047e9d4006b212",
+    "02-专项技术栈/chapters/I_nav_review.tex": "a3808d862716bbe5e0e678820a3f817df786270fdf7ed71ab5d53eaf59d56563",
+    "02-专项技术栈/chapters/J_comm.tex": "2dbfdf23a18ad76a4e47a8fd93a45468c32e4f90a90c6dd409dfe4557e11d60f",
+    "02-专项技术栈/chapters/K_sdr.tex": "0cefaca147bd0b35bc6fcb30d14a36c17030befce5b8cbe8cc35667251e16f40",
+    "02-专项技术栈/examples/camera/calibration-lab-demo/README.md": "311329d6be61e7238b82a7c0c98da3e04c79f021cb744e74f841a9080931d25f",
+    "02-专项技术栈/examples/communication/stream-link-demo/README.md": "bc3542b1de16f698ca79c05f2fef25d42c085952b79a1c59be62aea598ef2380",
+    "02-专项技术栈/examples/filter/state-estimation-demo/README.md": "a539efe0441a2f10703a590b9d33198abe914bd22f872637665dae7bcdd42454",
+    "02-专项技术栈/examples/geometry/pose-lab-demo/README.md": "3939620163ae6c22f8476319d43c5f497823ec7ff580756eb5f801d23e360d5b",
+    "02-专项技术栈/examples/mpc/horizon-control-demo/README.md": "53f372ca076dcef3de2ad9ea4e28966c55d1a042d6378938011e486fc8bad315",
+    "02-专项技术栈/examples/navigation/navigation-lab-demo/README.md": "0ce9f5c04b8296b4f20a7d62fa81ac5e796faf923dd03e139c1a39536923d292",
+    "02-专项技术栈/examples/navigation/navigation-lab-demo/client.py": "0f9e21a5bae8d266bd1c47d58d77a923d3621e3ad31f82bbe0c24a69a6968aaf",
+    "02-专项技术栈/examples/navigation/navigation-lab-demo/params.yaml": "4b1e04af9dd37257c21721f02e68b528b4d2b5601b182154ce001dc124d8a985",
+    "02-专项技术栈/examples/opencv/image-bridge-demo/README.md": "c3750d883f64dc8c8f3ba9fcc701a2bf7525a500f0093a981721523cfcaaacc4",
+    "02-专项技术栈/examples/opencv/image-bridge-demo/src/bridge_node.cpp": "d0062c1272c396f3b66a913ce5d9e5fb3921f51dfb7a72bf6a3b845783a7fe03",
+    "02-专项技术栈/examples/opencv/image-bridge-demo/src/roundtrip.cpp": "8353fb70a1a61d83e0f06338eeb357c87f4f75181452fef13442b796c9646039",
+    "02-专项技术栈/examples/opencv/image-lab-demo/README.md": "ea8a68ee88e15b2c8e60411b57ec4ea05e6a4e2025550a9f44610a588b7c7428",
+    "02-专项技术栈/examples/ros2/README.md": "9c952ea97a6a6b51faa663ff7c96e40b6c321af7da4caa44fb7171b331a11568",
+    "02-专项技术栈/examples/ros2/basic-interfaces-demo/README.md": "23d564c454ddd8dd9408a49b3371fecbcbc3b9366d1864f4ca2035da234dde68",
+    "02-专项技术栈/main.tex": "c11eb60af333baaf0c94460fb05e065a25a2dfbbad5365c4f8c39605f40ffa95",
+    "README.md": "a205290afb1f582e9ee41974543072d91876b63d38a6bc8a669f55c27d991b97",
+    "scripts/verify_camera_cli.py": "6bfd860e8f025624753d667193b358ec050ed970fa7f2567f5d0bcd19476aeaa",
+    "scripts/verify_camera_examples.py": "637ef670916d7c03497e61d1f9b02249b25153f59b637573c3bc1482a5741a78",
+    "scripts/verify_camera_gui.py": "e8c66f59c2bb7302f01415a25e354e10917c88c1c19888b0a27cb64312c494c8",
+    "scripts/verify_comm_examples.py": "c59dcb39fb197c99cfd087c1ae0f4c4733d9f80d369ed9669d1dbc8268ab8c22",
+    "scripts/verify_nav_examples.py": "5ec675cb20dbe909836e739c1c1e268208f21e65fcbb90548f122e8e1c0f60d2",
+    "scripts/verify_opencv_examples.py": "a9913ede208904747e4465220cbf4738a159a5a452d048fa25c9a02f48feb712",
+    "scripts/verify_ros_examples.py": "349ceb46ca2a74f90ef7814f40dd64fccfbc4d79c844b20d0997aae0e294df0e"
+  }
+}

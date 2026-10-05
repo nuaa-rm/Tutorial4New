@@ -73,14 +73,13 @@ try:
     goal.goal.pose.orientation.w = 1.
     planned = call(ComputePathToPose, "compute_path_to_pose", goal)
     path = planned.result.path
-    result = {"plan_status": planned.status, "plan_error": planned.result.error_code,
+    result = {"plan_status": planned.status,
               "path_poses": len(path.poses)}
     if planned.status == GoalStatus.STATUS_SUCCEEDED:
         follow = FollowPath.Goal(); follow.path = path
         follow.controller_id = "FollowPath"; follow.goal_checker_id = "goal"
-        follow.progress_checker_id = "progress"
         followed = call(FollowPath, "follow_path", follow)
-        result.update(follow_status=followed.status, follow_error=followed.result.error_code)
+        result.update(follow_status=followed.status)
     points = [[p.pose.position.x, p.pose.position.y] for p in path.poses]
     result.update(odom_samples=len(trajectory), command_samples=len(commands))
     if trajectory:

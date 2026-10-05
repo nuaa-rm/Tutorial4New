@@ -1,0 +1,30 @@
+[
+  {
+    "rmw": "rmw_fastrtps_cpp",
+    "repeat": 1,
+    "mode": "intra",
+    "width": 64,
+    "height": 48,
+    "channels": 3,
+    "rate": 25.0,
+    "frames": 20,
+    "depth": 5,
+    "reliable": "false",
+    "work_ms": 0,
+    "sent": 20,
+    "send_hz": 25.0006,
+    "received": 20,
+    "receive_hz": 25.0006,
+    "p50_ms": 0.026164,
+    "p95_ms": 0.036993,
+    "p99_ms": 0.036993,
+    "pointer_matches": 20,
+    "bad_frames": 0,
+    "wall_seconds": 3.689,
+    "cpu_seconds_before_stop": 2.0,
+    "peak_rss_sum_mb": 91.488,
+    "launch_returncode": 0,
+    "log": "rmw_fastrtps_cpp-intra-1.log",
+    "delivery_ratio": 1.0
+  }
+]

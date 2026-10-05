@@ -1,6 +1,6 @@
 # 相机与标定小实验
 
-从本目录执行。数值部分用 Ubuntu 系统 Python 3、NumPy、OpenCV、PyYAML；ROS 部分实际验证于 Ubuntu 24.04 / Jazzy。模拟棋盘格不代替真实镜头、曝光、板面或同步测试。
+从本目录执行。数值部分用 Ubuntu 系统 Python 3、NumPy、OpenCV、PyYAML；ROS 部分使用 Ubuntu 22.04 / Humble。模拟棋盘格不代替真实镜头、曝光、板面或同步测试。
 
 ~~~bash
 sudo apt install python3-numpy python3-opencv python3-yaml
@@ -25,13 +25,13 @@ python3 stereo.py --data data --model out/front.yaml --output out/stereo
 
 文件协作：board统一规格/角点检测；generate造输入；calibrate求解/逐图残差，调用model_io写YAML；validate固定内参检查独立照片；stereo固定内参求相对位姿和校正投影；replay_ros加载图/YAML、发布原图与参数并提供持久保存服务；check_ros核对实际校正输出。optics、format_gamma、noise分别负责独立小数组实验。全部11个核心源码在正文展示。
 
-## Jazzy 单目保存与校正
+## Humble 单目保存与校正
 
 ~~~bash
-sudo apt install ros-jazzy-camera-calibration ros-jazzy-image-proc \
-  ros-jazzy-camera-info-manager ros-jazzy-camera-info-manager-py \
-  ros-jazzy-rqt-image-view
-source /opt/ros/jazzy/setup.bash
+sudo apt install ros-humble-camera-calibration ros-humble-image-proc \
+  ros-humble-camera-info-manager \
+  ros-humble-rqt-image-view
+source /opt/ros/humble/setup.bash
 python3 replay_ros.py --images data/train --yaml out/ros-front.yaml
 ~~~
 
@@ -47,7 +47,7 @@ ros2 run camera_calibration cameracalibrator \
   -r camera/set_camera_info:=/camera/set_camera_info
 ~~~
 
-9×6数内角点，边长0.025米；两个径向系数对应固定k3=0。Jazzy采到40个样本也可能启用CALIBRATE，不代表覆盖条或真实质量已经合格。
+9×6数内角点，边长0.025米；两个径向系数对应固定k3=0。标定器采到40个样本也可能启用CALIBRATE，不代表覆盖条或真实质量已经合格。
 
 用Ctrl+C停止回放，再按同一命令启动。实际检查重启后参数、匹配时间戳与校正图，第三个终端跑check：
 
@@ -76,6 +76,6 @@ ros2 run camera_calibration cameracalibrator \
   -r right_camera/set_camera_info:=/right/set_camera_info
 ~~~
 
-左右发布同一时间戳，分别保存stereo-ros.yaml/stereo-ros_right.yaml。默认精确时间配对。--approximate 0.01（放在--ros-args前）仅允许配对时间差，不消除曝光时差或运动误差。已实际验证离线双目求解与双目回放同时间戳；这条双目GUI流程及真实双目装置仍未完成现场验证。
+左右发布同一时间戳，分别保存stereo-ros.yaml/stereo-ros_right.yaml。默认精确时间配对。--approximate 0.01（放在--ros-args前）仅允许配对时间差，不消除曝光时差或运动误差。核对左右角点、保存的两份参数及相同时间戳，再检查重启后的参数加载。真实双目装置还需现场检查同步、基线和曝光。
 
 自动验证见仓库scripts/verify_camera_examples.py和verify_camera_gui.py（GUI使用独立Xvfb，只控制自己的窗口）；完整证据/边界见docs/revision/volume-2-chapter-7.md。

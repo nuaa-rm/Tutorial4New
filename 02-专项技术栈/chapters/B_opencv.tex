@@ -2,7 +2,7 @@
 \subsubsection{OpenCV 简介与环境}
 前面我们处理的是消息和采样，接下来终于轮到图像了。你可能已经能把相机画面显示出来，不过“能看到”距离“找到目标”还有几步：图像怎么存、颜色怎么筛、噪点怎么去、最后拿什么描述形状？OpenCV（Open Source Computer Vision Library，开源计算机视觉库）把这些常用工具准备好了，我们先用小图把它们逐个试清楚，再接成流水线。
 
-卷一已经讲过 CMake，本章沿用那套构建方法，不再每做一个实验就覆盖一次 main.cpp。完整工程在本卷 \path{examples/opencv/image-lab-demo}，每个目标都只有一个 main；README 给出全部命令。Ubuntu 24.04 和 22.04 都可以通过 \texttt{libopencv-dev} 安装 OpenCV 4.x；下面以 ubuntu2404 中的 4.6.0 为实测版本。先进入工程目录，Distrobox 用户先进入容器。
+卷一已经讲过 CMake，本章沿用那套构建方法，不再每做一个实验就覆盖一次 main.cpp。完整工程在本卷 \path{examples/opencv/image-lab-demo}，每个目标都只有一个 main；README 给出全部命令。本章以 Ubuntu 22.04 为主，通过 \texttt{libopencv-dev} 安装 OpenCV 4.x。先进入工程目录，Distrobox 用户先进入自己的 Ubuntu 22.04 容器；下面的查询命令用来确认本机实际版本。
 \begin{example}[先确认是哪个 OpenCV 在工作]
 \begin{cvblock}
 \begin{tbash}
@@ -212,7 +212,7 @@ ORB（Oriented FAST and Rotated BRIEF）先检测局部关键点，再产生二�
 \subsubsection{与 ROS2 集成：像素和 encoding 必须一起变}
 ROS 图像类型是 \texttt{sensor\_msgs/msg/Image}。encoding 指明通道含义和像素类型，不只是“有几个字节”：RGB 与 BGR 都有三通道，颜色顺序却不同。cv\_bridge 在消息和 Mat 之间转换，toCvCopy 会复制并按目标编码做必要转换；需要共享时再查 toCvShare 的只读和生命周期条件。
 
-完整 ament 包在本卷 \path{examples/opencv/image-bridge-demo}，普通实验与 ROS 包分开构建。Jazzy 使用 \texttt{cv\_bridge/cv\_bridge.hpp}；其他发行版若只有 .h，按实际头文件调整后重建，本章没有把 Jazzy 实测写成 Humble 实测。
+完整 ament 包在本卷 \path{examples/opencv/image-bridge-demo}，普通实验与 ROS 包分开构建。Humble 使用 \texttt{cv\_bridge/cv\_bridge.h}，下面两个程序都包含这个头文件。
 \begin{example}[先做往返，再跑真实回调]
 先给包配置和依赖。这里沿用第一章的完整功能包结构；CMake 与 package.xml 中的名字一致，安装到包的 lib 目录。
 \begin{cvblock}
@@ -225,11 +225,11 @@ ROS 图像类型是 \texttt{sensor\_msgs/msg/Image}。encoding 指明通道含�
 \begin{cvblock}
 \lstinputlisting[language=C++,frame=single,numbers=left,caption={roundtrip.cpp：编码与 Header}]{examples/opencv/image-bridge-demo/src/roundtrip.cpp}
 \end{cvblock}
-在 Ubuntu/Jazzy 中按以下命令构建；最后一个路径换成自己的教材绝对路径。这个临时工作空间只为演示，别在没加载环境的 Arch 宿主机上运行 colcon 期待它自己找到 ROS。
+在 Ubuntu 22.04/Humble 中按以下命令构建；最后一个路径换成自己的教材绝对路径。这个临时工作空间只为演示，别在没加载环境的 Arch 宿主机上运行 colcon 期待它自己找到 ROS。
 \begin{cvblock}
 \begin{tbash}
-source /opt/ros/jazzy/setup.bash
-sudo apt install ros-jazzy-cv-bridge libopencv-dev
+source /opt/ros/humble/setup.bash
+sudo apt install ros-humble-cv-bridge libopencv-dev
 mkdir -p /tmp/image-bridge-ws
 cd /tmp/image-bridge-ws
 colcon build --base-paths /教材绝对路径/02-专项技术栈/examples/opencv/image-bridge-demo
@@ -262,4 +262,4 @@ ros2 run image_tools showimage --ros-args -r image:=/image_out
 像素类型、通道顺序、encoding 和 Header 是一套接口约定。转换既要改变实际像素，也要正确描述结果；图像能显示，不代表颜色、采集时间或坐标系就正确。先核对这些边界，再讨论实战检测算法。
 \end{conclusion}
 
-更多 API 可以查 \href{https://docs.opencv.org/4.x/d9/df8/tutorial_root.html}{OpenCV 官方教程}，需要确认轮廓面积、阈值或 ORB 参数时查对应模块；ROS 编码转换查 \href{https://github.com/ros-perception/vision_opencv/tree/4.1.0/cv_bridge}{Jazzy cv\_bridge 源码与接口}。
+更多 API 可以查 \href{https://docs.opencv.org/4.x/d9/df8/tutorial_root.html}{OpenCV 官方教程}，需要确认轮廓面积、阈值或 ORB 参数时查对应模块；ROS 编码转换查 \href{https://github.com/ros-perception/vision_opencv/tree/humble/cv_bridge}{Humble cv\_bridge 源码与接口}。

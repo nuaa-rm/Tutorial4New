@@ -1,0 +1,38 @@
+--- a/scripts/render_ros_diagrams.py
++++ b/scripts/render_ros_diagrams.py
+@@ -14,8 +14,9 @@
+ \node[box,minimum width=5cm] (py) at (3,3.2) {rclpy：Python 客户端库\\其他语言也可有客户端库};
+ \node[box,minimum width=11cm] (rcl) at (0,1.4) {rcl：公共客户端基础\\名称、时间、服务等基础机制};
+ \node[box,minimum width=11cm] (rmw) at (0,-0.4) {rmw：中间件接口\\发布 / 订阅、QoS、发现与通信图事件};
+-\node[box,minimum width=5cm] (fast) at (-3,-2.2) {Fast DDS\\对应 rmw\_fastrtps\_cpp};
+-\node[box,minimum width=5cm] (cyclone) at (3,-2.2) {Cyclone DDS\\对应 rmw\_cyclonedds\_cpp};
++\node[box,minimum width=3.4cm] (fast) at (-3.8,-2.2) {Fast DDS\\\texttt{rmw\_fastrtps\_cpp}};
++\node[box,minimum width=3.4cm] (cyclone) at (0,-2.2) {Cyclone DDS\\\texttt{rmw\_cyclonedds\_cpp}};
++\node[box,minimum width=3.4cm] (zenoh) at (3.8,-2.2) {Zenoh\\\texttt{rmw\_zenoh\_cpp}};
+ \draw[flow] (app.south) -- (cpp.north);
+ \draw[flow] (app.south) -- (py.north);
+ \draw[flow] (cpp.south) -- (rcl.north);
+@@ -23,7 +24,8 @@
+ \draw[flow] (rcl) -- (rmw);
+ \draw[flow] (rmw.south) -- (fast.north);
+ \draw[flow] (rmw.south) -- (cyclone.north);
+-\node at (0,-3.5) {图中列出本章使用的 DDS 实现；ROS2 还支持其他中间件};
++\draw[flow] (rmw.south) -- (zenoh.north);
++\node[align=center] at (0,-3.5) {图中列出本章比较的中间件；ROS2 还支持其他实现\\Fast DDS 与 Cyclone DDS 基于 DDS；Zenoh 不属于 DDS 实现};
+ ''',
+     'ros2_node': r'''
+ \node[box,minimum width=3.4cm,minimum height=2.6cm] (camera) at (-4.6,2.8) {节点 A\\图像发布者\\参数服务端};
+--- a/02-专项技术栈/chapters/A_ros2.tex
++++ b/02-专项技术栈/chapters/A_ros2.tex
+@@ -73,9 +73,9 @@
+ 常见术语的含义：
+ \begin{itemize}
+     \item \textbf{rclcpp}: ROS Client Library for C++，它是ROS2的C++客户端库，负责ROS2节点的创建、通信、生命周期管理等，我们使用的主要是这个库。
+-    \item \textbf{rmw}: ROS Middleware，它是ROS2的中间件，负责底层通信的实现。
++    \item \textbf{rmw}: ROS Middleware，它是ROS2的中间件接口，把上层的通信操作交给具体的中间件实现。
+     \item \textbf{QoS}: Quality of Service，它是通信策略的集合，包含历史深度、可靠性、持久性等；不会凭空保证处理速度或网络带宽。
+-    \item \textbf{DDS}: Data Distribution Service，它是ROS2的分布式数据服务，用来实现ROS2节点之间的通信。
++    \item \textbf{DDS}: Data Distribution Service，它是一种发布/订阅通信标准，Fast DDS 与 Cyclone DDS 是它的实现。ROS2 也可以通过 rmw 使用 Zenoh 等其他中间件。
+ \end{itemize}
+ \paragraph*{ROS2的节点与组件}
+ \textbf{ROS2的基本思想是分布式的、模块化的。}

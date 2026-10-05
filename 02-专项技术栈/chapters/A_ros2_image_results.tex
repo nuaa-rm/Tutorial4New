@@ -1,0 +1,37 @@
+% DDS: bgr250-1440x1080 的 18 轮；Zenoh: 本轮 bgr250 的 9 轮与 shm-6mib 的 3 轮。
+\begin{table}[htbp]
+\centering
+\small
+\caption{同机合成 BGR8 大图像对照，每项为三轮数值的中位数}
+\label{tab:ros2-image-results}
+\begin{tabular}{llrrrr}
+\toprule
+RMW & 布局 & 发送 / Hz & 接收 / Hz & 接收比例 & P95 / ms\\
+\midrule
+Fast DDS & separate & 250.0 & 87.5 & 34.7\% & 2.445\\
+Fast DDS & same & 250.0 & 250.2 & 100.0\% & 0.968\\
+Fast DDS & intra & 250.0 & 250.0 & 100.0\% & 0.042\\
+Cyclone DDS & separate & 250.0 & 249.6 & 99.7\% & 3.580\\
+Cyclone DDS & same & 250.1 & 250.2 & 100.0\% & 0.959\\
+Cyclone DDS & intra & 250.0 & 250.0 & 100.0\% & 0.031\\
+\midrule
+Zenoh & separate & 250.1 & 250.3 & 100.0\% & 3.243\\
+Zenoh & same & 250.0 & 250.2 & 100.0\% & 0.913\\
+Zenoh & intra & 250.0 & 250.0 & 100.0\% & 0.029\\
+Zenoh + SHM & separate & 250.0 & 250.4 & 100.0\% & 1.822\\
+\bottomrule
+\end{tabular}
+\end{table}
+这组 $1440\times1080$ 的 BGR8 数据在 2026 年 10 月 3 日的 Ubuntu 22.04/Humble Distrobox 中测得，主机为 i7-12700H，系统识别约 62.6 GiB 内存；Fast DDS 与 Cyclone DDS 的 RMW 分别为 6.2.10 与 1.3.5，Zenoh RMW/vendor 均为 0.1.9，Fast DDS 为 2.6.12，rclcpp 为 16.0.21。容器共享宿主网络和 IPC，测试清除 DDS/Zenoh 调优变量，深度 5、best\_effort、没有外部订阅者、没有算法工作。每轮发送 1000 帧，再留两秒排空；表中各项分别取中位数，P95 未跨轮合并样本。
+
+Fast DDS 的 separate 接收比例三轮为 34.7\%、35.9\%、18.1\%；Cyclone DDS 为 99.7\%、99.7\%、99.8\%。在这个默认配置与输入下，后者交付比例更高；Fast DDS 已收到样本的 P95 较低，不能抵消丢掉的大量帧。两种 DDS 的 same 与 intra 共 12 轮都完整收到 1000 帧，intra 的像素地址记录全部匹配。
+
+这些记录支持我们优先检查进程布局与所有权路径，也提醒我们继续核对配置，而不是给中间件排一个永久名次。
+
+Zenoh 的三种布局各重复三轮，默认关闭共享内存，九轮均收到 1000 帧。它的路由器只监听本机独立端口，同机 peer 直接连接；本轮结果不能代替跨主机、无线或多机器人链路实测。表中最后一行是另外三轮显式配置：开启 Zenoh 共享内存并使用 6 MiB 池，不能与默认项混为一种配置。其 P95 中位数约 1.822 ms，默认 separate 约为 3.243 ms；进程内路径仍更短，说明传输优化与应用层所有权交接解决的边界不同。
+
+最初用默认 48 MiB 池打开共享内存时，容器的 8 MiB 锁定内存限制导致分配失败。那三轮虽然也完整交付，却出现共享池错误，不能算作成功的 SHM 对照；回退记录另存，未放进上表。6 MiB 池的重测没有出现这个分配错误；后续仍要核对在途样本与回退，不能凭配置开关推断每帧路径或完整零拷贝。
+
+小图像的 same 模式中，还出现过 50 帧里 49 次源/接收像素地址数值相等：它没有开启进程内通信，分配器复用地址造成了这种现象。因此，地址记录必须与启用选项、所有权和生命周期一起判断。
+
+逐轮数据、原始日志与测量边界保存在仓库 \path{docs/revision/evidence/ros2-image-path-20261003-runtime/}。Zenoh 追加记录保存在 \path{docs/revision/evidence/ros2-zenoh-20261003-runtime/}。这些是合成像素通信数据，不是相机采集到识别完成的实测；CPU/GPU 转换与跨系统容器的共享样本路径也未由此验证。

@@ -2,7 +2,7 @@
 
 先把同一批三维点变成像素，再反过来恢复位姿，最后把多帧相机与三维点一起放进优化。这里使用明确生成的小规模数据，便于核对方向、尺度、导数和误差；没有把模拟结果当成赛场相机精度。
 
-在教材卷二的 examples/geometry/pose-lab-demo 目录执行。Ubuntu 24.04 / ROS 2 Jazzy 的 Distrobox 中已实际运行 Python 3.12.3、OpenCV 4.6.0、NumPy 1.26.4、SciPy 1.11.4、Matplotlib 3.6.3。项目本身不依赖 ROS。缺依赖时：
+在教材卷二的 examples/geometry/pose-lab-demo 目录执行。Ubuntu 24.04 的 Distrobox 中已实际运行 Python 3.12.3、OpenCV 4.6.0、NumPy 1.26.4、SciPy 1.11.4、Matplotlib 3.6.3。项目本身不依赖 ROS。缺依赖时：
 
 ~~~bash
 sudo apt install python3-numpy python3-opencv python3-scipy python3-matplotlib

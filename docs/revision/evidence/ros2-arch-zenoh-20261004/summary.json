@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-04",
+  "change": "ROS2 architecture adds Zenoh as a third RMW implementation",
+  "source_sha256": {
+    "scripts/render_ros_diagrams.py": "82dad6ccd221f44c52f5068586b4787205e3453432ea812d2aaad45dace6c5c3",
+    "02-专项技术栈/images/ros2_arch_revised.pdf": "edd06776a8ed4fd921688ebb7577bdaa075957d13308a41ccc8132126ec0edac",
+    "02-专项技术栈/chapters/A_ros2.tex": "36542b6c6ab42252ecc1971a117de79934ad9d59b6036f9a09191139a3bc7118",
+    "02-专项技术栈/main.pdf": "de666d8de7ca27c7f97f3c4114ece14aa7aae4c4485b4be98071d1a5028a7a63"
+  },
+  "book_pages": 293,
+  "figure_physical_page": 9,
+  "book_printed_page": 3,
+  "inspected_physical_pages": [
+    8,
+    9,
+    10
+  ],
+  "figure_style": "Existing teaching cyan vector boxes and arrows retained; three peer middleware implementations",
+  "runtime": "No runtime code changed. Existing 2026-10-03 runtime evidence retained; physical camera validation remains incomplete.",
+  "backup_directory": "/tmp/tutorial4new-ros-arch-20261004/before"
+}

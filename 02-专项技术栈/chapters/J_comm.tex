@@ -191,14 +191,14 @@ ROS 分支在系统环境加载后才导入 rclpy，创建节点与发布者；�
 \begin{commcode}
 \lstinputlisting[language=Python,frame=single,numbers=left,firstline=37,firstnumber=37,caption={bridge\_demo.py：命令入口}]{examples/communication/stream-link-demo/bridge_demo.py}
 \end{commcode}
-先执行 \texttt{python3 bridge\_demo.py}，应得到 (8, 1.25)。再在有 ROS2 的 Ubuntu 终端运行下面命令；Distrobox 先进入 ubuntu2404，两终端都加载同一发行版，Humble 将 jazzy 换成 humble。别用主机缺少 rclpy 的解释器运行容器中的 ROS 代码。
+先执行 \texttt{python3 bridge\_demo.py}，应得到 (8, 1.25)。再在有 ROS2 的 Ubuntu 终端运行下面命令；Distrobox 用户先进入已安装 Humble 的 Ubuntu 22.04 容器，两个终端都加载 Humble 环境。别用主机缺少 rclpy 的解释器运行容器中的 ROS 代码。
 \begin{commcode}
 \begin{tbash}
 # 终端一，进入项目目录后
-source /opt/ros/jazzy/setup.bash
+source /opt/ros/humble/setup.bash
 python3 bridge_demo.py --ros
 # 终端二，同域与相同发现范围
-source /opt/ros/jazzy/setup.bash
+source /opt/ros/humble/setup.bash
 ros2 topic echo /range_m std_msgs/msg/Float64 --once
 \end{tbash}
 \end{commcode}

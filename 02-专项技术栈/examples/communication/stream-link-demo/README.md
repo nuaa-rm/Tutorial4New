@@ -2,7 +2,7 @@
 
 这是卷二第二章的精简教学工程。长度前缀与 AA/数据/CRC 都是教学帧，不能发送给真实裁判系统或板端设备。
 
-依赖 Python 3.10 及以上。TCP、解析、状态实验只用标准库；Linux 伪终端实验另需 pySerial。Ubuntu 可安装 `sudo apt install python3-serial`；在 Distrobox ubuntu2404 内运行时先 `distrobox enter ubuntu2404`。没有依赖 ROS 的 API，因此 Jazzy/Humble 不影响这些脚本。
+依赖 Python 3.10 及以上。TCP、解析、状态实验只用标准库；Linux 伪终端实验另需 pySerial。Ubuntu 可安装 `sudo apt install python3-serial`；Distrobox 用户先进入自己的 Ubuntu 容器。上述字节流实验不需要 ROS。
 
 从本目录运行：
 
@@ -20,17 +20,17 @@ python3 bridge_demo.py
 
 event_demo明确拒绝满队列中的第三事件；第1事件确认丢失后重发但只执行一次，第2事件也只执行一次。它只模拟本次两个有限事件的确认/去重，没有进程重启后的持久化承诺。bridge_demo输出 `(8, 1.25)`，载荷用大端两个uint16约定序号和毫米。
 
-ROS变体需已安装并加载的rclpy和std_msgs。在Ubuntu容器两个终端都先加载同一发行版（Humble改脚本名）。终端一：
+ROS变体需已安装并加载的rclpy和std_msgs。在 Ubuntu 22.04 环境的两个终端都先加载 Humble。终端一：
 
 ```bash
-source /opt/ros/jazzy/setup.bash
+source /opt/ros/humble/setup.bash
 python3 bridge_demo.py --ros
 ```
 
 终端二：
 
 ```bash
-source /opt/ros/jazzy/setup.bash
+source /opt/ros/humble/setup.bash
 ros2 topic echo /range_m std_msgs/msg/Float64 --once
 ```
 
