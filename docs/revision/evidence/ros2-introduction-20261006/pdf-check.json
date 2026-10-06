@@ -1,0 +1,523 @@
+{
+  "total_pages": 328,
+  "advanced_entry": {
+    "number": "1.9",
+    "physical_page": 67
+  },
+  "answer_pages": [
+    297
+  ],
+  "visual_pages": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    12,
+    13,
+    15,
+    16,
+    17,
+    18,
+    20,
+    23,
+    24,
+    29,
+    31,
+    34,
+    35,
+    36,
+    38,
+    40,
+    41,
+    43,
+    45,
+    49,
+    50,
+    52,
+    54,
+    57,
+    58,
+    59,
+    61,
+    62,
+    63,
+    64,
+    67,
+    68,
+    71,
+    73,
+    74,
+    80,
+    82,
+    86,
+    87,
+    88,
+    89,
+    90,
+    91,
+    92,
+    297
+  ],
+  "heading_count": 62,
+  "heading_anchor_mismatches": [],
+  "issues": [],
+  "headings": [
+    {
+      "kind": "section",
+      "number": "1.1",
+      "title": "ROS2 入门与环境安装",
+      "book_page": 1,
+      "physical_page": 7
+    },
+    {
+      "kind": "subsection",
+      "number": "1.1.1",
+      "title": "从代码到机器人控制",
+      "book_page": 1,
+      "physical_page": 7
+    },
+    {
+      "kind": "subsection",
+      "number": "1.1.2",
+      "title": "安装 Humble 并验证节点通信",
+      "book_page": 1,
+      "physical_page": 7
+    },
+    {
+      "kind": "subsection",
+      "number": "1.1.3",
+      "title": "系统分层、节点与组件",
+      "book_page": 4,
+      "physical_page": 10
+    },
+    {
+      "kind": "section",
+      "number": "1.2",
+      "title": "工作空间、节点与消息接口",
+      "book_page": 6,
+      "physical_page": 12
+    },
+    {
+      "kind": "subsection",
+      "number": "1.2.1",
+      "title": "创建工作空间与第一个功能包",
+      "book_page": 6,
+      "physical_page": 12
+    },
+    {
+      "kind": "subsection",
+      "number": "1.2.2",
+      "title": "用 rclcpp 编写发布者与订阅者",
+      "book_page": 7,
+      "physical_page": 13
+    },
+    {
+      "kind": "subsection",
+      "number": "1.2.3",
+      "title": "用定时器周期发布消息",
+      "book_page": 9,
+      "physical_page": 15
+    },
+    {
+      "kind": "subsection",
+      "number": "1.2.4",
+      "title": "定义、生成与使用自定义消息",
+      "book_page": 9,
+      "physical_page": 15
+    },
+    {
+      "kind": "subsection",
+      "number": "1.2.5",
+      "title": "常用消息类型与接口查询",
+      "book_page": 10,
+      "physical_page": 16
+    },
+    {
+      "kind": "subsection",
+      "number": "1.2.6",
+      "title": "服务调用与后续工具",
+      "book_page": 11,
+      "physical_page": 17
+    },
+    {
+      "kind": "section",
+      "number": "1.3",
+      "title": "完整工程与收发验证",
+      "book_page": 12,
+      "physical_page": 18
+    },
+    {
+      "kind": "subsection",
+      "number": "1.3.1",
+      "title": "完整工程：组织文件并生成消息接口",
+      "book_page": 12,
+      "physical_page": 18
+    },
+    {
+      "kind": "subsection",
+      "number": "1.3.2",
+      "title": "完整工程：实现节点并声明构建依赖",
+      "book_page": 14,
+      "physical_page": 20
+    },
+    {
+      "kind": "subsection",
+      "number": "1.3.3",
+      "title": "完整工程：编译并验证话题收发",
+      "book_page": 17,
+      "physical_page": 23
+    },
+    {
+      "kind": "subsection",
+      "number": "1.3.4",
+      "title": "用 rqt 发布输入与监视回复",
+      "book_page": 18,
+      "physical_page": 24
+    },
+    {
+      "kind": "section",
+      "number": "1.4",
+      "title": "rqt 与 RViz2 图形化观测",
+      "book_page": 18,
+      "physical_page": 24
+    },
+    {
+      "kind": "subsection",
+      "number": "1.4.1",
+      "title": "把消息画出来：先准备一组能对照的数据",
+      "book_page": 18,
+      "physical_page": 24
+    },
+    {
+      "kind": "subsection",
+      "number": "1.4.2",
+      "title": "rqt：连线、曲线与图像都看一遍",
+      "book_page": 23,
+      "physical_page": 29
+    },
+    {
+      "kind": "subsection",
+      "number": "1.4.3",
+      "title": "RViz2：让坐标系、轨迹和图形各就各位",
+      "book_page": 25,
+      "physical_page": 31
+    },
+    {
+      "kind": "subsection",
+      "number": "1.4.4",
+      "title": "Marker：绘制、更新与删除三维图形",
+      "book_page": 25,
+      "physical_page": 31
+    },
+    {
+      "kind": "section",
+      "number": "1.5",
+      "title": "Foxglove：连接、观测与回放",
+      "book_page": 28,
+      "physical_page": 34
+    },
+    {
+      "kind": "subsection",
+      "number": "1.5.1",
+      "title": "Foxglove：安装、连接与保存自己的观察布局",
+      "book_page": 28,
+      "physical_page": 34
+    },
+    {
+      "kind": "subsection",
+      "number": "1.5.2",
+      "title": "Foxglove：给数字状态标注名称",
+      "book_page": 29,
+      "physical_page": 35
+    },
+    {
+      "kind": "subsection",
+      "number": "1.5.3",
+      "title": "Foxglove Plot：字段路径与数值换算",
+      "book_page": 29,
+      "physical_page": 35
+    },
+    {
+      "kind": "subsection",
+      "number": "1.5.4",
+      "title": "Foxglove Plot：时间对齐与两点测量",
+      "book_page": 30,
+      "physical_page": 36
+    },
+    {
+      "kind": "subsection",
+      "number": "1.5.5",
+      "title": "Foxglove 的 Image：把检测框与原图对上",
+      "book_page": 32,
+      "physical_page": 38
+    },
+    {
+      "kind": "subsection",
+      "number": "1.5.6",
+      "title": "Foxglove 3D：场景实体与空间测量",
+      "book_page": 34,
+      "physical_page": 40
+    },
+    {
+      "kind": "subsection",
+      "number": "1.5.7",
+      "title": "MCAP 录制与回放：把一次观察留下来",
+      "book_page": 35,
+      "physical_page": 41
+    },
+    {
+      "kind": "section",
+      "number": "1.6",
+      "title": "构建工具与环境排障",
+      "book_page": 37,
+      "physical_page": 43
+    },
+    {
+      "kind": "subsection",
+      "number": "1.6.1",
+      "title": "先检查环境，再检查代码",
+      "book_page": 37,
+      "physical_page": 43
+    },
+    {
+      "kind": "subsection",
+      "number": "1.6.2",
+      "title": "通信域与发现范围：只与自己的节点通信",
+      "book_page": 37,
+      "physical_page": 43
+    },
+    {
+      "kind": "subsection",
+      "number": "1.6.3",
+      "title": "ament、colcon 与可复现的小工程",
+      "book_page": 39,
+      "physical_page": 45
+    },
+    {
+      "kind": "subsection",
+      "number": "1.6.4",
+      "title": "自动依赖、库导出与构建测试",
+      "book_page": 43,
+      "physical_page": 49
+    },
+    {
+      "kind": "section",
+      "number": "1.7",
+      "title": "Launch 启动配置与模块组合",
+      "book_page": 44,
+      "physical_page": 50
+    },
+    {
+      "kind": "subsection",
+      "number": "1.7.1",
+      "title": "Launch 入门：用一个文件启动节点",
+      "book_page": 44,
+      "physical_page": 50
+    },
+    {
+      "kind": "subsection",
+      "number": "1.7.2",
+      "title": "Launch 配置：名字、YAML 与命令行参数",
+      "book_page": 46,
+      "physical_page": 52
+    },
+    {
+      "kind": "subsection",
+      "number": "1.7.3",
+      "title": "Launch 组合：引入子文件与条件启动",
+      "book_page": 48,
+      "physical_page": 54
+    },
+    {
+      "kind": "subsection",
+      "number": "1.7.4",
+      "title": "Launch 分组：命名空间与多实例启动",
+      "book_page": 51,
+      "physical_page": 57
+    },
+    {
+      "kind": "subsection",
+      "number": "1.7.5",
+      "title": "Launch 事件：进程状态与模块就绪",
+      "book_page": 52,
+      "physical_page": 58
+    },
+    {
+      "kind": "subsection",
+      "number": "1.7.6",
+      "title": "Launch 运行时检查：用 OpaqueFunction 取参数",
+      "book_page": 53,
+      "physical_page": 59
+    },
+    {
+      "kind": "section",
+      "number": "1.8",
+      "title": "日志、调试与 IDE 配置",
+      "book_page": 55,
+      "physical_page": 61
+    },
+    {
+      "kind": "subsection",
+      "number": "1.8.1",
+      "title": "日志：看见故障，也控制输出量",
+      "book_page": 55,
+      "physical_page": 61
+    },
+    {
+      "kind": "subsection",
+      "number": "1.8.2",
+      "title": "CLion：让编辑、构建和运行使用同一套环境",
+      "book_page": 56,
+      "physical_page": 62
+    },
+    {
+      "kind": "subsection",
+      "number": "1.8.3",
+      "title": "CLion：用编译数据库浏览多包工程",
+      "book_page": 57,
+      "physical_page": 63
+    },
+    {
+      "kind": "subsection",
+      "number": "1.8.4",
+      "title": "CLion：排查库头文件的解析参数",
+      "book_page": 58,
+      "physical_page": 64
+    },
+    {
+      "kind": "section",
+      "number": "1.9",
+      "title": "大图像链路：中间件与内存*",
+      "book_page": 61,
+      "physical_page": 67
+    },
+    {
+      "kind": "subsection",
+      "number": "1.9.1",
+      "title": "先给 1440$\\times $1080@250 Hz 算笔账*",
+      "book_page": 61,
+      "physical_page": 67
+    },
+    {
+      "kind": "subsection",
+      "number": "1.9.2",
+      "title": "RMW 与 DDS：安装、切换与收发验证*",
+      "book_page": 62,
+      "physical_page": 68
+    },
+    {
+      "kind": "subsection",
+      "number": "1.9.3",
+      "title": "DDS 网卡配置：比较两份 XML 的写法*",
+      "book_page": 62,
+      "physical_page": 68
+    },
+    {
+      "kind": "subsection",
+      "number": "1.9.4",
+      "title": "Zenoh 入门：安装、发现与路由器启动*",
+      "book_page": 65,
+      "physical_page": 71
+    },
+    {
+      "kind": "subsection",
+      "number": "1.9.5",
+      "title": "Zenoh 配置：会话、路由器与跨机连接*",
+      "book_page": 65,
+      "physical_page": 71
+    },
+    {
+      "kind": "subsection",
+      "number": "1.9.6",
+      "title": "固定输入与指标，安排中间件对照*",
+      "book_page": 67,
+      "physical_page": 73
+    },
+    {
+      "kind": "subsection",
+      "number": "1.9.7",
+      "title": "零拷贝与组件容器：先管好图像的所有权*",
+      "book_page": 68,
+      "physical_page": 74
+    },
+    {
+      "kind": "subsection",
+      "number": "1.9.8",
+      "title": "组件部署：切换进程布局并验证所有权*",
+      "book_page": 74,
+      "physical_page": 80
+    },
+    {
+      "kind": "subsection",
+      "number": "1.9.9",
+      "title": "借出消息：向中间件借一块内存*",
+      "book_page": 76,
+      "physical_page": 82
+    },
+    {
+      "kind": "subsection",
+      "number": "1.9.10",
+      "title": "250 Hz 对照：借出能力与进程布局*",
+      "book_page": 80,
+      "physical_page": 86
+    },
+    {
+      "kind": "subsection",
+      "number": "1.9.11",
+      "title": "250 Hz 对照：图像类型、共享方式与借出*",
+      "book_page": 81,
+      "physical_page": 87
+    },
+    {
+      "kind": "subsection",
+      "number": "1.9.12",
+      "title": "慢处理对照：队列深度与图像年龄*",
+      "book_page": 82,
+      "physical_page": 88
+    },
+    {
+      "kind": "subsection",
+      "number": "1.9.13",
+      "title": "从实验结果选择图像链路方案*",
+      "book_page": 83,
+      "physical_page": 89
+    },
+    {
+      "kind": "section",
+      "number": "1.10",
+      "title": "本章小结",
+      "book_page": 83,
+      "physical_page": 89
+    },
+    {
+      "kind": "section",
+      "number": "1.11",
+      "title": "本章验收",
+      "book_page": 85,
+      "physical_page": 91
+    }
+  ],
+  "sha256": "8e82cbb72a6f54b07a90abfb8594a2f67b4a469049d85ec52900cb524a51e063",
+  "status": "passed",
+  "compiler": "XeLaTeX",
+  "printed_toc_depth": 1,
+  "body_sections": 9,
+  "subsections": 51,
+  "optional_section_count": 1,
+  "optional_subsection_count": 13,
+  "full_size_inspection_pages": [
+    4,
+    7,
+    8,
+    67,
+    90,
+    91,
+    297
+  ],
+  "visual_result": "Chapter title, complete introduction items, TOC, all optional heading markers, chapter questions and acceptance split, answer title and neighboring pages reviewed. No clipping, overlap, orphan headings or broken references.",
+  "source_matches_current_workspace": true,
+  "runtime_scope": "ROS examples were not rerun; existing physical-camera, multi-host, fresh-install and client acceptance gaps remain."
+}

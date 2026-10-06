@@ -28,7 +28,7 @@
 
 | 章 | 内容 | 正文入口 |
 | --- | --- | --- |
-| 1 | ROS2 基础：节点、接口、Launch、构建、IDE 调试与排障 | [A_ros2.tex](02-专项技术栈/chapters/A_ros2.tex) |
+| 1 | ROS2 开发与工程实践：节点、接口、Launch、观测工具与调试；图像链路性能对照为进阶选读 | [A_ros2.tex](02-专项技术栈/chapters/A_ros2.tex) |
 | 2 | 多机通信方法：TCP、串口帧、CRC、重连和状态时效 | [J_comm.tex](02-专项技术栈/chapters/J_comm.tex) |
 | 3 | SDR 与电磁波解析：IQ、同步、解调和接收流水线 | [K_sdr.tex](02-专项技术栈/chapters/K_sdr.tex) |
 | 4 | OpenCV 与图像处理基础：图像、颜色、滤波、轮廓和 ROS 图像桥接 | [B_opencv.tex](02-专项技术栈/chapters/B_opencv.tex) |

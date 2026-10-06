@@ -10,6 +10,9 @@
 接下来先用习题和验收看看自己还有哪里不顺，再往后走。下一章我们会把通信问题扩展到多台机器，继续处理数据怎样传过去、怎样确认收到，以及连接出了问题该怎样恢复。有了这一章的收发和排障经验，我们就可以带着这些问题继续动手了。
 
 \Needspace{12\baselineskip}
+\begin{note}
+如果你暂时跳过了第\ref{sec:ros2-image-advanced}节，章末先做第\ref{prob:v2-ros-1}--\ref{prob:v2-ros-10}、\ref{prob:v2-ros-15}--\ref{prob:v2-ros-16}题。第\ref{prob:v2-ros-11}--\ref{prob:v2-ros-14}题随进阶部分补做，对应的随堂练习也可以留到那时。
+\end{note}
 \begin{problemset}
 \renewcommand{\theenumi}{\arabic{enumi}}
 \item \label{prob:v2-ros-1}基础：一个包里有两个可执行程序，每个程序创建一个节点。包、进程、节点分别有几个？同一进程能否有多个节点？
@@ -31,6 +34,7 @@
 \end{problemset}
 
 \section{本章验收}
+首次学习先完成前 5 项；后 3 项随进阶部分补验。完整学习后仍需完成全部 8 项，不用一次把两阶段都挤在一起。
 \begin{enumerate}
     \item 从空目录创建独立工作空间，现场运行字符串发布与订阅；由检查者更改输入文本，展示对应输出。
     \item 在完整工程中增加一个自定义字段并重新构建，展示接口查询、带时间戳的消息和定时器频率。

@@ -1,4 +1,4 @@
-\subsubsection{先给 1440\texorpdfstring{$\times$}{×}1080@250 Hz 算笔账}
+\subsubsection{先给 1440\texorpdfstring{$\times$}{×}1080@250 Hz 算笔账*}
 \label{sec:ros2-image-budget}
 前面用字符串把收发流程跑通了，接下来换成视觉系统里常见的图像。以 $1440\times1080@250\,\mathrm{Hz}$ 的输入为例，每隔 4 ms 就有一帧新图像。采集、转换、传输和识别要接力完成工作，我们既关心每秒能处理多少帧，也关心处理的是多久以前的画面。毕竟，相机拍得飞快，识别节点却在认真处理半秒前的装甲板，瞄准就跟不上了。
 
@@ -39,7 +39,7 @@ bgr8 / rgb8 & 4.6656 & 1166.4 & 9.3312\\
 \end{exercise}
 
 \Needspace{18\baselineskip}
-\subsubsection{RMW 与 DDS：安装、切换与收发验证}
+\subsubsection{RMW 与 DDS：安装、切换与收发验证*}
 \label{sec:ros2-rmw-selection}
 \texttt{rclcpp} 下面的 RMW 是中间件接口，它是我们消息传输的实际通道。Humble 的默认配置是 Fast DDS（\nolinkurl{rmw_fastrtps_cpp}），我们也可以换成 Cyclone DDS（\nolinkurl{rmw_cyclonedds_cpp}），或者使用 Zenoh（\nolinkurl{rmw_zenoh_cpp}）。发布与订阅的基本代码不用跟着改，但底层的实际发现机制、传输路径、缓存与配置方法会变化。大家可以体会一下这种抽象封装的思想。
 
@@ -94,7 +94,7 @@ listener 应和先前一样持续打印收到的 \texttt{Hello World} 及序号�
 
 如果启动时报找不到 RMW 动态库，用 \texttt{ros2 pkg prefix 实现包名} 检查包是否可见，再核对变量的拼写。环境变量属于当前终端，所以两个启动终端都需要设置。
 
-\subsubsection{DDS 网卡配置：比较两份 XML 的写法}
+\subsubsection{DDS 网卡配置：比较两份 XML 的写法*}
 默认配置能通信后，你可能发现机器同时接着有线、Wi-Fi 和虚拟网卡，发现消息走到了不想使用的网络上。我们用“只选定一块网卡”把两家的写法摆在一起。配置在本卷 \path{examples/ros2/rmw-config-demo}，只有两份 XML 和运行说明，不需要编译：
 \par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{lstlisting}[language={}]
@@ -167,7 +167,7 @@ ros2 daemon stop
 \end{exercise}
 
 \Needspace{18\baselineskip}
-\subsubsection{Zenoh 入门：安装、发现与路由器启动}
+\subsubsection{Zenoh 入门：安装、发现与路由器启动*}
 \texttt{rmw\_zenoh\_cpp} 把 ROS2 的中间件接口接到 Zenoh。我们继续运行原来的 talker/listener，用 JSON5 配置发现与连接方式。需要跨主机、无线链路或多机器人通信时，也可以据此安排路由与连接拓扑。
 
 \begin{example}[安装 Zenoh 并完成三终端收发]
@@ -208,7 +208,7 @@ ros2 run rmw_zenoh_cpp rmw_zenohd
 listener 应持续收到消息。完成后分别按 Ctrl+C 停止两个节点和 router。默认 peer 模式可以在发现后建立节点直连，下一例则用 client 模式让数据经过 router。
 \end{example}
 
-\subsubsection{Zenoh 配置：会话、路由器与跨机连接}
+\subsubsection{Zenoh 配置：会话、路由器与跨机连接*}
 每个 ROS 进程通过 RMW 创建 Zenoh 会话（session），会话决定节点如何连接。router 有自己的监听与路由配置。\texttt{ZENOH\_SESSION\_CONFIG\_URI} 指向节点会话文件，\texttt{ZENOH\_ROUTER\_CONFIG\_URI} 指向 router 文件。
 
 \begin{example}[先指定本机端点，再连接另一台机器]
@@ -298,7 +298,7 @@ ros2 daemon stop
 \end{itemize}
 \end{conclusion}
 
-\subsubsection{固定输入与指标，安排中间件对照}
+\subsubsection{固定输入与指标，安排中间件对照*}
 中间件已经能通信了，接下来固定消息、QoS 与部署布局，每轮只改变待比较的实现。这样看到差异时，我们才知道该从哪里找原因。
 
 \begin{example}[安排一个可以解释结果的对照]
@@ -315,7 +315,7 @@ Fast DDS 的 RMW 默认项、同步与异步发布、Data Sharing 配置可查 \
 \end{exercise}
 
 \Needspace{18\baselineskip}
-\subsubsection{零拷贝与组件容器：先管好图像的所有权}
+\subsubsection{零拷贝与组件容器：先管好图像的所有权*}
 \label{sec:ros2-image-components}
 算过负载后，我们来看看怎样减少搬运。\textbf{零拷贝（zero-copy）}指数据在某段传递过程中直接复用已有缓冲区。这里先把相机发布节点与识别订阅节点装进同一个进程，让 \texttt{rclcpp} 交接消息所有权，省去这两个节点之间的像素复制。
 
@@ -369,7 +369,7 @@ Sink 接到消息时记录延迟，检查首尾像素，在正常退出时输出
 \end{example}
 
 \Needspace{8\baselineskip}
-\subsubsection{组件部署：切换进程布局并验证所有权}
+\subsubsection{组件部署：切换进程布局并验证所有权*}
 \label{sec:ros2-image-deployment}
 \begin{example}[同一份组件，三种运行布局]
 Launch 文件保持相同 Source/Sink 和 QoS，只改变布局：\texttt{separate} 启动两个组件容器进程，\texttt{same} 把两者装进同一进程但关闭进程内通信，\texttt{intra} 则在同一进程中为两端启用它。这里使用单线程 \texttt{component\_container}，便于观察消息路径。
@@ -437,7 +437,7 @@ python3 src/image_path_demo/compare.py \
 用同一份源码依次运行 \texttt{intra}、\texttt{same}、\texttt{separate}，记录组件容器、PID 是否相同和前三帧的地址。解释为什么只有开启进程内路径并转移所有权的条件与地址记录一起，才能支持本例的像素传递结论。
 \end{exercise}
 
-\subsubsection{借出消息：向中间件借一块内存}
+\subsubsection{借出消息：向中间件借一块内存*}
 \label{sec:ros2-loaned-messages}
 前面由应用创建消息，再在进程内转移所有权。\textbf{借出消息（loaned message）}则由中间件提供样本缓冲区，发布者直接填充，发布后交还控制权，订阅者也可以借读同一份共享样本。
 
@@ -527,7 +527,7 @@ RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
 \end{itemize}
 \end{conclusion}
 
-\subsubsection{250 Hz 对照：借出能力与进程布局}
+\subsubsection{250 Hz 对照：借出能力与进程布局*}
 \label{sec:ros2-image-measurement}
 现在我们已经分清两类图像接口和几条内存路径，再用相同的合成负载比较中间件。所有实现都测试标准 Image 与 FixedImage，图像尺寸为 $1440\times1080$ BGR8，目标频率为 250 Hz。先比较共同的普通发布方式，再观察共享内存和支持借出的路径。
 

@@ -11,7 +11,7 @@
 | 一 | 1 Linux 工作环境 | 首次单章提交 0c2a991；apt/zsh/AstroNvim 补跑 90aeebd，Ubuntu VS Code GUI 与 Maple Mono NF CN 截图补跑 f08b276，正文对齐/Ninja 补充 ee937b5，Ubuntu CLion GUI 与 Maple Mono NF CN 截图补测 52c292c。真实安装/恢复、Windows 工具链、桌面登录与板端验证仍待补，详见 volume-1-chapter-1.md。 |
 | 一 | 2 现代 C++ 基础 | 已单章提交 66cad2d；20 项通过，70 个程序、10 个变体、14 张图已验证，详见 volume-1-chapter-2.md。 |
 | 一 | 3 编译过程与 CMake 基础 | 首次单章提交 b93d17e，中文跨卷路径显示修复 4cfafb1；20 项通过，随书工程、题解定位、构建/安装/窗口与 Jazzy 选读验证完成，详见 volume-1-chapter-3.md。 |
-| 二 | 1 ROS2 基础 | 首次单章提交5eb75ed；Jazzy/rqt核验已整理，CLion实际回调、产物对照与编译数据库补测44944b4；选定外部头文件解析参数修复cda6435，实际诊断15→0→15→0，完整脚本与13+10题解已整理。第二主机发现范围仍未完成，详见volume-2-chapter-1.md。 |
+| 二 | 1 ROS2 开发与工程实践 | 首次单章提交5eb75ed；Jazzy/rqt核验已整理，CLion实际回调、产物对照与编译数据库补测44944b4；选定外部头文件解析参数修复cda6435，实际诊断15→0→15→0，完整脚本与13+10题解已整理。第二主机发现范围仍未完成，详见volume-2-chapter-1.md。 |
 | 二 | 2 多机通信方法 | 已单章提交 f6934b2；30 条 Ubuntu/Jazzy 记录通过，跨物理主机与真实串口设备验证待补，详见 volume-2-chapter-2.md。 |
 | 二 | 3 SDR 与电磁波解析 | 已单章提交 a80b582；内容、完整 IQ 项目、题解与 PDF 已整理；23 条记录（含 75 组参数变体）通过，Pluto/射频实机未完成，详见 volume-2-chapter-3.md。 |
 | 二 | 4 OpenCV 与图像处理基础 | 已单章提交 95c3d92；内容、完整图像/ROS 工程、12+10 题解与 PDF 已整理；64 条 Ubuntu/Jazzy 记录通过，物理相机未完成，详见 volume-2-chapter-4.md。 |

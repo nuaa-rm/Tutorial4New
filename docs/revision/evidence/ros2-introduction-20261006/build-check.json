@@ -1,0 +1,21 @@
+{
+  "compiler": "XeLaTeX",
+  "passes": [
+    {
+      "pass_number": 1,
+      "exit": 0,
+      "seconds": 17.47,
+      "auxiliary_digest": "427f47490370a66ed1923a6c88419eb5638ef6d34c36f13e8570f3017c7f9441",
+      "stable": false
+    },
+    {
+      "pass_number": 2,
+      "exit": 0,
+      "seconds": 16.95,
+      "auxiliary_digest": "427f47490370a66ed1923a6c88419eb5638ef6d34c36f13e8570f3017c7f9441",
+      "stable": true
+    }
+  ],
+  "stable": true,
+  "sha256": "8e82cbb72a6f54b07a90abfb8594a2f67b4a469049d85ec52900cb524a51e063"
+}

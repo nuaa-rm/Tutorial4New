@@ -64,7 +64,7 @@ Zenoh 的 \texttt{separate} 行还可以与 SHM 行对照：开启共享内存�
 
 \end{example}
 
-\subsubsection{250 Hz 对照：图像类型、共享方式与借出}
+\subsubsection{250 Hz 对照：图像类型、共享方式与借出*}
 \label{sec:ros2-image-type-comparison}
 \begin{example}[同一收发程序，比较两类图像]
 项目中的 \texttt{image\_benchmark} 用同一份收发实现处理 Frame 中的标准 Image 与 FixedImage，接收端都在回调内读取消息。\texttt{compare\_images.py} 依次切换 RMW、消息类型和配置，管理本轮节点、Zenoh 路由器及 RouDi。默认配置组都采用普通发布，共享配置组分别开启 Fast DDS Data Sharing、Cyclone DDS iceoryx 和 Zenoh SHM，再为支持两端借出的定长类型追加借出发布。
@@ -139,7 +139,7 @@ Zenoh & FixedImage & 普通 & 100.0\% & 1.347 & 0/0\\
 运行三种 RMW、两类图像的统一对照，记录默认配置与共享配置下的接收比例、P95 和两端借出能力。解释变长 Image 不能直接借出时共享内存如何工作，定长图像也不能借出时又应怎样判断原因。
 \end{exercise}
 
-\subsubsection{慢处理对照：队列深度与图像年龄}
+\subsubsection{慢处理对照：队列深度与图像年龄*}
 只保留 Fast DDS 的两个进程，把 Sink 的模拟处理设为 8 ms。先用默认小图像观察排队：
 \par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{tbash}
@@ -171,7 +171,7 @@ python3 src/image_path_demo/compare.py \
 \end{exercise}
 
 
-\subsubsection{从实验结果选择图像链路方案}
+\subsubsection{从实验结果选择图像链路方案*}
 现在回到开始的问题：$1440\times1080$ 的图像每隔 4 ms 到来，我们怎样把它及时送进识别节点，并减少一路上的搬运？根据前面的同机对照，我们已经可以给这条图像链路选择方案。
 
 对于能放入同一进程的节点，\textbf{优先把这些近邻节点组成组件，开启进程内通信并交接消息所有权。}表\ref{tab:ros2-image-results} 中，三种 RMW 的 \texttt{intra} 都完整交付了图像，P95 为 0.029--0.042 ms。这条路径可以继续使用普通图像接口，直接复用像素缓冲区。

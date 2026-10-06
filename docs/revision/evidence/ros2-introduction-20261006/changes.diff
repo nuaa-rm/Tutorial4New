@@ -1,0 +1,272 @@
+diff --git a/02-专项技术栈/answers.tex b/02-专项技术栈/answers.tex
+index 09c3b26..4440e3a 100644
+--- a/02-专项技术栈/answers.tex
++++ b/02-专项技术栈/answers.tex
+@@ -6,9 +6,9 @@
+ 操作题给出步骤、预期结果和判断依据；依赖设备、软件版本或实验数据的数值，以实际记录为准。
+ 本章验收用于现场考核，不另列一份可以照抄的验收答案。
+ 
+-\section*{第一章：ROS2 基础}
++\section*{第一章：ROS2 开发与工程实践}
+ \phantomsection
+-\addcontentsline{toc}{section}{第一章题解：ROS2 基础}
++\addcontentsline{toc}{section}{第一章题解：ROS2 开发与工程实践}
+ \subsubsection*{随堂练习}
+ 
+ \paragraph*{随堂练习 \ref{ex:v2-ros-setup}}
+diff --git a/02-专项技术栈/chapters/A_ros2_image_path.tex b/02-专项技术栈/chapters/A_ros2_image_path.tex
+index db11250..6ac8f1c 100644
+--- a/02-专项技术栈/chapters/A_ros2_image_path.tex
++++ b/02-专项技术栈/chapters/A_ros2_image_path.tex
+@@ -1,4 +1,4 @@
+-\subsubsection{先给 1440\texorpdfstring{$\times$}{×}1080@250 Hz 算笔账}
++\subsubsection{先给 1440\texorpdfstring{$\times$}{×}1080@250 Hz 算笔账*}
+ \label{sec:ros2-image-budget}
+ 前面用字符串把收发流程跑通了，接下来换成视觉系统里常见的图像。以 $1440\times1080@250\,\mathrm{Hz}$ 的输入为例，每隔 4 ms 就有一帧新图像。采集、转换、传输和识别要接力完成工作，我们既关心每秒能处理多少帧，也关心处理的是多久以前的画面。毕竟，相机拍得飞快，识别节点却在认真处理半秒前的装甲板，瞄准就跟不上了。
+ 
+@@ -39,7 +39,7 @@ bgr8 / rgb8 & 4.6656 & 1166.4 & 9.3312\\
+ \end{exercise}
+ 
+ \Needspace{18\baselineskip}
+-\subsubsection{RMW 与 DDS：安装、切换与收发验证}
++\subsubsection{RMW 与 DDS：安装、切换与收发验证*}
+ \label{sec:ros2-rmw-selection}
+ \texttt{rclcpp} 下面的 RMW 是中间件接口，它是我们消息传输的实际通道。Humble 的默认配置是 Fast DDS（\nolinkurl{rmw_fastrtps_cpp}），我们也可以换成 Cyclone DDS（\nolinkurl{rmw_cyclonedds_cpp}），或者使用 Zenoh（\nolinkurl{rmw_zenoh_cpp}）。发布与订阅的基本代码不用跟着改，但底层的实际发现机制、传输路径、缓存与配置方法会变化。大家可以体会一下这种抽象封装的思想。
+ 
+@@ -94,7 +94,7 @@ listener 应和先前一样持续打印收到的 \texttt{Hello World} 及序号
+ 
+ 如果启动时报找不到 RMW 动态库，用 \texttt{ros2 pkg prefix 实现包名} 检查包是否可见，再核对变量的拼写。环境变量属于当前终端，所以两个启动终端都需要设置。
+ 
+-\subsubsection{DDS 网卡配置：比较两份 XML 的写法}
++\subsubsection{DDS 网卡配置：比较两份 XML 的写法*}
+ 默认配置能通信后，你可能发现机器同时接着有线、Wi-Fi 和虚拟网卡，发现消息走到了不想使用的网络上。我们用“只选定一块网卡”把两家的写法摆在一起。配置在本卷 \path{examples/ros2/rmw-config-demo}，只有两份 XML 和运行说明，不需要编译：
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+ \begin{lstlisting}[language={}]
+@@ -167,7 +167,7 @@ ros2 daemon stop
+ \end{exercise}
+ 
+ \Needspace{18\baselineskip}
+-\subsubsection{Zenoh 入门：安装、发现与路由器启动}
++\subsubsection{Zenoh 入门：安装、发现与路由器启动*}
+ \texttt{rmw\_zenoh\_cpp} 把 ROS2 的中间件接口接到 Zenoh。我们继续运行原来的 talker/listener，用 JSON5 配置发现与连接方式。需要跨主机、无线链路或多机器人通信时，也可以据此安排路由与连接拓扑。
+ 
+ \begin{example}[安装 Zenoh 并完成三终端收发]
+@@ -208,7 +208,7 @@ ros2 run rmw_zenoh_cpp rmw_zenohd
+ listener 应持续收到消息。完成后分别按 Ctrl+C 停止两个节点和 router。默认 peer 模式可以在发现后建立节点直连，下一例则用 client 模式让数据经过 router。
+ \end{example}
+ 
+-\subsubsection{Zenoh 配置：会话、路由器与跨机连接}
++\subsubsection{Zenoh 配置：会话、路由器与跨机连接*}
+ 每个 ROS 进程通过 RMW 创建 Zenoh 会话（session），会话决定节点如何连接。router 有自己的监听与路由配置。\texttt{ZENOH\_SESSION\_CONFIG\_URI} 指向节点会话文件，\texttt{ZENOH\_ROUTER\_CONFIG\_URI} 指向 router 文件。
+ 
+ \begin{example}[先指定本机端点，再连接另一台机器]
+@@ -298,7 +298,7 @@ ros2 daemon stop
+ \end{itemize}
+ \end{conclusion}
+ 
+-\subsubsection{固定输入与指标，安排中间件对照}
++\subsubsection{固定输入与指标，安排中间件对照*}
+ 中间件已经能通信了，接下来固定消息、QoS 与部署布局，每轮只改变待比较的实现。这样看到差异时，我们才知道该从哪里找原因。
+ 
+ \begin{example}[安排一个可以解释结果的对照]
+@@ -315,7 +315,7 @@ Fast DDS 的 RMW 默认项、同步与异步发布、Data Sharing 配置可查 \
+ \end{exercise}
+ 
+ \Needspace{18\baselineskip}
+-\subsubsection{零拷贝与组件容器：先管好图像的所有权}
++\subsubsection{零拷贝与组件容器：先管好图像的所有权*}
+ \label{sec:ros2-image-components}
+ 算过负载后，我们来看看怎样减少搬运。\textbf{零拷贝（zero-copy）}指数据在某段传递过程中直接复用已有缓冲区。这里先把相机发布节点与识别订阅节点装进同一个进程，让 \texttt{rclcpp} 交接消息所有权，省去这两个节点之间的像素复制。
+ 
+@@ -369,7 +369,7 @@ Sink 接到消息时记录延迟，检查首尾像素，在正常退出时输出
+ \end{example}
+ 
+ \Needspace{8\baselineskip}
+-\subsubsection{组件部署：切换进程布局并验证所有权}
++\subsubsection{组件部署：切换进程布局并验证所有权*}
+ \label{sec:ros2-image-deployment}
+ \begin{example}[同一份组件，三种运行布局]
+ Launch 文件保持相同 Source/Sink 和 QoS，只改变布局：\texttt{separate} 启动两个组件容器进程，\texttt{same} 把两者装进同一进程但关闭进程内通信，\texttt{intra} 则在同一进程中为两端启用它。这里使用单线程 \texttt{component\_container}，便于观察消息路径。
+@@ -437,7 +437,7 @@ python3 src/image_path_demo/compare.py \
+ 用同一份源码依次运行 \texttt{intra}、\texttt{same}、\texttt{separate}，记录组件容器、PID 是否相同和前三帧的地址。解释为什么只有开启进程内路径并转移所有权的条件与地址记录一起，才能支持本例的像素传递结论。
+ \end{exercise}
+ 
+-\subsubsection{借出消息：向中间件借一块内存}
++\subsubsection{借出消息：向中间件借一块内存*}
+ \label{sec:ros2-loaned-messages}
+ 前面由应用创建消息，再在进程内转移所有权。\textbf{借出消息（loaned message）}则由中间件提供样本缓冲区，发布者直接填充，发布后交还控制权，订阅者也可以借读同一份共享样本。
+ 
+@@ -527,7 +527,7 @@ RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
+ \end{itemize}
+ \end{conclusion}
+ 
+-\subsubsection{250 Hz 对照：借出能力与进程布局}
++\subsubsection{250 Hz 对照：借出能力与进程布局*}
+ \label{sec:ros2-image-measurement}
+ 现在我们已经分清两类图像接口和几条内存路径，再用相同的合成负载比较中间件。所有实现都测试标准 Image 与 FixedImage，图像尺寸为 $1440\times1080$ BGR8，目标频率为 250 Hz。先比较共同的普通发布方式，再观察共享内存和支持借出的路径。
+ 
+diff --git a/02-专项技术栈/chapters/A_ros2_image_results.tex b/02-专项技术栈/chapters/A_ros2_image_results.tex
+index 294f323..99f1d12 100644
+--- a/02-专项技术栈/chapters/A_ros2_image_results.tex
++++ b/02-专项技术栈/chapters/A_ros2_image_results.tex
+@@ -64,7 +64,7 @@ Zenoh 的 \texttt{separate} 行还可以与 SHM 行对照：开启共享内存
+ 
+ \end{example}
+ 
+-\subsubsection{250 Hz 对照：图像类型、共享方式与借出}
++\subsubsection{250 Hz 对照：图像类型、共享方式与借出*}
+ \label{sec:ros2-image-type-comparison}
+ \begin{example}[同一收发程序，比较两类图像]
+ 项目中的 \texttt{image\_benchmark} 用同一份收发实现处理 Frame 中的标准 Image 与 FixedImage，接收端都在回调内读取消息。\texttt{compare\_images.py} 依次切换 RMW、消息类型和配置，管理本轮节点、Zenoh 路由器及 RouDi。默认配置组都采用普通发布，共享配置组分别开启 Fast DDS Data Sharing、Cyclone DDS iceoryx 和 Zenoh SHM，再为支持两端借出的定长类型追加借出发布。
+@@ -139,7 +139,7 @@ Zenoh & FixedImage & 普通 & 100.0\% & 1.347 & 0/0\\
+ 运行三种 RMW、两类图像的统一对照，记录默认配置与共享配置下的接收比例、P95 和两端借出能力。解释变长 Image 不能直接借出时共享内存如何工作，定长图像也不能借出时又应怎样判断原因。
+ \end{exercise}
+ 
+-\subsubsection{慢处理对照：队列深度与图像年龄}
++\subsubsection{慢处理对照：队列深度与图像年龄*}
+ 只保留 Fast DDS 的两个进程，把 Sink 的模拟处理设为 8 ms。先用默认小图像观察排队：
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+ \begin{tbash}
+@@ -171,7 +171,7 @@ python3 src/image_path_demo/compare.py \
+ \end{exercise}
+ 
+ 
+-\subsubsection{从实验结果选择图像链路方案}
++\subsubsection{从实验结果选择图像链路方案*}
+ 现在回到开始的问题：$1440\times1080$ 的图像每隔 4 ms 到来，我们怎样把它及时送进识别节点，并减少一路上的搬运？根据前面的同机对照，我们已经可以给这条图像链路选择方案。
+ 
+ 对于能放入同一进程的节点，\textbf{优先把这些近邻节点组成组件，开启进程内通信并交接消息所有权。}表\ref{tab:ros2-image-results} 中，三种 RMW 的 \texttt{intra} 都完整交付了图像，P95 为 0.029--0.042 ms。这条路径可以继续使用普通图像接口，直接复用像素缓冲区。
+diff --git a/02-专项技术栈/chapters/A_ros2_review.tex b/02-专项技术栈/chapters/A_ros2_review.tex
+index c3c19d7..4c58342 100644
+--- a/02-专项技术栈/chapters/A_ros2_review.tex
++++ b/02-专项技术栈/chapters/A_ros2_review.tex
+@@ -10,6 +10,9 @@
+ 接下来先用习题和验收看看自己还有哪里不顺，再往后走。下一章我们会把通信问题扩展到多台机器，继续处理数据怎样传过去、怎样确认收到，以及连接出了问题该怎样恢复。有了这一章的收发和排障经验，我们就可以带着这些问题继续动手了。
+ 
+ \Needspace{12\baselineskip}
++\begin{note}
++如果你暂时跳过了第\ref{sec:ros2-image-advanced}节，章末先做第\ref{prob:v2-ros-1}--\ref{prob:v2-ros-10}、\ref{prob:v2-ros-15}--\ref{prob:v2-ros-16}题。第\ref{prob:v2-ros-11}--\ref{prob:v2-ros-14}题随进阶部分补做，对应的随堂练习也可以留到那时。
++\end{note}
+ \begin{problemset}
+ \renewcommand{\theenumi}{\arabic{enumi}}
+ \item \label{prob:v2-ros-1}基础：一个包里有两个可执行程序，每个程序创建一个节点。包、进程、节点分别有几个？同一进程能否有多个节点？
+@@ -31,6 +34,7 @@
+ \end{problemset}
+ 
+ \section{本章验收}
++首次学习先完成前 5 项；后 3 项随进阶部分补验。完整学习后仍需完成全部 8 项，不用一次把两阶段都挤在一起。
+ \begin{enumerate}
+     \item 从空目录创建独立工作空间，现场运行字符串发布与订阅；由检查者更改输入文本，展示对应输出。
+     \item 在完整工程中增加一个自定义字段并重新构建，展示接口查询、带时间戳的消息和定时器频率。
+diff --git a/02-专项技术栈/examples/ros2/visualization-demo/README.md b/02-专项技术栈/examples/ros2/visualization-demo/README.md
+index b81fc55..6fb64e2 100644
+--- a/02-专项技术栈/examples/ros2/visualization-demo/README.md
++++ b/02-专项技术栈/examples/ros2/visualization-demo/README.md
+@@ -1,6 +1,6 @@
+ # 用一组数据练习 ROS2 图形化观测
+ 
+-对应卷二 ROS2 基础的“把消息画出来”及其后的小节。Ubuntu 22.04 / ROS2 Humble，Python 3.10；合成图像与轨迹不需要相机，程序不控制机器人。
++对应卷二“ROS2 开发与工程实践”章的“把消息画出来”及其后的小节。Ubuntu 22.04 / ROS2 Humble，Python 3.10；合成图像与轨迹不需要相机，程序不控制机器人。
+ 
+ ## 安装与启动
+ 
+diff --git a/02-专项技术栈/main.tex b/02-专项技术栈/main.tex
+index adb0351..b5b7e88 100644
+--- a/02-专项技术栈/main.tex
++++ b/02-专项技术栈/main.tex
+@@ -22,7 +22,7 @@
+ \author{长空御风视觉组}
+ \institute{视觉组培训}
+ \date{\today}
+-\version{2026.08}
++\version{2026.10}
+ \TextbookVolume{2}
+ \extrainfo{四方向：自瞄 / 导航 / 决策 / 雷达。OpenCV、深度学习等为共用技能，按方向组合选修。}
+ 
+@@ -41,11 +41,13 @@
+ \mainmatter
+ 
+ % ============================================================
+-\chapter{ROS2 基础}
++\chapter{ROS2 开发与工程实践}
+ 
+ \begin{introduction}
+-  \item 学习目标：创建功能包并验证节点通信；用 rqt、RViz2 与 Foxglove 观察曲线、图像和三维消息；编写 Launch；完成排障与 IDE 调试；比较大图像的 RMW 与组件布局，探测借出能力。
+-  \item 建议学时：基础约 1 周，图形化观测另用半天至 1 天，工程实践另用 2--3 天，大图像链路实验另用半天至 1 天。
++  \item 学习目标：创建功能包并验证节点通信；用 rqt、RViz2 与 Foxglove 观察曲线、图像和三维消息；编写 Launch；完成排障与 IDE 调试；进阶时比较大图像的 RMW 与组件布局，探测借出能力。
++  \item 建议学时：每天 2--3 小时边读边做，含示例与练习；首次学习约 1.5--2 周，进阶实验另用 3--5 天，完整学习约 2--3 周。
++  \columnbreak
++  \item 学习顺序：标 * 的部分为进阶选读。首次先学到日志与调试，第\ref{sec:ros2-image-advanced}节及其子节可先跳过；遇到大图像传输或性能瓶颈，再回来学习中间件、组件与借出消息及性能对照。
+   \item 本卷边界：先修卷一 Linux、C++ 与 CMake；本卷 ROS2 内容、命令与代码以 Ubuntu 22.04 和 Humble 为主；实车集成见卷三。
+ \end{introduction}
+ 
+@@ -61,7 +63,11 @@
+ \input{chapters/A_ros2_engineering.tex}
+ 
+ \Needspace{18\baselineskip}
+-\section{大图像链路：中间件与内存}
++\section{大图像链路：中间件与内存*}
++\label{sec:ros2-image-advanced}
++\begin{note}
++从这里开始，我们要检查图像负载、中间件配置、进程边界和内存传递，内容会比前面的节点收发更深入。第一次学可以先跳到本章小结，把前面的工程、观测与调试流程练熟；等接入大图像，或遇到复制开销、丢帧与延迟问题时，再回来跟着对照实验查原因。
++\end{note}
+ \input{chapters/A_ros2_image_path.tex}
+ 
+ \input{chapters/A_ros2_review.tex}
+diff --git a/README.md b/README.md
+index 12822da..7f034fc 100644
+--- a/README.md
++++ b/README.md
+@@ -28,7 +28,7 @@
+ 
+ | 章 | 内容 | 正文入口 |
+ | --- | --- | --- |
+-| 1 | ROS2 基础：节点、接口、Launch、构建、IDE 调试与排障 | [A_ros2.tex](02-专项技术栈/chapters/A_ros2.tex) |
++| 1 | ROS2 开发与工程实践：节点、接口、Launch、观测工具与调试；图像链路性能对照为进阶选读 | [A_ros2.tex](02-专项技术栈/chapters/A_ros2.tex) |
+ | 2 | 多机通信方法：TCP、串口帧、CRC、重连和状态时效 | [J_comm.tex](02-专项技术栈/chapters/J_comm.tex) |
+ | 3 | SDR 与电磁波解析：IQ、同步、解调和接收流水线 | [K_sdr.tex](02-专项技术栈/chapters/K_sdr.tex) |
+ | 4 | OpenCV 与图像处理基础：图像、颜色、滤波、轮廓和 ROS 图像桥接 | [B_opencv.tex](02-专项技术栈/chapters/B_opencv.tex) |
+diff --git a/docs/revision/progress.md b/docs/revision/progress.md
+index 901060e..1212cfc 100644
+--- a/docs/revision/progress.md
++++ b/docs/revision/progress.md
+@@ -11,7 +11,7 @@
+ | 一 | 1 Linux 工作环境 | 首次单章提交 0c2a991；apt/zsh/AstroNvim 补跑 90aeebd，Ubuntu VS Code GUI 与 Maple Mono NF CN 截图补跑 f08b276，正文对齐/Ninja 补充 ee937b5，Ubuntu CLion GUI 与 Maple Mono NF CN 截图补测 52c292c。真实安装/恢复、Windows 工具链、桌面登录与板端验证仍待补，详见 volume-1-chapter-1.md。 |
+ | 一 | 2 现代 C++ 基础 | 已单章提交 66cad2d；20 项通过，70 个程序、10 个变体、14 张图已验证，详见 volume-1-chapter-2.md。 |
+ | 一 | 3 编译过程与 CMake 基础 | 首次单章提交 b93d17e，中文跨卷路径显示修复 4cfafb1；20 项通过，随书工程、题解定位、构建/安装/窗口与 Jazzy 选读验证完成，详见 volume-1-chapter-3.md。 |
+-| 二 | 1 ROS2 基础 | 首次单章提交5eb75ed；Jazzy/rqt核验已整理，CLion实际回调、产物对照与编译数据库补测44944b4；选定外部头文件解析参数修复cda6435，实际诊断15→0→15→0，完整脚本与13+10题解已整理。第二主机发现范围仍未完成，详见volume-2-chapter-1.md。 |
++| 二 | 1 ROS2 开发与工程实践 | 首次单章提交5eb75ed；Jazzy/rqt核验已整理，CLion实际回调、产物对照与编译数据库补测44944b4；选定外部头文件解析参数修复cda6435，实际诊断15→0→15→0，完整脚本与13+10题解已整理。第二主机发现范围仍未完成，详见volume-2-chapter-1.md。 |
+ | 二 | 2 多机通信方法 | 已单章提交 f6934b2；30 条 Ubuntu/Jazzy 记录通过，跨物理主机与真实串口设备验证待补，详见 volume-2-chapter-2.md。 |
+ | 二 | 3 SDR 与电磁波解析 | 已单章提交 a80b582；内容、完整 IQ 项目、题解与 PDF 已整理；23 条记录（含 75 组参数变体）通过，Pluto/射频实机未完成，详见 volume-2-chapter-3.md。 |
+ | 二 | 4 OpenCV 与图像处理基础 | 已单章提交 95c3d92；内容、完整图像/ROS 工程、12+10 题解与 PDF 已整理；64 条 Ubuntu/Jazzy 记录通过，物理相机未完成，详见 volume-2-chapter-4.md。 |
+diff --git a/docs/revision/volume-2-chapter-1.md b/docs/revision/volume-2-chapter-1.md
+index 674474a..f35f627 100644
+--- a/docs/revision/volume-2-chapter-1.md
++++ b/docs/revision/volume-2-chapter-1.md
+@@ -1,4 +1,4 @@
+-# 卷二第一章：ROS2 基础修订记录
++# 卷二第一章：ROS2 开发与工程实践修订记录
+ 
+ 本章保留原来的“先建节点，再解释通信，最后整理工程”讲解线。语言参照原 11/12/13.tex，用连贯段落带着读者操作，随步骤解释环境、名字和结果，不把正文改成检查清单。20 项中 19 项通过，第 19 项仍有真实环境验证缺口；本章及全书尚未全部验收。
+ 
+@@ -174,3 +174,7 @@
+ 按用户要求，ROS2 正文 `section` 从 3 组细分为 11 组，`subsubsection` 从 22 个细分为 52 个，分别组织入门、接口、完整工程、两组观测工具、构建、Launch、日志与 IDE、中间件、组件与借出、性能实验。本章小结与验收现编号为 1.12 和 1.13。纸面目录仍保持原显示深度，使用更具体的 section 定位内容。
+ 
+ 正文顺序、代码、图片、实验数值及 30+16 道题目保留；长示例按新主题边界拆分，跨节指引、长名称换行及标题分页同步调整。完整增量、分组与 20 项验收见 [目录层级细分记录](ros2-subsections-20261006.md)。本轮只验证结构与 PDF，既有现场运行验收缺口继续保留。
++
++## 章名与建议学时调整（2026-10-06）
++
++章名改为“ROS2 开发与工程实践”，同步题解、章节地图和示例说明。章首学时改为每天 2–3 小时，首次学习约 1.5–2 周，补齐进阶实验后完整学习约 2–3 周，包含示例与练习。“大图像链路：中间件与内存”及其子节用 `*` 标为进阶选读，可先跳到本章小结，遇到传输和性能问题时再回来；章末题与验收注明分阶段补做，全部任务保留。先修与实车集成边界保留；详见 [本轮修改与逐项检查](ros2-introduction-20261006.md)。
+diff --git a/docs/revision/whole-book-audit.md b/docs/revision/whole-book-audit.md
+index ffd1cb1..99f9caf 100644
+--- a/docs/revision/whole-book-audit.md
++++ b/docs/revision/whole-book-audit.md
+@@ -15,7 +15,7 @@
+ | 一/1 Linux 工作环境 | 0c2a991 | 19/1/0 | [记录](volume-1-chapter-1.md) |
+ | 一/2 现代 C++ 基础 | 66cad2d | 20/0/0 | [记录](volume-1-chapter-2.md) |
+ | 一/3 编译过程与 CMake 基础 | b93d17e | 20/0/0 | [记录](volume-1-chapter-3.md) |
+-| 二/1 ROS2 基础 | 5eb75ed | 19/1/0 | [记录](volume-2-chapter-1.md) |
++| 二/1 ROS2 开发与工程实践 | 5eb75ed | 19/1/0 | [记录](volume-2-chapter-1.md) |
+ | 二/2 多机通信方法 | f6934b2 | 19/1/0 | [记录](volume-2-chapter-2.md) |
+ | 二/3 SDR 与电磁波解析 | a80b582 | 19/1/0 | [记录](volume-2-chapter-3.md) |
+ | 二/4 OpenCV 与图像处理基础 | 95c3d92 | 19/1/0 | [记录](volume-2-chapter-4.md) |

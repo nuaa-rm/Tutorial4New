@@ -1,0 +1,24 @@
+{
+  "chapter_body_preserved_except_optional_heading_markers": [
+    "02-专项技术栈/chapters/A_ros2.tex",
+    "02-专项技术栈/chapters/A_ros2_engineering.tex",
+    "02-专项技术栈/chapters/A_ros2_project.tex",
+    "02-专项技术栈/chapters/A_ros2_image_path.tex",
+    "02-专项技术栈/chapters/A_ros2_image_results.tex",
+    "02-专项技术栈/chapters/A_ros2_visualization.tex"
+  ],
+  "optional_section_count": 1,
+  "optional_subsection_count": 13,
+  "review_original_content_preserved": true,
+  "answer_content_preserved_except_title": true,
+  "exercise_count": 30,
+  "chapter_problem_count": 16,
+  "complete_acceptance_item_count": 8,
+  "advanced_entry": "1.9",
+  "first_pass_problems": "1-10 and 15-16",
+  "advanced_problems": "11-14",
+  "first_pass_acceptance": "1-5",
+  "advanced_acceptance": "6-8",
+  "structure_check_exit": 0,
+  "structure_check_output": "第 1 章：30 道随堂练习，16 道章末习题，1 个习题集\n入口包含 33 个文件；366 个标签，300 个被引用标签\n包含路径、资源存在性、标签唯一性、引用与题解定位检查通过。内容覆盖与运行/PDF 检查须另行记录。\n"
+}

@@ -22,7 +22,7 @@
 \author{长空御风视觉组}
 \institute{视觉组培训}
 \date{\today}
-\version{2026.08}
+\version{2026.10}
 \TextbookVolume{2}
 \extrainfo{四方向：自瞄 / 导航 / 决策 / 雷达。OpenCV、深度学习等为共用技能，按方向组合选修。}
 
@@ -41,11 +41,13 @@
 \mainmatter
 
 % ============================================================
-\chapter{ROS2 基础}
+\chapter{ROS2 开发与工程实践}
 
 \begin{introduction}
-  \item 学习目标：创建功能包并验证节点通信；用 rqt、RViz2 与 Foxglove 观察曲线、图像和三维消息；编写 Launch；完成排障与 IDE 调试；比较大图像的 RMW 与组件布局，探测借出能力。
-  \item 建议学时：基础约 1 周，图形化观测另用半天至 1 天，工程实践另用 2--3 天，大图像链路实验另用半天至 1 天。
+  \item 学习目标：创建功能包并验证节点通信；用 rqt、RViz2 与 Foxglove 观察曲线、图像和三维消息；编写 Launch；完成排障与 IDE 调试；进阶时比较大图像的 RMW 与组件布局，探测借出能力。
+  \item 建议学时：每天 2--3 小时边读边做，含示例与练习；首次学习约 1.5--2 周，进阶实验另用 3--5 天，完整学习约 2--3 周。
+  \columnbreak
+  \item 学习顺序：标 * 的部分为进阶选读。首次先学到日志与调试，第\ref{sec:ros2-image-advanced}节及其子节可先跳过；遇到大图像传输或性能瓶颈，再回来学习中间件、组件与借出消息及性能对照。
   \item 本卷边界：先修卷一 Linux、C++ 与 CMake；本卷 ROS2 内容、命令与代码以 Ubuntu 22.04 和 Humble 为主；实车集成见卷三。
 \end{introduction}
 
@@ -61,7 +63,11 @@
 \input{chapters/A_ros2_engineering.tex}
 
 \Needspace{18\baselineskip}
-\section{大图像链路：中间件与内存}
+\section{大图像链路：中间件与内存*}
+\label{sec:ros2-image-advanced}
+\begin{note}
+从这里开始，我们要检查图像负载、中间件配置、进程边界和内存传递，内容会比前面的节点收发更深入。第一次学可以先跳到本章小结，把前面的工程、观测与调试流程练熟；等接入大图像，或遇到复制开销、丢帧与延迟问题时，再回来跟着对照实验查原因。
+\end{note}
 \input{chapters/A_ros2_image_path.tex}
 
 \input{chapters/A_ros2_review.tex}

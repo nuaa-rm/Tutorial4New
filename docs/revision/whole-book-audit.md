@@ -15,7 +15,7 @@
 | 一/1 Linux 工作环境 | 0c2a991 | 19/1/0 | [记录](volume-1-chapter-1.md) |
 | 一/2 现代 C++ 基础 | 66cad2d | 20/0/0 | [记录](volume-1-chapter-2.md) |
 | 一/3 编译过程与 CMake 基础 | b93d17e | 20/0/0 | [记录](volume-1-chapter-3.md) |
-| 二/1 ROS2 基础 | 5eb75ed | 19/1/0 | [记录](volume-2-chapter-1.md) |
+| 二/1 ROS2 开发与工程实践 | 5eb75ed | 19/1/0 | [记录](volume-2-chapter-1.md) |
 | 二/2 多机通信方法 | f6934b2 | 19/1/0 | [记录](volume-2-chapter-2.md) |
 | 二/3 SDR 与电磁波解析 | a80b582 | 19/1/0 | [记录](volume-2-chapter-3.md) |
 | 二/4 OpenCV 与图像处理基础 | 95c3d92 | 19/1/0 | [记录](volume-2-chapter-4.md) |
