@@ -1,0 +1,53 @@
+{
+  "all_topics_received": {
+    "/viz/signal": 20,
+    "/viz/pose": 20,
+    "/viz/twist": 20,
+    "/viz/path": 20,
+    "/viz/image": 20,
+    "/viz/markers": 20,
+    "/viz/annotations": 20,
+    "/viz/scene": 20,
+    "/tf": 20
+  },
+  "pose_and_speed": "单位四元数、1 m 圆与 1 m/s 速度通过",
+  "image_annotation_pairs": 20,
+  "tf": "target",
+  "marker_delete_restore": true,
+  "scene_entity": true,
+  "websocket_cdr": {
+    "/viz/annotations": "foxglove_msgs/msg/ImageAnnotations",
+    "/viz/image": "sensor_msgs/msg/Image",
+    "/viz/signal": "std_msgs/msg/Float64",
+    "/viz/twist": "geometry_msgs/msg/TwistStamped",
+    "/viz/pose": "geometry_msgs/msg/PoseStamped",
+    "/tf": "tf2_msgs/msg/TFMessage",
+    "/viz/path": "nav_msgs/msg/Path",
+    "/viz/markers": "visualization_msgs/msg/MarkerArray",
+    "/viz/scene": "foxglove_msgs/msg/SceneUpdate"
+  },
+  "mcap_duration_seconds": 11.99304679,
+  "mcap_deserialized_counts": {
+    "/viz/annotations": 121,
+    "/viz/image": 121,
+    "/viz/twist": 120,
+    "/viz/signal": 120,
+    "/viz/pose": 120,
+    "/tf": 120,
+    "/viz/path": 120,
+    "/viz/markers": 120,
+    "/viz/scene": 120
+  },
+  "mcap_replay_counts": {
+    "/viz/signal": 120,
+    "/viz/pose": 120,
+    "/viz/twist": 120,
+    "/viz/path": 120,
+    "/viz/image": 120,
+    "/viz/markers": 120,
+    "/viz/annotations": 121,
+    "/viz/scene": 120,
+    "/tf": 120
+  },
+  "status": "passed"
+}

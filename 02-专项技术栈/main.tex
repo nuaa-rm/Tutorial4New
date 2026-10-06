@@ -44,19 +44,23 @@
 \chapter{ROS2 基础}
 
 \begin{introduction}
-  \item 学习目标：创建功能包并验证节点通信；编写 Launch；检查依赖、环境和日志；完成 IDE 调试；比较大图像的 RMW 与组件布局，探测借出能力。
-  \item 建议学时：基础约 1 周，工程实践另用 2--3 天，大图像链路实验另用半天至 1 天。
+  \item 学习目标：创建功能包并验证节点通信；用 rqt、RViz2 与 Foxglove 观察曲线、图像和三维消息；编写 Launch；完成排障与 IDE 调试；比较大图像的 RMW 与组件布局，探测借出能力。
+  \item 建议学时：基础约 1 周，图形化观测另用半天至 1 天，工程实践另用 2--3 天，大图像链路实验另用半天至 1 天。
   \item 本卷边界：先修卷一 Linux、C++ 与 CMake；本卷 ROS2 内容、命令与代码以 Ubuntu 22.04 和 Humble 为主；实车集成见卷三。
 \end{introduction}
 
-\section{节点、接口与工程实践}
+\section{ROS2 入门与环境安装}
 
 \input{chapters/A_ros2.tex}
+\section{完整工程与收发验证}
 \input{chapters/A_ros2_project.tex}
+\section{rqt 与 RViz2 图形化观测}
+\input{chapters/A_ros2_visualization.tex}
 
-\section{构建、启动与排障}
+\section{构建工具与环境排障}
 \input{chapters/A_ros2_engineering.tex}
 
+\Needspace{18\baselineskip}
 \section{大图像链路：中间件与内存}
 \input{chapters/A_ros2_image_path.tex}
 

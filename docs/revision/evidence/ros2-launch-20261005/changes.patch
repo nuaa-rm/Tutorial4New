@@ -1,0 +1,551 @@
+--- a/02-专项技术栈/chapters/A_ros2_engineering.tex
++++ b/02-专项技术栈/chapters/A_ros2_engineering.tex
+@@ -341,8 +341,11 @@
+   src/heartbeat.cpp
+   test/test_interval.cpp
+   config/heartbeat.yaml
++  launch/basic.launch.py
+   launch/heartbeat.launch.py
+   launch/team.launch.py
++  launch/multi.launch.py
++  launch/checked.launch.py
+   cmake/Auto.cmake       # 只在自动宏实验时替换构建规则
+ \end{lstlisting}
+ \end{minipage}\par\smallskip
+@@ -353,12 +356,12 @@
+ cd ~/ros2_ws/src/training_tools
+ \end{tbash}
+ \end{minipage}\par\smallskip
+-保存 \texttt{package.xml}。这份文件是依赖清单，里面写明了这个包的名字，版本，描述，维护者，许可证类型。不过这些对我们的实际使用都不是很重要，我们需要掌握的是里面具体写出依赖的部分，需要把这个包和其他包的依赖关系写清楚。否则在编译时可能导致先后顺序弄错而无法编译。\verb|<buildtool_depend>| 声明 ament 等构建工具，\verb|<build_depend>| 声明构建依赖，\verb|<build_export_depend>| 声明下游编译所需依赖，\verb|<exec_depend>| 声明运行依赖，\verb|<test_depend>| 声明测试依赖。\verb|<depend>| 合并普通依赖的构建、导出与运行三种用途。对于初学者而言，只要使用最后一个\verb|<depend>|就可以了。
++保存 \texttt{package.xml}。这份文件是依赖清单，里面写明了这个包的名字，版本，描述，维护者，许可证类型。不过这些对我们的实际使用都不是很重要，我们需要掌握的是里面具体写出依赖的部分，需要把这个包和其他包的依赖关系写清楚。否则在编译时可能导致先后顺序弄错而无法编译。\nolinkurl{<buildtool_depend>} 声明 ament 等构建工具，\nolinkurl{<build_depend>} 声明构建依赖，\nolinkurl{<build_export_depend>} 声明下游编译所需依赖，\nolinkurl{<exec_depend>} 声明运行依赖，\nolinkurl{<test_depend>} 声明测试依赖。\nolinkurl{<depend>} 合并普通依赖的构建、导出与运行三种用途。对于初学者而言，只要使用最后一个\nolinkurl{<depend>}就可以了。
+ \Needspace{23\baselineskip}
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+ \lstinputlisting[frame=single,language=XML,caption={training\_tools/package.xml}]{examples/ros2/training_tools/package.xml}
+ \end{minipage}\par\smallskip
+-接下来保存 \texttt{src/heartbeat.cpp}。构造函数读出 text 参数，创建发布者，再让定时器每 200 毫秒发一次消息。句柄保存在成员中；lambda 捕获 text 的值，所以参数只在启动时读取一次，改变文本实验时要重启节点。
++接下来保存 \nolinkurl{src/heartbeat.cpp}。构造函数读出 text 参数，创建发布者，再让定时器每 200 毫秒发一次消息。句柄保存在成员中；lambda 捕获 text 的值，所以参数只在启动时读取一次，改变文本实验时要重启节点。
+ \Needspace{35\baselineskip}
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+ \lstinputlisting[frame=single,basicstyle=\ttfamily\footnotesize,language=C++,caption={heartbeat 的完整节点实现}]{examples/ros2/training_tools/src/heartbeat.cpp}
+@@ -462,68 +465,255 @@
+ \subsubsection{用 Launch 保存一次完整启动}
+ \label{sec:ros2-launch}
+ 
+-你现在已经能手动启动节点了。不过真正上车时，几个节点各有一串参数，靠大家在终端里手打很容易漏掉一个。启动文件（launch file）把节点、参数、命名空间和话题重映射一起记下来，下次就能用一条命令启动同样的配置。启动文件通常使用 Python 编写，它提供 \nolinkurl{generate_launch_description()}，返回 \texttt{LaunchDescription}；其中的动作在启动系统中执行。\texttt{Node} 的 package 是包名，executable 是安装后的程序名，name 是节点名，namespace 是命名空间，remappings 改变接口名称，parameters 给节点传参。
+-
+-\begin{example}[保存并覆盖启动参数]
+-继续使用 training\_tools。保存 \texttt{config/heartbeat.yaml}：
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\lstinputlisting[frame=single,language=,caption={参数文件}]{examples/ros2/training_tools/config/heartbeat.yaml}
+-\end{minipage}\par\smallskip
+-通配节点键使该参数文件在节点改名或加命名空间后仍适用。保存 \nolinkurl{launch/heartbeat.launch.py}：
+-\Needspace{32\baselineskip}
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\lstinputlisting[frame=single,language=Python,caption={心跳节点的启动文件}]{examples/ros2/training_tools/launch/heartbeat.launch.py}
+-\end{minipage}\par\smallskip
+-后面的参数字典覆盖 YAML 中的同名项。\texttt{LaunchConfiguration} 是运行时求值的替换对象，不是普通 Python 字符串；\texttt{ParameterValue} 明确字符串类型，避免 true 等输入被当成布尔量。
+-
+-通用形式为 \texttt{ros2 launch 包名 文件名 [参数名:=值]}。安装规则已写在前节 CMake 中，新增资源后重新构建并加载环境：
++你现在已经能手动启动节点了。不过真正上车时，相机、识别、串口各开一个终端，每个节点后面再跟一串参数，少打一个字，机器人就可能和你玩捉迷藏。启动文件（launch file）把这次需要运行的程序和配置记下来，下次用一条命令就能把它们重新启动。我们先让刚才的 heartbeat 跑起来，再逐步加上参数、命名空间和组合启动，最后看看需要按条件、按事件启动时怎么写。
++
++ROS2 支持 Python、XML 和 YAML 格式的启动文件。本节使用 Python：基础配置可以直接写，后面需要循环、检查文件或处理事件时，也能沿着同一种写法继续扩展。启动文件用什么语言，和节点用什么语言没有关系；Python Launch 完全可以启动我们刚写好的 C++ 节点。
++
++\paragraph*{先写一个只启动节点的文件}
++Python 启动文件的入口是 \nolinkurl{generate_launch_description()}。ROS2 加载文件后会调用它，得到一个 \texttt{LaunchDescription}，也就是这次启动要执行的动作列表。动作（action）不一定是节点，还可以是设置环境、引入另一个启动文件或注册事件处理器。\texttt{Node} 来自 \texttt{launch\_ros}，是在通用启动系统之上增加了 ROS 节点配置的动作。
++
++\begin{example}[把 ros2 run 写进启动文件]
++继续使用前节的 training\_tools，不需要新建包。在包内保存 \nolinkurl{launch/basic.launch.py}，完整文件如下：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\lstinputlisting[frame=single,language=Python,caption={先启动一个心跳节点}]{examples/ros2/training_tools/launch/basic.launch.py}
++\end{minipage}\par\smallskip
++这里的 \texttt{package} 是功能包名，\texttt{executable} 是安装后的可执行程序名。它们对应 \texttt{ros2 run training\_tools heartbeat} 中的两个名字，不是 C++ 类名，也不是 \texttt{heartbeat.cpp}。\texttt{name} 覆盖节点在源码里设置的名字；程序名不变，节点名可以按启动需要另取。\texttt{output='screen'} 让子进程的输出显示在当前终端。
++
++通用启动形式为 \texttt{ros2 launch 包名 文件名 [参数名:=值]}。前节的 CMake 已经安装整个 launch 和 config 目录，不过新增文件后仍要重新构建，让安装目录也有它。下面的命令在工作空间根目录执行：
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+ \begin{tbash}
+ cd ~/ros2_ws
++source /opt/ros/humble/setup.bash
+ colcon build --packages-select training_tools
+ source install/setup.bash
++ros2 launch training_tools basic.launch.py
++\end{tbash}
++\end{minipage}\par\smallskip
++另开一个终端，加载相同的底层和覆盖工作空间后检查：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\begin{tbash}
++ros2 node list
++ros2 topic echo /status std_msgs/msg/String --once
++\end{tbash}
++\end{minipage}\par\smallskip
++你应能找到 \texttt{/heartbeat}，并收到一条 ready。回到启动终端按 Ctrl+C，Launch 会通知它管理的进程退出，不需要再逐个终端关节点。下面的启动实验都分别运行，做完一轮先按 Ctrl+C，再开始下一轮，避免同名节点混在一起。
++\end{example}
++
++写 \texttt{Node(...)} 时，我们只是在描述“等会儿怎样启动”，并没有当场执行程序。把它放进返回的动作列表，启动系统才会处理它。这个区别后面会解释为什么参数不能直接当 Python 字符串用，也会解释为什么“写在前面”不等于“已经准备好了”。
++
++\paragraph*{节点名字、接口名字和参数分别配在哪里}
++刚才只有四个字段。真正开始连模块时，常用配置还包括下面这些：
++\begin{center}
++\begin{tabular}{p{0.25\textwidth}p{0.67\textwidth}}
++\toprule[1.5pt]
++字段 & 本节怎样使用 \\
++\midrule[1pt]
++\texttt{package / executable} & 找到已经安装的程序；不负责给它编译源码。\\
++\texttt{name / namespace} & 设置节点名与命名空间，例如 \nolinkurl{/red/heartbeat}。\\
++\texttt{parameters} & 传入参数字典、ROS 参数 YAML 文件，或把两者组合起来。\\
++\texttt{remappings} & 用 \texttt{(原名, 新名)} 修改话题、服务等接口名称。\\
++\texttt{output} & 设置子进程输出的去向；本节用 screen，日志出口见下一节。\\
++\texttt{additional\_env} & 在继承的环境上为这个进程增补环境变量。\\
++\bottomrule[1.5pt]
++\end{tabular}
++\end{center}
++
++先把三个“名字”分开：包名帮助 ROS2 找程序，节点名帮助你在计算图里找节点，话题名决定数据从哪里进、从哪里出。改节点名不会把它发布的所有话题一并改名。比如 heartbeat 源码里发布的是相对话题 \texttt{status}；加上 \texttt{namespace='red'}，完整名字就变成 \texttt{/red/status}。再写 \texttt{remappings=[('status', 'health')]}，最终发布到 \texttt{/red/health}。
++
++这里的相对名字会跟着命名空间走，而以 \texttt{/} 开头的绝对名字从根开始。例如把重映射目标写成 \texttt{/health}，结果就是 \texttt{/health}，不会再加 red。相机驱动发布 image\_raw，识别节点订阅 image，也可以通过重映射把它们接到同一个名字；不过你要分别核对两端的最终话题、类型和 QoS，Launch 不会替你修好接口不匹配的问题。
++
++\paragraph*{先放进 YAML，再把常改的值留给命令行}
++配置还少的时候，直接写 \texttt{parameters=[\{'text': 'ready'\}]} 就够用了。配置多起来之后，把它们放进 YAML 更方便比较和保存；经常随机器人或实验变化的几项，再通过启动参数（launch argument）从命令行传入。我们把这两种办法放在同一个例子里。
++
++\begin{example}[保存配置，并在启动时覆盖它]
++在 training\_tools 包内保存 \nolinkurl{config/heartbeat.yaml}：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\lstinputlisting[frame=single,language={},caption={心跳节点的 ROS 参数文件}]{examples/ros2/training_tools/config/heartbeat.yaml}
++\end{minipage}\par\smallskip
++\texttt{ros\_\_parameters} 下面才是节点参数。最外层的 \texttt{/**} 是通配节点键，让这份简单配置在节点改名或加命名空间后仍适用。若只想配置 \nolinkurl{/red/heartbeat}，也可以把这个键改成它的完整名字；名字不匹配时，文件虽然找到了，参数却不会落到你想配置的节点上。多节点系统也要留意通配键的范围，别把本来只给一个节点的配置发给其他节点。
++
++接下来保存 \nolinkurl{launch/heartbeat.launch.py}。这次让 robot 控制命名空间，text 控制消息内容，params\_file 控制 YAML 路径：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\lstinputlisting[frame=single,basicstyle=\ttfamily\footnotesize,language=Python,caption={可从命令行配置的心跳启动文件}]{examples/ros2/training_tools/launch/heartbeat.launch.py}
++\end{minipage}\par\smallskip
++
++我们按使用顺序拆开看。\nolinkurl{get_package_share_directory('training_tools')} 从安装索引找到这个包的资源目录，\texttt{Path} 再把 config 和文件名接上。这样把工作空间搬到另一台机器，启动文件仍能找到随包安装的配置；不必把自己的 \path{/home/student/ros2_ws/src/...} 写死在里面。
++
++\nolinkurl{DeclareLaunchArgument} 声明启动参数，给出默认值和说明。\nolinkurl{LaunchConfiguration('robot')} 则表示“执行到这里时，取 robot 的实际值”。它是一个替换对象（substitution），不是已经取出的 Python 字符串。声明参数不会自动修改节点：robot 必须接到 namespace 上，text 必须接到 parameters 上，它们才会影响这次运行。
++
++\texttt{parameters} 中先放 YAML 路径，再放一个字典，后面的 text 会覆盖 YAML 中的同名项。因此，只运行这个文件而不传 text，收到的是默认启动参数 \texttt{ready from launch}，不是 YAML 中的 \texttt{ready from yaml}。这很适合“文件保存基础配置，命令行改少数常用项”的做法；如果你希望完全采用 YAML 的 text，就删除后面的 text 字典，让文件决定它。
++
++最后，\texttt{ParameterValue(..., value\_type=str)} 明确告诉 Launch：text 要作为字符串传入。命令行传来的是文本，但 ROS 参数求值时可能把 true、123 这类内容解释成布尔量或整数，而 heartbeat 声明的 text 是字符串。把类型写清楚，可以避免“明明传了字，怎么说类型不对”的疑惑；真正的整数或布尔参数也可以相应指定 \texttt{int} 或 \texttt{bool}。
++
++重新构建并加载环境后，先看这个文件允许传什么，再启动：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\begin{tbash}
++ros2 launch training_tools heartbeat.launch.py --show-args
+ ros2 launch training_tools heartbeat.launch.py robot:=red text:=tracking
+ \end{tbash}
+ \end{minipage}\par\smallskip
+-另一终端加载环境后执行 \texttt{ros2 topic echo /red/health}，应收到 tracking；\texttt{ros2 param get /red/heartbeat text} 应显示同一值。直接运行程序时，可用 \texttt{--ros-args -r \_\_node:=新名 -p text:=内容} 设置名字和参数。
++\texttt{--show-args} 显示参数说明后退出，不会启动节点。第二条命令会启动 \nolinkurl{/red/heartbeat}，在另一终端检查：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\begin{tbash}
++ros2 topic echo /red/health std_msgs/msg/String --once
++ros2 param get /red/heartbeat text
++ros2 node info /red/heartbeat
++\end{tbash}
++\end{minipage}\par\smallskip
++应收到 tracking，参数查询也应显示 tracking，节点信息中能找到 \texttt{/red/health}。如果内容包含空格，把整个赋值参数加引号，例如 \texttt{'text:=ready for battle'}。若要使用另一份 YAML，传 \texttt{params\_file:=/实际路径/参数.yaml}；这是启动时选择外部配置，和在源码里写死某台机器的路径是两回事。
+ \end{example}
+ 
+ \begin{note}
+-\nolinkurl{get_package_share_directory} 返回包的安装资源目录，不是源码目录。\texttt{output='screen'} 控制子进程标准输出、标准错误的去向，不等于关闭 ROS 日志文件。\texttt{additional\_env} 在继承的进程环境上增补变量；\texttt{env} 用于指定完整环境，误用可能丢失 PATH 等必要配置。
++启动参数属于 Launch，节点参数属于运行中的 ROS 节点。\texttt{ros2 param get /red/heartbeat robot} 查不到本例的 robot，因为它只用来选择命名空间，并没有作为节点参数传入。\texttt{use\_sim\_time} 则是常见节点参数：需要模拟时钟的节点应一致设置，并有 \texttt{/clock} 来源；只给 Launch 声明一个同名参数不会自动配置所有节点。我们的 heartbeat 使用 \nolinkurl{create_wall_timer}，发布周期也不会因为设置模拟时间就自动改成模拟时钟。
+ \end{note}
+ 
+-\paragraph*{组合启动、条件与事件}
+-\nolinkurl{IncludeLaunchDescription} 复用已有启动文件；\texttt{IfCondition} 和 \texttt{UnlessCondition} 决定动作是否执行；\nolinkurl{SetEnvironmentVariable} 修改所在启动上下文的环境。只影响单个节点时优先用该节点的 \texttt{additional\_env}。
+-
+-\Needspace{8\baselineskip}
+-\begin{example}[按需启动观测节点，并在它退出时给出提示]
+-保存 \texttt{launch/team.launch.py}。本例观测进程来自 ROS2 CLI，启用前确认前文的 \texttt{ros2 topic echo} 可用。
+-\Needspace{42\baselineskip}
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\lstinputlisting[frame=single,basicstyle=\ttfamily\footnotesize,language=Python,caption={组合启动、条件与退出事件}]{examples/ros2/training_tools/launch/team.launch.py}
+-\end{minipage}\par\smallskip
+-本例观测话题固定为 \texttt{/red/health}，所以先保留 robot 默认值；下一道练习将它也改成可配置。重新构建后执行：
++\begin{exercise}
++\label{ex:v2-ros-launch-basic}
++把 basic 文件的节点名改为 pulse，确认程序仍叫 heartbeat、话题仍是 \texttt{/status}。然后用 heartbeat 启动文件传入 \texttt{robot:=blue text:=true}，查询完整节点名、最终话题名和 text 的参数类型。最后只在你的练习副本中删除覆盖 text 的字典，重新启动，说明消息为什么变回 YAML 中的内容。
++\end{exercise}
++
++\paragraph*{一个文件管一个模块，主文件负责组合}
++现在 heartbeat 已经能独立启动了。系统里再加一个观测程序时，我们没必要复制刚才的配置，而是用 \nolinkurl{IncludeLaunchDescription} 引入它。相机、识别、串口以后也可以各保留一个启动文件，最外层的 bringup 文件只负责把它们组合起来。需要改相机参数时，就不用在一份几百行的文件里翻半天。
++
++\begin{example}[按条件观测一条消息]
++保存 \nolinkurl{launch/team.launch.py}。本例用 \texttt{ExecuteProcess} 启动 \texttt{ros2 topic echo}，它是一个普通命令行进程；启动 ROS 节点通常仍用 \texttt{Node}，这样不必自己拼接 ROS 参数。完整文件如下：
++先导入需要的工具，并定义打印配置的辅助函数：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\lstinputlisting[frame=single,basicstyle=\ttfamily\footnotesize,language=Python,firstline=1,lastline=18,caption={team 的导入与辅助函数}]{examples/ros2/training_tools/launch/team.launch.py}
++\end{minipage}\par\smallskip
++入口函数里，我们先安排引入部分。目标文件交给 \nolinkurl{PythonLaunchDescriptionSource}，说明它是 Python 启动文件；\texttt{launch\_arguments} 把主文件的配置传给子文件。这里需要的是键值对序列，所以字典最后调用 \texttt{.items()}。主文件的 robot 接到了子文件的 robot，子文件再把它接到节点命名空间；text 固定传为 \texttt{team ready}，因此覆盖子文件的默认启动值。
++
++再看观测开关：\nolinkurl{IfCondition(LaunchConfiguration('watch'))} 在 watch 为 true 或 1 时执行这个动作，为 false 或 0 时跳过；\texttt{UnlessCondition} 正好反过来，所以关闭观测时会打印 \texttt{Observer disabled.}。布尔值不区分大小写，其他写法可能报错。不要写 Python 的 \nolinkurl{if LaunchConfiguration('watch'):}，也不要用 \texttt{bool('false')}：前者检查的是一个 Python 对象，后者仍为真，都没有按启动参数的布尔含义判断。
++
++入口里还设置了环境。\nolinkurl{SetEnvironmentVariable} 在所在 Launch 上下文中设置变量，影响之后使用这份环境启动的进程；本例把控制台颜色打开。只给一个节点加变量时，用 heartbeat 文件中的 \texttt{additional\_env} 更直接，它会保留原有 PATH、库搜索路径等配置。\texttt{env} 则用于从一份完整环境开始设置，不适合只想补一个变量的情况。Launch 改动的是它管理的环境，不会反过来修改已经打开的父终端。
++
++接着在同一个文件里写出完整入口，把这些动作组合起来：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\lstinputlisting[frame=single,basicstyle=\ttfamily\footnotesize,language=Python,firstline=19,caption={team 的完整启动入口}]{examples/ros2/training_tools/launch/team.launch.py}
++\end{minipage}\par\smallskip
++
++重新构建、加载环境，然后分别运行：
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+ \begin{tbash}
+ ros2 launch training_tools team.launch.py
+ ros2 launch training_tools team.launch.py watch:=false
+ \end{tbash}
+ \end{minipage}\par\smallskip
+-两条命令分别运行，之间按 Ctrl+C 结束。第一次观测到一条消息后观测进程退出，heartbeat 继续运行；第二次只启动 heartbeat。\texttt{OpaqueFunction} 在执行阶段取得上下文并返回动作，适合必须先把替换对象求值的逻辑；普通传参不必使用它。
+-\end{example}
++第一轮收到一条 team ready 后，观测进程退出，heartbeat 继续运行；第二轮只启动 heartbeat，并打印关闭观测的提示。这里的观测话题故意固定为 \texttt{/red/health}，所以先保留 robot 的默认值。只改 \texttt{robot:=blue} 时，发布者去了 blue，观测者却还在等 red；下面的练习会让它们一起跟着配置变化。至于 \texttt{OpaqueFunction} 和退出提示，我们稍后再拆开解释。
++\end{example}
++
++\begin{exercise}
++\label{ex:v2-ros-launch}
++将 team 启动文件的观测话题也与 robot 参数绑定，以 \texttt{robot:=blue} 启动，确认一次性观测能退出。再用 \texttt{watch:=false} 确认只启动 heartbeat，并出现关闭观测的提示。说明主文件的 robot、子文件的 robot 和节点命名空间是怎样接起来的。
++\end{exercise}
++
++\paragraph*{同一个模块启动两份：把配置放进各自的组}
++如果红、蓝两套传感器都要启动同一种程序，只给它们改节点名还不够，话题也要分开。\texttt{GroupAction} 可以把一组动作放在同一个作用域里；默认的 \texttt{scoped=True} 会在离开组时恢复启动配置和环境，\texttt{PushRosNamespace} 也会随这个组退出而恢复。这样给 red 加的命名空间就不会跑到后面的 blue 身上。
++
++\begin{example}[复用同一份启动文件，得到两套独立话题]
++保存 \nolinkurl{launch/multi.launch.py}：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\lstinputlisting[frame=single,basicstyle=\ttfamily\footnotesize,language=Python,caption={分组启动红蓝两套心跳}]{examples/ros2/training_tools/launch/multi.launch.py}
++\end{minipage}\par\smallskip
++
++这里的 Python 循环只是生成两组动作，每组都有自己新建的 Include 动作。\nolinkurl{PushRosNamespace('red')} 先加外层命名空间，子文件又通过 robot 得到相对命名空间 sensors，两者接成 \texttt{/red/sensors}。blue 那组则得到 \texttt{/blue/sensors}。参数名 robot 只是我们取的名字，并不会自动推断哪一段代表机器人；你传进去什么，子文件就使用什么。
++
++重新构建、加载环境后启动，并在另一终端查询：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\begin{tbash}
++# 启动终端
++ros2 launch training_tools multi.launch.py
++# 查询终端，先加载相同环境
++ros2 node list
++ros2 topic echo /red/sensors/health std_msgs/msg/String --once
++ros2 topic echo /blue/sensors/health std_msgs/msg/String --once
++\end{tbash}
++\end{minipage}\par\smallskip
++两条话题应分别返回 red ready 和 blue ready，对应节点是 \nolinkurl{/red/sensors/heartbeat} 与 \nolinkurl{/blue/sensors/heartbeat}。因为节点和重映射都使用相对名字，整个模块才能跟着外层命名空间走；如果子文件把名字写成 \texttt{/health}，两套模块就又挤到同一条绝对话题上了。
++\end{example}
++
++\begin{exercise}
++\label{ex:v2-ros-launch-group}
++在 multi 的练习副本里增加 green，把子文件的相对命名空间 sensors 改为 camera。先写出三个节点和三个发布话题的完整名字，再运行核对。若把子文件 remappings 的目标改成 \texttt{/health}，三个发布者会落在哪里？说明为什么分组不能自动隔离绝对话题名。
++\end{exercise}
++
++\paragraph*{事件告诉你进程发生了什么，不代表节点已经就绪}
++回头看 team 中的 \nolinkurl{RegisterEventHandler}。它注册了一个 \texttt{OnProcessExit} 处理器，\texttt{target\_action=observer} 指向前面创建的那个观测动作；观测进程退出时，启动系统再执行 \texttt{on\_exit} 列表里的 \texttt{LogInfo}。这里传的是动作对象，不是节点名字，也不是把同样参数再写一遍创建的新对象。处理器放在目标动作之前注册，可以避免错过很快启动、很快退出的进程。
++
++常见事件先记住下面几种，真要用时再查完整接口：
++\begin{center}
++\begin{tabular}{p{0.31\textwidth}p{0.61\textwidth}}
++\toprule[1.5pt]
++处理器 & 它观察到的事情 \\
++\midrule[1pt]
++\texttt{OnProcessStart} & 目标进程已经启动，可记录进程启动或执行后续动作。\\
++\texttt{OnProcessExit} & 目标进程已经退出；正常结束和异常退出都可能触发。\\
++\texttt{OnProcessIO} & 进程产生了标准输出或标准错误，可处理这些输出。\\
++\texttt{OnShutdown} & Launch 收到了关闭事件，例如用户按下 Ctrl+C。\\
++\bottomrule[1.5pt]
++\end{tabular}
++\end{center}
++
++\texttt{on\_exit} 里还可以放新的启动动作，或者用 \texttt{EmitEvent(event=Shutdown(reason='...'))} 请求关闭整套 Launch。比如相机进程退出后，你希望一起结束依赖它的识别进程，就可以为相机注册退出处理器。若只有正常退出才继续下一步，应在回调中检查事件的 \texttt{returncode}；不能把“进程退出了”一概当成“任务成功了”。本例只打印提示，所以观测退出不会结束心跳。
++
++不过，\nolinkurl{LaunchDescription([node_a, node_b])} 并不保证 A 完成初始化后才启动 B；\texttt{OnProcessStart} 也只说明进程启动，不能证明相机已打开、服务已可调用。\texttt{TimerAction} 可以把动作延后若干秒，但机器慢一点、设备插拔一次，固定等待时间就可能不够。需要服务时，让客户端显式 \nolinkurl{wait_for_service}；需要第一帧或有效标定时，就用相应数据或状态作为条件。顺序要靠真实的就绪信号，不能靠猜一个“应该够了”的秒数。
++
++生命周期节点（lifecycle node）是另一层状态管理。进程可以一直存在，而节点依次处于 unconfigured、inactive、active 等状态，需要配置、激活后才承担相应工作。只有程序本身实现了生命周期接口，才能用 \texttt{LifecycleNode}、状态转换和 \texttt{ros2 lifecycle} 工具管理它；把普通 \texttt{Node} 换一个 Launch 类名，不会给 heartbeat 自动补上这些能力。后面学导航时你会再次遇到这个机制，现在先分清“进程存在”和“模块可用”。
++
++\paragraph*{需要实际参数值时，再用 OpaqueFunction}
++大多数配置直接使用 \nolinkurl{LaunchConfiguration} 就够了。如果只是拼参数路径，可以使用 \nolinkurl{PathJoinSubstitution}；包路径也可以用 \nolinkurl{FindPackageShare} 替换对象，放到支持替换对象的动作字段中求值。不要为每个字符串都写回调。
++
++真正需要 Python 判断时就不同了。例如，你希望先检查用户指定的 YAML 是否存在，检查通过才引入子文件。这时候 \nolinkurl{Path(LaunchConfiguration('params_file'))} 还拿不到实际路径，\texttt{str(...)} 也只会得到对象的描述。\texttt{OpaqueFunction} 会在动作执行阶段把当前上下文（context）交给回调，让你用 \texttt{.perform(context)} 取出实际值，再返回后续动作。team 中的 \texttt{report\_config} 就用这个办法打印 robot；下面让它做一次实际检查。
++
++\begin{example}[检查配置文件后再启动]
++保存 \nolinkurl{launch/checked.launch.py}，完整文件如下：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\lstinputlisting[frame=single,basicstyle=\ttfamily\footnotesize,language=Python,firstline=1,lastline=29,caption={checked 的导入与文件检查回调}]{examples/ros2/training_tools/launch/checked.launch.py}
++\end{minipage}\par\smallskip
++同一个文件的入口如下。它先声明参数，再把检查回调交给启动系统：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\lstinputlisting[frame=single,basicstyle=\ttfamily\footnotesize,language=Python,firstline=30,caption={checked 的启动入口}]{examples/ros2/training_tools/launch/checked.launch.py}
++\end{minipage}\par\smallskip
++
++启动系统先执行两个参数声明，接着调用 \texttt{checked\_start(context)}。回调取出 params\_file，用 \texttt{expanduser()} 展开用户目录，再确认它是文件。如果不存在，就报错；如果存在，就返回日志动作和 Include 动作，由启动系统继续执行。回调不是让你在里面调用 \texttt{ros2 run}，也不要拿它去长时间等待设备，否则会拖住启动动作的处理。
++
++重新构建、加载环境后，分别试一份正常配置和一份不存在的配置：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\begin{tbash}
++ros2 launch training_tools checked.launch.py robot:=blue
++# 上一轮按 Ctrl+C 结束后，再执行这条负例
++ros2 launch training_tools checked.launch.py params_file:=/tmp/no-such-params.yaml
++\end{tbash}
++\end{minipage}\par\smallskip
++第一轮会打印实际使用的参数路径，\texttt{/blue/health} 应收到 checked ready；第二轮在启动 heartbeat 前报“参数文件不存在”。这里检查的是文件路径，不能证明 YAML 内容合法、节点参数类型匹配或相机可用；后面这些仍要由对应模块检查。
++\end{example}
++
++\begin{exercise}
++\label{ex:v2-ros-launch-runtime}
++在 team 的练习副本中，让 observer 退出后用 Shutdown 事件结束整套启动，保留一次性观测并记录心跳是否随之退出。再对 checked 传入一个你确认不存在的文件路径，核对失败发生在节点启动前。最后说明：为什么把 OnProcessExit 换成 OnProcessStart，或给相机固定延后两秒，都不能证明相机已有可用图像？
++\end{exercise}
++
++\paragraph*{启动不对时，沿着这几步找}
++如果文件写完却启动失败，先看失败发生在哪一步，而不是把参数来回乱改：
++\begin{center}
++\begin{tabular}{p{0.34\textwidth}p{0.58\textwidth}}
++\toprule[1.5pt]
++看到的现象 & 先检查什么 \\
++\midrule[1pt]
++找不到包、启动文件或配置 & 用 \texttt{ros2 pkg prefix training\_tools} 确认当前包前缀；核对安装规则、新文件是否重新构建，以及环境加载顺序。\\
++找不到 executable & 用 \texttt{ros2 pkg executables training\_tools} 查安装程序名；它不是源码文件名。\\
++YAML 存在，参数却没变化 & 核对节点键、参数类型、后面的覆盖字典，以及节点是否只在启动时读参数。\\
++节点在运行，观测一直等不到 & 用 \texttt{ros2 node info} 与 \texttt{ros2 topic info -v} 核对完整话题名、类型、QoS 和通信域。\\
++条件、路径或事件行为不对 & 用 \texttt{--show-args} 查可传参数，必要时用 \texttt{ros2 launch --debug 包名 文件名} 看启动过程；分清描述阶段、执行阶段和模块就绪。\\
++\bottomrule[1.5pt]
++\end{tabular}
++\end{center}
+ 
+ \begin{conclusion}
+-\begin{itemize}
+-\item 启动参数控制启动文件；节点参数需要再由 parameters 传给节点。
+-\item 事件处理器先注册，再启动目标动作，避免错过很快退出的进程。
+-\item 进程启动或退出不是服务就绪信号。依赖服务可用性时，应显式等待服务；需要状态管理时再学习生命周期节点。
+-\item 组合启动时检查命名空间和重映射后的完整话题名，不能只看源码中的短名。
+-\end{itemize}
++先让每个模块有一份能独立运行的启动文件，再由主文件引入。启动参数只有接到 namespace、parameters、condition 等位置才会影响行为；节点参数、相对话题名和环境变量各有自己的作用。配置文件随包安装，外部配置从命令行选择，分组把各套模块的相对命名空间分开。需要 Python 实际值时再用 OpaqueFunction，需要启动顺序时看真实就绪信号，不能把进程事件当成设备状态。
+ \end{conclusion}
+-\begin{exercise}
+-\label{ex:v2-ros-launch}
+-将 team 启动文件的观测话题也与 robot 参数绑定，以 \texttt{robot:=blue} 启动，确认一次性观测能退出。再用 \texttt{watch:=false} 确认只有 heartbeat 运行。
+-\end{exercise}
++
++想继续查替换对象和事件的完整写法，可以看 \href{https://docs.ros.org/en/humble/Tutorials/Intermediate/Launch/Using-Substitutions.html}{Humble 替换对象教程}和\href{https://docs.ros.org/en/humble/Tutorials/Intermediate/Launch/Using-Event-Handlers.html}{事件处理教程}。我们下一节继续用这个心跳节点，看看程序运行起来之后，怎样通过日志找到问题而不被输出淹没。
+ 
+ \subsubsection{日志：看见故障，也控制输出量}
+ \label{sec:ros2-logging}
+--- a/02-专项技术栈/answers.tex
++++ b/02-专项技术栈/answers.tex
+@@ -126,6 +126,17 @@
+ 预期边界测试全部通过，包前缀指向当前工作空间的安装目录。
+ \end{solution}
+ 
++\paragraph*{随堂练习 \ref{ex:v2-ros-launch-basic}}
++\begin{solution}
++在 basic 的练习副本中把 \nolinkurl{name='heartbeat'} 改为 \nolinkurl{name='pulse'}，保留 \nolinkurl{executable='heartbeat'}。重新构建并加载环境后，节点为 \texttt{/pulse}，程序名仍为 heartbeat，话题仍为 \texttt{/status}，消息为 ready。停止这一轮后执行：
++\begin{tbash}
++ros2 launch training_tools heartbeat.launch.py robot:=blue text:=true
++ros2 param get /blue/heartbeat text
++ros2 topic echo /blue/health std_msgs/msg/String --once
++\end{tbash}
++第一条命令在启动终端运行，后两条在加载相同环境的查询终端运行。完整节点名是 \nolinkurl{/blue/heartbeat}，话题是 \nolinkurl{/blue/health}；参数查询应显示 String value is: true，消息内容也是字符串 true，因为 ParameterValue 明确指定了 str。删除 parameters 中覆盖 text 的字典，保留 \nolinkurl{parameters=[LaunchConfiguration('params_file')]} 后重新构建、加载环境并重启，消息变成 ready from yaml。即使仍传 \texttt{text:=true}，这个启动参数也不再接到节点参数上，所以不会覆盖 YAML。
++\end{solution}
++
+ \paragraph*{随堂练习 \ref{ex:v2-ros-launch}}
+ \begin{solution}
+ 在 team 文件中将 observer 的 cmd 改成下面的列表，其余配置保持不变。嵌套列表把三个替换片段拼成同一个话题参数：
+@@ -142,7 +153,29 @@
+ \begin{tbash}
+ ros2 launch training_tools team.launch.py robot:=blue watch:=false
+ \end{tbash}
+-此时不启动 echo 进程。用另一个终端查询 \texttt{ros2 node list}、\texttt{ros2 topic info /blue/health}，应确认 heartbeat 发布者存在；查询命令本身可能产生临时观测节点，不能仅凭节点总数判断。
++此时不启动 echo 进程，并打印 Observer disabled.。用另一个终端查询 \texttt{ros2 node list}、\texttt{ros2 topic info /blue/health}，应确认 heartbeat 发布者存在；查询命令本身可能产生临时观测节点，不能仅凭节点总数判断。主文件声明 robot，用 launch\_arguments 将它传给子文件，子文件再通过 LaunchConfiguration 把值接到 Node 的 namespace。任一环节写成固定 red，都会使那一部分停止跟随命令行变化。
++\end{solution}
++
++\paragraph*{随堂练习 \ref{ex:v2-ros-launch-group}}
++\begin{solution}
++将循环改为 \nolinkurl{for robot in ('red', 'blue', 'green'):}，传给子文件的 robot 改为 camera。三个节点分别是 \nolinkurl{/red/camera/heartbeat}、\nolinkurl{/blue/camera/heartbeat}、\nolinkurl{/green/camera/heartbeat}；三个话题分别是 \nolinkurl{/red/camera/health}、\nolinkurl{/blue/camera/health}、\nolinkurl{/green/camera/health}。重新构建、加载环境后用 node list 和逐条 topic echo 核对，消息分别为 red ready、blue ready、green ready。
++
++如果在 heartbeat 启动文件中改为 \nolinkurl{remappings=[('status', '/health')]}，三个发布者都会发布到同一个 \texttt{/health}；用 \texttt{ros2 topic info /health -v} 应能看到三个发布者。绝对名字不加外层命名空间，GroupAction 只能限制组内配置的作用范围，不能重写这种名字。运行这轮负例时先结束其他心跳实验，避免混入额外发布者。
++\end{solution}
++
++\paragraph*{随堂练习 \ref{ex:v2-ros-launch-runtime}}
++\begin{solution}
++在 team 的练习副本中，从 launch.actions 增加导入 EmitEvent，并从 launch.events 导入 Shutdown。保留 OnProcessExit 的 target\_action，替换它的 on\_exit 列表：
++\begin{tpython}
++from launch.actions import EmitEvent
++from launch.events import Shutdown
++
++# 替换原 OnProcessExit 的 on_exit 参数
++on_exit=[EmitEvent(event=Shutdown(reason='Observer finished.'))],
++\end{tpython}
++重新构建并加载环境，使用默认 robot 和 watch 启动。观测到一条消息后，observer 退出触发 Shutdown，heartbeat 也被通知退出，启动命令返回；可在另一终端确认不再有本轮的 \texttt{/red/heartbeat}。这只展示“退出就关闭”的策略，异常退出也会触发，不能把它当作只在任务成功后继续的条件。
++
++给 checked 传入确实不存在的路径，应报“参数文件不存在”，日志中不应有 heartbeat 进程启动记录；需要使用另一个路径时直接替换 params\_file 的值。OnProcessStart 只证明进程启动，固定两秒延时只证明时间到了，都不能证明相机打开或已有有效图像。应等待设备状态、有效帧或相应服务，服务依赖可由客户端 wait\_for\_service 等待；生命周期状态也需要节点本身实现对应接口。文件存在性检查同样不能替代参数内容、设备与服务的就绪检查。
+ \end{solution}
+ 
+ \paragraph*{随堂练习 \ref{ex:v2-ros-log}}
+@@ -241,7 +274,7 @@
+ 
+ \paragraph*{第一章章末第 \ref{prob:v2-ros-8} 题}
+ \begin{solution}
+-完整话题名为 \texttt{/blue/health}。检查 launch/config 的安装规则、构建结果、环境加载顺序及 \texttt{ros2 pkg prefix training\_tools} 返回路径；再检查 get\_package\_share\_directory 拼出的文件名。源目录存在文件不代表安装目录已有文件。YAML 节点键还需匹配实际节点名，或使用本例的通配键。
++完整话题名为 \nolinkurl{/blue/health}。检查 launch/config 的安装规则、构建结果、环境加载顺序及 \texttt{ros2 pkg prefix training\_tools} 返回路径；再检查 get\_package\_share\_directory 拼出的文件名。源目录存在文件不代表安装目录已有文件。YAML 节点键还需匹配实际节点名，或使用本例的通配键。
+ \end{solution}
+ 
+ \paragraph*{第一章章末第 \ref{prob:v2-ros-9} 题}
+--- a/02-专项技术栈/examples/ros2/README.md
++++ b/02-专项技术栈/examples/ros2/README.md
+@@ -23,7 +23,29 @@
+ 
+ rosdep 尚未初始化时，先执行一次 `sudo rosdep init`，再用普通用户执行 `rosdep update`。已初始化就跳过 init。启动后应收到 `team ready`，一次性观测进程退出，heartbeat 持续运行；按 Ctrl+C 停止。`watch:=false` 关闭观测进程。
+ 
+-`team.launch.py` 有意把观测话题固定为 `/red/health`，用来练习把名字接到参数上；改变 robot 后同步话题的写法见对应随堂练习的卷末题解。heartbeat 在构造时读取 text 并捕获值，改变文本实验需重启节点。`test_interval` 是独立边界测试，未接入 heartbeat 的固定周期。
++Launch 部分沿用同一个 `training_tools` 包，新增文件时重新构建并加载环境即可，CMake 会安装整个 `launch/` 与 `config/` 目录。下面的实验分别运行，结束一轮先按 Ctrl+C，再开始下一轮；查询命令放在加载相同环境的另一终端执行。
++
++| 启动文件 | 演示什么 | 应观察到什么 |
++| --- | --- | --- |
++| `basic.launch.py` | 单节点、程序名与节点名 | `/heartbeat` 在 `/status` 发布 `ready`。 |
++| `heartbeat.launch.py` | 启动参数、YAML、类型、命名空间、重映射 | `robot:=blue text:=true` 在 `/blue/health` 发布字符串 `true`。默认启动的 text 字典会覆盖 YAML。 |
++| `team.launch.py` | Include、If/Unless 条件、环境、一次性观测与退出事件 | 默认收到一条 `team ready` 后观测退出，心跳持续运行；`watch:=false` 打印关闭观测的提示。 |
++| `multi.launch.py` | 分组作用域与相对命名空间 | `/red/sensors/health` 与 `/blue/sensors/health` 分别收到 `red ready`、`blue ready`。 |
++| `checked.launch.py` | OpaqueFunction 在执行阶段取值并检查文件 | 默认打印配置路径并发布 `checked ready`；不存在的文件在启动节点前报错。 |
++
++例如，在工作空间根目录、已构建并加载环境后执行：
++
++```bash
++ros2 launch training_tools heartbeat.launch.py --show-args
++ros2 launch training_tools heartbeat.launch.py robot:=blue text:=true
++# 查询终端
++ros2 param get /blue/heartbeat text
++ros2 topic echo /blue/health std_msgs/msg/String --once
++```
++
++第二轮结束后可以试 `ros2 launch training_tools multi.launch.py`，分别查询上表中的两条话题。`ros2 launch training_tools checked.launch.py params_file:=/tmp/no-such-params.yaml` 是故意失败的例子：先确认该文件不存在，启动应报参数文件不存在，且不启动 heartbeat。普通心跳启动文件也支持 `params_file:=/实际路径/参数.yaml`；checked 会先检查这一路径，文件存在不代表 YAML 内容或设备状态已经通过检查。
++
++`team.launch.py` 有意把观测话题固定为 `/red/health`，用来练习把名字接到参数上；改变 robot 后同步话题的写法见对应随堂练习的卷末题解。分组里的绝对话题名不会跟随外层命名空间；进程启动、退出或固定延时也不等于模块就绪。heartbeat 在构造时读取 text 并捕获值，改变文本实验需重启节点。`test_interval` 是独立边界测试，未接入 heartbeat 的固定周期。
+ 
+ 如果要试自动宏，把 `cmake/Auto.cmake` 复制为包根目录的 `CMakeLists.txt`，同时把清单的 buildtool_depend 改成 ament_cmake_auto，export 中仍保留 ament_cmake。然后重新运行 rosdep，并用 `colcon build --packages-select training_tools --cmake-clean-cache` 构建；两套构建规则二选一。
+ 
+--- a/02-专项技术栈/examples/ros2/training_tools/launch/heartbeat.launch.py
++++ b/02-专项技术栈/examples/ros2/training_tools/launch/heartbeat.launch.py
+@@ -10,13 +10,18 @@
+ def generate_launch_description():
+     share = Path(get_package_share_directory('training_tools'))
+     return LaunchDescription([
+-        DeclareLaunchArgument('robot', default_value='robot1'),
+-        DeclareLaunchArgument('text', default_value='ready from launch'),
++        DeclareLaunchArgument('robot', default_value='robot1',
++                             description='节点所在的相对命名空间'),
++        DeclareLaunchArgument('text', default_value='ready from launch',
++                             description='心跳消息的字符串内容'),
++        DeclareLaunchArgument('params_file',
++                             default_value=str(share / 'config' / 'heartbeat.yaml'),
++                             description='ROS 参数 YAML 文件路径'),
+         Node(
+             package='training_tools', executable='heartbeat',
+             name='heartbeat', namespace=LaunchConfiguration('robot'),
+             output='screen',
+-            parameters=[str(share / 'config' / 'heartbeat.yaml'),
++            parameters=[LaunchConfiguration('params_file'),
+                         {'text': ParameterValue(
+                             LaunchConfiguration('text'), value_type=str)}],
+             remappings=[('status', 'health')],
+--- a/02-专项技术栈/examples/ros2/training_tools/launch/team.launch.py
++++ b/02-专项技术栈/examples/ros2/training_tools/launch/team.launch.py
+@@ -5,7 +5,7 @@
+     DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription,
+     LogInfo, OpaqueFunction, RegisterEventHandler, SetEnvironmentVariable,
+ )
+-from launch.conditions import IfCondition
++from launch.conditions import IfCondition, UnlessCondition
+ from launch.event_handlers import OnProcessExit
+ from launch.launch_description_sources import PythonLaunchDescriptionSource
+ from launch.substitutions import LaunchConfiguration
+@@ -24,10 +24,14 @@
+         output='screen', condition=IfCondition(LaunchConfiguration('watch')),
+     )
+     return LaunchDescription([
+-        DeclareLaunchArgument('robot', default_value='red'),
+-        DeclareLaunchArgument('watch', default_value='true'),
++        DeclareLaunchArgument('robot', default_value='red',
++                             description='传给心跳启动文件的命名空间'),
++        DeclareLaunchArgument('watch', default_value='true',
++                             description='是否启动一次性话题观测进程'),
+         SetEnvironmentVariable('RCUTILS_COLORIZED_OUTPUT', '1'),
+         OpaqueFunction(function=report_config),
++        LogInfo(msg='Observer disabled.',
++                condition=UnlessCondition(LaunchConfiguration('watch'))),
+         RegisterEventHandler(OnProcessExit(
+             target_action=observer,
+             on_exit=[LogInfo(msg='Observer exited; heartbeat keeps running.')],
+--- /dev/null
++++ b/02-专项技术栈/examples/ros2/training_tools/launch/basic.launch.py
+@@ -0,0 +1,12 @@
++from launch import LaunchDescription
++from launch_ros.actions import Node
++
++
++def generate_launch_description():
++    heartbeat = Node(
++        package='training_tools',
++        executable='heartbeat',
++        name='heartbeat',
++        output='screen',
++    )
++    return LaunchDescription([heartbeat])
+--- /dev/null
++++ b/02-专项技术栈/examples/ros2/training_tools/launch/multi.launch.py
+@@ -0,0 +1,23 @@
++from pathlib import Path
++from ament_index_python.packages import get_package_share_directory
++from launch import LaunchDescription
++from launch.actions import GroupAction, IncludeLaunchDescription
++from launch.launch_description_sources import PythonLaunchDescriptionSource
++from launch_ros.actions import PushRosNamespace
++
++
++def generate_launch_description():
++    share = Path(get_package_share_directory('training_tools'))
++    groups = []
++    for robot in ('red', 'blue'):
++        groups.append(GroupAction(actions=[
++            PushRosNamespace(robot),
++            IncludeLaunchDescription(
++                PythonLaunchDescriptionSource(
++                    str(share / 'launch' / 'heartbeat.launch.py')),
++                launch_arguments={
++                    'robot': 'sensors', 'text': f'{robot} ready',
++                }.items(),
++            ),
++        ]))
++    return LaunchDescription(groups)
+--- /dev/null
++++ b/02-专项技术栈/examples/ros2/training_tools/launch/checked.launch.py
+@@ -0,0 +1,37 @@
++from pathlib import Path
++from ament_index_python.packages import get_package_share_directory
++from launch import LaunchDescription
++from launch.actions import (
++    DeclareLaunchArgument, IncludeLaunchDescription, LogInfo, OpaqueFunction,
++)
++from launch.launch_description_sources import PythonLaunchDescriptionSource
++from launch.substitutions import LaunchConfiguration
++
++
++def checked_start(context):
++    config = Path(LaunchConfiguration('params_file').perform(context))
++    config = config.expanduser().resolve()
++    if not config.is_file():
++        raise RuntimeError(f'参数文件不存在：{config}')
++    share = Path(get_package_share_directory('training_tools'))
++    return [
++        LogInfo(msg=f'Using parameters: {config}'),
++        IncludeLaunchDescription(
++            PythonLaunchDescriptionSource(
++                str(share / 'launch' / 'heartbeat.launch.py')),
++            launch_arguments={
++                'robot': LaunchConfiguration('robot'),
++                'params_file': str(config), 'text': 'checked ready',
++            }.items(),
++        ),
++    ]
++
++
++def generate_launch_description():
++    share = Path(get_package_share_directory('training_tools'))
++    return LaunchDescription([
++        DeclareLaunchArgument('robot', default_value='robot1'),
++        DeclareLaunchArgument('params_file',
++                             default_value=str(share / 'config' / 'heartbeat.yaml')),
++        OpaqueFunction(function=checked_start),
++    ])

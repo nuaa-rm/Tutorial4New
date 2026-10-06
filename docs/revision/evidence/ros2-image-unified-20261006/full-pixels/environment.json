@@ -1,0 +1,38 @@
+{
+  "output": "/home/mijiao/Apps/Tutorial4New/docs/revision/evidence/ros2-image-unified-20261006/full-pixels",
+  "rmws": [
+    "rmw_fastrtps_cpp",
+    "rmw_cyclonedds_cpp",
+    "rmw_zenoh_cpp"
+  ],
+  "types": [
+    "dynamic",
+    "fixed"
+  ],
+  "profiles": [
+    "default",
+    "shared"
+  ],
+  "include_loan": true,
+  "verify_full": true,
+  "rate": 10.0,
+  "frames": 20,
+  "repeat": 1,
+  "domain": 90,
+  "drain_seconds": 2.0,
+  "zenoh_port": 17876,
+  "zenoh_shm_pool_mib": 6,
+  "executable": "/tmp/tutorial4new-image-unified-20261006-ws/install/image_path_demo/lib/image_path_demo/image_benchmark",
+  "share": "/tmp/tutorial4new-image-unified-20261006-ws/install/image_path_demo/share/image_path_demo",
+  "ros_distro": "humble",
+  "width": 1440,
+  "height": 1080,
+  "encoding": "bgr8",
+  "payload_bytes": 4665600,
+  "depth": 5,
+  "reliability": "best_effort",
+  "layout": "separate",
+  "callback": "const Message &; only within callback",
+  "latency": "after fill, before publish -> callback entry",
+  "synthetic": true
+}

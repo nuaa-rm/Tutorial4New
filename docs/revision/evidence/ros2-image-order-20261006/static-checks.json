@@ -1,0 +1,53 @@
+{
+  "headings": [
+    "先给 1440\\texorpdfstring{$\\times$}{×}1080@250 Hz 算笔账}",
+    "中间件：ROS的底层通信机制}",
+    "零拷贝与组件容器：先管好图像的所有权}",
+    "借出消息：向中间件借一块内存}",
+    "把负载升到 250 Hz，再看图像有没有变旧}",
+    "Cyclone DDS 的 separate：用 iceoryx 交接共享样本}"
+  ],
+  "required_order": [
+    "\\label{sec:ros2-loaned-messages}",
+    "\\label{sec:ros2-image-measurement}",
+    "\\paragraph*{把 Zenoh 加进大图像对照}",
+    "\\paragraph*{故意让识别变慢一次}",
+    "\\label{sec:ros2-fixed-image-shm}",
+    "\\paragraph*{把图像定义成定长样本}"
+  ],
+  "positions": [
+    19422,
+    22907,
+    23945,
+    25427,
+    26622,
+    27288
+  ],
+  "tbash_blocks": 31,
+  "tbash_syntax": "passed",
+  "commands_unchanged_as_multiset": true,
+  "image_path_reference_rows_preserved": 12,
+  "iceoryx_table_rows_preserved": 5,
+  "legacy_rows_preserved": 10,
+  "core_listings_preserved": 15,
+  "runtime_files_unchanged": 16,
+  "runtime_sha256": {
+    "package.xml": "d15eb753be4df75f976222e7514eadc9a4b9a5bba477654442780ac7b53eff4d",
+    "CMakeLists.txt": "c1fafbd6a8fbffc59ad3b3e8dfb22d71fe6d374732a0d86149dca4c08d522dc4",
+    "compare.py": "b791a665566503d930a4d6b1b7a6a4d3718f1a97b9ff15d55a2db8cb73a4403c",
+    "compare_fixed.py": "cde229c0a38a1608bc1cf175f6d82a3ce448bab50aa60fb1090f2ce0031d5c18",
+    "msg/Frame.msg": "1377a1d8849313719b1442c46ade3c9252e61afb4fc7972d15ccbb7b60d3c151",
+    "msg/FixedImage.msg": "0ad6c0d71f41fd046215ecad2a834d1466cd38a9dfa608904c49557fca9bbe33",
+    "src/components.cpp": "961ea120e67184b4313cc8dd3806b2c029058826eeca77b81aa75baa3c68d540",
+    "src/loan_probe.cpp": "106b4c045e3e632f23a1111090df0072bb04f45df3ba6d9e96b3c558d08a5808",
+    "src/fixed_image.cpp": "e3af9ed03aa0953a78d454f2db9c3fd3dd1b3500ed7e477e52cec31dcd0b3734",
+    "launch/path.launch.py": "138b2f53be4c9238d5dce2f3df42a7345312d66dc9d420690c9fbaafbbbcb08c",
+    "config/fastdds-loan.xml": "edf2255c5a8da532147f2c24eed7e1987bae98be4ad792eadc5c8c23d04d809d",
+    "config/cyclone-iceoryx.xml": "aaad80e8edc425aff425c10b44cf0651cb36105a55118aa1539ce8957f5c0ee5",
+    "config/roudi.toml": "8eb7d2bf6b9f4fc7f5f7de4735ee76d3df8d043dbd79d1dc88120a36ca7a0bcd",
+    "__pycache__/compare.cpython-310.pyc": "5c85c63e966612907f028e3cddfe3777f4715c72469b777fcc3cb337fa32e439",
+    "__pycache__/compare.cpython-314.pyc": "ff74a2236a095852a990abcc31e25e7bb6bbf635047ca045945c279fee86e5c8",
+    "__pycache__/compare_fixed.cpython-314.pyc": "e262f3ed73426b40ece95e44bcced628119252f4dd280974410cad5fe1c61f15"
+  },
+  "structure_check": "第 1 章：24 道随堂练习，14 道章末习题，1 个习题集\n入口包含 32 个文件；340 个标签，283 个被引用标签\n包含路径、资源存在性、标签唯一性、引用与题解定位检查通过。内容覆盖与运行/PDF 检查须另行记录。\n"
+}

@@ -1,0 +1,17 @@
+{
+  "ros_distro": "humble",
+  "payload_bytes": 4665600,
+  "width": 1440,
+  "height": 1080,
+  "encoding": "bgr8",
+  "depth": 5,
+  "reliability": "best_effort",
+  "rate": 10.0,
+  "frames": 20,
+  "repeats": 1,
+  "drain_seconds": 2,
+  "cyclone_config": "/home/mijiao/Apps/Tutorial4New/02-\u4e13\u9879\u6280\u672f\u6808/examples/ros2/image-path-demo/config/cyclone-iceoryx.xml",
+  "receiver_callback": "const FixedImage &; used only inside callback",
+  "latency": "after fill, before publish -> callback entry",
+  "synthetic": true
+}

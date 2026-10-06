@@ -1,0 +1,8 @@
+(/tmp/tutorial-ros-launch-20261005/build/main.aux)
+
+LaTeX Font Warning: Some font shapes were not available, defaults substituted.
+
+ )
+(see the transcript file for additional information)
+Output written on /tmp/tutorial-ros-launch-20261005/build/main.pdf (308 pages).
+Transcript written on /tmp/tutorial-ros-launch-20261005/build/main.log.

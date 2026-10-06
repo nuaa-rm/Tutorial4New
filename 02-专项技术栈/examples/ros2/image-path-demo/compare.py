@@ -85,6 +85,8 @@ def run_case(args, rmw, mode, repeat):
         if key.startswith(('ZENOH_', 'RMW_ZENOH_')):
             env.pop(key)
     env.update(RMW_IMPLEMENTATION=rmw, ROS_DOMAIN_ID=str(args.domain), ROS_LOCALHOST_ONLY='1')
+    if rmw == 'rmw_cyclonedds_cpp' and args.cyclone_config:
+        env['CYCLONEDDS_URI'] = 'file://' + str(args.cyclone_config.resolve())
     parameters = dict(mode=mode, width=args.width, height=args.height, channels=args.channels,
                       rate=args.rate, frames=args.frames, depth=args.depth,
                       reliable=str(args.reliable).lower(), work_ms=args.work_ms)
@@ -164,9 +166,13 @@ def main():
     parser.add_argument('--zenoh-port', type=int, default=17447)
     parser.add_argument('--zenoh-shm', action='store_true',
                         help='显式开启 Zenoh 共享内存传输优化；默认关闭')
+    parser.add_argument('--cyclone-config', type=Path,
+                        help='仅为 Cyclone DDS 加载指定 XML；iceoryx 配置需要已运行的 RouDi')
     parser.add_argument('--zenoh-shm-pool-mib', type=int, default=48,
                         help='每个 Zenoh 会话的共享池大小；需同时核对 memlock 和 /dev/shm')
     args = parser.parse_args()
+    if args.cyclone_config and not args.cyclone_config.is_file():
+        parser.error('Cyclone DDS 配置文件不存在')
     if (args.width <= 0 or args.height <= 0 or args.width * args.height * args.channels > 64000000
             or not 0 < args.rate <= 10000 or args.frames < 2 or args.depth < 1
             or args.work_ms < 0 or args.repeat < 1 or args.drain_seconds <= 0
@@ -185,6 +191,7 @@ def main():
         zenoh_router='owned loopback router for each Zenoh case; included in CPU/RSS totals',
         zenoh_port=args.zenoh_port, zenoh_shm=args.zenoh_shm,
         zenoh_shm_pool_mib=args.zenoh_shm_pool_mib,
+        cyclone_config=str(args.cyclone_config.resolve()) if args.cyclone_config else None,
         synthetic=True, hardware_camera=False), ensure_ascii=False, indent=2) + '\n')
     if Path('DEFAULT_FASTRTPS_PROFILES.xml').exists():
         raise RuntimeError('当前目录有隐式 Fast DDS 配置；请换到干净目录运行')

@@ -1,0 +1,117 @@
+{
+  "status": "passed",
+  "compiler": "XeLaTeX",
+  "passes": 3,
+  "pages": 328,
+  "sha256": "90de6ceff88431a95e891d2b52304decc6d0d6385d9d51017298bc010e2de96a",
+  "bytes": 11159890,
+  "inspected_physical_pages": [
+    4,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    89,
+    90,
+    91,
+    299,
+    305
+  ],
+  "visual_review": "Contact sheet and full pages 36, 37 and 40 inspected; all selected pages except 36 remain pixel-identical to the previously inspected final build. Page 36 rechecked after Header/phase clarification and correction of the literal FoxQL array filter braces.",
+  "pixel_comparison": [
+    {
+      "physical_page": 4,
+      "same_pixels_as_previously_inspected": true
+    },
+    {
+      "physical_page": 33,
+      "same_pixels_as_previously_inspected": true
+    },
+    {
+      "physical_page": 34,
+      "same_pixels_as_previously_inspected": true
+    },
+    {
+      "physical_page": 35,
+      "same_pixels_as_previously_inspected": true
+    },
+    {
+      "physical_page": 36,
+      "same_pixels_as_previously_inspected": false
+    },
+    {
+      "physical_page": 37,
+      "same_pixels_as_previously_inspected": true
+    },
+    {
+      "physical_page": 38,
+      "same_pixels_as_previously_inspected": true
+    },
+    {
+      "physical_page": 39,
+      "same_pixels_as_previously_inspected": true
+    },
+    {
+      "physical_page": 40,
+      "same_pixels_as_previously_inspected": true
+    },
+    {
+      "physical_page": 41,
+      "same_pixels_as_previously_inspected": true
+    },
+    {
+      "physical_page": 42,
+      "same_pixels_as_previously_inspected": true
+    },
+    {
+      "physical_page": 43,
+      "same_pixels_as_previously_inspected": true
+    },
+    {
+      "physical_page": 44,
+      "same_pixels_as_previously_inspected": true
+    },
+    {
+      "physical_page": 89,
+      "same_pixels_as_previously_inspected": true
+    },
+    {
+      "physical_page": 90,
+      "same_pixels_as_previously_inspected": true
+    },
+    {
+      "physical_page": 91,
+      "same_pixels_as_previously_inspected": true
+    },
+    {
+      "physical_page": 299,
+      "same_pixels_as_previously_inspected": true
+    },
+    {
+      "physical_page": 305,
+      "same_pixels_as_previously_inspected": true
+    }
+  ],
+  "warnings": {
+    "preexisting_overfull": "engineering lines 408–409, 2.8734 pt",
+    "font_substitution": "template Fandol italic substitutes",
+    "new_overfull": false
+  },
+  "compile_failure_checks": {
+    "undefined_references": false,
+    "duplicate_labels": false,
+    "missing_characters": false,
+    "latex_errors": false,
+    "requires_rerun": false
+  },
+  "published_path": "02-专项技术栈/main.pdf",
+  "foxql_filter_pdf_text": "{id==0}; no printed escape backslashes"
+}

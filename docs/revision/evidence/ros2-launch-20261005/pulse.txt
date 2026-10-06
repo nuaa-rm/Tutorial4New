@@ -1,0 +1,12 @@
+[INFO] [launch]: All log files can be found below /tmp/tutorial4new-launch-20261005-runtime/ros-logs/2026-10-05-17-37-25-198607-mijiao-arch-122028
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [heartbeat-1]: process started with pid [122030]
+[heartbeat-1] [INFO] [1791193045.426005821] [pulse]: first heartbeat
+[heartbeat-1] [INFO] [1791193045.426079788] [pulse]: heartbeat alive
+[heartbeat-1] [INFO] [1791193047.626014488] [pulse]: heartbeat alive
+[heartbeat-1] [INFO] [1791193049.626085135] [pulse]: heartbeat alive
+[WARNING] [launch]: user interrupted with ctrl-c (SIGINT)
+[INFO] [heartbeat-1]: sending signal 'SIGINT' to process[heartbeat-1]
+[heartbeat-1] [INFO] [1791193049.753139359] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[heartbeat-1] [INFO] [1791193049.754275235] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[INFO] [heartbeat-1]: process has finished cleanly [pid 122030]

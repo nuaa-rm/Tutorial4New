@@ -1,0 +1,13 @@
+[INFO] [launch]: All log files can be found below /tmp/tutorial4new-launch-20261005-runtime/ros-logs/2026-10-05-17-38-21-425674-mijiao-arch-124199
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [launch.user]: Observing /red/health
+[INFO] [heartbeat-1]: process started with pid [124203]
+[INFO] [ros2-2]: process started with pid [124205]
+[heartbeat-1] [0m[INFO] [1791193101.664099756] [red.heartbeat]: first heartbeat[0m
+[heartbeat-1] [0m[INFO] [1791193101.664197886] [red.heartbeat]: heartbeat alive[0m
+[ros2-2] data: team ready
+[ros2-2] ---
+[INFO] [ros2-2]: process has finished cleanly [pid 124205]
+[INFO] [heartbeat-1]: sending signal 'SIGINT' to process[heartbeat-1]
+[heartbeat-1] [0m[INFO] [1791193102.390245754] [rclcpp]: signal_handler(SIGINT/SIGTERM)[0m
+[INFO] [heartbeat-1]: process has finished cleanly [pid 124203]

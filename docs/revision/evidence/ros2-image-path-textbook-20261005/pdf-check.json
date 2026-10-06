@@ -1,0 +1,69 @@
+{
+  "pages": 306,
+  "visually_checked_physical_pages": [
+    4,
+    5,
+    6,
+    7,
+    40,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    277,
+    278,
+    279,
+    280,
+    281,
+    282
+  ],
+  "final_passes": [
+    5,
+    6
+  ],
+  "pdf_sha256": "004ccb122381b21a331b2eeddc16880ebd334479c2f4176182a67c5dbee59df3",
+  "source_sha256": {
+    "02-专项技术栈/chapters/A_ros2_image_path.tex": "198136b06638d651759ee847b3d1d3b0cfa2e7f99263a33241a9a0af562ee713",
+    "02-专项技术栈/chapters/A_ros2_image_results.tex": "1cf207023b03a8ea409b72c2ee5d13efde0b1cedf5d24051d7a50cc4820cb0e7",
+    "02-专项技术栈/chapters/A_ros2_review.tex": "6feeda2d521fcb4d4eda6dc0ab3f5f580fca6dd7da2f17f297b4d4d84b22e3f3",
+    "02-专项技术栈/answers.tex": "fa86931a5044746ede908681c4bb1b7ffbb9abdc902cb0812ac78393d5513c5c",
+    "02-专项技术栈/examples/ros2/image-path-demo/README.md": "d732b73f37be0f40eddc51ed2d7722993a2f436c78e362314468cbd1e7832942"
+  },
+  "runtime_rerun": false,
+  "checklist": {
+    "passed": 19,
+    "incomplete": 1,
+    "not_applicable": 0
+  },
+  "remaining_layout_log": {
+    "file": "chapters/A_ros2_engineering.tex",
+    "lines": [
+      408,
+      409
+    ],
+    "overfull_pt": 2.8734,
+    "unchanged": true,
+    "physical_page": 40,
+    "visual_result": "文字可正常阅读"
+  }
+}

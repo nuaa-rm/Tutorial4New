@@ -1,21 +1,42 @@
+#include <algorithm>
 #include <iostream>
 #include <memory>
 #include <utility>
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/image.hpp"
-#include "std_msgs/msg/float64.hpp"
+#include "image_path_demo/msg/fixed_image.hpp"
 
 int main(int argc, char ** argv) {
   rclcpp::init(argc, argv);
   auto node = std::make_shared<rclcpp::Node>("loan_probe");
-  auto small = node->create_publisher<std_msgs::msg::Float64>("loan_value", 5);
-  auto image = node->create_publisher<sensor_msgs::msg::Image>("loan_image", 5);
-  std::cout << "LOAN {\"float64\":" << small->can_loan_messages()
-            << ",\"image\":" << image->can_loan_messages() << "}" << std::endl;
-  // API 可以回退到本地分配器，所以借出成功不等于中间件借出成功。
-  auto loan = small->borrow_loaned_message();
-  loan.get().data = 42.0;
-  small->publish(std::move(loan));
-  // 发布后不能继续使用 loan.get()。这里只检查发布端能力。
+  using FixedImage = image_path_demo::msg::FixedImage;
+  auto qos = rclcpp::QoS(5).best_effort();
+  auto image = node->create_publisher<sensor_msgs::msg::Image>("loan_image", qos);
+  auto fixed = node->create_publisher<FixedImage>("loan_fixed_image", qos);
+  std::cout << "LOAN {\"image\":" << image->can_loan_messages()
+            << ",\"fixed_image\":" << fixed->can_loan_messages() << "}" << std::endl;
+
+  // 普通 Image 的借出包装器使用本地分配器回退。
+  auto image_loan = image->borrow_loaned_message();
+  auto & dynamic = image_loan.get();
+  dynamic.header.stamp = node->now();
+  dynamic.header.frame_id = "camera";
+  dynamic.width = FixedImage::WIDTH;
+  dynamic.height = FixedImage::HEIGHT;
+  dynamic.encoding = "bgr8";
+  dynamic.is_bigendian = 0;
+  dynamic.step = FixedImage::WIDTH * FixedImage::CHANNELS;
+  dynamic.data.assign(dynamic.step * dynamic.height, 42);
+  image->publish(std::move(image_loan));
+
+  // FixedImage 为 true 时直接填充中间件样本，否则也使用本地分配器。
+  auto fixed_loan = fixed->borrow_loaned_message();
+  auto & embedded = fixed_loan.get();
+  embedded.sequence = 1;
+  embedded.sent_ns = 0;
+  std::fill(embedded.data.begin(), embedded.data.end(), 42);
+  fixed->publish(std::move(fixed_loan));
+  // 两类图像均为 1440×1080 BGR8；发布后停止访问借出对象及其引用。
+  std::cout << "PUBLISHED {\"image\":1,\"fixed_image\":1}" << std::endl;
   rclcpp::shutdown();
 }

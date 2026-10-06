@@ -1,0 +1,25 @@
+{
+  "before": [
+    "fastrtps_bcf5aecdca94e36c",
+    "fastrtps_bcf5aecdca94e36c_el",
+    "fastrtps_port29165",
+    "fastrtps_port29165_el",
+    "libpod_rootless_lock_1000",
+    "sem.fastrtps_port29165_mutex"
+  ],
+  "removed_owned_objects": [
+    "2277671979.zenoh",
+    "32048.zenoh",
+    "3266120130.zenoh",
+    "463556834.zenoh"
+  ],
+  "after": [
+    "fastrtps_bcf5aecdca94e36c",
+    "fastrtps_bcf5aecdca94e36c_el",
+    "fastrtps_port29165",
+    "fastrtps_port29165_el",
+    "libpod_rootless_lock_1000",
+    "sem.fastrtps_port29165_mutex"
+  ],
+  "mapped_or_open_references": []
+}

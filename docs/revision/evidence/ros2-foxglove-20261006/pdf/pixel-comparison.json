@@ -1,0 +1,74 @@
+[
+  {
+    "physical_page": 4,
+    "same_pixels_as_previously_inspected": true
+  },
+  {
+    "physical_page": 33,
+    "same_pixels_as_previously_inspected": true
+  },
+  {
+    "physical_page": 34,
+    "same_pixels_as_previously_inspected": true
+  },
+  {
+    "physical_page": 35,
+    "same_pixels_as_previously_inspected": true
+  },
+  {
+    "physical_page": 36,
+    "same_pixels_as_previously_inspected": false
+  },
+  {
+    "physical_page": 37,
+    "same_pixels_as_previously_inspected": true
+  },
+  {
+    "physical_page": 38,
+    "same_pixels_as_previously_inspected": true
+  },
+  {
+    "physical_page": 39,
+    "same_pixels_as_previously_inspected": true
+  },
+  {
+    "physical_page": 40,
+    "same_pixels_as_previously_inspected": true
+  },
+  {
+    "physical_page": 41,
+    "same_pixels_as_previously_inspected": true
+  },
+  {
+    "physical_page": 42,
+    "same_pixels_as_previously_inspected": true
+  },
+  {
+    "physical_page": 43,
+    "same_pixels_as_previously_inspected": true
+  },
+  {
+    "physical_page": 44,
+    "same_pixels_as_previously_inspected": true
+  },
+  {
+    "physical_page": 89,
+    "same_pixels_as_previously_inspected": true
+  },
+  {
+    "physical_page": 90,
+    "same_pixels_as_previously_inspected": true
+  },
+  {
+    "physical_page": 91,
+    "same_pixels_as_previously_inspected": true
+  },
+  {
+    "physical_page": 299,
+    "same_pixels_as_previously_inspected": true
+  },
+  {
+    "physical_page": 305,
+    "same_pixels_as_previously_inspected": true
+  }
+]

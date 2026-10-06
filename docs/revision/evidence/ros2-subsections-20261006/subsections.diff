@@ -1,0 +1,545 @@
+--- a/02-专项技术栈/chapters/A_ros2.tex
++++ b/02-专项技术栈/chapters/A_ros2.tex
+@@ -22,7 +22,7 @@
+ \end{tabular}
+ \end{center}
+ 
+-\paragraph*{ROS2的安装}
++\subsubsection{安装 Humble 并验证节点通信}
+ 接下来我们把 ROS2 安装到 Ubuntu 22.04 中。如果已经安装了 Humble，可以直接跳到后面的环境验证示例。
+ \begin{note}
+ 以下步骤根据 ROS2 Humble 官方安装教程整理：\url{https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debs.html}。书中给出本卷需要的安装流程；软件源配置将来有变化时，可以用这个链接核对。
+@@ -151,7 +151,7 @@
+ 安装流程是“检查系统与编码、配置软件源、更新并安装、加载环境、收发验证”。软件包安装在系统中，source 只改变当前终端的环境；能查到程序是第一步，实际收到消息才说明本节的通信示例跑通。
+ \end{conclusion}
+ 
+-\subsubsection{ROS2架构}
++\subsubsection{系统分层、节点与组件}
+ \paragraph*{ROS2的系统架构}
+ ROS2的系统架构如下图所示：
+ \begin{figure}[htbp]
+@@ -222,9 +222,9 @@
+ \end{itemize}
+ \end{conclusion}
+ 
+-\subsubsection{使用RCLCPP接口}
++\section{工作空间、节点与消息接口}
++\subsubsection{创建工作空间与第一个功能包}
+ 由图\ref{fig:ros2_arch}可以看到，rclcpp是ROS2的C++接口，我们在C++中使用这个来描述机器人的节点和节点之间的行为。
+-\paragraph*{创建ROS2工作空间和第一个包}
+ 首先，你需要寻找一个你喜欢的地方新建一个文件夹，这个名字不重要，但建议起个有意义的名字。
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+ \begin{tbash}
+@@ -282,7 +282,7 @@
+ 稍后的完整工程给出普通 ament\_cmake 配置（代码\ref{lst:ros2-basic-cmake}），先学会显式声明依赖与安装目标。
+ 
+ 之后我们就可以开始编写代码了。
+-\paragraph*{编写第一个ROS2节点}
++\subsubsection{用 rclcpp 编写发布者与订阅者}
+ 
+ 新建my\_node.cpp和my\_node.h文件。并在这两个文件中新建一个类my\_node，继承自rclcpp::Node。
+ Node类是ROS2提供的基础的类，我们会在这个基类上进行扩展。
+@@ -355,6 +355,7 @@
+ 然后打开 rqt 的 Message Publisher 与 Message Monitor，分别向话题发布与订阅消息，查看节点运行情况。完整工程跑通后，第\ref{sec:ros2-visualization}节会带我们继续用 rqt、RViz2 和 Foxglove 看曲线、图像与三维图形。
+ 
+ 
++\subsubsection{QoS：话题同名，为什么还收不到消息}
+ \begin{example}[能看见话题，为什么还收不到消息？]
+ 先暂时放下自己的节点，开两个加载了相同环境的终端，用 CLI 把这个现象单独复现。终端一每秒发送一条消息，明确选择 best\_effort；终端二先要求 reliable：
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+@@ -379,10 +380,10 @@
+ 把发布者改为 reliable、订阅者保留 best\_effort，预测能否收包并实际验证；说明为什么双方策略不必完全相同。
+ \end{exercise}
+ 
++\subsubsection{用定时器周期发布消息}
+ \begin{note}
+ 日志中的时间用于排查事件顺序。Unix 时间以 UTC 1970 年 1 月 1 日为纪元；ROS 时间还可能由仿真时钟提供，跨节点比较前先确认时钟来源。
+ \end{note}
+-\paragraph*{定时器回调}
+ 这个非常简单，定义rclcpp::TimerBase 类型，然后用C++中的 \texttt{chrono} 库来提供定时器时间，再使用\texttt{create\_wall\_timer}绑定一个函数作为回调函数即可。
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+ \begin{tcode}
+@@ -404,8 +405,8 @@
+ \end{minipage}\par\smallskip
+ 这个回调函数会每秒钟被调用一次，打印一下回调计数，并发布计数消息。
+ 
+-\paragraph*{编写自定义消息类型}
+-自定义消息由字段组成。字段可使用基本类型，也可使用 ROS2 已有的消息类型，例如 \texttt{std\_msgs/Header}。
++\subsubsection{定义、生成与使用自定义消息}
++自定义消息由字段组成。字段可使用基本类型，也可使用 ROS2 已有的消息类型，例如 \path{std_msgs/Header}。
+ 以实际应用例子，我们的机器人在自瞄时传输瞄准的装甲板数据时，需要知道id(敌方装甲板的编号)，yaw(装甲板的偏航角度)等信息。
+ 同时我们还要知道识别到的时间信息。与其把它们塞进一个难以检查的字符串，不如定义一条带类型的消息，让收发两边对字段和单位有共同约定。
+ 
+@@ -477,7 +478,7 @@
+ \label{ex:v2-ros-message}
+ 给消息加入 float64 distance 字段，重新构建消息包，检查接口输出。约定 distance 单位为米。
+ \end{exercise}
+-\paragraph*{ROS2的消息类型}
++\subsubsection{常用消息类型与接口查询}
+ 
+ 1.\ std\_msgs
+ 
+@@ -538,7 +539,7 @@
+ \end{itemize}
+ \end{conclusion}
+ 
+-\subsubsection{提升内容}
++\subsubsection{服务调用与后续工具}
+ 这部分是一些ROS2的较高级内容，主要是介绍名字和基本用途。
+ 可以在需要的时候查找对应关键词。
+ 
+--- a/02-专项技术栈/chapters/A_ros2_engineering.tex
++++ b/02-专项技术栈/chapters/A_ros2_engineering.tex
+@@ -34,7 +34,7 @@
+ 应显示 ROS 版本 2、发行版 humble，以及自己工作空间中的包安装前缀。若路径指向别的工作空间，先修正加载顺序；若找不到包，检查构建是否成功、包名是否一致。
+ \end{example}
+ 
+-\paragraph*{只与自己的节点通信}
++\subsubsection{通信域与发现范围：只与自己的节点通信}
+ 域编号用于把通信分组，不同域的节点之间不会互相通信。
+ 
+ \begin{example}[临时启用本机通信并恢复]
+@@ -92,6 +92,7 @@
+ 让本机 talker 使用域 42、listener 使用域 43，观察现象；把两端统一为 42 后重新启动并验证。写出恢复环境需要处理的进程和变量。
+ \end{exercise}
+ 
++\Needspace{18\baselineskip}
+ \subsubsection{ament、colcon 与可复现的小工程}
+ \label{sec:ros2-ament}
+ 
+@@ -178,8 +179,9 @@
+ 另一终端加载相同环境后运行 \texttt{ros2 topic echo /status}，应持续收到 ready。消息发布约 5 Hz。
+ \end{example}
+ 
+-\paragraph*{自动依赖与对外导出}
+-也许你已经觉得CMake里面的内容实在是冗长，每个包都需要 \verb|find_package|，然后\verb|target_link_libraries|，这样写一大串。
++\Needspace{18\baselineskip}
++\subsubsection{自动依赖、库导出与构建测试}
++也许你已经觉得CMake里面的内容实在是冗长，每个包都需要 \nolinkurl{find_package}，然后\nolinkurl{target_link_libraries}，这样写一大串。
+ 别担心， \texttt{ament\_cmake\_auto} 可以轻松地帮你减少重复声明。
+ 它依据清单寻找依赖。
+ 注意第三方库的 rosdep 键与 CMake 名称可能不同，例如OpenCV通过 \verb|rosdep resolve opencv2| 查询依赖，而 CMake  需要使用 \verb|find_package(OpenCV REQUIRED)|。这种时候Cmake里面的 \verb|find_package| 还是需要手动写的。
+@@ -228,7 +230,8 @@
+ 说明为什么源目录已有 launch 文件，\texttt{ros2 launch} 仍可能找不到它。将上例合法间隔上限改为 500，同时修改边界测试并重新验证。
+ \end{exercise}
+ 
+-\subsubsection{用 Launch 保存一次完整启动}
++\section{Launch 启动配置与模块组合}
++\subsubsection{Launch 入门：用一个文件启动节点}
+ \label{sec:ros2-launch}
+ 
+ 你现在已经能手动启动节点了。不过真正上车时，相机、识别、串口各开一个终端，每个节点后面再跟一串参数，少打一个字，机器人就可能和你玩捉迷藏。启动文件（launch file）把这次需要运行的程序和配置记下来，下次用一条命令就能把它们重新启动。我们先让刚才的 heartbeat 跑起来，再逐步加上参数、命名空间和组合启动，最后看看需要按条件、按事件启动时怎么写。
+@@ -239,13 +242,13 @@
+ Python 启动文件的入口是 \nolinkurl{generate_launch_description()}。ROS2 加载文件后会调用它，得到一个 \texttt{LaunchDescription}，也就是这次启动要执行的动作列表。动作（action）不一定是节点，还可以是设置环境、引入另一个启动文件或注册事件处理器。\texttt{Node} 来自 \texttt{launch\_ros}，是在通用启动系统之上增加了 ROS 节点配置的动作。
+ 
+ \begin{example}[把 ros2 run 写进启动文件]
+-继续使用前节的 training\_tools，不需要新建包。在包内保存 \nolinkurl{launch/basic.launch.py}，完整文件如下：
++继续使用前面的 training\_tools，不需要新建包。在包内保存 \nolinkurl{launch/basic.launch.py}，完整文件如下：
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+ \lstinputlisting[frame=single,language=Python,caption={先启动一个心跳节点}]{examples/ros2/training_tools/launch/basic.launch.py}
+ \end{minipage}\par\smallskip
+ 这里的 \texttt{package} 是功能包名，\texttt{executable} 是安装后的可执行程序名。它们对应 \texttt{ros2 run training\_tools heartbeat} 中的两个名字。\texttt{name} 覆盖节点在源码里设置的名字，程序名不变，节点名可以按启动需要另取。\texttt{output='screen'} 让子进程的输出显示在当前终端。
+ 
+-通用启动形式为 \texttt{ros2 launch 包名 文件名 [参数名:=值]}。前节的 CMake 已经安装整个 launch 和 config 目录，不过新增文件后仍要重新构建，让安装目录也有它。下面的命令在工作空间根目录执行：
++通用启动形式为 \texttt{ros2 launch 包名 文件名 [参数名:=值]}。前面的 CMake 已经安装整个 launch 和 config 目录，不过新增文件后仍要重新构建，让安装目录也有它。下面的命令在工作空间根目录执行：
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+ \begin{tbash}
+ cd ~/ros2_ws
+@@ -267,7 +270,8 @@
+ 
+ 写 \texttt{Node(...)} 时，我们只是在描述“等会儿怎样启动”，并没有当场执行程序。把它放进返回的动作列表，启动系统才会处理它。这个区别后面会解释为什么参数不能直接当 Python 字符串用，也会解释为什么“写在前面”不等于“已经准备好了”。
+ 
+-\paragraph*{节点名字、接口名字和参数分别配在哪里}
++\Needspace{18\baselineskip}
++\subsubsection{Launch 配置：名字、YAML 与命令行参数}
+ 刚才只有四个字段。真正开始连模块时，常用配置还包括下面这些：
+ \begin{center}
+ \begin{tabular}{p{0.25\textwidth}p{0.67\textwidth}}
+@@ -278,7 +282,7 @@
+ \texttt{name / namespace} & 设置节点名与命名空间，例如 \nolinkurl{/red/heartbeat}。\\
+ \texttt{parameters} & 传入参数字典、ROS 参数 YAML 文件，或把两者组合起来。\\
+ \texttt{remappings} & 用 \texttt{(原名, 新名)} 修改话题、服务等接口名称。\\
+-\texttt{output} & 设置子进程输出的去向；本节用 screen，日志出口见下一节。\\
++\texttt{output} & 设置子进程输出的去向；本节用 screen，日志出口见第\ref{sec:ros2-logging}节。\\
+ \texttt{additional\_env} & 在继承的环境上为这个进程增补环境变量。\\
+ \bottomrule[1.5pt]
+ \end{tabular}
+@@ -338,7 +342,7 @@
+ 把 basic 文件的节点名改为 pulse，确认程序仍叫 heartbeat、话题仍是 \texttt{/status}。然后用 heartbeat 启动文件传入 \texttt{robot:=blue text:=true}，查询完整节点名、最终话题名和 text 的参数类型。最后只在你的练习副本中删除覆盖 text 的字典，重新启动，说明消息为什么变回 YAML 中的内容。
+ \end{exercise}
+ 
+-\paragraph*{一个文件管一个模块，主文件负责组合}
++\subsubsection{Launch 组合：引入子文件与条件启动}
+ 现在 heartbeat 已经能独立启动了。系统里再加一个观测程序时，我们没必要在新的launch文件中复制刚才的配置，而是可以用 \nolinkurl{IncludeLaunchDescription} 引入它。相机、识别、串口以后也可以各保留一个启动文件，最外层的 bringup 文件只负责把它们组合起来。需要改相机参数时，就不用在一份几百行的文件里翻半天。
+ 
+ \begin{example}[按条件观测一条消息]
+@@ -374,8 +378,8 @@
+ 将 team 启动文件的观测话题也与 robot 参数绑定，以 \texttt{robot:=blue} 启动，确认一次性观测能退出。再用 \texttt{watch:=false} 确认只启动 heartbeat，并出现关闭观测的提示。说明主文件的 robot、子文件的 robot 和节点命名空间是怎样接起来的。
+ \end{exercise}
+ 
+-\paragraph*{同一个模块启动两份：把配置放进各自的组}
+-如果红、蓝两套传感器都要启动同一种程序，只给它们改节点名还不够，话题也要分开。\texttt{GroupAction} 可以把一组动作放在同一个作用域里；默认的 \texttt{scoped=True} 会在离开组时恢复启动配置和环境，\texttt{PushRosNamespace} 也会随这个组退出而恢复。这样给 red 加的命名空间就不会跑到后面的 blue 身上。
++\subsubsection{Launch 分组：命名空间与多实例启动}
++如果红、蓝两套传感器都要启动同一种程序，只给它们改节点名还不够，话题也要分开。\nolinkurl{GroupAction} 可以把一组动作放在同一个作用域里；默认的 \texttt{scoped=True} 会在离开组时恢复启动配置和环境，\texttt{PushRosNamespace} 也会随这个组退出而恢复。这样给 red 加的命名空间就不会跑到后面的 blue 身上。
+ 
+ \begin{example}[复用同一份启动文件，得到两套独立话题]
+ 保存 \nolinkurl{launch/multi.launch.py}：
+@@ -404,8 +408,8 @@
+ 在 multi 的练习副本里增加 green，把子文件的相对命名空间 sensors 改为 camera。先写出三个节点和三个发布话题的完整名字，再运行核对。若把子文件 remappings 的目标改成 \texttt{/health}，三个发布者会落在哪里？说明为什么分组不能自动隔离绝对话题名。
+ \end{exercise}
+ 
+-\paragraph*{事件告诉你进程发生了什么}
+-回头看 team 中的 \nolinkurl{RegisterEventHandler}。它注册了一个 \texttt{OnProcessExit} 处理器，\texttt{target\_action=observer} 指向前面创建的那个观测动作；观测进程退出时，启动系统再执行 \texttt{on\_exit} 列表里的 \texttt{LogInfo}。这里传的是动作对象，不是节点名字，也不是把同样参数再写一遍创建的新对象。处理器放在目标动作之前注册，可以避免错过很快启动、很快退出的进程。
++\subsubsection{Launch 事件：进程状态与模块就绪}
++回头看 team 中的 \nolinkurl{RegisterEventHandler}。它注册了一个 \texttt{OnProcessExit} 处理器，\nolinkurl{target_action=observer} 指向前面创建的那个观测动作；观测进程退出时，启动系统再执行 \texttt{on\_exit} 列表里的 \texttt{LogInfo}。这里传的是动作对象，不是节点名字，也不是把同样参数再写一遍创建的新对象。处理器放在目标动作之前注册，可以避免错过很快启动、很快退出的进程。
+ 
+ 常见事件先记住下面几种，真要用时再查完整接口：
+ \begin{center}
+@@ -427,7 +431,7 @@
+ 
+ 生命周期节点（lifecycle node）是另一层状态管理。进程可以一直存在，而节点依次处于 unconfigured、inactive、active 等状态，需要配置、激活后才承担相应工作。只有程序本身实现了生命周期接口，才能用 \texttt{LifecycleNode}、状态转换和 \texttt{ros2 lifecycle} 工具管理它；把普通 \texttt{Node} 换一个 Launch 类名，不会给 heartbeat 自动补上这些能力。后面学导航时你会再次遇到这个机制，现在先分清“进程存在”和“模块可用”。
+ 
+-\paragraph*{需要实际参数值时，再用 OpaqueFunction}
++\subsubsection{Launch 运行时检查：用 OpaqueFunction 取参数}
+ 大多数配置直接使用 \nolinkurl{LaunchConfiguration} 就够了。如果只是拼参数路径，可以使用 \nolinkurl{PathJoinSubstitution}；包路径也可以用 \nolinkurl{FindPackageShare} 替换对象，放到支持替换对象的动作字段中求值。
+ 真正需要 Python 判断时就不同了。例如，你希望先检查用户指定的 YAML 是否存在，检查通过才引入子文件。这时候 \nolinkurl{Path(LaunchConfiguration('params_file'))} 还拿不到实际路径，\texttt{str(...)} 也只会得到对象的描述。\texttt{OpaqueFunction} 会在动作执行阶段把当前上下文（context）交给回调，让你用 \texttt{.perform(context)} 取出实际值，再返回后续动作。team 中的 \texttt{report\_config} 就用这个办法打印 robot；下面让它做一次实际检查。
+ 
+@@ -481,6 +485,7 @@
+ 
+ 想继续查替换对象和事件的完整写法，可以看 \href{https://docs.ros.org/en/humble/Tutorials/Intermediate/Launch/Using-Substitutions.html}{Humble 替换对象教程}和\href{https://docs.ros.org/en/humble/Tutorials/Intermediate/Launch/Using-Event-Handlers.html}{事件处理教程}。我们下一节继续用这个心跳节点，看看程序运行起来之后，怎样通过日志找到问题而不被输出淹没。
+ 
++\section{日志、调试与 IDE 配置}
+ \subsubsection{日志：看见故障，也控制输出量}
+ \label{sec:ros2-logging}
+ 
+@@ -572,7 +577,7 @@
+ 
+ CLion 的 Build 只负责所选构建目标。设置 \texttt{CMAKE\_INSTALL\_PREFIX} 仅改变安装目的地，不会自动执行安装。需要从 \texttt{ros2 run} 启动修改后的代码时，应由 colcon 重建并安装，或明确执行 IDE 的 install 目标；同时确认运行时加载的是该安装前缀。调试 IDE 构建目录中的目标时，则直接使用该目标。
+ 
+-\paragraph*{用编译数据库浏览多包工程}
++\subsubsection{CLion：用编译数据库浏览多包工程}
+ 编译数据库（compilation database）记录每个翻译单元实际使用的编译器、宏和头文件搜索路径，适合让 IDE 按 colcon 的真实参数索引代码。
+ 
+ \begin{example}[生成并核对索引来源]
+@@ -586,7 +591,8 @@
+ 在 CLion 的 File $\rightarrow$ Open 中选择这个 JSON，再选 Open as Project，以编译数据库项目打开，核对 heartbeat.cpp 的包含路径。你可以在 \texttt{rclcpp/rclcpp.hpp} 上跳转到实际头文件，确认它来自当前发行版的安装目录。它只涵盖该包；修改项目根目录不会自动合并其他包的编译数据库。接口包须先构建，生成的消息头文件才存在。需要整个工作空间索引时，应显式收集各包的数据库并按工具支持方式合并。
+ \end{example}
+ 
+-\paragraph*{源码不红，库头文件却红怎么办}
++\Needspace{18\baselineskip}
++\subsubsection{CLion：排查库头文件的解析参数}
+ 这时候你可能会碰到一个看起来很矛盾的情况：heartbeat.cpp 能编译，跳进 rclcpp.hpp 却满屏红线，提示它自己的子头文件找不到。先别急着重装 ROS，我们要检查的是编辑器解析这个文件时用了哪些参数。头文件通常没有独立的编译记录，编辑器需要借用包含它的源码的参数；如果这一步没有借到，只有系统头文件路径，就会找不到 ROS 的头文件。比较源码与外部头文件的 clangd 解析命令，确认缺少了哪些 include 路径。成功编译说明编译器的配置可用，不能顺便证明编辑器的配置也正确。
+ 
+ \begin{example}[给指定头文件补上当前源码的解析参数]
+--- a/02-专项技术栈/chapters/A_ros2_image_path.tex
++++ b/02-专项技术栈/chapters/A_ros2_image_path.tex
+@@ -38,7 +38,8 @@
+ 计算该相机 Bayer8 和 BGR8 的负载率。若 BGR8 链路新增两次完整复制，估算新增读写量；再判断每帧串行处理 8 ms 时，把队列从 5 改成 100 能否持续处理全部 250 Hz 输入。说明你会同时记录哪两个指标，避免只看话题频率。
+ \end{exercise}
+ 
+-\subsubsection{中间件：ROS的底层通信机制}
++\Needspace{18\baselineskip}
++\subsubsection{RMW 与 DDS：安装、切换与收发验证}
+ \label{sec:ros2-rmw-selection}
+ \texttt{rclcpp} 下面的 RMW 是中间件接口，它是我们消息传输的实际通道。Humble 的默认配置是 Fast DDS（\nolinkurl{rmw_fastrtps_cpp}），我们也可以换成 Cyclone DDS（\nolinkurl{rmw_cyclonedds_cpp}），或者使用 Zenoh（\nolinkurl{rmw_zenoh_cpp}）。发布与订阅的基本代码不用跟着改，但底层的实际发现机制、传输路径、缓存与配置方法会变化。大家可以体会一下这种抽象封装的思想。
+ 
+@@ -93,7 +94,7 @@
+ 
+ 如果启动时报找不到 RMW 动态库，用 \texttt{ros2 pkg prefix 实现包名} 检查包是否可见，再核对变量的拼写。环境变量属于当前终端，所以两个启动终端都需要设置。
+ 
+-\paragraph*{两份 XML：目标相同，写法和加载方式不同}
++\subsubsection{DDS 网卡配置：比较两份 XML 的写法}
+ 默认配置能通信后，你可能发现机器同时接着有线、Wi-Fi 和虚拟网卡，发现消息走到了不想使用的网络上。我们用“只选定一块网卡”把两家的写法摆在一起。配置在本卷 \path{examples/ros2/rmw-config-demo}，只有两份 XML 和运行说明，不需要编译：
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+ \begin{lstlisting}[language={}]
+@@ -165,7 +166,8 @@
+ 分别使用两份 XML 跑通本机 talker/listener，记录 RMW 名称、域编号、配置路径和收到的消息。指出 Fast DDS 中“定义传输”“引用传输”“选为默认”的位置，并说明 Cyclone DDS 的 \texttt{Id="any"} 为什么不等于跨域通信。解释为什么两台机器选网卡时不能照抄同一个 IP。
+ \end{exercise}
+ 
+-\paragraph*{Zenoh：安装之后，还要安排发现与连接}
++\Needspace{18\baselineskip}
++\subsubsection{Zenoh 入门：安装、发现与路由器启动}
+ \texttt{rmw\_zenoh\_cpp} 把 ROS2 的中间件接口接到 Zenoh。我们继续运行原来的 talker/listener，用 JSON5 配置发现与连接方式。需要跨主机、无线链路或多机器人通信时，也可以据此安排路由与连接拓扑。
+ 
+ \begin{example}[安装 Zenoh 并完成三终端收发]
+@@ -206,7 +208,7 @@
+ listener 应持续收到消息。完成后分别按 Ctrl+C 停止两个节点和 router。默认 peer 模式可以在发现后建立节点直连，下一例则用 client 模式让数据经过 router。
+ \end{example}
+ 
+-\paragraph*{Zenoh 的两份 JSON5 分别给谁读}
++\subsubsection{Zenoh 配置：会话、路由器与跨机连接}
+ 每个 ROS 进程通过 RMW 创建 Zenoh 会话（session），会话决定节点如何连接。router 有自己的监听与路由配置。\texttt{ZENOH\_SESSION\_CONFIG\_URI} 指向节点会话文件，\texttt{ZENOH\_ROUTER\_CONFIG\_URI} 指向 router 文件。
+ 
+ \begin{example}[先指定本机端点，再连接另一台机器]
+@@ -296,11 +298,11 @@
+ \end{itemize}
+ \end{conclusion}
+ 
+-\paragraph*{再用大图像做对照}
++\subsubsection{固定输入与指标，安排中间件对照}
+ 中间件已经能通信了，接下来固定消息、QoS 与部署布局，每轮只改变待比较的实现。这样看到差异时，我们才知道该从哪里找原因。
+ 
+ \begin{example}[安排一个可以解释结果的对照]
+-接下来的组件、借出与测量示例共用 \path{examples/ros2/image-path-demo}。它生成相同的图像，固定帧数、尺寸、频率、\texttt{best\_effort} 和深度 5，对各 RMW 分别运行三种布局：两个进程、同一进程关闭进程内通信、同一进程开启进程内通信。前两项帮助观察中间件与进程边界，最后一项帮助观察所有权传递。完整构建和命令在下一节。
++接下来的组件、借出与测量示例共用 \path{examples/ros2/image-path-demo}。它生成相同的图像，固定帧数、尺寸、频率、\texttt{best\_effort} 和深度 5，对各 RMW 分别运行三种布局：两个进程、同一进程关闭进程内通信、同一进程开启进程内通信。前两项帮助观察中间件与进程边界，最后一项帮助观察所有权传递。完整源码见第\ref{sec:ros2-image-components}节，构建和对照命令见第\ref{sec:ros2-image-deployment}节。
+ 
+ 读结果时，把实际发送频率、接收比例和 P95/P99 延迟放在一起。P95 表示约 95\% 的已收到样本不超过这个延迟，丢掉的样本不参加统计。接收比例告诉我们交付了多少帧，延迟告诉我们这些帧来得有多快。CPU 时间和内存用量则帮助判断资源成本。
+ \end{example}
+@@ -309,9 +311,11 @@
+ 
+ \begin{exercise}
+ \label{ex:v2-ros-rmw-choice}
+-运行下一节的小图像对照，找出 Fast DDS、Cyclone DDS 与 Zenoh 在 \texttt{separate} 模式下的发送频率、接收比例与 P95。列出本轮保持相同的条件，并说明 Zenoh 的路由器在本次实验中负责什么、如何正常停止。若其中一项更好，说明还需补测什么，才能决定实际相机使用哪个实现。
++运行第\ref{sec:ros2-image-deployment}节的小图像对照，找出 Fast DDS、Cyclone DDS 与 Zenoh 在 \texttt{separate} 模式下的发送频率、接收比例与 P95。列出本轮保持相同的条件，并说明 Zenoh 的路由器在本次实验中负责什么、如何正常停止。若其中一项更好，说明还需补测什么，才能决定实际相机使用哪个实现。
+ \end{exercise}
+ 
++\Needspace{18\baselineskip}
++\section{组件通信与借出消息}
+ \subsubsection{零拷贝与组件容器：先管好图像的所有权}
+ \label{sec:ros2-image-components}
+ 算过负载后，我们来看看怎样减少搬运。\textbf{零拷贝（zero-copy）}指数据在某段传递过程中直接复用已有缓冲区。这里先把相机发布节点与识别订阅节点装进同一个进程，让 \texttt{rclcpp} 交接消息所有权，省去这两个节点之间的像素复制。
+@@ -323,7 +327,7 @@
+ \label{fig:ros2-image-paths}
+ \end{figure}
+ 
+-图\ref{fig:ros2-image-paths} 可以从“共享的是哪一块内存”来读。\textbf{第一行}在同一个进程里交接消息所有权，Source 与 Sink 使用同一份像素缓冲区。\textbf{第二行}以 Fast DDS 的 SHM transport 为例，共享的是传输缓冲区：顺着橙色虚线看，数据先从发送历史复制进去，再复制到接收历史。\textbf{第三行}在类型和配置满足借出条件时共享原始消息样本，发布端直接填充，订阅端直接借读。Fast DDS 的 Data Sharing 和 Cyclone DDS 的 iceoryx 可以配合两端借出，实现这条跨进程路径。下一节先说明类型条件，我们现在先做第一行。
++图\ref{fig:ros2-image-paths} 可以从“共享的是哪一块内存”来读。\textbf{第一行}在同一个进程里交接消息所有权，Source 与 Sink 使用同一份像素缓冲区。\textbf{第二行}以 Fast DDS 的 SHM transport 为例，共享的是传输缓冲区：顺着橙色虚线看，数据先从发送历史复制进去，再复制到接收历史。\textbf{第三行}在类型和配置满足借出条件时共享原始消息样本，发布端直接填充，订阅端直接借读。Fast DDS 的 Data Sharing 和 Cyclone DDS 的 iceoryx 可以配合两端借出，实现这条跨进程路径。第\ref{sec:ros2-loaned-messages}节再说明类型条件，我们现在先做第一行。
+ 
+ 为了把两个节点放进同一个进程，我们使用\textbf{组件（component）}，也就是可装载的节点实现，承载它们的进程叫\textbf{组件容器（component container）}。两端接收并使用 \texttt{NodeOptions}，启用 \nolinkurl{use_intra_process_comms}，再通过消息所有权接口走进程内通道。
+ 
+@@ -339,9 +343,9 @@
+   CMakeLists.txt          # 消息生成、组件注册和安装
+   msg/Frame.msg           # 图像与实验测量元数据
+   src/components.cpp     # Source、Sink 两个组件
+-  src/loan_probe.cpp     # 下一节的借出能力探测
++  src/loan_probe.cpp     # 借出部分的能力探测
+   launch/path.launch.py  # 相同节点的三种布局
+-  config/fastdds-loan.xml # 下一节的显式配置
++  config/fastdds-loan.xml # 借出部分的显式配置
+   compare.py             # 独立进程组运行并保存统计
+ \end{tbash}
+ \end{minipage}\par\smallskip
+@@ -359,10 +363,16 @@
+ 
+ 本实验在同一台电脑上，用 \texttt{steady\_clock} 对应的单调时钟比较发送与回调入口时刻。
+ 
+-接下来是完整清单与构建规则。清单声明组件库和消息生成依赖，CMake 生成消息接口、链接类型支持，再注册两个组件类。构建文件同时准备了 Frame 和 FixedImage 两种接口，我们先用 Frame 跑通小图像，下一节再比较接口布局。
++接下来是完整清单与构建规则。清单声明组件库和消息生成依赖，CMake 生成消息接口、链接类型支持，再注册两个组件类。构建文件同时准备了 Frame 和 FixedImage 两种接口，我们先用 Frame 跑通小图像，第\ref{sec:ros2-loaned-messages}节再比较接口布局。
+ \lstinputlisting[frame=single,language=XML,caption={组件实验依赖清单}]{examples/ros2/image-path-demo/package.xml}
+ \lstinputlisting[frame=single,language=cmake,caption={接口生成、组件注册与安装规则}]{examples/ros2/image-path-demo/CMakeLists.txt}
+ 
++\end{example}
++
++\Needspace{8\baselineskip}
++\subsubsection{组件部署：切换进程布局并验证所有权}
++\label{sec:ros2-image-deployment}
++\begin{example}[同一份组件，三种运行布局]
+ Launch 文件保持相同 Source/Sink 和 QoS，只改变布局：\texttt{separate} 启动两个组件容器进程，\texttt{same} 把两者装进同一进程但关闭进程内通信，\texttt{intra} 则在同一进程中为两端启用它。这里使用单线程 \texttt{component\_container}，便于观察消息路径。
+ \Needspace{5\baselineskip}
+ \lstinputlisting[frame=single,language=Python,caption={切换组件布局的 Launch 文件}]{examples/ros2/image-path-demo/launch/path.launch.py}
+@@ -463,7 +473,7 @@
+ \bottomrule
+ \end{tabular}
+ \end{center}
+-\texttt{FixedImage} 的 C++ 像素字段是 \nolinkurl{std::array<uint8_t, 4665600>}。每次向普通 Image 填相同数量的像素，字段仍然是动态数组。更换 FixedImage 的尺寸需要修改接口并重新构建两端，接入标准图像工具时则要补齐元数据并复制像素。两种接口都将在下一节接受相同条件的中间件对照。
++\texttt{FixedImage} 的 C++ 像素字段是 \nolinkurl{std::array<uint8_t, 4665600>}。每次向普通 Image 填相同数量的像素，字段仍然是动态数组。更换 FixedImage 的尺寸需要修改接口并重新构建两端，接入标准图像工具时则要补齐元数据并复制像素。两种接口都将在第\ref{sec:ros2-image-type-comparison}节接受相同条件的中间件对照。
+ 
+ \begin{example}[用 Image 和 FixedImage 探测借出能力]
+ 沿用刚才的工程，我们直接比较两类图像。程序为标准 Image 与 FixedImage 各创建一个发布者，查询能力后都调用借出接口，把相同的 $1440\times1080$ BGR8 像素填成 42，再分别发布。Image 的动态数组由本地分配器创建，FixedImage 在能力为 true 时直接填充中间件样本。
+@@ -500,7 +510,7 @@
+   ros2 run image_path_demo loan_probe
+ \end{tbash}
+ \end{minipage}\par\smallskip
+-\texttt{LOAN} 输出按 Image、FixedImage 的顺序列出发布端能力，1 表示支持中间件借出，0 表示借出包装器使用本地分配器。两类消息都调用了相同的 API，所以我们要结合能力输出，判断填充的是哪一块内存。\texttt{PUBLISHED} 表示两个发布调用都已完成，接收与性能由下一节的统一收发程序测量。各中间件的两类图像探测结果集中在表\ref{tab:ros2-image-loan-probe}。
++\texttt{LOAN} 输出按 Image、FixedImage 的顺序列出发布端能力，1 表示支持中间件借出，0 表示借出包装器使用本地分配器。两类消息都调用了相同的 API，所以我们要结合能力输出，判断填充的是哪一块内存。\texttt{PUBLISHED} 表示两个发布调用都已完成，接收与性能由第\ref{sec:ros2-image-type-comparison}节的统一收发程序测量。各中间件的两类图像探测结果集中在表\ref{tab:ros2-image-loan-probe}。
+ \end{example}
+ 
+ \begin{exercise}
+@@ -518,7 +528,8 @@
+ \end{itemize}
+ \end{conclusion}
+ 
+-\subsubsection{把负载升到 250 Hz，再看图像有没有变旧}
++\section{图像性能对照与方案选择}
++\subsubsection{250 Hz 对照：借出能力与进程布局}
+ \label{sec:ros2-image-measurement}
+ 现在我们已经分清两类图像接口和几条内存路径，再用相同的合成负载比较中间件。所有实现都测试标准 Image 与 FixedImage，图像尺寸为 $1440\times1080$ BGR8，目标频率为 250 Hz。先比较共同的普通发布方式，再观察共享内存和支持借出的路径。
+ 
+--- a/02-专项技术栈/chapters/A_ros2_image_results.tex
++++ b/02-专项技术栈/chapters/A_ros2_image_results.tex
+@@ -25,7 +25,7 @@
+ \end{table}
+ 定长布局让图像满足类型条件，Fast DDS 的 Data Sharing 和 Cyclone DDS 的 iceoryx 配置提供了对应的借出支持。Zenoh SHM 优化序列化数据的传输，本章所用实现的两类图像都不提供应用层借出。接下来把能力与实际收发结果放在一起比较。
+ 
+-\begin{example}[先比较布局，再统一比较两类图像]
++\begin{example}[固定图像负载，比较三种进程布局]
+ 两类图像使用相同像素内容、尺寸、频率、\texttt{best\_effort} 和 KeepLast 深度 5，每轮 1000 帧，再留两秒排空。延迟从填充完成、发布前开始，到接收回调入口结束，记录实际发送频率、接收比例与 P95。下面先保留普通 Image 的三种布局结果，再固定为两个进程，比较普通与定长接口。
+ 
+ \begin{table}[htbp]
+@@ -62,7 +62,11 @@
+ 
+ 这组普通 Image 数据保留为进程布局参考。接下来固定为 \texttt{separate}，再比较两类消息。
+ 
+-\paragraph*{同一收发程序，比较两类图像}
++\end{example}
++
++\subsubsection{250 Hz 对照：图像类型、共享方式与借出}
++\label{sec:ros2-image-type-comparison}
++\begin{example}[同一收发程序，比较两类图像]
+ 项目中的 \texttt{image\_benchmark} 用同一份收发实现处理 Frame 中的标准 Image 与 FixedImage，接收端都在回调内读取消息。\texttt{compare\_images.py} 依次切换 RMW、消息类型和配置，管理本轮节点、Zenoh 路由器及 RouDi。默认配置组都采用普通发布，共享配置组分别开启 Fast DDS Data Sharing、Cyclone DDS iceoryx 和 Zenoh SHM，再为支持两端借出的定长类型追加借出发布。
+ 
+ 在前面的独立工作空间中安装工具并运行统一对照：
+@@ -135,7 +139,7 @@
+ 运行三种 RMW、两类图像的统一对照，记录默认配置与共享配置下的接收比例、P95 和两端借出能力。解释变长 Image 不能直接借出时共享内存如何工作，定长图像也不能借出时又应怎样判断原因。
+ \end{exercise}
+ 
+-\paragraph*{故意让识别变慢一次}
++\subsubsection{慢处理对照：队列深度与图像年龄}
+ 只保留 Fast DDS 的两个进程，把 Sink 的模拟处理设为 8 ms。先用默认小图像观察排队：
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+ \begin{tbash}
+@@ -167,7 +171,7 @@
+ \end{exercise}
+ 
+ 
+-\paragraph*{从实验结果回到工程方案}
++\subsubsection{从实验结果选择图像链路方案}
+ 现在回到开始的问题：$1440\times1080$ 的图像每隔 4 ms 到来，我们怎样把它及时送进识别节点，并减少一路上的搬运？根据前面的同机对照，我们已经可以给这条图像链路选择方案。
+ 
+ 对于能放入同一进程的节点，\textbf{优先把这些近邻节点组成组件，开启进程内通信并交接消息所有权。}表\ref{tab:ros2-image-results} 中，三种 RMW 的 \texttt{intra} 都完整交付了图像，P95 为 0.029--0.042 ms。这条路径可以继续使用普通图像接口，直接复用像素缓冲区。
+--- a/02-专项技术栈/chapters/A_ros2_project.tex
++++ b/02-专项技术栈/chapters/A_ros2_project.tex
+@@ -1,4 +1,4 @@
+-\subsubsection{把节点与接口拼成完整工程}
++\subsubsection{完整工程：组织文件并生成消息接口}
+ \label{sec:ros2-project}
+ 刚才我们逐段写了节点和消息接口，现在把它们拼成一个能运行的小工程。完整源码就在本卷 \path{examples/ros2/basic-interfaces-demo}，包括两个包。my\_msgs 先生成消息类型，my\_package 再使用它；文件之间的关系如下：
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+@@ -19,7 +19,7 @@
+ \end{minipage}\par\smallskip
+ 你可以照着下面写，也可以把两个包复制到新工作空间的 src 中，再逐个核对。
+ 
+-\begin{example}[先生成接口，再启动节点]
++\begin{example}[准备消息包与接口生成规则]
+ 首先准备消息包。这个文件只写字段，不写 C++ 类定义，构建工具会自动生成代码。
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+ \lstinputlisting[frame=single,language={},caption={my\_msgs/msg/My.msg}]{examples/ros2/basic-interfaces-demo/my_msgs/msg/My.msg}
+@@ -33,7 +33,11 @@
+ \lstinputlisting[frame=single,language=XML,label=lst:xml_2,caption={my\_msgs/package.xml}]{examples/ros2/basic-interfaces-demo/my_msgs/package.xml}
+ \end{minipage}\par\smallskip
+ 
+-\Needspace{31\baselineskip}
++\end{example}
++
++\Needspace{35\baselineskip}
++\subsubsection{完整工程：实现节点并声明构建依赖}
++\begin{example}[把发布、订阅和定时器接起来]
+ 接下来准备节点包。头文件声明节点类并保存发布者、订阅者和定时器句柄；把句柄放在成员中，节点运行时它们才会一直存活。
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+ \lstinputlisting[frame=single,language=C++,label=lst:my_node_h,caption={my\_package/include/my\_package/my\_node.h},numbers=left,numberstyle={\color{gray}\tiny}]{examples/ros2/basic-interfaces-demo/my_package/include/my_package/my_node.h}
+@@ -67,6 +71,10 @@
+ \lstinputlisting[frame=single,language=XML,label=lst:xml_1,caption={my\_package/package.xml}]{examples/ros2/basic-interfaces-demo/my_package/package.xml}
+ \end{minipage}\par\smallskip
+ 
++\end{example}
++
++\subsubsection{完整工程：编译并验证话题收发}
++\begin{example}[先生成接口，再启动节点]
+ 把两个包放进 \path{~/ros2_ws/src} 后，回到工作空间根目录构建。
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+ \begin{tbash}
+@@ -98,6 +106,7 @@
+ 节点日志应显示收到 hello，send 应收到 I can hear:hello。按 Ctrl+C 结束节点和观察进程，再修改代码做练习。
+ \end{example}
+ 
++\subsubsection{用 rqt 发布输入与监视回复}
+ \begin{example}[用 rqt 看见同一条消息经过了哪里]
+ 终端里的收发已经跑通了，我们再把它搬到图形界面。先让 my\_node 保持运行，在同样加载了环境的两个终端分别打开插件：
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+--- a/02-专项技术栈/chapters/A_ros2_visualization.tex
++++ b/02-专项技术栈/chapters/A_ros2_visualization.tex
+@@ -138,7 +138,7 @@
+ \end{figure}
+ \end{example}
+ 
+-\paragraph*{Marker 消息怎样把检测结果画进三维场景}
++\subsubsection{Marker：绘制、更新与删除三维图形}
+ 要给目标画一个球、给速度画一支箭头，或者在旁边放上编号，我们发布 \path{visualization_msgs/msg/Marker}。一次要更新多个图形时，把它们放进 MarkerArray.markers。RViz2 分别使用 Marker、MarkerArray 显示，Foxglove 的 3D 面板也能读取这两种 ROS 消息。
+ 
+ \begin{example}[球、箭头、轨迹和文字共用一份目标位置]
+@@ -172,6 +172,7 @@
+ 把球改成边长 0.25 m 的立方体，再改变颜色和寿命，记录结果。解释把 alpha 留成 0、每帧改 id、只从 MarkerArray 中移除一个元素各会发生什么；用 show\_target 演示明确删除与恢复。
+ \end{exercise}
+ 
++\section{Foxglove：连接、观测与回放}
+ \subsubsection{Foxglove：安装、连接与保存自己的观察布局}
+ \label{sec:ros2-foxglove}
+ 
+@@ -205,6 +206,7 @@
+ 本项目也附有 \texttt{foxglove-panels/} 中的面板配置。想先得到和示例一致的画面，可以在相应面板的设置页打开右上角菜单，选 Import/Export settings（导入/导出设置），粘贴该面板的 JSON 并应用；这一步只恢复选中的面板，最后仍要保存整个布局。下面我们逐个试清楚这些设置。
+ \end{example}
+ 
++\subsubsection{Foxglove：给数字状态标注名称}
+ \begin{note}
+ “Annotate” 还有一种常见用法：给消息里的数字状态标上名字。比如 mode=1 到底表示待机还是跟踪？可以在自己的接口包（这里取名 viz\_interfaces）中写下面两份完整消息定义，再按前面自定义接口的步骤把它们加入 rosidl\_generate\_interfaces，重新构建并加载 install 环境。
+ \begin{lstlisting}[language={}]
+@@ -228,7 +230,7 @@
+ \end{figure}
+ \end{note}
+ 
+-\subsubsection{Foxglove 的曲线：字段路径、换算与两点测量}
++\subsubsection{Foxglove Plot：字段路径与数值换算}
+ \label{sec:ros2-foxglove-plot}
+ 
+ 先在 Plot 中把 X-axis value type 选为 Timestamp，添加两个 Series，Y-value 分别填 \path{/viz/signal.data} 和 \path{/viz/pose.pose.position.x}。Foxglove 用点号进入字段，与刚才 rqt\_plot 的斜线路径不同。输入路径时可以使用字段补全，也可以在 Raw Messages 中先确认字段层级，再复制相应路径。
+@@ -280,6 +282,10 @@
+ \texttt{.@delta}、\texttt{.@derivative}、\texttt{.@timedelta} 需要 Timestamp 横轴，不能用在 XY 或 Array index 横轴上；一条函数链最多用一个这样的时间序列函数。函数缺失或路径报错时先检查客户端版本。用差分看角速度时，还要处理角度绕回和噪声，否则 $179^\circ$ 到 $-179^\circ$ 的表示变化会产生很大的假尖峰。
+ \end{note}
+ 
++\end{example}
++
++\subsubsection{Foxglove Plot：时间对齐与两点测量}
++\begin{example}[按同一种时间来源比较曲线与轨迹]
+ 消息里有正确填写的 \texttt{header.stamp} 时，我们\textbf{优先用它来画曲线}。在 Series 的 Timestamp 设置中选择 Header stamp（中文界面为“ROS 头时间戳”），这样比较的是数据采集或生成的时刻。传输和处理有延迟时，两条本来同时采集的数据也能按原来的时间对齐；\texttt{.@derivative} 和 \texttt{.@timedelta} 同样使用这里选定的时间来源。
+ 
+ 本例的 pose、twist 和 path 都有 header，因此共同选 Header stamp；Float64 没有 header，signal 使用 Log time。这里先用它对照波形；真要精确比较 signal 与位姿的相位，就给自定义信号消息增加 Header，在同一次采样填入相同时间，再统一选 Header stamp。Log time 在实时连接中表示消息被接收的时刻，在录制文件中是原来的记录时刻，适合从接收侧观察消息间隔。先在 Raw Messages 确认 header.stamp 有效、持续更新，并核对比较对象使用同一种时钟；全为零或填错时，先修发布端。比较多条曲线时别混用采集时间与接收时间，采样频率不一样时也别把提示框中的最近一次值当成同一时刻的新样本。
+@@ -341,7 +347,7 @@
+ 把框的线宽改成 5 像素、中心圆直径改成 20 像素，保存一帧带标注的画面。再临时把所有标注时间戳加 50 ms，观察开启同步后的现象，恢复代码后重启。说明显示错误来自坐标、时间还是图像编码，并给出核对办法。
+ \end{exercise}
+ 
+-\subsubsection{Foxglove 的 3D 与录制回放：把一次观察留下来}
++\subsubsection{Foxglove 3D：场景实体与空间测量}
+ \label{sec:ros2-foxglove-3d}
+ 
+ 在 3D 的 Panel 设置里把 Display frame 选为 map，打开 TF、/viz/pose、/viz/path 与 /viz/markers，你应看到和 RViz2 对应的目标及轨迹。点一个对象可以查看其话题、编号与字段，再打开 Raw Messages 查同一对象。想跟着目标观察时可以选择 target 为跟随的坐标系；先用 map 看清整个运动，再切换视角，避免把相机视角的变化误认成目标运动。
+@@ -357,6 +363,7 @@
+ 再点 3D 右侧的 Measure 工具，选择两个点读距离。默认点击落在地面平面上，测量实体表面或点云点时按住 Alt 启用吸附（macOS 用 Option），确认端点确实贴在对象上。世界坐标单位为米，量一个已知 0.25 m 的方块可以帮助检查尺度。测到的只是当前展示的几何结果；坐标变换或尺寸填错时，尺子也会跟着量错。图形接口与测量控制分别见\href{https://docs.foxglove.dev/docs/sdk/schemas/scene-update}{SceneUpdate 定义}和\href{https://docs.foxglove.dev/docs/visualization/panels/3d}{3D 面板说明}。
+ \end{example}
+ 
++\subsubsection{MCAP 录制与回放：把一次观察留下来}
+ \begin{example}[录一段，再慢慢找不对劲的时刻]
+ 实时数据太快时，我们先把它留下。Humble 默认常用的 db3 不保存全部自定义消息定义，这里安装 MCAP 存储插件，并明确使用 \texttt{-s mcap}。保持数据源运行，在新的工作目录中录制本例的话题：
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+--- a/02-专项技术栈/main.tex
++++ b/02-专项技术栈/main.tex
+@@ -49,15 +49,18 @@
+   \item 本卷边界：先修卷一 Linux、C++ 与 CMake；本卷 ROS2 内容、命令与代码以 Ubuntu 22.04 和 Humble 为主；实车集成见卷三。
+ \end{introduction}
+ 
+-\section{节点、接口与工程实践}
++\section{ROS2 入门与环境安装}
+ 
+ \input{chapters/A_ros2.tex}
++\section{完整工程与收发验证}
+ \input{chapters/A_ros2_project.tex}
++\section{rqt 与 RViz2 图形化观测}
+ \input{chapters/A_ros2_visualization.tex}
+ 
+-\section{构建、启动与排障}
++\section{构建工具与环境排障}
+ \input{chapters/A_ros2_engineering.tex}
+ 
++\Needspace{18\baselineskip}
+ \section{大图像链路：中间件与内存}
+ \input{chapters/A_ros2_image_path.tex}
+ 

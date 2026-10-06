@@ -1,0 +1,249 @@
+{
+  "environment": {
+    "ros_distro": "humble",
+    "local_ip": "192.168.2.15",
+    "address_inventory": [
+      {
+        "ifindex": 1,
+        "ifname": "lo",
+        "flags": [
+          "LOOPBACK",
+          "UP",
+          "LOWER_UP"
+        ],
+        "mtu": 65536,
+        "qdisc": "noqueue",
+        "operstate": "UNKNOWN",
+        "group": "default",
+        "txqlen": 1000,
+        "addr_info": [
+          {
+            "family": "inet",
+            "local": "127.0.0.1",
+            "prefixlen": 8,
+            "scope": "host",
+            "label": "lo",
+            "valid_life_time": 4294967295,
+            "preferred_life_time": 4294967295
+          }
+        ]
+      },
+      {
+        "ifindex": 3,
+        "ifname": "wlp0s20f3",
+        "flags": [
+          "BROADCAST",
+          "MULTICAST",
+          "UP",
+          "LOWER_UP"
+        ],
+        "mtu": 1500,
+        "qdisc": "noqueue",
+        "operstate": "UP",
+        "group": "default",
+        "txqlen": 1000,
+        "altnames": [
+          "wlxb03cdc9ed0ea"
+        ],
+        "addr_info": [
+          {
+            "family": "inet",
+            "local": "192.168.2.15",
+            "prefixlen": 24,
+            "broadcast": "192.168.2.255",
+            "scope": "global",
+            "dynamic": true,
+            "noprefixroute": true,
+            "label": "wlp0s20f3",
+            "valid_life_time": 76054,
+            "preferred_life_time": 76054
+          }
+        ]
+      },
+      {
+        "ifindex": 4,
+        "ifname": "tailscale0",
+        "flags": [
+          "POINTOPOINT",
+          "MULTICAST",
+          "NOARP",
+          "UP",
+          "LOWER_UP"
+        ],
+        "mtu": 1280,
+        "qdisc": "fq_codel",
+        "operstate": "UNKNOWN",
+        "group": "default",
+        "txqlen": 500,
+        "addr_info": [
+          {
+            "family": "inet",
+            "local": "100.120.113.52",
+            "prefixlen": 32,
+            "scope": "global",
+            "label": "tailscale0",
+            "valid_life_time": 4294967295,
+            "preferred_life_time": 4294967295
+          }
+        ]
+      },
+      {
+        "ifindex": 5,
+        "ifname": "FlClash",
+        "flags": [
+          "POINTOPOINT",
+          "MULTICAST",
+          "NOARP",
+          "UP",
+          "LOWER_UP"
+        ],
+        "mtu": 9000,
+        "qdisc": "fq_codel",
+        "operstate": "UNKNOWN",
+        "group": "default",
+        "txqlen": 500,
+        "addr_info": [
+          {
+            "family": "inet",
+            "local": "198.18.0.1",
+            "prefixlen": 30,
+            "broadcast": "198.18.0.3",
+            "scope": "global",
+            "label": "FlClash",
+            "valid_life_time": 4294967295,
+            "preferred_life_time": 4294967295
+          }
+        ]
+      }
+    ],
+    "package_versions": "ros-humble-demo-nodes-cpp\t0.20.10-1jammy.20260907.223640\nros-humble-rmw-cyclonedds-cpp\t1.3.5-1jammy.20260907.205235\nros-humble-rmw-fastrtps-cpp\t6.2.10-1jammy.20260907.210327\nros-humble-rmw-zenoh-cpp\t0.1.9-1jammy.20260907.200640\n"
+  },
+  "cases": [
+    {
+      "case": "fastdds-default",
+      "implementation": "rmw_fastrtps_cpp",
+      "domain": 97,
+      "topic": "/tutorial4new_rmw_check_20261005/chatter",
+      "config": {
+        "ROS_LOCALHOST_ONLY": "1"
+      },
+      "received": [
+        "1",
+        "2",
+        "3"
+      ],
+      "published": [
+        "1",
+        "2",
+        "3"
+      ],
+      "status": "passed"
+    },
+    {
+      "case": "cyclonedds-default",
+      "implementation": "rmw_cyclonedds_cpp",
+      "domain": 97,
+      "topic": "/tutorial4new_rmw_check_20261005/chatter",
+      "config": {
+        "ROS_LOCALHOST_ONLY": "1"
+      },
+      "received": [
+        "1",
+        "2",
+        "3"
+      ],
+      "published": [
+        "1",
+        "2",
+        "3"
+      ],
+      "status": "passed"
+    },
+    {
+      "case": "fastdds-xml",
+      "implementation": "rmw_fastrtps_cpp",
+      "domain": 97,
+      "topic": "/tutorial4new_rmw_check_20261005/chatter",
+      "config": {
+        "FASTRTPS_DEFAULT_PROFILES_FILE": "/tmp/tutorial4new-rmw-runtime-20261005/fastdds.xml"
+      },
+      "received": [
+        "1",
+        "2",
+        "3"
+      ],
+      "published": [
+        "1",
+        "2",
+        "3"
+      ],
+      "status": "passed"
+    },
+    {
+      "case": "cyclonedds-xml",
+      "implementation": "rmw_cyclonedds_cpp",
+      "domain": 97,
+      "topic": "/tutorial4new_rmw_check_20261005/chatter",
+      "config": {
+        "CYCLONEDDS_URI": "file:///tmp/tutorial4new-rmw-runtime-20261005/cyclonedds.xml"
+      },
+      "received": [
+        "1",
+        "2",
+        "3"
+      ],
+      "published": [
+        "1",
+        "2",
+        "3"
+      ],
+      "status": "passed"
+    },
+    {
+      "case": "zenoh-default",
+      "implementation": "rmw_zenoh_cpp",
+      "domain": 97,
+      "topic": "/tutorial4new_rmw_check_20261005/chatter",
+      "config": {},
+      "received": [
+        "1",
+        "2",
+        "3"
+      ],
+      "published": [
+        "1",
+        "2",
+        "3"
+      ],
+      "status": "passed"
+    },
+    {
+      "case": "zenoh-json5-client",
+      "implementation": "rmw_zenoh_cpp",
+      "domain": 97,
+      "topic": "/tutorial4new_rmw_check_20261005/chatter",
+      "config": {
+        "ZENOH_ROUTER_CONFIG_URI": "/tmp/tutorial4new-rmw-runtime-20261005/router.json5",
+        "ZENOH_SESSION_CONFIG_URI": "/tmp/tutorial4new-rmw-runtime-20261005/session.json5"
+      },
+      "received": [
+        "1",
+        "2",
+        "3"
+      ],
+      "published": [
+        "1",
+        "2",
+        "3"
+      ],
+      "status": "passed"
+    }
+  ],
+  "cleanup": {
+    "all_owned_processes_exited": true
+  },
+  "limits": [
+    "同一台机器的临时通信测试，未验证第二台主机",
+    "未执行教材中的 apt 安装或源码构建步骤"
+  ]
+}

@@ -1,0 +1,226 @@
+[
+  {
+    "rmw": "rmw_fastrtps_cpp",
+    "message_type": "dynamic",
+    "profile": "default",
+    "publish_mode": "regular",
+    "send_hz": 250.031,
+    "receive_hz": 95.3326,
+    "delivery_ratio": 0.378,
+    "p95_ms": 1.84803,
+    "p99_ms": 2.25569,
+    "can_loan": [
+      0,
+      0
+    ],
+    "repeats": 3
+  },
+  {
+    "rmw": "rmw_fastrtps_cpp",
+    "message_type": "fixed",
+    "profile": "default",
+    "publish_mode": "regular",
+    "send_hz": 250.039,
+    "receive_hz": 100.929,
+    "delivery_ratio": 0.393,
+    "p95_ms": 1.75688,
+    "p99_ms": 1.96103,
+    "can_loan": [
+      0,
+      0
+    ],
+    "repeats": 3
+  },
+  {
+    "rmw": "rmw_cyclonedds_cpp",
+    "message_type": "dynamic",
+    "profile": "default",
+    "publish_mode": "regular",
+    "send_hz": 250.002,
+    "receive_hz": 250.091,
+    "delivery_ratio": 0.999,
+    "p95_ms": 2.87643,
+    "p99_ms": 3.16624,
+    "can_loan": [
+      0,
+      0
+    ],
+    "repeats": 3
+  },
+  {
+    "rmw": "rmw_cyclonedds_cpp",
+    "message_type": "fixed",
+    "profile": "default",
+    "publish_mode": "regular",
+    "send_hz": 249.999,
+    "receive_hz": 250.136,
+    "delivery_ratio": 1.0,
+    "p95_ms": 2.92972,
+    "p99_ms": 3.24664,
+    "can_loan": [
+      0,
+      0
+    ],
+    "repeats": 3
+  },
+  {
+    "rmw": "rmw_zenoh_cpp",
+    "message_type": "dynamic",
+    "profile": "default",
+    "publish_mode": "regular",
+    "send_hz": 250.013,
+    "receive_hz": 250.31,
+    "delivery_ratio": 1.0,
+    "p95_ms": 2.78011,
+    "p99_ms": 3.1678,
+    "can_loan": [
+      0,
+      0
+    ],
+    "repeats": 3
+  },
+  {
+    "rmw": "rmw_zenoh_cpp",
+    "message_type": "fixed",
+    "profile": "default",
+    "publish_mode": "regular",
+    "send_hz": 250.031,
+    "receive_hz": 250.326,
+    "delivery_ratio": 1.0,
+    "p95_ms": 2.95675,
+    "p99_ms": 3.54321,
+    "can_loan": [
+      0,
+      0
+    ],
+    "repeats": 3
+  },
+  {
+    "rmw": "rmw_fastrtps_cpp",
+    "message_type": "dynamic",
+    "profile": "shared",
+    "publish_mode": "regular",
+    "send_hz": 250.035,
+    "receive_hz": 108.748,
+    "delivery_ratio": 0.429,
+    "p95_ms": 1.73781,
+    "p99_ms": 1.92131,
+    "can_loan": [
+      0,
+      0
+    ],
+    "repeats": 3
+  },
+  {
+    "rmw": "rmw_fastrtps_cpp",
+    "message_type": "fixed",
+    "profile": "shared",
+    "publish_mode": "regular",
+    "send_hz": 250.023,
+    "receive_hz": 250.115,
+    "delivery_ratio": 1.0,
+    "p95_ms": 0.497963,
+    "p99_ms": 0.640431,
+    "can_loan": [
+      1,
+      1
+    ],
+    "repeats": 3
+  },
+  {
+    "rmw": "rmw_fastrtps_cpp",
+    "message_type": "fixed",
+    "profile": "shared",
+    "publish_mode": "loan",
+    "send_hz": 250.046,
+    "receive_hz": 250.041,
+    "delivery_ratio": 1.0,
+    "p95_ms": 0.340525,
+    "p99_ms": 0.376696,
+    "can_loan": [
+      1,
+      1
+    ],
+    "repeats": 3
+  },
+  {
+    "rmw": "rmw_cyclonedds_cpp",
+    "message_type": "dynamic",
+    "profile": "shared",
+    "publish_mode": "regular",
+    "send_hz": 250.04,
+    "receive_hz": 250.153,
+    "delivery_ratio": 1.0,
+    "p95_ms": 2.59775,
+    "p99_ms": 2.97648,
+    "can_loan": [
+      0,
+      0
+    ],
+    "repeats": 3
+  },
+  {
+    "rmw": "rmw_cyclonedds_cpp",
+    "message_type": "fixed",
+    "profile": "shared",
+    "publish_mode": "regular",
+    "send_hz": 250.04,
+    "receive_hz": 250.075,
+    "delivery_ratio": 1.0,
+    "p95_ms": 0.491568,
+    "p99_ms": 0.669434,
+    "can_loan": [
+      1,
+      1
+    ],
+    "repeats": 3
+  },
+  {
+    "rmw": "rmw_cyclonedds_cpp",
+    "message_type": "fixed",
+    "profile": "shared",
+    "publish_mode": "loan",
+    "send_hz": 250.047,
+    "receive_hz": 250.041,
+    "delivery_ratio": 1.0,
+    "p95_ms": 0.330493,
+    "p99_ms": 0.356544,
+    "can_loan": [
+      1,
+      1
+    ],
+    "repeats": 3
+  },
+  {
+    "rmw": "rmw_zenoh_cpp",
+    "message_type": "dynamic",
+    "profile": "shared",
+    "publish_mode": "regular",
+    "send_hz": 250.044,
+    "receive_hz": 250.47,
+    "delivery_ratio": 1.0,
+    "p95_ms": 1.38463,
+    "p99_ms": 1.66585,
+    "can_loan": [
+      0,
+      0
+    ],
+    "repeats": 3
+  },
+  {
+    "rmw": "rmw_zenoh_cpp",
+    "message_type": "fixed",
+    "profile": "shared",
+    "publish_mode": "regular",
+    "send_hz": 250.026,
+    "receive_hz": 250.39,
+    "delivery_ratio": 1.0,
+    "p95_ms": 1.34706,
+    "p99_ms": 1.53369,
+    "can_loan": [
+      0,
+      0
+    ],
+    "repeats": 3
+  }
+]

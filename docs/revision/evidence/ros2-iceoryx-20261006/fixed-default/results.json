@@ -1,0 +1,245 @@
+[
+  {
+    "repeat": 1,
+    "publish_mode": "regular",
+    "iceoryx": false,
+    "verify_full": false,
+    "sent": 1000,
+    "received": 998,
+    "send_hz": 250.023,
+    "receive_hz": 249.625,
+    "delivery_ratio": 0.998,
+    "p95_ms": 3.29219,
+    "p99_ms": 3.93773,
+    "bad_frames": 0,
+    "capabilities": {
+      "receive": {
+        "role": "receive",
+        "can_loan": 0,
+        "sizeof_message": 4665616
+      },
+      "send": {
+        "role": "send",
+        "can_loan": 0,
+        "sizeof_message": 4665616
+      }
+    },
+    "pointer_pairs": [
+      {
+        "sequence": 0,
+        "source": {
+          "role": "send",
+          "pid": 409894,
+          "sequence": 0,
+          "pixel_address": 140671305953312,
+          "mapping": null
+        },
+        "sink": {
+          "role": "receive",
+          "pid": 409893,
+          "sequence": 0,
+          "pixel_address": 139706879799344,
+          "mapping": null
+        },
+        "same_shared_sample": false
+      },
+      {
+        "sequence": 1,
+        "source": {
+          "role": "send",
+          "pid": 409894,
+          "sequence": 1,
+          "pixel_address": 94778840139152,
+          "mapping": {
+            "device": "00:00",
+            "inode": "0",
+            "object": "[heap]",
+            "offset": 599440
+          }
+        },
+        "sink": {
+          "role": "receive",
+          "pid": 409893,
+          "sequence": 1,
+          "pixel_address": 94167811593952,
+          "mapping": {
+            "device": "00:00",
+            "inode": "0",
+            "object": "[heap]",
+            "offset": 595680
+          }
+        },
+        "same_shared_sample": false
+      },
+      {
+        "sequence": 2,
+        "source": {
+          "role": "send",
+          "pid": 409894,
+          "sequence": 2,
+          "pixel_address": 94778840139152,
+          "mapping": {
+            "device": "00:00",
+            "inode": "0",
+            "object": "[heap]",
+            "offset": 599440
+          }
+        },
+        "sink": {
+          "role": "receive",
+          "pid": 409893,
+          "sequence": 2,
+          "pixel_address": 94167811593952,
+          "mapping": {
+            "device": "00:00",
+            "inode": "0",
+            "object": "[heap]",
+            "offset": 595680
+          }
+        },
+        "same_shared_sample": false
+      }
+    ],
+    "returncodes": {
+      "receive": 0,
+      "send": 0
+    }
+  },
+  {
+    "repeat": 2,
+    "publish_mode": "regular",
+    "iceoryx": false,
+    "verify_full": false,
+    "sent": 1000,
+    "received": 998,
+    "send_hz": 250.008,
+    "receive_hz": 249.646,
+    "delivery_ratio": 0.998,
+    "p95_ms": 2.9687,
+    "p99_ms": 3.30297,
+    "bad_frames": 0,
+    "capabilities": {
+      "receive": {
+        "role": "receive",
+        "can_loan": 0,
+        "sizeof_message": 4665616
+      },
+      "send": {
+        "role": "send",
+        "can_loan": 0,
+        "sizeof_message": 4665616
+      }
+    },
+    "pointer_pairs": [
+      {
+        "sequence": 0,
+        "source": {
+          "role": "send",
+          "pid": 409991,
+          "sequence": 0,
+          "pixel_address": 139650865209376,
+          "mapping": null
+        },
+        "sink": {
+          "role": "receive",
+          "pid": 409990,
+          "sequence": 0,
+          "pixel_address": 140350153269296,
+          "mapping": null
+        },
+        "same_shared_sample": false
+      },
+      {
+        "sequence": 1,
+        "source": {
+          "role": "send",
+          "pid": 409991,
+          "sequence": 1,
+          "pixel_address": 94053839517536,
+          "mapping": {
+            "device": "00:00",
+            "inode": "0",
+            "object": "[heap]",
+            "offset": 599904
+          }
+        },
+        "sink": {
+          "role": "receive",
+          "pid": 409990,
+          "sequence": 1,
+          "pixel_address": 94311467202208,
+          "mapping": {
+            "device": "00:00",
+            "inode": "0",
+            "object": "[heap]",
+            "offset": 595616
+          }
+        },
+        "same_shared_sample": false
+      },
+      {
+        "sequence": 2,
+        "source": {
+          "role": "send",
+          "pid": 409991,
+          "sequence": 2,
+          "pixel_address": 94053839517536,
+          "mapping": {
+            "device": "00:00",
+            "inode": "0",
+            "object": "[heap]",
+            "offset": 599904
+          }
+        },
+        "sink": {
+          "role": "receive",
+          "pid": 409990,
+          "sequence": 2,
+          "pixel_address": 94311467202208,
+          "mapping": {
+            "device": "00:00",
+            "inode": "0",
+            "object": "[heap]",
+            "offset": 595616
+          }
+        },
+        "same_shared_sample": false
+      }
+    ],
+    "returncodes": {
+      "receive": 0,
+      "send": 0
+    }
+  },
+  {
+    "repeat": 3,
+    "publish_mode": "regular",
+    "iceoryx": false,
+    "verify_full": false,
+    "sent": 1000,
+    "received": 992,
+    "send_hz": 249.996,
+    "receive_hz": 250.107,
+    "delivery_ratio": 0.992,
+    "p95_ms": 3.29978,
+    "p99_ms": 4.17097,
+    "bad_frames": 0,
+    "capabilities": {
+      "receive": {
+        "role": "receive",
+        "can_loan": 0,
+        "sizeof_message": 4665616
+      },
+      "send": {
+        "role": "send",
+        "can_loan": 0,
+        "sizeof_message": 4665616
+      }
+    },
+    "pointer_pairs": [],
+    "returncodes": {
+      "receive": 0,
+      "send": 0
+    }
+  }
+]

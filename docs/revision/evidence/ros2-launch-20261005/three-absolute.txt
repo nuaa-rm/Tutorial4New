@@ -1,0 +1,24 @@
+[INFO] [launch]: All log files can be found below /tmp/tutorial4new-launch-20261005-runtime/ros-logs/2026-10-05-17-38-14-019456-mijiao-arch-123903
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [heartbeat-1]: process started with pid [123904]
+[INFO] [heartbeat-2]: process started with pid [123906]
+[INFO] [heartbeat-3]: process started with pid [123908]
+[heartbeat-2] [0m[INFO] [1791193094.252239517] [blue.camera.heartbeat]: first heartbeat[0m
+[heartbeat-2] [0m[INFO] [1791193094.252342336] [blue.camera.heartbeat]: heartbeat alive[0m
+[heartbeat-3] [0m[INFO] [1791193094.252995910] [green.camera.heartbeat]: first heartbeat[0m
+[heartbeat-3] [0m[INFO] [1791193094.253045393] [green.camera.heartbeat]: heartbeat alive[0m
+[heartbeat-1] [0m[INFO] [1791193094.255432262] [red.camera.heartbeat]: first heartbeat[0m
+[heartbeat-1] [0m[INFO] [1791193094.255478653] [red.camera.heartbeat]: heartbeat alive[0m
+[WARNING] [launch]: user interrupted with ctrl-c (SIGINT)
+[INFO] [heartbeat-3]: sending signal 'SIGINT' to process[heartbeat-3]
+[INFO] [heartbeat-2]: sending signal 'SIGINT' to process[heartbeat-2]
+[INFO] [heartbeat-1]: sending signal 'SIGINT' to process[heartbeat-1]
+[heartbeat-3] [0m[INFO] [1791193095.604215162] [rclcpp]: signal_handler(SIGINT/SIGTERM)[0m
+[heartbeat-2] [0m[INFO] [1791193095.604287569] [rclcpp]: signal_handler(SIGINT/SIGTERM)[0m
+[heartbeat-1] [0m[INFO] [1791193095.604365536] [rclcpp]: signal_handler(SIGINT/SIGTERM)[0m
+[heartbeat-3] [0m[INFO] [1791193095.605577436] [rclcpp]: signal_handler(SIGINT/SIGTERM)[0m
+[heartbeat-2] [0m[INFO] [1791193095.605823032] [rclcpp]: signal_handler(SIGINT/SIGTERM)[0m
+[heartbeat-1] [0m[INFO] [1791193095.606048374] [rclcpp]: signal_handler(SIGINT/SIGTERM)[0m
+[INFO] [heartbeat-2]: process has finished cleanly [pid 123906]
+[INFO] [heartbeat-1]: process has finished cleanly [pid 123904]
+[INFO] [heartbeat-3]: process has finished cleanly [pid 123908]

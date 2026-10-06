@@ -1,0 +1,17 @@
+{
+  "ros_distro": "humble",
+  "payload_bytes": 4665600,
+  "width": 1440,
+  "height": 1080,
+  "encoding": "bgr8",
+  "depth": 5,
+  "reliability": "best_effort",
+  "rate": 250.0,
+  "frames": 1000,
+  "repeats": 3,
+  "drain_seconds": 2,
+  "cyclone_config": null,
+  "receiver_callback": "const FixedImage &; used only inside callback",
+  "latency": "after fill, before publish -> callback entry",
+  "synthetic": true
+}

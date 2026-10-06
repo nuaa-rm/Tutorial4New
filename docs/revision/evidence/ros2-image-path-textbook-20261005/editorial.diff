@@ -1,0 +1,595 @@
+--- before/02-专项技术栈/chapters/A_ros2_image_path.tex
++++ after/02-专项技术栈/chapters/A_ros2_image_path.tex
+@@ -1,6 +1,6 @@
+ \subsubsection{先给 1440\texorpdfstring{$\times$}{×}1080@250 Hz 算笔账}
+ \label{sec:ros2-image-budget}
+-前面用字符串把收发流程跑通了，接下来换成我们实际工作中会碰到的图像。相机最高可以达到 $1440\times1080@250\,\mathrm{Hz}$（宽 $\times$ 高），也就是每隔 4 ms 来一帧。这个数字说的是相机的工作上限；接到 ROS2 后，采集、转换、传输和识别能不能一直跟上，还得分开测。你大概也不希望相机拍得飞快，识别节点却在认真处理半秒前的装甲板。
++前面用字符串把收发流程跑通了，接下来换成视觉系统里常见的图像。以 $1440\times1080@250\,\mathrm{Hz}$ 的输入为例，每隔 4 ms 就有一帧新图像。采集、转换、传输和识别要接力完成工作，我们既关心每秒能处理多少帧，也关心处理的是多久以前的画面。毕竟，相机拍得飞快，识别节点却在认真处理半秒前的装甲板，瞄准就跟不上了。
+ 
+ 先把图像看成一块内存。每帧像素数是 $1440\times1080=1\,555\,200$，紧密排列时，原始像素负载率为
+ \[
+@@ -25,13 +25,13 @@
+ \begin{example}[复制一帧，到底搬了多少东西]
+ 假设相机先输出 Bayer8，我们在采集端转成 BGR8，再把完整彩色图像交给识别节点。一秒的 BGR8 像素就有约 1.17 GB。每多做一次完整复制，都要读一遍源数据、写一遍目标数据，按这个负载估算，新增的读写量约为 $2\times1.1664=2.3328\,\mathrm{GB/s}$。如果连续几段处理都各自复制一次，这笔账会不断叠加。
+ 
+-这是非常巨大的负载。而且 Bayer 转 BGR 本身也是一次产生新数据的处理，\texttt{std::move} 无法把它省掉。跨机器时，千兆网连 mono8 的纯像素都装不下，更别提BGR8 接近万兆网的标称带宽，我们甚至还没有算上给协议和其他数据留足的空间。
++所以，图像链路里的复制值得专门检查。Bayer 转 BGR 会生成新的像素数据，后续传递时则可以尝试复用这份缓冲区。跨机器还要算网络预算：mono8 的纯像素负载已经超过千兆网，BGR8 则接近万兆网的标称带宽，协议和其他数据也需要空间。
+ \end{example}
+ 
+ \paragraph*{队列深度救不了长期超时}
+-250 Hz 的到帧间隔是 4 ms；单个串行处理阶段若每帧要 8 ms，理想上限也只有 125 Hz。加大 \texttt{KeepLast} 深度可以吸收短时抖动，却不能提高长期处理能力。深度 5 的一份 BGR8 历史，仅像素就约 23.33 MB；多端历史和工作缓冲还会继续占内存。在 250 Hz 输入下，深度 10 对应约 40 ms 的入队跨度。这甚至不是延迟上界：发布端阻塞、其他队列和调度等待都会再增加图像年龄。
+-
+-对于需要及时瞄准的识别链路，我们通常先用小深度、易于丢弃旧帧的策略作起点，例如兼容的 \texttt{best\_effort} 加 \texttt{KeepLast(1)} 或较小深度，再按丢帧与延迟实测调整。离线录制如果要求完整保存，就要另算存储吞吐和可靠传输成本，必要时降帧率或独立部署。
++250 Hz 的到帧间隔是 4 ms。单个串行处理阶段若每帧要 8 ms，理想上限也只有 125 Hz，积压会不断增加。加大 \texttt{KeepLast} 深度可以吸收短时抖动，长期处理能力仍取决于每帧耗时。深度 5 的一份 BGR8 历史，仅像素就约 23.33 MB。在 250 Hz 输入下，深度 10 对应约 40 ms 的入队跨度，加上其他队列和调度等待，识别用到的画面还会更旧。
++
++对于需要及时瞄准的识别链路，我们通常先用 \texttt{best\_effort} 配合 \texttt{KeepLast(1)} 或较小深度，让旧帧及时让位，再根据接收比例与延迟调整。离线录制更重视完整保存，需要同时规划可靠传输和存储吞吐，必要时降低帧率或独立部署。
+ 
+ \begin{exercise}
+ \label{ex:v2-ros-image-budget}
+@@ -54,10 +54,10 @@
+ \end{tabular}
+ \end{center}
+ 
+-这里 Fast DDS 的包名仍保留历史上的 fastrtps 写法。Humble 默认使用 Fast DDS，desktop 安装通常已经带上它。Fast DDS 与 Cyclone DDS 都走 DDS/RTPS 协议，具备互通基础。Zenoh 使用另一套协议，稍微会有一些区别。
++Fast DDS 的包名仍保留历史上的 fastrtps 写法，Humble 的 desktop 安装通常已经带上它。Fast DDS 与 Cyclone DDS 都使用 DDS/RTPS 协议，Zenoh 则使用自己的协议。下面我们先学会切换实现，再比较它们的配置方式。
+ 
+ \paragraph*{先安装，再用默认配置跑通}
+-前面已经见过 \texttt{RMW\_IMPLEMENTATION}。现在先把实现装好，在两个终端显式选择同一种 RMW，停止旧节点后重启。DDS 实现之间存在互操作能力，但当前实验先用相同实现排除额外变量。
++前面已经见过 \texttt{RMW\_IMPLEMENTATION}。现在先把实现装好，在两个终端选择同一种 RMW，停止旧节点后重新启动。这样便能观察切换实现带来的变化。
+ 
+ \begin{example}[先用默认配置切换两种 DDS]
+ 先在一个终端安装 DDS 实现和收发示例：
+@@ -91,7 +91,7 @@
+ listener 应和先前一样持续打印收到的 \texttt{Hello World} 及序号。
+ \end{example}
+ 
+-如果启动时报找不到 RMW 动态库，先用 \texttt{ros2 pkg prefix 实现包名} 检查是否安装、是否加载了正确环境；如果包存在但变量拼错，也会加载失败。变量要在启动程序的那个终端设置，另一个终端不会自动继承。
++如果启动时报找不到 RMW 动态库，用 \texttt{ros2 pkg prefix 实现包名} 检查包是否可见，再核对变量的拼写。环境变量属于当前终端，所以两个启动终端都需要设置。
+ 
+ \paragraph*{两份 XML：目标相同，写法和加载方式不同}
+ 默认配置能通信后，你可能发现机器同时接着有线、Wi-Fi 和虚拟网卡，发现消息走到了不想使用的网络上。我们用“只选定一块网卡”把两家的写法摆在一起。配置在本卷 \path{examples/ros2/rmw-config-demo}，只有两份 XML 和运行说明，不需要编译：
+@@ -112,16 +112,16 @@
+ ip -br -4 addr
+ \end{tbash}
+ \end{minipage}\par\smallskip
+-\texttt{ip -br -4 addr} 简要列出各网卡的 IPv4 地址。假设你选中的有线网卡地址是 \texttt{192.168.10.20/24}，配置里只填 \texttt{192.168.10.20}；示例地址一定要换成当前机器真实拥有的地址，第二台机器则填它自己的地址。本例先使用允许组播（multicast）的局域网，组播可以让多个节点收到同一份发现消息。
++\texttt{ip -br -4 addr} 简要列出各网卡的 IPv4 地址。假设你选中的有线网卡地址是 \texttt{192.168.10.20/24}，配置里填 \texttt{192.168.10.20}。你需要换成自己所选网卡的地址，第二台机器也填写它自己的地址。本例使用允许组播（multicast）的局域网，组播可以让多个节点收到同一份发现消息。
+ 
+ \Needspace{27\baselineskip}
+ 先看完整的 \texttt{fastdds.xml}：
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+ \lstinputlisting[frame=single,language=XML,caption={Fast DDS：指定 UDPv4 传输与网卡}]{examples/ros2/rmw-config-demo/fastdds.xml}
+ \end{minipage}\par\smallskip
+-\texttt{transport\_descriptor} 定义一套叫 \texttt{robot\_udp} 的传输，\texttt{type} 选择 IPv4 上的 UDP，\nolinkurl{interfaceWhiteList} 列出允许使用的本机网卡地址。下面的 \texttt{participant} 是 DDS 通信参与者的配置；\texttt{userTransports} 引用刚才定义的名字，\nolinkurl{is_default_profile="true"} 让创建参与者时使用这套默认配置。如果只有定义、没有引用，传输就不会接到参与者上。
+-
+-\texttt{useBuiltinTransports=false} 关闭内建传输，让本例显式使用这套 UDPv4 配置；否则内建传输仍可能参与通信。同机默认的共享内存传输也随之关闭，这份 XML 是观察网络路径的配置，大家不要把它作为默认配置。
++\texttt{transport\_descriptor} 定义一套叫 \texttt{robot\_udp} 的传输，\texttt{type} 选择 IPv4 上的 UDP，\nolinkurl{interfaceWhiteList} 列出允许使用的本机网卡地址。下面的 \texttt{participant} 配置 DDS 通信参与者，通过 \texttt{userTransports} 引用这套传输，再用 \nolinkurl{is_default_profile="true"} 将其选为默认配置。顺着“定义、引用、选为默认”读，就能看清它如何生效。
++
++\texttt{useBuiltinTransports=false} 关闭内建传输，让本例使用指定的 UDPv4 路径，也关闭了同机默认的共享内存传输。这份配置适合观察网卡选择，后面的性能对照会恢复默认配置。
+ 
+ \Needspace{8\baselineskip}
+ 在两个终端保留前例的 Humble 环境和域 42，停止节点后设置：
+@@ -140,7 +140,7 @@
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+ \lstinputlisting[frame=single,language=XML,caption={Cyclone DDS：直接指定通信网卡}]{examples/ros2/rmw-config-demo/cyclonedds.xml}
+ \end{minipage}\par\smallskip
+-根元素变成了 \texttt{CycloneDDS}，命名空间也换成 \nolinkurl{https://cdds.io/config}。\texttt{Domain Id="any"} 表示这套配置匹配任意域，注意实际通信域仍由 \texttt{ROS\_DOMAIN\_ID} 决定，它不会让域 42 和域 43 互通。\texttt{General/Interfaces/NetworkInterface} 直接选择本机网卡，也可用 \texttt{name="enp3s0"} 按真实网卡名选择。\texttt{AllowMulticast=true} 允许在所选网卡上使用组播。
++根元素变成了 \texttt{CycloneDDS}，命名空间也换成 \nolinkurl{https://cdds.io/config}。\texttt{Domain Id="any"} 表示配置适用于任意域，节点实际使用的域仍由 \texttt{ROS\_DOMAIN\_ID} 决定。\nolinkurl{General/Interfaces/NetworkInterface} 直接选择本机网卡，也可用 \texttt{name="enp3s0"} 按网卡名选择。\texttt{AllowMulticast=true} 允许在所选网卡上使用组播。
+ 
+ 停止前一轮节点，在两个终端改为：
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+@@ -157,7 +157,7 @@
+ 两份文件虽然都是 XML，但里面的栏目不相同。Fast DDS 按 profile 定义参与者、传输及读写端配置；Cyclone DDS 按 Domain 下的 General、Discovery 等配置树组织参数。
+ 
+ \begin{note}
+-这两份配置只调整网卡与传输，不会覆盖节点代码中明确指定的 ROS QoS。修改更多参数时查对应版本文档：\href{https://fast-dds.docs.eprosima.com/en/2.6.x/fastdds/xml_configuration/xml_configuration.html}{Fast DDS 2.6 XML}、\href{https://github.com/ros2/rmw_fastrtps/tree/humble#full-qos-configuration}{Humble 的 QoS 配置优先级}和\href{https://cyclonedds.io/docs/cyclonedds/0.10.2/config.html}{Cyclone DDS 0.10 配置}。
++本例在 XML 中选择网卡与传输，在节点代码中设置 ROS QoS。需要继续调整参数时，可查\href{https://fast-dds.docs.eprosima.com/en/2.6.x/fastdds/xml_configuration/xml_configuration.html}{Fast DDS 2.6 XML}、\href{https://github.com/ros2/rmw_fastrtps/tree/humble#full-qos-configuration}{Humble 的 QoS 配置优先级}和\href{https://cyclonedds.io/docs/cyclonedds/0.10.2/config.html}{Cyclone DDS 0.10 配置}。
+ \end{note}
+ 
+ \begin{exercise}
+@@ -166,7 +166,7 @@
+ \end{exercise}
+ 
+ \paragraph*{Zenoh：安装之后，还要安排发现与连接}
+-Zenoh 使用自己的协议。\texttt{rmw\_zenoh\_cpp} 把 ROS2 的中间件接口接到 Zenoh，所以我们继续运行原来的 talker/listener，下面的发现与传输方式却换了，配置文件也从 XML 换成了 JSON5。需要跨主机、无线链路或多机器人通信时，可以进一步安排路由与连接拓扑。
++\texttt{rmw\_zenoh\_cpp} 把 ROS2 的中间件接口接到 Zenoh。我们继续运行原来的 talker/listener，用 JSON5 配置发现与连接方式。需要跨主机、无线链路或多机器人通信时，也可以据此安排路由与连接拓扑。
+ 
+ \begin{example}[安装 Zenoh 并完成三终端收发]
+ 在终端输入命令安装：
+@@ -201,13 +201,13 @@
+ ros2 run rmw_zenoh_cpp rmw_zenohd
+ \end{tbash}
+ \end{minipage}\par\smallskip
+-终端 B 运行 talker，终端 C 运行 listener，命令和前面的 DDS 实验相同。默认节点会连接本机 TCP 7447 的 router，获取发现信息；节点配置默认关闭组播发现，所以漏掉 router 时，节点之间会无法通信。若 router 启动时报告 IPv6 不可用，可按下例把它的监听端点替换成 IPv4 地址。
+-
+-listener 应持续收到消息。完成后分别按 Ctrl+C 停止两个节点和自己的 router。默认 peer 模式可以在发现后建立节点直连，router 不必转发所有应用消息；下一例用 client 模式明确让数据经过 router。
++终端 B 运行 talker，终端 C 运行 listener，命令和前面的 DDS 实验相同。默认节点通过本机 TCP 7447 的 router 获取发现信息，因此要先启动 router。若它报告 IPv6 不可用，可按下例改用 IPv4 监听地址。
++
++listener 应持续收到消息。完成后分别按 Ctrl+C 停止两个节点和 router。默认 peer 模式可以在发现后建立节点直连，下一例则用 client 模式让数据经过 router。
+ \end{example}
+ 
+ \paragraph*{Zenoh 的两份 JSON5 分别给谁读}
+-每个 ROS 进程通过 RMW 创建 Zenoh 会话（session），会话决定节点如何连接；router 则有自己的监听与路由配置。\texttt{ZENOH\_SESSION\_CONFIG\_URI} 指向节点会话文件，\texttt{ZENOH\_ROUTER\_CONFIG\_URI} 指向 router 文件。
++每个 ROS 进程通过 RMW 创建 Zenoh 会话（session），会话决定节点如何连接。router 有自己的监听与路由配置。\texttt{ZENOH\_SESSION\_CONFIG\_URI} 指向节点会话文件，\texttt{ZENOH\_ROUTER\_CONFIG\_URI} 指向 router 文件。
+ 
+ \begin{example}[先指定本机端点，再连接另一台机器]
+ 先复制已安装版本随包提供的完整配置，保留其中的 ROS 专用设置。在已经加载 Zenoh 安装环境的终端执行一次：
+@@ -242,7 +242,7 @@
+ },
+ \end{lstlisting}
+ \end{minipage}\par\smallskip
+-\texttt{connect.endpoints} 是节点要连接的目标；client 模式把通信交给 router 转发。这样“谁监听、谁主动连接”就清楚了，也避免远端节点仍用默认 peer 模式、却没有可达的直连地址。
++\texttt{connect.endpoints} 是节点要连接的目标，client 模式把通信交给 router 转发。将它与上面的 \texttt{listen.endpoints} 对照起来，就能分清谁在等待连接、谁在主动连接。
+ 
+ 终端 A 设置 router 的文件后启动：
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+@@ -260,10 +260,10 @@
+ \end{minipage}\par\smallskip
+ 先确认本机收发仍然正常。若要让另一台机器接入，假设 router 主机的实际局域网地址是 \texttt{192.168.10.20}，停止本轮进程，把 router 的监听端点改为 \nolinkurl{tcp/192.168.10.20:7447}，再把两台节点机器各自 session 文件中的连接端点都改为这个地址，保持 client 模式，重新启动 router 和节点。
+ 
+-跨机器前，两端仍要使用相同域与兼容的消息定义，并确认到 router 的 TCP 7447 连接可达、所用网络或容器端口已放行。这里用显式端点安排连接，不依赖局域网组播来寻找 router；Zenoh 的通信范围按 session/router 配置控制，注意此时\texttt{ROS\_LOCALHOST\_ONLY} 无法限制跨机器连接。
+-\end{example}
+-
+-\texttt{ZENOH\_CONFIG\_OVERRIDE} 还可以临时覆盖配置项，例如 \nolinkurl{listen/endpoints=["tcp/127.0.0.1:7447"]}；它在文件加载后应用，且对继承该变量的节点和 router 都生效。
++跨机器时，两端使用相同域与兼容的消息定义，并保证 router 的 TCP 7447 端口可达。节点按配置中的地址寻找 router，通信范围由 session/router 的连接配置控制，\texttt{ROS\_LOCALHOST\_ONLY} 不控制这条 Zenoh 连接。
++\end{example}
++
++临时调整参数时，还可以用 \texttt{ZENOH\_CONFIG\_OVERRIDE}，例如 \nolinkurl{listen/endpoints=["tcp/127.0.0.1:7447"]}。它在文件加载后应用，对继承该变量的节点和 router 都生效。
+ 
+ \begin{exercise}
+ \label{ex:v2-ros-zenoh-config}
+@@ -272,7 +272,7 @@
+ 
+ \Needspace{13\baselineskip}
+ \paragraph*{恢复实验环境，再按需要查进阶选项}
+-先在各终端按 Ctrl+C 停止本次节点与 router，再清除这次临时设置并停止 daemon。下面假定实验开始前这些变量没有设置；原来已有自己的配置时，应恢复记录下来的值：
++完成实验后，在各终端按 Ctrl+C 停止节点与 router，再清除临时设置并停止 daemon。实验前已有自定义配置的终端恢复原值，其余终端可执行：
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+ \begin{tbash}
+ unset RMW_IMPLEMENTATION ROS_DOMAIN_ID ROS_LOCALHOST_ONLY
+@@ -284,25 +284,25 @@
+ \end{tbash}
+ \end{minipage}\par\smallskip
+ 
+-\texttt{ROS\_DISCOVERY\_SERVER} 是 Fast DDS 发现服务器模式的入口，填写的是已部署服务器的地址与端口，不是“允许与哪些机器人通信”的名单。发现服务器帮助 DDS 参与者交换发现信息，通常不转发应用消息；它与上面的 Zenoh client/router 数据转发不是同一种机制。
+-
+-Zenoh 的发现、路由与参数可查 \href{https://github.com/ros2/rmw_zenoh/blob/humble/README.md}{安装与配置说明}和\href{https://github.com/ros2/rmw_zenoh/blob/humble/docs/design.md}{RMW 设计说明}。先把相同节点跑通，再测试大图像与实际网络，不能凭协议名字判断哪一个更快。
++\texttt{ROS\_DISCOVERY\_SERVER} 用来指定 Fast DDS 发现服务器的地址与端口。发现服务器帮助 DDS 参与者交换发现信息，应用消息通常仍由参与者直接交换。与之相比，上面的 Zenoh client/router 配置还让 router 承担数据转发。
++
++更多 Zenoh 配置可查\href{https://github.com/ros2/rmw_zenoh/blob/humble/README.md}{安装与配置说明}和\href{https://github.com/ros2/rmw_zenoh/blob/humble/docs/design.md}{RMW 设计说明}。三种实现都能收发后，我们就可以用相同输入比较它们了。
+ 
+ \begin{conclusion}
+ \begin{itemize}
+-\item 换 RMW 分三步：安装实现、选择实现、按该实现加载配置；DDS XML 与 Zenoh JSON5 不能互换。
++\item 换 RMW 分三步：安装实现、选择实现、加载对应配置。Fast DDS、Cyclone DDS 和 Zenoh 各有自己的配置格式。
+ \item DDS 网卡配置填本机地址；Zenoh 区分 router 监听端点与节点连接目标，默认发现要先启动 router。
+-\item 先用小消息确认收发，再固定输入与部署方式比较大图像；切换前停止旧节点，实验后恢复环境。
++\item 先用小消息确认收发，再固定输入与部署方式比较大图像。切换前停止旧节点，实验后恢复环境。
+ \end{itemize}
+ \end{conclusion}
+ 
+ \paragraph*{再用大图像做对照}
+-中间件已经能通信了，接下来固定消息、QoS 与部署布局，只改变待比较的实现。尤其不要一边换 RMW、一边改可靠性和图像尺寸，最后凭“好像快了”给某一家颁奖。
++中间件已经能通信了，接下来固定消息、QoS 与部署布局，每轮只改变待比较的实现。这样看到差异时，我们才知道该从哪里找原因。
+ 
+ \begin{example}[安排一个可以解释结果的对照]
+-本节与后两节共用 \path{examples/ros2/image-path-demo}。它生成同样的图像，先固定帧数、尺寸、频率、\texttt{best\_effort} 和深度 5，然后对两种 RMW 分别运行三种布局：两个进程、同一进程关闭进程内通信、同一进程开启进程内通信。这样，前两项帮助观察中间件与进程边界，最后一项帮助观察所有权传递；完整构建和命令在下一节。
+-
+-结果至少一起看发送实际频率、接收比例和 P95/P99 延迟。P95 表示约 95\% 的已收到样本不超过这个延迟；丢掉的样本不在延迟统计中，因此低延迟也可能伴随大量丢帧。再记录 CPU 时间和内存作为辅助信息。在真正的系统选型前，至少重复几轮，补测实际相机、算法、录制和网络。
++本节与后两节共用 \path{examples/ros2/image-path-demo}。它生成相同的图像，固定帧数、尺寸、频率、\texttt{best\_effort} 和深度 5，对各 RMW 分别运行三种布局：两个进程、同一进程关闭进程内通信、同一进程开启进程内通信。前两项帮助观察中间件与进程边界，最后一项帮助观察所有权传递。完整构建和命令在下一节。
++
++读结果时，把实际发送频率、接收比例和 P95/P99 延迟放在一起。P95 表示约 95\% 的已收到样本不超过这个延迟，丢掉的样本不参加统计。接收比例告诉我们交付了多少帧，延迟告诉我们这些帧来得有多快。CPU 时间和内存用量则帮助判断资源成本。
+ \end{example}
+ 
+ Fast DDS 的 RMW 默认项、同步与异步发布、Data Sharing 配置可查 \href{https://github.com/ros2/rmw_fastrtps/blob/humble/README.md}{Fast DDS 的说明}；Cyclone DDS的说明则在 \href{https://github.com/ros2/rmw_cyclonedds/blob/humble/README.md}{Cyclone DDS 的说明}。
+@@ -314,7 +314,7 @@
+ 
+ \subsubsection{零拷贝与组件容器：先管好图像的所有权}
+ \label{sec:ros2-image-components}
+-\textbf{零拷贝（zero-copy）一定要说清楚省掉哪一段复制。}我们先追求“相机发布节点到识别订阅回调”这一段的进程内像素传递：把两个节点装进同一个进程，让 \texttt{rclcpp} 直接交接消息的所有权。
++算过负载后，我们来看看怎样减少搬运。\textbf{零拷贝（zero-copy）}指数据在某段传递过程中直接复用已有缓冲区。这里先把相机发布节点与识别订阅节点装进同一个进程，让 \texttt{rclcpp} 交接消息所有权，省去这两个节点之间的像素复制。
+ 
+ \begin{figure}[H]
+ \centering
+@@ -325,9 +325,9 @@
+ 
+ 图\ref{fig:ros2-image-paths} 可以从“共享的是哪一块内存”来读。\textbf{第一行}在同一个进程里交接消息所有权，Source 与 Sink 使用同一份像素缓冲区。\textbf{第二行}以 Fast DDS 的 SHM transport 为例，共享的是传输缓冲区：顺着橙色虚线看，数据先从发送历史复制进去，再复制到接收历史。\textbf{第三行}共享的是消息样本，发布端直接填充借出样本，订阅端直接借读；Fast DDS 可以用 Data Sharing 配合两端借出，Cyclone DDS 可以用 iceoryx 配合两端借出，实现这条跨进程零拷贝路径。借出消息留到下一节，我们先做第一行。
+ 
+-为了把两个节点放进同一个进程，我们使用\textbf{组件（component）}，也就是可装载的节点实现；承载它们的进程叫\textbf{组件容器（component container）}。装到一起后，还要让两端接收并使用 \texttt{NodeOptions}，启用 \nolinkurl{use_intra_process_comms}，再选择合适的消息所有权接口，才能走图中的进程内通道。
+-
+-在第一行的路径中，发布者创建 \texttt{UniquePtr}，通过 \texttt{publish(std::move(msg))} 交出消息，唯一订阅者用同类指针接过它。\texttt{std::move} 表达“可以转移所有权”，实际交接由启用进程内通信的 \texttt{rclcpp} 通道完成，像素留在原来的缓冲区里。交出以后不要继续访问原消息；接收端要让持有消息的智能指针活到像素使用完毕，再释放它。
++为了把两个节点放进同一个进程，我们使用\textbf{组件（component）}，也就是可装载的节点实现，承载它们的进程叫\textbf{组件容器（component container）}。两端接收并使用 \texttt{NodeOptions}，启用 \nolinkurl{use_intra_process_comms}，再通过消息所有权接口走进程内通道。
++
++在第一行的路径中，发布者创建 \texttt{UniquePtr}，通过 \texttt{publish(std::move(msg))} 交出消息，唯一订阅者用同类指针接过它。\texttt{std::move} 表达“可以转移所有权”，实际交接由 \texttt{rclcpp} 的进程内通道完成，像素留在原来的缓冲区里。此后由接收端持有并使用消息，直到像素处理完毕再释放它。
+ 
+ \paragraph*{一份源码，三种部署}
+ \begin{example}[合成图像从 Source 交给 Sink]
+@@ -346,24 +346,24 @@
+ \end{tbash}
+ \end{minipage}\par\smallskip
+ 
+-\texttt{Frame.msg} 给正常的 \texttt{sensor\_msgs/Image} 加一层实验包装，序号、单调时钟和源缓冲区地址都放在包装里。\texttt{Image.header.stamp} 是节点时钟下的生成时间，\texttt{frame\_id} 表示相机坐标系。
++\texttt{Frame.msg} 在 \texttt{sensor\_msgs/Image} 外加一层测量信息，用序号对应每帧图像，用单调时钟计算延迟，用源缓冲区地址观察内存传递。图像本身的 \texttt{header.stamp} 记录节点时钟下的生成时间，\texttt{frame\_id} 表示相机坐标系。
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+ \lstinputlisting[frame=single,caption={图像包装接口}]{examples/ros2/image-path-demo/msg/Frame.msg}
+ \end{minipage}\par\smallskip
+ 
+-下面是完整的组件源码。Source 等订阅者出现后，按定时器周期分配并填充像素；完成指定帧数后停止发布。\texttt{sent\_ns} 在填充完成后、调用 publish 前记录，所以延迟统计从这里起算，发送频率则还会受到分配、填充与发送阻塞影响。
++下面是完整的组件源码。Source 等订阅者出现后，按定时器周期分配并填充像素，完成指定帧数后停止发布。\texttt{sent\_ns} 在填充完成后、调用 publish 前记录，延迟统计从这里起算。实际发送频率还取决于分配、填充和发布所花的时间。
+ \lstinputlisting[frame=single,language=C++,caption={合成图像发布组件与公共定义},firstline=1,lastline=76]{examples/ros2/image-path-demo/src/components.cpp}
+ 
+-Sink 接到消息时记录延迟，检查首尾像素，再在正常退出时输出统计。地址只在源端与接收端 PID 相同、同一帧对应的情况下比较。\texttt{work\_ms} 是可选的模拟处理耗时，默认 0。
++Sink 接到消息时记录延迟，检查首尾像素，在正常退出时输出统计。同一进程中，我们可以按帧比较源端与接收端的像素地址。\texttt{work\_ms} 是模拟处理耗时，默认 0，后面用它观察识别变慢时的排队现象。
+ \lstinputlisting[frame=single,language=C++,caption={图像接收组件与组件注册},firstline=77]{examples/ros2/image-path-demo/src/components.cpp}
+ 
+ 本实验在同一台电脑上，用 \texttt{steady\_clock} 对应的单调时钟比较发送与回调入口时刻。
+ 
+-接下来是完整清单与构建规则。清单声明组件库和消息生成依赖；CMake 生成 \texttt{Frame}、链接类型支持，再注册两个组件类。
++接下来是完整清单与构建规则。清单声明组件库和消息生成依赖，CMake 生成 \texttt{Frame}、链接类型支持，再注册两个组件类。
+ \lstinputlisting[frame=single,language=XML,caption={组件实验依赖清单}]{examples/ros2/image-path-demo/package.xml}
+ \lstinputlisting[frame=single,language=cmake,caption={接口生成、组件注册与安装规则}]{examples/ros2/image-path-demo/CMakeLists.txt}
+ 
+-Launch 文件保持相同 Source/Sink 和 QoS，只改变布局。\texttt{separate} 启动两个组件容器进程；\texttt{same} 把两者装进同一进程但关闭进程内通信；\texttt{intra} 放到同一进程并为两端启用它。这里使用单线程 \texttt{component\_container}，避免线程并发把最小实验变复杂。
++Launch 文件保持相同 Source/Sink 和 QoS，只改变布局：\texttt{separate} 启动两个组件容器进程，\texttt{same} 把两者装进同一进程但关闭进程内通信，\texttt{intra} 则在同一进程中为两端启用它。这里使用单线程 \texttt{component\_container}，便于观察消息路径。
+ \lstinputlisting[frame=single,language=Python,caption={切换组件布局的 Launch 文件}]{examples/ros2/image-path-demo/launch/path.launch.py}
+ 
+ 下面把教材所在目录保存为 \texttt{BOOK}，你需要替换成你的路径。Bash 中的环境脚本按下面写，Zsh 则使用对应的 \texttt{setup.zsh}。
+@@ -387,11 +387,15 @@
+ ros2 launch image_path_demo path.launch.py mode:=intra
+ \end{tbash}
+ \end{minipage}\par\smallskip
+-预期先出现三条 \texttt{POINTER} 输出，同一帧的 source 与 sink 像素地址相同，\texttt{same\_process=1}；约四秒后出现 \texttt{SOURCE\_DONE 100}。随后按 Ctrl+C 正常结束，查看 \texttt{SOURCE} 与 \texttt{SINK} 汇总：默认小输入应收到 100 帧、\texttt{bad\_frames=0}、\texttt{pointer\_matches=100}。逐帧打印会干扰高速实验，因此项目只打印前三帧及汇总。
+-
+-还可以在另一个加载相同环境、域和 RMW 的终端执行 \texttt{ros2 component list}，看到同一个 \texttt{/image\_box} 下有两个组件。若提示找不到类，核对两处注册名称、构建结果及工作空间环境；若组件存在但收不到消息，回到域、RMW、话题和 QoS 排查。只改 Launch 的 \texttt{mode:=same} 后重复运行，再改成 \texttt{mode:=separate}，应分别看到同进程的普通通信与两个不同 PID 的通信。
+-
+-切到小图像自动对照时，先停止手动实验，也停止额外的 echo、录制或显示订阅者。\texttt{compare.py} 会依次运行两种 RMW 与三种布局，给每次启动建立独立进程组，等发布完成并留出接收排空时间，再正常关闭这些进程。
++启动后，先看三条 \texttt{POINTER} 输出：同一帧的 source 与 sink 像素地址相同，\texttt{same\_process=1}。约四秒后出现 \texttt{SOURCE\_DONE 100}，再按 Ctrl+C 正常结束。\texttt{SOURCE} 与 \texttt{SINK} 汇总应显示收到 100 帧、\texttt{bad\_frames=0}、\texttt{pointer\_matches=100}。项目只打印前三帧及汇总，以减少日志对高速实验的干扰。
++
++在另一个加载相同环境、域和 RMW 的终端执行 \texttt{ros2 component list}，可以看到同一个 \texttt{/image\_box} 下的两个组件。随后依次改用 \texttt{mode:=same} 和 \texttt{mode:=separate}，观察同进程普通通信与跨进程通信。找不到组件类时检查注册名称和构建环境，组件已加载却收不到消息时则按前面的方法检查域、话题和 QoS。
++
++\begin{note}
++地址相等要结合启用选项和所有权路径来读。同进程中，分配器可能在前一帧释放后复用同一个地址，而不同进程各有自己的虚拟地址空间。本例用一对一的 \texttt{UniquePtr} 交接、进程内选项和对应帧的地址记录一起观察像素复用。
++\end{note}
++
++接下来停止手动节点和其他图像订阅者，运行自动对照。\texttt{compare.py} 会依次启动两种 DDS 与三种布局，等待发布和接收结束后关闭本轮进程：
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+ \begin{tbash}
+ cd ~/image_path_ws
+@@ -399,15 +403,24 @@
+   --output /tmp/image-path-small
+ \end{tbash}
+ \end{minipage}\par\smallskip
+-输出目录必须尚不存在。里面的 \texttt{results.json} 保存统计，各轮 \texttt{.log} 保留原始输出，\texttt{environment.json} 记录测量口径。参数的一般形式是 \texttt{--width 宽 --height 高 --channels 通道数 --rate 频率 --frames 帧数}；通道数本例只支持 1 与 3，分别对应 mono8 与 bgr8。\texttt{--repeat} 指定重复次数，\texttt{--modes} 可只选择一种布局，\texttt{--domain} 应选一个没有其他实验占用的域。
++每次使用一个新的输出目录。\texttt{results.json} 保存统计，\texttt{.log} 保留各轮输出，\texttt{environment.json} 记录实验条件。图像参数的一般形式是 \texttt{--width 宽 --height 高 --channels 通道数 --rate 频率 --frames 帧数}，其中通道数 1 与 3 分别对应 mono8 与 bgr8。\texttt{--repeat} 指定重复次数，\texttt{--modes} 选择布局，\texttt{--domain} 选择实验域。
++
++已安装 Zenoh 时，还可以用相同的小图像补做一组：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\begin{tbash}
++python3 src/image_path_demo/compare.py \
++  --output /tmp/image-path-zenoh-small --rmws rmw_zenoh_cpp
++\end{tbash}
++\end{minipage}\par\smallskip
++脚本会为这一组启动并关闭自己的 router。
+ \end{example}
+ 
+ \paragraph*{组件化省下复制，也改变故障边界}
+-同一个进程里的相机、预处理与识别组件共享故障命运：其中一个崩溃，整个容器可能一起退出。单线程执行器中，一个耗时回调还会推迟其他回调。改用多线程容器 \nolinkurl{component_container_mt} 时，也要安排回调组（callback group）并检查共享数据；多线程既不自动保证并行，也不自动解决竞争条件。
+-
+-因此，你可以先把需要传大图像的近邻节点组合起来，把控制、监控等职责按故障隔离要求拆开。多个订阅者也要考虑所有权：一份消息不能同时独占地交给两个 \texttt{UniquePtr} 接收者，可能产生复制；只读共享则要明确生命周期。外部录制、可视化或网络订阅者加入后，还可能触发额外的中间件发送。
+-
+-使用 OpenCV 时，\texttt{cv::Mat} 可以视图方式引用已有像素，也可能通过 \texttt{clone}、颜色转换等操作新建数据；要逐处核对。进程内消息直接交接之后又立刻 clone，一样会把大图像再搬一遍。
++相机、预处理与识别组件放进同一个进程后，其中一个崩溃可能使整个容器退出。单线程执行器中的耗时回调也会推迟其他回调。需要并行时，可以改用 \nolinkurl{component_container_mt}，通过回调组（callback group）安排并发，并为共享数据做好同步。
++
++因此，可以先把频繁传递大图像的节点组合起来，把控制、监控等职责按故障隔离要求拆开。增加订阅者时也要重新考虑所有权：多个独占接收者可能需要复制，只读共享则需要管理共同的生命周期。外部录制和可视化节点还会增加中间件发送负载。
++
++接到 OpenCV 时，\texttt{cv::Mat} 可以引用已有像素，\texttt{clone} 和颜色转换则会新建数据。沿着采集、传递和处理的顺序检查这些操作，就能找到下一处值得优化的复制。
+ 
+ \begin{exercise}
+ \label{ex:v2-ros-components}
+@@ -416,9 +429,9 @@
+ 
+ \subsubsection{借出消息：向中间件借一块内存}
+ \label{sec:ros2-loaned-messages}
+-前面由应用创建消息，再在进程内转移所有权。\textbf{借出消息（loaned message）}换了一个内存来源：发布者向中间件借样本缓冲区，把内容直接写进去，发布后交还控制权。如果支持条件满足，就能减少应用与中间件之间的一次复制或分配。它与组件化相关，却不是同一个开关，也不要求节点一定在同一个进程。
+-
+-这里最容易踩坑的是 \texttt{borrow\_loaned\_message()} 的回退行为。底层不支持时，\texttt{rclcpp} 可以使用本地分配器继续运行；“借到了一个 C++ 对象”不能证明对象来自中间件。要先查询这个发布者的 \texttt{can\_loan\_messages()}，再记录实际 RMW、类型与配置。
++前面由应用创建消息，再在进程内转移所有权。\textbf{借出消息（loaned message）}则由中间件提供样本缓冲区，发布者直接填充内容，发布后交还控制权。这样可以减少应用与中间件之间的分配或复制，适用于中间件和消息类型支持借出的场合。
++
++使用时，先用 \texttt{can\_loan\_messages()} 查询发布者的借出能力，再调用 \texttt{borrow\_loaned\_message()}。底层支持借出时，缓冲区来自中间件。底层不支持时，\texttt{rclcpp} 使用本地分配器回退，程序仍可继续发布。这个设计让同一段代码能适应不同实现。
+ 
+ \begin{example}[用 Float64 和 Image 探测借出能力]
+ 沿用刚才的工程，完整程序如下。\texttt{Float64} 是简单固定大小类型；普通 \texttt{Image} 内含可变长像素数组与字符串。探测程序同时查询两者，再借出并发布一个值为 42 的 Float64。
+@@ -431,7 +444,7 @@
+ \lstinputlisting[frame=single,language=XML,caption={借出探测用的 Fast DDS 配置}]{examples/ros2/image-path-demo/config/fastdds-loan.xml}
+ \end{minipage}\par\smallskip
+ 
+-先从没有遗留 DDS 配置的终端开始，确认当前工作目录没有 \nolinkurl{DEFAULT_FASTRTPS_PROFILES.xml}，加载环境后依次运行。变量仅写在一条命令前，只影响那次进程；路径通过已安装包获取。
++在没有额外 DDS 配置的终端和目录中，加载环境并依次运行下面四种组合。写在命令前的变量只影响该次进程，\texttt{PROFILE} 通过已安装包取得配置路径。
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+ \begin{tbash}
+ source /opt/ros/humble/setup.bash
+@@ -456,11 +469,24 @@
+   ros2 run image_path_demo loan_probe
+ \end{tbash}
+ \end{minipage}\par\smallskip
+-本章验证环境下，四轮 \texttt{LOAN} 输出的 \texttt{float64/image} 分别为 $0/0$、$1/0$、$0/0$、$0/0$。返回 0 的轮次会提示使用本地分配器；这是可用的回退路径。若你的结果不同，先记录版本与配置，再核对所用实现。
+-\end{example}
+-
+-\paragraph*{Zenoh 的共享内存与借出 API 分开看}
+-Zenoh 同样能优化本机序列化数据的传输。项目记录器的 \texttt{--zenoh-shm} 会为节点与路由器显式启用共享内存及传输优化；本章使用的默认配置关闭这一功能。它可以在普通发布路径下工作，不要求应用先调用借出 API。本章 Zenoh 0.1.9 的 Float64/Image 探测在关闭和开启共享内存时均为 0/0，发布调用通过本地分配器回退完成。因此，\texttt{can\_loan\_messages()} 为 false 与“传输层可以使用共享内存”并不矛盾；普通 Image 仍有对象分配、填充及序列化/反序列化边界。
++\texttt{LOAN} 输出中的 1 表示支持中间件借出，0 表示不支持，调用借出接口时会使用本地分配器。下面保留一组 Humble 参考结果，方便你将配置与能力对应起来：
++\begin{center}
++\begin{tabular}{lcc}
++\toprule
++发布端配置 & Float64 & Image\\
++\midrule
++Fast DDS 默认配置 & 0 & 0\\
++Fast DDS 启用 Data Sharing & 1 & 0\\
++Cyclone DDS 默认配置 & 0 & 0\\
++Fast DDS 显式禁用借出 & 0 & 0\\
++\bottomrule
++\end{tabular}
++\end{center}
++读这组数据时，重点看第二行：同一种实现换了配置，Float64 的借出能力也随之变化。你运行时应记录实际输出及对应配置。
++\end{example}
++
++\paragraph*{Zenoh：在传输层使用共享内存}
++Zenoh 的共享内存功能优化序列化数据在本机进程间的传输，普通发布接口也可以使用它。应用层的借出能力则由另一个接口查询。我们可以先用同一探测程序观察这一区别：
+ 
+ 先按第\ref{sec:ros2-rmw-selection}节启动自己的 Zenoh 路由器。在已加载 Humble 和组件工程的第二个终端运行发布端探测：
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+@@ -472,50 +498,51 @@
+   ros2 run image_path_demo loan_probe
+ \end{tbash}
+ \end{minipage}\par\smallskip
+-这里只有一个发布者，测的是借出接口，没有建立订阅端共享样本实验；不能拿这两次调用验证共享内存交付。结束后正常停止自己的路由器。
+-
+-\begin{example}[开了共享内存，也要检查有没有回退]
+-在同一个工程里，先看容量与进程资源限制：
++一组参考输出中，关闭与开启共享内存时的 Float64/Image 借出能力均为 0/0，发布使用本地分配器。这里观察的是发布端借出能力，传输层共享内存的对照放在下一节。完成后停止 router。
++
++\begin{example}[为共享内存池规划容量]
++共享内存池要容纳正在传递的图像。规划容量时，先估算每帧大小和同时在途的帧数，再留出元数据与分配开销的余量。你可以用下面两条命令查看可用空间和锁定内存额度：
+ \begin{tbash}
+ df -h /dev/shm
+ ulimit -l
+ \end{tbash}
+-本轮容器的共享内存空间约 32 GiB，锁定内存上限却只有 8192 KiB，即 8 MiB。所用 Zenoh 会锁定共享段，默认 48 MiB 池超过这个限制，日志出现 \texttt{Error creating lazy ShmProvider} 与 \texttt{OS error 12}；消息仍能交付，所以“收到 1000 帧”不能证明共享路径生效。不要只看到 \texttt{enabled=true} 就宣布优化成功。
+-
+-本实验改用 6 MiB 池重测，完整参数见第\ref{sec:ros2-image-measurement}节。这个设置足够放下一帧约 4.67 MB 的 BGR8，但可容纳的在途大样本很少；它是当前环境的演示条件，实际系统仍需按并发量规划池容量与资源限制。不要照搬 6 MiB 到所有相机。日志还要检查分配失败与回退；共享池创建成功也不能证明整条链路完全没有复制。
+-\end{example}
+-
+-\paragraph*{为什么普通 Image 不能直接套用这个结论}
+-固定长度、可直接映射的 plain 消息布局适合共享样本池；字符串与可变长数组通常不能直接放到这种借出路径里。即使给序列规定一个最大长度，也不等于自动满足 plain 布局。\texttt{Image} 在上面的探测中返回 false，包装了它的 \texttt{Frame} 也不能靠外面多加几个字段就变成固定布局。
+-
+-真要做跨进程大图像借出，需要设计并验证合适的固定布局或专门传输层，处理内存池容量、分辨率变化、两端生命周期与工具兼容性，还要核对生成的类型支持；不能随手把几 MB 的大数组放在栈上就宣称完成优化。对当前标准图像接口，先采用已验证的组件进程内路径，是更容易保持工具兼容与教学清晰的起点。
++\texttt{df} 显示共享内存文件系统的空间，\texttt{ulimit -l} 显示当前进程的锁定内存额度，单位是 KiB。所用 Zenoh 实现会锁定共享段，因此这两项都影响池的创建。
++
++一帧本例的 BGR8 约为 4.67 MB，池容量需要随在途帧数增加。项目用 \texttt{--zenoh-shm-pool-mib} 设置容量，默认 48 MiB。运行前让资源额度与池容量相匹配，运行后查看 router 和节点日志中的池创建、分配及回退信息，就能判断配置是否按预期工作。
++\end{example}
++
++\paragraph*{消息布局决定了借出方式}
++共享样本池适合固定长度、可直接映射的 plain 消息布局。普通 \texttt{Image} 含有字符串和可变长像素数组，因此在上面的探测中返回 false。\texttt{Frame} 包装后仍包含这些字段。给序列规定长度上限只是限定容量，plain 布局还要求数据能够直接映射到共享样本中。
++
++设计跨进程图像借出时，需要一起考虑消息布局、生成的类型支持、池容量、分辨率变化和两端生命周期。改用专用接口也会影响录制、显示等工具的兼容性。我们当前沿用标准 \texttt{Image}，先通过组件进程内通信减少像素复制，后续有需要再扩展共享样本方案。
+ 
+ \paragraph*{共享内存的两种用法：传输缓冲区与共享样本}
+ 图\ref{fig:ros2-image-paths} 第二行画的是 Fast DDS 的共享内存传输（SHM transport）：数据从写端历史复制到传输缓冲区，再复制到读端历史。Fast DDS 的 Data Sharing 则让读写端直接访问共享样本历史，配合发布端借出填充和订阅端借读，就能走到第三行的完整零拷贝路径。
+ 
+-Cyclone DDS 的 iceoryx 共享内存也能实现第三行。在 Humble 的这条路径中，需要启用共享内存并启动 RouDi，消息使用不引用外部内存的固定大小布局，QoS 也要支持共享内存交付。发布端借出共享内存块并直接填充，订阅端直接借读同一个样本，就能省掉跨进程交付中的数据复制；普通发布接口则仍要把应用数据复制或序列化到共享块中。具体条件与接口可查 \href{https://github.com/ros2/rmw_cyclonedds/blob/humble/shared_memory_support.md}{Cyclone DDS 的 Humble 共享内存说明}。前面的 Cyclone DDS 探测使用默认配置，未开启 iceoryx 共享内存；它与这里的共享样本路径采用不同配置。
+-
+-订阅端借出还涉及实现支持与样本有效期限制；本章不通过全局设置 \nolinkurl{ROS_DISABLE_LOANED_MESSAGES=0} 去强行开启它。普通订阅收到 42，最多证明这个值被交付，不能证明接收端从共享池直接借读。发布成功后，原借出对象已不归应用继续读写；没发布的借出对象也要按接口归还，\texttt{rclcpp::LoanedMessage} 的生命周期管理帮助你处理这一点。
+-
+-这几项分别对应 \href{https://github.com/ros2/rclcpp/blob/humble/rclcpp/include/rclcpp/loaned_message.hpp}{Humble 的借出与回退实现}、\href{https://github.com/ros2/rmw_fastrtps/blob/humble/rmw_fastrtps_cpp/src/publisher.cpp}{发布者借出条件}，以及 \href{https://fast-dds.docs.eprosima.com/en/v2.6.11/fastdds/use_cases/zero_copy/zero_copy.html}{Fast DDS 的完整零拷贝条件}。查资料时分清 DDS 库具备的能力、RMW 暴露的能力和你的节点实际使用的路径。
++Cyclone DDS 的 iceoryx 路径也采用共享样本。在 Humble 中，它需要启用共享内存并启动 RouDi，使用不引用外部内存的固定大小消息，以及支持共享内存交付的 QoS。发布端借出共享块直接填充，订阅端借读同一个样本，数据便留在共享块中。普通发布接口则需要先把应用数据复制或序列化进去。具体配置可查\href{https://github.com/ros2/rmw_cyclonedds/blob/humble/shared_memory_support.md}{Humble 的共享内存说明}。
++
++借出样本的使用期限由所有权决定：发布前由应用填充，发布后控制权交回中间件，订阅端在有效期内借读。\texttt{rclcpp::LoanedMessage} 会管理借出对象的归还，包括借出后没有发布的情况。开发这条路径时，应核对两端的接口支持和生命周期。
++
++进一步实现时，可对照\href{https://github.com/ros2/rclcpp/blob/humble/rclcpp/include/rclcpp/loaned_message.hpp}{Humble 的借出与回退实现}、\href{https://github.com/ros2/rmw_fastrtps/blob/humble/rmw_fastrtps_cpp/src/publisher.cpp}{发布者借出条件}和\href{https://fast-dds.docs.eprosima.com/en/v2.6.11/fastdds/use_cases/zero_copy/zero_copy.html}{Fast DDS 的零拷贝说明}，沿着“消息类型、RMW 接口、两端使用方式”检查整条路径。
+ 
+ \begin{exercise}
+ \label{ex:v2-ros-loans}
+-保存四轮 DDS loan\_probe 的原始输出，找出真正从中间件借出 Float64 的轮次；再比较 Zenoh 关闭与开启共享内存的借出输出。解释 Image 返回 false、程序却仍能运行的原因，以及为什么这份记录不能证明跨进程图像已经完整零拷贝。写出借出对象发布后必须遵守的所有权规则。
++保存四轮 DDS loan\_probe 的输出，找出从中间件借出 Float64 的轮次，再比较 Zenoh 关闭与开启共享内存的借出输出。解释 Image 返回 false 时程序如何继续运行。结合数据路径图，说明从发布端借出走到跨进程共享样本还需要哪些条件，并写出发布后的所有权规则。
+ \end{exercise}
+ 
++\Needspace{9\baselineskip}
+ \begin{conclusion}
+ \begin{itemize}
+-\item RMW 选择决定通信实现，QoS 决定交付与历史策略；两者都不能补足不足的处理能力。
+-\item ROS2 组件容器安排节点的进程边界，Distrobox 安排运行环境；同进程还需启用进程内通信并管理所有权。
+-\item 进程内直接交接、DDS 共享内存传输、Data Sharing、Zenoh 传输优化与借出消息分别解决不同边界；零拷贝结论必须指出范围。
+-\item 借出 API 可以回退。先看能力、消息布局与配置，再看实际缓冲区和生命周期。
++\item RMW 选择通信实现，QoS 安排交付与历史策略，处理能力取决于各阶段耗时。
++\item 组件容器安排进程边界，进程内通信配合所有权接口交接消息。
++\item 共享传输缓冲区优化中间件搬运，共享样本配合两端借出可进一步省去复制。读图时先找共享的内存位于哪一层。
++\item 借出能力与消息布局、实现和配置有关，回退时由本地分配器提供对象。
+ \end{itemize}
+ \end{conclusion}
+ 
+ \subsubsection{把负载升到 250 Hz，再看图像有没有变旧}
+ \label{sec:ros2-image-measurement}
+-现在小图像已跑通，我们把合成负载改成 $1440\times1080$ 的 BGR8。尺寸与目标频率来自前面的相机场景，像素由内存生成；这次测试没有接相机、转换 Bayer 或运行识别算法。目标 250 Hz 是定时器请求，不是程序预先保证的实测结果。
++现在小图像已跑通，我们把合成负载改成 $1440\times1080$ 的 BGR8，目标频率设为 250 Hz。本节测量从发布前到订阅回调入口的通信延迟。相机采集、Bayer 转换和识别耗时留到接入实际系统时分段测量。
+ 
+ \begin{example}[重复三轮，保存吞吐与延迟记录]
+ 先停止手动节点与额外订阅者，在同一个工作空间执行：
+@@ -527,13 +554,18 @@
+   --rate 250 --frames 1000 --repeat 3
+ \end{tbash}
+ \end{minipage}\par\smallskip
+-每种组合正常发完 1000 帧后留两秒接收排空时间；程序输出实际发送/接收频率、接收比例与 P95。统计源码见 \texttt{compare.py}，参数和计时点已在环境记录中写明。出现未完成、缺少正常退出统计或像素检查失败时，脚本会报错并保留日志，不会把失败轮次填成零延迟。
++每种组合发送 1000 帧后，再留两秒让接收端处理队列中的剩余消息。程序保存实际发送/接收频率、接收比例与 P95，异常轮次会提示错误并保留日志。下面用一组参考数据练习读结果：
+ 
+ \input{chapters/A_ros2_image_results.tex}
+ 
+-观察时先问：Source 是否真的接近 250 Hz？如果没有，接收端频率低可能来自源端分配、发送阻塞或同进程回调争用；如果 Source 接近 250 Hz，接收比例却很低，才继续查交付与接收瓶颈。P95 低也要配合接收比例读，不能只拿已经收到的少数新帧做结论。\texttt{same} 与 \texttt{intra} 都有一个单线程容器，\texttt{separate} 有两个容器进程，所以对照同时体现部署布局的变化；不能把全部差值都算成某一种 DDS 内部复制的耗时。
+-
+-记录器还保存本实验进程组的累计 CPU 秒和进程 RSS 之和。CPU 包括发现、加载与排空，不能直接当作稳态利用率；RSS 之和可能重复计算共享页，不能直接当作实际物理内存用量。真正选型时再分段测量、重复并改变实验顺序，必要时采用跟踪工具定位具体复制或等待位置。
++读你自己的结果时，可以按下面的顺序找瓶颈：
++\begin{enumerate}
++\item 先看 Source 的实际频率。达不到目标时，检查分配、填充、发布阻塞和回调调度。
++\item Source 跟得上而接收比例低时，检查交付和接收处理。结合 P95，判断已收到的帧来得是否及时。
++\item 比较 \texttt{same} 与 \texttt{intra}，观察进程内所有权交接的作用。比较 \texttt{separate} 与 \texttt{same} 时，还要考虑进程和执行器数量的变化。
++\end{enumerate}
++
++资源统计可作为辅助：累计 CPU 时间包含发现、加载与排空阶段，RSS 汇总包含各进程的常驻页，可能重复计算共享页。需要进一步定位成本时，再按阶段测量，并用跟踪工具寻找具体的复制和等待位置。
+ \end{example}
+ 
+ \Needspace{9\baselineskip}
+@@ -547,20 +579,19 @@
+   --rate 250 --frames 1000 --repeat 3
+ \end{tbash}
+ \end{minipage}\par\smallskip
+-需要一次调度三个实现时，用 \texttt{--rmws} 同时列出三种 RMW。记录器仍使用自己的路由器与本机端点，默认关闭 Zenoh 共享内存，避免把改变传输配置与改变 RMW 混成一个变量。
+-
+-然后只保留两个进程，显式打开共享内存，并记录前面检查过的池容量：
++需要一次比较三个实现时，用 \texttt{--rmws} 同时列出三种 RMW。记录器会管理本轮 router，默认关闭 Zenoh 共享内存。
++
++然后只保留两个进程，打开共享内存做另一组对照。下面使用项目默认的 48 MiB 池，先按上一节检查资源额度，也可用 \texttt{--zenoh-shm-pool-mib} 指定已规划的容量：
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+ \begin{tbash}
+ python3 src/image_path_demo/compare.py \
+   --output /tmp/image-path-zenoh-shm \
+   --rmws rmw_zenoh_cpp --modes separate --zenoh-shm \
+-  --zenoh-shm-pool-mib 6 \
+   --width 1440 --height 1080 --channels 3 \
+   --rate 250 --frames 1000 --repeat 3
+ \end{tbash}
+ \end{minipage}\par\smallskip
+-这是第二项独立对照，不能混入默认配置的结果。记录器保存共享内存开关、池容量、端口及路由器日志；检查 \texttt{zenoh\_shm\_provider\_error} 与原始日志，再读吞吐和延迟。资源限制、历史深度和在途样本都可能改变结果；即使本轮完整交付，也要继续测算法、实际相机与网络。
++这组结果单独保存，比较的是同一 RMW 开关共享内存后的变化。先查看日志中的池创建与分配情况，再比较接收比例和延迟。表\ref{tab:ros2-image-results} 的 SHM 参考行使用 6 MiB 池，读表和复测时应保留这一容量条件。
+ 
+ \paragraph*{故意让识别变慢一次}
+ 接下来只保留 Fast DDS 的两个进程，把 Sink 的模拟处理设为 8 ms。先用默认小图像观察排队，不让图像大小掩盖处理能力问题：
+@@ -572,11 +603,23 @@
+   --rate 250 --frames 500 --work-ms 8 --depth 5
+ \end{tbash}
+ \end{minipage}\par\smallskip
+-预期接收处理跟不上到帧节奏，可能丢帧并出现等待；看实际发送频率、接收比例和延迟，不要求输出某个固定帧数。换用 \texttt{--depth 100}，对比丢帧与图像年龄。较深队列可能让更多旧帧被处理，代价是延迟；本例有限帧数可能最终排空，不能把“最后都收完”当作长期稳定。若慢处理需要更久排空，可增大 \texttt{--drain-seconds}，并把这个条件记录下来。
+-
+-本次小图像实测中，两轮 Source 都接近 250 Hz，Sink 约为 122 Hz。深度 5 收到 249/500 帧，P95 约 20.0 ms；深度 100 收到 344/500 帧，P95 约 746.6 ms，两轮都使用两秒排空。较深的队列让这一轮收到了更多帧，也让已经收到的旧帧等得更久。数值是这次实验的结果，后续按自己的日志核对。
+-
+-对串行的长期 8 ms 阶段，应该减少工作量、降采样、只处理最新帧，或设计可验证的并行流水线。零拷贝会减少搬运成本，却不能省掉算法本来需要的计算。图像容器还要配好外部观测边界：250 Hz 图像没必要全速送给 GUI，可以专门降频/缩小后输出给显示与录制节点。
++接收端每帧花 8 ms，输入却每 4 ms 来一帧，队列很快就会积压。再换一个输出目录，用 \texttt{--depth 100} 重跑，保持其余条件相同，观察加深队列如何改变接收比例和图像年龄。\texttt{--drain-seconds} 决定发布结束后等待接收的时间，比较时也应保持一致。
++
++\Needspace{9\baselineskip}
++一组参考结果中，Source 均接近 250 Hz，Sink 约为 122 Hz，两轮都等待两秒排空：
++\begin{center}
++\begin{tabular}{rrr}
++\toprule
++队列深度 & 接收帧数 / 发送帧数 & P95 / ms\\
++\midrule
++5 & 249 / 500 & 20.0\\
++100 & 344 / 500 & 746.6\\
++\bottomrule
++\end{tabular}
++\end{center}
++较深的队列让更多帧留到发布结束后继续处理，也让它们等得更久。有限帧数可以在输入停止后排空，持续输入时仍受约 125 Hz 的串行处理能力限制。这就回到了本节开头的问题：识别需要的是及时可用的画面。
++
++接下来可以减少算法工作量、降采样、只处理最新帧，或把计算安排为并行流水线。减少复制与优化计算可以一起推进。显示支路通常先缩小图像并降低频率，录制支路则按保存需求和存储带宽单独规划。
+ 
+ \begin{exercise}
+ \label{ex:v2-ros-image-slow}
+--- before/02-专项技术栈/chapters/A_ros2_image_results.tex
++++ after/02-专项技术栈/chapters/A_ros2_image_results.tex
+@@ -1,8 +1,9 @@
+-% DDS: bgr250-1440x1080 的 18 轮；Zenoh: 本轮 bgr250 的 9 轮与 shm-6mib 的 3 轮。
++% 逐轮数据与详细运行条件见 docs/revision/ros2-image-path-textbook-20261005.md。
++% 参考输入：1440×1080 BGR8、250 Hz、best_effort、深度 5，每轮 1000 帧。
+ \begin{table}[htbp]
+ \centering
+ \small
+-\caption{同机合成 BGR8 大图像对照，每项为三轮数值的中位数}
++\caption{同机合成 BGR8 的一组参考结果，每项为三轮数值的中位数}
+ \label{tab:ros2-image-results}
+ \begin{tabular}{llrrrr}
+ \toprule
+@@ -22,16 +23,12 @@
+ \bottomrule
+ \end{tabular}
+ \end{table}
+-这组 $1440\times1080$ 的 BGR8 数据在 2026 年 10 月 3 日的 Ubuntu 22.04/Humble Distrobox 中测得，主机为 i7-12700H，系统识别约 62.6 GiB 内存；Fast DDS 与 Cyclone DDS 的 RMW 分别为 6.2.10 与 1.3.5，Zenoh RMW/vendor 均为 0.1.9，Fast DDS 为 2.6.12，rclcpp 为 16.0.21。容器共享宿主网络和 IPC，测试清除 DDS/Zenoh 调优变量，深度 5、best\_effort、没有外部订阅者、没有算法工作。每轮发送 1000 帧，再留两秒排空；表中各项分别取中位数，P95 未跨轮合并样本。
++表\ref{tab:ros2-image-results} 来自 Ubuntu 22.04 / Humble 下的合成图像实验：$1440\times1080$ BGR8、目标 250 Hz、\texttt{best\_effort}、深度 5，无模拟算法耗时和额外订阅者。每轮发送 1000 帧，再等待两秒排空，各指标分别取三轮的中位数。Zenoh 默认行关闭共享内存，SHM 行另用 6 MiB 池。
+ 
+-Fast DDS 的 separate 接收比例三轮为 34.7\%、35.9\%、18.1\%；Cyclone DDS 为 99.7\%、99.7\%、99.8\%。在这个默认配置与输入下，后者交付比例更高；Fast DDS 已收到样本的 P95 较低，不能抵消丢掉的大量帧。两种 DDS 的 same 与 intra 共 12 轮都完整收到 1000 帧，intra 的像素地址记录全部匹配。
++我们先读两个进程的结果。Fast DDS 的 P95 为 2.445 ms，看起来比 Cyclone DDS 的 3.580 ms 更低，但接收比例只有 34.7\%，后者为 99.7\%。这里的 P95 只统计已收到的帧，所以要结合接收比例判断交付质量。
+ 
+-这些记录支持我们优先检查进程布局与所有权路径，也提醒我们继续核对配置，而不是给中间件排一个永久名次。
++再沿着同一种 RMW 比较布局。\texttt{same} 与 \texttt{intra} 都完整交付，开启进程内通信后的延迟更低，也与像素缓冲区直接交接的路径相对应。因此，检查进程布局和所有权，是优化大图像链路的一个好起点。
+ 
+-Zenoh 的三种布局各重复三轮，默认关闭共享内存，九轮均收到 1000 帧。它的路由器只监听本机独立端口，同机 peer 直接连接；本轮结果不能代替跨主机、无线或多机器人链路实测。表中最后一行是另外三轮显式配置：开启 Zenoh 共享内存并使用 6 MiB 池，不能与默认项混为一种配置。其 P95 中位数约 1.822 ms，默认 separate 约为 3.243 ms；进程内路径仍更短，说明传输优化与应用层所有权交接解决的边界不同。
++Zenoh 的 \texttt{separate} 行还可以与 SHM 行对照：开启共享内存后，P95 从 3.243 ms 降到 1.822 ms。进程内路径则更短。将这几行与图\ref{fig:ros2-image-paths} 对照，就能看到传输层优化与应用层所有权交接各自的作用。
+ 
+-最初用默认 48 MiB 池打开共享内存时，容器的 8 MiB 锁定内存限制导致分配失败。那三轮虽然也完整交付，却出现共享池错误，不能算作成功的 SHM 对照；回退记录另存，未放进上表。6 MiB 池的重测没有出现这个分配错误；后续仍要核对在途样本与回退，不能凭配置开关推断每帧路径或完整零拷贝。
+-
+-小图像的 same 模式中，还出现过 50 帧里 49 次源/接收像素地址数值相等：它没有开启进程内通信，分配器复用地址造成了这种现象。因此，地址记录必须与启用选项、所有权和生命周期一起判断。
+-
+-逐轮数据、原始日志与测量边界保存在仓库 \path{docs/revision/evidence/ros2-image-path-20261003-runtime/}。Zenoh 追加记录保存在 \path{docs/revision/evidence/ros2-zenoh-20261003-runtime/}。这些是合成像素通信数据，不是相机采集到识别完成的实测；CPU/GPU 转换与跨系统容器的共享样本路径也未由此验证。
++这组数据用来练习比较方法。实际选择时，在自己的相机、算法与网络条件下重复测量，再确定布局和配置。详细版本、逐轮数值与异常日志保存在配套修订记录中。
+--- before/02-专项技术栈/chapters/A_ros2_review.tex
++++ after/02-专项技术栈/chapters/A_ros2_review.tex
+@@ -1,7 +1,7 @@
+ \section{本章小结}
+ 先用节点与话题划分职责，再用功能包管理代码和依赖。应熟练完成发布、订阅、定时器和自定义接口的最小闭环。工程运行按“声明依赖、构建安装、加载环境、Launch 启动、观察话题与日志”串联；发生问题时先检查实际使用的包和二进制路径，再检查域、发现范围、接口与 QoS。CLion 使用独立构建目录，运行环境应与终端一致。
+ 
+-大图像链路从像素负载与 4 ms 时间预算开始，再比较 Fast DDS、Cyclone DDS、Zenoh、QoS 和部署布局；Zenoh 的默认发现还要运行路由器。组件容器配合进程内通信与所有权传递，可以省去本例节点之间的像素复制；DDS 共享内存、Data Sharing、Zenoh 传输优化与借出消息需要分别核对。借出探测有本地分配回退，普通 Image 不能凭一个 API 调用宣称跨进程零拷贝。测量同时看实际发送频率、接收比例和延迟尾部，再补上算法耗时、物理采集与外部订阅者。安全通信、复杂网络与完整跨进程共享样本池按项目需要查文档并单独验证。
++大图像链路先从像素负载与 4 ms 时间预算算起，再沿着发布、传输和接收寻找开销。Fast DDS、Cyclone DDS 和 Zenoh 提供不同通信实现，组件进程内通信则通过所有权交接复用像素缓冲区。共享内存传输与共享样本位于不同层，借出消息的能力取决于类型、实现和配置，回退时仍可使用本地分配器。读实验结果时，把实际发送频率、接收比例和延迟放在一起，再将测量扩展到相机采集、转换、识别与观测支路。复杂网络和跨进程共享样本方案可以按项目需要继续学习。
+ 
+ \Needspace{12\baselineskip}
+ \begin{problemset}
+--- before/02-专项技术栈/answers.tex
++++ after/02-专项技术栈/answers.tex
+@@ -190,7 +190,7 @@
+ 
+ \paragraph*{随堂练习 \ref{ex:v2-ros-image-budget}}
+ \begin{solution}
+-Bayer8 为 $1440\times1080\times250=388\,800\,000\,\mathrm{B/s}$，即 388.8 MB/s；BGR8 乘以 3，为 1166.4 MB/s。两次完整复制各读写一遍，估算新增 $2\times2\times1.1664=4.6656\,\mathrm{GB/s}$ 读写量，实际总线流量受缓存、DMA 和实现影响。8 ms 串行阶段理想只能处理 125 Hz，队列加深不能长期保住全部 250 Hz 输入；它可能让图像变旧。至少同时记录接收比例与图像年龄/延迟，并确认 Source 的实际发送频率，不能只看目标定时器设置。
++Bayer8 为 $1440\times1080\times250=388\,800\,000\,\mathrm{B/s}$，即 388.8 MB/s，BGR8 乘以 3，为 1166.4 MB/s。两次完整复制各读写一遍，估算新增 $2\times2\times1.1664=4.6656\,\mathrm{GB/s}$ 读写量。8 ms 串行阶段的理想处理能力为 125 Hz，持续输入 250 Hz 时会积压，加深队列只会容纳更多等待中的图像。应同时记录接收比例与图像年龄，并检查 Source 的实际发送频率。
+ \end{solution}
+ 
+ \paragraph*{随堂练习 \ref{ex:v2-ros-rmw}}
+@@ -214,24 +214,26 @@
+ \begin{tbash}
+ python3 src/image_path_demo/compare.py --output /tmp/rmw-small-answer
+ \end{tbash}
+-再执行正文的 Zenoh 小输入命令。从对应 results.json 选三个 separate 行，记录 send\_hz、delivery\_ratio 与 p95\_ms。默认相同条件为 64×48 BGR8、25 Hz、100 帧、best\_effort、深度 5、两个单线程容器、相同域与本机范围、没有模拟工作及外部订阅者；只改变 RMW 及其必需的发现基础设施。Zenoh 默认使用路由器协助发现，同机 peer 可直接交换数据；不能认定所有像素都经由路由器转发。自动记录器管理自己的路由器，手动实验则先正常关闭节点再关闭自己的路由器。Zenoh 的路由器也计入资源；既有 DDS XML 不能当作 Zenoh 配置。结论仅覆盖这轮输入。实际选型还要重复、改变顺序，并补测大图像、相机 SDK、转换与算法耗时、录制/显示支路、需要的网络及故障恢复。某一项获胜不能代替这些验证。
++再执行正文的 Zenoh 小图像命令。从 results.json 选出三种实现的 separate 行，记录 send\_hz、delivery\_ratio 与 p95\_ms。相同条件为 64×48 BGR8、25 Hz、100 帧、best\_effort、深度 5、两个单线程容器、相同域和本机端点，无模拟工作及额外订阅者。Zenoh 的 router 协助发现，同机 peer 可以直接交换数据，router 的资源也计入统计。自动记录器负责关闭本轮 router，手动实验则先关闭节点再关闭 router。实际选型时，继续用大图像重复测量，并加入相机 SDK、转换、算法、观测支路和所需网络，检查负载与故障恢复。
+ \end{solution}
+ 
+ \paragraph*{随堂练习 \ref{ex:v2-ros-components}}
+ \begin{solution}
+-三轮分别使用 mode:=intra、same、separate，SOURCE\_DONE 后正常 Ctrl+C 保存统计；另一终端用 ros2 component list 记录容器。intra 与 same 都有一个进程，separate 的两个组件在两个进程。intra 的两端选项和 UniquePtr 接口建立所有权交接路径，同一帧数据地址应相同；same 可能分配器复用刚释放的地址；跨进程虚拟地址没有这种比较意义。没有外部订阅者的一对一条件也要保留。
++三轮分别使用 mode:=intra、same、separate，在 SOURCE\_DONE 后按 Ctrl+C 保存统计，另一终端用 ros2 component list 查看容器。intra 与 same 都有一个进程，separate 有两个进程。intra 的两端选项和一对一 UniquePtr 接口建立所有权交接路径，同一帧的像素地址应相同。same 中分配器可能复用已释放的地址，不同进程则各有自己的虚拟地址空间，所以要把地址记录与配置、所有权路径一起读。
+ \end{solution}
+ 
+ \paragraph*{随堂练习 \ref{ex:v2-ros-loans}}
+ \begin{solution}
+-按第\ref{sec:ros2-loaned-messages}节四条命令保存版本、配置与原始 LOAN 输出。本章所测 Humble 下，默认 Fast DDS 为 0/0；启用显式 Data Sharing 后为 1/0，此轮 Float64 真正向中间件借出；默认未启用 iceoryx 共享内存的 Cyclone DDS 和显式禁用轮为 0/0；追加的 Zenoh 0.1.9 在共享内存关闭/开启时也均为 0/0，发布调用使用本地分配回退。Zenoh 的传输优化不能代替借出接口证据。Image 的动态字符串与像素数组不满足这里的 plain 固定布局条件。API 在不能借出时使用本地分配器，所以运行成功仍可能是回退。记录只验证发布端能力与发布调用，还缺接收端借出、共享样本交付、消息布局和样本有效期等证据。发布后借出对象的控制权已交出，不能继续读写 loan.get()；没有发布也要按接口管理和归还。若版本导致输出不同，应保留真实结果并查实现，不能写死。
++参考结果中，默认 Fast DDS 为 0/0，启用 Data Sharing 后为 1/0，默认 Cyclone DDS 和显式禁用借出时为 0/0。第二轮的 Float64 使用中间件借出。Zenoh 开关共享内存时均为 0/0，这体现了传输优化与发布端借出能力的区别。
++
++Image 含动态字符串与像素数组，不满足本例的 plain 固定布局条件，\texttt{rclcpp} 会通过本地分配器继续发布。走到跨进程共享样本路径，还需要合适的消息布局、共享池与交付配置、接收端借读支持，以及两端有效期管理。发布后控制权交回中间件，应用应停止访问原借出对象。未发布的对象由 \texttt{LoanedMessage} 管理归还。实验记录保留自己的实际输出及对应版本、配置即可。
+ \end{solution}
+ 
+ \paragraph*{随堂练习 \ref{ex:v2-ros-image-slow}}
+ \begin{solution}
+-在同一环境中重复正文慢处理命令，分别用 depth 5 与 100，两个全新的输出目录，其他条件相同：250 Hz、500 帧、小图像、separate、Fast DDS、8 ms 模拟工作、默认两秒排空。记录 send\_hz、delivery\_ratio、p95\_ms 与排空设置；加深历史可能提高有限窗口的接收比例，也可能增加旧图像等待，具体数值以实测为准。该串行阶段长期能力仍不超过理想 125 Hz。若改排空时间，必须明确记录，不能比较不同口径而不说明。
+-
+-一种可行方案是相机、必要预处理与识别组成同一组件进程，启用进程内通信并明确唯一所有权；控制与监控按故障隔离需求独立部署。显示支路由专门组件缩小并降频后发出，记录节点按带宽/存储预算部署。主链路使用较小历史并按实时需求选择交付策略；RMW 用重复实测选，不把某个品牌固定视为更快。算法阶段超预算时，减负、降采样或验证并行处理，不能只加深队列。
++分别用 depth 5 与 100 运行慢处理命令，使用两个新输出目录，其余条件相同：250 Hz、500 帧、小图像、separate、Fast DDS、8 ms 模拟工作、两秒排空。记录 send\_hz、delivery\_ratio、p95\_ms 与排空设置。加深队列可以在有限实验中留下更多帧，也会增加等待时间，持续处理能力仍受理想 125 Hz 的上限约束。
++
++一种可行方案是把相机、必要预处理与识别组成同一组件进程，启用进程内通信并交接唯一所有权，将控制与监控按故障隔离需求独立部署。显示支路先缩小图像并降频，录制节点按带宽和存储预算部署。主链路采用较小历史和适合实时需求的交付策略，RMW 根据重复测量选择。算法阶段超预算时，可以减负、降采样或安排并行处理。
+ \end{solution}
+ 
+ \subsubsection*{章末习题}
+--- before/02-专项技术栈/examples/ros2/image-path-demo/README.md
++++ after/02-专项技术栈/examples/ros2/image-path-demo/README.md
+@@ -69,7 +69,7 @@
+ 
+ 记录器每轮启动并正常关闭自己的 Zenoh 路由器，默认只监听 127.0.0.1:17447；节点使用该端点连接，默认关闭 Zenoh SHM。每轮有额外的 `-router.log`、路由器退出状态与配置字段。端口已占用则退出，换未占用端口用 `--zenoh-port`。路由器计入 CPU/RSS，不连接或关闭已有路由器。脚本清除子进程继承的 `ZENOH_*` 与 `RMW_ZENOH_*` 调优变量，不改用户配置。
+ 
+-默认自动对照仍选两种 DDS；要一次比较三个实现，显式传入 `--rmws rmw_fastrtps_cpp rmw_cyclonedds_cpp rmw_zenoh_cpp`。在默认 Zenoh 大图像记录之后，只改共享内存配置，用 `--zenoh-shm` 和记录过的池容量做独立对照：
++默认自动对照仍选两种 DDS；要一次比较三个实现，显式传入 `--rmws rmw_fastrtps_cpp rmw_cyclonedds_cpp rmw_zenoh_cpp`。正文按每帧大小、在途帧数和资源额度讲解容量规划，操作示例使用项目默认的 48 MiB 池。下面的 6 MiB 设置用于复现参考表中已有的 SHM 记录：
+ 
+ ```bash
+ python3 src/image_path_demo/compare.py \

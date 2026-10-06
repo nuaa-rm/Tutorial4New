@@ -1,0 +1,350 @@
+[
+  {
+    "repeat": 1,
+    "publish_mode": "loan",
+    "iceoryx": true,
+    "verify_full": false,
+    "sent": 1000,
+    "received": 1000,
+    "send_hz": 250.048,
+    "receive_hz": 250.047,
+    "delivery_ratio": 1.0,
+    "p95_ms": 0.327278,
+    "p99_ms": 0.398627,
+    "bad_frames": 0,
+    "capabilities": {
+      "receive": {
+        "role": "receive",
+        "can_loan": 1,
+        "sizeof_message": 4665616
+      },
+      "send": {
+        "role": "send",
+        "can_loan": 1,
+        "sizeof_message": 4665616
+      }
+    },
+    "pointer_pairs": [
+      {
+        "sequence": 0,
+        "source": {
+          "role": "send",
+          "pid": 410801,
+          "sequence": 0,
+          "pixel_address": 140326815819896,
+          "mapping": {
+            "device": "00:1a",
+            "inode": "17289",
+            "object": "/dev/shm/mijiao",
+            "offset": 157816
+          }
+        },
+        "sink": {
+          "role": "receive",
+          "pid": 410800,
+          "sequence": 0,
+          "pixel_address": 139827532163192,
+          "mapping": {
+            "device": "00:1a",
+            "inode": "17289",
+            "object": "/dev/shm/mijiao",
+            "offset": 157816
+          }
+        },
+        "same_shared_sample": true
+      },
+      {
+        "sequence": 1,
+        "source": {
+          "role": "send",
+          "pid": 410801,
+          "sequence": 1,
+          "pixel_address": 140326815819896,
+          "mapping": {
+            "device": "00:1a",
+            "inode": "17289",
+            "object": "/dev/shm/mijiao",
+            "offset": 157816
+          }
+        },
+        "sink": {
+          "role": "receive",
+          "pid": 410800,
+          "sequence": 1,
+          "pixel_address": 139827532163192,
+          "mapping": {
+            "device": "00:1a",
+            "inode": "17289",
+            "object": "/dev/shm/mijiao",
+            "offset": 157816
+          }
+        },
+        "same_shared_sample": true
+      },
+      {
+        "sequence": 2,
+        "source": {
+          "role": "send",
+          "pid": 410801,
+          "sequence": 2,
+          "pixel_address": 140326815819896,
+          "mapping": {
+            "device": "00:1a",
+            "inode": "17289",
+            "object": "/dev/shm/mijiao",
+            "offset": 157816
+          }
+        },
+        "sink": {
+          "role": "receive",
+          "pid": 410800,
+          "sequence": 2,
+          "pixel_address": 139827532163192,
+          "mapping": {
+            "device": "00:1a",
+            "inode": "17289",
+            "object": "/dev/shm/mijiao",
+            "offset": 157816
+          }
+        },
+        "same_shared_sample": true
+      }
+    ],
+    "returncodes": {
+      "receive": 0,
+      "send": 0
+    }
+  },
+  {
+    "repeat": 2,
+    "publish_mode": "loan",
+    "iceoryx": true,
+    "verify_full": false,
+    "sent": 1000,
+    "received": 1000,
+    "send_hz": 250.07,
+    "receive_hz": 250.073,
+    "delivery_ratio": 1.0,
+    "p95_ms": 0.333598,
+    "p99_ms": 0.361014,
+    "bad_frames": 0,
+    "capabilities": {
+      "receive": {
+        "role": "receive",
+        "can_loan": 1,
+        "sizeof_message": 4665616
+      },
+      "send": {
+        "role": "send",
+        "can_loan": 1,
+        "sizeof_message": 4665616
+      }
+    },
+    "pointer_pairs": [
+      {
+        "sequence": 0,
+        "source": {
+          "role": "send",
+          "pid": 410934,
+          "sequence": 0,
+          "pixel_address": 140271255971960,
+          "mapping": {
+            "device": "00:1a",
+            "inode": "17289",
+            "object": "/dev/shm/mijiao",
+            "offset": 157816
+          }
+        },
+        "sink": {
+          "role": "receive",
+          "pid": 410933,
+          "sequence": 0,
+          "pixel_address": 140595372910712,
+          "mapping": {
+            "device": "00:1a",
+            "inode": "17289",
+            "object": "/dev/shm/mijiao",
+            "offset": 157816
+          }
+        },
+        "same_shared_sample": true
+      },
+      {
+        "sequence": 1,
+        "source": {
+          "role": "send",
+          "pid": 410934,
+          "sequence": 1,
+          "pixel_address": 140271255971960,
+          "mapping": {
+            "device": "00:1a",
+            "inode": "17289",
+            "object": "/dev/shm/mijiao",
+            "offset": 157816
+          }
+        },
+        "sink": {
+          "role": "receive",
+          "pid": 410933,
+          "sequence": 1,
+          "pixel_address": 140595372910712,
+          "mapping": {
+            "device": "00:1a",
+            "inode": "17289",
+            "object": "/dev/shm/mijiao",
+            "offset": 157816
+          }
+        },
+        "same_shared_sample": true
+      },
+      {
+        "sequence": 2,
+        "source": {
+          "role": "send",
+          "pid": 410934,
+          "sequence": 2,
+          "pixel_address": 140271255971960,
+          "mapping": {
+            "device": "00:1a",
+            "inode": "17289",
+            "object": "/dev/shm/mijiao",
+            "offset": 157816
+          }
+        },
+        "sink": {
+          "role": "receive",
+          "pid": 410933,
+          "sequence": 2,
+          "pixel_address": 140595372910712,
+          "mapping": {
+            "device": "00:1a",
+            "inode": "17289",
+            "object": "/dev/shm/mijiao",
+            "offset": 157816
+          }
+        },
+        "same_shared_sample": true
+      }
+    ],
+    "returncodes": {
+      "receive": 0,
+      "send": 0
+    }
+  },
+  {
+    "repeat": 3,
+    "publish_mode": "loan",
+    "iceoryx": true,
+    "verify_full": false,
+    "sent": 1000,
+    "received": 1000,
+    "send_hz": 250.061,
+    "receive_hz": 250.051,
+    "delivery_ratio": 1.0,
+    "p95_ms": 0.337722,
+    "p99_ms": 0.375558,
+    "bad_frames": 0,
+    "capabilities": {
+      "receive": {
+        "role": "receive",
+        "can_loan": 1,
+        "sizeof_message": 4665616
+      },
+      "send": {
+        "role": "send",
+        "can_loan": 1,
+        "sizeof_message": 4665616
+      }
+    },
+    "pointer_pairs": [
+      {
+        "sequence": 0,
+        "source": {
+          "role": "send",
+          "pid": 411179,
+          "sequence": 0,
+          "pixel_address": 139766794446968,
+          "mapping": {
+            "device": "00:1a",
+            "inode": "17289",
+            "object": "/dev/shm/mijiao",
+            "offset": 157816
+          }
+        },
+        "sink": {
+          "role": "receive",
+          "pid": 411178,
+          "sequence": 0,
+          "pixel_address": 139630408263800,
+          "mapping": {
+            "device": "00:1a",
+            "inode": "17289",
+            "object": "/dev/shm/mijiao",
+            "offset": 157816
+          }
+        },
+        "same_shared_sample": true
+      },
+      {
+        "sequence": 1,
+        "source": {
+          "role": "send",
+          "pid": 411179,
+          "sequence": 1,
+          "pixel_address": 139766794446968,
+          "mapping": {
+            "device": "00:1a",
+            "inode": "17289",
+            "object": "/dev/shm/mijiao",
+            "offset": 157816
+          }
+        },
+        "sink": {
+          "role": "receive",
+          "pid": 411178,
+          "sequence": 1,
+          "pixel_address": 139630408263800,
+          "mapping": {
+            "device": "00:1a",
+            "inode": "17289",
+            "object": "/dev/shm/mijiao",
+            "offset": 157816
+          }
+        },
+        "same_shared_sample": true
+      },
+      {
+        "sequence": 2,
+        "source": {
+          "role": "send",
+          "pid": 411179,
+          "sequence": 2,
+          "pixel_address": 139766794446968,
+          "mapping": {
+            "device": "00:1a",
+            "inode": "17289",
+            "object": "/dev/shm/mijiao",
+            "offset": 157816
+          }
+        },
+        "sink": {
+          "role": "receive",
+          "pid": 411178,
+          "sequence": 2,
+          "pixel_address": 139630408263800,
+          "mapping": {
+            "device": "00:1a",
+            "inode": "17289",
+            "object": "/dev/shm/mijiao",
+            "offset": 157816
+          }
+        },
+        "same_shared_sample": true
+      }
+    ],
+    "returncodes": {
+      "receive": 0,
+      "send": 0
+    }
+  }
+]

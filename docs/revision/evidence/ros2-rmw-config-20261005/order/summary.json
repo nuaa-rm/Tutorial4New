@@ -1,0 +1,37 @@
+{
+  "request": "将中间件安装和配置后移，环境小节只保留环境变量切换说明",
+  "pdf_pages": 307,
+  "pdf_sha256": "ab445c0b4d999820dd9e8ec9a01552cb1290b61986d592d36c430a81f7f071cf",
+  "compile_passes": 2,
+  "inspected_physical_pages": [
+    26,
+    27,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    281,
+    282,
+    283,
+    284
+  ],
+  "structure": {
+    "included_files": 32,
+    "unique_labels": 337,
+    "referenced_labels": 282,
+    "exercises": 23,
+    "chapter_questions": 14
+  },
+  "commands": {
+    "original_shell_blocks_preserved": 47,
+    "current_shell_blocks_syntax_checked": 48
+  },
+  "answers_follow_exercise_order": true,
+  "existing_warning": "Launch 段落 Overfull hbox 2.8734pt，A_ros2_engineering.tex:408-409",
+  "runtime_rerun": false
+}

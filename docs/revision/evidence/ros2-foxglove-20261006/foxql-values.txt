@@ -1,0 +1,68 @@
+Browser tab: 2, Title: "recording_0.mcap | Foxglove", URL: "https://app.foxglove.dev/83615652/view?layoutId=lay_0eecxSgjq7byOaPq&ds=remote-file&ds.url=http%3A%2F%2F127.0.0.1%3A8766%2Frecording_0.mcap&time=2026-10-06T06%3A27%3A44.932492852Z".
+The following is a diff from the previous accessibility tree with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 472-473, 615-618
++					615 button 显示左侧边栏
+~							614 container /viz/signal.data.@abs 0.4117346906542845  (81 毫秒前) /viz/signal.data.@negative -0.4117346906542845  (81 毫秒前) /viz/signal.data.@mul(1000).@div(1000) 0.4117346906542845  (81 毫秒前) /viz/signal.data.@add(1).@sub(1) 0.4117346906542845  (81 毫秒前) /viz/twist.twist.linear.@norm 1  (81 毫秒前) /viz/path.poses.@length 90  (81 毫秒前) /viz/twist.twist.linear.@norm.@sqrt 1  (81 毫秒前) /viz/twist.twist.linear.@norm.@log10 0  (81 毫秒前) /viz/pose.pose.orientation.@rpy.yaw.@sin -0.9113037608348934  (81 毫秒前) /viz/pose.pose.orientation.@rpy.yaw.@cos -0.4117346906542845  (81 毫秒前) /viz/pose.pose.position.x.@delta -0.04568111015735088 81 毫秒前
++								616 container
++									617 image
++		618 container 2:27:51.165 PM CST
++			619 text 2:27:51.165 PM CST
++		620 container /viz/signal.data.@abs 0.4117346906542845  (81 毫秒前) /viz/signal.data.@negative -0.4117346906542845  (81 毫秒前) /viz/signal.data.@mul(1000).@div(1000) 0.4117346906542845  (81 毫秒前) /viz/signal.data.@add(1).@sub(1) 0.4117346906542845  (81 毫秒前) /viz/twist.twist.linear.@norm 1  (81 毫秒前) /viz/path.poses.@length 90  (81 毫秒前) /viz/twist.twist.linear.@norm.@sqrt 1  (81 毫秒前) /viz/twist.twist.linear.@norm.@log10 0  (81 毫秒前) /viz/pose.pose.orientation.@rpy.yaw.@sin -0.9113037608348934  (81 毫秒前) /viz/pose.pose.orientation.@rpy.yaw.@cos -0.4117346906542845  (81 毫秒前) /viz/pose.pose.position.x.@delta -0.04568111015735088  (81 毫秒前)
++			621 text /viz/signal.data.@abs
++			622 container
++				623 text 0.4117346906542845
++				624 text  (81 毫秒前)
++			625 text /viz/signal.data.@negative
++			626 container
++				627 text -0.4117346906542845
++				628 text  (81 毫秒前)
++			629 text /viz/signal.data.@mul(1000).@div(1000)
++			630 container
++				631 text 0.4117346906542845
++				632 text  (81 毫秒前)
++			633 text /viz/signal.data.@add(1).@sub(1)
++			634 container
++				635 text 0.4117346906542845
++				636 text  (81 毫秒前)
++			637 text /viz/twist.twist.linear.@norm
++			638 container
++				639 text 1
++				640 text  (81 毫秒前)
++			641 text /viz/path.poses.@length
++			642 container
++				643 text 90
++				644 text  (81 毫秒前)
++			645 text /viz/twist.twist.linear.@norm.@sqrt
++			646 container
++				647 text 1
++				648 text  (81 毫秒前)
++			649 text /viz/twist.twist.linear.@norm.@log10
++			650 container
++				651 text 0
++				652 text  (81 毫秒前)
++			653 text /viz/pose.pose.orientation.@rpy.yaw.@sin
++			654 container
++				655 text -0.9113037608348934
++				656 text  (81 毫秒前)
++			657 text /viz/pose.pose.orientation.@rpy.yaw.@cos
++			658 container
++				659 text -0.4117346906542845
++				660 text  (81 毫秒前)
++			661 text /viz/pose.pose.position.x.@delta
++			662 container
++				663 text -0.04568111015735088
++				664 text  (81 毫秒前)
++			665 text /viz/pose.pose.position.x.@derivative
++			666 container
++				667 text -0.45659673397287487
++				668 text  (81 毫秒前)
++			669 text /viz/pose.pose.position.x.@timedelta
++			670 container
++				671 text 0.10004694900000022
++				672 text  (81 毫秒前)
++			673 text /viz/markers.markers[:]{id==0}.pose.position.x
++			674 container
++				675 text -0.9113037608348934
++				676 text  (79 毫秒前)
++			677 text 6.332162381885206
+The focused UI element is 616 container

@@ -1,0 +1,9 @@
+{
+  "shell_blocks": 31,
+  "bash_syntax": "passed",
+  "python_syntax": "passed",
+  "original_numeric_rows_preserved": 10,
+  "chinese_semicolons": 7,
+  "full_fixed_source_included": "1-66; 67-end",
+  "structure": "23 exercises,14 problems,32 included files,339 labels,282 referenced labels"
+}

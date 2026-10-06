@@ -1,0 +1,213 @@
+--- before/02-专项技术栈/answers.tex
++++ after/02-专项技术栈/answers.tex
+@@ -224,7 +224,7 @@
+ 
+ \paragraph*{随堂练习 \ref{ex:v2-ros-loans}}
+ \begin{solution}
+-参考结果中，默认 Fast DDS 为 0/0，启用 Data Sharing 后为 1/0，默认 Cyclone DDS 和显式禁用借出时为 0/0。Float64 满足定长布局条件，启用 Data Sharing 后可以借出。Image 含动态字符串与像素数组，不能直接借出原始样本，使用本地分配器回退仍可继续发布。Zenoh 开关共享内存时均为 0/0，传输共享内存与应用借出能力分别对应不同环节。
++按 Image、FixedImage 的顺序，默认配置均为 0/0，Fast DDS 启用 Data Sharing、Cyclone DDS 启用 iceoryx 后均为 0/1，显式禁用借出时回到 0/0。FixedImage 的像素内嵌在定长数组中，满足类型条件后可由相应配置提供借出支持。Image 含动态字符串与像素数组，不能直接借出原始样本，但本地分配器回退让它也能完成填充和发布。Zenoh 开关共享内存时均为 0/0，传输共享内存与应用借出能力对应不同环节。
+ 
+ FixedImage 用内嵌数组约定 1440×1080 BGR8，更改尺寸要重新生成接口，接入标准 Image 工具需要补元数据并复制像素。发布后停止访问借出对象，回调返回后停止使用借读引用或像素视图。未发布对象由 \texttt{LoanedMessage} 管理归还，接收样本由执行器在回调结束后归还。
+ \end{solution}
+@@ -316,7 +316,7 @@
+ 
+ \paragraph*{第一章章末第 \ref{prob:v2-ros-13} 题}
+ \begin{solution}
+-Float64 返回 true 表示当前发布者可以借出中间件样本。Image 包含变长字段，不能直接借出原始样本。loan\_probe 借出并发布的是 Float64，Image 用于查询能力。
++FixedImage 返回 true 表示当前发布者可以借出中间件样本，程序直接填充它的内嵌像素数组。Image 包含变长字段，能力返回 false，借出包装器使用本地分配器创建对象。loan\_probe 对两类图像都查询能力、填充和发布，因此程序运行成功也能展示分配器回退的作用。
+ 
+ 证明跨进程图像共享样本，需要定长且满足布局条件的接口、支持的共享配置与两端借出能力。再确认内存池容量、发布与回调内的使用期限，并验证实际共享位置或传递路径。
+ \end{solution}
+--- before/02-专项技术栈/chapters/A_ros2_image_path.tex
++++ after/02-专项技术栈/chapters/A_ros2_image_path.tex
+@@ -465,8 +465,8 @@
+ \end{center}
+ \texttt{FixedImage} 的 C++ 像素字段是 \nolinkurl{std::array<uint8_t, 4665600>}。每次向普通 Image 填相同数量的像素，字段仍然是动态数组。更换 FixedImage 的尺寸需要修改接口并重新构建两端，接入标准图像工具时则要补齐元数据并复制像素。两种接口都将在下一节接受相同条件的中间件对照。
+ 
+-\begin{example}[用 Float64 和 Image 探测借出能力]
+-沿用刚才的工程，完整程序如下。\texttt{Float64} 是简单固定大小类型，普通 \texttt{Image} 含变长字段。Image 在这里用于查询能力，程序借出并发布的是值为 42 的 Float64。
++\begin{example}[用 Image 和 FixedImage 探测借出能力]
++沿用刚才的工程，我们直接比较两类图像。程序为标准 Image 与 FixedImage 各创建一个发布者，查询能力后都调用借出接口，把相同的 $1440\times1080$ BGR8 像素填成 42，再分别发布。Image 的动态数组由本地分配器创建，FixedImage 在能力为 true 时直接填充中间件样本。
+ \lstinputlisting[frame=single,language=C++,caption={借出能力与本地分配回退探测}]{examples/ros2/image-path-demo/src/loan_probe.cpp}
+ 
+ 在本章的 Humble/Fast DDS 实现中，固定类型还需要启用 Data Sharing。项目给出一份显式配置，设置同步发布、可扩展的预分配历史，以及两端 Data Sharing 自动选择。
+@@ -500,25 +500,12 @@
+   ros2 run image_path_demo loan_probe
+ \end{tbash}
+ \end{minipage}\par\smallskip
+-\texttt{LOAN} 输出中的 1 表示支持中间件借出，0 表示不支持，调用借出接口时会使用本地分配器。下面保留一组 Humble 参考结果，方便你将配置与能力对应起来：
+-\begin{center}
+-\begin{tabular}{lcc}
+-\toprule
+-发布端配置 & Float64 & Image\\
+-\midrule
+-Fast DDS 默认配置 & 0 & 0\\
+-Fast DDS 启用 Data Sharing & 1 & 0\\
+-Cyclone DDS 默认配置 & 0 & 0\\
+-Fast DDS 显式禁用借出 & 0 & 0\\
+-\bottomrule
+-\end{tabular}
+-\end{center}
+-这组数据把类型和配置的条件分开了：启用 Data Sharing 后，定长 Float64 可以借出，变长 Image 仍然不能借出。默认配置下，定长类型也可能返回 0。
++\texttt{LOAN} 输出按 Image、FixedImage 的顺序列出发布端能力，1 表示支持中间件借出，0 表示借出包装器使用本地分配器。两类消息都调用了相同的 API，所以我们要结合能力输出，判断填充的是哪一块内存。\texttt{PUBLISHED} 表示两个发布调用都已完成，接收与性能由下一节的统一收发程序测量。各中间件的两类图像探测结果集中在表\ref{tab:ros2-image-loan-probe}。
+ \end{example}
+ 
+ \begin{exercise}
+ \label{ex:v2-ros-loans}
+-保存默认 DDS、显式配置与 Zenoh 的 loan\_probe 输出。说明为什么启用 Data Sharing 后 Float64 可以借出而 Image 不能，返回 false 时程序如何继续发布。比较标准 Image 与 FixedImage 的字段布局、工具兼容性，并写出借出对象与借读引用的使用期限。
++保存默认 DDS、显式配置与 Zenoh 的 loan\_probe 输出。说明为什么启用 Data Sharing 后 FixedImage 可以借出而 Image 不能，返回 false 时程序如何继续发布。比较标准 Image 与 FixedImage 的字段布局、工具兼容性，并写出借出对象与借读引用的使用期限。
+ \end{exercise}
+ 
+ \Needspace{9\baselineskip}
+--- before/02-专项技术栈/chapters/A_ros2_image_results.tex
++++ after/02-专项技术栈/chapters/A_ros2_image_results.tex
+@@ -1,4 +1,30 @@
+ % 实验介绍、两类图像的统一结果与解读集中在本文件。
++\paragraph*{先看两类图像的借出能力}
++刚才的 \texttt{loan\_probe} 直接比较标准 Image 与 FixedImage 的发布端能力。用默认配置、共享配置及显式禁用借出分别运行，得到表\ref{tab:ros2-image-loan-probe}。两类图像都成功完成了填充和发布调用，变长 Image 始终使用本地分配器回退。
++
++\begin{table}[htbp]
++\centering
++\small
++\caption{标准 Image 与定长 FixedImage 的发布端借出能力}
++\label{tab:ros2-image-loan-probe}
++\begin{tabular}{llcc}
++\toprule
++RMW & 配置 & Image & FixedImage\\
++\midrule
++Fast DDS & 默认 & 0 & 0\\
++Fast DDS & Data Sharing & 0 & 1\\
++Fast DDS & 显式禁用借出 & 0 & 0\\
++\midrule
++Cyclone DDS & 默认 & 0 & 0\\
++Cyclone DDS & iceoryx & 0 & 1\\
++\midrule
++Zenoh & 默认 & 0 & 0\\
++Zenoh & SHM & 0 & 0\\
++\bottomrule
++\end{tabular}
++\end{table}
++定长布局让图像满足类型条件，Fast DDS 的 Data Sharing 和 Cyclone DDS 的 iceoryx 配置提供了对应的借出支持。Zenoh SHM 优化序列化数据的传输，本章所用实现的两类图像都不提供应用层借出。接下来把能力与实际收发结果放在一起比较。
++
+ \begin{example}[先比较布局，再统一比较两类图像]
+ 两类图像使用相同像素内容、尺寸、频率、\texttt{best\_effort} 和 KeepLast 深度 5，每轮 1000 帧，再留两秒排空。延迟从填充完成、发布前开始，到接收回调入口结束，记录实际发送频率、接收比例与 P95。下面先保留普通 Image 的三种布局结果，再固定为两个进程，比较普通与定长接口。
+ 
+--- before/02-专项技术栈/chapters/A_ros2_review.tex
++++ after/02-专项技术栈/chapters/A_ros2_review.tex
+@@ -18,7 +18,7 @@
+ \item \label{prob:v2-ros-10}实践：同一包在 CLion 中运行的是新代码，ros2 run 却仍显示旧文本。说明构建、安装和环境三个环节的排查顺序，并给出修复命令。
+ \item \label{prob:v2-ros-11}基础：1440×1080@250 Hz 的 Bayer8 转成 BGR8 后，纯像素负载率变为多少？每多复制一次 BGR8，估算新增读写量。为什么队列加深不能补足一个长期 8 ms 的串行阶段？
+ \item \label{prob:v2-ros-12}提高：两个节点在同一个 Distrobox 中，分别运行在两个组件容器进程里。能否使用本章的进程内直接交接？若合并进程，还需要什么条件，又会改变什么故障边界？
+-\item \label{prob:v2-ros-13}提高：loan\_probe 的 Float64 能力返回 true，Image 返回 false，但程序运行成功。分别能得到什么结论？还缺哪些证据才能证明完整的跨进程图像零拷贝？
++\item \label{prob:v2-ros-13}提高：loan\_probe 的 FixedImage 能力返回 true，Image 返回 false，但程序运行成功。分别能得到什么结论？还缺哪些证据才能证明完整的跨进程图像零拷贝？
+ \item \label{prob:v2-ros-14}实践：某轮 RMW 对照发送接近 250 Hz，接收比例只有 40\%，P95 为 2 ms；另一轮接收比例为 99\%，P95 为 4 ms。说明为什么不能单按 P95 选型，并设计下一轮相机链路测量。
+ \end{problemset}
+ 
+--- before/02-专项技术栈/examples/ros2/image-path-demo/CMakeLists.txt
++++ after/02-专项技术栈/examples/ros2/image-path-demo/CMakeLists.txt
+@@ -4,7 +4,6 @@
+ find_package(rclcpp REQUIRED)
+ find_package(rclcpp_components REQUIRED)
+ find_package(sensor_msgs REQUIRED)
+-find_package(std_msgs REQUIRED)
+ find_package(rosidl_default_generators REQUIRED)
+ rosidl_generate_interfaces(${PROJECT_NAME}
+   "msg/Frame.msg" "msg/FixedImage.msg" DEPENDENCIES sensor_msgs)
+@@ -16,7 +15,9 @@
+ rclcpp_components_register_nodes(image_nodes
+   "image_path_demo::Source" "image_path_demo::Sink")
+ add_executable(loan_probe src/loan_probe.cpp)
+-ament_target_dependencies(loan_probe rclcpp sensor_msgs std_msgs)
++target_compile_features(loan_probe PUBLIC cxx_std_17)
++ament_target_dependencies(loan_probe rclcpp sensor_msgs)
++target_link_libraries(loan_probe "${typesupport}")
+ add_executable(fixed_image src/fixed_image.cpp)
+ target_compile_features(fixed_image PUBLIC cxx_std_17)
+ ament_target_dependencies(fixed_image rclcpp)
+--- before/02-专项技术栈/examples/ros2/image-path-demo/README.md
++++ after/02-专项技术栈/examples/ros2/image-path-demo/README.md
+@@ -92,7 +92,7 @@
+ 
+ 用新目录和 depth 100 重跑慢处理，其余条件不变。加深队列会改变有限帧实验的交付与等待时间，持续 8 ms 串行处理的理想上限为 125 Hz。
+ 
+-`loan_probe` 比较 Float64 和标准 Image。Humble 的 Fast DDS 默认为 0/0，启用配置后为 1/0，显式禁用后为 0/0：
++`loan_probe` 直接比较标准 Image 和定长 FixedImage。两者都填充并发布 1440×1080 BGR8，所有像素字节均为 42。`LOAN` 按 `image`、`fixed_image` 的顺序输出发布端能力。Humble 的 Fast DDS 默认为 0/0，启用 Data Sharing 后为 0/1，显式禁用后为 0/0：
+ 
+ ```bash
+ unset CYCLONEDDS_URI FASTRTPS_DEFAULT_PROFILES_FILE RMW_FASTRTPS_USE_QOS_FROM_XML
+@@ -107,8 +107,8 @@
+   ROS_DISABLE_LOANED_MESSAGES=1 ros2 run image_path_demo loan_probe
+ ```
+ 
+-程序运行成功说明回退可用，判断中间件借出要看 can_loan_messages。发布后停止访问借出对象，回调返回后停止使用借读引用和像素视图。
++普通 Image 使用本地分配器回退，FixedImage 在能力为 true 时直接填充中间件样本。`PUBLISHED` 表示两次发布调用均已完成。接收检查与性能统计使用前面的统一收发程序。发布后停止访问借出对象，回调返回后停止使用借读引用和像素视图。
+ 
+ 原 `fixed_image` / `compare_fixed.py` 保留为共享文件偏移诊断工具，详细用途及已有实测见 [iceoryx 记录](../../../../docs/revision/ros2-iceoryx-20261006.md)。正文的两类消息比较统一使用 compare_images.py，数据与解释集中在 chapters/A_ros2_image_results.tex。
+ 
+-找不到程序时先检查构建、source install/setup.bash 和 ros2 pkg prefix。收不到消息时检查 RMW、域、QoS 和管理进程日志。结束手动实验后恢复日常的域、发现范围及 RMW。当前修订与逐项检查见 [统一比较记录](../../../../docs/revision/ros2-image-unified-20261006.md)。
++找不到程序时先检查构建、source install/setup.bash 和 ros2 pkg prefix。收不到消息时检查 RMW、域、QoS 和管理进程日志。结束手动实验后恢复日常的域、发现范围及 RMW。统一收发证据见 [统一比较记录](../../../../docs/revision/ros2-image-unified-20261006.md)，本次借出探测与逐项检查见 [两类图像探测记录](../../../../docs/revision/ros2-image-loan-probe-20261006.md)。
+--- before/02-专项技术栈/examples/ros2/image-path-demo/package.xml
++++ after/02-专项技术栈/examples/ros2/image-path-demo/package.xml
+@@ -10,7 +10,6 @@
+   <depend>rclcpp</depend>
+   <depend>rclcpp_components</depend>
+   <depend>sensor_msgs</depend>
+-  <depend>std_msgs</depend>
+   <exec_depend>rosidl_default_runtime</exec_depend>
+   <exec_depend>launch_ros</exec_depend>
+   <member_of_group>rosidl_interface_packages</member_of_group>
+--- before/02-专项技术栈/examples/ros2/image-path-demo/src/loan_probe.cpp
++++ after/02-专项技术栈/examples/ros2/image-path-demo/src/loan_probe.cpp
+@@ -1,21 +1,42 @@
++#include <algorithm>
+ #include <iostream>
+ #include <memory>
+ #include <utility>
+ #include "rclcpp/rclcpp.hpp"
+ #include "sensor_msgs/msg/image.hpp"
+-#include "std_msgs/msg/float64.hpp"
++#include "image_path_demo/msg/fixed_image.hpp"
+ 
+ int main(int argc, char ** argv) {
+   rclcpp::init(argc, argv);
+   auto node = std::make_shared<rclcpp::Node>("loan_probe");
+-  auto small = node->create_publisher<std_msgs::msg::Float64>("loan_value", 5);
+-  auto image = node->create_publisher<sensor_msgs::msg::Image>("loan_image", 5);
+-  std::cout << "LOAN {\"float64\":" << small->can_loan_messages()
+-            << ",\"image\":" << image->can_loan_messages() << "}" << std::endl;
+-  // API 可以回退到本地分配器，所以借出成功不等于中间件借出成功。
+-  auto loan = small->borrow_loaned_message();
+-  loan.get().data = 42.0;
+-  small->publish(std::move(loan));
+-  // 发布后不能继续使用 loan.get()。这里只检查发布端能力。
++  using FixedImage = image_path_demo::msg::FixedImage;
++  auto qos = rclcpp::QoS(5).best_effort();
++  auto image = node->create_publisher<sensor_msgs::msg::Image>("loan_image", qos);
++  auto fixed = node->create_publisher<FixedImage>("loan_fixed_image", qos);
++  std::cout << "LOAN {\"image\":" << image->can_loan_messages()
++            << ",\"fixed_image\":" << fixed->can_loan_messages() << "}" << std::endl;
++
++  // 普通 Image 的借出包装器使用本地分配器回退。
++  auto image_loan = image->borrow_loaned_message();
++  auto & dynamic = image_loan.get();
++  dynamic.header.stamp = node->now();
++  dynamic.header.frame_id = "camera";
++  dynamic.width = FixedImage::WIDTH;
++  dynamic.height = FixedImage::HEIGHT;
++  dynamic.encoding = "bgr8";
++  dynamic.is_bigendian = 0;
++  dynamic.step = FixedImage::WIDTH * FixedImage::CHANNELS;
++  dynamic.data.assign(dynamic.step * dynamic.height, 42);
++  image->publish(std::move(image_loan));
++
++  // FixedImage 为 true 时直接填充中间件样本，否则也使用本地分配器。
++  auto fixed_loan = fixed->borrow_loaned_message();
++  auto & embedded = fixed_loan.get();
++  embedded.sequence = 1;
++  embedded.sent_ns = 0;
++  std::fill(embedded.data.begin(), embedded.data.end(), 42);
++  fixed->publish(std::move(fixed_loan));
++  // 两类图像均为 1440×1080 BGR8；发布后停止访问借出对象及其引用。
++  std::cout << "PUBLISHED {\"image\":1,\"fixed_image\":1}" << std::endl;
+   rclcpp::shutdown();
+ }

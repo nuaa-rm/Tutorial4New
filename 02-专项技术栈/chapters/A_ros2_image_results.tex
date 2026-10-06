@@ -1,8 +1,37 @@
-% DDS: bgr250-1440x1080 的 18 轮；Zenoh: 本轮 bgr250 的 9 轮与 shm-6mib 的 3 轮。
+% 实验介绍、两类图像的统一结果与解读集中在本文件。
+\paragraph*{先看两类图像的借出能力}
+刚才的 \texttt{loan\_probe} 直接比较标准 Image 与 FixedImage 的发布端能力。用默认配置、共享配置及显式禁用借出分别运行，得到表\ref{tab:ros2-image-loan-probe}。两类图像都成功完成了填充和发布调用，变长 Image 始终使用本地分配器回退。
+
 \begin{table}[htbp]
 \centering
 \small
-\caption{同机合成 BGR8 大图像对照，每项为三轮数值的中位数}
+\caption{标准 Image 与定长 FixedImage 的发布端借出能力}
+\label{tab:ros2-image-loan-probe}
+\begin{tabular}{llcc}
+\toprule
+RMW & 配置 & Image & FixedImage\\
+\midrule
+Fast DDS & 默认 & 0 & 0\\
+Fast DDS & Data Sharing & 0 & 1\\
+Fast DDS & 显式禁用借出 & 0 & 0\\
+\midrule
+Cyclone DDS & 默认 & 0 & 0\\
+Cyclone DDS & iceoryx & 0 & 1\\
+\midrule
+Zenoh & 默认 & 0 & 0\\
+Zenoh & SHM & 0 & 0\\
+\bottomrule
+\end{tabular}
+\end{table}
+定长布局让图像满足类型条件，Fast DDS 的 Data Sharing 和 Cyclone DDS 的 iceoryx 配置提供了对应的借出支持。Zenoh SHM 优化序列化数据的传输，本章所用实现的两类图像都不提供应用层借出。接下来把能力与实际收发结果放在一起比较。
+
+\begin{example}[固定图像负载，比较三种进程布局]
+两类图像使用相同像素内容、尺寸、频率、\texttt{best\_effort} 和 KeepLast 深度 5，每轮 1000 帧，再留两秒排空。延迟从填充完成、发布前开始，到接收回调入口结束，记录实际发送频率、接收比例与 P95。下面先保留普通 Image 的三种布局结果，再固定为两个进程，比较普通与定长接口。
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{同机合成 BGR8 的一组参考结果，每项为三轮数值的中位数}
 \label{tab:ros2-image-results}
 \begin{tabular}{llrrrr}
 \toprule
@@ -11,6 +40,7 @@ RMW & 布局 & 发送 / Hz & 接收 / Hz & 接收比例 & P95 / ms\\
 Fast DDS & separate & 250.0 & 87.5 & 34.7\% & 2.445\\
 Fast DDS & same & 250.0 & 250.2 & 100.0\% & 0.968\\
 Fast DDS & intra & 250.0 & 250.0 & 100.0\% & 0.042\\
+\midrule
 Cyclone DDS & separate & 250.0 & 249.6 & 99.7\% & 3.580\\
 Cyclone DDS & same & 250.1 & 250.2 & 100.0\% & 0.959\\
 Cyclone DDS & intra & 250.0 & 250.0 & 100.0\% & 0.031\\
@@ -22,16 +52,134 @@ Zenoh + SHM & separate & 250.0 & 250.4 & 100.0\% & 1.822\\
 \bottomrule
 \end{tabular}
 \end{table}
-这组 $1440\times1080$ 的 BGR8 数据在 2026 年 10 月 3 日的 Ubuntu 22.04/Humble Distrobox 中测得，主机为 i7-12700H，系统识别约 62.6 GiB 内存；Fast DDS 与 Cyclone DDS 的 RMW 分别为 6.2.10 与 1.3.5，Zenoh RMW/vendor 均为 0.1.9，Fast DDS 为 2.6.12，rclcpp 为 16.0.21。容器共享宿主网络和 IPC，测试清除 DDS/Zenoh 调优变量，深度 5、best\_effort、没有外部订阅者、没有算法工作。每轮发送 1000 帧，再留两秒排空；表中各项分别取中位数，P95 未跨轮合并样本。
+表\ref{tab:ros2-image-results} 来自一组合成图像实验：$1440\times1080$ BGR8、目标 250 Hz、\texttt{best\_effort}、深度 5，无模拟算法耗时和额外订阅者。每轮发送 1000 帧，再等待两秒排空，各指标分别取三轮的中位数。Zenoh 默认行关闭共享内存，SHM 行另用 6 MiB 池。
 
-Fast DDS 的 separate 接收比例三轮为 34.7\%、35.9\%、18.1\%；Cyclone DDS 为 99.7\%、99.7\%、99.8\%。在这个默认配置与输入下，后者交付比例更高；Fast DDS 已收到样本的 P95 较低，不能抵消丢掉的大量帧。两种 DDS 的 same 与 intra 共 12 轮都完整收到 1000 帧，intra 的像素地址记录全部匹配。
+我们先读两个进程的结果。Fast DDS 的 P95 为 2.445 ms，看起来比 Cyclone DDS 的 3.580 ms 更低，但接收比例只有 34.7\%，后者为 99.7\%。这里的 P95 只统计已收到的帧，所以要结合接收比例判断交付质量。
 
-这些记录支持我们优先检查进程布局与所有权路径，也提醒我们继续核对配置，而不是给中间件排一个永久名次。
+再沿着同一种 RMW 比较布局。\texttt{same} 与 \texttt{intra} 都完整交付，开启进程内通信后的延迟更低，也与像素缓冲区直接交接的路径相对应。因此，检查进程布局和所有权，是优化大图像链路的一个好起点。
 
-Zenoh 的三种布局各重复三轮，默认关闭共享内存，九轮均收到 1000 帧。它的路由器只监听本机独立端口，同机 peer 直接连接；本轮结果不能代替跨主机、无线或多机器人链路实测。表中最后一行是另外三轮显式配置：开启 Zenoh 共享内存并使用 6 MiB 池，不能与默认项混为一种配置。其 P95 中位数约 1.822 ms，默认 separate 约为 3.243 ms；进程内路径仍更短，说明传输优化与应用层所有权交接解决的边界不同。
+Zenoh 的 \texttt{separate} 行还可以与 SHM 行对照：开启共享内存后，P95 从 3.243 ms 降到 1.822 ms。进程内路径则更短。将这几行与图\ref{fig:ros2-image-paths} 对照，就能看到传输层优化与应用层所有权交接各自的作用。
 
-最初用默认 48 MiB 池打开共享内存时，容器的 8 MiB 锁定内存限制导致分配失败。那三轮虽然也完整交付，却出现共享池错误，不能算作成功的 SHM 对照；回退记录另存，未放进上表。6 MiB 池的重测没有出现这个分配错误；后续仍要核对在途样本与回退，不能凭配置开关推断每帧路径或完整零拷贝。
+这组普通 Image 数据保留为进程布局参考。接下来固定为 \texttt{separate}，再比较两类消息。
 
-小图像的 same 模式中，还出现过 50 帧里 49 次源/接收像素地址数值相等：它没有开启进程内通信，分配器复用地址造成了这种现象。因此，地址记录必须与启用选项、所有权和生命周期一起判断。
+\end{example}
 
-逐轮数据、原始日志与测量边界保存在仓库 \path{docs/revision/evidence/ros2-image-path-20261003-runtime/}。Zenoh 追加记录保存在 \path{docs/revision/evidence/ros2-zenoh-20261003-runtime/}。这些是合成像素通信数据，不是相机采集到识别完成的实测；CPU/GPU 转换与跨系统容器的共享样本路径也未由此验证。
+\subsubsection{250 Hz 对照：图像类型、共享方式与借出}
+\label{sec:ros2-image-type-comparison}
+\begin{example}[同一收发程序，比较两类图像]
+项目中的 \texttt{image\_benchmark} 用同一份收发实现处理 Frame 中的标准 Image 与 FixedImage，接收端都在回调内读取消息。\texttt{compare\_images.py} 依次切换 RMW、消息类型和配置，管理本轮节点、Zenoh 路由器及 RouDi。默认配置组都采用普通发布，共享配置组分别开启 Fast DDS Data Sharing、Cyclone DDS iceoryx 和 Zenoh SHM，再为支持两端借出的定长类型追加借出发布。
+
+在前面的独立工作空间中安装工具并运行统一对照：
+\par\medskip\noindent\begin{minipage}{\linewidth}
+\begin{tbash}
+sudo apt install ros-humble-iceoryx-posh
+python3 src/image_path_demo/compare_images.py \
+  --output /tmp/image-types-bgr250 --include-loan \
+  --rate 250 --frames 1000 --repeat 3
+\end{tbash}
+\end{minipage}\par\smallskip
+这条命令将三种中间件的两类消息都纳入比较，按轮次保存日志、借出能力和统计。共享池需要与消息大小和在途帧数匹配，本组 Zenoh 使用 6 MiB 池，RouDi 使用项目中的图像池。你可以通过 \texttt{--zenoh-shm-pool-mib} 调整 Zenoh 池容量，同时检查 \texttt{/dev/shm} 空间与锁定内存额度。
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{统一收发程序的默认配置对照，三轮数值的中位数}
+\label{tab:ros2-image-types-default}
+\begin{tabular}{llrrrc}
+\toprule
+RMW & 图像接口 & 发送 / Hz & 接收比例 & P95 / ms & 借出（发/收）\\
+\midrule
+Fast DDS & 标准 Image & 250.0 & 37.8\% & 1.848 & 0/0\\
+Fast DDS & FixedImage & 250.0 & 39.3\% & 1.757 & 0/0\\
+\midrule
+Cyclone DDS & 标准 Image & 250.0 & 99.9\% & 2.876 & 0/0\\
+Cyclone DDS & FixedImage & 250.0 & 100.0\% & 2.930 & 0/0\\
+\midrule
+Zenoh & 标准 Image & 250.0 & 100.0\% & 2.780 & 0/0\\
+Zenoh & FixedImage & 250.0 & 100.0\% & 2.957 & 0/0\\
+\bottomrule
+\end{tabular}
+\end{table}
+表\ref{tab:ros2-image-types-default} 的两类消息都采用普通发布。借出列记录两端实际能力，默认配置下定长图像也没有自动获得借出支持。比较接口时，先看接收比例，再看已收到图像的延迟。
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{三种中间件的共享配置对照，三轮数值的中位数}
+\label{tab:ros2-image-types-shared}
+\begin{tabular}{lllrrc}
+\toprule
+RMW & 图像接口 & 发布 & 接收比例 & P95 / ms & 借出（发/收）\\
+\midrule
+Fast DDS & 标准 Image & 普通 & 42.9\% & 1.738 & 0/0\\
+Fast DDS & FixedImage & 普通 & 100.0\% & 0.498 & 1/1\\
+Fast DDS & FixedImage & 借出 & 100.0\% & 0.341 & 1/1\\
+\midrule
+Cyclone DDS & 标准 Image & 普通 & 100.0\% & 2.598 & 0/0\\
+Cyclone DDS & FixedImage & 普通 & 100.0\% & 0.492 & 1/1\\
+Cyclone DDS & FixedImage & 借出 & 100.0\% & 0.330 & 1/1\\
+\midrule
+Zenoh & 标准 Image & 普通 & 100.0\% & 1.385 & 0/0\\
+Zenoh & FixedImage & 普通 & 100.0\% & 1.347 & 0/0\\
+\bottomrule
+\end{tabular}
+\end{table}
+表\ref{tab:ros2-image-types-shared} 使用同样的像素负载与 QoS，各轮实际发送频率为 250.0--250.1 Hz。Fast DDS 载入 Data Sharing 配置，变长 Image 仍走普通传输路径。Cyclone DDS 的 iceoryx 和 Zenoh SHM 则可以交付序列化后的 Image。
+
+定长图像在 Fast DDS 与 Cyclone DDS 的共享配置下，两端借出能力均为 1/1。在相同接口与配置内，借出发布的 P95 分别从普通发布的 0.498、0.492 ms 降到 0.341、0.330 ms，对应直接填充共享样本所省下的复制。Zenoh 的两类消息均为 0/0，FixedImage 在这里仍需序列化，固定尺寸本身不会改变应用层借出支持，因此我们没有在表中展示借出它的发布方式。
+
+完整逐轮记录与所用版本保存在配套实验文档中。上面的默认组、共享配置组和借出组分别回答接口布局、配置与发布方式的问题。
+
+
+读结果时，先看实际发送频率，再看接收比例，最后解释已经收到的帧有多旧。固定布局改变了接口与内存组织，能否直接借出还要看相应 RMW 的能力。算法需要的是及时到达的图像，下面再观察处理阶段超时会发生什么。
+\end{example}
+
+\begin{exercise}
+\label{ex:v2-ros-fixed-image}
+运行三种 RMW、两类图像的统一对照，记录默认配置与共享配置下的接收比例、P95 和两端借出能力。解释变长 Image 不能直接借出时共享内存如何工作，定长图像也不能借出时又应怎样判断原因。
+\end{exercise}
+
+\subsubsection{慢处理对照：队列深度与图像年龄}
+只保留 Fast DDS 的两个进程，把 Sink 的模拟处理设为 8 ms。先用默认小图像观察排队：
+\par\medskip\noindent\begin{minipage}{\linewidth}
+\begin{tbash}
+python3 src/image_path_demo/compare.py \
+  --output /tmp/image-path-slow \
+  --rmws rmw_fastrtps_cpp --modes separate \
+  --rate 250 --frames 500 --work-ms 8 --depth 5
+\end{tbash}
+\end{minipage}\par\smallskip
+接收端每帧花 8 ms，输入却每 4 ms 来一帧，队列很快积压。再换一个输出目录，用 \texttt{--depth 100} 重跑，保持其余条件和两秒排空时间相同。
+
+\Needspace{9\baselineskip}
+一组参考结果中，Source 均接近 250 Hz，Sink 约为 122 Hz：
+\begin{center}
+\begin{tabular}{rrr}
+\toprule
+队列深度 & 接收帧数 / 发送帧数 & P95 / ms\\
+\midrule
+5 & 249 / 500 & 20.0\\
+100 & 344 / 500 & 746.6\\
+\bottomrule
+\end{tabular}
+\end{center}
+较深的队列让更多帧留到发布结束后继续处理，也让它们等得更久。持续输入时，串行处理能力仍受理想 125 Hz 的上限约束。我们可以减少算法工作量、降采样、只处理最新帧，或安排并行流水线，以及让显示支路先缩小图像并降低频率，录制支路按保存需求和存储带宽单独规划。
+
+\begin{exercise}
+\label{ex:v2-ros-image-slow}
+运行深度 5 和 100 的慢处理对照，记录实际发送频率、接收比例、P95 和排空时间。根据记录解释吞吐、丢帧和图像年龄的关系，再给相机到识别的主链路与降频可视化支路画一份部署方案。
+\end{exercise}
+
+
+\subsubsection{从实验结果选择图像链路方案}
+现在回到开始的问题：$1440\times1080$ 的图像每隔 4 ms 到来，我们怎样把它及时送进识别节点，并减少一路上的搬运？根据前面的同机对照，我们已经可以给这条图像链路选择方案。
+
+对于能放入同一进程的节点，\textbf{优先把这些近邻节点组成组件，开启进程内通信并交接消息所有权。}表\ref{tab:ros2-image-results} 中，三种 RMW 的 \texttt{intra} 都完整交付了图像，P95 为 0.029--0.042 ms。这条路径可以继续使用普通图像接口，直接复用像素缓冲区。
+
+如果识别需要独立进程，又希望沿用标准 Image，\textbf{选择 Zenoh SHM 作为跨进程图像方案。}表\ref{tab:ros2-image-types-default} 与表\ref{tab:ros2-image-types-shared} 中，它的接收比例保持 100\%，P95 从 2.780 ms 降到 1.385 ms。已有 DDS 系统也可以采用 Cyclone DDS 的共享配置，其标准 Image 完整交付，P95 为 2.598 ms。而且普通 Image 的工具兼容性得以保留。
+
+如果主链路的尺寸与格式固定，也接受自定义接口，\textbf{就可以采用 FixedImage，配合 Fast DDS Data Sharing 或 Cyclone DDS iceoryx 的两端借出}，换取最优的性能。这两组借出发布都完整交付了图像，P95 分别为 0.341 ms 和 0.330 ms。此时可以沿用工程已有的 DDS 实现，把工作重点放在定长接口、两端借出与共享池配置上。需要接入标准图像工具的支路，再补齐元数据并转换接口。
+
+传输方案选好后，还要解决识别阶段的时间预算。每帧串行处理 8 ms，理想吞吐只有 125 Hz。刚才把队列从 5 加到 100，虽然接收帧数增加了，P95 却从 20.0 ms 升到 746.6 ms。因此，主链路采用较小的有界队列，优先处理最新可用的图像。要持续处理 250 Hz，就要减少单帧工作量，或安排达到目标吞吐的并行流水线。显示支路可以缩小图像并降低频率，录制支路则按保存需求安排缓存与写盘。
+
+这就是我们在开头约定的讲解过程：\textbf{从工程问题出发，先算预算，再建立基线，用相同负载比较布局、消息类型和共享方式，最后把交付比例与延迟转成方案选择。}下一步，把选中的方案接回真实相机与识别程序，检查采集到识别完成的整条链路。以后遇到其他性能问题，你也可以沿着这条思路调查：先明确要解决的现象，选出能回答问题的指标，再让每一次对照的结果决定下一步动作。

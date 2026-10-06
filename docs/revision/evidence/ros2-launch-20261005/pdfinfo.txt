@@ -1,0 +1,18 @@
+Keywords:        ElegantBook
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20260113)
+CreationDate:    Mon Oct  5 17:45:08 2026 CST
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           308
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       10719353 bytes
+Optimized:       no
+PDF version:     1.7

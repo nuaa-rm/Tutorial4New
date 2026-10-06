@@ -1,0 +1,5 @@
+Starting >>> training_tools
+Finished <<< training_tools [0.08s]
+
+Summary: 1 package finished [0.25s]
+Summary: 3 tests, 0 errors, 0 failures, 0 skipped

@@ -1,0 +1,15 @@
+[general]
+version = 1
+
+[[segment]]
+# 小池用于管理信息及小消息。
+[[segment.mempool]]
+size = 128
+count = 128
+[[segment.mempool]]
+size = 1024
+count = 128
+# 每块 5 MiB，容纳固定图像和传输元数据，共 32 块。
+[[segment.mempool]]
+size = 5242880
+count = 32

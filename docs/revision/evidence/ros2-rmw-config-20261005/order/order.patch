@@ -1,0 +1,596 @@
+--- before/chapters/A_ros2_engineering.tex
++++ after/chapters/A_ros2_engineering.tex
+@@ -68,253 +68,20 @@
+ 建议大家调车时，记得设置只在本地通信。曾经学长在调试场地发现明明没启动自瞄的车居然还能收到图像消息，沉思了半个小时，差点要怀疑人生了，最后发现自己的手机非常的烫，才意识到是自己开了热点，所有车都在同一个域里互相通信了。
+ \end{note}
+ 
+-\paragraph*{切换中间件与进阶变量*}
+-刚才我们通过域编号把节点分开了，接下来让我们看看如何切换消息底下的通信实现。RMW 是 ROS2 的中间件接口：上层仍然调用同一套发布、订阅 API，下面可以接 Fast DDS、Cyclone DDS 或 Zenoh。我们先让同一对 talker/listener 换个实现继续通信，再看配置文件研究怎样改变它的网络行为。
+-
+-\begin{center}
+-\begin{tabular}{p{0.18\textwidth}p{0.36\textwidth}p{0.36\textwidth}}
+-\toprule[1.5pt]
+-实现 & Humble 安装包 & RMW 变量值 \\
+-\midrule[1pt]
+-Fast DDS & \nolinkurl{ros-humble-rmw-fastrtps-cpp} & \nolinkurl{rmw_fastrtps_cpp} \\
+-Cyclone DDS & \nolinkurl{ros-humble-rmw-cyclonedds-cpp} & \nolinkurl{rmw_cyclonedds_cpp} \\
+-Zenoh & \nolinkurl{ros-humble-rmw-zenoh-cpp} & \nolinkurl{rmw_zenoh_cpp} \\
+-\bottomrule[1.5pt]
+-\end{tabular}
+-\end{center}
+-
+-这里 Fast DDS 的包名仍保留历史上的 fastrtps 写法。Humble 默认使用 Fast DDS，desktop 安装通常已经带上它。Fast DDS 与 Cyclone DDS 都走 DDS/RTPS 协议，具备互通基础。Zenoh 使用另一套协议，稍微会有一些区别。
+-
+-\begin{example}[先用默认配置切换两种 DDS]
+-先在一个终端安装 DDS 实现和收发示例：
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\begin{tbash}
+-sudo apt update
+-sudo apt install ros-humble-demo-nodes-cpp \
+-  ros-humble-rmw-fastrtps-cpp ros-humble-rmw-cyclonedds-cpp
+-\end{tbash}
+-\end{minipage}\par\smallskip
+-然后在两个新终端分别执行下面的设置：
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\begin{tbash}
+-source /opt/ros/humble/setup.bash
+-export ROS_DOMAIN_ID=42
+-export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+-\end{tbash}
+-\end{minipage}\par\smallskip
+-将中间件切换为 Cyclone DDS。随后在终端 A 运行：
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\begin{tbash}
+-ros2 run demo_nodes_cpp talker
+-\end{tbash}
+-\end{minipage}\par\smallskip
+-在终端 B 运行：
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\begin{tbash}
+-ros2 run demo_nodes_cpp listener
+-\end{tbash}
+-\end{minipage}\par\smallskip
+-listener 应和先前一样持续打印收到的 \texttt{Hello World} 及序号。
+-\end{example}
+-
+-如果启动时报找不到 RMW 动态库，先用 \texttt{ros2 pkg prefix 实现包名} 检查是否安装、是否加载了正确环境；如果包存在但变量拼错，也会加载失败。变量要在启动程序的那个终端设置，另一个终端不会自动继承。
+-
+-\paragraph*{两份 XML：目标相同，写法和加载方式不同}
+-默认配置能通信后，你可能发现机器同时接着有线、Wi-Fi 和虚拟网卡，发现消息走到了不想使用的网络上。我们用“只选定一块网卡”把两家的写法摆在一起。配置在本卷 \path{examples/ros2/rmw-config-demo}，只有两份 XML 和运行说明，不需要编译：
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\begin{lstlisting}[language={}]
+-rmw-config-demo/
+-  fastdds.xml       # 定义传输，再交给默认 participant
+-  cyclonedds.xml    # 在当前域的配置中直接选择网卡
+-  README.md        # DDS 对照、Zenoh 启动与恢复
+-\end{lstlisting}
+-\end{minipage}\par\smallskip
+-
+-\begin{example}[用两份配置选择通信网卡]
+-先把示例复制到自己的实验目录：
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\begin{tbash}
+-cp -r examples/ros2/rmw-config-demo ~/ros2-rmw-demo
+-ip -br -4 addr
+-\end{tbash}
+-\end{minipage}\par\smallskip
+-\texttt{ip -br -4 addr} 简要列出各网卡的 IPv4 地址。假设你选中的有线网卡地址是 \texttt{192.168.10.20/24}，配置里只填 \texttt{192.168.10.20}；示例地址一定要换成当前机器真实拥有的地址，第二台机器则填它自己的地址。本例先使用允许组播（multicast）的局域网，组播可以让多个节点收到同一份发现消息。
+-
+-\Needspace{27\baselineskip}
+-先看完整的 \texttt{fastdds.xml}：
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\lstinputlisting[frame=single,language=XML,caption={Fast DDS：指定 UDPv4 传输与网卡}]{examples/ros2/rmw-config-demo/fastdds.xml}
+-\end{minipage}\par\smallskip
+-\texttt{transport\_descriptor} 定义一套叫 \texttt{robot\_udp} 的传输，\texttt{type} 选择 IPv4 上的 UDP，\nolinkurl{interfaceWhiteList} 列出允许使用的本机网卡地址。下面的 \texttt{participant} 是 DDS 通信参与者的配置；\texttt{userTransports} 引用刚才定义的名字，\nolinkurl{is_default_profile="true"} 让创建参与者时使用这套默认配置。如果只有定义、没有引用，传输就不会接到参与者上。
+-
+-\texttt{useBuiltinTransports=false} 关闭内建传输，让本例显式使用这套 UDPv4 配置；否则内建传输仍可能参与通信。同机默认的共享内存传输也随之关闭，这份 XML 是观察网络路径的配置，大家不要把它作为默认配置。
+-
+-在两个终端保留前例的 Humble 环境和域 42，停止节点后设置：
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\begin{tbash}
+-unset CYCLONEDDS_URI
++\paragraph*{用环境变量切换中间件}
++\texttt{RMW\_IMPLEMENTATION} 用来选择已经安装的中间件实现，发布、订阅代码仍使用原来的 ROS2 接口。例如 Humble 默认的 Fast DDS 对应 \nolinkurl{rmw_fastrtps_cpp}。先停止旧节点，再在启动节点的两个终端分别设置：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\begin{tbash}
+ export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+-export FASTRTPS_DEFAULT_PROFILES_FILE="$HOME/ros2-rmw-demo/fastdds.xml"
+ ros2 daemon stop
+ \end{tbash}
+ \end{minipage}\par\smallskip
+-这里变量接收 XML 文件路径，我们用绝对路径避免启动目录变化造成找不到文件。然后分别启动 talker/listener，检查接收序号是否持续增加。
+-
+-\Needspace{18\baselineskip}
+-再看完成相同网卡选择任务的 \texttt{cyclonedds.xml}：
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\lstinputlisting[frame=single,language=XML,caption={Cyclone DDS：直接指定通信网卡}]{examples/ros2/rmw-config-demo/cyclonedds.xml}
+-\end{minipage}\par\smallskip
+-根元素变成了 \texttt{CycloneDDS}，命名空间也换成 \nolinkurl{https://cdds.io/config}。\texttt{Domain Id="any"} 表示这套配置匹配任意域，注意实际通信域仍由 \texttt{ROS\_DOMAIN\_ID} 决定，它不会让域 42 和域 43 互通。\texttt{General/Interfaces/NetworkInterface} 直接选择本机网卡，也可用 \texttt{name="enp3s0"} 按真实网卡名选择。\texttt{AllowMulticast=true} 允许在所选网卡上使用组播。
+-
+-停止前一轮节点，在两个终端改为：
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\begin{tbash}
+-unset FASTRTPS_DEFAULT_PROFILES_FILE
+-export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+-export CYCLONEDDS_URI="file://$HOME/ros2-rmw-demo/cyclonedds.xml"
+-ros2 daemon stop
+-\end{tbash}
+-\end{minipage}\par\smallskip
+-\texttt{file://} 后接绝对路径，展开后形如 \nolinkurl{file:///home/username/ros2-rmw-demo/cyclonedds.xml}。再次分别启动 talker/listener，核对同样的接收现象。
+-\end{example}
+-
+-两份文件虽然都是 XML，但里面的栏目不相同。Fast DDS 按 profile 定义参与者、传输及读写端配置；Cyclone DDS 按 Domain 下的 General、Discovery 等配置树组织参数。
+-
+-\begin{note}
+-这两份配置只调整网卡与传输，不会覆盖节点代码中明确指定的 ROS QoS。修改更多参数时查对应版本文档：\href{https://fast-dds.docs.eprosima.com/en/2.6.x/fastdds/xml_configuration/xml_configuration.html}{Fast DDS 2.6 XML}、\href{https://github.com/ros2/rmw_fastrtps/tree/humble#full-qos-configuration}{Humble 的 QoS 配置优先级}和\href{https://cyclonedds.io/docs/cyclonedds/0.10.2/config.html}{Cyclone DDS 0.10 配置}。
+-\end{note}
+-
+-\begin{exercise}
+-\label{ex:v2-ros-rmw}
+-分别使用两份 XML 跑通本机 talker/listener，记录 RMW 名称、域编号、配置路径和收到的消息。指出 Fast DDS 中“定义传输”“引用传输”“选为默认”的位置，并说明 Cyclone DDS 的 \texttt{Id="any"} 为什么不等于跨域通信。解释为什么两台机器选网卡时不能照抄同一个 IP。
+-\end{exercise}
+-
+-\paragraph*{Zenoh：安装之后，还要安排发现与连接}
+-Zenoh 也接在 RMW 接口下面，所以这次继续运行原来的 talker/listener。不过它不走 DDS/RTPS，配置文件也从 XML 换成了 JSON5。
+-
+-\begin{example}[安装 Zenoh 并完成三终端收发]
+-在终端输入命令安装：
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\begin{tbash}
+-sudo apt update
+-sudo apt install ros-humble-rmw-zenoh-cpp
+-source /opt/ros/humble/setup.bash
+-ros2 pkg prefix rmw_zenoh_cpp
+-ros2 pkg executables rmw_zenoh_cpp
+-\end{tbash}
+-\end{minipage}\par\smallskip
+-应能查到安装目录和 \texttt{rmw\_zenohd} 可执行程序。
+-
+-停止 DDS 节点，打开三个终端，分别加载所选安装环境并执行：
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\begin{tbash}
+-source /opt/ros/humble/setup.bash
+-# 源码安装时，在这里再 source 自己工作空间的 install/setup.bash
+-export ROS_DOMAIN_ID=42
+-export RMW_IMPLEMENTATION=rmw_zenoh_cpp
+-unset ROS_LOCALHOST_ONLY ROS_DISCOVERY_SERVER
+-unset CYCLONEDDS_URI FASTRTPS_DEFAULT_PROFILES_FILE
+-unset ZENOH_SESSION_CONFIG_URI ZENOH_ROUTER_CONFIG_URI
+-unset ZENOH_CONFIG_OVERRIDE
+-ros2 daemon stop
+-\end{tbash}
+-\end{minipage}\par\smallskip
+-终端 A 先启动 Zenoh 路由器（router），保持它运行：
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\begin{tbash}
+-ros2 run rmw_zenoh_cpp rmw_zenohd
+-\end{tbash}
+-\end{minipage}\par\smallskip
+-终端 B 运行 talker，终端 C 运行 listener，命令和前面的 DDS 实验相同。默认节点会连接本机 TCP 7447 的 router，获取发现信息；节点配置默认关闭组播发现，所以漏掉 router 时，节点之间会无法通信。若 router 启动时报告 IPv6 不可用，可按下例把它的监听端点替换成 IPv4 地址。
+-
+-listener 应持续收到消息。完成后分别按 Ctrl+C 停止两个节点和自己的 router。默认 peer 模式可以在发现后建立节点直连，router 不必转发所有应用消息；下一例用 client 模式明确让数据经过 router。
+-\end{example}
+-
+-\paragraph*{Zenoh 的两份 JSON5 分别给谁读}
+-每个 ROS 进程通过 RMW 创建 Zenoh 会话（session），会话决定节点如何连接；router 则有自己的监听与路由配置。\texttt{ZENOH\_SESSION\_CONFIG\_URI} 指向节点会话文件，\texttt{ZENOH\_ROUTER\_CONFIG\_URI} 指向 router 文件。
+-
+-\begin{example}[先指定本机端点，再连接另一台机器]
+-先复制已安装版本随包提供的完整配置，保留其中的 ROS 专用设置。在已经加载 Zenoh 安装环境的终端执行一次：
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\begin{tbash}
+-mkdir -p ~/ros2-rmw-demo/zenoh
+-zenoh_share="$(ros2 pkg prefix --share rmw_zenoh_cpp)"
+-cp "$zenoh_share/config/DEFAULT_RMW_ZENOH_SESSION_CONFIG.json5" \
+-  ~/ros2-rmw-demo/zenoh/session.json5
+-cp "$zenoh_share/config/DEFAULT_RMW_ZENOH_ROUTER_CONFIG.json5" \
+-  ~/ros2-rmw-demo/zenoh/router.json5
+-\end{tbash}
+-\end{minipage}\par\smallskip
+-编辑 \texttt{router.json5}，在已有的 mode 和 listen 中找到下列字段并改成这样，其他字段保留：
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\begin{lstlisting}[language={},frame=single]
+-mode: "router",
+-listen: {
+-  endpoints: ["tcp/127.0.0.1:7447"],
+-  // 保留 listen 中的其他字段
+-},
+-\end{lstlisting}
+-\end{minipage}\par\smallskip
+-\texttt{listen.endpoints} 是 router 在本机接受连接的地址。接下来编辑 \texttt{session.json5} 的已有字段：
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\begin{lstlisting}[language={},frame=single]
+-mode: "client",
+-connect: {
+-  endpoints: ["tcp/127.0.0.1:7447"],
+-  // 保留 connect 中的其他字段
+-},
+-\end{lstlisting}
+-\end{minipage}\par\smallskip
+-\texttt{connect.endpoints} 是节点要连接的目标；client 模式把通信交给 router 转发。这样“谁监听、谁主动连接”就清楚了，也避免远端节点仍用默认 peer 模式、却没有可达的直连地址。
+-
+-终端 A 设置 router 的文件后启动：
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\begin{tbash}
+-export ZENOH_ROUTER_CONFIG_URI="$HOME/ros2-rmw-demo/zenoh/router.json5"
+-ros2 run rmw_zenoh_cpp rmw_zenohd
+-\end{tbash}
+-\end{minipage}\par\smallskip
+-终端 B、C 分别设置 session 的文件，停止旧 daemon，再分别运行 talker/listener：
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\begin{tbash}
+-export ZENOH_SESSION_CONFIG_URI="$HOME/ros2-rmw-demo/zenoh/session.json5"
+-ros2 daemon stop
+-\end{tbash}
+-\end{minipage}\par\smallskip
+-先确认本机收发仍然正常。若要让另一台机器接入，假设 router 主机的实际局域网地址是 \texttt{192.168.10.20}，停止本轮进程，把 router 的监听端点改为 \nolinkurl{tcp/192.168.10.20:7447}，再把两台节点机器各自 session 文件中的连接端点都改为这个地址，保持 client 模式，重新启动 router 和节点。
+-
+-跨机器前，两端仍要使用相同域与兼容的消息定义，并确认到 router 的 TCP 7447 连接可达、所用网络或容器端口已放行。这里用显式端点安排连接，不依赖局域网组播来寻找 router；Zenoh 的通信范围按 session/router 配置控制，注意此时\texttt{ROS\_LOCALHOST\_ONLY} 无法限制跨机器连接。
+-\end{example}
+-
+-\texttt{ZENOH\_CONFIG\_OVERRIDE} 还可以临时覆盖配置项，例如 \nolinkurl{listen/endpoints=["tcp/127.0.0.1:7447"]}；它在文件加载后应用，且对继承该变量的节点和 router 都生效。
+-
+-\begin{exercise}
+-\label{ex:v2-ros-zenoh-config}
+-按上例复制并修改两份 JSON5，以本机 client/router 方式跑通收发。记录三个终端各自需要的配置变量，说明 \texttt{listen.endpoints} 与 \texttt{connect.endpoints} 的区别，以及远端节点为什么不能连接自己的 \texttt{127.0.0.1}。结束后停止本次进程并恢复默认 RMW。
+-\end{exercise}
+-
+-\paragraph*{恢复实验环境，再按需要查进阶选项}
+-先在各终端按 Ctrl+C 停止本次节点与 router，再清除这次临时设置并停止 daemon。下面假定实验开始前这些变量没有设置；原来已有自己的配置时，应恢复记录下来的值：
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\begin{tbash}
+-unset RMW_IMPLEMENTATION ROS_DOMAIN_ID ROS_LOCALHOST_ONLY
+-unset FASTRTPS_DEFAULT_PROFILES_FILE CYCLONEDDS_URI
+-unset ROS_DISCOVERY_SERVER RMW_FASTRTPS_USE_QOS_FROM_XML
+-unset ZENOH_SESSION_CONFIG_URI ZENOH_ROUTER_CONFIG_URI
+-unset ZENOH_CONFIG_OVERRIDE
+-ros2 daemon stop
+-\end{tbash}
+-\end{minipage}\par\smallskip
+-
+-\texttt{ROS\_DISCOVERY\_SERVER} 是 Fast DDS 发现服务器模式的入口，填写的是已部署服务器的地址与端口，不是“允许与哪些机器人通信”的名单。发现服务器帮助 DDS 参与者交换发现信息，通常不转发应用消息；它与上面的 Zenoh client/router 数据转发不是同一种机制。
++重新启动节点后，新进程才会使用这个选择；用 \texttt{unset RMW\_IMPLEMENTATION} 可以恢复默认实现。安装其他实现后，改这个变量就能切换。具体安装、配置和对照实验留到第\ref{sec:ros2-rmw-selection}节，再结合大图像链路一起看。
+ 
+ \begin{conclusion}
+ \begin{itemize}
+ \item 找不到包：先确认构建、安装和环境加载，再修改代码。
+ \item 看不到节点：检查域、发现范围和 RMW，再检查 QoS 与接口。
+-\item 换 RMW 分三步：安装实现、选择实现、按该实现加载配置；DDS XML 与 Zenoh JSON5 不能互换。
+-\item DDS 网卡配置填本机地址；Zenoh 区分 router 监听端点与节点连接目标，默认发现要先启动 router。
+ \item 改了环境：重启相关节点与 daemon；变量只影响继承它的新进程。
+ \item 域与发现范围负责通信组织；认证和访问控制需要另行配置。
+ \end{itemize}
+--- before/chapters/A_ros2_image_path.tex
++++ after/chapters/A_ros2_image_path.tex
+@@ -40,22 +40,264 @@
+ 
+ \subsubsection{中间件怎么选：先比较同一条链路}
+ \label{sec:ros2-rmw-selection}
+-\texttt{rclcpp} 下面的 RMW 是中间件接口，并不是某一家 DDS 产品的名字。Humble 的常用起点是 Fast DDS（\nolinkurl{rmw_fastrtps_cpp}），我们也可以换成 Cyclone DDS（\nolinkurl{rmw_cyclonedds_cpp}），或者使用 Zenoh（ \nolinkurl{rmw_zenoh_cpp}）。发布与订阅的基本代码通常不用跟着改，但发现机制、传输路径、缓存与配置方法会变化。小字符串测试能确认通信成立，大图像测试才能暴露吞吐、分片与排队问题。
++\texttt{rclcpp} 下面的 RMW 是中间件接口，并不是某一家 DDS 产品的名字。Humble 的常用起点是 Fast DDS（\nolinkurl{rmw_fastrtps_cpp}），我们也可以换成 Cyclone DDS（\nolinkurl{rmw_cyclonedds_cpp}），或者使用 Zenoh（\nolinkurl{rmw_zenoh_cpp}）。发布与订阅的基本代码通常不用跟着改，但发现机制、传输路径、缓存与配置方法会变化。小字符串测试能确认通信成立，大图像测试才能暴露吞吐、分片与排队问题。
+ 
+ \begin{center}
+-\begin{tabular}{p{0.17\textwidth}p{0.35\textwidth}p{0.35\textwidth}}
+-\toprule
+-实现 & 接入与发现\\
+-\midrule
+-Fast DDS & Humble 默认 RMW；按需使用自己的 XML 配置\\
+-Cyclone DDS & 安装对应 RMW 后切换；配置使用 \nolinkurl{CYCLONEDDS_URI}\\
+-Zenoh & 安装对应 RMW 后切换；默认通过路由器协助发现\\
+-共同口径 & 两端使用相同 RMW、消息、QoS 与部署布局\\
+-\bottomrule
++\begin{tabular}{p{0.18\textwidth}p{0.36\textwidth}p{0.36\textwidth}}
++\toprule[1.5pt]
++实现 & Humble 安装包 & RMW 变量值 \\
++\midrule[1pt]
++Fast DDS & \nolinkurl{ros-humble-rmw-fastrtps-cpp} & \nolinkurl{rmw_fastrtps_cpp} \\
++Cyclone DDS & \nolinkurl{ros-humble-rmw-cyclonedds-cpp} & \nolinkurl{rmw_cyclonedds_cpp} \\
++Zenoh & \nolinkurl{ros-humble-rmw-zenoh-cpp} & \nolinkurl{rmw_zenoh_cpp} \\
++\bottomrule[1.5pt]
+ \end{tabular}
+ \end{center}
+ 
+-切换操作见前面的环境小节。这里进一步要求两端显式设置同一种 RMW，停止旧节点后重启。DDS 实现之间存在互操作能力，但当前实验应先排除混用实现造成的变量。尤其不要一边换 RMW、一边改可靠性和图像尺寸，最后凭“好像快了”给某一家颁奖。
++这里 Fast DDS 的包名仍保留历史上的 fastrtps 写法。Humble 默认使用 Fast DDS，desktop 安装通常已经带上它。Fast DDS 与 Cyclone DDS 都走 DDS/RTPS 协议，具备互通基础。Zenoh 使用另一套协议，稍微会有一些区别。
++
++\paragraph*{先安装，再用默认配置跑通}
++前面已经见过 \texttt{RMW\_IMPLEMENTATION}。现在先把实现装好，在两个终端显式选择同一种 RMW，停止旧节点后重启。DDS 实现之间存在互操作能力，但当前实验先用相同实现排除额外变量。
++
++\begin{example}[先用默认配置切换两种 DDS]
++先在一个终端安装 DDS 实现和收发示例：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\begin{tbash}
++sudo apt update
++sudo apt install ros-humble-demo-nodes-cpp \
++  ros-humble-rmw-fastrtps-cpp ros-humble-rmw-cyclonedds-cpp
++\end{tbash}
++\end{minipage}\par\smallskip
++然后在两个新终端分别执行下面的设置：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\begin{tbash}
++source /opt/ros/humble/setup.bash
++export ROS_DOMAIN_ID=42
++export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
++\end{tbash}
++\end{minipage}\par\smallskip
++将中间件切换为 Cyclone DDS。随后在终端 A 运行：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\begin{tbash}
++ros2 run demo_nodes_cpp talker
++\end{tbash}
++\end{minipage}\par\smallskip
++在终端 B 运行：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\begin{tbash}
++ros2 run demo_nodes_cpp listener
++\end{tbash}
++\end{minipage}\par\smallskip
++listener 应和先前一样持续打印收到的 \texttt{Hello World} 及序号。
++\end{example}
++
++如果启动时报找不到 RMW 动态库，先用 \texttt{ros2 pkg prefix 实现包名} 检查是否安装、是否加载了正确环境；如果包存在但变量拼错，也会加载失败。变量要在启动程序的那个终端设置，另一个终端不会自动继承。
++
++\paragraph*{两份 XML：目标相同，写法和加载方式不同}
++默认配置能通信后，你可能发现机器同时接着有线、Wi-Fi 和虚拟网卡，发现消息走到了不想使用的网络上。我们用“只选定一块网卡”把两家的写法摆在一起。配置在本卷 \path{examples/ros2/rmw-config-demo}，只有两份 XML 和运行说明，不需要编译：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\begin{lstlisting}[language={}]
++rmw-config-demo/
++  fastdds.xml       # 定义传输，再交给默认 participant
++  cyclonedds.xml    # 在当前域的配置中直接选择网卡
++  README.md        # DDS 对照、Zenoh 启动与恢复
++\end{lstlisting}
++\end{minipage}\par\smallskip
++
++\begin{example}[用两份配置选择通信网卡]
++先把示例复制到自己的实验目录：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\begin{tbash}
++cp -r examples/ros2/rmw-config-demo ~/ros2-rmw-demo
++ip -br -4 addr
++\end{tbash}
++\end{minipage}\par\smallskip
++\texttt{ip -br -4 addr} 简要列出各网卡的 IPv4 地址。假设你选中的有线网卡地址是 \texttt{192.168.10.20/24}，配置里只填 \texttt{192.168.10.20}；示例地址一定要换成当前机器真实拥有的地址，第二台机器则填它自己的地址。本例先使用允许组播（multicast）的局域网，组播可以让多个节点收到同一份发现消息。
++
++\Needspace{27\baselineskip}
++先看完整的 \texttt{fastdds.xml}：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\lstinputlisting[frame=single,language=XML,caption={Fast DDS：指定 UDPv4 传输与网卡}]{examples/ros2/rmw-config-demo/fastdds.xml}
++\end{minipage}\par\smallskip
++\texttt{transport\_descriptor} 定义一套叫 \texttt{robot\_udp} 的传输，\texttt{type} 选择 IPv4 上的 UDP，\nolinkurl{interfaceWhiteList} 列出允许使用的本机网卡地址。下面的 \texttt{participant} 是 DDS 通信参与者的配置；\texttt{userTransports} 引用刚才定义的名字，\nolinkurl{is_default_profile="true"} 让创建参与者时使用这套默认配置。如果只有定义、没有引用，传输就不会接到参与者上。
++
++\texttt{useBuiltinTransports=false} 关闭内建传输，让本例显式使用这套 UDPv4 配置；否则内建传输仍可能参与通信。同机默认的共享内存传输也随之关闭，这份 XML 是观察网络路径的配置，大家不要把它作为默认配置。
++
++\Needspace{8\baselineskip}
++在两个终端保留前例的 Humble 环境和域 42，停止节点后设置：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\begin{tbash}
++unset CYCLONEDDS_URI
++export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
++export FASTRTPS_DEFAULT_PROFILES_FILE="$HOME/ros2-rmw-demo/fastdds.xml"
++ros2 daemon stop
++\end{tbash}
++\end{minipage}\par\smallskip
++这里变量接收 XML 文件路径，我们用绝对路径避免启动目录变化造成找不到文件。然后分别启动 talker/listener，检查接收序号是否持续增加。
++
++\Needspace{18\baselineskip}
++再看完成相同网卡选择任务的 \texttt{cyclonedds.xml}：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\lstinputlisting[frame=single,language=XML,caption={Cyclone DDS：直接指定通信网卡}]{examples/ros2/rmw-config-demo/cyclonedds.xml}
++\end{minipage}\par\smallskip
++根元素变成了 \texttt{CycloneDDS}，命名空间也换成 \nolinkurl{https://cdds.io/config}。\texttt{Domain Id="any"} 表示这套配置匹配任意域，注意实际通信域仍由 \texttt{ROS\_DOMAIN\_ID} 决定，它不会让域 42 和域 43 互通。\texttt{General/Interfaces/NetworkInterface} 直接选择本机网卡，也可用 \texttt{name="enp3s0"} 按真实网卡名选择。\texttt{AllowMulticast=true} 允许在所选网卡上使用组播。
++
++停止前一轮节点，在两个终端改为：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\begin{tbash}
++unset FASTRTPS_DEFAULT_PROFILES_FILE
++export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
++export CYCLONEDDS_URI="file://$HOME/ros2-rmw-demo/cyclonedds.xml"
++ros2 daemon stop
++\end{tbash}
++\end{minipage}\par\smallskip
++\texttt{file://} 后接绝对路径，展开后形如 \nolinkurl{file:///home/username/ros2-rmw-demo/cyclonedds.xml}。再次分别启动 talker/listener，核对同样的接收现象。
++\end{example}
++
++两份文件虽然都是 XML，但里面的栏目不相同。Fast DDS 按 profile 定义参与者、传输及读写端配置；Cyclone DDS 按 Domain 下的 General、Discovery 等配置树组织参数。
++
++\begin{note}
++这两份配置只调整网卡与传输，不会覆盖节点代码中明确指定的 ROS QoS。修改更多参数时查对应版本文档：\href{https://fast-dds.docs.eprosima.com/en/2.6.x/fastdds/xml_configuration/xml_configuration.html}{Fast DDS 2.6 XML}、\href{https://github.com/ros2/rmw_fastrtps/tree/humble#full-qos-configuration}{Humble 的 QoS 配置优先级}和\href{https://cyclonedds.io/docs/cyclonedds/0.10.2/config.html}{Cyclone DDS 0.10 配置}。
++\end{note}
++
++\begin{exercise}
++\label{ex:v2-ros-rmw}
++分别使用两份 XML 跑通本机 talker/listener，记录 RMW 名称、域编号、配置路径和收到的消息。指出 Fast DDS 中“定义传输”“引用传输”“选为默认”的位置，并说明 Cyclone DDS 的 \texttt{Id="any"} 为什么不等于跨域通信。解释为什么两台机器选网卡时不能照抄同一个 IP。
++\end{exercise}
++
++\paragraph*{Zenoh：安装之后，还要安排发现与连接}
++Zenoh 使用自己的协议。\texttt{rmw\_zenoh\_cpp} 把 ROS2 的中间件接口接到 Zenoh，所以我们继续运行原来的 talker/listener，下面的发现与传输方式却换了，配置文件也从 XML 换成了 JSON5。需要跨主机、无线链路或多机器人通信时，可以进一步安排路由与连接拓扑。
++
++\begin{example}[安装 Zenoh 并完成三终端收发]
++在终端输入命令安装：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\begin{tbash}
++sudo apt update
++sudo apt install ros-humble-rmw-zenoh-cpp
++source /opt/ros/humble/setup.bash
++ros2 pkg prefix rmw_zenoh_cpp
++ros2 pkg executables rmw_zenoh_cpp
++\end{tbash}
++\end{minipage}\par\smallskip
++应能查到安装目录和 \texttt{rmw\_zenohd} 可执行程序。
++
++停止 DDS 节点，打开三个终端，分别加载所选安装环境并执行：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\begin{tbash}
++source /opt/ros/humble/setup.bash
++# 源码安装时，在这里再 source 自己工作空间的 install/setup.bash
++export ROS_DOMAIN_ID=42
++export RMW_IMPLEMENTATION=rmw_zenoh_cpp
++unset ROS_LOCALHOST_ONLY ROS_DISCOVERY_SERVER
++unset CYCLONEDDS_URI FASTRTPS_DEFAULT_PROFILES_FILE
++unset ZENOH_SESSION_CONFIG_URI ZENOH_ROUTER_CONFIG_URI
++unset ZENOH_CONFIG_OVERRIDE
++ros2 daemon stop
++\end{tbash}
++\end{minipage}\par\smallskip
++终端 A 先启动 Zenoh 路由器（router），保持它运行：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\begin{tbash}
++ros2 run rmw_zenoh_cpp rmw_zenohd
++\end{tbash}
++\end{minipage}\par\smallskip
++终端 B 运行 talker，终端 C 运行 listener，命令和前面的 DDS 实验相同。默认节点会连接本机 TCP 7447 的 router，获取发现信息；节点配置默认关闭组播发现，所以漏掉 router 时，节点之间会无法通信。若 router 启动时报告 IPv6 不可用，可按下例把它的监听端点替换成 IPv4 地址。
++
++listener 应持续收到消息。完成后分别按 Ctrl+C 停止两个节点和自己的 router。默认 peer 模式可以在发现后建立节点直连，router 不必转发所有应用消息；下一例用 client 模式明确让数据经过 router。
++\end{example}
++
++\paragraph*{Zenoh 的两份 JSON5 分别给谁读}
++每个 ROS 进程通过 RMW 创建 Zenoh 会话（session），会话决定节点如何连接；router 则有自己的监听与路由配置。\texttt{ZENOH\_SESSION\_CONFIG\_URI} 指向节点会话文件，\texttt{ZENOH\_ROUTER\_CONFIG\_URI} 指向 router 文件。
++
++\begin{example}[先指定本机端点，再连接另一台机器]
++先复制已安装版本随包提供的完整配置，保留其中的 ROS 专用设置。在已经加载 Zenoh 安装环境的终端执行一次：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\begin{tbash}
++mkdir -p ~/ros2-rmw-demo/zenoh
++zenoh_share="$(ros2 pkg prefix --share rmw_zenoh_cpp)"
++cp "$zenoh_share/config/DEFAULT_RMW_ZENOH_SESSION_CONFIG.json5" \
++  ~/ros2-rmw-demo/zenoh/session.json5
++cp "$zenoh_share/config/DEFAULT_RMW_ZENOH_ROUTER_CONFIG.json5" \
++  ~/ros2-rmw-demo/zenoh/router.json5
++\end{tbash}
++\end{minipage}\par\smallskip
++\Needspace{11\baselineskip}
++编辑 \texttt{router.json5}，在已有的 mode 和 listen 中找到下列字段并改成这样，其他字段保留：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\begin{lstlisting}[language={},frame=single]
++mode: "router",
++listen: {
++  endpoints: ["tcp/127.0.0.1:7447"],
++  // 保留 listen 中的其他字段
++},
++\end{lstlisting}
++\end{minipage}\par\smallskip
++\texttt{listen.endpoints} 是 router 在本机接受连接的地址。接下来编辑 \texttt{session.json5} 的已有字段：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\begin{lstlisting}[language={},frame=single]
++mode: "client",
++connect: {
++  endpoints: ["tcp/127.0.0.1:7447"],
++  // 保留 connect 中的其他字段
++},
++\end{lstlisting}
++\end{minipage}\par\smallskip
++\texttt{connect.endpoints} 是节点要连接的目标；client 模式把通信交给 router 转发。这样“谁监听、谁主动连接”就清楚了，也避免远端节点仍用默认 peer 模式、却没有可达的直连地址。
++
++终端 A 设置 router 的文件后启动：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\begin{tbash}
++export ZENOH_ROUTER_CONFIG_URI="$HOME/ros2-rmw-demo/zenoh/router.json5"
++ros2 run rmw_zenoh_cpp rmw_zenohd
++\end{tbash}
++\end{minipage}\par\smallskip
++终端 B、C 分别设置 session 的文件，停止旧 daemon，再分别运行 talker/listener：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\begin{tbash}
++export ZENOH_SESSION_CONFIG_URI="$HOME/ros2-rmw-demo/zenoh/session.json5"
++ros2 daemon stop
++\end{tbash}
++\end{minipage}\par\smallskip
++先确认本机收发仍然正常。若要让另一台机器接入，假设 router 主机的实际局域网地址是 \texttt{192.168.10.20}，停止本轮进程，把 router 的监听端点改为 \nolinkurl{tcp/192.168.10.20:7447}，再把两台节点机器各自 session 文件中的连接端点都改为这个地址，保持 client 模式，重新启动 router 和节点。
++
++跨机器前，两端仍要使用相同域与兼容的消息定义，并确认到 router 的 TCP 7447 连接可达、所用网络或容器端口已放行。这里用显式端点安排连接，不依赖局域网组播来寻找 router；Zenoh 的通信范围按 session/router 配置控制，注意此时\texttt{ROS\_LOCALHOST\_ONLY} 无法限制跨机器连接。
++\end{example}
++
++\texttt{ZENOH\_CONFIG\_OVERRIDE} 还可以临时覆盖配置项，例如 \nolinkurl{listen/endpoints=["tcp/127.0.0.1:7447"]}；它在文件加载后应用，且对继承该变量的节点和 router 都生效。
++
++\begin{exercise}
++\label{ex:v2-ros-zenoh-config}
++按上例复制并修改两份 JSON5，以本机 client/router 方式跑通收发。记录三个终端各自需要的配置变量，说明 \texttt{listen.endpoints} 与 \texttt{connect.endpoints} 的区别，以及远端节点为什么不能连接自己的 \texttt{127.0.0.1}。结束后停止本次进程并恢复默认 RMW。
++\end{exercise}
++
++\Needspace{13\baselineskip}
++\paragraph*{恢复实验环境，再按需要查进阶选项}
++先在各终端按 Ctrl+C 停止本次节点与 router，再清除这次临时设置并停止 daemon。下面假定实验开始前这些变量没有设置；原来已有自己的配置时，应恢复记录下来的值：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\begin{tbash}
++unset RMW_IMPLEMENTATION ROS_DOMAIN_ID ROS_LOCALHOST_ONLY
++unset FASTRTPS_DEFAULT_PROFILES_FILE CYCLONEDDS_URI
++unset ROS_DISCOVERY_SERVER RMW_FASTRTPS_USE_QOS_FROM_XML
++unset ZENOH_SESSION_CONFIG_URI ZENOH_ROUTER_CONFIG_URI
++unset ZENOH_CONFIG_OVERRIDE
++ros2 daemon stop
++\end{tbash}
++\end{minipage}\par\smallskip
++
++\texttt{ROS\_DISCOVERY\_SERVER} 是 Fast DDS 发现服务器模式的入口，填写的是已部署服务器的地址与端口，不是“允许与哪些机器人通信”的名单。发现服务器帮助 DDS 参与者交换发现信息，通常不转发应用消息；它与上面的 Zenoh client/router 数据转发不是同一种机制。
++
++Zenoh 的发现、路由与参数可查 \href{https://github.com/ros2/rmw_zenoh/blob/humble/README.md}{安装与配置说明}和\href{https://github.com/ros2/rmw_zenoh/blob/humble/docs/design.md}{RMW 设计说明}。先把相同节点跑通，再测试大图像与实际网络，不能凭协议名字判断哪一个更快。
++
++\begin{conclusion}
++\begin{itemize}
++\item 换 RMW 分三步：安装实现、选择实现、按该实现加载配置；DDS XML 与 Zenoh JSON5 不能互换。
++\item DDS 网卡配置填本机地址；Zenoh 区分 router 监听端点与节点连接目标，默认发现要先启动 router。
++\item 先用小消息确认收发，再固定输入与部署方式比较大图像；切换前停止旧节点，实验后恢复环境。
++\end{itemize}
++\end{conclusion}
++
++\paragraph*{再用大图像做对照}
++中间件已经能通信了，接下来固定消息、QoS 与部署布局，只改变待比较的实现。尤其不要一边换 RMW、一边改可靠性和图像尺寸，最后凭“好像快了”给某一家颁奖。
+ 
+ \begin{example}[安排一个可以解释结果的对照]
+ 本节与后两节共用 \path{examples/ros2/image-path-demo}。它生成同样的图像，先固定帧数、尺寸、频率、\texttt{best\_effort} 和深度 5，然后对两种 RMW 分别运行三种布局：两个进程、同一进程关闭进程内通信、同一进程开启进程内通信。这样，前两项帮助观察中间件与进程边界，最后一项帮助观察所有权传递；完整构建和命令在下一节。
+@@ -64,11 +306,6 @@
+ \end{example}
+ 
+ Fast DDS 的 RMW 默认项、同步与异步发布、Data Sharing 配置可查 \href{https://github.com/ros2/rmw_fastrtps/blob/humble/README.md}{Fast DDS 的说明}；Cyclone DDS的说明则在 \href{https://github.com/ros2/rmw_cyclonedds/blob/humble/README.md}{Cyclone DDS 的说明}。
+-
+-\paragraph*{把 Zenoh 接到同一条图像链路}
+-Zenoh 不是另一家 DDS。\texttt{rmw\_zenoh\_cpp} 把 ROS2 的中间件接口接到 Zenoh，所以我们仍然编写熟悉的节点、消息和组件，下面的发现与传输方式却换了。默认配置先连接本机 Zenoh 路由器，由它协助节点发现彼此，随后同机 peer 会建立直接连接。需要跨主机、无线链路或多机器人通信时，可以进一步配置路由与连接拓扑。
+-
+-Zenoh 的发现、路由与参数可查 \href{https://github.com/ros2/rmw_zenoh/blob/humble/README.md}{安装与配置说明}和\href{https://github.com/ros2/rmw_zenoh/blob/humble/docs/design.md}{RMW 设计说明}。先把相同节点跑通，再测试大图像与实际网络，不能凭协议名字判断哪一个更快。
+ 
+ \begin{exercise}
+ \label{ex:v2-ros-rmw-choice}
+--- before/answers.tex
++++ after/answers.tex
+@@ -86,20 +86,6 @@
+ ros2 topic pub --once /receive std_msgs/msg/String "{data: armor_found}"
+ \end{tbash}
+ 应收到 \texttt{I can hear:armor\_found}。停止节点后，原命令可能等待订阅者；加 \nolinkurl{--wait-matching-subscriptions} 并设为 0，可以在没有订阅者时也发送一次，但不会收到回复。CLI 打印 publishing 只说明发布端执行了发送，处理是否发生要由回调日志、响应消息等证据确认。
+-\end{solution}
+-
+-\paragraph*{随堂练习 \ref{ex:v2-ros-rmw}}
+-\begin{solution}
+-先按正文安装两种实现，把实验目录内两份 XML 的示例 IP 换成所选本机网卡的真实 IPv4 地址。每轮两个终端使用相同域与同一种 RMW，各自设置对应配置变量，停止旧节点和 daemon 后分别启动 talker/listener。判断依据是 listener 持续收到 \texttt{Hello World} 和递增序号；同时记录 \texttt{printenv} 查到的实现、域与配置路径，不能用 talker 单方面打印 Publishing 代替收发证据。
+-
+-Fast DDS 的 \texttt{transport\_descriptors} 定义 \texttt{robot\_udp}，\texttt{participant/rtps/userTransports} 引用该名字，\texttt{is\_default\_profile="true"} 把 participant 设为默认。\texttt{useBuiltinTransports=false} 关闭内建传输，本例使用显式定义的 UDPv4。Cyclone DDS 的 \texttt{Domain Id="any"} 只决定配置适用于哪些域，实际通信域仍由 \texttt{ROS\_DOMAIN\_ID} 决定；它不会取消域隔离。网卡白名单或 \texttt{NetworkInterface} 选择的是当前机器的接口，因此两台机器应分别填写自己的地址。XML 的根元素、命名空间与配置树不同，改环境变量名不能把一种 XML 转成另一种。
+-\end{solution}
+-
+-\paragraph*{随堂练习 \ref{ex:v2-ros-zenoh-config}}
+-\begin{solution}
+-三个终端都加载 Humble（源码安装时再加载 Zenoh 工作空间），设置 \texttt{rmw\_zenoh\_cpp} 与域 42。router 终端用 \texttt{ZENOH\_ROUTER\_CONFIG\_URI} 加载完整 router 文件，监听 \nolinkurl{tcp/127.0.0.1:7447}；talker 和 listener 终端用 \texttt{ZENOH\_SESSION\_CONFIG\_URI} 加载完整 session 文件，设置 client 模式并连接同一端点。两类变量都用绝对文件路径，不加 \texttt{file://}。先启动 router，再启动两个节点，以 listener 持续收包作为完成依据。
+-
+-\texttt{listen.endpoints} 指定当前进程接受连接的位置，\texttt{connect.endpoints} 指定主动连接的目标。远端机器上的 \texttt{127.0.0.1} 指向远端自己，跨机器时应换成 router 主机可达的真实地址，router 也要监听相应地址。默认 peer 配置可以在发现后直连；本题的 client 配置让 router 转发应用数据。结束时分别按 Ctrl+C 停止两个节点与本次 router，在各终端按正文清除临时 RMW、域、DDS/Zenoh 配置变量和覆盖项，再停止 daemon；实验前已有自定义值则恢复原值。只结束 router 或只 unset 变量，都不会把仍运行的节点切回 DDS。
+ \end{solution}
+ 
+ \paragraph*{随堂练习 \ref{ex:v2-ros-domain}}
+@@ -207,6 +193,21 @@
+ Bayer8 为 $1440\times1080\times250=388\,800\,000\,\mathrm{B/s}$，即 388.8 MB/s；BGR8 乘以 3，为 1166.4 MB/s。两次完整复制各读写一遍，估算新增 $2\times2\times1.1664=4.6656\,\mathrm{GB/s}$ 读写量，实际总线流量受缓存、DMA 和实现影响。8 ms 串行阶段理想只能处理 125 Hz，队列加深不能长期保住全部 250 Hz 输入；它可能让图像变旧。至少同时记录接收比例与图像年龄/延迟，并确认 Source 的实际发送频率，不能只看目标定时器设置。
+ \end{solution}
+ 
++\paragraph*{随堂练习 \ref{ex:v2-ros-rmw}}
++\begin{solution}
++先按正文安装两种实现，把实验目录内两份 XML 的示例 IP 换成所选本机网卡的真实 IPv4 地址。每轮两个终端使用相同域与同一种 RMW，各自设置对应配置变量，停止旧节点和 daemon 后分别启动 talker/listener。判断依据是 listener 持续收到 \texttt{Hello World} 和递增序号；同时记录 \texttt{printenv} 查到的实现、域与配置路径，不能用 talker 单方面打印 Publishing 代替收发证据。
++
++Fast DDS 的 \texttt{transport\_descriptors} 定义 \texttt{robot\_udp}，\texttt{participant/rtps/userTransports} 引用该名字，\texttt{is\_default\_profile="true"} 把 participant 设为默认。\texttt{useBuiltinTransports=false} 关闭内建传输，本例使用显式定义的 UDPv4。Cyclone DDS 的 \texttt{Domain Id="any"} 只决定配置适用于哪些域，实际通信域仍由 \texttt{ROS\_DOMAIN\_ID} 决定；它不会取消域隔离。网卡白名单或 \texttt{NetworkInterface} 选择的是当前机器的接口，因此两台机器应分别填写自己的地址。XML 的根元素、命名空间与配置树不同，改环境变量名不能把一种 XML 转成另一种。
++\end{solution}
++
++\paragraph*{随堂练习 \ref{ex:v2-ros-zenoh-config}}
++\begin{solution}
++三个终端都加载 Humble（源码安装时再加载 Zenoh 工作空间），设置 \texttt{rmw\_zenoh\_cpp} 与域 42。router 终端用 \texttt{ZENOH\_ROUTER\_CONFIG\_URI} 加载完整 router 文件，监听 \nolinkurl{tcp/127.0.0.1:7447}；talker 和 listener 终端用 \texttt{ZENOH\_SESSION\_CONFIG\_URI} 加载完整 session 文件，设置 client 模式并连接同一端点。两类变量都用绝对文件路径，不加 \texttt{file://}。先启动 router，再启动两个节点，以 listener 持续收包作为完成依据。
++
++\texttt{listen.endpoints} 指定当前进程接受连接的位置，\texttt{connect.endpoints} 指定主动连接的目标。远端机器上的 \texttt{127.0.0.1} 指向远端自己，跨机器时应换成 router 主机可达的真实地址，router 也要监听相应地址。默认 peer 配置可以在发现后直连；本题的 client 配置让 router 转发应用数据。结束时分别按 Ctrl+C 停止两个节点与本次 router，在各终端按正文清除临时 RMW、域、DDS/Zenoh 配置变量和覆盖项，再停止 daemon；实验前已有自定义值则恢复原值。只结束 router 或只 unset 变量，都不会把仍运行的节点切回 DDS。
++\end{solution}
++
++\Needspace{7\baselineskip}
+ \paragraph*{随堂练习 \ref{ex:v2-ros-rmw-choice}}
+ \begin{solution}
+ 在加载 Humble 与 image\_path\_demo 的工作空间里，先停旧节点与额外订阅者，再运行：

@@ -1,4 +1,4 @@
-\subsubsection{把节点与接口拼成完整工程}
+\subsubsection{完整工程：组织文件并生成消息接口}
 \label{sec:ros2-project}
 刚才我们逐段写了节点和消息接口，现在把它们拼成一个能运行的小工程。完整源码就在本卷 \path{examples/ros2/basic-interfaces-demo}，包括两个包。my\_msgs 先生成消息类型，my\_package 再使用它；文件之间的关系如下：
 \par\medskip\noindent\begin{minipage}{\linewidth}
@@ -17,10 +17,10 @@ basic-interfaces-demo/
     src/node_run.cpp
 \end{lstlisting}
 \end{minipage}\par\smallskip
-你可以照着下面写，也可以把两个包复制到新工作空间的 src 中，再逐个核对。已有同名包时另建工作空间，避免把自己的代码覆盖掉。维护者信息是教学占位值，发布自己的包时再改成实际信息。
+你可以照着下面写，也可以把两个包复制到新工作空间的 src 中，再逐个核对。
 
-\begin{example}[先生成接口，再启动节点]
-首先准备消息包。这个文件只写字段，不写 C++ 类定义；构建工具会生成代码。yaw 的单位在接口注释里约定为弧度，时间戳来自节点使用的时钟。
+\begin{example}[准备消息包与接口生成规则]
+首先准备消息包。这个文件只写字段，不写 C++ 类定义，构建工具会自动生成代码。
 \par\medskip\noindent\begin{minipage}{\linewidth}
 \lstinputlisting[frame=single,language={},caption={my\_msgs/msg/My.msg}]{examples/ros2/basic-interfaces-demo/my_msgs/msg/My.msg}
 \end{minipage}\par\smallskip
@@ -33,7 +33,11 @@ basic-interfaces-demo/
 \lstinputlisting[frame=single,language=XML,label=lst:xml_2,caption={my\_msgs/package.xml}]{examples/ros2/basic-interfaces-demo/my_msgs/package.xml}
 \end{minipage}\par\smallskip
 
-\Needspace{31\baselineskip}
+\end{example}
+
+\Needspace{35\baselineskip}
+\subsubsection{完整工程：实现节点并声明构建依赖}
+\begin{example}[把发布、订阅和定时器接起来]
 接下来准备节点包。头文件声明节点类并保存发布者、订阅者和定时器句柄；把句柄放在成员中，节点运行时它们才会一直存活。
 \par\medskip\noindent\begin{minipage}{\linewidth}
 \lstinputlisting[frame=single,language=C++,label=lst:my_node_h,caption={my\_package/include/my\_package/my\_node.h},numbers=left,numberstyle={\color{gray}\tiny}]{examples/ros2/basic-interfaces-demo/my_package/include/my_package/my_node.h}
@@ -53,7 +57,7 @@ basic-interfaces-demo/
 \end{minipage}\par\smallskip
 
 
-最后由入口文件初始化 ROS2、创建节点并调用 spin。spin 让执行器调度回调；只创建对象却不进入执行器，回调不会按上面的预期工作。
+最后由入口文件初始化 ROS2、创建节点并调用 spin。spin 让执行器调度回调。如果只创建对象却不进入执行器，回调不会按上面的预期工作。
 \par\medskip\noindent\begin{minipage}{\linewidth}
 \lstinputlisting[frame=single,language=C++,label=lst:node_run_cpp,caption={my\_package/src/node\_run.cpp},numbers=left,numberstyle={\color{gray}\tiny}]{examples/ros2/basic-interfaces-demo/my_package/src/node_run.cpp}
 \end{minipage}\par\smallskip
@@ -67,7 +71,11 @@ basic-interfaces-demo/
 \lstinputlisting[frame=single,language=XML,label=lst:xml_1,caption={my\_package/package.xml}]{examples/ros2/basic-interfaces-demo/my_package/package.xml}
 \end{minipage}\par\smallskip
 
-把两个包放进 \path{~/ros2_ws/src} 后，回到工作空间根目录构建。下面使用 Humble 环境。若已有同名项目，使用你刚建的新工作空间路径。
+\end{example}
+
+\subsubsection{完整工程：编译并验证话题收发}
+\begin{example}[先生成接口，再启动节点]
+把两个包放进 \path{~/ros2_ws/src} 后，回到工作空间根目录构建。
 \par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{tbash}
 source /opt/ros/humble/setup.bash
@@ -77,7 +85,7 @@ source install/setup.bash
 ros2 run my_package my_node
 \end{tbash}
 \end{minipage}\par\smallskip
-\texttt{--packages-up-to} 同时构建工作空间中的消息依赖。节点应每秒记录一次 timer count，并打印 id 为 1、yaw 为 0.25 的自定义消息；计数表示回调次数，不能拿它冒充真实时间。
+\texttt{--packages-up-to} 同时构建工作空间中的消息依赖。节点应每秒记录一次 timer count，并打印 id 为 1、yaw 为 0.25 的自定义消息。
 
 终端二加载同一系统与工作空间环境后观察一次消息：
 \par\medskip\noindent\begin{minipage}{\linewidth}
@@ -95,9 +103,10 @@ ros2 topic echo /send
 ros2 topic pub --once /receive std_msgs/msg/String "{data: hello}"
 \end{tbash}
 \end{minipage}\par\smallskip
-节点日志应显示收到 hello，send 应收到 I can hear:hello。按 Ctrl+C 结束节点和观察进程，再修改代码做练习；不要让上一轮遗留的节点混进下一轮结果。
+节点日志应显示收到 hello，send 应收到 I can hear:hello。按 Ctrl+C 结束节点和观察进程，再修改代码做练习。
 \end{example}
 
+\subsubsection{用 rqt 发布输入与监视回复}
 \begin{example}[用 rqt 看见同一条消息经过了哪里]
 终端里的收发已经跑通了，我们再把它搬到图形界面。先让 my\_node 保持运行，在同样加载了环境的两个终端分别打开插件：
 \par\medskip\noindent\begin{minipage}{\linewidth}
@@ -106,19 +115,20 @@ ros2 run rqt_gui rqt_gui --standalone rqt_publisher
 ros2 run rqt_gui rqt_gui --standalone rqt_topic
 \end{tbash}
 \end{minipage}\par\smallskip
-如果缺少插件，用 \texttt{sudo apt install ros-humble-rqt-publisher ros-humble-rqt-topic} 安装。容器内运行 GUI 时，需要 Distrobox 已提供显示环境，只有 SSH 命令行而没有显示服务的终端不能直接打开窗口。
+如果缺少插件，用 \texttt{sudo apt install ros-humble-rqt-publisher ros-humble-rqt-topic} 安装。
 
 在 Message Publisher 中选择话题 /receive、类型 \texttt{std\_msgs/msg/String}，添加发布者。展开 data 字段，在 expression 列填入带引号的 Python 字符串 \texttt{'armor\_found'}，再勾选发布者启用发送。在 Message Monitor 中勾选 /receive、/send、/my\_msg 与 /timer\_ 并展开字段；你应看到输入、带前缀的回复和持续变化的计数，yaw 则保持 0.25。若没有值，先确认勾选的是话题左侧的监视框，再检查环境和消息类型。
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.9\textwidth]{ros2_rqt_revised.png}
+  \includegraphics[width=0.8\textwidth]{ros2_rqt_revised.png}
   \caption{rqt 发布与监视插件：对照 receive 的输入与 send 的回复}
   \label{fig:ros2-rqt}
 \end{figure}
+
 图\ref{fig:ros2-rqt}中，上半部分是发布输入，下半部分是监视结果。重点看两条 data：输入是 armor\_found，回复多了 I can hear:，这正是字符串回调做的事情。你的窗口摆放可以不同，字段与话题应对应得上。
 
-现在按 Ctrl+C 停止 my\_node。发布端还能发送 receive，但 send 不再有新回复；监视器可能暂时保留最后一条数据，不能把旧值当成节点仍在工作。重新启动节点后，如果话题条目被移除了，就重新勾选监视，再确认回复恢复。最后关闭插件与节点，我们才算把这一轮实验收干净。
+现在按 Ctrl+C 停止 my\_node。发布端还能发送 receive，但 send 不再有新回复；监视器可能暂时保留最后一条数据。重新启动节点后，如果话题条目被移除了，就重新勾选监视，再确认回复恢复。
 \end{example}
 
 \begin{exercise}

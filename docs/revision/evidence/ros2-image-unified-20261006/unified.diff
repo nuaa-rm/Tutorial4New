@@ -1,0 +1,1174 @@
+--- before/answers.tex
++++ after/answers.tex
+@@ -224,9 +224,16 @@
+ 
+ \paragraph*{随堂练习 \ref{ex:v2-ros-loans}}
+ \begin{solution}
+-参考结果中，默认 Fast DDS 为 0/0，启用 Data Sharing 后为 1/0，默认 Cyclone DDS 和显式禁用借出时为 0/0。第二轮的 Float64 使用中间件借出。Zenoh 开关共享内存时均为 0/0，这体现了传输优化与发布端借出能力的区别。
+-
+-Image 含动态字符串与像素数组，当前探测配置下由本地分配器提供对象，借出调用仍可继续发布。判断应用是否取得中间件样本要看借出能力，判断传输是否使用共享内存要看收发路径与配置。发布后控制权交回中间件，应停止访问原借出对象。未发布对象由 \texttt{LoanedMessage} 管理归还。
++参考结果中，默认 Fast DDS 为 0/0，启用 Data Sharing 后为 1/0，默认 Cyclone DDS 和显式禁用借出时为 0/0。Float64 满足定长布局条件，启用 Data Sharing 后可以借出。Image 含动态字符串与像素数组，不能直接借出原始样本，使用本地分配器回退仍可继续发布。Zenoh 开关共享内存时均为 0/0，传输共享内存与应用借出能力分别对应不同环节。
++
++FixedImage 用内嵌数组约定 1440×1080 BGR8，更改尺寸要重新生成接口，接入标准 Image 工具需要补元数据并复制像素。发布后停止访问借出对象，回调返回后停止使用借读引用或像素视图。未发布对象由 \texttt{LoanedMessage} 管理归还，接收样本由执行器在回调结束后归还。
++\end{solution}
++
++\paragraph*{随堂练习 \ref{ex:v2-ros-fixed-image}}
++\begin{solution}
++三种 RMW 都比较标准 Image 与 FixedImage，保持 1440×1080 BGR8、250 Hz、KeepLast(5)、best\_effort、1000 帧和两秒排空相同。默认配置都使用普通发布，共享配置分别使用 Data Sharing、iceoryx 与 Zenoh SHM。只为两端支持借出的定长类型追加借出发布，记录实际能力与日志。
++
++变长 Image 使用序列化传输。Cyclone DDS iceoryx 和 Zenoh SHM 可以将序列化数据放进共享内存，Fast DDS 的 SHM transport 共享传输缓冲区。FixedImage 满足类型布局条件后，仍要检查中间件与配置是否提供借出；Zenoh 的定长类型在本章实现中也不能借出。比较时把发送频率、接收比例和 P95 放在一起，再判断是否需要调整布局、资源或处理阶段。
+ \end{solution}
+ 
+ \paragraph*{随堂练习 \ref{ex:v2-ros-image-slow}}
+@@ -234,15 +241,6 @@
+ 分别用 depth 5 与 100 运行慢处理命令，使用两个新输出目录，其余条件相同：250 Hz、500 帧、小图像、separate、Fast DDS、8 ms 模拟工作、两秒排空。记录 send\_hz、delivery\_ratio、p95\_ms 与排空设置。加深队列可以在有限实验中留下更多帧，也会增加等待时间，持续处理能力仍受理想 125 Hz 的上限约束。
+ 
+ 一种可行方案是把相机、必要预处理与识别组成同一组件进程，启用进程内通信并交接唯一所有权，将控制与监控按故障隔离需求独立部署。显示支路先缩小图像并降频，录制节点按带宽和存储预算部署。主链路采用较小历史和适合实时需求的交付策略，RMW 根据重复测量选择。算法阶段超预算时，可以减负、降采样或安排并行处理。
+-\end{solution}
+-
+-\paragraph*{随堂练习 \ref{ex:v2-ros-fixed-image}}
+-\begin{solution}
+-低频完整检查应收到 20 帧、bad\_frames=0。三轮高速对照记录接收比例和 P95，借出组应能按序号对应相同共享文件及文件偏移，跨进程虚拟地址数值可以不同。
+-
+-开启 Cyclone DDS 的 iceoryx 后，Float64/Image 为 1/0，标准 Image 将序列化数据放进共享块。FixedImage 用内嵌定长数组约定 1440×1080 BGR8，尺寸与格式由类型确定，显示为标准 Image 时需要补齐元数据并复制像素。固定图像两端能力为 1/1，借出发布直接填充原始共享样本，普通发布则把应用消息复制进去。
+-
+-发布后停止访问原借出对象，回调返回后停止访问借读引用或像素视图。未发布对象由 \texttt{LoanedMessage} 管理归还，接收样本由执行器在回调结束后归还。
+ \end{solution}
+ 
+ \subsubsection*{章末习题}
+@@ -318,7 +316,9 @@
+ 
+ \paragraph*{第一章章末第 \ref{prob:v2-ros-13} 题}
+ \begin{solution}
+-Float64 返回 true 表示这个发布者在当前类型与配置下支持中间件借出；发布调用成功不证明接收端借出。Image false 表示当前不能走相同借出路径，API 成功可能来自本地分配回退。完整跨进程图像零拷贝还需合适类型支持、共享样本交付、两端借出、内存池与样本生命周期、实际路径验证；SHM 可用或收到一个值都不足以替代这些证据。
++Float64 返回 true 表示当前发布者可以借出中间件样本。Image 包含变长字段，不能直接借出原始样本。loan\_probe 借出并发布的是 Float64，Image 用于查询能力。
++
++证明跨进程图像共享样本，需要定长且满足布局条件的接口、支持的共享配置与两端借出能力。再确认内存池容量、发布与回调内的使用期限，并验证实际共享位置或传递路径。
+ \end{solution}
+ 
+ \paragraph*{第一章章末第 \ref{prob:v2-ros-14} 题}
+--- before/chapters/A_ros2_image_path.tex
++++ after/chapters/A_ros2_image_path.tex
+@@ -323,7 +323,7 @@
+ \label{fig:ros2-image-paths}
+ \end{figure}
+ 
+-图\ref{fig:ros2-image-paths} 可以从“共享的是哪一块内存”来读。\textbf{第一行}在同一个进程里交接消息所有权，Source 与 Sink 使用同一份像素缓冲区。\textbf{第二行}以 Fast DDS 的 SHM transport 为例，共享的是传输缓冲区：顺着橙色虚线看，数据先从发送历史复制进去，再复制到接收历史。\textbf{第三行}共享的是消息样本，发布端直接填充借出样本，订阅端直接借读；Fast DDS 可以用 Data Sharing 配合两端借出，Cyclone DDS 可以用 iceoryx 配合两端借出，实现这条跨进程零拷贝路径。借出消息留到下一节，我们先做第一行。
++图\ref{fig:ros2-image-paths} 可以从“共享的是哪一块内存”来读。\textbf{第一行}在同一个进程里交接消息所有权，Source 与 Sink 使用同一份像素缓冲区。\textbf{第二行}以 Fast DDS 的 SHM transport 为例，共享的是传输缓冲区：顺着橙色虚线看，数据先从发送历史复制进去，再复制到接收历史。\textbf{第三行}在类型和配置满足借出条件时共享原始消息样本，发布端直接填充，订阅端直接借读。Fast DDS 的 Data Sharing 和 Cyclone DDS 的 iceoryx 可以配合两端借出，实现这条跨进程路径。下一节先说明类型条件，我们现在先做第一行。
+ 
+ 为了把两个节点放进同一个进程，我们使用\textbf{组件（component）}，也就是可装载的节点实现，承载它们的进程叫\textbf{组件容器（component container）}。两端接收并使用 \texttt{NodeOptions}，启用 \nolinkurl{use_intra_process_comms}，再通过消息所有权接口走进程内通道。
+ 
+@@ -359,11 +359,12 @@
+ 
+ 本实验在同一台电脑上，用 \texttt{steady\_clock} 对应的单调时钟比较发送与回调入口时刻。
+ 
+-接下来是完整清单与构建规则。清单声明组件库和消息生成依赖，CMake 生成消息接口、链接类型支持，再注册两个组件类。构建文件也准备了第\ref{sec:ros2-fixed-image-shm}节的固定图像扩展，我们先运行当前的 Frame 示例。
++接下来是完整清单与构建规则。清单声明组件库和消息生成依赖，CMake 生成消息接口、链接类型支持，再注册两个组件类。构建文件同时准备了 Frame 和 FixedImage 两种接口，我们先用 Frame 跑通小图像，下一节再比较接口布局。
+ \lstinputlisting[frame=single,language=XML,caption={组件实验依赖清单}]{examples/ros2/image-path-demo/package.xml}
+ \lstinputlisting[frame=single,language=cmake,caption={接口生成、组件注册与安装规则}]{examples/ros2/image-path-demo/CMakeLists.txt}
+ 
+ Launch 文件保持相同 Source/Sink 和 QoS，只改变布局：\texttt{separate} 启动两个组件容器进程，\texttt{same} 把两者装进同一进程但关闭进程内通信，\texttt{intra} 则在同一进程中为两端启用它。这里使用单线程 \texttt{component\_container}，便于观察消息路径。
++\Needspace{5\baselineskip}
+ \lstinputlisting[frame=single,language=Python,caption={切换组件布局的 Launch 文件}]{examples/ros2/image-path-demo/launch/path.launch.py}
+ 
+ 下面把教材所在目录保存为 \texttt{BOOK}，你需要替换成你的路径。Bash 中的环境脚本按下面写，Zsh 则使用对应的 \texttt{setup.zsh}。
+@@ -429,15 +430,44 @@
+ 
+ \subsubsection{借出消息：向中间件借一块内存}
+ \label{sec:ros2-loaned-messages}
+-前面由应用创建消息，再在进程内转移所有权。\textbf{借出消息（loaned message）}则由中间件提供样本缓冲区，发布者直接填充内容，发布后交还控制权。这样可以减少应用与中间件之间的分配或复制，适用于中间件和消息类型支持借出的场合。
+-
+-使用时，先用 \texttt{can\_loan\_messages()} 查询发布者的借出能力，再调用 \texttt{borrow\_loaned\_message()}。底层支持借出时，缓冲区来自中间件。底层不支持时，\texttt{rclcpp} 使用本地分配器回退，程序仍可继续发布。这个设计让同一段代码能适应不同实现。
++前面由应用创建消息，再在进程内转移所有权。\textbf{借出消息（loaned message）}则由中间件提供样本缓冲区，发布者直接填充，发布后交还控制权，订阅者也可以借读同一份共享样本。
++
++\textbf{变长消息不能通过本章的中间件借出路径直接交接原始样本。}标准 \texttt{sensor\_msgs/Image} 的像素是动态数组，\texttt{encoding} 和 \texttt{header.frame\_id} 也是字符串，因此它不能直接借出。Fast DDS 开启 Data Sharing 后仍受这个类型条件约束。想让图像使用这条路径，我们需要定义像素内嵌的定长消息。
++
++定长布局解决了类型条件，接下来还要由所选 RMW 和配置提供借出支持。使用时，先查询 \texttt{can\_loan\_messages()}，再调用 \texttt{borrow\_loaned\_message()}。返回 true 时，缓冲区来自中间件。返回 false 时，\texttt{rclcpp} 的借出包装器会用本地分配器创建对象，让程序继续发布。这种回退仍然由应用分配内存。发布借出对象后停止访问它，订阅端的借读引用或像素视图只在回调内使用。
++
++\paragraph*{共享内存工具分别做什么}
++Fast DDS 的 \textbf{SHM transport} 共享传输缓冲区，\textbf{Data Sharing} 共享消息样本。在 Humble 中，定长且满足 plain 布局条件的类型启用 Data Sharing 后，可以配合两端借出减少样本复制。plain 要求样本布局适合直接共享，给动态数组设置一个长度上限还不够。
++
++Cyclone DDS 使用 \textbf{iceoryx} 管理同机进程间的共享样本，由 \textbf{RouDi} 创建共享池并管理使用共享池的进程。配置中的 \texttt{SharedMemory/Enable} 打开这条路径，池中的块要容得下消息，QoS 要采用实现支持的组合。定长内嵌消息可以配合两端借出，标准 Image 则会序列化到共享块中，再由接收端恢复。\href{https://github.com/ros2/rmw_cyclonedds/blob/humble/shared_memory_support.md}{Humble 共享内存说明}列出了类型、QoS 与共享池条件，配套工程已经提供 XML 和 RouDi 配置。
++
++本章 \textbf{Zenoh SHM} 共享的是序列化数据，它可以沿用普通 Image，也可以传递定长图像。它优化的是传输环节，所用 \texttt{rmw\_zenoh\_cpp} 的应用层借出能力仍为 false。这样我们就有了两个清楚的观察点：共享内存装的是序列化数据还是原始样本，应用取得的是自己分配的对象还是中间件借出的对象。
++
++\paragraph*{给图像定义定长接口}
++普通 Image 适合运行时改变尺寸和格式，也能直接接入常用图像工具。为了比较定长布局，我们给前面的 $1440\times1080$ BGR8 负载定义 \texttt{FixedImage}：$4665600$ 个像素字节内嵌在消息里，只增加序号和单机测量时间。
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\lstinputlisting[frame=single,caption={定长图像接口：1440×1080 BGR8}]{examples/ros2/image-path-demo/msg/FixedImage.msg}
++\end{minipage}\par\smallskip
++
++\begin{center}
++\small
++\begin{tabular}{lp{0.34\linewidth}p{0.34\linewidth}}
++\toprule
++比较项 & 标准 Image & 本例 FixedImage\\
++\midrule
++像素存储 & 动态数组，像素另行分配 & 定长数组，像素内嵌在消息中\\
++尺寸与格式 & 每帧描述宽、高、编码和步长 & 类型约定 1440×1080 BGR8\\
++时间与坐标系 & Header 提供时间戳和 frame\_id & 单机测量时间和序号\\
++中间件借出 & 变长字段不满足本章借出条件 & 布局满足条件后再查询实现能力\\
++工具衔接 & 常用图像工具直接接收 & 转成标准 Image 时需适配\\
++\bottomrule
++\end{tabular}
++\end{center}
++\texttt{FixedImage} 的 C++ 像素字段是 \nolinkurl{std::array<uint8_t, 4665600>}。每次向普通 Image 填相同数量的像素，字段仍然是动态数组。更换 FixedImage 的尺寸需要修改接口并重新构建两端，接入标准图像工具时则要补齐元数据并复制像素。两种接口都将在下一节接受相同条件的中间件对照。
+ 
+ \begin{example}[用 Float64 和 Image 探测借出能力]
+-沿用刚才的工程，完整程序如下。\texttt{Float64} 是简单固定大小类型；普通 \texttt{Image} 内含可变长像素数组与字符串。探测程序同时查询两者，再借出并发布一个值为 42 的 Float64。
+-\par\medskip\noindent\begin{minipage}{\linewidth}
++沿用刚才的工程，完整程序如下。\texttt{Float64} 是简单固定大小类型，普通 \texttt{Image} 含变长字段。Image 在这里用于查询能力，程序借出并发布的是值为 42 的 Float64。
+ \lstinputlisting[frame=single,language=C++,caption={借出能力与本地分配回退探测}]{examples/ros2/image-path-demo/src/loan_probe.cpp}
+-\end{minipage}\par\smallskip
+ 
+ 在本章的 Humble/Fast DDS 实现中，固定类型还需要启用 Data Sharing。项目给出一份显式配置，设置同步发布、可扩展的预分配历史，以及两端 Data Sharing 自动选择。
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+@@ -483,285 +513,26 @@
+ \bottomrule
+ \end{tabular}
+ \end{center}
+-读这组数据时，重点看第二行：同一种实现换了配置，Float64 的借出能力也随之变化。你运行时应记录实际输出及对应配置。
+-\end{example}
+-
+-\paragraph*{Zenoh：在传输层使用共享内存}
+-Zenoh 的共享内存功能优化序列化数据在本机进程间的传输，普通发布接口也可以使用它。应用层的借出能力则由另一个接口查询。接着用探测程序比较两种能力：
+-
+-先按第\ref{sec:ros2-rmw-selection}节启动自己的 Zenoh 路由器。在已加载 Humble 和组件工程的第二个终端运行发布端探测：
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\begin{tbash}
+-RMW_IMPLEMENTATION=rmw_zenoh_cpp \
+-  ros2 run image_path_demo loan_probe
+-ZENOH_CONFIG_OVERRIDE='transport/shared_memory/enabled=true' \
+-  RMW_IMPLEMENTATION=rmw_zenoh_cpp \
+-  ros2 run image_path_demo loan_probe
+-\end{tbash}
+-\end{minipage}\par\smallskip
+-一组参考输出中，关闭与开启共享内存时的 Float64/Image 借出能力均为 0/0，发布使用本地分配器。这里观察的是发布端借出能力，传输层共享内存的对照放在下一节。完成后停止 router。
++这组数据把类型和配置的条件分开了：启用 Data Sharing 后，定长 Float64 可以借出，变长 Image 仍然不能借出。默认配置下，定长类型也可能返回 0。
++\end{example}
+ 
+ \begin{exercise}
+ \label{ex:v2-ros-loans}
+-保存默认 DDS、显式配置与 Zenoh 的 loan\_probe 输出，解释 Image 返回 false 时程序如何继续发布。结合 Zenoh 开关共享内存时的结果，说明传输层共享内存与应用层借出能力的区别，并写出发布借出对象后应如何处理它的所有权。
++保存默认 DDS、显式配置与 Zenoh 的 loan\_probe 输出。说明为什么启用 Data Sharing 后 Float64 可以借出而 Image 不能，返回 false 时程序如何继续发布。比较标准 Image 与 FixedImage 的字段布局、工具兼容性，并写出借出对象与借读引用的使用期限。
+ \end{exercise}
+ 
+ \Needspace{9\baselineskip}
+ \begin{conclusion}
+ \begin{itemize}
+-\item RMW 选择通信实现，QoS 安排交付与历史策略，处理能力取决于各阶段耗时。
+-\item 组件容器安排进程边界，进程内通信配合所有权接口交接消息。
+-\item 传输层共享内存优化进程间搬运，借出接口决定应用如何取得和归还样本，两者要分别观察。
+-\item 借出能力与消息布局、实现和配置有关，回退时由本地分配器提供对象。
++\item 组件进程内通信交接消息所有权，先处理进程边界与像素缓冲区的使用方式。
++\item 变长 Image 不能直接借出中间件原始样本，定长类型还要满足实现与配置条件。
++\item Data Sharing 与 iceoryx 可以共享原始样本，Zenoh SHM 沿用序列化数据传输。
++\item 借出能力为 false 时，本地分配器回退让代码继续运行，内存由应用分配。
+ \end{itemize}
+ \end{conclusion}
+ 
+ \subsubsection{把负载升到 250 Hz，再看图像有没有变旧}
+ \label{sec:ros2-image-measurement}
+-现在小图像已跑通，我们把合成负载改成 $1440\times1080$ 的 BGR8，目标频率设为 250 Hz。本节测量从发布前到订阅回调入口的通信延迟。相机采集、Bayer 转换和识别耗时留到接入实际系统时分段测量。
+-
+-\Needspace{8\baselineskip}
+-\begin{example}[重复三轮，保存吞吐与延迟记录]
+-先停止手动节点与额外订阅者，在同一个工作空间执行：
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\begin{tbash}
+-python3 src/image_path_demo/compare.py \
+-  --output /tmp/image-path-bgr250 \
+-  --width 1440 --height 1080 --channels 3 \
+-  --rate 250 --frames 1000 --repeat 3
+-\end{tbash}
+-\end{minipage}\par\smallskip
+-每种组合发送 1000 帧后，再留两秒让接收端处理队列中的剩余消息。程序保存实际发送/接收频率、接收比例与 P95，异常轮次会提示错误并保留日志。下面用一组参考数据练习读结果：
++现在我们已经分清两类图像接口和几条内存路径，再用相同的合成负载比较中间件。所有实现都测试标准 Image 与 FixedImage，图像尺寸为 $1440\times1080$ BGR8，目标频率为 250 Hz。先比较共同的普通发布方式，再观察共享内存和支持借出的路径。
+ 
+ \input{chapters/A_ros2_image_results.tex}
+-
+-读你自己的结果时，可以按下面的顺序找瓶颈：
+-\begin{enumerate}
+-\item 先看 Source 的实际频率。达不到目标时，检查分配、填充、发布阻塞和回调调度。
+-\item Source 跟得上而接收比例低时，检查交付和接收处理。结合 P95，判断已收到的帧来得是否及时。
+-\item 比较 \texttt{same} 与 \texttt{intra}，观察进程内所有权交接的作用。比较 \texttt{separate} 与 \texttt{same} 时，还要考虑进程和执行器数量的变化。
+-\end{enumerate}
+-
+-资源统计可作为辅助：累计 CPU 时间包含发现、加载与排空阶段，RSS 汇总包含各进程的常驻页，可能重复计算共享页。需要进一步定位成本时，再按阶段测量，并用跟踪工具寻找具体的复制和等待位置。
+-\end{example}
+-
+-\Needspace{9\baselineskip}
+-\paragraph*{把 Zenoh 加进大图像对照}
+-上面的默认命令保留两种 DDS。安装 Zenoh 后，保持相同图像、QoS 和三种布局，另用新目录运行：
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\begin{tbash}
+-python3 src/image_path_demo/compare.py \
+-  --output /tmp/image-path-zenoh-bgr250 --rmws rmw_zenoh_cpp \
+-  --width 1440 --height 1080 --channels 3 \
+-  --rate 250 --frames 1000 --repeat 3
+-\end{tbash}
+-\end{minipage}\par\smallskip
+-需要一次比较三个实现时，用 \texttt{--rmws} 同时列出三种 RMW。记录器会管理本轮 router，默认关闭 Zenoh 共享内存。
+-
+-接下来只保留 \texttt{separate} 的两个进程，给同样的标准 Image 打开 Zenoh 共享内存。先按图像大小规划池容量，再运行对照。
+-
+-\begin{example}[为共享内存池规划容量]
+-共享内存池要容纳正在传递的图像。规划容量时，先估算每帧大小和同时在途的帧数，再留出元数据与分配开销的余量。你可以用下面两条命令查看可用空间和锁定内存额度：
+-\begin{tbash}
+-df -h /dev/shm
+-ulimit -l
+-\end{tbash}
+-\texttt{df} 显示共享内存文件系统的空间，\texttt{ulimit -l} 显示当前进程的锁定内存额度，单位是 KiB。所用 Zenoh 实现会锁定共享段，因此这两项都影响池的创建。
+-
+-一帧本例的 BGR8 约为 4.67 MB，池容量需要随在途帧数增加。项目用 \texttt{--zenoh-shm-pool-mib} 设置容量，默认 48 MiB。运行前让资源额度与池容量相匹配，运行后查看 router 和节点日志中的池创建、分配及回退信息，就能判断配置是否按预期工作。
+-\end{example}
+-
+-\Needspace{7\baselineskip}
+-下面使用项目默认的 48 MiB 池，也可用 \texttt{--zenoh-shm-pool-mib} 指定已规划的容量：
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\begin{tbash}
+-python3 src/image_path_demo/compare.py \
+-  --output /tmp/image-path-zenoh-shm \
+-  --rmws rmw_zenoh_cpp --modes separate --zenoh-shm \
+-  --width 1440 --height 1080 --channels 3 \
+-  --rate 250 --frames 1000 --repeat 3
+-\end{tbash}
+-\end{minipage}\par\smallskip
+-这组结果单独保存，比较的是同一 RMW 开关共享内存后的变化。先查看日志中的池创建与分配情况，再比较接收比例和延迟。表\ref{tab:ros2-image-results} 的 SHM 参考行使用 6 MiB 池，读表和复测时应保留这一容量条件。
+-
+-\paragraph*{故意让识别变慢一次}
+-接下来只保留 Fast DDS 的两个进程，把 Sink 的模拟处理设为 8 ms。先用默认小图像观察排队，不让图像大小掩盖处理能力问题：
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\begin{tbash}
+-python3 src/image_path_demo/compare.py \
+-  --output /tmp/image-path-slow \
+-  --rmws rmw_fastrtps_cpp --modes separate \
+-  --rate 250 --frames 500 --work-ms 8 --depth 5
+-\end{tbash}
+-\end{minipage}\par\smallskip
+-接收端每帧花 8 ms，输入却每 4 ms 来一帧，队列很快就会积压。再换一个输出目录，用 \texttt{--depth 100} 重跑，保持其余条件相同，观察加深队列如何改变接收比例和图像年龄。\texttt{--drain-seconds} 决定发布结束后等待接收的时间，比较时也应保持一致。
+-
+-\Needspace{9\baselineskip}
+-一组参考结果中，Source 均接近 250 Hz，Sink 约为 122 Hz，两轮都等待两秒排空：
+-\begin{center}
+-\begin{tabular}{rrr}
+-\toprule
+-队列深度 & 接收帧数 / 发送帧数 & P95 / ms\\
+-\midrule
+-5 & 249 / 500 & 20.0\\
+-100 & 344 / 500 & 746.6\\
+-\bottomrule
+-\end{tabular}
+-\end{center}
+-较深的队列让更多帧留到发布结束后继续处理，也让它们等得更久。有限帧数可以在输入停止后排空，持续输入时仍受约 125 Hz 的串行处理能力限制。这就回到了本节开头的问题：识别需要的是及时可用的画面。
+-
+-接下来可以减少算法工作量、降采样、只处理最新帧，或把计算安排为并行流水线。减少复制与优化计算可以一起推进。显示支路通常先缩小图像并降低频率，录制支路则按保存需求和存储带宽单独规划。
+-
+-\begin{exercise}
+-\label{ex:v2-ros-image-slow}
+-运行深度 5 和 100 的慢处理对照，记录实际发送频率、接收比例、P95 和排空时间。根据记录解释吞吐、丢帧和图像年龄的关系；再给相机到识别的主链路与降频可视化支路画一份部署方案，说明组件组合、进程隔离和 RMW 的选择依据。
+-\end{exercise}
+-
+-\subsubsection{Cyclone DDS 的 separate：用 iceoryx 交接共享样本}
+-\label{sec:ros2-fixed-image-shm}
+-前面已经用标准 Image 比较了三种进程布局，也在 Zenoh 的 \texttt{separate} 路径中打开了共享内存。现在回到 Cyclone DDS 的两个进程：默认配置通过 DDS 交付图像，我们还可以启用它的 iceoryx 共享内存路径，继续减少同机传递的开销。
+-
+-先把两种共享内存方式接起来看。本章的 Zenoh 路径把序列化数据放入共享内存，标准 Image 可以沿用原接口。Cyclone DDS 的 iceoryx 路径也能传递序列化后的标准 Image。进一步使用两端借出时，发布者直接填充共享块中的原始消息，订阅者直接引用这个样本，这就对消息布局提出了要求：大小在编译时确定，数据全部内嵌，不能含动态字符串、动态数组或指向外部分配的指针。
+-
+-与刚才的 Zenoh 共享内存配置相比，这条路径还要单独启动 \textbf{RouDi}，由它创建共享池并管理使用共享池的进程。共享块要容得下消息和管理开销，QoS 也要落在所用实现支持的组合内。本节沿用 Humble，使用 KeepLast 深度 5、\texttt{best\_effort}、volatile、自动活性和无限 deadline。\href{https://github.com/ros2/rmw_cyclonedds/blob/humble/shared_memory_support.md}{Humble 共享内存说明}列出了这条路径的类型、QoS 与池容量条件。
+-
+-\paragraph*{把图像定义成定长样本}
+-标准 \texttt{sensor\_msgs/Image} 可以改变尺寸和编码，像素放在动态数组中，\texttt{encoding} 与 \texttt{header.frame\_id} 也是字符串。每次都发送相同尺寸，也不会改变这些字段的类型。我们把刚才的 $1440\times1080$ BGR8 图像定义为 \texttt{FixedImage}，让 $1440\times1080\times3=4665600$ 个像素字节内嵌在消息里，再用借出接口直接填充和读取它。
+-
+-\begin{example}[自定义固定图像，运行跨进程借出]
+-沿用 \path{examples/ros2/image-path-demo}，这部分扩展包含下面的文件。前面的 CMake 已生成两种接口，并安装 \texttt{fixed\_image} 程序和两份配置。
+-\begin{tbash}
+-msg/FixedImage.msg       # 固定布局图像
+-src/fixed_image.cpp     # 独立发布端或订阅端
+-config/cyclone-iceoryx.xml # 开启 Cyclone 共享内存
+-config/roudi.toml       # 图像共享池
+-compare_fixed.py       # 两个进程的统计与共享位置检查
+-\end{tbash}
+-
+-接口中只保留序号、测量时间和内嵌像素。尺寸常量属于类型定义，不占每帧负载。
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\lstinputlisting[frame=single,caption={固定为 1440×1080 BGR8 的图像接口}]{examples/ros2/image-path-demo/msg/FixedImage.msg}
+-\end{minipage}\par\smallskip
+-
+-生成的 C++ 像素字段是 \nolinkurl{std::array<uint8_t, 4665600>}。它与普通 Image 的区别可以归纳为：
+-\begin{center}
+-\small
+-\begin{tabular}{lp{0.34\linewidth}p{0.34\linewidth}}
+-\toprule
+-比较项 & 标准 Image & 本例 FixedImage\\
+-\midrule
+-像素存储 & 动态数组，像素另行分配 & 定长数组，像素内嵌在消息中\\
+-尺寸与格式 & 每帧描述宽、高、编码和步长 & 类型约定 1440×1080 BGR8，紧密排列\\
+-时间与坐标系 & Header 提供时间戳和 frame\_id & 只带单机测量时间和序号\\
+-工具衔接 & 常用图像工具直接接收 & 显示或录制为标准 Image 时需适配\\
+-\bottomrule
+-\end{tabular}
+-\end{center}
+-我们用固定布局换取直接映射共享样本的机会。更换分辨率时要修改接口并重新构建两端。需要接入标准图像工具时，可以把像素复制到 Image 并补齐元数据，代价就发生在适配支路上。算法也可以在回调内用 \texttt{cv::Mat} 建立像素视图，视图的有效期跟随借读样本。
+-
+-接下来准备共享池。Cyclone 配置中的 \texttt{SharedMemory/Enable} 开启 iceoryx 路径：
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\lstinputlisting[frame=single,language=XML,caption={开启 Cyclone DDS 的 iceoryx 路径}]{examples/ros2/image-path-demo/config/cyclone-iceoryx.xml}
+-\end{minipage}\par\smallskip
+-RouDi 配置按块大小分池。下面为大图像准备 32 个 5 MiB 块，共约 160 MiB，另外保留小块池。每个大块容得下本例约 4.67 MB 的消息及共享块管理开销。
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\lstinputlisting[frame=single,caption={RouDi 的固定图像共享池}]{examples/ros2/image-path-demo/config/roudi.toml}
+-\end{minipage}\par\smallskip
+-
+-完整收发程序如下。\texttt{role} 决定创建发布者还是订阅者，两端使用 \texttt{best\_effort}、KeepLast 深度 5。构造时输出借出能力，借出模式要求能力为真，再开始实验。
+-\lstinputlisting[frame=single,language=C++,caption={固定图像：创建收发端与汇总统计},firstline=1,lastline=66]{examples/ros2/image-path-demo/src/fixed_image.cpp}
+-
+-\texttt{fill} 让同一帧的全部像素取序号对应的值，填充完成后记录发送时刻。\texttt{loan=true} 时，先借共享块，再直接填充并发布。\texttt{loan=false} 时，应用创建自己的消息，普通发布接口将内容送入中间件。接收端在回调入口记时，检查像素，并记录前三帧的地址。
+-\lstinputlisting[frame=single,language=C++,caption={固定图像：填充、发布与回调内借读},firstline=67]{examples/ros2/image-path-demo/src/fixed_image.cpp}
+-
+-这里的订阅回调使用 \texttt{const FixedImage \&}，在回调内借读，返回后由执行器归还样本。Humble 的这个示例只为该回调形式打开订阅端借出。发布后也要停止访问原借出对象，\texttt{LoanedMessage} 会管理未发布对象的归还。
+-
+-\Needspace{4\baselineskip}
+-先在工作空间中安装 RouDi 并构建。\nolinkurl{ros-humble-rmw-cyclonedds-cpp} 提供中间件，\nolinkurl{ros-humble-iceoryx-posh} 提供 RouDi：
+-\begin{tbash}
+-source /opt/ros/humble/setup.bash
+-sudo apt install ros-humble-rmw-cyclonedds-cpp ros-humble-iceoryx-posh
+-cd ~/image_path_ws
+-colcon build --packages-select image_path_demo \
+-  --cmake-args -DCMAKE_BUILD_TYPE=Release
+-source install/setup.bash
+-SHARE="$(ros2 pkg prefix --share image_path_demo)"
+-iox-roudi -c "$SHARE/config/roudi.toml"
+-\end{tbash}
+-看到 \texttt{RouDi is ready for clients} 后，让这个终端继续运行。在另外两个实验终端都加载环境并设置相同的 RMW、域与配置：
+-\begin{tbash}
+-source /opt/ros/humble/setup.bash
+-cd ~/image_path_ws
+-source install/setup.bash
+-export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+-export ROS_DOMAIN_ID=89
+-export ROS_LOCALHOST_ONLY=1
+-SHARE="$(ros2 pkg prefix --share image_path_demo)"
+-export CYCLONEDDS_URI="file://$SHARE/config/cyclone-iceoryx.xml"
+-\end{tbash}
+-在终端二启动接收端，在终端三启动发布端。先用 10 Hz 的 20 帧逐字节检查图像，变量 \nolinkurl{ROS_DISABLE_LOANED_MESSAGES=0} 只作用于本条命令：
+-\begin{tbash}
+-# 终端二：接收与完整像素检查
+-ROS_DISABLE_LOANED_MESSAGES=0 ros2 run image_path_demo fixed_image \
+-  --ros-args -r __node:=fixed_receive -p role:=receive -p verify_full:=true
+-# 终端三：借出并填充共享图像
+-ROS_DISABLE_LOANED_MESSAGES=0 ros2 run image_path_demo fixed_image \
+-  --ros-args -r __node:=fixed_send -p role:=send -p rate:=10.0 -p frames:=20
+-\end{tbash}
+-两端的 \texttt{FIXED\_CAP} 应显示 \texttt{can\_loan=1}。发布端显示 \texttt{FIXED\_DONE 20} 后，先结束发布端，再结束接收端，检查接收统计为 20 帧、\texttt{bad\_frames=0}。实验结束时再关闭 RouDi。
+-
+-\paragraph*{比较普通发布与借出发布}
+-自动记录器会启动并关闭自己的两个收发进程，RouDi 继续由终端一提供。在已加载工作空间环境的终端运行：
+-\par\medskip\noindent\begin{minipage}{\linewidth}
+-\begin{tbash}
+-CFG="$(ros2 pkg prefix --share image_path_demo)/config/cyclone-iceoryx.xml"
+-python3 src/image_path_demo/compare_fixed.py \
+-  --output /tmp/fixed-full-check --cyclone-config "$CFG" \
+-  --rate 10 --frames 20 --repeat 1 --verify-full
+-python3 src/image_path_demo/compare_fixed.py \
+-  --output /tmp/fixed-regular --cyclone-config "$CFG" \
+-  --publish-mode regular --rate 250 --frames 1000 --repeat 3
+-python3 src/image_path_demo/compare_fixed.py \
+-  --output /tmp/fixed-loan --cyclone-config "$CFG" \
+-  --publish-mode loan --rate 250 --frames 1000 --repeat 3
+-\end{tbash}
+-\end{minipage}\par\smallskip
+-\texttt{--publish-mode} 只改变发布端的普通或借出接口，两组接收端都借读。要增加默认 DDS 对照，使用 \texttt{regular} 并去掉 \texttt{--cyclone-config}，换一个输出目录。标准 Image 的对照则沿用 \texttt{compare.py}：
+-\begin{tbash}
+-python3 src/image_path_demo/compare.py \
+-  --output /tmp/image-cyclone-shm \
+-  --rmws rmw_cyclonedds_cpp --modes separate --cyclone-config "$CFG" \
+-  --width 1440 --height 1080 --channels 3 \
+-  --rate 250 --frames 1000 --repeat 3 --domain 89
+-\end{tbash}
+-同样去掉配置参数并换输出目录，就能得到标准 Image 的默认 DDS 结果。记录器将环境变量限定在自己的子进程中。
+-
+-\begin{table}[htbp]
+-\centering
+-\small
+-\caption{Cyclone DDS 同机跨进程合成 BGR8 对照，三轮数值的中位数}
+-\label{tab:ros2-iceoryx-results}
+-\begin{tabular}{llrr}
+-\toprule
+-接口 & 发布与交付 & 接收比例 & P95 / ms\\
+-\midrule
+-Frame（标准 Image） & 普通发布，默认 DDS & 99.4\% & 3.735\\
+-Frame（标准 Image） & 普通发布，iceoryx & 100.0\% & 1.668\\
+-FixedImage & 普通发布，默认 DDS & 99.8\% & 3.292\\
+-FixedImage & 普通发布，iceoryx & 100.0\% & 0.505\\
+-FixedImage & 借出发布，iceoryx & 100.0\% & 0.334\\
+-\bottomrule
+-\end{tabular}
+-\end{table}
+-这组数据使用相同的 $1440\times1080$ BGR8 像素、250 Hz 目标、1000 帧、深度 5 和 \texttt{best\_effort}，每轮发布后留两秒排空，各组实际发送频率约为 250 Hz。延迟从填充完成后到接收回调入口计算。先在相同接口内比较配置，再在 FixedImage 内比较两种发布方式，就能看出传输优化与直接填充共享块各自省下的成本。
+-
+-\paragraph*{两种图像在共享块中装的是什么}
+-标准 Image 也可以经 iceoryx 传输，但动态字段需要序列化后放进共享块，接收端再恢复消息。开启 iceoryx 后，\texttt{loan\_probe} 的 Float64/Image 能力为 1/0。FixedImage 两端则都支持借出，借出发布直接写入共享块中的原始样本，订阅回调直接引用它。
+-
+-本例还检查了实际位置：\texttt{compare\_fixed.py} 按帧序号，将两端像素地址转换为共享文件及文件内偏移。三轮借出实验中，前三帧都落在同一共享文件的相同偏移。另做的低频共享块跟踪确认，标准 Image 交付的是序列化数据，FixedImage 借出交付的是原始样本。两个进程的虚拟地址可以不同，真正对应的是同一份共享数据。详细逐轮记录留在实验文档中。
+-\end{example}
+-
+-\begin{exercise}
+-\label{ex:v2-ros-fixed-image}
+-运行 FixedImage 的低频完整检查和普通/借出发布对照，记录两端能力、接收比例、P95 与共享文件偏移。对照标准 Image，说明字段布局、工具兼容性和共享块内容有何区别，再写出发布后及回调返回后的使用期限。
+-\end{exercise}
+--- before/chapters/A_ros2_image_results.tex
++++ after/chapters/A_ros2_image_results.tex
+@@ -1,5 +1,7 @@
+-% 逐轮数据与详细运行条件见 docs/revision/ros2-image-path-textbook-20261005.md。
+-% 参考输入：1440×1080 BGR8、250 Hz、best_effort、深度 5，每轮 1000 帧。
++% 实验介绍、两类图像的统一结果与解读集中在本文件。
++\begin{example}[先比较布局，再统一比较两类图像]
++两类图像使用相同像素内容、尺寸、频率、\texttt{best\_effort} 和 KeepLast 深度 5，每轮 1000 帧，再留两秒排空。延迟从填充完成、发布前开始，到接收回调入口结束，记录实际发送频率、接收比例与 P95。下面先保留普通 Image 的三种布局结果，再固定为两个进程，比较普通与定长接口。
++
+ \begin{table}[htbp]
+ \centering
+ \small
+@@ -32,6 +34,108 @@
+ 
+ Zenoh 的 \texttt{separate} 行还可以与 SHM 行对照：开启共享内存后，P95 从 3.243 ms 降到 1.822 ms。进程内路径则更短。将这几行与图\ref{fig:ros2-image-paths} 对照，就能看到传输层优化与应用层所有权交接各自的作用。
+ 
+-这组数据用来练习比较方法。实际选择时，在自己的相机、算法与网络条件下重复测量，再确定布局和配置。详细版本、逐轮数值与异常日志保存在配套修订记录中。
++这组普通 Image 数据保留为进程布局参考。接下来固定为 \texttt{separate}，再比较两类消息。
+ 
+-表中的 Cyclone DDS 使用默认配置。读完这组标准 Image 对照后，第\ref{sec:ros2-fixed-image-shm}节再沿着它的 \texttt{separate} 路径启用 iceoryx，并比较共享传输与直接借出样本。
++\paragraph*{同一收发程序，比较两类图像}
++项目中的 \texttt{image\_benchmark} 用同一份收发实现处理 Frame 中的标准 Image 与 FixedImage，接收端都在回调内读取消息。\texttt{compare\_images.py} 依次切换 RMW、消息类型和配置，管理本轮节点、Zenoh 路由器及 RouDi。默认配置组都采用普通发布，共享配置组分别开启 Fast DDS Data Sharing、Cyclone DDS iceoryx 和 Zenoh SHM，再为支持两端借出的定长类型追加借出发布。
++
++在前面的独立工作空间中安装工具并运行统一对照：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\begin{tbash}
++sudo apt install ros-humble-iceoryx-posh
++python3 src/image_path_demo/compare_images.py \
++  --output /tmp/image-types-bgr250 --include-loan \
++  --rate 250 --frames 1000 --repeat 3
++\end{tbash}
++\end{minipage}\par\smallskip
++这条命令将三种中间件的两类消息都纳入比较，按轮次保存日志、借出能力和统计。共享池需要与消息大小和在途帧数匹配，本组 Zenoh 使用 6 MiB 池，RouDi 使用项目中的图像池。你可以通过 \texttt{--zenoh-shm-pool-mib} 调整 Zenoh 池容量，同时检查 \texttt{/dev/shm} 空间与锁定内存额度。
++
++\begin{table}[htbp]
++\centering
++\small
++\caption{统一收发程序的默认配置对照，三轮数值的中位数}
++\label{tab:ros2-image-types-default}
++\begin{tabular}{llrrrc}
++\toprule
++RMW & 图像接口 & 发送 / Hz & 接收比例 & P95 / ms & 借出（发/收）\\
++\midrule
++Fast DDS & 标准 Image & 250.0 & 37.8\% & 1.848 & 0/0\\
++Fast DDS & FixedImage & 250.0 & 39.3\% & 1.757 & 0/0\\
++\midrule
++Cyclone DDS & 标准 Image & 250.0 & 99.9\% & 2.876 & 0/0\\
++Cyclone DDS & FixedImage & 250.0 & 100.0\% & 2.930 & 0/0\\
++\midrule
++Zenoh & 标准 Image & 250.0 & 100.0\% & 2.780 & 0/0\\
++Zenoh & FixedImage & 250.0 & 100.0\% & 2.957 & 0/0\\
++\bottomrule
++\end{tabular}
++\end{table}
++表\ref{tab:ros2-image-types-default} 的两类消息都采用普通发布。借出列记录两端实际能力，默认配置下定长图像也没有自动获得借出支持。比较接口时，先看接收比例，再看已收到图像的延迟。
++
++\begin{table}[htbp]
++\centering
++\small
++\caption{三种中间件的共享配置对照，三轮数值的中位数}
++\label{tab:ros2-image-types-shared}
++\begin{tabular}{lllrrc}
++\toprule
++RMW & 图像接口 & 发布 & 接收比例 & P95 / ms & 借出（发/收）\\
++\midrule
++Fast DDS & 标准 Image & 普通 & 42.9\% & 1.738 & 0/0\\
++Fast DDS & FixedImage & 普通 & 100.0\% & 0.498 & 1/1\\
++Fast DDS & FixedImage & 借出 & 100.0\% & 0.341 & 1/1\\
++\midrule
++Cyclone DDS & 标准 Image & 普通 & 100.0\% & 2.598 & 0/0\\
++Cyclone DDS & FixedImage & 普通 & 100.0\% & 0.492 & 1/1\\
++Cyclone DDS & FixedImage & 借出 & 100.0\% & 0.330 & 1/1\\
++\midrule
++Zenoh & 标准 Image & 普通 & 100.0\% & 1.385 & 0/0\\
++Zenoh & FixedImage & 普通 & 100.0\% & 1.347 & 0/0\\
++\bottomrule
++\end{tabular}
++\end{table}
++表\ref{tab:ros2-image-types-shared} 使用同样的像素负载与 QoS，各轮实际发送频率为 250.0--250.1 Hz。Fast DDS 载入 Data Sharing 配置，变长 Image 仍走普通传输路径。Cyclone DDS 的 iceoryx 和 Zenoh SHM 则可以交付序列化后的 Image。
++
++定长图像在 Fast DDS 与 Cyclone DDS 的共享配置下，两端借出能力均为 1/1。在相同接口与配置内，借出发布的 P95 分别从普通发布的 0.498、0.492 ms 降到 0.341、0.330 ms，对应直接填充共享样本所省下的复制。Zenoh 的两类消息均为 0/0，FixedImage 在这里仍需序列化，固定尺寸本身不会改变应用层借出支持。
++
++完整逐轮记录与所用版本保存在配套实验文档中。上面的默认组、共享配置组和借出组分别回答接口布局、配置与发布方式的问题。
++
++
++读结果时，先看实际发送频率，再看接收比例，最后解释已经收到的帧有多旧。固定布局改变了接口与内存组织，能否直接借出还要看相应 RMW 的能力。算法需要的是及时到达的图像，下面再观察处理阶段超时会发生什么。
++\end{example}
++
++\begin{exercise}
++\label{ex:v2-ros-fixed-image}
++运行三种 RMW、两类图像的统一对照，记录默认配置与共享配置下的接收比例、P95 和两端借出能力。解释变长 Image 不能直接借出时共享内存如何工作，定长图像也不能借出时又应怎样判断原因。
++\end{exercise}
++
++\paragraph*{故意让识别变慢一次}
++只保留 Fast DDS 的两个进程，把 Sink 的模拟处理设为 8 ms。先用默认小图像观察排队：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\begin{tbash}
++python3 src/image_path_demo/compare.py \
++  --output /tmp/image-path-slow \
++  --rmws rmw_fastrtps_cpp --modes separate \
++  --rate 250 --frames 500 --work-ms 8 --depth 5
++\end{tbash}
++\end{minipage}\par\smallskip
++接收端每帧花 8 ms，输入却每 4 ms 来一帧，队列很快积压。再换一个输出目录，用 \texttt{--depth 100} 重跑，保持其余条件和两秒排空时间相同。
++
++\Needspace{9\baselineskip}
++一组参考结果中，Source 均接近 250 Hz，Sink 约为 122 Hz：
++\begin{center}
++\begin{tabular}{rrr}
++\toprule
++队列深度 & 接收帧数 / 发送帧数 & P95 / ms\\
++\midrule
++5 & 249 / 500 & 20.0\\
++100 & 344 / 500 & 746.6\\
++\bottomrule
++\end{tabular}
++\end{center}
++较深的队列让更多帧留到发布结束后继续处理，也让它们等得更久。持续输入时，串行处理能力仍受理想 125 Hz 的上限约束。我们可以减少算法工作量、降采样、只处理最新帧，或安排并行流水线。显示支路先缩小图像并降低频率，录制支路按保存需求和存储带宽单独规划。
++
++\begin{exercise}
++\label{ex:v2-ros-image-slow}
++运行深度 5 和 100 的慢处理对照，记录实际发送频率、接收比例、P95 和排空时间。根据记录解释吞吐、丢帧和图像年龄的关系，再给相机到识别的主链路与降频可视化支路画一份部署方案。
++\end{exercise}
+--- before/chapters/A_ros2_review.tex
++++ after/chapters/A_ros2_review.tex
+@@ -1,7 +1,7 @@
+ \section{本章小结}
+ 先用节点与话题划分职责，再用功能包管理代码和依赖。应熟练完成发布、订阅、定时器和自定义接口的最小闭环。工程运行按“声明依赖、构建安装、加载环境、Launch 启动、观察话题与日志”串联；发生问题时先检查实际使用的包和二进制路径，再检查域、发现范围、接口与 QoS。CLion 使用独立构建目录，运行环境应与终端一致。
+ 
+-大图像链路先从像素负载与 4 ms 时间预算算起，再学习中间件选择、组件所有权交接与借出接口。用标准 Image 升到 250 Hz 后，我们把实际发送频率、接收比例和延迟放在一起，观察进程布局、Zenoh 共享内存与处理速度的影响。随后沿着 Cyclone DDS 的 separate 路径引入 iceoryx，从共享传输进一步走到定长图像的共享样本，比较接口约束、发布方式与样本有效期。接入实际相机时，再把测量扩展到采集、转换、识别与观测支路，复杂网络则留待项目中继续学习。
++大图像链路先从像素负载与 4 ms 时间预算算起，再学习中间件、组件所有权与借出条件。标准 Image 的变长字段不能直接借出原始样本，定长图像还要由实现与配置提供支持。Fast DDS Data Sharing、Cyclone DDS iceoryx 与 Zenoh SHM 分别安排共享样本或序列化数据的传递。掌握这些机制后，再用相同条件比较三种中间件的普通与定长图像，把发送频率、接收比例和延迟一起看。接入实际相机时，将测量扩展到采集、转换、识别与观测支路。
+ 
+ \Needspace{12\baselineskip}
+ \begin{problemset}
+@@ -30,6 +30,6 @@
+     \item 提交包含清单、构建规则、参数与 Launch 的 training\_tools 包；由检查者指定命名空间和文本，现场启动并展示对应话题。
+     \item 现场演示本机通信范围设置与恢复，保存一份独立实验日志；在 IDE 中命中发布回调断点，并说明实际运行的程序路径。
+     \item 现场构建 image\_path\_demo，由检查者指定尺寸、RMW 和组件布局；选择 Zenoh 时演示自己的路由器启动与正常关闭；展示原始日志、接收比例与延迟记录，说明计时点和合成图像的验证范围。
+-    \item 现场切换借出探测配置，展示固定类型、Image 与禁用后的结果。再运行 iceoryx 固定图像的完整像素检查，展示两端借出能力和共享文件偏移，说明与标准 Image 的布局、兼容性及使用期限的区别。
++    \item 现场切换借出探测配置，展示定长类型、Image 与禁用后的结果。再对三种中间件统一运行普通与定长图像的像素检查和性能对照，展示两端借出能力，说明类型布局、共享方式、工具兼容性和样本使用期限。
+     \item 使用实际相机逐步升到可用的目标帧率，记录采集、回调、识别完成与输出时刻；说明主链路与降频观测支路的布局。设备达不到指定参数时记录实际尺寸、格式与频率，不以合成实验代替物理采集验收。
+ \end{enumerate}
+--- before/examples/ros2/image-path-demo/CMakeLists.txt
++++ after/examples/ros2/image-path-demo/CMakeLists.txt
+@@ -21,7 +21,11 @@
+ target_compile_features(fixed_image PUBLIC cxx_std_17)
+ ament_target_dependencies(fixed_image rclcpp)
+ target_link_libraries(fixed_image "${typesupport}")
+-install(TARGETS image_nodes loan_probe fixed_image
++add_executable(image_benchmark src/image_benchmark.cpp)
++target_compile_features(image_benchmark PUBLIC cxx_std_17)
++ament_target_dependencies(image_benchmark rclcpp)
++target_link_libraries(image_benchmark "${typesupport}")
++install(TARGETS image_nodes loan_probe fixed_image image_benchmark
+   ARCHIVE DESTINATION lib LIBRARY DESTINATION lib
+   RUNTIME DESTINATION lib/${PROJECT_NAME})
+ install(DIRECTORY launch config DESTINATION share/${PROJECT_NAME})
+--- before/examples/ros2/image-path-demo/README.md
++++ after/examples/ros2/image-path-demo/README.md
+@@ -1,12 +1,12 @@
+-# 大图像、中间件与组件布局实验
++# 图像、中间件与内存路径
+ 
+-对应卷二 ROS2 章“大图像链路：中间件与内存”。环境为 Ubuntu 22.04 + ROS2 Humble。支持 Fast DDS、Cyclone DDS 和 Zenoh 三种 RMW，使用相同节点与 QoS 比较进程布局；另用自定义固定图像实测 iceoryx 共享样本与两端借出。
++对应卷二 ROS2 章。正文先介绍组件所有权、借出条件和共享内存工具，再统一比较三种中间件的普通 Image 与 FixedImage。Ubuntu 22.04 / ROS2 Humble 为主线。
+ 
+-正文按“通用机制与小图像 → 标准 Image 的 250 Hz、Zenoh SHM 与慢处理对照 → Cyclone DDS 的 separate、iceoryx 条件与定长图像”推进。下面保留各实验的操作入口。
++普通 Image 的动态数组和字符串不满足本章的原始样本借出条件。FixedImage 使用内嵌定长数组，更改尺寸需要重新生成接口，转成标准 Image 时需要复制像素并补元数据。定长布局还要由 RMW 和配置提供借出支持；本章的 Zenoh 实现对两类消息都不提供应用层借出。
+ 
+-默认生成 64×48、BGR8、25 Hz、100 帧，便于先检查操作。相机场景使用 1440×1080（宽×高）、目标 250 Hz：Bayer8 的紧密排列纯像素负载为 388.8 MB/s，BGR8 为 1166.4 MB/s。输入由内存生成，不连接相机、不运行 Bayer 转换或识别，不证明物理相机端到端达到 250 Hz。
++## 构建并运行小图像
+ 
+-在 Ubuntu/Humble 中打开 Bash，从独立的新工作空间构建。`BOOK` 改为实际教材目录；已有同名目录时另建工作空间，不覆盖自己的包。Zsh 使用对应的 setup.zsh。
++在 Ubuntu/Humble 的 Bash 终端，从独立工作空间构建。`BOOK` 改为实际教材目录，已有同名工作空间时另选目录。
+ 
+ ```bash
+ source /opt/ros/humble/setup.bash
+@@ -27,209 +27,88 @@
+ ros2 launch image_path_demo path.launch.py mode:=intra
+ ```
+ 
+-rosdep 尚未初始化时，先执行一次 `sudo rosdep init`，普通用户执行 `rosdep update`；已初始化则跳过。先停止同域的旧实验与额外订阅者。
+-
+-Source 和 Sink 共用 `Frame.msg`，其中测量序号、单调时钟与源像素地址包在正常 Image 外，保留 Image 的时间戳和坐标系。完整 Source/Sink 在 `src/components.cpp`；清单、构建规则、接口、Launch 和借出配置都在正文直接引入。
+-
+-三种 mode：
++rosdep 尚未初始化时，先执行一次 `sudo rosdep init`，普通用户执行 `rosdep update`。Zsh 加载对应的 setup.zsh。先停止同域旧实验与额外订阅者。
+ 
+ | mode | 进程布局 | 进程内通信 |
+-|---|---|---|
+-| separate | 两个单线程组件容器进程 | 关闭 |
+-| same | 一个单线程容器、两个组件 | 关闭 |
+-| intra | 一个单线程容器、两个组件 | 两端开启 |
++| --- | --- | --- |
++| separate | 两个单线程组件容器 | 关闭 |
++| same | 一个容器、两个组件 | 关闭 |
++| intra | 一个容器、两个组件 | 两端开启 |
+ 
+-启动后前三条 `POINTER` 显示同一帧的源与接收像素地址。intra 应显示 same_process=1、对应地址一致；约四秒出现 `SOURCE_DONE 100`。按 Ctrl+C 正常退出，检查 SOURCE/SINK 汇总：默认应收到 100 帧，bad_frames=0，pointer_matches=100。像素检查只覆盖首尾字节，并非全帧哈希检查。跨进程地址不能比较；same 模式可能因分配器复用地址而出现相等，地址本身不能证明零拷贝。intra 的结论需要实际启用路径、UniquePtr 所有权条件与记录共同支持。
++默认 64×48 BGR8、25 Hz、100 帧。intra 的前三条 POINTER 应显示同一进程及对应像素地址一致。出现 SOURCE_DONE 100 后 Ctrl+C，默认应收到 100 帧、bad_frames=0、pointer_matches=100。源码为 `src/components.cpp`，Frame 在标准 Image 外增加单机测量信息。
+ 
+-在相同环境、域和 RMW 的另一终端执行 `ros2 component list`，应看到 /image_box 内的两个组件。component_container 是单线程；换成 component_container_mt 时还要处理回调组与数据竞争。这个最小实验不引入并发。Distrobox 是系统运行环境；同一 Distrobox 中的不同进程仍是 separate 路径。
++## 统一比较普通与定长图像
+ 
+-自动运行两种 RMW × 三种布局：
++`src/image_benchmark.cpp` 的模板收发节点用同一份实现处理两种类型，固定为 1440×1080 BGR8。动态类型使用 Frame 中的标准 Image，定长类型使用 FixedImage。两端独立进程、best_effort、KeepLast(5)，接收端统一采用回调内 const 引用。
+ 
+ ```bash
+-cd ~/image_path_ws
+-python3 src/image_path_demo/compare.py --output /tmp/image-path-small
+-python3 src/image_path_demo/compare.py \
+-  --output /tmp/image-path-bgr250 \
+-  --width 1440 --height 1080 --channels 3 \
++sudo apt update
++sudo apt install ros-humble-rmw-zenoh-cpp ros-humble-iceoryx-posh
++python3 src/image_path_demo/compare_images.py \
++  --output /tmp/image-types-bgr250 --include-loan \
+   --rate 250 --frames 1000 --repeat 3
+ ```
+ 
+-输出目录须尚不存在，再次运行换名字。需要 Python3 标准库、Linux /proc 和已加载的安装环境。`--channels 1` 生成 mono8，3 生成 bgr8；`--rmws`、`--modes` 可选择子集，`--domain` 更换独立域，`--depth` 改两端历史，`--reliable` 把两端改为可靠；`--work-ms` 模拟接收处理耗时。脚本只关闭自己启动的进程组，保留原始日志。查询所有选项用 `python3 src/image_path_demo/compare.py --help`。
++输出目录须尚不存在，重复运行换名字。每轮分别运行三种 RMW、两类消息，以及 default/shared 两种配置。default 均采用普通发布，shared 配置如下：
+ 
+-Zenoh 是额外安装的非 DDS 中间件；保持 Ubuntu 22.04/Humble，在同一个组件工程中使用：
++| RMW | shared 的作用 | 定长消息借出 |
++| --- | --- | --- |
++| Fast DDS | 载入 fastdds-loan.xml，启用 Data Sharing | 查询两端能力后追加 loan 发布 |
++| Cyclone DDS | 载入 cyclone-iceoryx.xml，由 RouDi 提供共享池 | 查询两端能力后追加 loan 发布 |
++| Zenoh | 开启序列化数据的 SHM 传输 | 本章实现不支持应用借出 |
++
++`--include-loan` 只给实际两端支持的定长类型追加借出组，其他组合仍完整测试普通发布。记录器启动并关闭自己的两个节点、Zenoh 路由器和 RouDi，不接管已有管理进程；已有 RouDi 时先结束已有实验，或仅选择 default。
++
++常用选择：`--rmws` 指定 RMW 子集，`--types dynamic fixed` 选择消息类型，`--profiles default shared` 选择配置，`--domain` 更换独立域。Zenoh 路由器默认监听 127.0.0.1:17876，端口被占用时用 `--zenoh-port` 指定新端口。
++
++本例 Zenoh 池默认 6 MiB，适合复测书中参考条件。部署时根据单帧大小与在途帧数规划 `--zenoh-shm-pool-mib`，用 `df -h /dev/shm` 和 `ulimit -l` 检查共享空间与锁定内存额度。RouDi 使用 `config/roudi.toml` 的 32 个 5 MiB 图像块和小块池。Humble 的该 iceoryx 路径采用支持的 KeepLast、活性、deadline 等 QoS 组合，详见 [官方说明](https://github.com/ros2/rmw_cyclonedds/blob/humble/shared_memory_support.md)。
++
++逐字节检查可以先用低频运行同一矩阵：
+ 
+ ```bash
+-sudo apt update
+-sudo apt install ros-humble-rmw-zenoh-cpp
+-python3 src/image_path_demo/compare.py \
+-  --output /tmp/image-path-zenoh-small --rmws rmw_zenoh_cpp
+-python3 src/image_path_demo/compare.py \
+-  --output /tmp/image-path-zenoh-bgr250 --rmws rmw_zenoh_cpp \
+-  --width 1440 --height 1080 --channels 3 \
+-  --rate 250 --frames 1000 --repeat 3
++python3 src/image_path_demo/compare_images.py \
++  --output /tmp/image-types-full --rate 10 --frames 20 --repeat 1 \
++  --verify-full --include-loan
+ ```
+ 
+-记录器每轮启动并正常关闭自己的 Zenoh 路由器，默认只监听 127.0.0.1:17447；节点使用该端点连接，默认关闭 Zenoh SHM。每轮有额外的 `-router.log`、路由器退出状态与配置字段。端口已占用则退出，换未占用端口用 `--zenoh-port`。路由器计入 CPU/RSS，不连接或关闭已有路由器。脚本清除子进程继承的 `ZENOH_*` 与 `RMW_ZENOH_*` 调优变量，不改用户配置。
++这组检查对所有已收到的帧逐字节验证，best_effort 的接收比例另行记录。高速对照检查像素数量及首尾值。统计延迟从填充完成、publish 前到回调入口，发送频率包含分配与填充成本。每轮结束留两秒排空，参数为 `--drain-seconds`。合成数据不包含物理相机、SDK、颜色转换或识别耗时。
+ 
+-默认自动对照仍选两种 DDS；要一次比较三个实现，显式传入 `--rmws rmw_fastrtps_cpp rmw_cyclonedds_cpp rmw_zenoh_cpp`。正文按每帧大小、在途帧数和资源额度讲解容量规划，操作示例使用项目默认的 48 MiB 池。下面的 6 MiB 设置用于复现参考表中已有的 SHM 记录：
++输出 `environment.json`、`results.json`、收发日志、Zenoh 路由器日志和共享池退出记录。结果包含实际频率、接收比例、P95/P99、坏帧数、两端借出能力和退出状态。丢失帧不参加延迟统计。使用 `--help` 查看全部选项。
++
++## 组件布局、借出探测与慢处理
++
++`compare.py` 保留原组件布局对照，可改变图像尺寸、深度和模拟处理耗时：
+ 
+ ```bash
++python3 src/image_path_demo/compare.py --output /tmp/image-path-small
+ python3 src/image_path_demo/compare.py \
+-  --output /tmp/image-path-zenoh-shm \
+-  --rmws rmw_zenoh_cpp --modes separate --zenoh-shm \
+-  --zenoh-shm-pool-mib 6 \
+-  --width 1440 --height 1080 --channels 3 \
+-  --rate 250 --frames 1000 --repeat 3
++  --output /tmp/image-path-layouts --width 1440 --height 1080 --channels 3 \
++  --rate 250 --frames 1000 --repeat 3 \
++  --rmws rmw_fastrtps_cpp rmw_cyclonedds_cpp rmw_zenoh_cpp
++python3 src/image_path_demo/compare.py \
++  --output /tmp/image-path-slow-5 --rmws rmw_fastrtps_cpp --modes separate \
++  --rate 250 --frames 500 --work-ms 8 --depth 5
+ ```
+ 
+-这会显式为路由器与所有节点开启 `transport/shared_memory/enabled` 和 `transport/shared_memory/transport_optimization/enabled`。本轮默认 48 MiB 池超过容器 8 MiB 的 memlock 上限，出现 `Error creating lazy ShmProvider` / `OS error 12`，仍收到全部帧。这是回退记录，不能算作 SHM 验证通过。上面的新对照用 `--zenoh-shm-pool-mib 6` 设置每个会话的池；参数默认仍为 48 MiB。用 `ulimit -l`（KiB）与 `df -h /dev/shm` 同时检查。6 MiB 只足够容纳很少的 4.67 MB 在途大样本，真实部署按容量预算设置。
++用新目录和 depth 100 重跑慢处理，其余条件不变。加深队列会改变有限帧实验的交付与等待时间，持续 8 ms 串行处理的理想上限为 125 Hz。
+ 
+-它优化序列化数据的传输；普通 Image 的应用对象仍有分配、填充与序列化/反序列化边界，不能据此声称相机到算法完整零拷贝。要核对 SHM 容量、锁定内存限制、版本与回退；本轮另用 20 帧低频诊断，记录 Source 创建 6291456 字节共享段、Sink 打开同一段；这支持共享池实际可用，但没有逐帧跟踪证明 250 Hz 的所有数据始终通过 SHM。诊断增加详细日志，不能混入性能表。
+-
+-手动启动时使用两个加载 Humble 的终端。终端一执行 `ros2 run rmw_zenoh_cpp rmw_zenohd`；终端二加载本工程的 `install/setup.bash`、设置 `ROS_DOMAIN_ID=87`、`ROS_LOCALHOST_ONLY=1` 和 `RMW_IMPLEMENTATION=rmw_zenoh_cpp`，再运行同一条 Launch。默认路由器端口为 7447；默认节点通过它发现同机 peer，然后可直接交换数据。发布结束后先 Ctrl+C 正常关闭节点，再关闭自己的路由器。查询终端使用同一 RMW/域，可执行 `ros2 component list --no-daemon`，避免旧 RMW 的缓存。
+-
+-收不到消息时检查路由器、端口、两端 RMW/域及残留配置；不要把默认配置下缺少路由器的发现问题当成“Zenoh 不支持该消息”。两端均使用 Humble，Zenoh RMW 不自动互通 DDS 或 `zenoh-bridge-ros2dds`，跨发行版与桥接须另行核对。说明见 [Humble 分支](https://github.com/ros2/rmw_zenoh/blob/humble/README.md)与 [RMW 设计](https://github.com/ros2/rmw_zenoh/blob/humble/docs/design.md)。
+-
+-每轮记录：
+-
+-- `results.json`：实际发送/接收频率、接收帧数/发送帧数、已收到样本的 P50/P95/P99、像素地址检查及首尾内容检查。
+-- 每轮 `.log`：组件加载、前三帧地址、发布完成及正常退出统计。
+-- `environment.json`：合成输入与计时口径。
+-
+-发送前先分配与填充像素；延迟从填充完成后、publish 前开始，到订阅回调入口结束。不含曝光、SDK、图像生成或识别耗时。Linux 单机 steady_clock/CLOCK_MONOTONIC 用于计算；多机不能直接相减未同步的时钟。发送频率根据首末发送时刻计算，接收频率根据首末回调入口计算，因此二者可能有小幅差异；接收比例更直接表达有限帧数的交付情况。丢掉的帧不进入延迟统计，低 P95 不能替代高接收比例。
+-
+-CPU 秒包括存活的节点进程组及本实验 Zenoh 路由器在发现、加载、运行与排空阶段的累计用量；不等于稳态 CPU 百分比。RSS 是进程值相加，会重复计算共享页。跨布局还改变了执行器数量，不能把所有差值归因于某一次 DDS 复制。测量顺序固定，可重复并改顺序再验证。
+-
+-默认对照会清除子进程的 DDS XML、发布模式与借出调优变量，不改个人配置。当前目录若有隐式 `DEFAULT_FASTRTPS_PROFILES.xml` 则拒绝继续；换到干净目录。不要在实验中加入 echo、GUI 或录制订阅者，它们会改变路径和负载。
+-
+-慢处理对照，在上面的环境中运行：
++`loan_probe` 比较 Float64 和标准 Image。Humble 的 Fast DDS 默认为 0/0，启用配置后为 1/0，显式禁用后为 0/0：
+ 
+ ```bash
+-python3 src/image_path_demo/compare.py \
+-  --output /tmp/image-path-slow-5 \
+-  --rmws rmw_fastrtps_cpp --modes separate \
+-  --rate 250 --frames 500 --work-ms 8 --depth 5
+-python3 src/image_path_demo/compare.py \
+-  --output /tmp/image-path-slow-100 \
+-  --rmws rmw_fastrtps_cpp --modes separate \
+-  --rate 250 --frames 500 --work-ms 8 --depth 100
+-```
+-
+-两轮使用小图像，排除大负载。记录发送频率、接收比例、延迟与两秒排空条件。改 `--drain-seconds` 要同时记下新条件；有限帧数最后排空不代表 8 ms 串行阶段能长期处理 250 Hz。改成同进程单线程时，耗时回调还会拖慢 Source，不能把接收比例高当成输入仍为 250 Hz。
+-
+-借出探测是独立程序，前三轮分别是默认 Fast DDS、显式 Data Sharing 和默认未开启 iceoryx 共享内存的 Cyclone DDS，第四轮禁用借出：
+-
+-```bash
+-source /opt/ros/humble/setup.bash
+-cd ~/image_path_ws
+-source install/setup.bash
+-export ROS_DOMAIN_ID=88
+-export ROS_LOCALHOST_ONLY=1
++unset CYCLONEDDS_URI FASTRTPS_DEFAULT_PROFILES_FILE RMW_FASTRTPS_USE_QOS_FROM_XML
+ unset ROS_DISABLE_LOANED_MESSAGES
+-unset FASTRTPS_DEFAULT_PROFILES_FILE RMW_FASTRTPS_USE_QOS_FROM_XML
+-unset CYCLONEDDS_URI
+ RMW_IMPLEMENTATION=rmw_fastrtps_cpp ros2 run image_path_demo loan_probe
+ PROFILE="$(ros2 pkg prefix --share image_path_demo)/config/fastdds-loan.xml"
+ RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
+   FASTRTPS_DEFAULT_PROFILES_FILE="$PROFILE" RMW_FASTRTPS_USE_QOS_FROM_XML=1 \
+   ros2 run image_path_demo loan_probe
+-RMW_IMPLEMENTATION=rmw_cyclonedds_cpp ros2 run image_path_demo loan_probe
+ RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
+   FASTRTPS_DEFAULT_PROFILES_FILE="$PROFILE" RMW_FASTRTPS_USE_QOS_FROM_XML=1 \
+   ROS_DISABLE_LOANED_MESSAGES=1 ros2 run image_path_demo loan_probe
+ ```
+ 
+-先排除隐式 XML 和其他遗留配置。本章验证版本下 float64/image 依次为 0/0、1/0、0/0、0/0。API 能回退到本地分配器，所以程序运行成功不能代替 can_loan_messages 判断。这四轮是发布端探测，后面的固定图像实验再验证两端借出与跨进程共享样本。普通 Image 的动态数组和字符串不符合本例固定布局借出条件；bounded 也不自动等于 plain。
++程序运行成功说明回退可用，判断中间件借出要看 can_loan_messages。发布后停止访问借出对象，回调返回后停止使用借读引用和像素视图。
+ 
+-Zenoh 的借出接口另测。先按上面的手动流程启动自己的路由器，再在加载了同一工程的第二个终端执行：
++原 `fixed_image` / `compare_fixed.py` 保留为共享文件偏移诊断工具，详细用途及已有实测见 [iceoryx 记录](../../../../docs/revision/ros2-iceoryx-20261006.md)。正文的两类消息比较统一使用 compare_images.py，数据与解释集中在 chapters/A_ros2_image_results.tex。
+ 
+-```bash
+-RMW_IMPLEMENTATION=rmw_zenoh_cpp ros2 run image_path_demo loan_probe
+-ZENOH_CONFIG_OVERRIDE='transport/shared_memory/enabled=true' \
+-  RMW_IMPLEMENTATION=rmw_zenoh_cpp ros2 run image_path_demo loan_probe
+-```
+-
+-本轮 Zenoh 0.1.9 的两次 Float64/Image 输出均为 0/0，发布通过本地分配器回退；这个单发布端探测没有建立订阅端 SHM 数据交付，不能验证完整跨进程零拷贝。结束后正常停止自己的路由器。
+-
+-## Cyclone DDS 的 separate：iceoryx 与固定图像
+-
+-完成标准 Image 的 250 Hz 和 Zenoh SHM 对照后，再沿着 Cyclone DDS 的 separate 路径启用 iceoryx。Zenoh SHM 沿用标准 Image 的序列化传输；iceoryx 也能传递序列化 Image，进一步直接借出原始样本则要求固定、内嵌的消息布局，还要启动 RouDi、准备足够大的共享块并采用支持的 QoS。本例使用 KeepLast 深度 5、best_effort、volatile、自动活性和无限 deadline。
+-
+-`FixedImage.msg` 固定为 1440×1080 BGR8，4,665,600 字节的像素内嵌在消息中，生成 `std::array`。它只带序号和单机测量时间，不含动态数组、编码字符串或坐标系字符串。标准 `sensor_msgs/Image` 可以改变尺寸、格式和步长，带 Header，常用图像工具可以直接接收。固定接口的尺寸变化需要重新生成接口，适配成标准 Image 需要补元数据并复制像素。
+-
+-标准 Image 可以序列化后经 iceoryx 共享块交付，仍不支持本例的消息借出。固定接口配合借出发布和回调内借读，直接访问共享块中的原始样本。普通发布固定接口时，应用消息仍需复制进共享块。
+-
+-在前面构建的工作空间中，终端一启动自己的 RouDi。不要同时启动第二个 RouDi 来接管已有实验。
+-
+-```bash
+-source /opt/ros/humble/setup.bash
+-sudo apt install ros-humble-rmw-cyclonedds-cpp ros-humble-iceoryx-posh
+-cd ~/image_path_ws
+-colcon build --packages-select image_path_demo --cmake-args -DCMAKE_BUILD_TYPE=Release
+-source install/setup.bash
+-SHARE="$(ros2 pkg prefix --share image_path_demo)"
+-iox-roudi -c "$SHARE/config/roudi.toml"
+-```
+-
+-配置开启 `SharedMemory/Enable`，RouDi 采用 32 个 5 MiB 图像块及小块池。大块需容纳约 4.67 MB 的固定消息和块头，32 块约占 160 MiB，管理段另计。看到 `RouDi is ready for clients` 后，在另外两个实验终端加载相同环境：
+-
+-```bash
+-source /opt/ros/humble/setup.bash
+-cd ~/image_path_ws
+-source install/setup.bash
+-export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+-export ROS_DOMAIN_ID=89
+-export ROS_LOCALHOST_ONLY=1
+-SHARE="$(ros2 pkg prefix --share image_path_demo)"
+-export CYCLONEDDS_URI="file://$SHARE/config/cyclone-iceoryx.xml"
+-```
+-
+-分别启动收发端，先跑低频完整像素检查：
+-
+-```bash
+-# 终端二
+-ROS_DISABLE_LOANED_MESSAGES=0 ros2 run image_path_demo fixed_image \
+-  --ros-args -r __node:=fixed_receive -p role:=receive -p verify_full:=true
+-# 终端三
+-ROS_DISABLE_LOANED_MESSAGES=0 ros2 run image_path_demo fixed_image \
+-  --ros-args -r __node:=fixed_send -p role:=send -p rate:=10.0 -p frames:=20
+-```
+-
+-两端 `FIXED_CAP` 的 can_loan 应为 1，消息对象大小为 4,665,616 字节。出现 `FIXED_DONE 20` 后，先 Ctrl+C 结束发布端，再结束接收端。接收端应为 count=20、bad_frames=0。接收回调为 `const FixedImage &`，只在回调内使用样本；本例按 [Humble rclcpp 的订阅端说明](https://github.com/ros2/rclcpp/blob/humble/rclcpp/src/rclcpp/subscription_base.cpp)为这种回调形式局部设置 `ROS_DISABLE_LOANED_MESSAGES=0`。发布后停止访问借出对象，回调返回后停止使用引用和像素视图。
+-
+-自动对照用新的输出目录，RouDi 仍由终端一提供。记录器只管理自己的两个进程，参数 `--publish-mode` 改变发布接口，两组接收端都借读。
+-
+-```bash
+-CFG="$(ros2 pkg prefix --share image_path_demo)/config/cyclone-iceoryx.xml"
+-python3 src/image_path_demo/compare_fixed.py \
+-  --output /tmp/fixed-full-check --cyclone-config "$CFG" \
+-  --rate 10 --frames 20 --repeat 1 --verify-full
+-python3 src/image_path_demo/compare_fixed.py \
+-  --output /tmp/fixed-regular --cyclone-config "$CFG" \
+-  --publish-mode regular --rate 250 --frames 1000 --repeat 3
+-python3 src/image_path_demo/compare_fixed.py \
+-  --output /tmp/fixed-loan --cyclone-config "$CFG" \
+-  --publish-mode loan --rate 250 --frames 1000 --repeat 3
+-```
+-
+-固定接口的默认 DDS 对照使用 `--publish-mode regular` 并去掉 `--cyclone-config`。标准 Image 使用原组件程序：
+-
+-```bash
+-python3 src/image_path_demo/compare.py \
+-  --output /tmp/image-cyclone-shm \
+-  --rmws rmw_cyclonedds_cpp --modes separate --cyclone-config "$CFG" \
+-  --width 1440 --height 1080 --channels 3 \
+-  --rate 250 --frames 1000 --repeat 3 --domain 89
+-```
+-
+-去掉配置参数并换输出目录可得标准 Image 默认 DDS 结果。两个记录器都只在子进程中加载指定配置，关闭默认测试的隐式 XML。Cyclone 0.10 的文件路径使用未转义的实际路径，避免把中文编码成 `%E4...`。
+-
+-`compare_fixed.py` 记录两端借出能力、前三帧地址对应的 `/proc/PID/maps` 共享文件和偏移、交付统计及像素检查。跨进程比较的是同一帧对应的共享文件与文件偏移。`--verify-full` 逐字节检查，适合低频验证；250 Hz 对照检查首尾像素，并把所有填充时间计入实际发送频率，延迟从填充完成起算。自动关闭后保存统计，手动实验结束先停止节点，再关闭自己的 RouDi。
+-
+-2026-10-06 实测：默认 Float64/Image 为 0/0，启用 iceoryx 后为 1/0；固定接口两端为 1/1。低频 20 帧全像素通过，250 Hz 借出组每轮收到 1000 帧，三轮前三帧的共享文件与偏移均对应。独立低频直接跟踪还确认了 Image 的序列化共享块和 FixedImage 的原始共享样本。三轮 P95 中位数：标准 Image 默认 3.735 ms、iceoryx 1.668 ms；固定接口默认 3.292 ms、iceoryx 普通发布 0.505 ms、借出发布 0.334 ms。详细条件和原始记录见 [iceoryx 实测记录](../../../../docs/revision/ros2-iceoryx-20261006.md)，技术条件见 [rmw_cyclonedds 的 Humble 共享内存说明](https://github.com/ros2/rmw_cyclonedds/blob/humble/shared_memory_support.md)。
+-
+-共享内存传输、Data Sharing、Zenoh 传输优化、借出 API 与进程内所有权交接分别对应不同边界。实际相机还要测 SDK/DMA、颜色转换、OpenCV 视图或复制、CPU/GPU、识别和外部订阅者。图像传递结论仅覆盖本例无进程外订阅者的一对一 intra 路径；多 UniquePtr 接收者可能需要复制，多个只读接收者还需考虑共享生命周期。
+-
+-找不到包时检查 source install/setup.bash 和 ros2 pkg prefix；组件找不到检查注册类名与 CMake；接收为零先查同域旧节点、RMW 与 QoS；缺少统计应正常 Ctrl+C，而不是强制终止。超时或帧检查失败保留日志，先回到小输入定位，不把失败记录填成零延迟。实验结束后停止手动节点，恢复或取消为本实验设置的域、发现范围与 RMW，再回到日常配置。
+-
+-当前讲解顺序与逐项章节检查见 [顺序调整记录](../../../../docs/revision/ros2-image-order-20261006.md)。
++找不到程序时先检查构建、source install/setup.bash 和 ros2 pkg prefix。收不到消息时检查 RMW、域、QoS 和管理进程日志。结束手动实验后恢复日常的域、发现范围及 RMW。当前修订与逐项检查见 [统一比较记录](../../../../docs/revision/ros2-image-unified-20261006.md)。
+--- /dev/null
++++ after/examples/ros2/image-path-demo/src/image_benchmark.cpp
+@@ -0,0 +1,150 @@
++#include <algorithm>
++#include <chrono>
++#include <cstdint>
++#include <iostream>
++#include <memory>
++#include <stdexcept>
++#include <string>
++#include <type_traits>
++#include <vector>
++#include "rclcpp/rclcpp.hpp"
++#include "image_path_demo/msg/frame.hpp"
++#include "image_path_demo/msg/fixed_image.hpp"
++
++using DynamicImage = image_path_demo::msg::Frame;
++using FixedImage = image_path_demo::msg::FixedImage;
++
++auto steady_ns() {
++  return std::chrono::duration_cast<std::chrono::nanoseconds>(
++    std::chrono::steady_clock::now().time_since_epoch()).count();
++}
++
++template<class Message>
++decltype(auto) pixels(Message & message) {
++  if constexpr (std::is_same_v<std::remove_cv_t<Message>, FixedImage>)
++    return (message.data);
++  else
++    return (message.image.data);
++}
++
++// 两种接口共用同一收发实现，仅准备图像字段的方式不同。
++template<class Message>
++class ImageBenchmark : public rclcpp::Node {
++public:
++  ImageBenchmark() : Node("image_benchmark") {
++    role_ = declare_parameter<std::string>("role", "receive");
++    frames_ = declare_parameter("frames", 1000);
++    const double rate = declare_parameter("rate", 250.0);
++    loan_ = declare_parameter("loan", false);
++    verify_full_ = declare_parameter("verify_full", false);
++    if (frames_ < 2 || rate <= 0 || rate > 10000)
++      throw std::invalid_argument("核对帧数和频率");
++    auto qos = rclcpp::QoS(rclcpp::KeepLast(5)).best_effort();
++    if (role_ == "send") {
++      pub_ = create_publisher<Message>("benchmark_frames", qos);
++      capability(pub_->can_loan_messages());
++      if (loan_ && !pub_->can_loan_messages())
++        throw std::runtime_error("当前类型与配置不支持中间件借出");
++      timer_ = create_wall_timer(std::chrono::nanoseconds(int64_t(1e9 / rate)),
++        [this] { send(); });
++    } else if (role_ == "receive") {
++      // 两种接口都在回调内读样本，返回后不再保存引用或像素视图。
++      sub_ = create_subscription<Message>("benchmark_frames", qos,
++        [this](const Message & message) { receive(message); });
++      capability(sub_->can_loan_messages());
++    } else {
++      throw std::invalid_argument("role 应为 send 或 receive");
++    }
++  }
++  ~ImageBenchmark() override {
++    std::sort(latency_.begin(), latency_.end());
++    auto percentile = [this](double q) {
++      return latency_.empty() ? 0.0 : latency_[size_t(q * (latency_.size() - 1))];
++    };
++    const double span = (last_ - first_) / 1e9;
++    std::cout << "BENCH_STATS {\"role\":\"" << role_
++              << "\",\"count\":" << count_
++              << ",\"hz\":" << (span > 0 ? (count_ - 1) / span : 0)
++              << ",\"p95_ms\":" << percentile(0.95)
++              << ",\"p99_ms\":" << percentile(0.99)
++              << ",\"bad_frames\":" << bad_frames_ << "}" << std::endl;
++  }
++private:
++  void capability(bool supported) {
++    std::cout << "BENCH_CAP {\"role\":\"" << role_
++              << "\",\"can_loan\":" << supported << "}" << std::endl;
++  }
++  void fill(Message & message) {
++    if constexpr (std::is_same_v<Message, DynamicImage>) {
++      auto & image = message.image;
++      image.header.stamp = now();
++      image.header.frame_id = "camera_optical_frame";
++      image.width = 1440; image.height = 1080;
++      image.encoding = "bgr8"; image.step = 1440 * 3; image.is_bigendian = 0;
++      image.data.resize(4665600);
++      message.source_address = 0; message.source_pid = 0;
++    }
++    auto & data = pixels(message);
++    std::fill(data.begin(), data.end(), uint8_t(count_ % 256));
++    message.sequence = count_;
++    message.sent_ns = steady_ns();
++    if (count_ == 0) first_ = message.sent_ns;
++    last_ = message.sent_ns;
++  }
++  void send() {
++    if (pub_->get_subscription_count() == 0) return;
++    if (loan_) {
++      auto message = pub_->borrow_loaned_message();
++      fill(message.get());
++      pub_->publish(std::move(message));
++    } else {
++      auto message = std::make_unique<Message>(rosidl_runtime_cpp::MessageInitialization::SKIP);
++      fill(*message);
++      pub_->publish(std::move(message));
++    }
++    if (++count_ == uint64_t(frames_)) {
++      timer_->cancel();
++      std::cout << "BENCH_DONE " << count_ << std::endl;
++    }
++  }
++  void receive(const Message & message) {
++    const auto arrival = steady_ns();
++    if (count_ == 0) first_ = arrival;
++    last_ = arrival;
++    latency_.push_back((arrival - message.sent_ns) / 1e6);
++    const auto & data = pixels(message);
++    const uint8_t expected = uint8_t(message.sequence % 256);
++    bool valid = data.size() == 4665600 && data.front() == expected && data.back() == expected;
++    if (verify_full_)
++      valid = valid && std::all_of(data.begin(), data.end(),
++        [expected](uint8_t pixel) { return pixel == expected; });
++    if (!valid) ++bad_frames_;
++    ++count_;
++  }
++  std::string role_;
++  int frames_ = 1000;
++  bool loan_ = false, verify_full_ = false;
++  uint64_t count_ = 0, first_ = 0, last_ = 0, bad_frames_ = 0;
++  std::vector<double> latency_;
++  typename rclcpp::Publisher<Message>::SharedPtr pub_;
++  typename rclcpp::Subscription<Message>::SharedPtr sub_;
++  rclcpp::TimerBase::SharedPtr timer_;
++};
++
++int main(int argc, char ** argv) {
++  rclcpp::init(argc, argv);
++  try {
++    const auto arguments = rclcpp::remove_ros_arguments(argc, argv);
++    if (arguments.size() != 2 || (arguments[1] != "dynamic" && arguments[1] != "fixed"))
++      throw std::invalid_argument("选择 dynamic 或 fixed 图像接口");
++    rclcpp::Node::SharedPtr node;
++    if (arguments[1] == "fixed") node = std::make_shared<ImageBenchmark<FixedImage>>();
++    else node = std::make_shared<ImageBenchmark<DynamicImage>>();
++    rclcpp::spin(node);
++  } catch (const std::exception & error) {
++    std::cerr << error.what() << std::endl;
++    rclcpp::shutdown();
++    return 2;
++  }
++  rclcpp::shutdown();
++}
+--- /dev/null
++++ after/examples/ros2/image-path-demo/compare_images.py
+@@ -0,0 +1,164 @@
++#!/usr/bin/env python3
++"""同一收发程序比较三种 RMW 的普通 Image 与 FixedImage。"""
++import argparse
++from contextlib import contextmanager
++import json
++import os
++from pathlib import Path
++import re
++import signal
++import subprocess
++import time
++from compare import stop_process, zenoh_router
++
++
++@contextmanager
++def shared_pool(args):
++    """RouDi 只管理本次实验；已有管理进程时拒绝启动第二个。"""
++    if 'shared' not in args.profiles or 'rmw_cyclonedds_cpp' not in args.rmws:
++        yield
++        return
++    if subprocess.run(['pgrep', '-x', 'iox-roudi'], stdout=subprocess.DEVNULL).returncode == 0:
++        raise RuntimeError('已有 RouDi；结束已有实验，或只选择 default 配置')
++    before = sorted(p.name for p in Path('/dev/shm').iterdir())
++    path = args.output / 'roudi.log'
++    with path.open('w') as stream:
++        child = subprocess.Popen(['iox-roudi', '-c', str(args.share / 'config/roudi.toml')],
++                                 stdout=stream, stderr=subprocess.STDOUT, start_new_session=True)
++        try:
++            end = time.monotonic() + 15
++            while 'RouDi is ready' not in path.read_text():
++                if child.poll() is not None or time.monotonic() > end:
++                    raise RuntimeError(f'RouDi 未就绪，查看 {path}')
++                time.sleep(0.05)
++            yield
++        finally:
++            stop_process(child)
++            after = sorted(p.name for p in Path('/dev/shm').iterdir())
++            (args.output / 'shared-pool-cleanup.json').write_text(json.dumps(dict(
++                before=before, after=after, added=sorted(set(after) - set(before)),
++                roudi_returncode=child.returncode), indent=2) + '\n')
++
++
++def run_case(args, rmw, kind, profile, publish_mode, number):
++    env = os.environ.copy()
++    for key in ('CYCLONEDDS_URI', 'FASTRTPS_DEFAULT_PROFILES_FILE',
++                'FASTDDS_DEFAULT_PROFILES_FILE', 'RMW_FASTRTPS_USE_QOS_FROM_XML',
++                'RMW_FASTRTPS_PUBLICATION_MODE', 'ROS_DISABLE_LOANED_MESSAGES'):
++        env.pop(key, None)
++    for key in list(env):
++        if key.startswith(('ZENOH_', 'RMW_ZENOH_')):
++            env.pop(key)
++    env.update(RMW_IMPLEMENTATION=rmw, ROS_LOCALHOST_ONLY='1',
++               ROS_DOMAIN_ID=str(args.domain), ROS_DISABLE_LOANED_MESSAGES='0')
++    if profile == 'shared' and rmw == 'rmw_cyclonedds_cpp':
++        env['CYCLONEDDS_URI'] = 'file://' + str(args.share / 'config/cyclone-iceoryx.xml')
++    if profile == 'shared' and rmw == 'rmw_fastrtps_cpp':
++        env.update(FASTRTPS_DEFAULT_PROFILES_FILE=str(args.share / 'config/fastdds-loan.xml'),
++                   RMW_FASTRTPS_USE_QOS_FROM_XML='1')
++    args.zenoh_shm = profile == 'shared'
++    name = f'{rmw}-{kind}-{profile}-{publish_mode}-{number}'
++    paths = {role: args.output / f'{name}-{role}.log' for role in ('receive', 'send')}
++    router_log = args.output / f'{name}-router.log'
++    children, streams = {}, {}
++    start, done = time.monotonic(), None
++    with zenoh_router(args, rmw, env, router_log):
++        try:
++            for role in ('receive', 'send'):
++                streams[role] = paths[role].open('w')
++                command = [str(args.executable), kind, '--ros-args', '-r',
++                           f'__node:=benchmark_{role}', '-p', f'role:={role}',
++                           '-p', f'loan:={str(publish_mode == "loan").lower()}',
++                           '-p', f'frames:={args.frames}', '-p', f'rate:={args.rate}',
++                           '-p', f'verify_full:={str(args.verify_full).lower()}']
++                children[role] = subprocess.Popen(command, env=env, stdout=streams[role],
++                                                  stderr=subprocess.STDOUT, start_new_session=True)
++            while True:
++                if any(child.poll() is not None for child in children.values()):
++                    raise RuntimeError(f'收发进程提前退出，查看 {name} 的日志')
++                if f'BENCH_DONE {args.frames}' in paths['send'].read_text() and done is None:
++                    done = time.monotonic()
++                if done is not None and time.monotonic() - done >= args.drain_seconds:
++                    break
++                if time.monotonic() - start > max(30, args.frames / args.rate * 6 + 15):
++                    raise RuntimeError(f'发布未完成，查看 {name} 的日志')
++                time.sleep(0.02)
++        finally:
++            for child in children.values():
++                stop_process(child)
++            for stream in streams.values():
++                stream.close()
++    stats, capabilities = {}, {}
++    for role, path in paths.items():
++        content = path.read_text()
++        stats[role] = json.loads(re.findall(r'BENCH_STATS (\{[^\n]*\})', content)[-1])
++        capabilities[role] = json.loads(re.findall(r'BENCH_CAP (\{[^\n]*\})', content)[-1])
++    if stats['send']['count'] != args.frames or not 0 < stats['receive']['count'] <= args.frames:
++        raise RuntimeError(f'帧数不正确，查看 {name} 的日志')
++    if stats['receive']['bad_frames']:
++        raise RuntimeError(f'像素检查失败，查看 {name} 的日志')
++    return dict(rmw=rmw, message_type=kind, profile=profile, publish_mode=publish_mode,
++                repeat=number, sent=stats['send']['count'], received=stats['receive']['count'],
++                send_hz=stats['send']['hz'], receive_hz=stats['receive']['hz'],
++                delivery_ratio=stats['receive']['count'] / args.frames,
++                p95_ms=stats['receive']['p95_ms'], p99_ms=stats['receive']['p99_ms'],
++                bad_frames=stats['receive']['bad_frames'], capabilities=capabilities,
++                zenoh_shm_provider_error=any('Error creating lazy ShmProvider' in p.read_text()
++                                             for p in [*paths.values(), router_log] if p.exists()),
++                returncodes={k: v.returncode for k, v in children.items()})
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('--output', type=Path, required=True)
++    parser.add_argument('--rmws', nargs='+', choices=['rmw_fastrtps_cpp', 'rmw_cyclonedds_cpp',
++                        'rmw_zenoh_cpp'], default=['rmw_fastrtps_cpp', 'rmw_cyclonedds_cpp', 'rmw_zenoh_cpp'])
++    parser.add_argument('--types', nargs='+', choices=['dynamic', 'fixed'], default=['dynamic', 'fixed'])
++    parser.add_argument('--profiles', nargs='+', choices=['default', 'shared'], default=['default', 'shared'])
++    parser.add_argument('--include-loan', action='store_true')
++    parser.add_argument('--verify-full', action='store_true')
++    parser.add_argument('--rate', type=float, default=250.0)
++    parser.add_argument('--frames', type=int, default=1000)
++    parser.add_argument('--repeat', type=int, default=3)
++    parser.add_argument('--domain', type=int, default=90)
++    parser.add_argument('--drain-seconds', type=float, default=2.0)
++    parser.add_argument('--zenoh-port', type=int, default=17876)
++    parser.add_argument('--zenoh-shm-pool-mib', type=int, default=6)
++    args = parser.parse_args()
++    if (args.frames < 2 or not 0 < args.rate <= 10000 or args.repeat < 1 or
++            not 0 <= args.domain <= 101 or args.drain_seconds < 0 or
++            not 1024 <= args.zenoh_port <= 65535 or args.zenoh_shm_pool_mib < 5):
++        parser.error('核对帧数、频率、重复次数、域、排空时间、端口与共享池容量')
++    if Path('DEFAULT_FASTRTPS_PROFILES.xml').exists():
++        parser.error('当前目录存在隐式 Fast DDS 配置，请换到干净目录')
++    prefix = Path(subprocess.check_output(['ros2', 'pkg', 'prefix', 'image_path_demo'], text=True).strip())
++    args.executable = prefix / 'lib/image_path_demo/image_benchmark'
++    args.share = Path(subprocess.check_output(['ros2', 'pkg', 'prefix', '--share', 'image_path_demo'], text=True).strip())
++    args.output.mkdir(parents=True, exist_ok=False)
++    metadata = {key: str(value) if isinstance(value, Path) else value for key, value in vars(args).items()}
++    metadata.update(ros_distro=os.environ.get('ROS_DISTRO'), width=1440, height=1080,
++                    encoding='bgr8', payload_bytes=4665600, depth=5, reliability='best_effort',
++                    layout='separate', callback='const Message &; only within callback',
++                    latency='after fill, before publish -> callback entry', synthetic=True)
++    (args.output / 'environment.json').write_text(json.dumps(metadata, indent=2) + '\n')
++    rows = []
++    with shared_pool(args):
++        for number in range(1, args.repeat + 1):
++            for profile in args.profiles:
++                for rmw in args.rmws:
++                    for kind in args.types:
++                        ordinary = run_case(args, rmw, kind, profile, 'regular', number)
++                        modes = [ordinary]
++                        if (args.include_loan and kind == 'fixed' and
++                                all(cap['can_loan'] for cap in ordinary['capabilities'].values())):
++                            modes.append(run_case(args, rmw, kind, profile, 'loan', number))
++                        for row in modes:
++                            rows.append(row)
++                            (args.output / 'results.json').write_text(json.dumps(rows, indent=2) + '\n')
++                            print(f"{rmw} {kind} {profile} {row['publish_mode']} 第 {number} 轮："
++                                  f"{row['send_hz']:.1f} Hz，接收 {row['delivery_ratio']:.1%}，"
++                                  f"P95 {row['p95_ms']:.3f} ms", flush=True)
++
++
++if __name__ == '__main__':
++    main()

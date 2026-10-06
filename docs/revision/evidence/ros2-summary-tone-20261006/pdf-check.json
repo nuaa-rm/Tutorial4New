@@ -1,0 +1,19 @@
+{
+  "pages": 308,
+  "passes": 2,
+  "reference_files_stable": true,
+  "undefined_references": false,
+  "undefined_citations": false,
+  "rendered_and_inspected_pages": [
+    4,
+    71,
+    72,
+    73
+  ],
+  "visual_inspection": "目录、小结、习题与验收页均清晰，无重叠、截断或本次新增溢出",
+  "existing_overfull": "A_ros2_engineering.tex lines 408–409: 2.8734 pt",
+  "summary_paragraphs": 5,
+  "problemset_and_acceptance_unchanged": true,
+  "source_sha256": "7029748e649362beaed34a721a65bdedbe2cc255af64833447da72a1be2ee49a",
+  "pdf_sha256": "4a5cb74656f3c8efcb26b41c388b014bfb747905cae9c981c4e580ceefe3d284"
+}

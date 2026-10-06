@@ -8,31 +8,56 @@ import tempfile
 from render_ch1_diagrams import HEADER
 
 BODY = r'''
-\node[anchor=west] at (-6.7,6.1) {跨进程：先检查 RMW 的实际传输路径};
-\node[box,minimum width=3.0cm] (a) at (-4.8,4.9) {相机节点\\应用图像缓冲区};
-\node[box,minimum width=3.0cm] (b) at (-1.2,4.9) {发送端 DDS\\历史 / 传输缓冲区};
-\node[box,minimum width=3.0cm] (c) at (2.4,4.9) {接收端 DDS\\历史 / 传输缓冲区};
-\node[box,minimum width=3.0cm] (d) at (6.0,4.9) {识别节点\\应用图像缓冲区};
-\draw[flow] (a)--(b);
-\draw[flow] (b)--(c);
-\draw[flow] (c)--(d);
-\node[align=center] at (0.6,3.45) {序列化、缓存及复制次数由实现与配置决定\\
-共享内存传输（SHM）可以减少网络开销，仍可能复制样本};
-\node[anchor=west] at (-6.7,1.95) {同一组件容器 + 进程内通信：本章首先验证的路径};
-\draw[teachingcyan,dashed,rounded corners] (-6.65,-0.1) rectangle (7.7,1.5);
-\node[box,minimum width=3.2cm] (e) at (-4.5,.75) {Source 组件\\持有 UniquePtr};
-\node[box,minimum width=3.9cm] (f) at (.6,.75) {rclcpp 进程内通道\\移动所有权，保留像素地址};
-\node[box,minimum width=3.2cm] (g) at (5.65,.75) {Sink 组件\\接过 UniquePtr};
-\draw[flow] (e)--(f); \draw[flow] (f)--(g);
-\node at (.6,-.65) {此图限定一对一且没有进程外订阅者；图像生成与算法处理仍有成本};
-\node[anchor=west] at (-6.7,-2.1) {跨进程的完整零拷贝：三段条件都要满足};
-\node[box,minimum width=3.0cm] (h) at (-4.8,-3.3) {发布端应用\\借出样本};
-\node[box,minimum width=3.0cm] (i) at (-1.2,-3.3) {DDS 写端\\共享样本池};
-\node[box,minimum width=3.0cm] (j) at (2.4,-3.3) {DDS 读端\\访问同一批样本};
-\node[box,minimum width=3.0cm] (k) at (6.0,-3.3) {订阅端应用\\借出读取 / 归还};
-\draw[flow] (h)--(i); \draw[flow] (i)--(j); \draw[flow] (j)--(k);
-\node[align=center] at (.6,-4.75) {两端 DDS 经 Data Sharing 访问共享历史；消息布局与生命周期须分别核实\\
-本章 loan\_probe 只验证发布端能力；普通 Image 不因此获得跨进程零拷贝};
+\definecolor{copyorange}{RGB}{164,93,36}
+\tikzset{
+  process/.style={draw=teachingcyan!60,dashed,rounded corners=3pt},
+  shared/.style={box,fill=teachingcyan!14,minimum width=3.3cm},
+  copying/.style={flow,draw=copyorange,dashed},
+  pathlabel/.style={font=\footnotesize,fill=white,inner sep=1.5pt}}
+
+% 1. 消息所有权在同一进程内交接。
+\node[anchor=west,font=\small\bfseries] at (-7.15,6.45) {1\quad 进程内传递};
+\draw[process] (-7.15,3.75) rectangle (7.15,6.05);
+\node at (0,5.7) {同一个进程：ROS2 组件容器};
+\node[box,minimum width=3.1cm] (source) at (-4.8,4.9) {Source 组件\\持有 UniquePtr};
+\node[box,minimum width=4.2cm] (intra) at (0,4.9) {rclcpp 进程内通道\\转移消息所有权};
+\node[box,minimum width=3.1cm] (sink) at (4.8,4.9) {Sink 组件\\接过 UniquePtr};
+\draw[flow] (source)--(intra);
+\draw[flow] (intra)--(sink);
+\node[font=\footnotesize] at (0,4.08) {交接前后使用同一份消息与像素缓冲区};
+
+% 2. Fast DDS 的 SHM transport 共享传输缓冲区，两端历史各存一份数据。
+\node[anchor=west,font=\small\bfseries] at (-7.15,3.15) {2\quad Fast DDS 的 SHM transport：共享传输缓冲区};
+\draw[process] (-7.15,-.65) rectangle (-2.65,2.75);
+\draw[process] (2.65,-.65) rectangle (7.15,2.75);
+\node at (-4.9,2.4) {发布进程};
+\node at (4.9,2.4) {订阅进程};
+\node[box,minimum width=3.1cm] (pubapp) at (-4.9,1.6) {发布端应用\\应用图像缓冲区};
+\node[box,minimum width=3.1cm] (writer) at (-4.9,.1) {DDS 写端\\发送历史};
+\node[shared,minimum height=1.2cm] (transport) at (0,.1) {共享传输缓冲区\\序列化数据};
+\node[box,minimum width=3.1cm] (reader) at (4.9,.1) {DDS 读端\\接收历史};
+\node[box,minimum width=3.1cm] (subapp) at (4.9,1.6) {订阅端应用\\应用图像缓冲区};
+\draw[flow] (pubapp)--node[pathlabel,right]{序列化} (writer);
+\draw[copying] (writer)--node[pathlabel,above]{复制写入} (transport);
+\draw[copying] (transport)--node[pathlabel,above]{复制读出} (reader);
+\draw[flow] (reader)--node[pathlabel,left]{反序列化} (subapp);
+
+% 3. 共享样本路径涵盖 Fast DDS Data Sharing 和 Cyclone DDS/iceoryx。
+\node[anchor=west,font=\small\bfseries] at (-7.15,-1.05) {3\quad 完整的跨进程零拷贝：共享同一份样本};
+\draw[process] (-7.15,-4.85) rectangle (-2.65,-1.45);
+\draw[process] (2.65,-4.85) rectangle (7.15,-1.45);
+\node at (-4.9,-1.8) {发布进程};
+\node at (4.9,-1.8) {订阅进程};
+\node[box,minimum width=3.1cm] (loanpub) at (-4.9,-2.6) {发布端应用\\填充借出样本};
+\node[box,minimum width=3.1cm] (loanwriter) at (-4.9,-4.1) {DDS 写端\\管理共享样本};
+\node[shared,minimum height=2.2cm] (pool) at (0,-3.35) {共享样本池\\同一份消息数据};
+\node[align=center,font=\footnotesize] at (0,-1.8) {Fast DDS：Data Sharing\\Cyclone DDS：iceoryx};
+\node[box,minimum width=3.1cm] (loanreader) at (4.9,-4.1) {DDS 读端\\引用共享样本};
+\node[box,minimum width=3.1cm] (loansub) at (4.9,-2.6) {订阅端应用\\借出读取 / 归还};
+\draw[flow] (loanpub.east)--node[pathlabel,above]{直接填充} ([yshift=6mm]pool.west);
+\draw[flow] ([yshift=6mm]pool.east)--node[pathlabel,above]{直接读取} (loansub.west);
+\draw[flow] (loanwriter.east)--node[pathlabel,below]{样本引用} ([yshift=-6mm]pool.west);
+\draw[flow] ([yshift=-6mm]pool.east)--node[pathlabel,below]{样本引用} (loanreader.west);
 '''
 
 

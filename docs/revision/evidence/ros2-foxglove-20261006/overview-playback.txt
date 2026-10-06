@@ -1,0 +1,103 @@
+- banner:
+  - button "菜单":
+  - button "查看数据源信息":
+    - generic: recording_0.mcap
+  - button "数据源操作":
+  - button "此布局有未保存的更改 Tutoria l4New ROS2 图形化观测":
+    - generic "此布局有未保存的更改":
+    - generic "Tutorial4New ROS2 图形化观测":
+      - generic: Tutoria
+      - generic: l4New ROS2 图形化观测
+  - generic "添加面板":
+    - button "添加面板按钮":
+  - generic "显示左侧边栏 [":
+    - button "显示左侧边栏" [active]:
+  - button "显示右侧边栏":
+  - button "时区菜单按钮":
+    - text: GMT+8
+  - button "显示智能体侧边栏":
+  - button "用户个人资料菜单按钮":
+- text: Replace Split Expand Close
+- banner:
+  - generic: 3D
+  - button:
+  - button:
+  - button:
+- button:
+- button "3D":
+  - generic: 3D
+- button:
+- button:
+- text: Replace Split Expand Close
+- banner:
+  - generic: /viz/image
+  - button [disabled]:
+  - separator
+  - button:
+  - button:
+  - button:
+- generic: "同步时间:"
+- generic: 2026-10-06 2:27:44.884 PM CST
+- text: Replace Split Expand Close
+- banner:
+  - generic: Yaw 角度：rpy 与 ypr
+  - button:
+  - button:
+  - button:
+  - button [disabled]:
+  - separator
+  - button:
+  - button:
+  - button:
+- generic: /viz/pose.pose.orientation.@rpy.yaw.@degrees
+- generic "切换可见性":
+  - checkbox "切换可见性" [checked]
+- generic "删除数据系列":
+  - button "删除数据系列":
+- generic: /viz/pose.pose.orientation.@ypr.yaw.@degrees
+- generic "切换可见性":
+  - checkbox "切换可见性" [checked]
+- generic "删除数据系列":
+  - button "删除数据系列":
+- text: Replace Split Expand Close
+- banner:
+  - generic: 正弦、位置与速度模长
+  - button:
+  - button:
+  - button:
+  - button [disabled]:
+  - separator
+  - button:
+  - button:
+  - button:
+- generic: /viz/signal.data
+- generic "切换可见性":
+  - checkbox "切换可见性" [checked]
+- generic "删除数据系列":
+  - button "删除数据系列":
+- generic: /viz/pose.pose.position.x
+- generic "切换可见性":
+  - checkbox "切换可见性" [checked]
+- generic "删除数据系列":
+  - button "删除数据系列":
+- generic: /viz/twist.twist.linear.@norm
+- generic "切换可见性":
+  - checkbox "切换可见性" [checked]
+- generic "删除数据系列":
+  - button "删除数据系列":
+- slider "回放位置"
+- button "创建事件" [disabled]:
+- button "数据源":
+- button "打开回放时长编辑器":
+- generic "回放时间方式":
+  - generic: 2026-10-06 2:27:44.932 PM CST
+- button "向后跳转":
+- button "播放":
+- button "向前跳转":
+- button:
+- button "1×":
+  - text: 1×
+- list
+- tooltip "显示左侧边栏 [":
+  - text: 显示左侧边栏
+  - generic: "["

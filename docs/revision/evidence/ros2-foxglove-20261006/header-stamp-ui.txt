@@ -1,0 +1,200 @@
+[
+  {
+    "id": "settings__field__general-xAxisVal",
+    "text": "X 轴值类型时间戳"
+  },
+  {
+    "id": "settings__field__paths-0-timestampMethod",
+    "text": "时间戳ROS 头时间戳"
+  },
+  {
+    "id": "settings__field__paths-1-timestampMethod",
+    "text": "时间戳ROS 头时间戳"
+  }
+]
+Browser tab: 2, Title: "ws://127.0.0.1:8765 | Foxglove", URL: "https://app.foxglove.dev/83615652/view?layoutId=lay_0eecxSgjq7byOaPq&ds=foxglove-websocket&ds.url=ws%3A%2F%2F127.0.0.1%3A8765".
+1 AXWebArea ws://127.0.0.1:8765 | Foxglove, URL: app.foxglove.dev/83615652/view?layoutId=lay_0eecxSgjq7byOaPq&ds=foxglove-websocket&ds.url=ws%3A%2F%2F127.0.0.1%3A8765
+	2 container
+		3 container
+			4 container
+				5 container
+					6 pop up button Description: 菜单, ID: app-menu-button
+					7 container ws://127.0.0.1:8765
+						8 text ws:
+						9 text //127.0.0.1:8765
+					10 pop up button Tutoria l4New ROS2 图形化观测
+						11 container Tutorial4New ROS2 图形化观测
+							12 text Tutoria
+							13 text l4New ROS2 图形化观测
+					14 container 添加面板
+						15 pop up button Description: 添加面板按钮, ID: add-panel-button
+					276 button 隐藏左侧边栏
+					17 button 显示右侧边栏
+					18 pop up button Description: 时区菜单按钮, ID: timezone-select-button
+					19 checkbox Description: 显示智能体侧边栏, Value: 0
+					20 pop up button Description: 用户个人资料菜单按钮, ID: user-button
+				277 container
+					278 tab group
+						279 tab (selected, settable, boolean) 面板, Value: 1
+						280 tab (selectable, settable, boolean) 主题, Value: 0
+						281 tab (selectable, settable, boolean) 问题, Value: 0
+						282 tab (selectable, settable, boolean) 数据源, Value: 0
+						283 tab (selectable, settable, boolean) 元数据, Value: 0
+						284 tab (selectable, settable, boolean) 附件, Value: 0
+					285 text 图表面板
+					286 container
+						287 link Description: 查看文档, Value: docs.foxglove.dev/docs/visualization/panels/plot
+						288 pop up button 更多操作
+					289 text 标题
+					290 text field (settable) Yaw 角度：rpy 与 ypr
+					291 container
+						292 text 通用
+					293 text X 轴值类型
+					294 text 与其他图表同步
+					295 container 与其他图表同步
+						296 checkbox 关, Value: 0
+						297 checkbox 开, Value: 1
+					298 container
+						299 text 图例
+					300 container
+						301 text X 轴
+					302 container
+						303 text Y 轴
+					304 container
+						305 text 数据系列
+					306 button 添加数据系列
+					307 pop up button 更多操作
+					308 text 筛选
+					309 container
+						310 text /viz/pose.pose.orientation.@rpy.yaw.@degrees
+					311 button 删除数据系列
+					312 pop up button 更多操作
+					313 text Y 值
+					314 container
+						315 combo box (collapsed, settable) Value: /viz/pose.pose.orientation.@rpy.yaw.@degrees, Secondary Actions: Expand
+					316 text 标签
+					317 text field (settable)
+					318 text 颜色
+					319 container
+						320 text field (settable) #4e98e2
+					321 text 线宽
+					322 text field (settable)
+					323 text 显示线条
+					324 container 显示线条
+						325 checkbox 关, Value: 0
+						326 checkbox 开, Value: 1
+					327 text 线插值
+					328 text 时间戳
+					329 container
+						330 text /viz/pose.pose.orientation.@ypr.yaw.@degrees
+					331 button 删除数据系列
+					332 pop up button 更多操作
+					333 text Y 值
+					334 container
+						335 combo box (collapsed, settable) Value: /viz/pose.pose.orientation.@ypr.yaw.@degrees, Secondary Actions: Expand
+					336 text 标签
+					337 text field (settable)
+					338 text 颜色
+					339 container
+						340 text field (settable) #f5774d
+					341 text 线宽
+					342 text field (settable)
+					343 text 显示线条
+					344 container 显示线条
+						345 checkbox 关, Value: 0
+						346 checkbox 开, Value: 1
+					347 text 线插值
+					348 text 时间戳
+					349 container
+						350 container
+							351 container
+								352 text 3D
+								353 button
+								354 button
+								355 pop up button panel-menu-button
+								356 container
+									357 image
+									358 button
+									359 button 3D
+									360 button
+									361 button
+									362 button
+						363 container
+							364 container
+								365 text /viz/image
+								366 button
+								367 button
+								368 pop up button panel-menu-button
+								369 container
+									370 image
+									371 text 同步时间 : 2026-10-06 3:21:22.371 PM CST
+						372 container
+							373 container
+								374 text Yaw 角度：rpy 与 ypr
+								375 button
+								376 button
+								377 button
+								378 button
+								379 container 设置 ,
+									380 button
+								381 pop up button panel-menu-button
+								382 container
+									383 text /viz/pose.pose.orientation.@rpy.yaw.@degrees
+									384 container
+										385 container 切换可见性
+											386 checkbox (settable, integer) Description: 切换可见性, Value: 1
+										387 container 删除数据系列
+											388 button 删除数据系列
+									389 text /viz/pose.pose.orientation.@ypr.yaw.@degrees
+									390 container
+										391 container 切换可见性
+											392 checkbox (settable, integer) Description: 切换可见性, Value: 1
+										393 container 删除数据系列
+											394 button 删除数据系列
+								395 container
+									396 image
+						397 container
+							398 container
+								399 text 正弦、位置与速度模长
+								400 button
+								401 button
+								402 button
+								403 button
+								404 button
+								405 pop up button panel-menu-button
+								406 container
+									407 text /viz/signal.data
+									408 container
+										409 container 切换可见性
+											410 checkbox (settable, integer) Description: 切换可见性, Value: 1
+										411 container 删除数据系列
+											412 button 删除数据系列
+									413 text /viz/pose.pose.position.x
+									414 container
+										415 container 切换可见性
+											416 checkbox (settable, integer) Description: 切换可见性, Value: 1
+										417 container 删除数据系列
+											418 button 删除数据系列
+									419 text /viz/twist.twist.linear.@norm
+									420 container
+										421 container 切换可见性
+											422 checkbox (settable, integer) Description: 切换可见性, Value: 1
+										423 container 删除数据系列
+											424 button 删除数据系列
+								425 container
+									426 image
+				184 container
+					185 button (disabled) 创建事件
+					186 button 数据源
+					187 checkbox (disabled) Description: 打开回放时长编辑器, Value: 0
+					188 container 回放时间方式
+						189 text 2026-10-06 3:21:22.486 PM CST
+					190 button (disabled) 向后跳转
+					191 button (disabled) 暂停
+					192 button (disabled) 向前跳转
+					193 checkbox (disabled) 0
+		427 container 设置 ,
+			428 container
+				429 text 设置 ,
+
+The focused UI element is 380 button

@@ -1,0 +1,14 @@
+{
+  "02-专项技术栈/chapters/A_ros2_image_path.tex": {
+    "semicolons_before": 67,
+    "semicolons_after": 7
+  },
+  "shell_blocks_checked": 24,
+  "source_inclusions_and_labels_preserved": true,
+  "slow_case_values_preserved": true,
+  "02-专项技术栈/chapters/A_ros2_image_results.tex": {
+    "semicolons_before": 10,
+    "semicolons_after": 0
+  },
+  "data_rows_preserved": 10
+}

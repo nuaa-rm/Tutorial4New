@@ -1,0 +1,169 @@
+{
+  "initial_build": "Source directory contained incomplete main.aux; final build uses a clean source copy.",
+  "passes": [
+    {
+      "pass": 1,
+      "exit": 0,
+      "seconds": 15.98,
+      "stable": false,
+      "aux_digest": "67886396ed997786757ce7609b126b342f2027839136b98dbf0be7e84c7fb7c9"
+    },
+    {
+      "pass": 2,
+      "exit": 0,
+      "seconds": 15.83,
+      "stable": false,
+      "aux_digest": "b26947316492196cb9ed070b7da8914c72c07b9b6213d4ff229fc3a431efb2f6"
+    },
+    {
+      "pass": 3,
+      "exit": 0,
+      "seconds": 15.95,
+      "stable": true,
+      "aux_digest": "b26947316492196cb9ed070b7da8914c72c07b9b6213d4ff229fc3a431efb2f6"
+    },
+    {
+      "pass": 4,
+      "exit": 0,
+      "seconds": 17.03,
+      "stable": true,
+      "aux_digest": "b26947316492196cb9ed070b7da8914c72c07b9b6213d4ff229fc3a431efb2f6"
+    },
+    {
+      "pass": 5,
+      "exit": 0,
+      "seconds": 16.1,
+      "stable": true,
+      "aux_digest": "b26947316492196cb9ed070b7da8914c72c07b9b6213d4ff229fc3a431efb2f6"
+    },
+    {
+      "pass": 6,
+      "exit": 0,
+      "seconds": 16.9,
+      "stable": false,
+      "aux_digest": "4d9dbef0d73d742a9da93c1bc368325dba4f1dcf93c4779dfedd73f6f227a5dc"
+    },
+    {
+      "pass": 7,
+      "exit": 0,
+      "seconds": 15.98,
+      "stable": false,
+      "aux_digest": "9ef81a81cf0d58f528089b06c3e988995b0c2c5249ab22fbc296bf8ba7ad82f5"
+    },
+    {
+      "pass": 8,
+      "exit": 0,
+      "seconds": 15.79,
+      "stable": true,
+      "aux_digest": "9ef81a81cf0d58f528089b06c3e988995b0c2c5249ab22fbc296bf8ba7ad82f5"
+    },
+    {
+      "pass": 9,
+      "exit": 0,
+      "seconds": 17.23,
+      "stable": false,
+      "aux_digest": "2b0f67200cc084b20de52c627e2e02fe494a362d4aaa8a3ff1deb7f3bf1d31b3"
+    },
+    {
+      "pass": 10,
+      "exit": 0,
+      "seconds": 17.92,
+      "stable": false,
+      "aux_digest": "b26947316492196cb9ed070b7da8914c72c07b9b6213d4ff229fc3a431efb2f6"
+    },
+    {
+      "pass": 11,
+      "exit": 0,
+      "seconds": 16.52,
+      "stable": true,
+      "aux_digest": "b26947316492196cb9ed070b7da8914c72c07b9b6213d4ff229fc3a431efb2f6"
+    },
+    {
+      "pass": 12,
+      "exit": 0,
+      "seconds": 15.84,
+      "stable": false,
+      "aux_digest": "c7ffcdb08d795f8dee10a2ab7e0e874a0b2ecb3b773b2c167133a40976dcba05"
+    },
+    {
+      "pass": 13,
+      "exit": 0,
+      "seconds": 16.03,
+      "stable": true,
+      "aux_digest": "c7ffcdb08d795f8dee10a2ab7e0e874a0b2ecb3b773b2c167133a40976dcba05"
+    },
+    {
+      "pass": 14,
+      "exit": 0,
+      "seconds": 16.94,
+      "stable": false,
+      "aux_digest": "97a318ef8d984044e2760617fe4173ee6bedd996c329760d5cb84a8a062e8cfc"
+    },
+    {
+      "pass": 15,
+      "exit": 0,
+      "seconds": 15.9,
+      "stable": true,
+      "aux_digest": "97a318ef8d984044e2760617fe4173ee6bedd996c329760d5cb84a8a062e8cfc"
+    },
+    {
+      "pass": 16,
+      "exit": 0,
+      "seconds": 16.94,
+      "stable": true,
+      "aux_digest": "97a318ef8d984044e2760617fe4173ee6bedd996c329760d5cb84a8a062e8cfc"
+    },
+    {
+      "pass": 17,
+      "exit": 0,
+      "seconds": 15.98,
+      "stable": true,
+      "aux_digest": "97a318ef8d984044e2760617fe4173ee6bedd996c329760d5cb84a8a062e8cfc"
+    },
+    {
+      "pass": 18,
+      "exit": 0,
+      "seconds": 17.59,
+      "stable": true,
+      "aux_digest": "97a318ef8d984044e2760617fe4173ee6bedd996c329760d5cb84a8a062e8cfc"
+    },
+    {
+      "pass": 19,
+      "exit": 0,
+      "seconds": 16.66,
+      "stable": true,
+      "aux_digest": "97a318ef8d984044e2760617fe4173ee6bedd996c329760d5cb84a8a062e8cfc"
+    },
+    {
+      "exit": 0,
+      "seconds": 17.95,
+      "stable": true,
+      "aux_digest": "97a318ef8d984044e2760617fe4173ee6bedd996c329760d5cb84a8a062e8cfc",
+      "pass": 20
+    },
+    {
+      "exit": 0,
+      "seconds": 17.2,
+      "stable": true,
+      "aux_digest": "97a318ef8d984044e2760617fe4173ee6bedd996c329760d5cb84a8a062e8cfc",
+      "pass": 21
+    },
+    {
+      "pass": 22,
+      "exit": 0,
+      "seconds": 15.97,
+      "stable": false,
+      "aux_digest": "c7310850815e48f4783c030ca61c936a47520dece99edf260a8c192eadbad112"
+    },
+    {
+      "pass": 23,
+      "exit": 0,
+      "seconds": 15.86,
+      "stable": true,
+      "aux_digest": "c7310850815e48f4783c030ca61c936a47520dece99edf260a8c192eadbad112"
+    }
+  ],
+  "failures": [],
+  "final_sha256": "0d331299c94ef97cdb7add4cecebd793db1684a90e8b4918c7400542cd552321",
+  "toc_policy": "Keep printed TOC depth at 1; split the ROS body into 11 sections and 52 subsections, per user instruction."
+}

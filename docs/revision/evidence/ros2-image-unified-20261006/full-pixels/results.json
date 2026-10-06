@@ -1,0 +1,422 @@
+[
+  {
+    "rmw": "rmw_fastrtps_cpp",
+    "message_type": "dynamic",
+    "profile": "default",
+    "publish_mode": "regular",
+    "repeat": 1,
+    "sent": 20,
+    "received": 9,
+    "send_hz": 10.0007,
+    "receive_hz": 5.71624,
+    "delivery_ratio": 0.45,
+    "p95_ms": 2.79184,
+    "p99_ms": 2.79184,
+    "bad_frames": 0,
+    "capabilities": {
+      "receive": {
+        "role": "receive",
+        "can_loan": 0
+      },
+      "send": {
+        "role": "send",
+        "can_loan": 0
+      }
+    },
+    "zenoh_shm_provider_error": false,
+    "returncodes": {
+      "receive": 0,
+      "send": 0
+    }
+  },
+  {
+    "rmw": "rmw_fastrtps_cpp",
+    "message_type": "fixed",
+    "profile": "default",
+    "publish_mode": "regular",
+    "repeat": 1,
+    "sent": 20,
+    "received": 2,
+    "send_hz": 10.0029,
+    "receive_hz": 1.24838,
+    "delivery_ratio": 0.1,
+    "p95_ms": 1.91901,
+    "p99_ms": 1.91901,
+    "bad_frames": 0,
+    "capabilities": {
+      "receive": {
+        "role": "receive",
+        "can_loan": 0
+      },
+      "send": {
+        "role": "send",
+        "can_loan": 0
+      }
+    },
+    "zenoh_shm_provider_error": false,
+    "returncodes": {
+      "receive": 0,
+      "send": 0
+    }
+  },
+  {
+    "rmw": "rmw_cyclonedds_cpp",
+    "message_type": "dynamic",
+    "profile": "default",
+    "publish_mode": "regular",
+    "repeat": 1,
+    "sent": 20,
+    "received": 17,
+    "send_hz": 9.99931,
+    "receive_hz": 8.90541,
+    "delivery_ratio": 0.85,
+    "p95_ms": 5.49507,
+    "p99_ms": 5.49507,
+    "bad_frames": 0,
+    "capabilities": {
+      "receive": {
+        "role": "receive",
+        "can_loan": 0
+      },
+      "send": {
+        "role": "send",
+        "can_loan": 0
+      }
+    },
+    "zenoh_shm_provider_error": false,
+    "returncodes": {
+      "receive": 0,
+      "send": 0
+    }
+  },
+  {
+    "rmw": "rmw_cyclonedds_cpp",
+    "message_type": "fixed",
+    "profile": "default",
+    "publish_mode": "regular",
+    "repeat": 1,
+    "sent": 20,
+    "received": 14,
+    "send_hz": 10.0016,
+    "receive_hz": 10.0297,
+    "delivery_ratio": 0.7,
+    "p95_ms": 5.09828,
+    "p99_ms": 5.09828,
+    "bad_frames": 0,
+    "capabilities": {
+      "receive": {
+        "role": "receive",
+        "can_loan": 0
+      },
+      "send": {
+        "role": "send",
+        "can_loan": 0
+      }
+    },
+    "zenoh_shm_provider_error": false,
+    "returncodes": {
+      "receive": 0,
+      "send": 0
+    }
+  },
+  {
+    "rmw": "rmw_zenoh_cpp",
+    "message_type": "dynamic",
+    "profile": "default",
+    "publish_mode": "regular",
+    "repeat": 1,
+    "sent": 20,
+    "received": 20,
+    "send_hz": 10.0013,
+    "receive_hz": 10.0186,
+    "delivery_ratio": 1.0,
+    "p95_ms": 5.07101,
+    "p99_ms": 5.07101,
+    "bad_frames": 0,
+    "capabilities": {
+      "receive": {
+        "role": "receive",
+        "can_loan": 0
+      },
+      "send": {
+        "role": "send",
+        "can_loan": 0
+      }
+    },
+    "zenoh_shm_provider_error": false,
+    "returncodes": {
+      "receive": 0,
+      "send": 0
+    }
+  },
+  {
+    "rmw": "rmw_zenoh_cpp",
+    "message_type": "fixed",
+    "profile": "default",
+    "publish_mode": "regular",
+    "repeat": 1,
+    "sent": 20,
+    "received": 20,
+    "send_hz": 10.0033,
+    "receive_hz": 10.0204,
+    "delivery_ratio": 1.0,
+    "p95_ms": 4.12113,
+    "p99_ms": 4.12113,
+    "bad_frames": 0,
+    "capabilities": {
+      "receive": {
+        "role": "receive",
+        "can_loan": 0
+      },
+      "send": {
+        "role": "send",
+        "can_loan": 0
+      }
+    },
+    "zenoh_shm_provider_error": false,
+    "returncodes": {
+      "receive": 0,
+      "send": 0
+    }
+  },
+  {
+    "rmw": "rmw_fastrtps_cpp",
+    "message_type": "dynamic",
+    "profile": "shared",
+    "publish_mode": "regular",
+    "repeat": 1,
+    "sent": 20,
+    "received": 2,
+    "send_hz": 10.0037,
+    "receive_hz": 2.49575,
+    "delivery_ratio": 0.1,
+    "p95_ms": 1.61484,
+    "p99_ms": 1.61484,
+    "bad_frames": 0,
+    "capabilities": {
+      "receive": {
+        "role": "receive",
+        "can_loan": 0
+      },
+      "send": {
+        "role": "send",
+        "can_loan": 0
+      }
+    },
+    "zenoh_shm_provider_error": false,
+    "returncodes": {
+      "receive": 0,
+      "send": 0
+    }
+  },
+  {
+    "rmw": "rmw_fastrtps_cpp",
+    "message_type": "fixed",
+    "profile": "shared",
+    "publish_mode": "regular",
+    "repeat": 1,
+    "sent": 20,
+    "received": 20,
+    "send_hz": 10.0013,
+    "receive_hz": 10.0082,
+    "delivery_ratio": 1.0,
+    "p95_ms": 1.59063,
+    "p99_ms": 1.59063,
+    "bad_frames": 0,
+    "capabilities": {
+      "receive": {
+        "role": "receive",
+        "can_loan": 1
+      },
+      "send": {
+        "role": "send",
+        "can_loan": 1
+      }
+    },
+    "zenoh_shm_provider_error": false,
+    "returncodes": {
+      "receive": 0,
+      "send": 0
+    }
+  },
+  {
+    "rmw": "rmw_fastrtps_cpp",
+    "message_type": "fixed",
+    "profile": "shared",
+    "publish_mode": "loan",
+    "repeat": 1,
+    "sent": 20,
+    "received": 20,
+    "send_hz": 10.0047,
+    "receive_hz": 10.006,
+    "delivery_ratio": 1.0,
+    "p95_ms": 0.358023,
+    "p99_ms": 0.358023,
+    "bad_frames": 0,
+    "capabilities": {
+      "receive": {
+        "role": "receive",
+        "can_loan": 1
+      },
+      "send": {
+        "role": "send",
+        "can_loan": 1
+      }
+    },
+    "zenoh_shm_provider_error": false,
+    "returncodes": {
+      "receive": 0,
+      "send": 0
+    }
+  },
+  {
+    "rmw": "rmw_cyclonedds_cpp",
+    "message_type": "dynamic",
+    "profile": "shared",
+    "publish_mode": "regular",
+    "repeat": 1,
+    "sent": 20,
+    "received": 20,
+    "send_hz": 10.0033,
+    "receive_hz": 10.0068,
+    "delivery_ratio": 1.0,
+    "p95_ms": 3.54653,
+    "p99_ms": 3.54653,
+    "bad_frames": 0,
+    "capabilities": {
+      "receive": {
+        "role": "receive",
+        "can_loan": 0
+      },
+      "send": {
+        "role": "send",
+        "can_loan": 0
+      }
+    },
+    "zenoh_shm_provider_error": false,
+    "returncodes": {
+      "receive": 0,
+      "send": 0
+    }
+  },
+  {
+    "rmw": "rmw_cyclonedds_cpp",
+    "message_type": "fixed",
+    "profile": "shared",
+    "publish_mode": "regular",
+    "repeat": 1,
+    "sent": 20,
+    "received": 20,
+    "send_hz": 10.0034,
+    "receive_hz": 10.0059,
+    "delivery_ratio": 1.0,
+    "p95_ms": 0.508184,
+    "p99_ms": 0.508184,
+    "bad_frames": 0,
+    "capabilities": {
+      "receive": {
+        "role": "receive",
+        "can_loan": 1
+      },
+      "send": {
+        "role": "send",
+        "can_loan": 1
+      }
+    },
+    "zenoh_shm_provider_error": false,
+    "returncodes": {
+      "receive": 0,
+      "send": 0
+    }
+  },
+  {
+    "rmw": "rmw_cyclonedds_cpp",
+    "message_type": "fixed",
+    "profile": "shared",
+    "publish_mode": "loan",
+    "repeat": 1,
+    "sent": 20,
+    "received": 20,
+    "send_hz": 10.0057,
+    "receive_hz": 10.0064,
+    "delivery_ratio": 1.0,
+    "p95_ms": 0.337846,
+    "p99_ms": 0.337846,
+    "bad_frames": 0,
+    "capabilities": {
+      "receive": {
+        "role": "receive",
+        "can_loan": 1
+      },
+      "send": {
+        "role": "send",
+        "can_loan": 1
+      }
+    },
+    "zenoh_shm_provider_error": false,
+    "returncodes": {
+      "receive": 0,
+      "send": 0
+    }
+  },
+  {
+    "rmw": "rmw_zenoh_cpp",
+    "message_type": "dynamic",
+    "profile": "shared",
+    "publish_mode": "regular",
+    "repeat": 1,
+    "sent": 20,
+    "received": 20,
+    "send_hz": 10.0025,
+    "receive_hz": 10.0414,
+    "delivery_ratio": 1.0,
+    "p95_ms": 4.13574,
+    "p99_ms": 4.13574,
+    "bad_frames": 0,
+    "capabilities": {
+      "receive": {
+        "role": "receive",
+        "can_loan": 0
+      },
+      "send": {
+        "role": "send",
+        "can_loan": 0
+      }
+    },
+    "zenoh_shm_provider_error": false,
+    "returncodes": {
+      "receive": 0,
+      "send": 0
+    }
+  },
+  {
+    "rmw": "rmw_zenoh_cpp",
+    "message_type": "fixed",
+    "profile": "shared",
+    "publish_mode": "regular",
+    "repeat": 1,
+    "sent": 20,
+    "received": 20,
+    "send_hz": 10.0031,
+    "receive_hz": 10.0433,
+    "delivery_ratio": 1.0,
+    "p95_ms": 4.18063,
+    "p99_ms": 4.18063,
+    "bad_frames": 0,
+    "capabilities": {
+      "receive": {
+        "role": "receive",
+        "can_loan": 0
+      },
+      "send": {
+        "role": "send",
+        "can_loan": 0
+      }
+    },
+    "zenoh_shm_provider_error": false,
+    "returncodes": {
+      "receive": 0,
+      "send": 0
+    }
+  }
+]

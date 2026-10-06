@@ -1,0 +1,750 @@
+--- 02-专项技术栈/chapters/A_ros2_image_path.tex (before)
++++ 02-专项技术栈/chapters/A_ros2_image_path.tex
+@@ -359,7 +359,7 @@
+ 
+ 本实验在同一台电脑上，用 \texttt{steady\_clock} 对应的单调时钟比较发送与回调入口时刻。
+ 
+-接下来是完整清单与构建规则。清单声明组件库和消息生成依赖，CMake 生成 \texttt{Frame}、链接类型支持，再注册两个组件类。
++接下来是完整清单与构建规则。清单声明组件库和消息生成依赖，CMake 生成 \texttt{Frame} 与后面使用的 \texttt{FixedImage}，链接类型支持，再注册两个组件类。
+ \lstinputlisting[frame=single,language=XML,caption={组件实验依赖清单}]{examples/ros2/image-path-demo/package.xml}
+ \lstinputlisting[frame=single,language=cmake,caption={接口生成、组件注册与安装规则}]{examples/ros2/image-path-demo/CMakeLists.txt}
+ 
+@@ -454,6 +454,7 @@
+ export ROS_LOCALHOST_ONLY=1
+ unset ROS_DISABLE_LOANED_MESSAGES
+ unset FASTRTPS_DEFAULT_PROFILES_FILE RMW_FASTRTPS_USE_QOS_FROM_XML
++unset CYCLONEDDS_URI
+ RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
+   ros2 run image_path_demo loan_probe
+ PROFILE="$(ros2 pkg prefix --share image_path_demo)/config/fastdds-loan.xml"
+@@ -485,8 +486,147 @@
+ 读这组数据时，重点看第二行：同一种实现换了配置，Float64 的借出能力也随之变化。你运行时应记录实际输出及对应配置。
+ \end{example}
+ 
++\subsubsection{固定图像：用 iceoryx 交接共享样本}
++\label{sec:ros2-fixed-image-shm}
++刚才的 Cyclone DDS 使用默认配置。现在我们启用它的 iceoryx 共享内存路径，让两个进程访问同一份图像样本。\textbf{RouDi} 是 iceoryx 的运行管理进程，负责创建共享池和管理使用它的进程。节点通过 Cyclone DDS 发现对方，再由 iceoryx 交付本机共享样本。
++
++先解决消息布局。标准 \texttt{sensor\_msgs/Image} 可以改变尺寸和编码，像素放在动态数组中，\texttt{encoding} 与 \texttt{header.frame\_id} 也是字符串。即使每次都发送同样尺寸，类型仍然包含动态字段。为了直接在共享块中借出整张图像，我们给这条链路定义 \texttt{FixedImage}：固定为 $1440\times1080$、BGR8，像素数组长度为 $1440\times1080\times3=4665600$。
++
++\begin{example}[自定义固定图像，运行跨进程借出]
++沿用 \path{examples/ros2/image-path-demo}，新增文件的职责如下。前面引入的 CMake 已生成两种接口，并安装 \texttt{fixed\_image} 程序和两份配置。
++\begin{tbash}
++msg/FixedImage.msg       # 固定布局图像
++src/fixed_image.cpp     # 独立发布端或订阅端
++config/cyclone-iceoryx.xml # 开启 Cyclone 共享内存
++config/roudi.toml       # 图像共享池
++compare_fixed.py       # 两个进程的统计与共享位置检查
++\end{tbash}
++
++接口中只保留序号、测量时间和内嵌像素。尺寸常量属于类型定义，不占每帧负载。
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\lstinputlisting[frame=single,caption={固定为 1440×1080 BGR8 的图像接口}]{examples/ros2/image-path-demo/msg/FixedImage.msg}
++\end{minipage}\par\smallskip
++
++生成的 C++ 像素字段是 \nolinkurl{std::array<uint8_t, 4665600>}。它与普通 Image 的区别可以归纳为：
++\begin{center}
++\small
++\begin{tabular}{lp{0.34\linewidth}p{0.34\linewidth}}
++\toprule
++比较项 & 标准 Image & 本例 FixedImage\\
++\midrule
++像素存储 & 动态数组，像素另行分配 & 定长数组，像素内嵌在消息中\\
++尺寸与格式 & 每帧描述宽、高、编码和步长 & 类型约定 1440×1080 BGR8，紧密排列\\
++时间与坐标系 & Header 提供时间戳和 frame\_id & 只带单机测量时间和序号\\
++工具衔接 & 常用图像工具直接接收 & 显示或录制为标准 Image 时需适配\\
++\bottomrule
++\end{tabular}
++\end{center}
++我们用固定布局换取直接映射共享样本的机会。更换分辨率时要修改接口并重新构建两端。需要接入标准图像工具时，可以把像素复制到 Image 并补齐元数据，代价就发生在适配支路上。算法也可以在回调内用 \texttt{cv::Mat} 建立像素视图，视图的有效期跟随借读样本。
++
++接下来准备共享池。Cyclone 配置中的 \texttt{SharedMemory/Enable} 开启 iceoryx 路径：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\lstinputlisting[frame=single,language=XML,caption={开启 Cyclone DDS 的 iceoryx 路径}]{examples/ros2/image-path-demo/config/cyclone-iceoryx.xml}
++\end{minipage}\par\smallskip
++RouDi 配置按块大小分池。下面为大图像准备 32 个 5 MiB 块，共约 160 MiB，另外保留小块池。每个大块容得下本例约 4.67 MB 的消息及共享块管理开销。
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\lstinputlisting[frame=single,caption={RouDi 的固定图像共享池}]{examples/ros2/image-path-demo/config/roudi.toml}
++\end{minipage}\par\smallskip
++
++完整收发程序如下。\texttt{role} 决定创建发布者还是订阅者，两端使用 \texttt{best\_effort}、KeepLast 深度 5。构造时输出借出能力，借出模式要求能力为真，再开始实验。
++\lstinputlisting[frame=single,language=C++,caption={固定图像：创建收发端与汇总统计},firstline=1,lastline=66]{examples/ros2/image-path-demo/src/fixed_image.cpp}
++
++\texttt{fill} 让同一帧的全部像素取序号对应的值，填充完成后记录发送时刻。\texttt{loan=true} 时，先借共享块，再直接填充并发布。\texttt{loan=false} 时，应用创建自己的消息，普通发布接口将内容送入中间件。接收端在回调入口记时，检查像素，并记录前三帧的地址。
++\lstinputlisting[frame=single,language=C++,caption={固定图像：填充、发布与回调内借读},firstline=67]{examples/ros2/image-path-demo/src/fixed_image.cpp}
++
++这里的订阅回调使用 \texttt{const FixedImage \&}，在回调内借读，返回后由执行器归还样本。Humble 的这个示例只为该回调形式打开订阅端借出。发布后也要停止访问原借出对象，\texttt{LoanedMessage} 会管理未发布对象的归还。
++
++\Needspace{4\baselineskip}
++先在工作空间中安装 RouDi 并构建。\nolinkurl{ros-humble-rmw-cyclonedds-cpp} 提供中间件，\nolinkurl{ros-humble-iceoryx-posh} 提供 RouDi。\href{https://github.com/ros2/rmw_cyclonedds/blob/humble/shared_memory_support.md}{Humble 共享内存说明}列出了构建与 QoS 条件，本例使用支持这条路径的固定类型和 QoS。
++\begin{tbash}
++source /opt/ros/humble/setup.bash
++sudo apt install ros-humble-rmw-cyclonedds-cpp ros-humble-iceoryx-posh
++cd ~/image_path_ws
++colcon build --packages-select image_path_demo \
++  --cmake-args -DCMAKE_BUILD_TYPE=Release
++source install/setup.bash
++SHARE="$(ros2 pkg prefix --share image_path_demo)"
++iox-roudi -c "$SHARE/config/roudi.toml"
++\end{tbash}
++看到 \texttt{RouDi is ready for clients} 后，让这个终端继续运行。在另外两个实验终端都加载环境并设置相同的 RMW、域与配置：
++\begin{tbash}
++source /opt/ros/humble/setup.bash
++cd ~/image_path_ws
++source install/setup.bash
++export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
++export ROS_DOMAIN_ID=89
++export ROS_LOCALHOST_ONLY=1
++SHARE="$(ros2 pkg prefix --share image_path_demo)"
++export CYCLONEDDS_URI="file://$SHARE/config/cyclone-iceoryx.xml"
++\end{tbash}
++在终端二启动接收端，在终端三启动发布端。先用 10 Hz 的 20 帧逐字节检查图像，变量 \nolinkurl{ROS_DISABLE_LOANED_MESSAGES=0} 只作用于本条命令：
++\begin{tbash}
++# 终端二：接收与完整像素检查
++ROS_DISABLE_LOANED_MESSAGES=0 ros2 run image_path_demo fixed_image \
++  --ros-args -r __node:=fixed_receive -p role:=receive -p verify_full:=true
++# 终端三：借出并填充共享图像
++ROS_DISABLE_LOANED_MESSAGES=0 ros2 run image_path_demo fixed_image \
++  --ros-args -r __node:=fixed_send -p role:=send -p rate:=10.0 -p frames:=20
++\end{tbash}
++两端的 \texttt{FIXED\_CAP} 应显示 \texttt{can\_loan=1}。发布端显示 \texttt{FIXED\_DONE 20} 后，先结束发布端，再结束接收端，检查接收统计为 20 帧、\texttt{bad\_frames=0}。实验结束时再关闭 RouDi。
++
++\paragraph*{比较普通发布与借出发布}
++自动记录器会启动并关闭自己的两个收发进程，RouDi 继续由终端一提供。在已加载工作空间环境的终端运行：
++\par\medskip\noindent\begin{minipage}{\linewidth}
++\begin{tbash}
++CFG="$(ros2 pkg prefix --share image_path_demo)/config/cyclone-iceoryx.xml"
++python3 src/image_path_demo/compare_fixed.py \
++  --output /tmp/fixed-full-check --cyclone-config "$CFG" \
++  --rate 10 --frames 20 --repeat 1 --verify-full
++python3 src/image_path_demo/compare_fixed.py \
++  --output /tmp/fixed-regular --cyclone-config "$CFG" \
++  --publish-mode regular --rate 250 --frames 1000 --repeat 3
++python3 src/image_path_demo/compare_fixed.py \
++  --output /tmp/fixed-loan --cyclone-config "$CFG" \
++  --publish-mode loan --rate 250 --frames 1000 --repeat 3
++\end{tbash}
++\end{minipage}\par\smallskip
++\texttt{--publish-mode} 只改变发布端的普通或借出接口，两组接收端都借读。要增加默认 DDS 对照，使用 \texttt{regular} 并去掉 \texttt{--cyclone-config}，换一个输出目录。标准 Image 的对照则沿用 \texttt{compare.py}：
++\begin{tbash}
++python3 src/image_path_demo/compare.py \
++  --output /tmp/image-cyclone-shm \
++  --rmws rmw_cyclonedds_cpp --modes separate --cyclone-config "$CFG" \
++  --width 1440 --height 1080 --channels 3 \
++  --rate 250 --frames 1000 --repeat 3 --domain 89
++\end{tbash}
++同样去掉配置参数并换输出目录，就能得到标准 Image 的默认 DDS 结果。记录器将环境变量限定在自己的子进程中。
++
++\begin{table}[htbp]
++\centering
++\small
++\caption{Cyclone DDS 同机跨进程合成 BGR8 对照，三轮数值的中位数}
++\label{tab:ros2-iceoryx-results}
++\begin{tabular}{llrr}
++\toprule
++接口 & 发布与交付 & 接收比例 & P95 / ms\\
++\midrule
++Frame（标准 Image） & 普通发布，默认 DDS & 99.4\% & 3.735\\
++Frame（标准 Image） & 普通发布，iceoryx & 100.0\% & 1.668\\
++FixedImage & 普通发布，默认 DDS & 99.8\% & 3.292\\
++FixedImage & 普通发布，iceoryx & 100.0\% & 0.505\\
++FixedImage & 借出发布，iceoryx & 100.0\% & 0.334\\
++\bottomrule
++\end{tabular}
++\end{table}
++这组数据使用相同的 $1440\times1080$ BGR8 像素、250 Hz 目标、1000 帧、深度 5 和 \texttt{best\_effort}，每轮发布后留两秒排空，各组实际发送频率约为 250 Hz。延迟从填充完成后到接收回调入口计算。先在相同接口内比较配置，再在 FixedImage 内比较两种发布方式，就能看出传输优化与直接填充共享块各自省下的成本。
++
++\paragraph*{两种图像在共享块中装的是什么}
++标准 Image 也可以经 iceoryx 传输，但动态字段需要序列化后放进共享块，接收端再恢复消息。开启 iceoryx 后，\texttt{loan\_probe} 的 Float64/Image 能力为 1/0。FixedImage 两端则都支持借出，借出发布直接写入共享块中的原始样本，订阅回调直接引用它。
++
++本例还检查了实际位置：\texttt{compare\_fixed.py} 按帧序号，将两端像素地址转换为共享文件及文件内偏移。三轮借出实验中，前三帧都落在同一共享文件的相同偏移。另做的低频共享块跟踪确认，标准 Image 交付的是序列化数据，FixedImage 借出交付的是原始样本。两个进程的虚拟地址可以不同，真正对应的是同一份共享数据。详细逐轮记录留在实验文档中。
++\end{example}
++
+ \paragraph*{Zenoh：在传输层使用共享内存}
+-Zenoh 的共享内存功能优化序列化数据在本机进程间的传输，普通发布接口也可以使用它。应用层的借出能力则由另一个接口查询。我们可以先用同一探测程序观察这一区别：
++Zenoh 的共享内存功能优化序列化数据在本机进程间的传输，普通发布接口也可以使用它。应用层的借出能力则由另一个接口查询。接着用探测程序比较两种能力：
+ 
+ 先按第\ref{sec:ros2-rmw-selection}节启动自己的 Zenoh 路由器。在已加载 Humble 和组件工程的第二个终端运行发布端探测：
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+@@ -511,23 +651,9 @@
+ 一帧本例的 BGR8 约为 4.67 MB，池容量需要随在途帧数增加。项目用 \texttt{--zenoh-shm-pool-mib} 设置容量，默认 48 MiB。运行前让资源额度与池容量相匹配，运行后查看 router 和节点日志中的池创建、分配及回退信息，就能判断配置是否按预期工作。
+ \end{example}
+ 
+-\paragraph*{消息布局决定了借出方式}
+-共享样本池适合固定长度、可直接映射的 plain 消息布局。普通 \texttt{Image} 含有字符串和可变长像素数组，因此在上面的探测中返回 false。\texttt{Frame} 包装后仍包含这些字段。给序列规定长度上限只是限定容量，plain 布局还要求数据能够直接映射到共享样本中。
+-
+-设计跨进程图像借出时，需要一起考虑消息布局、生成的类型支持、池容量、分辨率变化和两端生命周期。改用专用接口也会影响录制、显示等工具的兼容性。我们当前沿用标准 \texttt{Image}，先通过组件进程内通信减少像素复制，后续有需要再扩展共享样本方案。
+-
+-\paragraph*{共享内存的两种用法：传输缓冲区与共享样本}
+-图\ref{fig:ros2-image-paths} 第二行画的是 Fast DDS 的共享内存传输（SHM transport）：数据从写端历史复制到传输缓冲区，再复制到读端历史。Fast DDS 的 Data Sharing 则让读写端直接访问共享样本历史，配合发布端借出填充和订阅端借读，就能走到第三行的完整零拷贝路径。
+-
+-Cyclone DDS 的 iceoryx 路径也采用共享样本。在 Humble 中，它需要启用共享内存并启动 RouDi，使用不引用外部内存的固定大小消息，以及支持共享内存交付的 QoS。发布端借出共享块直接填充，订阅端借读同一个样本，数据便留在共享块中。普通发布接口则需要先把应用数据复制或序列化进去。具体配置可查\href{https://github.com/ros2/rmw_cyclonedds/blob/humble/shared_memory_support.md}{Humble 的共享内存说明}。
+-
+-借出样本的使用期限由所有权决定：发布前由应用填充，发布后控制权交回中间件，订阅端在有效期内借读。\texttt{rclcpp::LoanedMessage} 会管理借出对象的归还，包括借出后没有发布的情况。开发这条路径时，应核对两端的接口支持和生命周期。
+-
+-进一步实现时，可对照\href{https://github.com/ros2/rclcpp/blob/humble/rclcpp/include/rclcpp/loaned_message.hpp}{Humble 的借出与回退实现}、\href{https://github.com/ros2/rmw_fastrtps/blob/humble/rmw_fastrtps_cpp/src/publisher.cpp}{发布者借出条件}和\href{https://fast-dds.docs.eprosima.com/en/v2.6.11/fastdds/use_cases/zero_copy/zero_copy.html}{Fast DDS 的零拷贝说明}，沿着“消息类型、RMW 接口、两端使用方式”检查整条路径。
+-
+ \begin{exercise}
+ \label{ex:v2-ros-loans}
+-保存四轮 DDS loan\_probe 的输出，找出从中间件借出 Float64 的轮次，再比较 Zenoh 关闭与开启共享内存的借出输出。解释 Image 返回 false 时程序如何继续运行。结合数据路径图，说明从发布端借出走到跨进程共享样本还需要哪些条件，并写出发布后的所有权规则。
++保存默认 DDS、显式配置与 Zenoh 的 loan\_probe 输出，解释 Image 返回 false 时程序如何继续发布。再运行 FixedImage 的低频完整检查和普通/借出发布对照，记录两端能力、接收比例、P95 与共享文件偏移。说明两种图像接口的字段布局、工具兼容性和共享块内容有何区别，并写出发布后及回调返回后的使用期限。
+ \end{exercise}
+ 
+ \Needspace{9\baselineskip}
+@@ -535,7 +661,7 @@
+ \begin{itemize}
+ \item RMW 选择通信实现，QoS 安排交付与历史策略，处理能力取决于各阶段耗时。
+ \item 组件容器安排进程边界，进程内通信配合所有权接口交接消息。
+-\item 共享传输缓冲区优化中间件搬运，共享样本配合两端借出可进一步省去复制。读图时先找共享的内存位于哪一层。
++\item 共享传输缓冲区优化中间件搬运，共享样本配合两端借出可进一步省去复制。固定图像用布局约束换取直接映射，标准 Image 则保留尺寸、格式与工具兼容性。
+ \item 借出能力与消息布局、实现和配置有关，回退时由本地分配器提供对象。
+ \end{itemize}
+ \end{conclusion}
+@@ -544,6 +670,7 @@
+ \label{sec:ros2-image-measurement}
+ 现在小图像已跑通，我们把合成负载改成 $1440\times1080$ 的 BGR8，目标频率设为 250 Hz。本节测量从发布前到订阅回调入口的通信延迟。相机采集、Bayer 转换和识别耗时留到接入实际系统时分段测量。
+ 
++\Needspace{8\baselineskip}
+ \begin{example}[重复三轮，保存吞吐与延迟记录]
+ 先停止手动节点与额外订阅者，在同一个工作空间执行：
+ \par\medskip\noindent\begin{minipage}{\linewidth}
+--- 02-专项技术栈/chapters/A_ros2_image_results.tex (before)
++++ 02-专项技术栈/chapters/A_ros2_image_results.tex
+@@ -23,7 +23,7 @@
+ \bottomrule
+ \end{tabular}
+ \end{table}
+-表\ref{tab:ros2-image-results} 来自笔者电脑实际测试下的合成图像实验：$1440\times1080$ BGR8、目标 250 Hz、\texttt{best\_effort}、深度 5，无模拟算法耗时和额外订阅者。每轮发送 1000 帧，再等待两秒排空，各指标分别取三轮的中位数。Zenoh 默认行关闭共享内存，SHM 行另用 6 MiB 池。
++表\ref{tab:ros2-image-results} 来自一组合成图像实验：$1440\times1080$ BGR8、目标 250 Hz、\texttt{best\_effort}、深度 5，无模拟算法耗时和额外订阅者。每轮发送 1000 帧，再等待两秒排空，各指标分别取三轮的中位数。Zenoh 默认行关闭共享内存，SHM 行另用 6 MiB 池。
+ 
+ 我们先读两个进程的结果。Fast DDS 的 P95 为 2.445 ms，看起来比 Cyclone DDS 的 3.580 ms 更低，但接收比例只有 34.7\%，后者为 99.7\%。这里的 P95 只统计已收到的帧，所以要结合接收比例判断交付质量。
+ 
+@@ -32,3 +32,5 @@
+ Zenoh 的 \texttt{separate} 行还可以与 SHM 行对照：开启共享内存后，P95 从 3.243 ms 降到 1.822 ms。进程内路径则更短。将这几行与图\ref{fig:ros2-image-paths} 对照，就能看到传输层优化与应用层所有权交接各自的作用。
+ 
+ 这组数据用来练习比较方法。实际选择时，在自己的相机、算法与网络条件下重复测量，再确定布局和配置。详细版本、逐轮数值与异常日志保存在配套修订记录中。
++
++表中的 Cyclone DDS 使用默认配置。开启 iceoryx 后的标准 Image 与固定图像对照见表\ref{tab:ros2-iceoryx-results}，我们在相同接口内比较配置与发布方式。
+--- 02-专项技术栈/chapters/A_ros2_review.tex (before)
++++ 02-专项技术栈/chapters/A_ros2_review.tex
+@@ -1,7 +1,7 @@
+ \section{本章小结}
+ 先用节点与话题划分职责，再用功能包管理代码和依赖。应熟练完成发布、订阅、定时器和自定义接口的最小闭环。工程运行按“声明依赖、构建安装、加载环境、Launch 启动、观察话题与日志”串联；发生问题时先检查实际使用的包和二进制路径，再检查域、发现范围、接口与 QoS。CLion 使用独立构建目录，运行环境应与终端一致。
+ 
+-大图像链路先从像素负载与 4 ms 时间预算算起，再沿着发布、传输和接收寻找开销。Fast DDS、Cyclone DDS 和 Zenoh 提供不同通信实现，组件进程内通信则通过所有权交接复用像素缓冲区。共享内存传输与共享样本位于不同层，借出消息的能力取决于类型、实现和配置，回退时仍可使用本地分配器。读实验结果时，把实际发送频率、接收比例和延迟放在一起，再将测量扩展到相机采集、转换、识别与观测支路。复杂网络和跨进程共享样本方案可以按项目需要继续学习。
++大图像链路先从像素负载与 4 ms 时间预算算起，再沿着发布、传输和接收寻找开销。Fast DDS、Cyclone DDS 和 Zenoh 提供不同通信实现，组件进程内通信则通过所有权交接复用像素缓冲区。共享内存传输与共享样本位于不同层，借出消息的能力取决于类型、实现和配置，回退时仍可使用本地分配器。读实验结果时，把实际发送频率、接收比例和延迟放在一起，再将测量扩展到相机采集、转换、识别与观测支路。固定图像通过 iceoryx 演示了跨进程共享样本，代价是接口的尺寸与格式约束，复杂网络则留待项目中继续学习。
+ 
+ \Needspace{12\baselineskip}
+ \begin{problemset}
+@@ -30,6 +30,6 @@
+     \item 提交包含清单、构建规则、参数与 Launch 的 training\_tools 包；由检查者指定命名空间和文本，现场启动并展示对应话题。
+     \item 现场演示本机通信范围设置与恢复，保存一份独立实验日志；在 IDE 中命中发布回调断点，并说明实际运行的程序路径。
+     \item 现场构建 image\_path\_demo，由检查者指定尺寸、RMW 和组件布局；选择 Zenoh 时演示自己的路由器启动与正常关闭；展示原始日志、接收比例与延迟记录，说明计时点和合成图像的验证范围。
+-    \item 现场切换借出探测的配置，展示固定类型、Image 与禁用后的结果；结合组件图说明所有权交接、回退和跨进程零拷贝的区别。
++    \item 现场切换借出探测配置，展示固定类型、Image 与禁用后的结果。再运行 iceoryx 固定图像的完整像素检查，展示两端借出能力和共享文件偏移，说明与标准 Image 的布局、兼容性及使用期限的区别。
+     \item 使用实际相机逐步升到可用的目标帧率，记录采集、回调、识别完成与输出时刻；说明主链路与降频观测支路的布局。设备达不到指定参数时记录实际尺寸、格式与频率，不以合成实验代替物理采集验收。
+ \end{enumerate}
+--- 02-专项技术栈/answers.tex (before)
++++ 02-专项技术栈/answers.tex
+@@ -226,7 +226,9 @@
+ \begin{solution}
+ 参考结果中，默认 Fast DDS 为 0/0，启用 Data Sharing 后为 1/0，默认 Cyclone DDS 和显式禁用借出时为 0/0。第二轮的 Float64 使用中间件借出。Zenoh 开关共享内存时均为 0/0，这体现了传输优化与发布端借出能力的区别。
+ 
+-Image 含动态字符串与像素数组，不满足本例的 plain 固定布局条件，\texttt{rclcpp} 会通过本地分配器继续发布。走到跨进程共享样本路径，还需要合适的消息布局、共享池与交付配置、接收端借读支持，以及两端有效期管理。发布后控制权交回中间件，应用应停止访问原借出对象。未发布的对象由 \texttt{LoanedMessage} 管理归还。实验记录保留自己的实际输出及对应版本、配置即可。
++Image 含动态字符串与像素数组，借出调用通过本地分配器继续发布。开启 Cyclone 的 iceoryx 后，Float64/Image 为 1/0，标准 Image 将序列化数据放进共享块。FixedImage 用内嵌定长数组约定 1440×1080 BGR8，牺牲每帧尺寸、编码的灵活性，显示为标准 Image 时还要适配。固定图像两端能力为 1/1，借出发布直接填充原始共享样本，普通发布则把应用消息复制进去。
++
++低频完整检查应收到 20 帧、bad\_frames=0。三轮高速对照记录接收比例和 P95，借出组应能按序号对应相同共享文件及文件偏移，跨进程虚拟地址数值可以不同。发布后控制权交回中间件，回调返回后停止访问借读引用或像素视图。未发布对象由 \texttt{LoanedMessage} 管理归还，接收样本由执行器在回调结束后归还。
+ \end{solution}
+ 
+ \paragraph*{随堂练习 \ref{ex:v2-ros-image-slow}}
+--- 02-专项技术栈/examples/ros2/image-path-demo/CMakeLists.txt (before)
++++ 02-专项技术栈/examples/ros2/image-path-demo/CMakeLists.txt
+@@ -7,7 +7,7 @@
+ find_package(std_msgs REQUIRED)
+ find_package(rosidl_default_generators REQUIRED)
+ rosidl_generate_interfaces(${PROJECT_NAME}
+-  "msg/Frame.msg" DEPENDENCIES sensor_msgs)
++  "msg/Frame.msg" "msg/FixedImage.msg" DEPENDENCIES sensor_msgs)
+ rosidl_get_typesupport_target(typesupport ${PROJECT_NAME} rosidl_typesupport_cpp)
+ add_library(image_nodes SHARED src/components.cpp)
+ target_compile_features(image_nodes PUBLIC cxx_std_17)
+@@ -17,7 +17,11 @@
+   "image_path_demo::Source" "image_path_demo::Sink")
+ add_executable(loan_probe src/loan_probe.cpp)
+ ament_target_dependencies(loan_probe rclcpp sensor_msgs std_msgs)
+-install(TARGETS image_nodes loan_probe
++add_executable(fixed_image src/fixed_image.cpp)
++target_compile_features(fixed_image PUBLIC cxx_std_17)
++ament_target_dependencies(fixed_image rclcpp)
++target_link_libraries(fixed_image "${typesupport}")
++install(TARGETS image_nodes loan_probe fixed_image
+   ARCHIVE DESTINATION lib LIBRARY DESTINATION lib
+   RUNTIME DESTINATION lib/${PROJECT_NAME})
+ install(DIRECTORY launch config DESTINATION share/${PROJECT_NAME})
+--- 02-专项技术栈/examples/ros2/image-path-demo/compare.py (before)
++++ 02-专项技术栈/examples/ros2/image-path-demo/compare.py
+@@ -85,6 +85,8 @@
+         if key.startswith(('ZENOH_', 'RMW_ZENOH_')):
+             env.pop(key)
+     env.update(RMW_IMPLEMENTATION=rmw, ROS_DOMAIN_ID=str(args.domain), ROS_LOCALHOST_ONLY='1')
++    if rmw == 'rmw_cyclonedds_cpp' and args.cyclone_config:
++        env['CYCLONEDDS_URI'] = 'file://' + str(args.cyclone_config.resolve())
+     parameters = dict(mode=mode, width=args.width, height=args.height, channels=args.channels,
+                       rate=args.rate, frames=args.frames, depth=args.depth,
+                       reliable=str(args.reliable).lower(), work_ms=args.work_ms)
+@@ -164,9 +166,13 @@
+     parser.add_argument('--zenoh-port', type=int, default=17447)
+     parser.add_argument('--zenoh-shm', action='store_true',
+                         help='显式开启 Zenoh 共享内存传输优化；默认关闭')
++    parser.add_argument('--cyclone-config', type=Path,
++                        help='仅为 Cyclone DDS 加载指定 XML；iceoryx 配置需要已运行的 RouDi')
+     parser.add_argument('--zenoh-shm-pool-mib', type=int, default=48,
+                         help='每个 Zenoh 会话的共享池大小；需同时核对 memlock 和 /dev/shm')
+     args = parser.parse_args()
++    if args.cyclone_config and not args.cyclone_config.is_file():
++        parser.error('Cyclone DDS 配置文件不存在')
+     if (args.width <= 0 or args.height <= 0 or args.width * args.height * args.channels > 64000000
+             or not 0 < args.rate <= 10000 or args.frames < 2 or args.depth < 1
+             or args.work_ms < 0 or args.repeat < 1 or args.drain_seconds <= 0
+@@ -185,6 +191,7 @@
+         zenoh_router='owned loopback router for each Zenoh case; included in CPU/RSS totals',
+         zenoh_port=args.zenoh_port, zenoh_shm=args.zenoh_shm,
+         zenoh_shm_pool_mib=args.zenoh_shm_pool_mib,
++        cyclone_config=str(args.cyclone_config.resolve()) if args.cyclone_config else None,
+         synthetic=True, hardware_camera=False), ensure_ascii=False, indent=2) + '\n')
+     if Path('DEFAULT_FASTRTPS_PROFILES.xml').exists():
+         raise RuntimeError('当前目录有隐式 Fast DDS 配置；请换到干净目录运行')
+--- 02-专项技术栈/examples/ros2/image-path-demo/README.md (before)
++++ 02-专项技术栈/examples/ros2/image-path-demo/README.md
+@@ -1,6 +1,6 @@
+ # 大图像、中间件与组件布局实验
+ 
+-对应卷二 ROS2 章“大图像链路：中间件与内存”。环境为 Ubuntu 22.04 + ROS2 Humble。支持 Fast DDS、Cyclone DDS 和 Zenoh 三种 RMW，使用相同节点与 QoS 比较进程布局；另探测固定消息类型与 Image 的发布端借出能力。
++对应卷二 ROS2 章“大图像链路：中间件与内存”。环境为 Ubuntu 22.04 + ROS2 Humble。支持 Fast DDS、Cyclone DDS 和 Zenoh 三种 RMW，使用相同节点与 QoS 比较进程布局；另用自定义固定图像实测 iceoryx 共享样本与两端借出。
+ 
+ 默认生成 64×48、BGR8、25 Hz、100 帧，便于先检查操作。相机场景使用 1440×1080（宽×高）、目标 250 Hz：Bayer8 的紧密排列纯像素负载为 388.8 MB/s，BGR8 为 1166.4 MB/s。输入由内存生成，不连接相机、不运行 Bayer 转换或识别，不证明物理相机端到端达到 250 Hz。
+ 
+@@ -125,6 +125,7 @@
+ export ROS_LOCALHOST_ONLY=1
+ unset ROS_DISABLE_LOANED_MESSAGES
+ unset FASTRTPS_DEFAULT_PROFILES_FILE RMW_FASTRTPS_USE_QOS_FROM_XML
++unset CYCLONEDDS_URI
+ RMW_IMPLEMENTATION=rmw_fastrtps_cpp ros2 run image_path_demo loan_probe
+ PROFILE="$(ros2 pkg prefix --share image_path_demo)/config/fastdds-loan.xml"
+ RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
+@@ -136,7 +137,82 @@
+   ROS_DISABLE_LOANED_MESSAGES=1 ros2 run image_path_demo loan_probe
+ ```
+ 
+-先排除隐式 XML 和其他遗留配置。本章验证版本下 float64/image 依次为 0/0、1/0、0/0、0/0。API 能回退到本地分配器，所以程序运行成功不能代替 can_loan_messages 判断。这里没有验证订阅端借出或跨进程图像零拷贝，不全局设置 ROS_DISABLE_LOANED_MESSAGES=0。普通 Image 的动态数组和字符串不符合本例固定布局借出条件；bounded 也不自动等于 plain。
++先排除隐式 XML 和其他遗留配置。本章验证版本下 float64/image 依次为 0/0、1/0、0/0、0/0。API 能回退到本地分配器，所以程序运行成功不能代替 can_loan_messages 判断。这四轮是发布端探测，后面的固定图像实验再验证两端借出与跨进程共享样本。普通 Image 的动态数组和字符串不符合本例固定布局借出条件；bounded 也不自动等于 plain。
++
++## Cyclone DDS、iceoryx 与固定图像
++
++`FixedImage.msg` 固定为 1440×1080 BGR8，4,665,600 字节的像素内嵌在消息中，生成 `std::array`。它只带序号和单机测量时间，不含动态数组、编码字符串或坐标系字符串。标准 `sensor_msgs/Image` 可以改变尺寸、格式和步长，带 Header，常用图像工具可以直接接收。固定接口的尺寸变化需要重新生成接口，适配成标准 Image 需要补元数据并复制像素。
++
++标准 Image 可以序列化后经 iceoryx 共享块交付，仍不支持本例的消息借出。固定接口配合借出发布和回调内借读，直接访问共享块中的原始样本。普通发布固定接口时，应用消息仍需复制进共享块。
++
++在前面构建的工作空间中，终端一启动自己的 RouDi。不要同时启动第二个 RouDi 来接管已有实验。
++
++```bash
++source /opt/ros/humble/setup.bash
++sudo apt install ros-humble-rmw-cyclonedds-cpp ros-humble-iceoryx-posh
++cd ~/image_path_ws
++colcon build --packages-select image_path_demo --cmake-args -DCMAKE_BUILD_TYPE=Release
++source install/setup.bash
++SHARE="$(ros2 pkg prefix --share image_path_demo)"
++iox-roudi -c "$SHARE/config/roudi.toml"
++```
++
++配置开启 `SharedMemory/Enable`，RouDi 采用 32 个 5 MiB 图像块及小块池。大块需容纳约 4.67 MB 的固定消息和块头，32 块约占 160 MiB，管理段另计。看到 `RouDi is ready for clients` 后，在另外两个实验终端加载相同环境：
++
++```bash
++source /opt/ros/humble/setup.bash
++cd ~/image_path_ws
++source install/setup.bash
++export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
++export ROS_DOMAIN_ID=89
++export ROS_LOCALHOST_ONLY=1
++SHARE="$(ros2 pkg prefix --share image_path_demo)"
++export CYCLONEDDS_URI="file://$SHARE/config/cyclone-iceoryx.xml"
++```
++
++分别启动收发端，先跑低频完整像素检查：
++
++```bash
++# 终端二
++ROS_DISABLE_LOANED_MESSAGES=0 ros2 run image_path_demo fixed_image \
++  --ros-args -r __node:=fixed_receive -p role:=receive -p verify_full:=true
++# 终端三
++ROS_DISABLE_LOANED_MESSAGES=0 ros2 run image_path_demo fixed_image \
++  --ros-args -r __node:=fixed_send -p role:=send -p rate:=10.0 -p frames:=20
++```
++
++两端 `FIXED_CAP` 的 can_loan 应为 1，消息对象大小为 4,665,616 字节。出现 `FIXED_DONE 20` 后，先 Ctrl+C 结束发布端，再结束接收端。接收端应为 count=20、bad_frames=0。接收回调为 `const FixedImage &`，只在回调内使用样本；本例按 [Humble rclcpp 的订阅端说明](https://github.com/ros2/rclcpp/blob/humble/rclcpp/src/rclcpp/subscription_base.cpp)为这种回调形式局部设置 `ROS_DISABLE_LOANED_MESSAGES=0`。发布后停止访问借出对象，回调返回后停止使用引用和像素视图。
++
++自动对照用新的输出目录，RouDi 仍由终端一提供。记录器只管理自己的两个进程，参数 `--publish-mode` 改变发布接口，两组接收端都借读。
++
++```bash
++CFG="$(ros2 pkg prefix --share image_path_demo)/config/cyclone-iceoryx.xml"
++python3 src/image_path_demo/compare_fixed.py \
++  --output /tmp/fixed-full-check --cyclone-config "$CFG" \
++  --rate 10 --frames 20 --repeat 1 --verify-full
++python3 src/image_path_demo/compare_fixed.py \
++  --output /tmp/fixed-regular --cyclone-config "$CFG" \
++  --publish-mode regular --rate 250 --frames 1000 --repeat 3
++python3 src/image_path_demo/compare_fixed.py \
++  --output /tmp/fixed-loan --cyclone-config "$CFG" \
++  --publish-mode loan --rate 250 --frames 1000 --repeat 3
++```
++
++固定接口的默认 DDS 对照使用 `--publish-mode regular` 并去掉 `--cyclone-config`。标准 Image 使用原组件程序：
++
++```bash
++python3 src/image_path_demo/compare.py \
++  --output /tmp/image-cyclone-shm \
++  --rmws rmw_cyclonedds_cpp --modes separate --cyclone-config "$CFG" \
++  --width 1440 --height 1080 --channels 3 \
++  --rate 250 --frames 1000 --repeat 3 --domain 89
++```
++
++去掉配置参数并换输出目录可得标准 Image 默认 DDS 结果。两个记录器都只在子进程中加载指定配置，关闭默认测试的隐式 XML。Cyclone 0.10 的文件路径使用未转义的实际路径，避免把中文编码成 `%E4...`。
++
++`compare_fixed.py` 记录两端借出能力、前三帧地址对应的 `/proc/PID/maps` 共享文件和偏移、交付统计及像素检查。跨进程比较的是同一帧对应的共享文件与文件偏移。`--verify-full` 逐字节检查，适合低频验证；250 Hz 对照检查首尾像素，并把所有填充时间计入实际发送频率，延迟从填充完成起算。自动关闭后保存统计，手动实验结束先停止节点，再关闭自己的 RouDi。
++
++2026-10-06 实测：默认 Float64/Image 为 0/0，启用 iceoryx 后为 1/0；固定接口两端为 1/1。低频 20 帧全像素通过，250 Hz 借出组每轮收到 1000 帧，三轮前三帧的共享文件与偏移均对应。独立低频直接跟踪还确认了 Image 的序列化共享块和 FixedImage 的原始共享样本。三轮 P95 中位数：标准 Image 默认 3.735 ms、iceoryx 1.668 ms；固定接口默认 3.292 ms、iceoryx 普通发布 0.505 ms、借出发布 0.334 ms。详细条件和原始记录见 [iceoryx 实测记录](../../../../docs/revision/ros2-iceoryx-20261006.md)，技术条件见 [rmw_cyclonedds 的 Humble 共享内存说明](https://github.com/ros2/rmw_cyclonedds/blob/humble/shared_memory_support.md)。
+ 
+ Zenoh 的借出接口另测。先按上面的手动流程启动自己的路由器，再在加载了同一工程的第二个终端执行：
+ 
+--- 02-专项技术栈/examples/ros2/image-path-demo/compare_fixed.py (before)
++++ 02-专项技术栈/examples/ros2/image-path-demo/compare_fixed.py
+@@ -0,0 +1,138 @@
++#!/usr/bin/env python3
++"""运行两个固定图像进程，保存统计及共享段偏移；RouDi 由调用者启动。"""
++import argparse
++import json
++import os
++from pathlib import Path
++import re
++import subprocess
++import time
++from compare import stop_process
++
++
++def mapping(pid, address):
++    """跨进程比较同一共享文件及文件偏移，不比较虚拟地址数值。"""
++    for line in Path(f'/proc/{pid}/maps').read_text().splitlines():
++        fields = line.split(maxsplit=5)
++        start, end = (int(value, 16) for value in fields[0].split('-'))
++        if start <= address < end:
++            return dict(device=fields[3], inode=fields[4],
++                        object=fields[5] if len(fields) == 6 else '',
++                        offset=int(fields[2], 16) + address - start)
++    return None
++
++
++def run(args, number, executable):
++    env = os.environ.copy()
++    for key in ('CYCLONEDDS_URI', 'FASTRTPS_DEFAULT_PROFILES_FILE',
++                'FASTDDS_DEFAULT_PROFILES_FILE', 'RMW_FASTRTPS_USE_QOS_FROM_XML'):
++        env.pop(key, None)
++    env.update(RMW_IMPLEMENTATION='rmw_cyclonedds_cpp', ROS_LOCALHOST_ONLY='1',
++               ROS_DOMAIN_ID=str(args.domain),
++               ROS_DISABLE_LOANED_MESSAGES='0' if args.cyclone_config else '1')
++    if args.cyclone_config:
++        env['CYCLONEDDS_URI'] = 'file://' + str(args.cyclone_config.resolve())
++    paths = {role: args.output / f'{number}-{role}.log' for role in ('receive', 'send')}
++    children, streams, pointers = {}, {}, {}
++    start, done = time.monotonic(), None
++    try:
++        for role in ('receive', 'send'):
++            streams[role] = paths[role].open('w')
++            command = [str(executable), '--ros-args', '-r', f'__node:=fixed_image_{role}',
++                       '-p', f'role:={role}',
++                       '-p', f'loan:={str(args.publish_mode == "loan").lower()}',
++                       '-p', f'require_loan:={str(bool(args.cyclone_config)).lower()}',
++                       '-p', f'frames:={args.frames}', '-p', f'rate:={args.rate}',
++                       '-p', f'verify_full:={str(args.verify_full).lower()}']
++            children[role] = subprocess.Popen(command, env=env, stdout=streams[role],
++                                              stderr=subprocess.STDOUT, start_new_session=True)
++        while True:
++            for role, path in paths.items():
++                for item in re.findall(r'FIXED_POINTER (\{[^\n]*\})', path.read_text()):
++                    row = json.loads(item)
++                    key = (role, row['sequence'])
++                    if key not in pointers:
++                        row['mapping'] = mapping(row['pid'], row['pixel_address'])
++                        pointers[key] = row
++            if any(child.poll() is not None for child in children.values()):
++                raise RuntimeError('收发进程提前退出，查看本轮日志')
++            if f'FIXED_DONE {args.frames}' in paths['send'].read_text() and done is None:
++                done = time.monotonic()
++            if done is not None and time.monotonic() - done >= 2:
++                break
++            if time.monotonic() - start > max(30, args.frames / args.rate * 6 + 15):
++                raise RuntimeError('发布未完成，查看本轮日志')
++            time.sleep(0.02)
++    finally:
++        for child in children.values():
++            stop_process(child)
++        for stream in streams.values():
++            stream.close()
++    stats, caps = {}, {}
++    for role, path in paths.items():
++        text = path.read_text()
++        stats[role] = json.loads(re.findall(r'FIXED_STATS (\{[^\n]*\})', text)[-1])
++        caps[role] = json.loads(re.findall(r'FIXED_CAP (\{[^\n]*\})', text)[-1])
++    pairs = []
++    for (role, sequence), source in pointers.items():
++        sink = pointers.get(('receive', sequence))
++        if role != 'send' or not sink:
++            continue
++        a, b = source['mapping'], sink['mapping']
++        shared = bool(a and b and a['object'].startswith('/dev/shm/') and
++                      a['device'] == b['device'] and a['inode'] == b['inode'] and
++                      a['offset'] == b['offset'])
++        pairs.append(dict(sequence=sequence, source=source, sink=sink, same_shared_sample=shared))
++    if stats['send']['count'] != args.frames or stats['receive']['count'] == 0:
++        raise RuntimeError('发送帧数不足或没有收到图像')
++    if stats['receive']['bad_frames']:
++        raise RuntimeError('像素检查失败')
++    if args.publish_mode == 'loan' and args.cyclone_config and not any(
++            pair['same_shared_sample'] for pair in pairs):
++        raise RuntimeError('没有获得相同共享段偏移的证据')
++    return dict(repeat=number, publish_mode=args.publish_mode,
++                iceoryx=bool(args.cyclone_config), verify_full=args.verify_full,
++                sent=stats['send']['count'], received=stats['receive']['count'],
++                send_hz=stats['send']['hz'], receive_hz=stats['receive']['hz'],
++                delivery_ratio=stats['receive']['count'] / args.frames,
++                p95_ms=stats['receive']['p95_ms'], p99_ms=stats['receive']['p99_ms'],
++                bad_frames=stats['receive']['bad_frames'], capabilities=caps,
++                pointer_pairs=pairs, returncodes={k: v.returncode for k, v in children.items()})
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('--output', type=Path, required=True)
++    parser.add_argument('--cyclone-config', type=Path)
++    parser.add_argument('--publish-mode', choices=('regular', 'loan'), default='loan')
++    parser.add_argument('--rate', type=float, default=250.0)
++    parser.add_argument('--frames', type=int, default=1000)
++    parser.add_argument('--repeat', type=int, default=3)
++    parser.add_argument('--domain', type=int, default=89)
++    parser.add_argument('--verify-full', action='store_true')
++    args = parser.parse_args()
++    if args.frames < 2 or not 0 < args.rate <= 10000 or args.repeat < 1 or not 0 <= args.domain <= 101:
++        parser.error('核对帧数、频率、重复次数与域编号')
++    if args.cyclone_config and not args.cyclone_config.is_file():
++        parser.error('Cyclone DDS 配置不存在')
++    prefix = subprocess.check_output(['ros2', 'pkg', 'prefix', 'image_path_demo'], text=True).strip()
++    executable = Path(prefix) / 'lib/image_path_demo/fixed_image'
++    args.output.mkdir(parents=True, exist_ok=False)
++    (args.output / 'environment.json').write_text(json.dumps(dict(
++        ros_distro=os.environ.get('ROS_DISTRO'), payload_bytes=4665600,
++        width=1440, height=1080, encoding='bgr8', depth=5, reliability='best_effort',
++        rate=args.rate, frames=args.frames, repeats=args.repeat, drain_seconds=2,
++        cyclone_config=str(args.cyclone_config.resolve()) if args.cyclone_config else None,
++        receiver_callback='const FixedImage &; used only inside callback',
++        latency='after fill, before publish -> callback entry', synthetic=True), indent=2)+'\n')
++    rows = []
++    for number in range(1, args.repeat + 1):
++        row = run(args, number, executable)
++        rows.append(row)
++        (args.output / 'results.json').write_text(json.dumps(rows, indent=2)+'\n')
++        print(f"第 {number} 轮：发送 {row['send_hz']:.1f} Hz，接收 {row['delivery_ratio']:.1%}，"
++              f"P95 {row['p95_ms']:.3f} ms", flush=True)
++
++
++if __name__ == '__main__':
++    main()
+--- 02-专项技术栈/examples/ros2/image-path-demo/msg/FixedImage.msg (before)
++++ 02-专项技术栈/examples/ros2/image-path-demo/msg/FixedImage.msg
+@@ -0,0 +1,9 @@
++# 固定为 1440×1080 BGR8，常量不占消息负载。
++uint32 WIDTH=1440
++uint32 HEIGHT=1080
++uint32 CHANNELS=3
++# 序号与单机单调时钟用于本实验测量。
++uint64 sequence
++uint64 sent_ns
++# 像素内嵌在消息中，生成 std::array，不含字符串或动态数组。
++uint8[4665600] data
+--- 02-专项技术栈/examples/ros2/image-path-demo/src/fixed_image.cpp (before)
++++ 02-专项技术栈/examples/ros2/image-path-demo/src/fixed_image.cpp
+@@ -0,0 +1,146 @@
++#include <algorithm>
++#include <chrono>
++#include <cstdint>
++#include <iostream>
++#include <memory>
++#include <stdexcept>
++#include <string>
++#include <vector>
++#include <unistd.h>
++#include "rclcpp/rclcpp.hpp"
++#include "image_path_demo/msg/fixed_image.hpp"
++
++using Image = image_path_demo::msg::FixedImage;
++static_assert(rosidl_generator_traits::has_fixed_size<Image>::value);
++
++uint64_t steady_ns() {
++  return std::chrono::duration_cast<std::chrono::nanoseconds>(
++    std::chrono::steady_clock::now().time_since_epoch()).count();
++}
++
++class FixedImageNode : public rclcpp::Node {
++public:
++  FixedImageNode() : Node("fixed_image") {
++    role_ = declare_parameter<std::string>("role", "receive");
++    frames_ = declare_parameter("frames", 1000);
++    const double rate = declare_parameter("rate", 250.0);
++    loan_ = declare_parameter("loan", true);
++    const bool require_loan = declare_parameter("require_loan", true);
++    verify_full_ = declare_parameter("verify_full", false);
++    if (frames_ < 2 || rate <= 0 || rate > 10000)
++      throw std::invalid_argument("核对帧数和频率");
++    auto qos = rclcpp::QoS(rclcpp::KeepLast(5)).best_effort();
++    if (role_ == "send") {
++      pub_ = create_publisher<Image>("fixed_frames", qos);
++      report_capability(pub_->can_loan_messages());
++      if (loan_ && !pub_->can_loan_messages())
++        throw std::runtime_error("当前发布者不支持中间件借出");
++      timer_ = create_wall_timer(std::chrono::nanoseconds(int64_t(1e9 / rate)),
++        [this] { send(); });
++    } else if (role_ == "receive") {
++      // 只在回调内借读，不把引用或像素视图保存到回调外。
++      sub_ = create_subscription<Image>("fixed_frames", qos,
++        [this](const Image & image) { receive(image); });
++      report_capability(sub_->can_loan_messages());
++      if (require_loan && !sub_->can_loan_messages())
++        throw std::runtime_error("当前订阅者未启用借读");
++    } else {
++      throw std::invalid_argument("role 应为 send 或 receive");
++    }
++  }
++
++  ~FixedImageNode() override {
++    std::sort(latency_.begin(), latency_.end());
++    auto percentile = [this](double q) {
++      return latency_.empty() ? 0.0 : latency_[size_t(q * (latency_.size() - 1))];
++    };
++    const double span = (last_ - first_) / 1e9;
++    std::cout << "FIXED_STATS {\"role\":\"" << role_
++              << "\",\"count\":" << count_
++              << ",\"hz\":" << (span > 0 ? (count_ - 1) / span : 0)
++              << ",\"p50_ms\":" << percentile(0.50)
++              << ",\"p95_ms\":" << percentile(0.95)
++              << ",\"p99_ms\":" << percentile(0.99)
++              << ",\"bad_frames\":" << bad_frames_ << "}" << std::endl;
++  }
++
++private:
++  void report_capability(bool can_loan) {
++    std::cout << "FIXED_CAP {\"role\":\"" << role_
++              << "\",\"can_loan\":" << can_loan
++              << ",\"sizeof_message\":" << sizeof(Image) << "}" << std::endl;
++  }
++
++  void report_pointer(const Image & image) {
++    if (count_ < 3) {
++      std::cout << "FIXED_POINTER {\"role\":\"" << role_
++                << "\",\"pid\":" << getpid()
++                << ",\"sequence\":" << image.sequence
++                << ",\"pixel_address\":"
++                << reinterpret_cast<uintptr_t>(image.data.data()) << "}" << std::endl;
++    }
++  }
++
++  void fill(Image & image) {
++    image.sequence = count_;
++    std::fill(image.data.begin(), image.data.end(), uint8_t(count_ % 256));
++    image.sent_ns = steady_ns();
++    if (count_ == 0) first_ = image.sent_ns;
++    last_ = image.sent_ns;
++    report_pointer(image);
++  }
++
++  void send() {
++    if (pub_->get_subscription_count() == 0) return;
++    if (loan_) {
++      auto image = pub_->borrow_loaned_message();
++      fill(image.get());
++      pub_->publish(std::move(image));
++    } else {
++      auto image = std::make_unique<Image>(rosidl_runtime_cpp::MessageInitialization::SKIP);
++      fill(*image);
++      pub_->publish(std::move(image));
++    }
++    if (++count_ == uint64_t(frames_)) {
++      timer_->cancel();
++      std::cout << "FIXED_DONE " << count_ << std::endl;
++    }
++  }
++
++  void receive(const Image & image) {
++    const auto arrival = steady_ns();
++    if (count_ == 0) first_ = arrival;
++    last_ = arrival;
++    latency_.push_back((arrival - image.sent_ns) / 1e6);
++    const uint8_t expected = uint8_t(image.sequence % 256);
++    bool valid = image.data.front() == expected && image.data.back() == expected;
++    if (verify_full_)
++      valid = std::all_of(image.data.begin(), image.data.end(),
++        [expected](uint8_t pixel) { return pixel == expected; });
++    if (!valid) ++bad_frames_;
++    report_pointer(image);
++    ++count_;
++  }
++
++  std::string role_;
++  int frames_ = 1000;
++  bool loan_ = true, verify_full_ = false;
++  uint64_t count_ = 0, bad_frames_ = 0, first_ = 0, last_ = 0;
++  std::vector<double> latency_;
++  rclcpp::Publisher<Image>::SharedPtr pub_;
++  rclcpp::Subscription<Image>::SharedPtr sub_;
++  rclcpp::TimerBase::SharedPtr timer_;
++};
++
++int main(int argc, char ** argv) {
++  rclcpp::init(argc, argv);
++  try {
++    auto node = std::make_shared<FixedImageNode>();
++    rclcpp::spin(node);
++  } catch (const std::exception & error) {
++    std::cerr << error.what() << std::endl;
++    rclcpp::shutdown();
++    return 2;
++  }
++  rclcpp::shutdown();
++}
+--- 02-专项技术栈/examples/ros2/image-path-demo/config/cyclone-iceoryx.xml (before)
++++ 02-专项技术栈/examples/ros2/image-path-demo/config/cyclone-iceoryx.xml
+@@ -0,0 +1,9 @@
++<?xml version="1.0" encoding="UTF-8" ?>
++<CycloneDDS xmlns="https://cdds.io/config">
++  <Domain Id="any">
++    <SharedMemory>
++      <Enable>true</Enable>
++      <LogLevel>warn</LogLevel>
++    </SharedMemory>
++  </Domain>
++</CycloneDDS>
+--- 02-专项技术栈/examples/ros2/image-path-demo/config/roudi.toml (before)
++++ 02-专项技术栈/examples/ros2/image-path-demo/config/roudi.toml
+@@ -0,0 +1,15 @@
++[general]
++version = 1
++
++[[segment]]
++# 小池用于管理信息及小消息。
++[[segment.mempool]]
++size = 128
++count = 128
++[[segment.mempool]]
++size = 1024
++count = 128
++# 每块 5 MiB，容纳固定图像和传输元数据，共 32 块。
++[[segment.mempool]]
++size = 5242880
++count = 32

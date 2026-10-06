@@ -1,0 +1,12 @@
+{
+  "performance_cases": 5,
+  "performance_rounds": 15,
+  "frames_sent": 15000,
+  "all_bad_frames_zero": true,
+  "fixed_loan_rounds_full_delivery": true,
+  "shared_pointer_pairs": 9,
+  "table_p95_matches_medians": true,
+  "manual_full_check": "20/20",
+  "low_frequency_trace_matches": "20/20 for both dynamic and fixed",
+  "disable_loan_exit": 2
+}

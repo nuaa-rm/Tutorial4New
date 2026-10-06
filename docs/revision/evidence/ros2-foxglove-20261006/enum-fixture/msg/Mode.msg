@@ -1,0 +1,3 @@
+uint8 IDLE=0
+uint8 TRACKING=1
+uint8 LOST=2

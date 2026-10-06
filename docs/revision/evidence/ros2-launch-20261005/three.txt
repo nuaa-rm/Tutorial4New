@@ -1,0 +1,31 @@
+[INFO] [launch]: All log files can be found below /tmp/tutorial4new-launch-20261005-runtime/ros-logs/2026-10-05-17-38-06-921002-mijiao-arch-123625
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [heartbeat-1]: process started with pid [123626]
+[INFO] [heartbeat-2]: process started with pid [123628]
+[INFO] [heartbeat-3]: process started with pid [123630]
+[heartbeat-3] [0m[INFO] [1791193087.158642484] [green.camera.heartbeat]: first heartbeat[0m
+[heartbeat-3] [0m[INFO] [1791193087.158749836] [green.camera.heartbeat]: heartbeat alive[0m
+[heartbeat-2] [0m[INFO] [1791193087.160465130] [blue.camera.heartbeat]: first heartbeat[0m
+[heartbeat-2] [0m[INFO] [1791193087.160551224] [blue.camera.heartbeat]: heartbeat alive[0m
+[heartbeat-1] [0m[INFO] [1791193087.161799887] [red.camera.heartbeat]: first heartbeat[0m
+[heartbeat-1] [0m[INFO] [1791193087.161848582] [red.camera.heartbeat]: heartbeat alive[0m
+[heartbeat-3] [0m[INFO] [1791193089.358701530] [green.camera.heartbeat]: heartbeat alive[0m
+[heartbeat-2] [0m[INFO] [1791193089.360511321] [blue.camera.heartbeat]: heartbeat alive[0m
+[heartbeat-1] [0m[INFO] [1791193089.361831192] [red.camera.heartbeat]: heartbeat alive[0m
+[heartbeat-3] [0m[INFO] [1791193091.358701442] [green.camera.heartbeat]: heartbeat alive[0m
+[heartbeat-2] [0m[INFO] [1791193091.360534932] [blue.camera.heartbeat]: heartbeat alive[0m
+[heartbeat-1] [0m[INFO] [1791193091.361917254] [red.camera.heartbeat]: heartbeat alive[0m
+[heartbeat-3] [0m[INFO] [1791193093.358776061] [green.camera.heartbeat]: heartbeat alive[0m
+[heartbeat-2] [0m[INFO] [1791193093.360539845] [blue.camera.heartbeat]: heartbeat alive[0m
+[WARNING] [launch]: user interrupted with ctrl-c (SIGINT)
+[INFO] [heartbeat-3]: sending signal 'SIGINT' to process[heartbeat-3]
+[INFO] [heartbeat-2]: sending signal 'SIGINT' to process[heartbeat-2]
+[INFO] [heartbeat-1]: sending signal 'SIGINT' to process[heartbeat-1]
+[heartbeat-1] [0m[INFO] [1791193093.485125804] [rclcpp]: signal_handler(SIGINT/SIGTERM)[0m
+[heartbeat-3] [0m[INFO] [1791193093.485125786] [rclcpp]: signal_handler(SIGINT/SIGTERM)[0m
+[heartbeat-2] [0m[INFO] [1791193093.485160524] [rclcpp]: signal_handler(SIGINT/SIGTERM)[0m
+[heartbeat-3] [0m[INFO] [1791193093.487195938] [rclcpp]: signal_handler(SIGINT/SIGTERM)[0m
+[heartbeat-1] [0m[INFO] [1791193093.487683815] [rclcpp]: signal_handler(SIGINT/SIGTERM)[0m
+[ERROR] [heartbeat-2]: process has died [pid 123628, exit code -2, cmd '/tmp/tutorial4new-launch-20261005-runtime/install/training_tools/lib/training_tools/heartbeat --ros-args -r __node:=heartbeat -r __ns:=/blue/camera --params-file /tmp/tutorial4new-launch-20261005-runtime/install/training_tools/share/training_tools/config/heartbeat.yaml --params-file /tmp/launch_params_8yic7nr5 -r status:=health'].
+[INFO] [heartbeat-3]: process has finished cleanly [pid 123630]
+[INFO] [heartbeat-1]: process has finished cleanly [pid 123626]

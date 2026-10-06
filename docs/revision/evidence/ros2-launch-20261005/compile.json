@@ -1,0 +1,31 @@
+{
+  "entry": "02-专项技术栈/main.tex",
+  "pages": 308,
+  "pdf_sha256": "3c9447e657e81c1cfd69e361525372068db94a1404127553e4973c363dcb35f4",
+  "auxiliary_stable": true,
+  "diagnostics": {
+    "overfull": [],
+    "missing_character": [],
+    "undefined_reference": [],
+    "duplicate_label": [],
+    "rerun": []
+  },
+  "visually_reviewed_physical_pages": [
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    281,
+    282,
+    283
+  ],
+  "scope": "Launch 正文、相邻章节衔接与新增题解；共享模板和图片未修改"
+}

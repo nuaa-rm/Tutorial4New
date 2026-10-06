@@ -1,0 +1,20 @@
+{
+  "status": "passed",
+  "included_tex_files": 33,
+  "source_labels": 363,
+  "referenced_labels": 296,
+  "undefined_compiled_references": [],
+  "duplicate_source_labels": [],
+  "visualization_images": [
+    "images/ros2_rqt_plot_revised.png",
+    "images/ros2_rviz_views_revised.png",
+    "images/ros2_foxglove_enum_revised.jpg",
+    "images/ros2_foxglove_plot_measure_revised.jpg",
+    "images/ros2_foxglove_xy_measure_revised.jpg",
+    "images/ros2_foxglove_image_sync_revised.jpg",
+    "images/ros2_foxglove_replay_revised.jpg"
+  ],
+  "panel_json_count": 5,
+  "header_stamp_defaults": "pose/twist and both yaw series passed; Float64 signal uses Log time",
+  "image_synchronize": true
+}

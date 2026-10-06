@@ -1,0 +1,618 @@
+This is XeTeX, Version 3.141592653-2.6-0.999998 (TeX Live 2026/Arch Linux) (preloaded format=xelatex)
+ restricted \write18 enabled.
+entering extended mode
+(./main.tex
+LaTeX2e <2025-11-01>
+L3 programming layer <2026-01-19>
+(./elegantbook.cls
+Document Class: elegantbook 2026/05/01 v4.7 ElegantBook document class
+(/usr/share/texmf-dist/tex/latex/kvoptions/kvoptions.sty
+(/usr/share/texmf-dist/tex/latex/graphics/keyval.sty)
+(/usr/share/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty)
+(/usr/share/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty))
+(/usr/share/texmf-dist/tex/latex/etoolbox/etoolbox.sty)
+(/usr/share/texmf-dist/tex/latex/base/book.cls
+Document Class: book 2025/01/22 v1.4n Standard LaTeX document class
+(/usr/share/texmf-dist/tex/latex/base/bk11.clo))
+(/usr/share/texmf-dist/tex/latex/setspace/setspace.sty)
+(/usr/share/texmf-dist/tex/latex/csquotes/csquotes.sty
+(/usr/share/texmf-dist/tex/latex/csquotes/csquotes.def)
+(/usr/share/texmf-dist/tex/latex/csquotes/csquotes.cfg))
+(/usr/share/texmf-dist/tex/latex/hyperref/hyperref.sty
+(/usr/share/texmf-dist/tex/generic/iftex/iftex.sty)
+(/usr/share/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty)
+(/usr/share/texmf-dist/tex/generic/pdfescape/pdfescape.sty
+(/usr/share/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+(/usr/share/texmf-dist/tex/generic/infwarerr/infwarerr.sty)))
+(/usr/share/texmf-dist/tex/latex/hycolor/hycolor.sty)
+(/usr/share/texmf-dist/tex/latex/hyperref/nameref.sty
+(/usr/share/texmf-dist/tex/latex/refcount/refcount.sty)
+(/usr/share/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty))
+(/usr/share/texmf-dist/tex/generic/stringenc/stringenc.sty)
+(/usr/share/texmf-dist/tex/latex/hyperref/pd1enc.def)
+(/usr/share/texmf-dist/tex/generic/intcalc/intcalc.sty)
+(/usr/share/texmf-dist/tex/latex/hyperref/puenc.def)
+(/usr/share/texmf-dist/tex/latex/url/url.sty)
+(/usr/share/texmf-dist/tex/generic/bitset/bitset.sty
+(/usr/share/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty)))
+(/usr/share/texmf-dist/tex/latex/hyperref/hxetex.def
+(/usr/share/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+(/usr/share/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty)))
+(/usr/share/texmf-dist/tex/latex/geometry/geometry.sty
+(/usr/share/texmf-dist/tex/generic/iftex/ifvtex.sty))
+(/usr/share/texmf-dist/tex/latex/tools/indentfirst.sty)
+(/usr/share/texmf-dist/tex/latex/comment/comment.sty
+Excluding comment 'comment')
+(/usr/share/texmf-dist/tex/latex/fontspec/fontspec.sty
+(/usr/share/texmf-dist/tex/latex/l3packages/xparse/xparse.sty
+(/usr/share/texmf-dist/tex/latex/l3kernel/expl3.sty
+(/usr/share/texmf-dist/tex/latex/l3backend/l3backend-xetex.def)))
+(/usr/share/texmf-dist/tex/latex/fontspec/fontspec-xetex.sty
+(/usr/share/texmf-dist/tex/latex/base/fontenc.sty)
+(/usr/share/texmf-dist/tex/latex/fontspec/fontspec.cfg)))
+(/usr/share/texmf-dist/tex/latex/newtx/TeXGyreTermesX.fontspec)
+(/usr/share/texmf-dist/tex/latex/ctex/ctex.sty
+(/usr/share/texmf-dist/tex/latex/ctex/ctexhook.sty)
+(/usr/share/texmf-dist/tex/latex/ctex/ctexpatch.sty)
+(/usr/share/texmf-dist/tex/latex/base/fix-cm.sty
+(/usr/share/texmf-dist/tex/latex/base/ts1enc.def))
+(/usr/share/texmf-dist/tex/latex/ctex/config/ctexopts.cfg)
+(/usr/share/texmf-dist/tex/latex/ctex/engine/ctex-engine-xetex.def
+(/usr/share/texmf-dist/tex/xelatex/xecjk/xeCJK.sty
+(/usr/share/texmf-dist/tex/latex/l3packages/xtemplate/xtemplate.sty)
+(/usr/share/texmf-dist/tex/xelatex/xecjk/xeCJK.cfg)))
+(/usr/share/texmf-dist/tex/latex/zhnumber/zhnumber.sty
+(/usr/share/texmf-dist/tex/latex/zhnumber/zhnumber-utf8.cfg))
+(/usr/share/texmf-dist/tex/latex/ctex/scheme/ctex-scheme-plain.def)
+(/usr/share/texmf-dist/tex/latex/ctex/fontset/ctex-fontset-fandol.def))
+(/usr/share/texmf-dist/tex/latex/ctex/config/ctex.cfg)
+(/usr/share/texmf-dist/tex/latex/anyfontsize/anyfontsize.sty)
+(/usr/share/texmf-dist/tex/latex/xcolor/xcolor.sty
+(/usr/share/texmf-dist/tex/latex/graphics-cfg/color.cfg)
+(/usr/share/texmf-dist/tex/latex/graphics-def/xetex.def)
+(/usr/share/texmf-dist/tex/latex/graphics/mathcolor.ltx))
+(/usr/share/texmf-dist/tex/latex/colortbl/colortbl.sty
+(/usr/share/texmf-dist/tex/latex/tools/array.sty))
+(/usr/share/texmf-dist/tex/latex/mwe/mwe.sty
+(/usr/share/texmf-dist/tex/latex/graphics/graphicx.sty
+(/usr/share/texmf-dist/tex/latex/graphics/graphics.sty
+(/usr/share/texmf-dist/tex/latex/graphics/trig.sty)
+(/usr/share/texmf-dist/tex/latex/graphics-cfg/graphics.cfg)))
+(/usr/share/texmf-dist/tex/latex/lipsum/lipsum.sty
+(/usr/share/texmf-dist/tex/latex/l3packages/l3keys2e/l3keys2e.sty)
+(/usr/share/texmf-dist/tex/latex/lipsum/lipsum.ltd.tex))
+(/usr/share/texmf-dist/tex/latex/blindtext/blindtext.sty
+(/usr/share/texmf-dist/tex/latex/tools/xspace.sty)))
+(/usr/share/texmf-dist/tex/latex/tools/enumerate.sty)
+(/usr/share/texmf-dist/tex/latex/enumitem/enumitem.sty)
+(/usr/share/texmf-dist/tex/latex/caption/caption.sty
+(/usr/share/texmf-dist/tex/latex/caption/caption3.sty))
+(/usr/share/texmf-dist/tex/latex/amsmath/amsmath.sty
+For additional information on amsmath, use the `?' option.
+(/usr/share/texmf-dist/tex/latex/amsmath/amstext.sty
+(/usr/share/texmf-dist/tex/latex/amsmath/amsgen.sty))
+(/usr/share/texmf-dist/tex/latex/amsmath/amsbsy.sty)
+(/usr/share/texmf-dist/tex/latex/amsmath/amsopn.sty))
+(/usr/share/texmf-dist/tex/latex/jknapltx/mathrsfs.sty)
+(/usr/share/texmf-dist/tex/latex/amsfonts/amsfonts.sty)
+(/usr/share/texmf-dist/tex/latex/amsfonts/amssymb.sty)
+(/usr/share/texmf-dist/tex/latex/booktabs/booktabs.sty)
+(/usr/share/texmf-dist/tex/latex/tools/multicol.sty)
+(/usr/share/texmf-dist/tex/latex/multirow/multirow.sty)
+(/usr/share/texmf-dist/tex/latex/fancyvrb/fancyvrb.sty)
+(/usr/share/texmf-dist/tex/latex/makecell/makecell.sty)
+(/usr/share/texmf-dist/tex/generic/hologo/hologo.sty)
+(/usr/share/texmf-dist/tex/latex/titlesec/titlesec.sty)
+(/usr/share/texmf-dist/tex/latex/appendix/appendix.sty)
+(/usr/share/texmf-dist/tex/latex/biblatex/biblatex.sty
+(/usr/share/texmf-dist/tex/latex/logreq/logreq.sty
+(/usr/share/texmf-dist/tex/latex/logreq/logreq.def))
+(/usr/share/texmf-dist/tex/latex/base/ifthen.sty)
+(/usr/share/texmf-dist/tex/latex/biblatex/blx-dm.def)
+(/usr/share/texmf-dist/tex/latex/biblatex/blx-unicode.def)
+(/usr/share/texmf-dist/tex/latex/biblatex/blx-compat.def)
+(/usr/share/texmf-dist/tex/latex/biblatex/biblatex.def)
+(/usr/share/texmf-dist/tex/latex/biblatex/bbx/numeric.bbx
+(/usr/share/texmf-dist/tex/latex/biblatex/bbx/standard.bbx))
+(/usr/share/texmf-dist/tex/latex/biblatex/cbx/numeric-comp.cbx)
+(/usr/share/texmf-dist/tex/latex/biblatex/biblatex.cfg)
+(/usr/share/texmf-dist/tex/latex/biblatex/blx-case-expl3.sty))
+(/usr/share/texmf-dist/tex/latex/pgf/frontendlayer/tikz.sty
+(/usr/share/texmf-dist/tex/latex/pgf/basiclayer/pgf.sty
+(/usr/share/texmf-dist/tex/latex/pgf/utilities/pgfrcs.sty
+(/usr/share/texmf-dist/tex/generic/pgf/utilities/pgfutil-common.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/utilities/pgfutil-latex.def)
+(/usr/share/texmf-dist/tex/generic/pgf/utilities/pgfrcs.code.tex
+(/usr/share/texmf-dist/tex/generic/pgf/pgf.revision.tex)))
+(/usr/share/texmf-dist/tex/latex/pgf/basiclayer/pgfcore.sty
+(/usr/share/texmf-dist/tex/latex/pgf/systemlayer/pgfsys.sty
+(/usr/share/texmf-dist/tex/generic/pgf/systemlayer/pgfsys.code.tex
+(/usr/share/texmf-dist/tex/generic/pgf/utilities/pgfkeys.code.tex
+(/usr/share/texmf-dist/tex/generic/pgf/utilities/pgfkeyslibraryfiltered.code.te
+x)) (/usr/share/texmf-dist/tex/generic/pgf/systemlayer/pgf.cfg)
+(/usr/share/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-xetex.def
+(/usr/share/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-dvipdfmx.def
+(/usr/share/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-common-pdf.def))))
+(/usr/share/texmf-dist/tex/generic/pgf/systemlayer/pgfsyssoftpath.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/systemlayer/pgfsysprotocol.code.tex))
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcore.code.tex
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathutil.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathparser.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.basic.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.trigonometric.code
+.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.random.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.comparison.code.te
+x) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.base.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.round.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.misc.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.integerarithmetics
+.code.tex) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathcalc.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfloat.code.tex))
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfint.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepoints.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathconstruct.code.tex
+) (/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathusage.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorescopes.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcoregraphicstate.code.tex)
+
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransformations.code.t
+ex) (/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorequick.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreobjects.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathprocessing.code.te
+x) (/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorearrows.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreshade.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreimage.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreexternal.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorelayers.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransparency.code.tex)
+ (/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepatterns.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorerdf.code.tex)))
+(/usr/share/texmf-dist/tex/generic/pgf/modules/pgfmoduleshapes.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/modules/pgfmoduleplot.code.tex)
+(/usr/share/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-0-65.sty)
+(/usr/share/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-1-18.sty))
+(/usr/share/texmf-dist/tex/latex/pgf/utilities/pgffor.sty
+(/usr/share/texmf-dist/tex/latex/pgf/utilities/pgfkeys.sty
+(/usr/share/texmf-dist/tex/generic/pgf/utilities/pgfkeys.code.tex))
+(/usr/share/texmf-dist/tex/latex/pgf/math/pgfmath.sty
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex))
+(/usr/share/texmf-dist/tex/generic/pgf/utilities/pgffor.code.tex))
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/tikz.code.tex
+(/usr/share/texmf-dist/tex/generic/pgf/libraries/pgflibraryplothandlers.code.te
+x) (/usr/share/texmf-dist/tex/generic/pgf/modules/pgfmodulematrix.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrary
+topaths.code.tex)))
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrary
+backgrounds.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrary
+calc.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrary
+shadows.code.tex
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrary
+fadings.code.tex
+(/usr/share/texmf-dist/tex/generic/pgf/libraries/pgflibraryfadings.code.tex)))
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrary
+positioning.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrary
+fit.code.tex) (/usr/share/texmf-dist/tex/latex/apptools/apptools.sty)
+(/usr/share/texmf-dist/tex/latex/psnfss/pifont.sty
+(/usr/share/texmf-dist/tex/latex/psnfss/upzd.fd)
+(/usr/share/texmf-dist/tex/latex/psnfss/upsy.fd))
+(/usr/share/texmf-dist/tex/latex/manfnt/manfnt.sty)
+(/usr/share/texmf-dist/tex/latex/bbding/bbding.sty)
+(/usr/share/texmf-dist/tex/latex/tcolorbox/tcolorbox.sty
+(/usr/share/texmf-dist/tex/latex/tools/verbatim.sty)
+(/usr/share/texmf-dist/tex/latex/environ/environ.sty
+(/usr/share/texmf-dist/tex/latex/trimspaces/trimspaces.sty))
+(/usr/share/texmf-dist/tex/latex/tcolorbox/tcbraster.code.tex
+Library (tcolorbox): 'tcbraster.code.tex' version '6.9.0'
+) (/usr/share/texmf-dist/tex/latex/tcolorbox/tcbskins.code.tex
+Library (tcolorbox): 'tcbskins.code.tex' version '6.9.0'
+(/usr/share/texmf-dist/tex/latex/tikzfill/tikzfill.image.sty
+(/usr/share/texmf-dist/tex/latex/tikzfill/tikzfill-common.sty)
+(/usr/share/texmf-dist/tex/latex/tikzfill/tikzlibraryfill.image.code.tex))
+(/usr/share/texmf-dist/tex/latex/tcolorbox/tcbskinsjigsaw.code.tex
+Library (tcolorbox): 'tcbskinsjigsaw.code.tex' version '6.9.0'
+)) (/usr/share/texmf-dist/tex/latex/tcolorbox/tcbbreakable.code.tex
+Library (tcolorbox): 'tcbbreakable.code.tex' version '6.9.0'
+(/usr/share/texmf-dist/tex/latex/pdfcol/pdfcol.sty))
+(/usr/share/texmf-dist/tex/latex/tcolorbox/tcbhooks.code.tex
+Library (tcolorbox): 'tcbhooks.code.tex' version '6.9.0'
+) (/usr/share/texmf-dist/tex/latex/tcolorbox/tcbtheorems.code.tex
+Library (tcolorbox): 'tcbtheorems.code.tex' version '6.9.0'
+) (/usr/share/texmf-dist/tex/latex/tcolorbox/tcbfitting.code.tex
+Library (tcolorbox): 'tcbfitting.code.tex' version '6.9.0'
+)) (/usr/share/texmf-dist/tex/latex/adforn/adforn.sty
+(/usr/share/texmf-dist/tex/latex/svn-prov/svn-prov.sty)
+(/usr/share/texmf-dist/tex/latex/fixtounicode/fixtounicode.sty))
+(/usr/share/texmf-dist/tex/latex/fancyhdr/fancyhdr.sty)
+(/usr/share/texmf-dist/tex/latex/listings/listings.sty
+(/usr/share/texmf-dist/tex/latex/listings/lstpatch.sty)
+(/usr/share/texmf-dist/tex/latex/listings/lstmisc.sty)
+(/usr/share/texmf-dist/tex/latex/listings/listings.cfg))
+(/usr/share/texmf-dist/tex/xelatex/xecjk/xeCJK-listings.sty)
+==> First Aid for listings.sty no longer applied!
+    Expected:
+        2024/09/23 1.10c (Carsten Heinz)
+    but found:
+        2025/11/14 1.11b (Carsten Heinz)
+    so I'm assuming it got fixed.
+(/usr/share/texmf-dist/tex/latex/listings/lstlang1.sty)
+(/usr/share/texmf-dist/tex/latex/listings/lstlang2.sty)
+(/usr/share/texmf-dist/tex/latex/listings/lstlang3.sty)
+(/usr/share/texmf-dist/tex/latex/listings/lstlang1.sty)
+(/usr/share/texmf-dist/tex/latex/listings/lstlang2.sty)
+(/usr/share/texmf-dist/tex/latex/listings/lstlang3.sty)
+(/usr/share/texmf-dist/tex/latex/listings/lstlang1.sty)
+(/usr/share/texmf-dist/tex/latex/listings/lstlang2.sty)
+(/usr/share/texmf-dist/tex/latex/listings/lstlang3.sty)
+(/usr/share/texmf-dist/tex/latex/listings/lstmisc.sty)
+(/usr/share/texmf-dist/tex/latex/tools/bm.sty)
+(/usr/share/texmf-dist/tex/latex/tools/calc.sty)
+(/usr/share/texmf-dist/tex/latex/tocloft/tocloft.sty))
+(../templates/preamble.tex
+(/usr/share/texmf-dist/tex/latex/caption/subcaption.sty)
+(/usr/share/texmf-dist/tex/latex/float/float.sty)
+(/usr/share/texmf-dist/tex/latex/mdframed/mdframed.sty
+(/usr/share/texmf-dist/tex/latex/zref/zref-abspage.sty
+(/usr/share/texmf-dist/tex/latex/zref/zref-base.sty
+(/usr/share/texmf-dist/tex/generic/etexcmds/etexcmds.sty)
+(/usr/share/texmf-dist/tex/latex/auxhook/auxhook.sty)))
+(/usr/share/texmf-dist/tex/latex/needspace/needspace.sty)
+(/usr/share/texmf-dist/tex/latex/mdframed/md-frame-1.mdf))
+(../templates/cover.tex)) (/usr/share/texmf-dist/tex/latex/xurl/xurl.sty
+xurl: Set penalties for biblatex
+) (/tmp/tutorial4new-image-path-textbook-20261005-build/main.aux)
+(/tmp/tutorial4new-image-path-textbook-20261005-build/main.out)
+(/tmp/tutorial4new-image-path-textbook-20261005-build/main.out)
+*geometry* driver: auto-detecting
+*geometry* detected driver: xetex
+(/usr/share/texmf-dist/tex/latex/footmisc/footmisc.sty)
+(/usr/share/texmf-dist/tex/latex/biblatex/lbx/english.lbx)
+No file main.bbl.
+[1] [2] (./preface/editors_note.tex
+(/usr/share/texmf-dist/tex/latex/jknapltx/ursfs.fd)
+(/usr/share/texmf-dist/tex/latex/amsfonts/umsa.fd)
+(/usr/share/texmf-dist/tex/latex/amsfonts/umsb.fd)) [1]
+(/tmp/tutorial4new-image-path-textbook-20261005-build/main.toc [2] [3])
+[4]
+Chapter 1.
+(/usr/share/texmf-dist/tex/latex/bbding/Uding.fd)
+Underfull \hbox (badness 10000) in paragraph at lines 49--50
+[]\TU/FandolKai-Regular(0)/m/n/10.95 本 卷 边 界：|  先 修 卷 一 \TU/TeXGyreTermesX(0)/m
+/n/10.95 Linux\TU/FandolKai-Regular(0)/m/n/10.95 、| \TU/TeXGyreTermesX(0)/m/n/1
+0.95 C++ \TU/FandolKai-Regular(0)/m/n/10.95 与
+(./chapters/A_ros2.tex [1]
+(/usr/share/texmf-dist/tex/latex/listings/lstlang1.sty)
+(/usr/share/texmf-dist/tex/latex/listings/lstmisc.sty)
+(/usr/share/texmf-dist/tex/latex/listings/lstlang1.sty) [2]
+
+LaTeX Font Warning: Font shape `TU/FandolFang-Regular(0)/m/it' undefined
+(Font)              using `TU/FandolFang-Regular(0)/m/n' instead on input line 
+123.
+
+[3] [4] [5] [6] (/usr/share/texmf-dist/tex/latex/listings/lstlang1.sty)
+(/usr/share/texmf-dist/tex/latex/listings/lstlang1.sty)
+(/usr/share/texmf-dist/tex/latex/listings/lstmisc.sty) [7] [8] [9] [10])
+(./chapters/A_ros2_project.tex [11]
+(./examples/ros2/basic-interfaces-demo/my_msgs/msg/My.msg)
+(./examples/ros2/basic-interfaces-demo/my_msgs/CMakeLists.txt)
+(./examples/ros2/basic-interfaces-demo/my_msgs/package.xml) [12] [13]
+(./examples/ros2/basic-interfaces-demo/my_package/include/my_package/my_node.h)
+(./examples/ros2/basic-interfaces-demo/my_package/src/my_node.cpp [14])
+(./examples/ros2/basic-interfaces-demo/my_package/src/my_node.cpp) [15]
+(./examples/ros2/basic-interfaces-demo/my_package/src/my_node.cpp)
+(./examples/ros2/basic-interfaces-demo/my_package/src/node_run.cpp)
+(./examples/ros2/basic-interfaces-demo/my_package/CMakeLists.txt) [16]
+(./examples/ros2/basic-interfaces-demo/my_package/package.xml) [17] [18])
+(./chapters/A_ros2_engineering.tex [19] [20] [21]
+(./examples/ros2/training_tools/package.xml) [22]
+(./examples/ros2/training_tools/src/heartbeat.cpp)
+(./examples/ros2/training_tools/CMakeLists.txt) [23] [24]
+(./examples/ros2/training_tools/cmake/Auto.cmake) [25]
+(./examples/ros2/training_tools/test/test_interval.cpp) [26]
+(/usr/share/texmf-dist/tex/latex/listings/lstlang1.sty)
+(./examples/ros2/training_tools/launch/basic.launch.py)
+Underfull \hbox (badness 2384) in paragraph at lines 246--247
+[]\TU/FandolSong-Regular(0)/m/n/10.95 这 里 的 \TU/lmtt/m/n/10.95 package \TU/Fand
+olSong-Regular(0)/m/n/10.95 是 功 能 包 名，| \TU/lmtt/m/n/10.95 executable \TU/Fando
+lSong-Regular(0)/m/n/10.95 是 安 装 后 的 可 执 行 程 序 名。|  它 们 对 应 \TU/lmtt/m/n/10.95 
+ros2 run
+[27]
+Underfull \hbox (badness 4981) in paragraph at lines 292--293
+[] []\TU/FandolSong-Regular(0)/b/n/10.95 先 放 进 \TU/TeXGyreTermesX(0)/b/n/10.95 
+YAML\TU/FandolSong-Regular(0)/b/n/10.95 ，|  再 把 常 改 的 值 留 给 命 令 行[] \TU/FandolS
+ong-Regular(0)/m/n/10.95 配 置 还 少 的 时 候，|  直 接 写 \TU/lmtt/m/n/10.95 parameters=[
+{'text':
+(./examples/ros2/training_tools/config/heartbeat.yaml)
+(./examples/ros2/training_tools/launch/heartbeat.launch.py) [28] [29]
+(./examples/ros2/training_tools/launch/team.launch.py) [30]
+(./examples/ros2/training_tools/launch/team.launch.py) [31] [32]
+Underfull \hbox (badness 1005) in paragraph at lines 378--379
+[] []\TU/FandolSong-Regular(0)/b/n/10.95 同 一 个 模 块 启 动 两 份：|  把 配 置 放 进 各 自 的 组
+[] \TU/FandolSong-Regular(0)/m/n/10.95 如 果 红、|  蓝 两 套 传 感 器 都 要 启 动 同 一 种 程 序，|
+  只 给
+(./examples/ros2/training_tools/launch/multi.launch.py) [33]
+Overfull \hbox (2.8734pt too wide) in paragraph at lines 408--409
+[] []\TU/FandolSong-Regular(0)/b/n/10.95 事 件 告 诉 你 进 程 发 生 了 什 么[] \TU/FandolSo
+ng-Regular(0)/m/n/10.95 回 头 看 \TU/TeXGyreTermesX(0)/m/n/10.95 team \TU/FandolSo
+ng-Regular(0)/m/n/10.95 中 的 $[] [] [] [] [] [] [] [] [] [] [] [] [] [] [] [] []
+ [] [][]$。|  它 注 册 了 一 个 \TU/lmtt/m/n/10.95 OnProcessExit
+
+Underfull \hbox (badness 1163) in paragraph at lines 426--427
+[]\TU/FandolSong-Regular(0)/m/n/10.95 不 过，| $[] [] [] [] [] [] [] [] [] [] [] [
+] [] [] [] [] [][][][] [] [] [] [] [] [][] [] [] [] [] [] [] [] []$ 并 不 保 证 \TU
+/TeXGyreTermesX(0)/m/n/10.95 A \TU/FandolSong-Regular(0)/m/n/10.95 完 成 初 始 化 后 
+才 启 动 \TU/TeXGyreTermesX(0)/m/n/10.95 B\TU/FandolSong-Regular(0)/m/n/10.95 ；|
+[34] (./examples/ros2/training_tools/launch/checked.launch.py)
+(./examples/ros2/training_tools/launch/checked.launch.py) [35]
+Underfull \hbox (badness 5817) in paragraph at lines 473--474
+[]|\TU/FandolSong-Regular(0)/m/n/10.95 用 \TU/lmtt/m/n/10.95 --show-args \TU/Fan
+dolSong-Regular(0)/m/n/10.95 查 可 传 参 数，|  必 要 时 用 \TU/lmtt/m/n/10.95 ros2 launc
+h
+[36] [37] [38] [39] (./examples/ros2/header_flags.py) [40]
+(./examples/ros2/header_flags.py) [41]) (./chapters/A_ros2_image_path.tex
+[42] [43] [44] (./examples/ros2/rmw-config-demo/fastdds.xml) [45]
+(./examples/ros2/rmw-config-demo/cyclonedds.xml) [46] [47]
+Underfull \hbox (badness 2359) in paragraph at lines 261--262
+[]\TU/FandolSong-Regular(0)/m/n/10.95 先 确 认 本 机 收 发 仍 然 正 常。|  若 要 让 另 一 台 机 器 
+接 入，|  假 设 \TU/TeXGyreTermesX(0)/m/n/10.95 router \TU/FandolSong-Regular(0)/m/n
+/10.95 主 机 的 实 际 局 域 网 地 址 是
+[48] [49] [50] (./examples/ros2/image-path-demo/msg/Frame.msg)
+(./examples/ros2/image-path-demo/src/components.cpp [51] [52])
+(./examples/ros2/image-path-demo/src/components.cpp [53])
+(./examples/ros2/image-path-demo/package.xml [54])
+(./examples/ros2/image-path-demo/CMakeLists.txt)
+(./examples/ros2/image-path-demo/launch/path.launch.py [55]) [56]
+Underfull \hbox (badness 2644) in paragraph at lines 392--393
+[]\TU/FandolSong-Regular(0)/m/n/10.95 在 另 一 个 加 载 相 同 环 境、|  域 和 \TU/TeXGyreTer
+mesX(0)/m/n/10.95 RMW \TU/FandolSong-Regular(0)/m/n/10.95 的 终 端 执 行 \TU/lmtt/m/
+n/10.95 ros2 component list\TU/FandolSong-Regular(0)/m/n/10.95 ，|  可 以 看 到 同 一 
+个
+[57] (./examples/ros2/image-path-demo/src/loan_probe.cpp) [58]
+(./examples/ros2/image-path-demo/config/fastdds-loan.xml) [59] [60] [61]
+(./chapters/A_ros2_image_results.tex) [62] [63]) (./chapters/A_ros2_review.tex
+(/usr/share/texmf-dist/tex/latex/adforn/uornementsadf.fd) [64]) [65]
+Chapter 2.
+(./chapters/J_comm.tex [66]
+(./examples/communication/stream-link-demo/ping_demo.py) [67]
+(./examples/communication/stream-link-demo/framing.py) [68]
+(./examples/communication/stream-link-demo/parser_demo.py) [69]
+(./examples/communication/stream-link-demo/state.py) [70]
+(./examples/communication/stream-link-demo/state.py) [71]
+(./examples/communication/stream-link-demo/latest_demo.py) [72]
+(./examples/communication/stream-link-demo/event_demo.py) [73] [74]
+(./examples/communication/stream-link-demo/tcp_demo.py) [75]
+(./examples/communication/stream-link-demo/tcp_demo.py)
+(./examples/communication/stream-link-demo/tcp_demo.py) [76]
+(./examples/communication/stream-link-demo/framing.py) [77]
+(./examples/communication/stream-link-demo/serial_demo.py) [78] [79]
+(./examples/communication/stream-link-demo/bridge_demo.py)
+(./examples/communication/stream-link-demo/bridge_demo.py) [80]
+(./examples/communication/stream-link-demo/bridge_demo.py) [81]
+(./examples/communication/stream-link-demo/fault_demo.py) [82])
+(./chapters/J_comm_review.tex [83]) [84]
+Chapter 3.
+(./chapters/K_sdr.tex [85] (./examples/sdr/iq-replay-demo/tone_demo.py)
+[86] (./examples/sdr/iq-replay-demo/frame.py) [87]
+(./examples/sdr/iq-replay-demo/synth.py)
+(./examples/sdr/iq-replay-demo/record.py) [88]
+(./examples/sdr/iq-replay-demo/record.py)
+(./examples/sdr/iq-replay-demo/replay.py) [89] [90]
+(./examples/sdr/iq-replay-demo/decode.py) [91]
+(./examples/sdr/iq-replay-demo/decode.py) [92]
+(./examples/sdr/iq-replay-demo/frame.py)
+(./examples/sdr/iq-replay-demo/state_demo.py) [93]
+(./examples/sdr/iq-replay-demo/state_demo.py) [94]
+
+LaTeX Font Warning: Font shape `TU/FandolKai-Regular(0)/m/it' undefined
+(Font)              using `TU/FandolKai-Regular(0)/m/n' instead on input line 1
+54.
+
+[95] (./examples/sdr/iq-replay-demo/capture_pluto.py) [96]
+Underfull \hbox (badness 1635) in paragraph at lines 186--187
+[]\TU/FandolSong-Regular(0)/m/n/10.95 先 执 行 \TU/lmtt/m/n/10.95 .venv/bin/python
+ capture_pluto.py --help\TU/FandolSong-Regular(0)/m/n/10.95 。|  实 机 调 用 形 式 为 \
+TU/lmtt/m/n/10.95 capture_pluto.py
+) (./chapters/K_sdr_review.tex [97]) [98]
+Chapter 4.
+(./chapters/B_opencv.tex (./examples/opencv/image-lab-demo/CMakeLists.txt)
+[99] (./examples/opencv/image-lab-demo/src/version_demo.cpp)
+(./examples/opencv/image-lab-demo/src/mat_demo.cpp)
+Underfull \hbox (badness 4995) in paragraph at lines 39--40
+[]\TU/TeXGyreTermesX(0)/m/n/10.95 ROI \TU/FandolSong-Regular(0)/m/n/10.95 通 用 形
+ 式 是 \TU/lmtt/m/n/10.95 image(cv::Rect(x,y,width,height))\TU/FandolSong-Regular
+(0)/m/n/10.95 ，|  矩 形 必 须 落 在 原 图 内。|  它 可 能 不
+
+Underfull \hbox (badness 2050) in paragraph at lines 39--40
+\TU/FandolSong-Regular(0)/m/n/10.95 是 连 续 内 存；|  性 能 敏 感 时 可 逐 行 用 \TU/lmtt/m/n
+/10.95 ptr<T>(row)\TU/FandolSong-Regular(0)/m/n/10.95 ，|  不 能 未 经 检 查 就 把 所 有 行
+ 按 无 填 充 数 组 摊 平。|
+[100] (./examples/opencv/image-lab-demo/src/io_demo.cpp)
+(./examples/opencv/image-lab-demo/src/viewer_demo.cpp) [101]
+(./examples/opencv/image-lab-demo/src/video_demo.cpp) [102] [103]
+(./examples/opencv/image-lab-demo/src/hsv_demo.cpp)
+(./examples/opencv/image-lab-demo/src/threshold_demo.cpp) [104]
+(./examples/opencv/image-lab-demo/src/filter_demo.cpp) [105] [106]
+(./examples/opencv/image-lab-demo/src/morphology_demo.cpp)
+(./examples/opencv/image-lab-demo/src/contour_demo.cpp) [107]
+(./examples/opencv/image-lab-demo/src/resize_demo.cpp) [108]
+(./examples/opencv/image-lab-demo/src/features_demo.cpp)
+(./examples/opencv/image-lab-demo/src/sample_demo.cpp) [109]
+(./examples/opencv/image-lab-demo/src/pipeline_demo.cpp) [110]
+(./examples/opencv/image-lab-demo/src/pipeline_demo.cpp) [111] [112]
+(./examples/opencv/image-bridge-demo/CMakeLists.txt)
+(./examples/opencv/image-bridge-demo/package.xml) [113]
+(./examples/opencv/image-bridge-demo/src/roundtrip.cpp) [114]
+(./examples/opencv/image-bridge-demo/src/bridge_node.cpp)
+(./examples/opencv/image-bridge-demo/src/bridge_node.cpp) [115])
+(./chapters/B_opencv_review.tex [116]) [117]
+Chapter 5.
+
+Underfull \hbox (badness 10000) in paragraph at lines 114--115
+[]\TU/FandolSong-Regular(0)/m/it/10.95 学 习 目 标：|  核 对 拟 合 与 数 据 划 分；|  构
+(./chapters/C_dl.tex (./examples/dl/lenet-training-demo/fit_demo.py) [118]
+[119] (./examples/dl/lenet-training-demo/data.py) [120] [121]
+(./examples/dl/lenet-training-demo/ops_demo.py) [122] [123]
+(./examples/dl/lenet-training-demo/model.py) [124]
+(./examples/dl/lenet-training-demo/loss_demo.py) [125]
+(./examples/dl/lenet-training-demo/grad_demo.py) [126]
+(./examples/dl/lenet-training-demo/mode_demo.py)
+(./examples/dl/lenet-training-demo/engine.py) [127] [128]
+(./examples/dl/lenet-training-demo/train.py)
+(./examples/dl/lenet-training-demo/train.py) [129] [130]
+(./examples/dl/lenet-training-demo/infer.py) [131]
+(./examples/dl/lenet-training-demo/infer.py) [132]
+(./examples/dl/lenet-training-demo/device_demo.py) [133] [134]
+(./examples/dl/lenet-training-demo/nms_demo.py)
+(./examples/dl/lenet-training-demo/requirements-export.txt)
+(./examples/dl/lenet-training-demo/export_compare.py) [135]
+(./examples/dl/lenet-training-demo/export_compare.py) [136]
+(./examples/dl/lenet-training-demo/benchmark.py)) (./chapters/C_dl_review.tex
+[137]) [138]
+Chapter 6.
+(./chapters/D_cuda.tex (./examples/cuda/vector-lab-demo/cpu_demo.cpp) [139]
+[140] [141] [142] [143] (./examples/cuda/vector-lab-demo/CMakeLists.txt)
+[144] (./examples/cuda/vector-lab-demo/common.cuh) [145]
+(./examples/cuda/vector-lab-demo/device_info.cu) [146] [147]
+(./examples/cuda/vector-lab-demo/kernels.cuh)
+(./examples/cuda/vector-lab-demo/vec_add.cu) [148] [149]
+(./examples/cuda/vector-lab-demo/kernels.cuh) [150]
+(./examples/cuda/vector-lab-demo/shared_sum.cu) [151]
+(./examples/cuda/vector-lab-demo/error_demo.cu) [152] [153]
+(./examples/cuda/vector-lab-demo/kernels.cuh)
+(./examples/cuda/vector-lab-demo/pipeline.cu)
+(./examples/cuda/vector-lab-demo/pipeline.cu) [154]
+(./examples/cuda/vector-lab-demo/pipeline.cu)
+(./examples/cuda/vector-lab-demo/pipeline.cu) [155] [156])
+(./chapters/D_cuda_review.tex [157]) [158]
+Chapter 7.
+(./chapters/E_camera.tex [159] [160] [161]
+(./examples/camera/calibration-lab-demo/noise.py [162])
+(./examples/camera/calibration-lab-demo/format_gamma.py [163]) [164] [165]
+[166] (./examples/camera/calibration-lab-demo/optics.py [167]) [168]
+(./examples/camera/calibration-lab-demo/board.py)
+(./examples/camera/calibration-lab-demo/generate.py [169])
+(./examples/camera/calibration-lab-demo/generate.py [170])
+(./examples/camera/calibration-lab-demo/calibrate.py [171])
+(./chapters/E_calibration.tex [172] [173]
+(./examples/camera/calibration-lab-demo/validate.py) [174]
+(./examples/camera/calibration-lab-demo/model_io.py [175])
+(./examples/camera/calibration-lab-demo/replay_ros.py [176])
+(./examples/camera/calibration-lab-demo/replay_ros.py) [177]
+(./examples/camera/calibration-lab-demo/replay_ros.py)
+(./examples/camera/calibration-lab-demo/replay_ros.py) [178] [179]
+(./examples/camera/calibration-lab-demo/check_ros.py [180])
+(./examples/camera/calibration-lab-demo/check_ros.py)
+Underfull \hbox (badness 2119) in paragraph at lines 153--154
+\TU/FandolSong-Regular(0)/m/n/10.95 这 个 选 项 只 跳 过 启 动 检 查，|  不 会 创 建 服 务，| \TU/
+TeXGyreTermesX(0)/m/n/10.95 COMMIT \TU/FandolSong-Regular(0)/m/n/10.95 也 不 会 突 
+然 拥 有 超 能 力。|  我 们 的 回 放 可 以
+[181] (./examples/camera/calibration-lab-demo/stereo.py [182]) [183]) [184])
+(./chapters/E_camera_review.tex) [185]
+Chapter 8.
+
+Underfull \hbox (badness 7796) in paragraph at lines 159--160
+[]\TU/FandolSong-Regular(0)/m/it/10.95 学 习 目 标：|  实 现 因 果 低 通 与 位 置\TU/TeXGyreT
+ermesX(0)/m/n/10.95 /\TU/FandolSong-Regular(0)/m/it/10.95 速 度
+(./chapters/F_filter.tex [186]
+(./examples/filter/state-estimation-demo/smooth.py [187])
+(./examples/filter/state-estimation-demo/smooth.py) [188] [189]
+(./examples/filter/state-estimation-demo/fusion.py) [190] [191] [192]
+(./examples/filter/state-estimation-demo/linear.py)
+(./examples/filter/state-estimation-demo/scalar.py) [193]
+(./examples/filter/state-estimation-demo/data.py [194])
+(./examples/filter/state-estimation-demo/run.py) [195]
+(./examples/filter/state-estimation-demo/run.py) [196]
+(./examples/filter/state-estimation-demo/plot.py) [197] [198]
+(./examples/filter/state-estimation-demo/sigma.py [199])
+(./examples/filter/state-estimation-demo/moments_demo.py) [200]
+(./examples/filter/state-estimation-demo/ukf.py [201]))
+(./chapters/F_filter_review.tex [202]) [203]
+Chapter 9.
+(./chapters/G_ba.tex [204] [205] (./examples/geometry/pose-lab-demo/model.py)
+(./examples/geometry/pose-lab-demo/basics.py) [206] [207]
+(./examples/geometry/pose-lab-demo/dlt.py [208]) [209] [210]
+(./examples/geometry/pose-lab-demo/pnp_demo.py) [211] [212]
+(./examples/geometry/pose-lab-demo/numeric_demo.py)
+(/usr/share/texmf-dist/tex/latex/amsfonts/ueuf.fd) [213]
+(./examples/geometry/pose-lab-demo/lie.py [214])
+(./examples/geometry/pose-lab-demo/lie_demo.py) [215] [216]
+(./examples/geometry/pose-lab-demo/residual.py)
+(./examples/geometry/pose-lab-demo/jacobian_demo.py) [217]
+(./examples/geometry/pose-lab-demo/optimize.py) [218]
+(./examples/geometry/pose-lab-demo/pose_demo.py) [219] [220]
+(./examples/geometry/pose-lab-demo/bundle_demo.py) [221]
+(./examples/geometry/pose-lab-demo/bundle_demo.py) [222]
+(./examples/geometry/pose-lab-demo/schur.py) [223]
+(./examples/geometry/pose-lab-demo/graph_demo.py)
+(./examples/geometry/pose-lab-demo/plot.py [224]) [225]
+(./examples/geometry/pose-lab-demo/registration_demo.py [226]))
+(./chapters/G_ba_review.tex [227]) [228]
+Chapter 10.
+(./chapters/H_mpc.tex
+Underfull \hbox (badness 1112) in paragraph at lines 11--13
+\TU/TeXGyreTermesX(0)/m/n/10.95 J \TU/FandolSong-Regular(0)/m/n/10.95 是 转 动 惯 量
+，| \TU/TeXGyreTermesX(0)/m/n/10.95 B \TU/FandolSong-Regular(0)/m/n/10.95 是 阻 尼 
+系 数；|  这 里 忽 略 摩 擦、|  间 隙 等 效 应。|  零 初 始 条 件 下，|  拉 普 拉 斯 变 换 给 出
+[229] (./examples/mpc/horizon-control-demo/requirements.txt)
+(./examples/mpc/horizon-control-demo/response.py [230]) [231] [232]
+(./examples/mpc/horizon-control-demo/model.py [233])
+(./examples/mpc/horizon-control-demo/scalar.py)
+Underfull \hbox (badness 1072) in paragraph at lines 162--164
+[] []\TU/FandolSong-Regular(0)/b/n/10.95 练 习 \TU/TeXGyreTermesX(0)/b/n/10.95 10
+.6 [][] \TU/FandolSong-Regular(0)/m/n/10.95 把 \TU/TeXGyreTermesX(0)/m/n/10.95 R
+ \TU/FandolSong-Regular(0)/m/n/10.95 改 为 \TU/TeXGyreTermesX(0)/m/n/10.95 9\TU/F
+andolSong-Regular(0)/m/n/10.95 ，|  推 导 输 入 和 代 价，|  判 断 是 否 限 幅。|  再 解 释 为 什 么 
+重 新 规 划 的 后 三 步 是
+[234] (./examples/mpc/horizon-control-demo/prediction.py) [235]
+(./examples/mpc/horizon-control-demo/qp.py [236])
+(./examples/mpc/horizon-control-demo/controller.py [237])
+(./examples/mpc/horizon-control-demo/run.py [238])
+(./examples/mpc/horizon-control-demo/run.py) [239] [240] [241]
+(./examples/mpc/horizon-control-demo/plot.py [242]))
+(./chapters/H_mpc_review.tex [243]) [244]
+Chapter 11.
+(./chapters/I_nav.tex [245] [246] [247]
+(./examples/navigation/navigation-lab-demo/tf_demo.py [248]) [249]
+(./examples/navigation/navigation-lab-demo/localization.py) [250] [251]
+(./examples/navigation/navigation-lab-demo/point_filters.cpp)
+(./examples/navigation/navigation-lab-demo/CMakeLists.txt [252])
+(./examples/navigation/navigation-lab-demo/grid.py [253])
+(./examples/navigation/navigation-lab-demo/grid.py [254]) [255] [256] [257]
+(./examples/navigation/navigation-lab-demo/params.yaml)
+(./examples/navigation/navigation-lab-demo/params.yaml [258])
+(./examples/navigation/navigation-lab-demo/sim.py [259])
+(./examples/navigation/navigation-lab-demo/lab.launch.py [260])
+(./examples/navigation/navigation-lab-demo/client.py [261])
+(./examples/navigation/navigation-lab-demo/client.py [262]) [263]
+(./examples/navigation/navigation-lab-demo/plot.py [264]) [265]
+Underfull \hbox (badness 1152) in paragraph at lines 330--331
+[]\TU/FandolSong-Regular(0)/b/n/10.95 示 例 \TU/TeXGyreTermesX(0)/b/n/10.95 11.11
+ []\TU/lmtt/m/n/10.95 bt.py \TU/FandolSong-Regular(0)/m/n/10.95 是 可 以 逐 \TU/TeX
+GyreTermesX(0)/m/n/10.95 tick \TU/FandolSong-Regular(0)/m/n/10.95 运 行 的 等 价 教 学
+ 模 拟 器，| \TU/lmtt/m/n/10.95 Control \TU/FandolSong-Regular(0)/m/n/10.95 实 现 带 记
+ 忆 的 顺 序\TU/TeXGyreTermesX(0)/m/n/10.95 /\TU/FandolSong-Regular(0)/m/n/10.95 选 
+择 节 点，|
+(./examples/navigation/navigation-lab-demo/bt.py)
+(./examples/navigation/navigation-lab-demo/bt.py [266]) [267])
+(./chapters/I_nav_review.tex [268]) [269] [270] (./answers.tex [271]
+Underfull \hbox (badness 10000) in paragraph at lines 59--60
+\TU/FandolSong-Regular(0)/m/it/10.95 应 看 到 新 增 字 段。|  若 节 点 要 访 问 该 字 段，|  再 重 
+新 构 建 依 赖 它 的 包，|  例 如 执 行 \TU/lmtt/m/n/10.95 colcon build
+[272] [273] [274] [275] [276] [277] [278] [279] [280] [281] [282] [283]
+[284] [285] [286] [287] [288] [289] [290] [291] [292] [293] [294] [295]
+[296] [297] [298] [299]) [300]
+(/tmp/tutorial4new-image-path-textbook-20261005-build/main.aux)
+
+LaTeX Font Warning: Some font shapes were not available, defaults substituted.
+
+ )
+(see the transcript file for additional information)
+Output written on /tmp/tutorial4new-image-path-textbook-20261005-build/main.pdf
+ (306 pages).
+Transcript written on /tmp/tutorial4new-image-path-textbook-20261005-build/main
+.log.

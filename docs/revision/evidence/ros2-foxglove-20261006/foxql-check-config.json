@@ -1,0 +1,103 @@
+{
+  "foxglovePanelTitle": "FoxQL 常用函数核验",
+  "paths": [
+    {
+      "timestampMethod": "receiveTime",
+      "value": "/viz/signal.data.@abs",
+      "enabled": true,
+      "color": "#4e98e2",
+      "id": "foxql-check-0"
+    },
+    {
+      "timestampMethod": "receiveTime",
+      "value": "/viz/signal.data.@negative",
+      "enabled": true,
+      "color": "#f5774d",
+      "id": "foxql-check-1"
+    },
+    {
+      "timestampMethod": "receiveTime",
+      "value": "/viz/signal.data.@mul(1000).@div(1000)",
+      "enabled": true,
+      "color": "#f7df71",
+      "id": "foxql-check-2"
+    },
+    {
+      "timestampMethod": "receiveTime",
+      "value": "/viz/signal.data.@add(1).@sub(1)",
+      "enabled": true,
+      "color": "#4e98e2",
+      "id": "foxql-check-3"
+    },
+    {
+      "timestampMethod": "headerStamp",
+      "value": "/viz/twist.twist.linear.@norm",
+      "enabled": true,
+      "color": "#f5774d",
+      "id": "foxql-check-4"
+    },
+    {
+      "timestampMethod": "headerStamp",
+      "value": "/viz/path.poses.@length",
+      "enabled": true,
+      "color": "#f7df71",
+      "id": "foxql-check-5"
+    },
+    {
+      "timestampMethod": "headerStamp",
+      "value": "/viz/twist.twist.linear.@norm.@sqrt",
+      "enabled": true,
+      "color": "#4e98e2",
+      "id": "foxql-check-6"
+    },
+    {
+      "timestampMethod": "headerStamp",
+      "value": "/viz/twist.twist.linear.@norm.@log10",
+      "enabled": true,
+      "color": "#f5774d",
+      "id": "foxql-check-7"
+    },
+    {
+      "timestampMethod": "headerStamp",
+      "value": "/viz/pose.pose.orientation.@rpy.yaw.@sin",
+      "enabled": true,
+      "color": "#f7df71",
+      "id": "foxql-check-8"
+    },
+    {
+      "timestampMethod": "headerStamp",
+      "value": "/viz/pose.pose.orientation.@rpy.yaw.@cos",
+      "enabled": true,
+      "color": "#4e98e2",
+      "id": "foxql-check-9"
+    },
+    {
+      "timestampMethod": "headerStamp",
+      "value": "/viz/pose.pose.position.x.@delta",
+      "enabled": true,
+      "color": "#f5774d",
+      "id": "foxql-check-10"
+    },
+    {
+      "timestampMethod": "headerStamp",
+      "value": "/viz/pose.pose.position.x.@derivative",
+      "enabled": true,
+      "color": "#f7df71",
+      "id": "foxql-check-11"
+    },
+    {
+      "timestampMethod": "headerStamp",
+      "value": "/viz/pose.pose.position.x.@timedelta",
+      "enabled": true,
+      "color": "#4e98e2",
+      "id": "foxql-check-12"
+    },
+    {
+      "timestampMethod": "receiveTime",
+      "value": "/viz/markers.markers[:]{id==0}.pose.position.x",
+      "enabled": true,
+      "color": "#f5774d",
+      "id": "foxql-check-13"
+    }
+  ]
+}

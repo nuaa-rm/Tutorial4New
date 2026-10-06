@@ -1,0 +1,19 @@
+{
+  "foxglovePanelTitle": "Yaw 角度：rpy 与 ypr",
+  "paths": [
+    {
+      "timestampMethod": "headerStamp",
+      "value": "/viz/pose.pose.orientation.@rpy.yaw.@degrees",
+      "enabled": true,
+      "color": "#4e98e2",
+      "id": "d0c0ba1b-7c55-41a8-90e3-eacc58cbdd40"
+    },
+    {
+      "timestampMethod": "headerStamp",
+      "value": "/viz/pose.pose.orientation.@ypr.yaw.@degrees",
+      "enabled": true,
+      "color": "#f5774d",
+      "id": "f9b270b0-56d9-4d25-bc53-24d48a71a97a"
+    }
+  ]
+}

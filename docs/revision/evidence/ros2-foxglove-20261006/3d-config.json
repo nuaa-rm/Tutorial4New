@@ -1,0 +1,78 @@
+{
+  "cameraState": {
+    "perspective": true,
+    "distance": 5.999999999999999,
+    "phi": 60.00000000000005,
+    "thetaOffset": 60.000000000000036,
+    "targetOffset": [
+      0,
+      0,
+      0
+    ],
+    "target": [
+      0,
+      0,
+      0
+    ],
+    "targetOrientation": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "fovy": 45,
+    "near": 0.5,
+    "far": 5000
+  },
+  "followMode": "follow-pose",
+  "fixedFrame": "map",
+  "scene": {},
+  "transforms": {},
+  "topics": {
+    "/viz/markers": {
+      "visible": true
+    },
+    "/viz/path": {
+      "visible": true
+    },
+    "/viz/pose": {
+      "visible": true
+    },
+    "/viz/scene": {
+      "visible": true
+    }
+  },
+  "layers": {
+    "grid": {
+      "visible": true,
+      "drawBehind": false,
+      "instanceId": "dc878e01-b24b-4f8e-a0c5-73aba3c76a00",
+      "layerId": "foxglove.Grid",
+      "size": 10,
+      "divisions": 10,
+      "lineWidth": 1,
+      "color": "#248eff",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "publish": {
+    "type": "point",
+    "poseTopic": "/move_base_simple/goal",
+    "pointTopic": "/clicked_point",
+    "poseEstimateTopic": "/initialpose",
+    "poseEstimateXDeviation": 0.5,
+    "poseEstimateYDeviation": 0.5,
+    "poseEstimateThetaDeviation": 0.26179939
+  },
+  "synchronize": false,
+  "imageMode": {}
+}

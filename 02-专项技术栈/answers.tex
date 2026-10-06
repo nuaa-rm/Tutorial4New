@@ -13,13 +13,15 @@
 
 \paragraph*{随堂练习 \ref{ex:v2-ros-setup}}
 \begin{solution}
-talker 属于 \texttt{demo\_nodes\_cpp}。加载当前发行版环境后，可执行：
+加载 Humble 环境后，\texttt{printenv ROS\_VERSION ROS\_DISTRO} 应依次输出 2 和 humble；talker 属于 \texttt{demo\_nodes\_cpp}。可执行：
 \begin{tbash}
+source /opt/ros/humble/setup.bash
+printenv ROS_VERSION ROS_DISTRO
 ros2 pkg executables demo_nodes_cpp
 ros2 run --help
 ros2 run demo_nodes_cpp talker
 \end{tbash}
-前两条分别确认包中的可执行程序与启动语法，第三条启动发布节点。按 Ctrl+C 结束。
+pkg executables 确认包中的可执行程序，run --help 查询启动语法，最后一条启动发布节点。在另一个已加载 Humble 环境的终端运行 \texttt{ros2 run demo\_nodes\_py listener}，应看到与发布端对应的 Hello World 文本和序号。记录一组 Publishing 与 I heard 输出即可作为收发证据；按 Ctrl+C 分别结束两个程序。
 \end{solution}
 
 \paragraph*{随堂练习 \ref{ex:v2-ros-graph}}
@@ -86,6 +88,42 @@ ros2 topic pub --once /receive std_msgs/msg/String "{data: armor_found}"
 应收到 \texttt{I can hear:armor\_found}。停止节点后，原命令可能等待订阅者；加 \nolinkurl{--wait-matching-subscriptions} 并设为 0，可以在没有订阅者时也发送一次，但不会收到回复。CLI 打印 publishing 只说明发布端执行了发送，处理是否发生要由回调日志、响应消息等证据确认。
 \end{solution}
 
+\paragraph*{随堂练习 \ref{ex:v2-ros-viz-source}}
+\begin{solution}
+依次是 PoseStamped、Image、ImageAnnotations，三者的生成时间来自同一次回调。rgb8 每像素 3 字节，step 为 1920，data 为 $360\times1920=691200$ 字节。标注元素的 timestamp 与 image.header.stamp 一致，新版标注消息的顶层 timestamp 也一致。算法完成时间可以另行记录，作为标注关联时间时会使结果对不上输入帧。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-ros-rqt-views}}
+\begin{solution}
+rqt\_plot 使用 \path{/viz/pose/pose/position/y}，x 与 y 分别为 cos(t) 和 sin(t)，幅值约 1，相差四分之一个周期。Image View 的 raw 图像应为绿色色块。停止后，窗口可以保留曲线历史与最后一帧；结合 topic hz、发布者数量或新增消息时间判断是否继续接收。重新启动后检查曲线与图像恢复变化，记录实际插件版本及字段路径。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-ros-rviz-markers}}
+\begin{solution}
+在 markers.py 中把 sphere 的 type 改为 Marker.CUBE，scale.x/y/z 保持 0.25，修改 color 和 lifetime，重启数据源即可。alpha=0 时透明；不同 ns/id 被视为不同对象，持续新增会保留多份历史直到过期；从数组中省略对象不会自动删除已有图形。show\_target=false 明确发送 target/0 的 DELETE，true 再发送 ADD 恢复。用固定 ns/id、非零 alpha、合法朝向和有意义的寿命核对显示。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-ros-foxglove-plot}}
+\begin{solution}
+可使用以下完整表达式，时间差曲线使用 Timestamp 横轴；pose/twist 有有效的 header.stamp，优先共同选 Header stamp（ROS 头时间戳），按采集或生成时间对齐，求导与时间差也使用该时间来源：
+\begin{lstlisting}[language={}]
+/viz/pose.pose.orientation.@rpy.yaw.@degrees
+/viz/twist.twist.linear.@norm
+/viz/pose.pose.position.x.@timedelta
+\end{lstlisting}
+yaw 按周期表示，速度模长约 1 m/s，消息间隔约 0.1 s。正弦两个相邻峰值间隔约 $2\pi=6.283$ s；XY 图使用 position.x 和 position.y，1:1 轴尺度下圆的直径约 2 m。时间图的两轴分别为秒和数值单位，不能混成欧氏空间距离；XY 图两轴同为米时才能把差值合成米为单位的直线距离。账号权限或客户端不支持时记待验证项，不能用手算结果当成面板实测。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-ros-image-annotations}}
+\begin{solution}
+修改 box.thickness=5.0、center.diameter=20.0。时间偏移练习把 stamp 转为总纳秒，加 50000000 后用 divmod 按 $10^9$ 拆为秒和纳秒，再填入所有标注时间与顶层时间；只改其中一处可能被另一处覆盖。同步要求完全匹配，50 ms 偏移后的标注与 100 ms 间隔的原图无法配对，画面可能停在最后匹配帧或不显示新帧。恢复输入图像的 header.stamp 后应继续更新；算法处理结束时间不能替代原图采集时间。逐项核对像素位置、宽高、编码和消息时间，保留自己的画面与记录。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-ros-viz-replay}}
+\begin{solution}
+提交导出的布局 JSON、至少 10 s 的 MCAP 和一项包含路径、单位及时间来源的测量记录。bag info 应能找到本例话题与非零消息量；停止原发布端后重新打开文件，在一个时间点检查 pose、Marker/SceneEntity、原图与标注。三维轨迹和二维色块分别由合成公式生成，没有完成相机投影或目标识别；真实采集、标定、检测耗时和高帧率显示负载需要实际设备再验。布局中的 Foxglove 面板操作由可用账号现场核对。
+\end{solution}
+
 \paragraph*{随堂练习 \ref{ex:v2-ros-domain}}
 \begin{solution}
 域不同的两个节点不能按普通 DDS 发现互相通信；统一为 42 后应恢复收发。两端都先停止节点，再设置相同的 \texttt{ROS\_DOMAIN\_ID} 和发现范围，执行 \texttt{ros2 daemon stop} 并重新启动。恢复默认实验环境时停止节点、unset \texttt{ROS\_DOMAIN\_ID}、\texttt{ROS\_LOCALHOST\_ONLY}，停止 daemon 后重新运行；持久写入启动文件的设置也需删除或更改。域隔离实验须排除同名遗留发布者。
@@ -110,6 +148,17 @@ ros2 pkg prefix training_tools
 预期边界测试全部通过，包前缀指向当前工作空间的安装目录。
 \end{solution}
 
+\paragraph*{随堂练习 \ref{ex:v2-ros-launch-basic}}
+\begin{solution}
+在 basic 的练习副本中把 \nolinkurl{name='heartbeat'} 改为 \nolinkurl{name='pulse'}，保留 \nolinkurl{executable='heartbeat'}。重新构建并加载环境后，节点为 \texttt{/pulse}，程序名仍为 heartbeat，话题仍为 \texttt{/status}，消息为 ready。停止这一轮后执行：
+\begin{tbash}
+ros2 launch training_tools heartbeat.launch.py robot:=blue text:=true
+ros2 param get /blue/heartbeat text
+ros2 topic echo /blue/health std_msgs/msg/String --once
+\end{tbash}
+第一条命令在启动终端运行，后两条在加载相同环境的查询终端运行。完整节点名是 \nolinkurl{/blue/heartbeat}，话题是 \nolinkurl{/blue/health}；参数查询应显示 String value is: true，消息内容也是字符串 true，因为 ParameterValue 明确指定了 str。删除 parameters 中覆盖 text 的字典，保留 \nolinkurl{parameters=[LaunchConfiguration('params_file')]} 后重新构建、加载环境并重启，消息变成 ready from yaml。即使仍传 \texttt{text:=true}，这个启动参数也不再接到节点参数上，所以不会覆盖 YAML。
+\end{solution}
+
 \paragraph*{随堂练习 \ref{ex:v2-ros-launch}}
 \begin{solution}
 在 team 文件中将 observer 的 cmd 改成下面的列表，其余配置保持不变。嵌套列表把三个替换片段拼成同一个话题参数：
@@ -126,7 +175,29 @@ ros2 launch training_tools team.launch.py robot:=blue
 \begin{tbash}
 ros2 launch training_tools team.launch.py robot:=blue watch:=false
 \end{tbash}
-此时不启动 echo 进程。用另一个终端查询 \texttt{ros2 node list}、\texttt{ros2 topic info /blue/health}，应确认 heartbeat 发布者存在；查询命令本身可能产生临时观测节点，不能仅凭节点总数判断。
+此时不启动 echo 进程，并打印 Observer disabled.。用另一个终端查询 \texttt{ros2 node list}、\texttt{ros2 topic info /blue/health}，应确认 heartbeat 发布者存在；查询命令本身可能产生临时观测节点，不能仅凭节点总数判断。主文件声明 robot，用 launch\_arguments 将它传给子文件，子文件再通过 LaunchConfiguration 把值接到 Node 的 namespace。任一环节写成固定 red，都会使那一部分停止跟随命令行变化。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-ros-launch-group}}
+\begin{solution}
+将循环改为 \nolinkurl{for robot in ('red', 'blue', 'green'):}，传给子文件的 robot 改为 camera。三个节点分别是 \nolinkurl{/red/camera/heartbeat}、\nolinkurl{/blue/camera/heartbeat}、\nolinkurl{/green/camera/heartbeat}；三个话题分别是 \nolinkurl{/red/camera/health}、\nolinkurl{/blue/camera/health}、\nolinkurl{/green/camera/health}。重新构建、加载环境后用 node list 和逐条 topic echo 核对，消息分别为 red ready、blue ready、green ready。
+
+如果在 heartbeat 启动文件中改为 \nolinkurl{remappings=[('status', '/health')]}，三个发布者都会发布到同一个 \texttt{/health}；用 \texttt{ros2 topic info /health -v} 应能看到三个发布者。绝对名字不加外层命名空间，GroupAction 只能限制组内配置的作用范围，不能重写这种名字。运行这轮负例时先结束其他心跳实验，避免混入额外发布者。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-ros-launch-runtime}}
+\begin{solution}
+在 team 的练习副本中，从 launch.actions 增加导入 EmitEvent，并从 launch.events 导入 Shutdown。保留 OnProcessExit 的 target\_action，替换它的 on\_exit 列表：
+\begin{tpython}
+from launch.actions import EmitEvent
+from launch.events import Shutdown
+
+# 替换原 OnProcessExit 的 on_exit 参数
+on_exit=[EmitEvent(event=Shutdown(reason='Observer finished.'))],
+\end{tpython}
+重新构建并加载环境，使用默认 robot 和 watch 启动。观测到一条消息后，observer 退出触发 Shutdown，heartbeat 也被通知退出，启动命令返回；可在另一终端确认不再有本轮的 \texttt{/red/heartbeat}。这只展示“退出就关闭”的策略，异常退出也会触发，不能把它当作只在任务成功后继续的条件。
+
+给 checked 传入确实不存在的路径，应报“参数文件不存在”，日志中不应有 heartbeat 进程启动记录；需要使用另一个路径时直接替换 params\_file 的值。OnProcessStart 只证明进程启动，固定两秒延时只证明时间到了，都不能证明相机打开或已有有效图像。应等待设备状态、有效帧或相应服务，服务依赖可由客户端 wait\_for\_service 等待；生命周期状态也需要节点本身实现对应接口。文件存在性检查同样不能替代参数内容、设备与服务的就绪检查。
 \end{solution}
 
 \paragraph*{随堂练习 \ref{ex:v2-ros-log}}
@@ -155,35 +226,57 @@ ros2 run training_tools heartbeat
 
 \paragraph*{随堂练习 \ref{ex:v2-ros-image-budget}}
 \begin{solution}
-Bayer8 为 $1440\times1080\times250=388\,800\,000\,\mathrm{B/s}$，即 388.8 MB/s；BGR8 乘以 3，为 1166.4 MB/s。两次完整复制各读写一遍，估算新增 $2\times2\times1.1664=4.6656\,\mathrm{GB/s}$ 读写量，实际总线流量受缓存、DMA 和实现影响。8 ms 串行阶段理想只能处理 125 Hz，队列加深不能长期保住全部 250 Hz 输入；它可能让图像变旧。至少同时记录接收比例与图像年龄/延迟，并确认 Source 的实际发送频率，不能只看目标定时器设置。
+Bayer8 为 $1440\times1080\times250=388\,800\,000\,\mathrm{B/s}$，即 388.8 MB/s，BGR8 乘以 3，为 1166.4 MB/s。两次完整复制各读写一遍，估算新增 $2\times2\times1.1664=4.6656\,\mathrm{GB/s}$ 读写量。8 ms 串行阶段的理想处理能力为 125 Hz，持续输入 250 Hz 时会积压，加深队列只会容纳更多等待中的图像。应同时记录接收比例与图像年龄，并检查 Source 的实际发送频率。
 \end{solution}
 
+\paragraph*{随堂练习 \ref{ex:v2-ros-rmw}}
+\begin{solution}
+先按正文安装两种实现，把实验目录内两份 XML 的示例 IP 换成所选本机网卡的真实 IPv4 地址。每轮两个终端使用相同域与同一种 RMW，各自设置对应配置变量，停止旧节点和 daemon 后分别启动 talker/listener。判断依据是 listener 持续收到 \texttt{Hello World} 和递增序号；同时记录 \texttt{printenv} 查到的实现、域与配置路径，不能用 talker 单方面打印 Publishing 代替收发证据。
+
+Fast DDS 的 \texttt{transport\_descriptors} 定义 \texttt{robot\_udp}，\texttt{participant/rtps/userTransports} 引用该名字，\texttt{is\_default\_profile="true"} 把 participant 设为默认。\texttt{useBuiltinTransports=false} 关闭内建传输，本例使用显式定义的 UDPv4。Cyclone DDS 的 \texttt{Domain Id="any"} 只决定配置适用于哪些域，实际通信域仍由 \texttt{ROS\_DOMAIN\_ID} 决定；它不会取消域隔离。网卡白名单或 \texttt{NetworkInterface} 选择的是当前机器的接口，因此两台机器应分别填写自己的地址。XML 的根元素、命名空间与配置树不同，改环境变量名不能把一种 XML 转成另一种。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-ros-zenoh-config}}
+\begin{solution}
+三个终端都加载 Humble（源码安装时再加载 Zenoh 工作空间），设置 \texttt{rmw\_zenoh\_cpp} 与域 42。router 终端用 \texttt{ZENOH\_ROUTER\_CONFIG\_URI} 加载完整 router 文件，监听 \nolinkurl{tcp/127.0.0.1:7447}；talker 和 listener 终端用 \texttt{ZENOH\_SESSION\_CONFIG\_URI} 加载完整 session 文件，设置 client 模式并连接同一端点。两类变量都用绝对文件路径，不加 \texttt{file://}。先启动 router，再启动两个节点，以 listener 持续收包作为完成依据。
+
+\texttt{listen.endpoints} 指定当前进程接受连接的位置，\texttt{connect.endpoints} 指定主动连接的目标。远端机器上的 \texttt{127.0.0.1} 指向远端自己，跨机器时应换成 router 主机可达的真实地址，router 也要监听相应地址。默认 peer 配置可以在发现后直连；本题的 client 配置让 router 转发应用数据。结束时分别按 Ctrl+C 停止两个节点与本次 router，在各终端按正文清除临时 RMW、域、DDS/Zenoh 配置变量和覆盖项，再停止 daemon；实验前已有自定义值则恢复原值。只结束 router 或只 unset 变量，都不会把仍运行的节点切回 DDS。
+\end{solution}
+
+\Needspace{7\baselineskip}
 \paragraph*{随堂练习 \ref{ex:v2-ros-rmw-choice}}
 \begin{solution}
 在加载 Humble 与 image\_path\_demo 的工作空间里，先停旧节点与额外订阅者，再运行：
 \begin{tbash}
 python3 src/image_path_demo/compare.py --output /tmp/rmw-small-answer
 \end{tbash}
-再执行正文的 Zenoh 小输入命令。从对应 results.json 选三个 separate 行，记录 send\_hz、delivery\_ratio 与 p95\_ms。默认相同条件为 64×48 BGR8、25 Hz、100 帧、best\_effort、深度 5、两个单线程容器、相同域与本机范围、没有模拟工作及外部订阅者；只改变 RMW 及其必需的发现基础设施。Zenoh 默认使用路由器协助发现，同机 peer 可直接交换数据；不能认定所有像素都经由路由器转发。自动记录器管理自己的路由器，手动实验则先正常关闭节点再关闭自己的路由器。Zenoh 的路由器也计入资源；既有 DDS XML 不能当作 Zenoh 配置。结论仅覆盖这轮输入。实际选型还要重复、改变顺序，并补测大图像、相机 SDK、转换与算法耗时、录制/显示支路、需要的网络及故障恢复。某一项获胜不能代替这些验证。
+再执行正文的 Zenoh 小图像命令。从 results.json 选出三种实现的 separate 行，记录 send\_hz、delivery\_ratio 与 p95\_ms。相同条件为 64×48 BGR8、25 Hz、100 帧、best\_effort、深度 5、两个单线程容器、相同域和本机端点，无模拟工作及额外订阅者。Zenoh 的 router 协助发现，同机 peer 可以直接交换数据，router 的资源也计入统计。自动记录器负责关闭本轮 router，手动实验则先关闭节点再关闭 router。实际选型时，继续用大图像重复测量，并加入相机 SDK、转换、算法、观测支路和所需网络，检查负载与故障恢复。
 \end{solution}
 
 \paragraph*{随堂练习 \ref{ex:v2-ros-components}}
 \begin{solution}
-三轮分别使用 mode:=intra、same、separate，SOURCE\_DONE 后正常 Ctrl+C 保存统计；另一终端用 ros2 component list 记录容器。intra 与 same 都有一个进程，separate 的两个组件在两个进程。intra 的两端选项和 UniquePtr 接口建立所有权交接路径，同一帧数据地址应相同；same 可能分配器复用刚释放的地址，不能仅凭数值相同判定；跨进程虚拟地址没有这种比较意义。没有外部订阅者的一对一条件也要保留。同一 Distrobox 只说明运行环境相同，两个独立进程不满足 rclcpp 进程内通信条件；组件布局与系统容器是不同维度。
-
-用 df -h /dev/shm 记录实际共享内存挂载与容量，从部署配置核对网络、IPC 模式和共享路径。NVIDIA 环境可查设备文件及 nvidia-smi；设备可见仅证明环境集成，不证明 CPU/GPU 图像传输或推理零拷贝。本例没有验证 SDK/DMA、颜色转换、GPU 输入/输出和真实识别的边界；非 NVIDIA 平台按实际设备检查。
+三轮分别使用 mode:=intra、same、separate，在 SOURCE\_DONE 后按 Ctrl+C 保存统计，另一终端用 ros2 component list 查看容器。intra 与 same 都有一个进程，separate 有两个进程。intra 的两端选项和一对一 UniquePtr 接口建立所有权交接路径，同一帧的像素地址应相同。same 中分配器可能复用已释放的地址，不同进程则各有自己的虚拟地址空间，所以要把地址记录与配置、所有权路径一起读。
 \end{solution}
 
 \paragraph*{随堂练习 \ref{ex:v2-ros-loans}}
 \begin{solution}
-按第\ref{sec:ros2-loaned-messages}节四条命令保存版本、配置与原始 LOAN 输出。本章所测 Humble 下，默认 Fast DDS 为 0/0；启用显式 Data Sharing 后为 1/0，此轮 Float64 真正向中间件借出；Cyclone DDS 和显式禁用轮为 0/0；追加的 Zenoh 0.1.9 在共享内存关闭/开启时也均为 0/0，发布调用使用本地分配回退。Zenoh 的传输优化不能代替借出接口证据。Image 的动态字符串与像素数组不满足这里的 plain 固定布局条件。API 在不能借出时使用本地分配器，所以运行成功仍可能是回退。记录只验证发布端能力与发布调用，还缺接收端借出、共享样本交付、消息布局和样本有效期等证据。发布后借出对象的控制权已交出，不能继续读写 loan.get()；没有发布也要按接口管理和归还。若版本导致输出不同，应保留真实结果并查实现，不能写死。
+按 Image、FixedImage 的顺序，默认配置均为 0/0，Fast DDS 启用 Data Sharing、Cyclone DDS 启用 iceoryx 后均为 0/1，显式禁用借出时回到 0/0。FixedImage 的像素内嵌在定长数组中，满足类型条件后可由相应配置提供借出支持。Image 含动态字符串与像素数组，不能直接借出原始样本，但本地分配器回退让它也能完成填充和发布。Zenoh 开关共享内存时均为 0/0，传输共享内存与应用借出能力对应不同环节。
+
+FixedImage 用内嵌数组约定 1440×1080 BGR8，更改尺寸要重新生成接口，接入标准 Image 工具需要补元数据并复制像素。发布后停止访问借出对象，回调返回后停止使用借读引用或像素视图。未发布对象由 \texttt{LoanedMessage} 管理归还，接收样本由执行器在回调结束后归还。
+\end{solution}
+
+\paragraph*{随堂练习 \ref{ex:v2-ros-fixed-image}}
+\begin{solution}
+三种 RMW 都比较标准 Image 与 FixedImage，保持 1440×1080 BGR8、250 Hz、KeepLast(5)、best\_effort、1000 帧和两秒排空相同。默认配置都使用普通发布，共享配置分别使用 Data Sharing、iceoryx 与 Zenoh SHM。只为两端支持借出的定长类型追加借出发布，记录实际能力与日志。
+
+变长 Image 使用序列化传输。Cyclone DDS iceoryx 和 Zenoh SHM 可以将序列化数据放进共享内存，Fast DDS 的 SHM transport 共享传输缓冲区。FixedImage 满足类型布局条件后，仍要检查中间件与配置是否提供借出；Zenoh 的定长类型在本章实现中也不能借出。比较时把发送频率、接收比例和 P95 放在一起，再判断是否需要调整布局、资源或处理阶段。
 \end{solution}
 
 \paragraph*{随堂练习 \ref{ex:v2-ros-image-slow}}
 \begin{solution}
-在同一环境中重复正文慢处理命令，分别用 depth 5 与 100，两个全新的输出目录，其他条件相同：250 Hz、500 帧、小图像、separate、Fast DDS、8 ms 模拟工作、默认两秒排空。记录 send\_hz、delivery\_ratio、p95\_ms 与排空设置；加深历史可能提高有限窗口的接收比例，也可能增加旧图像等待，具体数值以实测为准。该串行阶段长期能力仍不超过理想 125 Hz。若改排空时间，必须明确记录，不能比较不同口径而不说明。
+分别用 depth 5 与 100 运行慢处理命令，使用两个新输出目录，其余条件相同：250 Hz、500 帧、小图像、separate、Fast DDS、8 ms 模拟工作、两秒排空。记录 send\_hz、delivery\_ratio、p95\_ms 与排空设置。加深队列可以在有限实验中留下更多帧，也会增加等待时间，持续处理能力仍受理想 125 Hz 的上限约束。
 
-一种可行方案是相机、必要预处理与识别组成同一组件进程，启用进程内通信并明确唯一所有权；控制与监控按故障隔离需求独立部署。显示支路由专门组件缩小并降频后发出，记录节点按带宽/存储预算部署。主链路使用较小历史并按实时需求选择交付策略；RMW 用重复实测选，不把某个品牌固定视为更快。算法阶段超预算时，减负、降采样或验证并行处理，不能只加深队列。
+一种可行方案是把相机、必要预处理与识别组成同一组件进程，启用进程内通信并交接唯一所有权，将控制与监控按故障隔离需求独立部署。显示支路先缩小图像并降频，录制节点按带宽和存储预算部署。主链路采用较小历史和适合实时需求的交付策略，RMW 根据重复测量选择。算法阶段超预算时，可以减负、降采样或安排并行处理。
 \end{solution}
 
 \subsubsection*{章末习题}
@@ -225,7 +318,7 @@ python3 src/image_path_demo/compare.py --output /tmp/rmw-small-answer
 
 \paragraph*{第一章章末第 \ref{prob:v2-ros-8} 题}
 \begin{solution}
-完整话题名为 \texttt{/blue/health}。检查 launch/config 的安装规则、构建结果、环境加载顺序及 \texttt{ros2 pkg prefix training\_tools} 返回路径；再检查 get\_package\_share\_directory 拼出的文件名。源目录存在文件不代表安装目录已有文件。YAML 节点键还需匹配实际节点名，或使用本例的通配键。
+完整话题名为 \nolinkurl{/blue/health}。检查 launch/config 的安装规则、构建结果、环境加载顺序及 \texttt{ros2 pkg prefix training\_tools} 返回路径；再检查 get\_package\_share\_directory 拼出的文件名。源目录存在文件不代表安装目录已有文件。YAML 节点键还需匹配实际节点名，或使用本例的通配键。
 \end{solution}
 
 \paragraph*{第一章章末第 \ref{prob:v2-ros-9} 题}
@@ -259,12 +352,24 @@ BGR8 为 1166.4 MB/s，即 9.3312 Gbit/s 的纯像素。每新增一次完整复
 
 \paragraph*{第一章章末第 \ref{prob:v2-ros-13} 题}
 \begin{solution}
-Float64 返回 true 表示这个发布者在当前类型与配置下支持中间件借出；发布调用成功不证明接收端借出。Image false 表示当前不能走相同借出路径，API 成功可能来自本地分配回退。完整跨进程图像零拷贝还需合适类型支持、共享样本交付、两端借出、内存池与样本生命周期、实际路径验证；SHM 可用或收到一个值都不足以替代这些证据。
+FixedImage 返回 true 表示当前发布者可以借出中间件样本，程序直接填充它的内嵌像素数组。Image 包含变长字段，能力返回 false，借出包装器使用本地分配器创建对象。loan\_probe 对两类图像都查询能力、填充和发布，因此程序运行成功也能展示分配器回退的作用。
+
+证明跨进程图像共享样本，需要定长且满足布局条件的接口、支持的共享配置与两端借出能力。再确认内存池容量、发布与回调内的使用期限，并验证实际共享位置或传递路径。
 \end{solution}
 
 \paragraph*{第一章章末第 \ref{prob:v2-ros-14} 题}
 \begin{solution}
 P95 只计算已收到的样本，40\% 接收比例可能把大量帧丢掉后才显得延迟低；99\% 的结果虽然延迟更大，却交付了更多帧。先按实时性与完整性需求给阈值，再一起评估。下一轮固定尺寸、格式、QoS、进程布局、订阅者、版本与网络，多次重复并调整顺序，记录实际采集/发送/接收/处理频率、接收比例、采样至回调及识别完成的延迟分位数，另记 CPU、内存与异常。实车跨时钟计时先解决同步，合成结果不代替物理相机验证。
+\end{solution}
+
+\paragraph*{第一章章末第 \ref{prob:v2-ros-15} 题}
+\begin{solution}
+Marker 先检查显示类型与话题、QoS、Fixed Frame 到 frame\_id 的 TF 与时间，再检查非零尺寸、color.a、有效四元数、ns/id 和 lifetime。图像同步先核对 image.header.stamp、标注顶层/元素 timestamp，以及所有已勾选的标注话题是否持续发布同一帧。MarkerArray 是一批更新指令，省略某对象不是删除指令，需要同 ns/id 的 DELETE 或明确设置寿命。
+\end{solution}
+
+\paragraph*{第一章章末第 \ref{prob:v2-ros-16} 题}
+\begin{solution}
+完整路径为 \nolinkurl{/viz/pose.pose.orientation.@rpy.yaw.@degrees} 和 \nolinkurl{/viz/twist.twist.linear.@norm}。前者单位为度，后者按本例约定为 m/s。时间曲线的两轴差值分别是秒和纵轴数值的单位；XY 的 x/y 都是米时，直线距离 $\sqrt{\Delta x^2+\Delta y^2}$ 才同样为米。
 \end{solution}
 
 \section*{第二章：多机通信方法}

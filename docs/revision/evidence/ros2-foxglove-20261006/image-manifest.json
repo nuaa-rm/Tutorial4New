@@ -1,0 +1,62 @@
+[
+  {
+    "book_image": "02-专项技术栈/images/ros2_foxglove_enum_revised.jpg",
+    "actual_screenshot": "enum-tracking.jpg",
+    "size_px": [
+      660,
+      115
+    ],
+    "sha256": "46a04110db440d243032ebd1247329544ee380762f5ac3faa3e6642d0b23bf9a",
+    "source_and_book_bytes_identical": true,
+    "pixel_edits": false,
+    "reviewed_in_pdf": true
+  },
+  {
+    "book_image": "02-专项技术栈/images/ros2_foxglove_plot_measure_revised.jpg",
+    "actual_screenshot": "plot-measure-panel.jpg",
+    "size_px": [
+      661,
+      487
+    ],
+    "sha256": "740cc329f10431dd7a001159c826886b981dd31d1fc08b8e36d683db765f060e",
+    "source_and_book_bytes_identical": true,
+    "pixel_edits": false,
+    "reviewed_in_pdf": true
+  },
+  {
+    "book_image": "02-专项技术栈/images/ros2_foxglove_xy_measure_revised.jpg",
+    "actual_screenshot": "xy-measure-panel.jpg",
+    "size_px": [
+      661,
+      487
+    ],
+    "sha256": "5ce437221bfca48f615789db0a04f22ba3f9b9813c6729ea3bcc96fb6cdd8fe6",
+    "source_and_book_bytes_identical": true,
+    "pixel_edits": false,
+    "reviewed_in_pdf": true
+  },
+  {
+    "book_image": "02-专项技术栈/images/ros2_foxglove_image_sync_revised.jpg",
+    "actual_screenshot": "image-sync-detail.jpg",
+    "size_px": [
+      1321,
+      520
+    ],
+    "sha256": "873510b075166d52b2dddb21a029862660a26b49e35e38bd8bc0914bdd5b7fd9",
+    "source_and_book_bytes_identical": true,
+    "pixel_edits": false,
+    "reviewed_in_pdf": true
+  },
+  {
+    "book_image": "02-专项技术栈/images/ros2_foxglove_replay_revised.jpg",
+    "actual_screenshot": "overview-playback.jpg",
+    "size_px": [
+      1321,
+      1048
+    ],
+    "sha256": "b03626f54365efec584634317ad4c13d6b60774bd96cf6d1b3333b74318cbdbb",
+    "source_and_book_bytes_identical": true,
+    "pixel_edits": false,
+    "reviewed_in_pdf": true
+  }
+]

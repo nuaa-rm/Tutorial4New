@@ -1,0 +1,27 @@
+{
+  "foxglovePanelTitle": "正弦、位置与速度模长",
+  "paths": [
+    {
+      "timestampMethod": "receiveTime",
+      "value": "/viz/signal.data",
+      "enabled": true,
+      "color": "#4e98e2",
+      "id": "9534c602-0bbc-44df-8133-e23602a9eb0e"
+    },
+    {
+      "timestampMethod": "headerStamp",
+      "value": "/viz/pose.pose.position.x",
+      "enabled": true,
+      "color": "#f5774d",
+      "id": "9c699550-a7ed-4731-81d7-9617f6f4d3bf"
+    },
+    {
+      "timestampMethod": "headerStamp",
+      "value": "/viz/twist.twist.linear.@norm",
+      "enabled": true,
+      "color": "#f7df71",
+      "id": "05f05092-ff6a-4969-b2bf-fe4b7563e8d2"
+    }
+  ],
+  "showLegend": true
+}

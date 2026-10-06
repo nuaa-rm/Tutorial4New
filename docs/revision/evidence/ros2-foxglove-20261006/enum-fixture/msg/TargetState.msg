@@ -1,0 +1,2 @@
+viz_interfaces/Mode mode_foxglove_enum
+uint8 mode

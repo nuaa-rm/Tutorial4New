@@ -1,0 +1,42 @@
+{
+  "pdf_pages": 301,
+  "viewed_physical_pages": [
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    274,
+    275
+  ],
+  "unchanged_final_pages_compared_to_viewed": [
+    26,
+    30,
+    31,
+    32,
+    33
+  ],
+  "auxiliary_files_stable": true,
+  "shell_blocks_syntax_checked": 15,
+  "source_structure": {
+    "included_files": 32,
+    "labels": 334,
+    "referenced_labels": 280,
+    "exercises": 20,
+    "chapter_problems": 14
+  },
+  "runtime_cases_passed": 6,
+  "pdf_sha256": "33eb5f55d36b0c7298120498fc211de44f6e1dedc58385e8404498ac2ba34777",
+  "compiler_limitations": [
+    "模板原有 Fandol 字形替代提示；未新增文献调用"
+  ],
+  "not_verified": [
+    "全新 apt 安装",
+    "Zenoh 源码构建",
+    "第二台主机收发",
+    "既有章节的物理相机等验收"
+  ]
+}

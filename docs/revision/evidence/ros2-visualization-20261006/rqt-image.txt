@@ -1,0 +1,2 @@
+[INFO] [1791267515.271996063] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+The X11 connection broke (error 1). Did the X11 server die?

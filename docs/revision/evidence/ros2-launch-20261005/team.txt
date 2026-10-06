@@ -1,0 +1,18 @@
+[INFO] [launch]: All log files can be found below /tmp/tutorial4new-launch-20261005-runtime/ros-logs/2026-10-05-17-37-44-881085-mijiao-arch-122733
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [launch.user]: Observing /red/health
+[INFO] [heartbeat-1]: process started with pid [122782]
+[INFO] [ros2-2]: process started with pid [122784]
+[heartbeat-1] [0m[INFO] [1791193065.115064306] [red.heartbeat]: first heartbeat[0m
+[heartbeat-1] [0m[INFO] [1791193065.115160552] [red.heartbeat]: heartbeat alive[0m
+[ros2-2] data: team ready
+[ros2-2] ---
+[INFO] [ros2-2]: process has finished cleanly [pid 122784]
+[INFO] [launch.user]: Observer exited; heartbeat keeps running.
+[heartbeat-1] [0m[INFO] [1791193067.115192832] [red.heartbeat]: heartbeat alive[0m
+[heartbeat-1] [0m[INFO] [1791193069.315159593] [red.heartbeat]: heartbeat alive[0m
+[WARNING] [launch]: user interrupted with ctrl-c (SIGINT)
+[INFO] [heartbeat-1]: sending signal 'SIGINT' to process[heartbeat-1]
+[heartbeat-1] [0m[INFO] [1791193069.442992013] [rclcpp]: signal_handler(SIGINT/SIGTERM)[0m
+[heartbeat-1] [0m[INFO] [1791193069.443932270] [rclcpp]: signal_handler(SIGINT/SIGTERM)[0m
+[INFO] [heartbeat-1]: process has finished cleanly [pid 122782]

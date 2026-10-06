@@ -1,0 +1,28 @@
+{
+  "before": [
+    "fastrtps_bcf5aecdca94e36c",
+    "fastrtps_bcf5aecdca94e36c_el",
+    "fastrtps_port29165",
+    "fastrtps_port29165_el",
+    "libpod_rootless_lock_1000",
+    "sem.fastrtps_port29165_mutex"
+  ],
+  "after": [
+    "fastrtps_bcf5aecdca94e36c",
+    "fastrtps_bcf5aecdca94e36c_el",
+    "fastrtps_port29165",
+    "fastrtps_port29165_el",
+    "libpod_rootless_lock_1000",
+    "sem.fastrtps_port29165_mutex"
+  ],
+  "added": [],
+  "removed": [],
+  "owned_zenoh_control_marker_removed": {
+    "name": "2940201145.zenoh",
+    "size": 32,
+    "rootless_owner": 1,
+    "visible_open_or_mapped_pids": []
+  },
+  "container_restored": "exited 143",
+  "no_existing_shared_objects_deleted": true
+}

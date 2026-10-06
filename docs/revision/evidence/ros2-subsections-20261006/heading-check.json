@@ -1,0 +1,167 @@
+{
+  "total_before": 22,
+  "total_after": 52,
+  "example_count_before": 41,
+  "example_count_after": 46,
+  "crossref_adjustments": 11,
+  "environment_and_heading_nesting": "passed",
+  "files": [
+    {
+      "file": "A_ros2.tex",
+      "before": 4,
+      "after": 10,
+      "content_preserved_except_heading_example_boundaries_and_crossrefs": true,
+      "code_preserved_except_two_directory_comments": true,
+      "listing_sources_preserved": true,
+      "exercise_blocks_preserved_except_crossrefs": true,
+      "headings": [
+        "从代码到机器人控制",
+        "安装 Humble 并验证节点通信",
+        "系统分层、节点与组件",
+        "创建工作空间与第一个功能包",
+        "用 rclcpp 编写发布者与订阅者",
+        "QoS：话题同名，为什么还收不到消息",
+        "用定时器周期发布消息",
+        "定义、生成与使用自定义消息",
+        "常用消息类型与接口查询",
+        "服务调用与后续工具"
+      ]
+    },
+    {
+      "file": "A_ros2_engineering.tex",
+      "before": 5,
+      "after": 14,
+      "content_preserved_except_heading_example_boundaries_and_crossrefs": true,
+      "code_preserved_except_two_directory_comments": true,
+      "listing_sources_preserved": true,
+      "exercise_blocks_preserved_except_crossrefs": true,
+      "headings": [
+        "先检查环境，再检查代码",
+        "通信域与发现范围：只与自己的节点通信",
+        "ament、colcon 与可复现的小工程",
+        "自动依赖、库导出与构建测试",
+        "Launch 入门：用一个文件启动节点",
+        "Launch 配置：名字、YAML 与命令行参数",
+        "Launch 组合：引入子文件与条件启动",
+        "Launch 分组：命名空间与多实例启动",
+        "Launch 事件：进程状态与模块就绪",
+        "Launch 运行时检查：用 OpaqueFunction 取参数",
+        "日志：看见故障，也控制输出量",
+        "CLion：让编辑、构建和运行使用同一套环境",
+        "CLion：用编译数据库浏览多包工程",
+        "CLion：排查库头文件的解析参数"
+      ]
+    },
+    {
+      "file": "A_ros2_image_path.tex",
+      "before": 5,
+      "after": 10,
+      "content_preserved_except_heading_example_boundaries_and_crossrefs": true,
+      "code_preserved_except_two_directory_comments": true,
+      "listing_sources_preserved": true,
+      "exercise_blocks_preserved_except_crossrefs": true,
+      "headings": [
+        "先给 1440\\texorpdfstring{$\\times$}{×}1080@250 Hz 算笔账",
+        "RMW 与 DDS：安装、切换与收发验证",
+        "DDS 网卡配置：比较两份 XML 的写法",
+        "Zenoh 入门：安装、发现与路由器启动",
+        "Zenoh 配置：会话、路由器与跨机连接",
+        "固定输入与指标，安排中间件对照",
+        "零拷贝与组件容器：先管好图像的所有权",
+        "组件部署：切换进程布局并验证所有权",
+        "借出消息：向中间件借一块内存",
+        "250 Hz 对照：借出能力与进程布局"
+      ]
+    },
+    {
+      "file": "A_ros2_image_results.tex",
+      "before": 0,
+      "after": 3,
+      "content_preserved_except_heading_example_boundaries_and_crossrefs": true,
+      "code_preserved_except_two_directory_comments": true,
+      "listing_sources_preserved": true,
+      "exercise_blocks_preserved_except_crossrefs": true,
+      "headings": [
+        "250 Hz 对照：图像类型、共享方式与借出",
+        "慢处理对照：队列深度与图像年龄",
+        "从实验结果选择图像链路方案"
+      ]
+    },
+    {
+      "file": "A_ros2_project.tex",
+      "before": 1,
+      "after": 4,
+      "content_preserved_except_heading_example_boundaries_and_crossrefs": true,
+      "code_preserved_except_two_directory_comments": true,
+      "listing_sources_preserved": true,
+      "exercise_blocks_preserved_except_crossrefs": true,
+      "headings": [
+        "完整工程：组织文件并生成消息接口",
+        "完整工程：实现节点并声明构建依赖",
+        "完整工程：编译并验证话题收发",
+        "用 rqt 发布输入与监视回复"
+      ]
+    },
+    {
+      "file": "A_ros2_review.tex",
+      "before": 0,
+      "after": 0,
+      "content_preserved_except_heading_example_boundaries_and_crossrefs": true,
+      "code_preserved_except_two_directory_comments": true,
+      "listing_sources_preserved": true,
+      "exercise_blocks_preserved_except_crossrefs": true,
+      "headings": []
+    },
+    {
+      "file": "A_ros2_visualization.tex",
+      "before": 7,
+      "after": 11,
+      "content_preserved_except_heading_example_boundaries_and_crossrefs": true,
+      "code_preserved_except_two_directory_comments": true,
+      "listing_sources_preserved": true,
+      "exercise_blocks_preserved_except_crossrefs": true,
+      "headings": [
+        "把消息画出来：先准备一组能对照的数据",
+        "rqt：连线、曲线与图像都看一遍",
+        "RViz2：让坐标系、轨迹和图形各就各位",
+        "Marker：绘制、更新与删除三维图形",
+        "Foxglove：安装、连接与保存自己的观察布局",
+        "Foxglove：给数字状态标注名称",
+        "Foxglove Plot：字段路径与数值换算",
+        "Foxglove Plot：时间对齐与两点测量",
+        "Foxglove 的 Image：把检测框与原图对上",
+        "Foxglove 3D：场景实体与空间测量",
+        "MCAP 录制与回放：把一次观察留下来"
+      ]
+    }
+  ],
+  "inline_formatting_adjustments": {
+    "A_ros2.tex": [
+      {
+        "old": "例如 \\texttt{std\\_msgs/Header}。",
+        "new": "例如 \\path{std_msgs/Header}。"
+      }
+    ],
+    "A_ros2_engineering.tex": [
+      {
+        "old": "每个包都需要 \\verb|find_package|，然后\\verb|target_link_libraries|",
+        "new": "每个包都需要 \\nolinkurl{find_package}，然后\\nolinkurl{target_link_libraries}"
+      },
+      {
+        "old": "话题也要分开。\\texttt{GroupAction}",
+        "new": "话题也要分开。\\nolinkurl{GroupAction}"
+      },
+      {
+        "old": "\\texttt{target\\_action=observer} 指向",
+        "new": "\\nolinkurl{target_action=observer} 指向"
+      }
+    ]
+  },
+  "post_layout_body_preservation": "passed",
+  "body_sections_before": 3,
+  "body_sections_after": 11,
+  "section_regrouping_content_preservation": "passed",
+  "printed_toc_depth_changed": false,
+  "heading_pagination_adjustments": "Ten heading boundaries reserve space: two sections at 18 baselines, project implementation at 35, component deployment at 8, and six other subsections at 18. Source content and code remain unchanged.",
+  "post_pagination_content_preservation": "passed"
+}

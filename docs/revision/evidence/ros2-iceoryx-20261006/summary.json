@@ -1,0 +1,57 @@
+[
+  {
+    "case": "dynamic-default",
+    "repeats": 3,
+    "send_hz": 250.002,
+    "receive_hz": 249.132,
+    "delivery_ratio": 0.994,
+    "p95_ms": 3.73548,
+    "p99_ms": 4.61075,
+    "bad_frames": 0,
+    "same_shared_pairs": 0
+  },
+  {
+    "case": "dynamic-shm",
+    "repeats": 3,
+    "send_hz": 250.036,
+    "receive_hz": 250.213,
+    "delivery_ratio": 1.0,
+    "p95_ms": 1.66789,
+    "p99_ms": 2.24206,
+    "bad_frames": 0,
+    "same_shared_pairs": 0
+  },
+  {
+    "case": "fixed-default",
+    "repeats": 3,
+    "send_hz": 250.008,
+    "receive_hz": 249.646,
+    "delivery_ratio": 0.998,
+    "p95_ms": 3.29219,
+    "p99_ms": 3.93773,
+    "bad_frames": 0,
+    "same_shared_pairs": 0
+  },
+  {
+    "case": "fixed-shm-regular",
+    "repeats": 3,
+    "send_hz": 250.027,
+    "receive_hz": 250.059,
+    "delivery_ratio": 1.0,
+    "p95_ms": 0.505223,
+    "p99_ms": 0.670094,
+    "bad_frames": 0,
+    "same_shared_pairs": 0
+  },
+  {
+    "case": "fixed-shm-loan",
+    "repeats": 3,
+    "send_hz": 250.061,
+    "receive_hz": 250.051,
+    "delivery_ratio": 1.0,
+    "p95_ms": 0.333598,
+    "p99_ms": 0.375558,
+    "bad_frames": 0,
+    "same_shared_pairs": 9
+  }
+]

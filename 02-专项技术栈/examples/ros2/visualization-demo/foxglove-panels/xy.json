@@ -1,0 +1,17 @@
+{
+  "foxglovePanelTitle": "XY 圆轨迹（米）",
+  "paths": [
+    {
+      "timestampMethod": "headerStamp",
+      "value": "/viz/pose.pose.position.y",
+      "enabled": true,
+      "color": "#4e98e2",
+      "id": "9534c602-0bbc-44df-8133-e23602a9eb0e",
+      "xValuePath": "/viz/pose.pose.position.x"
+    }
+  ],
+  "showLegend": true,
+  "timeRange": "all",
+  "xAxisVal": "custom",
+  "axisScalesMode": "lockedScales"
+}

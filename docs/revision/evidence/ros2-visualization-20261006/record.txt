@@ -1,0 +1,17 @@
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1791268124.603118746] [rosbag2_recorder]: Press SPACE for pausing/resuming
+[INFO] [1791268124.605262713] [rosbag2_recorder]: Listening for topics...
+[INFO] [1791268124.605269568] [rosbag2_recorder]: Event publisher thread: Starting
+[INFO] [1791268124.607301542] [rosbag2_recorder]: Subscribed to topic '/viz/twist'
+[INFO] [1791268124.609218812] [rosbag2_recorder]: Subscribed to topic '/viz/signal'
+[INFO] [1791268124.613067438] [rosbag2_recorder]: Subscribed to topic '/viz/scene'
+[INFO] [1791268124.613420892] [rosbag2_recorder]: Subscribed to topic '/viz/pose'
+[INFO] [1791268124.613943851] [rosbag2_recorder]: Subscribed to topic '/viz/path'
+[INFO] [1791268124.614869288] [rosbag2_recorder]: Subscribed to topic '/viz/markers'
+[INFO] [1791268124.615330597] [rosbag2_recorder]: Subscribed to topic '/viz/image'
+[INFO] [1791268124.615901205] [rosbag2_recorder]: Subscribed to topic '/viz/annotations'
+[INFO] [1791268124.616568135] [rosbag2_recorder]: Subscribed to topic '/tf'
+[INFO] [1791268124.616620616] [rosbag2_recorder]: Recording...
+[INFO] [1791268124.616923290] [rosbag2_recorder]: All requested topics are subscribed. Stopping discovery...
+[INFO] [1791268136.676506962] [rosbag2_cpp]: Writing remaining messages from cache to the bag. It may take a while
+[INFO] [1791268136.677589487] [rosbag2_recorder]: Event publisher thread: Exiting
+[INFO] [1791268136.677629175] [rosbag2_recorder]: Recording stopped

@@ -1,0 +1,14 @@
+{
+  "environment": {"os": "Ubuntu 22.04.5", "ros": "Humble", "viewer": "Foxglove web", "check_date": "2026-10-06"},
+  "connection": {"url": "ws://127.0.0.1:8765", "status": "passed", "synthetic_data": true},
+  "header_stamp": {"yaw_series": "headerStamp", "pose_x": "headerStamp", "twist_norm": "headerStamp", "signal": "receiveTime", "ui_evidence": "header-stamp-ui.txt"},
+  "plot_inspection": {"delta_x_s": 3.899794, "delta_y": 1.760310, "point_1": [5.051888, 0.998573], "point_2": [8.951682, -0.761737], "evidence": "plot-measure.jpg"},
+  "xy_inspection": {"distance_m": 1.999565, "delta_x_m": 1.999553, "delta_y_m": 0.007035, "point_1": [0.999850, 0.017331], "point_2": [-0.999703, 0.024366], "axis_scales": "1:1", "evidence": "xy-measure.jpg"},
+  "foxql": {"status": "passed", "tested_paths": "foxql-check-config.json", "actual_values": "foxql-values.txt", "velocity_norm": 1.0, "sample_delta_s": 0.10004694900000022, "derivative": -0.45659673397287487},
+  "image_annotations": {"status": "passed", "synchronize": true, "offset_test_ns": 50000000, "shifted_messages_observed_at_least": 2550, "offset_ui": "等待同步消息", "restored": true, "evidence": ["image-offset-50ms.jpg", "image-restored.jpg"]},
+  "enum": {"build": "passed", "message": "viz_interfaces/msg/TargetState", "value": 1, "viewer_label": "TRACKING", "evidence": "enum-tracking.txt"},
+  "3d": {"ros_markers_pose_path": "displayed", "scene_entity": "displayed", "ground_measure": "passed", "alt_surface_snap": "not tested", "evidence": ["3d-ground-measure.jpg", "3d-ground-measure-playback.jpg", "overview-playback.jpg"]},
+  "playback": {"format": "MCAP", "source": "remote-file via localhost HTTP Range server", "synthetic_ros_recording": true, "play_pause_seek": "passed", "local_file_chooser": "not completed"},
+  "layout": {"name": "Tutorial4New ROS2 图形化观测", "save_reload_restore": "passed", "panel_json_import_apply": "passed", "complete_layout_file_download": "not completed"},
+  "not_tested": ["fresh Linux desktop installation", "CSV file download", "3D Alt surface snapping", "real camera", "second physical computer"]
+}

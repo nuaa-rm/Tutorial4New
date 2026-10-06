@@ -1,0 +1,28 @@
+{
+  "stats": {
+    "receive": {
+      "role": "receive",
+      "count": 20,
+      "hz": 10.0037,
+      "p50_ms": 0.11689,
+      "p95_ms": 0.239644,
+      "p99_ms": 0.239644,
+      "bad_frames": 0
+    },
+    "send": {
+      "role": "send",
+      "count": 20,
+      "hz": 10.0033,
+      "p50_ms": 0,
+      "p95_ms": 0,
+      "p99_ms": 0,
+      "bad_frames": 0
+    }
+  },
+  "disable_loan_returncode": 2,
+  "returncodes": {
+    "receive": 0,
+    "send": 0
+  },
+  "roudi_returncode": 0
+}

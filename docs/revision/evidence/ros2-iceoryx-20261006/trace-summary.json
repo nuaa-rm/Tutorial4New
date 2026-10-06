@@ -1,0 +1,990 @@
+[
+  {
+    "case": "trace-dynamic-shm",
+    "published_chunks": 20,
+    "taken_chunks": 20,
+    "matched_shared_chunks": 20,
+    "data_states": [
+      2
+    ],
+    "payload_sizes": [
+      4665696
+    ],
+    "pairs": [
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413059,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "6fd412c53d93d850",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413057,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "6fd412c53d93d850",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413059,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "49dad59b8ba308cb",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413057,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "49dad59b8ba308cb",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413059,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "8a8ee7779e634294",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413057,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "8a8ee7779e634294",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413059,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "706c3c6b52946e1a",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413057,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "706c3c6b52946e1a",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413059,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "58f89199da977c81",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413057,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "58f89199da977c81",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413059,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "5a5c2e1bb1b0c2d6",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413057,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "5a5c2e1bb1b0c2d6",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413059,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "df83ceb070c001a6",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413057,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "df83ceb070c001a6",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413059,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "9f58e7a65ac302e5",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413057,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "9f58e7a65ac302e5",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413059,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "0af638f744684097",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413057,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "0af638f744684097",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413059,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "596c92cbe8becca6",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413057,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "596c92cbe8becca6",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413059,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "77b4aa334e7ed436",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413057,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "77b4aa334e7ed436",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413059,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "06f64c45e3723da3",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413057,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "06f64c45e3723da3",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413059,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "74b0cc4fe40afc51",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413057,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "74b0cc4fe40afc51",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413059,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "65091d16f45d36b8",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413057,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "65091d16f45d36b8",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413059,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "cd95f6014a3eedcc",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413057,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "cd95f6014a3eedcc",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413059,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "38b31417f3a78a5f",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413057,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "38b31417f3a78a5f",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413059,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "2432606bdc0e7f29",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413057,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "2432606bdc0e7f29",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413059,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "9f613605406819bc",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413057,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "9f613605406819bc",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413059,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "b9c585168609bcf5",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413057,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "b9c585168609bcf5",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413059,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "ca06e8a73b175ed7",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413057,
+          "state": 2,
+          "bytes": 4665696,
+          "hash": "ca06e8a73b175ed7",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      }
+    ]
+  },
+  {
+    "case": "trace-fixed-shm-loan",
+    "published_chunks": 20,
+    "taken_chunks": 20,
+    "matched_shared_chunks": 20,
+    "data_states": [
+      1
+    ],
+    "payload_sizes": [
+      4665616
+    ],
+    "pairs": [
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413163,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "dd6272ccfd600ef7",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413162,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "dd6272ccfd600ef7",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413163,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "f627cf55a2c20a0f",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413162,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "f627cf55a2c20a0f",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413163,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "42a36ddb9ed01567",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413162,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "42a36ddb9ed01567",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413163,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "6d21234eb6265ea2",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413162,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "6d21234eb6265ea2",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413163,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "8203050c2bb1db7a",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413162,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "8203050c2bb1db7a",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413163,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "0fac2d9c074837a5",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413162,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "0fac2d9c074837a5",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413163,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "dee6efd3d50d4ad3",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413162,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "dee6efd3d50d4ad3",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413163,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "6d86072b2def1bd4",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413162,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "6d86072b2def1bd4",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413163,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "a56f467969cae5eb",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413162,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "a56f467969cae5eb",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413163,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "0159873a8c26d156",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413162,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "0159873a8c26d156",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413163,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "5b55bd337107908a",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413162,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "5b55bd337107908a",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413163,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "df2a6bbb0380c254",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413162,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "df2a6bbb0380c254",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413163,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "518de6236f74b65c",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413162,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "518de6236f74b65c",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413163,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "5bcb9e3c7d90876e",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413162,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "5bcb9e3c7d90876e",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413163,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "439a8c5d80d117dd",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413162,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "439a8c5d80d117dd",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413163,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "78218cb17fa7e0f9",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413162,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "78218cb17fa7e0f9",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413163,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "5cab878680400643",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413162,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "5cab878680400643",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413163,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "4427901a47078c7d",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413162,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "4427901a47078c7d",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413163,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "965a6c7c3b7c3d4c",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413162,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "965a6c7c3b7c3d4c",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      },
+      {
+        "publish": {
+          "event": "publish",
+          "pid": 413163,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "f034f1bcaf7cc9da",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        },
+        "take": {
+          "event": "take",
+          "pid": 413162,
+          "state": 1,
+          "bytes": 4665616,
+          "hash": "f034f1bcaf7cc9da",
+          "device": "00:1a",
+          "inode": 17337,
+          "object": "/dev/shm/mijiao",
+          "offset": 157800
+        }
+      }
+    ]
+  }
+]

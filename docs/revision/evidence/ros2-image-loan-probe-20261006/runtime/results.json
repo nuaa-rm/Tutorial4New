@@ -1,0 +1,93 @@
+[
+  {
+    "rmw": "rmw_fastrtps_cpp",
+    "profile": "default",
+    "capabilities": {
+      "image": 0,
+      "fixed_image": 0
+    },
+    "publish_calls": {
+      "image": 1,
+      "fixed_image": 1
+    },
+    "returncode": 0
+  },
+  {
+    "rmw": "rmw_fastrtps_cpp",
+    "profile": "shared",
+    "capabilities": {
+      "image": 0,
+      "fixed_image": 1
+    },
+    "publish_calls": {
+      "image": 1,
+      "fixed_image": 1
+    },
+    "returncode": 0
+  },
+  {
+    "rmw": "rmw_fastrtps_cpp",
+    "profile": "disabled",
+    "capabilities": {
+      "image": 0,
+      "fixed_image": 0
+    },
+    "publish_calls": {
+      "image": 1,
+      "fixed_image": 1
+    },
+    "returncode": 0
+  },
+  {
+    "rmw": "rmw_cyclonedds_cpp",
+    "profile": "default",
+    "capabilities": {
+      "image": 0,
+      "fixed_image": 0
+    },
+    "publish_calls": {
+      "image": 1,
+      "fixed_image": 1
+    },
+    "returncode": 0
+  },
+  {
+    "rmw": "rmw_cyclonedds_cpp",
+    "profile": "shared",
+    "capabilities": {
+      "image": 0,
+      "fixed_image": 1
+    },
+    "publish_calls": {
+      "image": 1,
+      "fixed_image": 1
+    },
+    "returncode": 0
+  },
+  {
+    "rmw": "rmw_zenoh_cpp",
+    "profile": "default",
+    "capabilities": {
+      "image": 0,
+      "fixed_image": 0
+    },
+    "publish_calls": {
+      "image": 1,
+      "fixed_image": 1
+    },
+    "returncode": 0
+  },
+  {
+    "rmw": "rmw_zenoh_cpp",
+    "profile": "shared",
+    "capabilities": {
+      "image": 0,
+      "fixed_image": 0
+    },
+    "publish_calls": {
+      "image": 1,
+      "fixed_image": 1
+    },
+    "returncode": 0
+  }
+]

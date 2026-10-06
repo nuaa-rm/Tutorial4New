@@ -1,0 +1,4 @@
+Browser tab: 2, Title: "recording_0.mcap | Foxglove", URL: "https://app.foxglove.dev/83615652/p/prj_0dX17X5zF56IFJIK/view?layoutId=lay_0eecxSgjq7byOaPq&ds=remote-file&ds.url=http%3A%2F%2F127.0.0.1%3A8766%2Frecording_0.mcap&time=2026-10-06T06%3A27%3A50.860051180Z".
+The following is a diff from the previous accessibility tree with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 115-117
+The focused UI element is 1 AXWebArea recording_0.mcap | Foxglove, URL: app.foxglove.dev/83615652/p/prj_0dX17X5zF56IFJIK/view?layoutId=lay_0eecxSgjq7byOaPq&ds=remote-file&ds.url=http%3A%2F%2F127.0.0.1%3A8766%2Frecording_0.mcap&time=2026-10-06T06%3A27%3A50.860051180Z

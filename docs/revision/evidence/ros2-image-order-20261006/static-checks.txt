@@ -1,0 +1,35 @@
+{
+  "headings": [
+    "先给 1440\\texorpdfstring{$\\times$}{×}1080@250 Hz 算笔账}",
+    "中间件：ROS的底层通信机制}",
+    "零拷贝与组件容器：先管好图像的所有权}",
+    "借出消息：向中间件借一块内存}",
+    "把负载升到 250 Hz，再看图像有没有变旧}",
+    "Cyclone DDS 的 separate：用 iceoryx 交接共享样本}"
+  ],
+  "required_order": [
+    "\\label{sec:ros2-loaned-messages}",
+    "\\label{sec:ros2-image-measurement}",
+    "\\paragraph*{把 Zenoh 加进大图像对照}",
+    "\\paragraph*{故意让识别变慢一次}",
+    "\\label{sec:ros2-fixed-image-shm}",
+    "\\paragraph*{把图像定义成定长样本}"
+  ],
+  "positions": [
+    19422,
+    22907,
+    23945,
+    25427,
+    26622,
+    27288
+  ],
+  "tbash_blocks": 31,
+  "tbash_syntax": "passed",
+  "commands_unchanged_as_multiset": true,
+  "image_path_reference_rows_preserved": 12,
+  "iceoryx_table_rows_preserved": 5,
+  "legacy_rows_preserved": 10,
+  "core_listings_preserved": 15,
+  "runtime_files_unchanged": 16,
+  "structure_check": "第 1 章：24 道随堂练习，14 道章末习题，1 个习题集\n入口包含 32 个文件；340 个标签，283 个被引用标签\n包含路径、资源存在性、标签唯一性、引用与题解定位检查通过。内容覆盖与运行/PDF 检查须另行记录。\n"
+}

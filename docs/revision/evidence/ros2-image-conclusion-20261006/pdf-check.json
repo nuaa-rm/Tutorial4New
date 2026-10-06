@@ -1,0 +1,25 @@
+{
+  "pages": 308,
+  "final_passes": [
+    1,
+    2
+  ],
+  "reference_files_stable": {
+    "aux": true,
+    "toc": true,
+    "out": true
+  },
+  "sha256": "805cddaf5215432ae44db0e2b1acc6745d0065b06666f6e55ec564f4794c8ab2",
+  "rendered_pages": [
+    4,
+    70,
+    71,
+    72,
+    73,
+    284,
+    286
+  ],
+  "visual_inspection": "passed: contents, final conclusion, nearby result/review and answer pages checked",
+  "existing_overfull": "A_ros2_engineering.tex lines 408-409: 2.8734 pt",
+  "target_overfull": false
+}

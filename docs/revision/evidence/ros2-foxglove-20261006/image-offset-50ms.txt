@@ -1,0 +1,10 @@
+Browser tab: 2, Title: "ws://127.0.0.1:8765 | Foxglove", URL: "https://app.foxglove.dev/83615652/view?layoutId=lay_0eecxSgjq7byOaPq&ds=foxglove-websocket&ds.url=ws%3A%2F%2F127.0.0.1%3A8765".
+The following is a diff from the previous accessibility tree with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 195-196, 214
++					277 button 显示左侧边栏
++							278 button
++								279 button
+~						190 text 2026-10-06 3:19:42.483 PM CST
++		280 container 折叠
++			281 text 折叠
+The focused UI element is 1 AXWebArea ws://127.0.0.1:8765 | Foxglove, URL: app.foxglove.dev/83615652/view?layoutId=lay_0eecxSgjq7byOaPq&ds=foxglove-websocket&ds.url=ws%3A%2F%2F127.0.0.1%3A8765

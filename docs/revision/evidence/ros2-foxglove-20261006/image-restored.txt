@@ -1,0 +1,11 @@
+Browser tab: 2, Title: "ws://127.0.0.1:8765 | Foxglove", URL: "https://app.foxglove.dev/83615652/view?layoutId=lay_0eecxSgjq7byOaPq&ds=foxglove-websocket&ds.url=ws%3A%2F%2F127.0.0.1%3A8765".
+The following is a diff from the previous accessibility tree with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 16
++					271 container 显示左侧边栏 [
++						272 button 显示左侧边栏
+~								216 text 同步时间 : 2026-10-06 3:20:32.371 PM CST
+~						189 text 2026-10-06 3:20:32.475 PM CST
++		273 container 显示左侧边栏 [
++			274 container
++				275 text 显示左侧边栏 [
+The focused UI element is 272 button 显示左侧边栏

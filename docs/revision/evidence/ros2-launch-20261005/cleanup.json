@@ -1,0 +1,6 @@
+{
+  "remaining_test_programs": [],
+  "container": "ubuntu2204",
+  "initial_state": "stopped",
+  "final_state": "stopped"
+}
