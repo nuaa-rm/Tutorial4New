@@ -42,12 +42,12 @@
   ],
   "runtime_limits": "真实双机/跨网/服务启动/硬件/长时间运行未实测",
   "sha256": {
-    "01-基础通识/main.pdf": "dbb37d8dba9d5f67c6f4af725173b981cd79723294685192246ec941c2f98c11",
+    "01-基础通识/main.pdf": "b08aa84796cb52b5d1f5cf999aaffdab3e49d036f346a8df3f90ad8d0ee44b87",
     "01-基础通识/images/deployment/tailscale_magicdns.png": "d0da4d2ba4e63a009c1f452c18e6bd7dcbff8666a00d7a9a819f043989b6ff17",
     "01-基础通识/images/deployment/gnome42-rdp.png": "d39b20bb8da87f43ea51f27c0452ae5ce99b44ba481bd340e70013a11f905050",
     "01-基础通识/images/deployment/rustdesk-client.png": "68e7c2d82207762e93ec12aebf052e85683fbc16d9ca589d0d31f8e47217a427",
-    "01-基础通识/images/deployment/network_paths_revised.png": "6c9a8af255ecf9e5e5d41abc7e0672680446e731cfbe42e6fb7e7977081a79b7",
-    "01-基础通识/images/deployment/kvm_wiring_revised.png": "933855b953a62a418f653acbf080f6ba2a5321df647e3446883b8ea98cbc2544",
+    "01-基础通识/images/deployment/network_paths_revised.png": "5979f13c580cabdb39e328b9d44a982cd152c209c5d083bdb7efbe53e19ce0fc",
+    "01-基础通识/images/deployment/kvm_wiring_revised.png": "f6a52613d6e400454f59d6e107da2bedab3a8aa2fc2bd758602c0493c41ddcfb",
     "01-基础通识/images/deployment/openterface-mini-kvm.jpg": "ba1782939e2c88fb08bb51fd3bd32887f7191e0ea9f8707a77d7d9a705fa61ea",
     "01-基础通识/images/deployment/pikvm-v4.jpg": "fc8ae93e2f7b5034d192929fdc78064580b902f44de98c631d55670d4319a59c",
     "01-基础通识/images/deployment/portable-monitor.jpg": "f359a9bfd6a131d9b6e7b3cd1e00f26d2b816f1a572954305bb2f83ec00ae0f6"
@@ -74,5 +74,7 @@
   "aux_and_toc_stable": true,
   "last_pass_text_changed_pages": [
     9
-  ]
+  ],
+  "font_fix": "font-fix.json",
+  "post_font_fix_compilation_passes": 1
 }

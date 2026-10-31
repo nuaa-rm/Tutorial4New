@@ -1,0 +1,64 @@
+{
+  "date": "2026-10-31",
+  "reason": "图5.4反馈字体不自然；TTC默认选JP，改为SC，图5.6同因同步修正",
+  "fonts": {
+    "Regular": {
+      "default_index_0": [
+        "Noto Sans CJK JP",
+        "Regular"
+      ],
+      "explicit_index_2": [
+        "Noto Sans CJK SC",
+        "Regular"
+      ]
+    },
+    "Bold": {
+      "default_index_0": [
+        "Noto Sans CJK JP",
+        "Bold"
+      ],
+      "explicit_index_2": [
+        "Noto Sans CJK SC",
+        "Bold"
+      ]
+    }
+  },
+  "images": [
+    {
+      "path": "01-基础通识/images/deployment/network_paths_revised.png",
+      "size": [
+        1540,
+        1060
+      ],
+      "before_sha256": "6c9a8af255ecf9e5e5d41abc7e0672680446e731cfbe42e6fb7e7977081a79b7",
+      "after_sha256": "5979f13c580cabdb39e328b9d44a982cd152c209c5d083bdb7efbe53e19ce0fc"
+    },
+    {
+      "path": "01-基础通识/images/deployment/kvm_wiring_revised.png",
+      "size": [
+        1660,
+        1100
+      ],
+      "before_sha256": "933855b953a62a418f653acbf080f6ba2a5321df647e3446883b8ea98cbc2544",
+      "after_sha256": "f6a52613d6e400454f59d6e107da2bedab3a8aa2fc2bd758602c0493c41ddcfb"
+    }
+  ],
+  "compile_exit_code": 0,
+  "page_count": 286,
+  "aux_and_toc_unchanged": true,
+  "all_pages_text_unchanged": true,
+  "visual_checked_physical_pages": [
+    217,
+    226
+  ],
+  "visual_result": "候选和实际PDF图中文字完整、字形自然，无裁切或重叠",
+  "figure_numbers": [
+    "5.4",
+    "5.6"
+  ],
+  "printed_pages": [
+    208,
+    217
+  ],
+  "warnings": "仅保留既有字体替代和第一章Night Theme Switcher段落溢出；没有新增缺字/引用/排版警告"
+}

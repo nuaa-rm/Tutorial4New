@@ -7,3 +7,4 @@ New chapter: physical 207-230; printed 198-221.
 Visual review: covers/TOC, full new chapter, revised summary and new solutions.
 Chapters 1-4 text unchanged across physical 10-206 compared with original PDF.
 Final pass 7: .aux and .toc byte-identical to preceding pass; PDF text changed only on TOC physical page 9 to refresh final page numbers.
+Font follow-up: explicit Noto Sans CJK SC face; one compilation; .aux/.toc and all PDF text unchanged; physical pages 217/226 visually checked. See font-fix.json.

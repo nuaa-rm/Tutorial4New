@@ -14,10 +14,14 @@ def main():
     args.output_dir.mkdir(parents=True, exist_ok=True)
     regular = '/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc'
     bold = '/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc'
-    font = ImageFont.truetype(regular, 31)
-    small = ImageFont.truetype(regular, 28)
-    heading = ImageFont.truetype(bold, 36)
-    title = ImageFont.truetype(bold, 44)
+    # TTC 默认第 0 项是日文字形；第 2 项才是简体中文 SC。
+    font = ImageFont.truetype(regular, 31, index=2)
+    small = ImageFont.truetype(regular, 28, index=2)
+    heading = ImageFont.truetype(bold, 36, index=2)
+    title = ImageFont.truetype(bold, 44, index=2)
+    if any(face.getname()[0] != 'Noto Sans CJK SC'
+           for face in (font, small, heading, title)):
+        raise ValueError('字体合集的第 2 项不是简体中文 SC，请核对字体文件')
     canvas = Image.new('RGB', (1540, 1060), 'white')
     draw = ImageDraw.Draw(canvas)
     ink, cyan, line = '#203741', '#057D95', '#95CBD6'
