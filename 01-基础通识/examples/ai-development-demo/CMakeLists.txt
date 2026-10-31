@@ -1,0 +1,11 @@
+cmake_minimum_required(VERSION 3.20)
+project(ai_distance_lab LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+add_library(distance src/distance.cpp)
+target_include_directories(distance PUBLIC include)
+add_executable(distance_test tests/distance_test.cpp)
+target_link_libraries(distance_test PRIVATE distance)
+enable_testing()
+add_test(NAME distance_contract COMMAND distance_test)

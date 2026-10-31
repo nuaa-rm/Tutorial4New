@@ -1,0 +1,13 @@
+{
+  "chapter_files": [
+    "01-基础通识/Chapter4/chapter.tex",
+    "01-基础通识/Chapter4/cli_workflow.tex",
+    "01-基础通识/Chapter4/desktop.tex",
+    "01-基础通识/Chapter4/management.tex",
+    "01-基础通识/Chapter4/principles.tex"
+  ],
+  "exercise_and_problem_labels": 33,
+  "all_answers_exactly_once": true,
+  "environment_pairing": "pass",
+  "scope": "通用原理与软件案例分开；AGENTS/Skills只增加位置和文件名差异提示；示例源码未改，运行验证沿用初版证据"
+}

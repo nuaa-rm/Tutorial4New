@@ -1,0 +1,15 @@
+Test project /tmp/tutorial4new-ai-guide-20261031-p2kw1nvn/lab/build
+    Start 1: distance_contract
+1/1 Test #1: distance_contract ................***Failed    0.00 sec
+FAIL mm=1500 expected=1.5 actual=1
+FAIL mm=-500 expected=-0.5 actual=0
+failures=2
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   0.00 sec
+
+The following tests FAILED:
+	  1 - distance_contract (Failed)
+Errors while running CTest

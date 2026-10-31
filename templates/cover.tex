@@ -18,16 +18,21 @@
 
 \makeatletter
 \newcommand{\textbook@coverdata}{%
+  \def\textbook@stages{3}%
+  \def\textbook@rowbottom{0.074}%
   \ifcase\TextbookVolumeNumber\relax
   \or
     \def\textbook@vol{卷一}\def\textbook@num{01}%
     \def\textbook@topic{基础通识}%
     \def\textbook@english{FOUNDATIONS}%
-    \def\textbook@keywords{Linux\quad /\quad 现代 C++\quad /\quad CMake\quad /\quad Git}%
-    \def\textbook@intro{我们先从开发环境开始，把第一个工程跑起来。\\再练好工具、语言与协作，为后面的专项学习打基础。}%
+    \def\textbook@keywords{Linux\quad /\quad 现代 C++\quad /\quad CMake\quad /\quad Git\quad /\quad AI 协作}%
+    \def\textbook@intro{从 Linux、C++ 与 CMake 练起，把工程跑起来。\\再借助 AI 完成修改，自己检查并验证交付。}%
+    \def\textbook@stages{4}%
+    \def\textbook@rowbottom{0.054}%
     \def\textbook@one{先把工作环境用顺手}\def\textbook@onedesc{装好并维护 Linux，练习命令行、Shell 和 Git，\\把每次修改记下来，让开发过程能再走一遍。}%
     \def\textbook@two{用 C++ 把程序写明白}\def\textbook@twodesc{从类与对象学到容器、资源管理和并发，\\弄清数据怎样流动、对象该由谁管理。}%
     \def\textbook@three{把工程搭起来，再验证结果}\def\textbook@threedesc{学会编译与链接，用 CMake 管好多文件工程，\\遇到错误按阶段排查，让程序顺利跑起来。}%
+    \def\textbook@four{用好 AI 协作，独立验证交付}\def\textbook@fourdesc{选好入口与模型，组织上下文、项目规则和 Skill，\\用 Git 与 worktree 管好修改，独立检查结果。}%
   \or
     \def\textbook@vol{卷二}\def\textbook@num{02}%
     \def\textbook@topic{专项技术栈}%
@@ -137,7 +142,8 @@
   % 切角信息面板与编号节点；连线统一在面板之前绘制。
   \path[fill=coverpale!38,draw=coveraqua!23,line width=0.5pt]
     (0.18,#1+0.047) -- (0.888,#1+0.047) -- (0.91,#1+0.031)
-    -- (0.91,#1-0.074) -- (0.202,#1-0.074) -- (0.18,#1-0.058) -- cycle;
+    -- (0.91,#1-\textbook@rowbottom) -- (0.202,#1-\textbook@rowbottom)
+    -- (0.18,#1-\textbook@rowbottom+0.016) -- cycle;
   \draw[coveraqua!65,line width=0.7pt] (0.146,#1+0.019) -- (0.18,#1+0.019);
   \path[fill=coverink] (0.086,#1+0.045) -- (0.137,#1+0.045)
     -- (0.154,#1+0.032) -- (0.154,#1-0.009) -- (0.103,#1-0.009)
@@ -149,8 +155,9 @@
   \node[anchor=north west,inner sep=0pt,text=covermuted,align=left,
     font=\sffamily\fontsize{10.5}{17}\selectfont] at (0.215,#1-0.017) {#4};
   \node[anchor=north east,inner sep=0pt,text=covermuted,
-    font=\sffamily\fontsize{6.5}{9}\selectfont] at (0.877,#1+0.027) {#2\ /\ 03};
-  \draw[coveraqua,line width=1pt] (0.887,#1-0.060) -- (0.902,#1-0.060);
+    font=\sffamily\fontsize{6.5}{9}\selectfont] at (0.877,#1+0.027) {#2\ /\ 0\textbook@stages};
+  \draw[coveraqua,line width=1pt] (0.887,#1-\textbook@rowbottom+0.014)
+    -- (0.902,#1-\textbook@rowbottom+0.014);
 }
 
 \newcommand{\textbook@titlepage}{%
@@ -212,14 +219,26 @@
 
       \node[anchor=west,inner sep=0pt,text=covermuted,
         font=\sffamily\fontsize{8}{11}\selectfont]
-        at (0.10,0.626) {学习路径\quad /\quad 3 个阶段};
-      \draw[coveraqua!65,line width=1pt] (0.120,0.580) -- (0.120,0.298);
-      \foreach \y in {0.485,0.345} {
-        \draw[coveraqua,line width=0.8pt] (0.115,\y+0.006) -- (0.120,\y) -- (0.125,\y+0.006);
-      }
-      \textbook@learningrow{0.558}{01}{\textbook@one}{\textbook@onedesc}
-      \textbook@learningrow{0.418}{02}{\textbook@two}{\textbook@twodesc}
-      \textbook@learningrow{0.278}{03}{\textbook@three}{\textbook@threedesc}
+        at (0.10,0.626) {学习路径\quad /\quad \textbook@stages\ 个阶段};
+      \ifnum\textbook@stages=4
+        % 卷一四章各占一个阶段，收紧面板高度，保留正文字号和页底留白。
+        \draw[coveraqua!65,line width=1pt] (0.120,0.587) -- (0.120,0.255);
+        \foreach \y in {0.510,0.400,0.290} {
+          \draw[coveraqua,line width=0.8pt] (0.115,\y+0.006) -- (0.120,\y) -- (0.125,\y+0.006);
+        }
+        \textbook@learningrow{0.565}{01}{\textbook@one}{\textbook@onedesc}
+        \textbook@learningrow{0.455}{02}{\textbook@two}{\textbook@twodesc}
+        \textbook@learningrow{0.345}{03}{\textbook@three}{\textbook@threedesc}
+        \textbook@learningrow{0.235}{04}{\textbook@four}{\textbook@fourdesc}
+      \else
+        \draw[coveraqua!65,line width=1pt] (0.120,0.580) -- (0.120,0.298);
+        \foreach \y in {0.485,0.345} {
+          \draw[coveraqua,line width=0.8pt] (0.115,\y+0.006) -- (0.120,\y) -- (0.125,\y+0.006);
+        }
+        \textbook@learningrow{0.558}{01}{\textbook@one}{\textbook@onedesc}
+        \textbook@learningrow{0.418}{02}{\textbook@two}{\textbook@twodesc}
+        \textbook@learningrow{0.278}{03}{\textbook@three}{\textbook@threedesc}
+      \fi
 
       \draw[coveraqua!55,line width=0.5pt] (0.10,0.173) -- (0.90,0.173);
       \draw[coveraccent,line width=1.2pt] (0.10,0.173) -- (0.16,0.173);

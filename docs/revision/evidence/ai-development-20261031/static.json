@@ -1,0 +1,14 @@
+{
+  "chapter_files": [
+    "01-基础通识/Chapter4/chapter.tex",
+    "01-基础通识/Chapter4/cli_workflow.tex",
+    "01-基础通识/Chapter4/desktop.tex",
+    "01-基础通识/Chapter4/management.tex",
+    "01-基础通识/Chapter4/principles.tex"
+  ],
+  "exercises": 23,
+  "problems": 10,
+  "all_answers_exactly_once": true,
+  "example_count": 27,
+  "environment_pairing": "pass"
+}

@@ -1,0 +1,173 @@
+{
+  "pdf": "01-基础通识/main.pdf",
+  "sha256": "bd61a200ea4f527a9bae515a7dab55d3b7b8f26cc76131ac2c1273bc33aa5b01",
+  "physical_pages": 254,
+  "chapter_physical_pages": [
+    174,
+    201
+  ],
+  "chapter_printed_pages": [
+    165,
+    192
+  ],
+  "toc_reviewed": [
+    8,
+    9
+  ],
+  "summary_reviewed": [
+    202,
+    203,
+    204,
+    205,
+    206,
+    207,
+    208,
+    209
+  ],
+  "new_answers_reviewed": [
+    250,
+    251,
+    252,
+    253,
+    254
+  ],
+  "undefined_references": false,
+  "missing_characters": false,
+  "duplicate_labels": false,
+  "rerun_required": false,
+  "preexisting_warnings": [
+    "Fandol font bold/italic substitution",
+    "Chapter1/11.tex Night Theme Switcher paragraph: Overfull hbox 21.58704pt"
+  ],
+  "new_chapter_overfull_hbox": false,
+  "outline": [
+    {
+      "title": "第四章 更高效的利用AI开发",
+      "physical_page": 174
+    },
+    {
+      "title": "4.1 先学会负责，再学会让 AI 干活",
+      "physical_page": 174
+    },
+    {
+      "title": "4.2 大语言模型怎样生成回答",
+      "physical_page": 175
+    },
+    {
+      "title": "4.3 模型与思考等级怎样选",
+      "physical_page": 176
+    },
+    {
+      "title": "4.4 管理上下文：让它看到该看的东西",
+      "physical_page": 177
+    },
+    {
+      "title": "4.5 工具、权限与证据的边界",
+      "physical_page": 178
+    },
+    {
+      "title": "4.6 装好工具，先选对入口",
+      "physical_page": 179
+    },
+    {
+      "title": "4.7 用桌面主界面走完一次开发闭环",
+      "physical_page": 182
+    },
+    {
+      "title": "4.8 用插件与 MCP 接入开发资料和工具",
+      "physical_page": 184
+    },
+    {
+      "title": "4.9 在终端里使用 Codex CLI",
+      "physical_page": 186
+    },
+    {
+      "title": "4.10 把计划、目标、对话与工作区安排好",
+      "physical_page": 189
+    },
+    {
+      "title": "4.11 提示词：把愿望写成可以验收的任务",
+      "physical_page": 193
+    },
+    {
+      "title": "4.12 项目管理：让代码、证据和决策留在工程里",
+      "physical_page": 194
+    },
+    {
+      "title": "4.13 AGENTS.md 与 Skills：把有效经验沉淀下来",
+      "physical_page": 196
+    },
+    {
+      "title": "4.14 综合实验：让 AI 修复，你负责证明",
+      "physical_page": 198
+    },
+    {
+      "title": "4.15 本章小结",
+      "physical_page": 200
+    },
+    {
+      "title": "练习",
+      "physical_page": 200
+    },
+    {
+      "title": "4.16 本章验收",
+      "physical_page": 201
+    },
+    {
+      "title": "卷一小结",
+      "physical_page": 202
+    },
+    {
+      "title": "第四章题解：更高效的利用AI开发",
+      "physical_page": 250
+    }
+  ],
+  "visual_review_status": "pass",
+  "visual_review": [
+    {
+      "physical_pages": [
+        174,
+        183
+      ],
+      "reviewer": "desktop subagent",
+      "result": "逐页复查，章首孤行与CLI安装拆页已修，无裁切乱码溢出"
+    },
+    {
+      "physical_pages": [
+        184,
+        193
+      ],
+      "reviewer": "CLI subagent",
+      "result": "逐页复查，启动/Plan/worktree短代码与练习断页已修，无明显新问题"
+    },
+    {
+      "physical_pages": [
+        194,
+        201
+      ],
+      "reviewer": "independent reviewer",
+      "result": "逐页复查，规则/Skill/核心代码/习题/验收完整可读"
+    },
+    {
+      "physical_pages": [
+        8,
+        9,
+        202,
+        203,
+        204,
+        205,
+        206,
+        207,
+        208,
+        209,
+        250,
+        251,
+        252,
+        253,
+        254
+      ],
+      "reviewer": "root",
+      "result": "目录、小结与新增题解渲染已查看；最后一轮PNG逐像素比较与所查看版本一致"
+    }
+  ]
+}

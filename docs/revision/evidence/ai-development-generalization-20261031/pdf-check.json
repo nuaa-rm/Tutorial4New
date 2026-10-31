@@ -1,0 +1,69 @@
+{
+  "pdf": "01-基础通识/main.pdf",
+  "sha256": "26eb28ad0de618bf106a3e9cebde444c8304318d42b20462afd738182a95c39a",
+  "physical_pages": 256,
+  "chapter_physical_pages": [
+    174,
+    203
+  ],
+  "chapter_printed_pages": [
+    165,
+    194
+  ],
+  "new_answers_physical_pages": [
+    252,
+    256
+  ],
+  "root_render_checks": [
+    {
+      "physical_page": 8,
+      "identical_to_root_reviewed_rendering": true
+    },
+    {
+      "physical_page": 9,
+      "identical_to_root_reviewed_rendering": false
+    },
+    {
+      "physical_page": 252,
+      "identical_to_root_reviewed_rendering": true
+    },
+    {
+      "physical_page": 253,
+      "identical_to_root_reviewed_rendering": true
+    },
+    {
+      "physical_page": 254,
+      "identical_to_root_reviewed_rendering": true
+    },
+    {
+      "physical_page": 255,
+      "identical_to_root_reviewed_rendering": true
+    },
+    {
+      "physical_page": 256,
+      "identical_to_root_reviewed_rendering": true
+    },
+    {
+      "physical_page": 209,
+      "identical_to_root_reviewed_rendering": true
+    },
+    {
+      "physical_page": 210,
+      "identical_to_root_reviewed_rendering": true
+    },
+    {
+      "physical_page": 211,
+      "identical_to_root_reviewed_rendering": true
+    }
+  ],
+  "undefined_references": false,
+  "missing_characters": false,
+  "duplicate_labels": false,
+  "rerun_required": false,
+  "preexisting_warnings": [
+    "Fandol font substitutions",
+    "Chapter1 Night Theme Switcher: 21.58704pt Overfull hbox"
+  ],
+  "new_chapter_overfull": false,
+  "visual_review_status": "superseded by screenshot revision; later layout fixes and full final review recorded in ai-development-screenshots-20261031"
+}

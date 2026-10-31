@@ -1,0 +1,5 @@
+Two final XeLaTeX runs after layout corrections, both exit 0.
+256 physical pages; chapter 4 physical 174-203; new answers 252-256.
+No missing characters, undefined references, duplicate labels or rerun requests.
+No new chapter Overfull warnings. Preexisting Chapter1/font warnings unchanged.
+C++ demo unchanged; previous recorded software tests remain the runtime evidence.

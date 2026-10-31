@@ -1,0 +1,7 @@
+Final build: two XeLaTeX runs after layout edits, both exit 0.
+PDF: 254 physical pages; chapter 4 physical 174-201; added answers physical 250-254.
+No undefined references, duplicate labels, missing characters, or rerun request.
+New chapter: no Overfull box warnings.
+Preexisting warning: Chapter1/11.tex Night Theme Switcher paragraph, 21.58704pt Overfull hbox.
+Preexisting warnings: Fandol bold/italic font substitutions.
+Output written on main.pdf (254 pages).

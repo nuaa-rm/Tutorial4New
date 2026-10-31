@@ -1,0 +1,91 @@
+{
+  "tools": "/home/mijiao/.local/share/JetBrains/Toolbox/apps/clion/bin/cmake/linux/x64/bin",
+  "source_preserved_with_intentional_bug": true,
+  "independent_inputs": [
+    1,
+    999,
+    -1500,
+    -2147483648,
+    2147483647
+  ],
+  "results": [
+    {
+      "name": "configure",
+      "command": [
+        "cmake",
+        "-S",
+        ".",
+        "-B",
+        "build"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0
+    },
+    {
+      "name": "baseline-build",
+      "command": [
+        "cmake",
+        "--build",
+        "build"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0
+    },
+    {
+      "name": "baseline-test",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "build",
+        "--output-on-failure"
+      ],
+      "exit_code": 8,
+      "expected_exit_code": 8
+    },
+    {
+      "name": "fixed-build",
+      "command": [
+        "cmake",
+        "--build",
+        "build"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0
+    },
+    {
+      "name": "fixed-test",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "build",
+        "--output-on-failure"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0
+    },
+    {
+      "name": "independent-build",
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-Wall",
+        "-Wextra",
+        "-Iinclude",
+        "src/distance.cpp",
+        "tests/independent.cpp",
+        "-o",
+        "build/independent"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0
+    },
+    {
+      "name": "independent-test",
+      "command": [
+        "./build/independent"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0
+    }
+  ]
+}

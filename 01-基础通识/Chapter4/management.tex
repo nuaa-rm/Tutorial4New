@@ -1,0 +1,208 @@
+\section{提示词：把愿望写成可以验收的任务}
+\label{sec:ai-prompts}
+
+现在我们会选入口，也知道模型需要哪些上下文了。接下来最常见的问题是：“我说得挺清楚，它怎么还是改错了？”先看看你的提示词有没有把\textbf{现象、目标与验收}分开。“优化识别效果”只有方向，没有说明在哪组图上、用什么指标判断、允许付出多少延迟；模型只好替你猜。猜得再流畅，也不等于猜中了队内需求。
+
+提示词（Prompt）不必写成咒语。对于开发任务，通常补齐下面几项就够了：
+\begin{center}
+\begin{tabular}{p{0.16\textwidth}p{0.73\textwidth}}
+\toprule
+信息 & 应写出的内容 \\
+\midrule
+目标与现象 & 现在发生什么，期望变成什么；把“修复卡顿”变成一个可观察行为。\\
+相关证据 & 仓库、入口文件、复现命令、完整的相关报错、输入样本与版本。\\
+范围与约束 & 哪个模块可修改，接口、单位、依赖与硬件条件有什么限制。\\
+验收与交付 & 用什么命令、样本和指标判断完成；交付代码、说明还是方案。\\
+不确定处 & 哪些条件还不知道，先调查什么，哪些决策需要向你确认。\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+不要为了凑“上下文”粘贴几万行日志。给出首次错误附近的日志、运行命令及文件路径，让有工具的代理自行定位其余内容；未获本地文件访问能力的聊天需要你附上最小相关代码或文件。截图适合表达界面、曲线与视觉现象，编译错误优先附可复制的文本。发送前检查日志与附件，移除令牌、密码、队友隐私和无关的队内资料。
+
+\begin{example}[同一个错误，怎样从许愿变成任务]
+随书工程位于本卷 \path{examples/ai-development-demo}。先复制到自己的练习目录，后文会完整运行。与其发“这代码算距离不准，你帮我改好”，不如这样写：
+\begin{lstlisting}[language={}]
+请修复当前工程毫米到米的换算。
+现象：1500 mm 得到 1 m，-500 mm 得到 0 m。
+先读 include/distance.hpp、src/distance.cpp 和 tests/distance_test.cpp，
+定位运算类型造成的原因；输入允许负位移，返回值仍为 double。
+不修改接口、单位或测试容差，不引入依赖。
+修改后重新构建并运行 CTest，核对 0、1000、1500、-500 mm；
+另选一个非整米输入复核。交付差异、原因、实际验证和未验证范围。
+\end{lstlisting}
+前提、文件、行为与判断方法都明确了，代理才有条件做工程工作。若你只是想学原理，就把第一句改成“只解释错误，先给提示，不修改文件”，并先自己预测结果。这也是普通聊天很合适的用法。
+\end{example}
+
+反馈也要有证据。不要反复发送“还是不行”“再聪明一点”；写清“新构建后输入为……，实际输出……，预期……，这是命令和日志”。如果你怀疑它的方案，要求它比较候选原因、列出能区分这些原因的实验，或指出结论对应的文件与官方资料。\textbf{要可检查的解释与依据}，无需索要不可见的内部逐字思考过程，更不能把一大段解释当成验证。
+
+代理运行时，发现关键约束漏了就及时补充；下一项独立任务可以排队。不要一边让它修函数，一边在同一聊天中突然讨论装系统。若目标已经变了，要明确说“停止当前任务，保存现状，改做……”，并检查仍在运行的命令。功能入口见第~\ref{sec:ai-workflow}~节。
+
+\begin{exercise}\label{ex:ai-prompt}
+把“帮我优化串口，不能丢包，顺便重构一下”改成一个可执行任务。给出你还需采集的证据、可修改范围、可衡量的验收，以及尚不知道时应先调查的条件；不要编造波特率或固件协议。
+\end{exercise}
+
+\section{项目管理：让代码、证据和决策留在工程里}
+\label{sec:ai-project-management}
+
+AI 把写出第一版代码变快了，也会把失控修改变快。一个聊天承接需求、设计、几十次试错和硬件结论，过几天谁也说不清当前采用了哪个方案。你仍是项目负责人：拆解目标、确认接口、决定合并、安排验收；代理负责在明确范围内调查和实现。
+
+先在仓库里保存一个别人能复现的基线：查看 \texttt{git status}，确认已有修改属于谁，运行原有构建与关键测试，再开始新的分支。原测试失败要记录，不能把失败悄悄归到本次改动，也不能顺手修掉所有无关问题。替换旧实现时通过提交或分支保留历史，不要在源码目录堆出 \texttt{final2}、\texttt{newnew}、\texttt{backup-old.cpp}；构建系统可能把“备份”也编进去。
+
+任务按\textbf{能够单独验证的结果}拆分。例如“让视觉节点支持断线重连”，可以分成复现与日志、重连状态机、离线故障注入、设备拔插验收。每一步记录输入输出、责任人、验收条件与依赖关系。串口恢复以后能否立刻发控制量，可能要电控确认；不能用“AI 说可以”替代接口协商。
+
+\begin{example}[给一个小任务安排完整闭环]
+在练习工程中，把本次目标写进 \texttt{task.md}，先运行测试保存失败样本，再让代理在修复分支工作。交付前自己做四件事：
+\begin{enumerate}
+  \item 查看差异，确认修改针对错误原因，没有顺手换掉接口或删除测试。
+  \item 从修改后的源码重新构建，运行原测试与自己新增的样本，记录命令和退出状态。
+  \item 要求代理指出风险，再由你检查关键算式和边界；另一聊天或另一同学可做独立审查。
+  \item 将通过检查的源码、测试与说明提交，再按队内流程发起合并请求（Pull Request，PR）。
+\end{enumerate}
+验收结果是“这些输入上的换算符合接口”，不能写成“测距系统已验证”。如果换成真实视觉工程，还要另排相机、板端、时序和实车验收。
+\end{example}
+
+项目资料要各司其职。下面是一个建议结构，不必为了小任务把所有目录都建出来：
+\begin{lstlisting}[language={}]
+README.md                  # 人能按它配置、构建和运行
+AGENTS.md                  # 代理每次工作都应遵守的项目规则
+docs/tasks/distance.md     # 本次现象、范围、验收与状态
+docs/decisions/units.md    # 为什么选这个接口，舍弃方案的理由
+docs/verification/        # 环境、命令、样本、结果与限制
+.agents/skills/            # 经过实践、可按需复用的工作流程
+src/ include/ tests/       # 代码与可执行的行为检查
+\end{lstlisting}
+聊天可以链接这些资料，但不替代它们。交接写清当前分支与提交、已完成事项、待办和阻塞、验证证据与下一条可执行命令。换聊天、上下文压缩或换队友后，都先重新检查磁盘和 Git 状态；摘要里的“测试通过”是历史记录，不代表现在这份源码仍通过。
+
+\subsubsection{怎样审查 AI 交付}
+先问它改动了什么行为，再读实现这个行为的代码。构建成功只证明能构建；测试通过只覆盖实际执行到的用例；基准变快还要核对数据、运行环境和质量是否一致。尤其注意代理是否为了让测试通过修改了期望值、跳过失败分支、扩大容差、捕获所有异常后假装成功。测试与实现都由同一个代理写时，可能共享同一个错误假设，需要你另选反例。
+
+遇到失败，先保存失败输入和日志，再修。遇到重构，先守住行为基线，再分步改变结构。涉及比赛设备，把离线回放、仿真、软件回环、板端与实车结果分开记录。代理无法接触设备时，让它准备测试脚本和验收步骤，由具备条件的人执行，不能把“预期通过”写成“实测通过”。
+
+并行时给每个任务标明允许修改的文件、接口与返回材料，共享状态由一个集成人负责。两个代理都能改同一目录，并不意味着它们能自动避让；worktree 的目录隔离也不消除逻辑冲突。合并以后还要重跑组合测试，具体操作见第~\ref{sec:ai-workflow}~节。
+
+\begin{exercise}\label{ex:ai-management}
+你要把相机输入替换成录像回放，同时另一位同学修串口重连。设计两个任务的边界和集成顺序，并写一份交接提纲。指出哪些检查可离线完成，哪些结论仍需真实设备。
+\end{exercise}
+
+\section{AGENTS.md 与 Skills：把有效经验沉淀下来}
+\label{sec:ai-rules-skills}
+
+下面按 Codex 的位置、文件名和加载方式讲解 \texttt{AGENTS.md} 与 Skills；其他产品的对应文件可能放在不同位置、采用不同文件名，使用时查其说明即可。
+
+\subsubsection{AGENTS.md 放长期规则，不放整个聊天}
+\texttt{AGENTS.md} 是给代码代理的项目说明。它适合保存\textbf{长期稳定、会改变代理决策、能核验}的信息：工程入口、构建与测试命令、模块边界、单位与坐标系、代码约定、生成文件的来源、验收要求与禁止触碰的资源。写“修改公共接口时同步调用方与接口说明”，比“你是世界顶尖程序员，一定要认真”有用得多。
+
+不要把本周待办、某次日志、完整 API 手册或密码放进去；这些分别属于任务记录、验证资料、按需参考与凭据管理。也不要要求“所有改动必须跑全部设备测试”，却不给设备或替代路径；应写清涉及哪些行为时必须安排设备验收，无法执行时如何报告缺口。文件不是越长越有效，重复规则同样占上下文。
+
+Codex 的全局指导通常来自 \path{~/.codex/AGENTS.md}；仓库内则沿项目根到启动工作目录逐层读取。相同目录有 \texttt{AGENTS.override.md} 时，优先读取它而不是普通文件；更靠近当前目录的规则可以细化前面的约定。\textbf{不要假定一次从根目录启动就递归加载所有子目录规则}，进入专门模块工作时应确认当前目录与实际加载来源。
+
+\Needspace{15\baselineskip}
+\begin{example}[给距离换算工程写一份够用的规则]
+练习项目的完整 \texttt{AGENTS.md} 如下：
+\lstinputlisting[language={}]{examples/ai-development-demo/AGENTS.md}
+在练习副本启动 Codex，先发“列出本次读取的指导文件、工作目录和测试命令，暂不修改代码”，核对它是否读到这些规则。CLI 也可用 \texttt{/init} 生成草稿，但必须人工检查生成的命令是否真的可用、是否误写了项目约束。修改后若新规则没有生效，重启会话再核对。
+\end{example}
+
+这份示例只约束教学工程，不该复制到所有项目。真实项目的毫米、米、相机系、世界系等约定必须来自实际接口；代理声称规则已读，也仍需你检查输出和后续行为。
+
+\begin{exercise}\label{ex:ai-agents}
+给你正在学习的一个 CMake 工程写不超过一页的 \texttt{AGENTS.md}。至少写出入口、真实可执行的构建与测试命令、一个容易出错的项目约定、无法验证时的报告方式；另列两项你刻意放到其他文档里的内容，并说明原因。
+\end{exercise}
+
+\subsubsection{何时值得写 Skill}
+技能（Skill）把\textbf{可重复的任务流程}打包成说明及必要的脚本、参考资料或模板。比如你反复要求“审查坐标变换时核对源坐标系、目标坐标系、单位和时间戳”，每次都遗漏相似检查，就值得做成技能。只发生一次、流程还没想清、普通一句话已足够表达的任务，先直接做；不要为了“有 Skills”给每个小函数写一套流程。
+
+\texttt{AGENTS.md} 是项目工作时应常驻的规则，Skill 是匹配任务才展开的操作方法。插件可以分发技能和连接器，MCP 工具提供读取数据或执行操作的能力。\textbf{技能不会凭空增加工具权限，也不等于训练模型}；写了“检查相机”却没有 SDK、设备或输入资料，它仍无法测相机。
+
+Codex 先看到技能的名称与描述，决定使用后才读取完整 \texttt{SKILL.md}，这叫渐进披露（Progressive Disclosure）。因此描述要写“何时使用、做什么”，并在容易混淆处说明边界，别写成“任何代码任务都使用本技能”。正文写必要输入、关键判断、输出和失败处理；确定性、常重复的计算可以交给脚本，大段按需资料放 \texttt{references/}，生成产物所需模板放 \texttt{assets/}。一个短流程只需要一个文件。
+
+\Needspace{19\baselineskip}
+\begin{example}[手写并调用一个数值换算审查 Skill]
+随书模板的完整内容如下。文件开头的 YAML 元数据必须有 \texttt{name} 与 \texttt{description}；名称用小写字母、数字和连字符，目录与名称保持一致，便于查找。
+\lstinputlisting[language={}]{examples/ai-development-demo/skill-template/mm-conversion-review/SKILL.md}
+模板故意放在 \texttt{skill-template/}，不会当作已安装技能。要在练习副本使用，从项目根运行：
+\begin{tbash}
+mkdir -p .agents/skills
+cp -r skill-template/mm-conversion-review .agents/skills/
+codex
+\end{tbash}
+这是仓库内共享的放置方式。个人跨项目技能可放在当前文档支持的 \path{~/.agents/skills}；团队应把项目技能纳入版本管理，而不要让它只存在某位同学的电脑上。CLI 用 \texttt{/skills} 查是否被发现，再发送：
+\begin{lstlisting}[language={}]
+$mm-conversion-review 请审查当前换算修改，只给发现与验证结果。
+\end{lstlisting}
+如果列表未更新，重新启动 Codex。桌面版从 Skills 入口查找与选择；不同入口的提及符号以其选择器为准，不要把 CLI 的 \texttt{\$} 语法硬套到普通 Chat。
+\end{example}
+
+如果当前环境提供 \texttt{skill-creator}，也可以请它帮你起草，但要先给它真实的重复任务和成功标准，最后逐条检查草稿。不要让技能接管所有任务、引入无关流程或默认代表你批准发布和发消息。
+
+写好后至少做三种验证：一个应触发的换算任务、一个相近但不应触发的构建故障、一个缺少接口范围的任务。观察它是否读取实际证据、是否守住“只审查”的边界、缺条件时是否正确说明缺口，而不是机械检查回复标题。如果带脚本，单独运行成功、失败和边界输入，检查退出码与输出。根据真实失败收敛规则，再提交版本；不要每遇到一次意外就永久添加一大条全局禁令。
+
+\begin{exercise}\label{ex:ai-skill}
+把“复查一个常见 CMake 目标链接错误”整理成一个技能草稿。给出名称、能区分任务的描述、必要输入和输出，以及一个应该触发与一个不该触发的请求。说明哪些步骤适合写脚本，哪些需要代理判断；不要照抄毫米换算的检查项。
+\end{exercise}
+
+\begin{conclusion}
+本次目标写在任务卡；稳定项目规则写在 \texttt{AGENTS.md}；重复流程写成 Skill；精确操作交给脚本与测试；运行事实写入验证记录；关键选择写入决策记录。每份资料都要能找到维护它的人和对应的代码版本。聊天提供协作过程，仓库保存可交接的工程事实。
+\end{conclusion}
+
+本节的指导文件发现规则与技能格式核对于 2026 年 10 月 31 日，后续版本以官方说明为准：\href{https://learn.chatgpt.com/docs/agent-configuration/agents-md}{AGENTS.md 指导文件}、\href{https://learn.chatgpt.com/docs/build-skills}{Skills 编写与发现}。提示词与运行中补充要求的入口见\href{https://learn.chatgpt.com/docs/prompting}{官方 Prompting 指南}。
+
+\section{综合实验：让 AI 修复，你负责证明}
+\label{sec:ai-lab}
+
+这次只修一个纯函数。小到你可以完整读懂，才适合练协作流程。先复制本卷 \path{examples/ai-development-demo} 到自己的练习目录，例如 \path{~/rm-ai-lab}；以下命令都在副本根目录运行。需要 C++17 编译器、CMake 3.20 及以上，版本管理时还需 Git；离线运行工程不需要模型、API Key 或硬件。
+
+\Needspace{10\baselineskip}
+\begin{lstlisting}[language={}]
+ai-development-demo/
+  CMakeLists.txt
+  include/distance.hpp
+  src/distance.cpp
+  tests/distance_test.cpp
+  AGENTS.md  task.md  README.md  .gitignore
+  skill-template/mm-conversion-review/SKILL.md
+\end{lstlisting}
+接口先给出单位和允许范围，测试据此写出预期；实现提供具体运算，CMake 将实现与测试链接起来。请先预测四个输入的结果，再运行。
+\lstinputlisting[language=C++]{examples/ai-development-demo/include/distance.hpp}
+\lstinputlisting[language=C++]{examples/ai-development-demo/src/distance.cpp}
+\noindent\begin{minipage}{\linewidth}
+\lstinputlisting[language=C++]{examples/ai-development-demo/tests/distance_test.cpp}
+\end{minipage}\par
+\Needspace{13\baselineskip}
+\lstinputlisting[language=cmake]{examples/ai-development-demo/CMakeLists.txt}
+
+\begin{example}[走完一次修复与交付]
+先建立并构建工程：
+\begin{tbash}
+cmake -S . -B build
+cmake --build build
+ctest --test-dir build --output-on-failure
+\end{tbash}
+随书原版\textbf{故意带有缺陷}，第一次 CTest 应返回非零；其中 1500 与 -500 两个用例失败，输出 \texttt{failures=2}。\texttt{int / int} 先做整数除法，小数部分朝零截断，然后才转换为 \texttt{double}。函数的返回类型不能让已经丢掉的小数回来；只测 0 和 1000 就看不出问题。
+
+接下来，在这个\textbf{练习副本}初始化自己的仓库，保存已知失败的教学基线，再切修复分支。不要在教材仓库或已有队内仓库里重复执行初始化：
+\Needspace{8\baselineskip}
+\begin{tbash}
+git init -b main
+git add .gitignore AGENTS.md CMakeLists.txt include src tests task.md README.md skill-template
+git commit -m "保存带已知缺陷的教学基线"
+git switch -c fix/distance-units
+\end{tbash}
+若 Git 要求身份配置，在副本里用 \texttt{git config user.name}、\texttt{git config user.email} 设置自己的姓名和邮箱，细节回看第一章。再启动代码代理，把 \texttt{task.md} 的条件和第~\ref{sec:ai-prompts}~节的提示词交给它；也可以先让普通聊天解释问题，再自己修。
+
+修改后你要能解释下面两种写法的区别：
+\begin{tcpp}
+return millimeters / 1000.0;  // 运算前改变操作数类型
+return static_cast<double>(millimeters / 1000);  // 运算后转换，已经太晚
+\end{tcpp}
+亲自查看 \texttt{git diff}，重新构建并运行同一组 CTest；成功应为全部通过且退出状态为零。再独立增加 1、999 或 -1500 mm 等输入，先手算再验证，不把“代理说过了”当作运行记录。
+
+最后整理交接：修改原因、实际采用的算式、代码版本、运行命令和退出状态、额外输入与未验证范围。核对后只提交相关源码、测试和必要说明。构建产物由 \texttt{.gitignore} 排除；若使用了技能，将你确认过的技能一并版本管理。
+\end{example}
+
+它只有一行错误，但覆盖了需求、接口、原理、工具、版本和证据。如果代理绕过测试，或你无法解释转换发生在运算之前还是之后，这个练习都还没有完成。对更大的项目，只是把同样的闭环按模块展开。
+
+\begin{exercise}\label{ex:ai-lab}
+在练习副本完成修复，提交一次不含构建产物的 Git 修改。另写一份交接说明，并回答：原来两个整米用例为何通过？新增一个什么输入能进一步检查截断？为什么这份结果不能证明实车测距准确？
+\end{exercise}

@@ -16,11 +16,12 @@
 | **卷二 · 专项技术栈** | 怎样实现视觉系统中的各个技术模块 | [main.tex](02-专项技术栈/main.tex) | [examples](02-专项技术栈/examples/) |
 | **卷三 · RM 视觉概述** | 怎样把模块串成比赛链路，并与其他组协作 | [main.tex](03-RM视觉概述/main.tex) | [examples](03-RM视觉概述/examples/) |
 
-### 卷一 · 基础通识（3 章）
+### 卷一 · 基础通识（4 章）
 
 1. **Linux 工作环境**：Ubuntu 双系统、文件与权限、Shell、Git、CLion / VS Code、串口基础，以及备份、Conda、桌面美化等选修内容。
 2. **现代 C++ 基础**：类、引用与移动、lambda、智能指针、STL 和多线程。
 3. **编译过程与 CMake 基础**：从源码到程序，组织多文件工程、库、依赖和安装规则。
+4. **更高效的利用AI开发**：先讲通用的模型选择、推理投入、上下文与协作原理，再以 ChatGPT 桌面版和 Codex CLI 演示聊天与代理入口、计划、目标、对话与 worktree，编写 AGENTS.md 与 Skills，并独立验证 AI 生成的代码。
 
 卷一面向所有方向。标 `*` 的小节为选修，不计入通识考核；刚入门时先把核心工程跑通，美化和进阶维护可以等用到时再回来查。
 
@@ -157,6 +158,7 @@ python3 scripts/export_volumes.py --output "$HOME/Downloads/教材导出" --over
 | 想练习什么 | 可以从这里开始 |
 | --- | --- |
 | C++ 构建、库与安装 | [build-pipeline-demo](01-基础通识/examples/build-pipeline-demo/README.md) |
+| AI 协作、任务验收与 Skill | [ai-development-demo](01-基础通识/examples/ai-development-demo/README.md) |
 | ROS2 节点、接口、Launch 与工程排障 | [ROS2 工程实践](02-专项技术栈/examples/ros2/README.md) |
 | OpenCV 图像处理和中间结果观察 | [image-lab-demo](02-专项技术栈/examples/opencv/image-lab-demo/README.md) |
 | 从训练到独立推理 | [lenet-training-demo](02-专项技术栈/examples/dl/lenet-training-demo/README.md) |
@@ -175,7 +177,7 @@ Tutorial4New/
 ├── main.tex                     # 三卷编译入口的提示页
 ├── 01-基础通识/
 │   ├── main.tex                 # 卷一入口
-│   ├── Chapter1/、Chapter2/、Chapter3/
+│   ├── Chapter1/、Chapter2/、Chapter3/、Chapter4/
 │   ├── examples/                # 随书工程
 │   ├── images/                  # 正文插图
 │   └── answers.tex              # 参考题解
@@ -207,6 +209,8 @@ Tutorial4New/
 ## 当前进度
 
 以下是 **2026-09-29 已记录的修订与验收状态**，后续以 [全书验收汇总](docs/revision/whole-book-audit.md) 和其中的逐章记录为准。
+
+2026-10-31 新增卷一第 4 章《更高效的利用AI开发》，位于卷末小结前，附随堂练习、章末题解与离线小工程。该章不计入下方首次修订的历史统计；功能资料核对与本次验证范围见 [第四章记录](docs/revision/volume-1-chapter-4.md)。
 
 三卷 **21 章已完成首次逐章整理并分别提交**，补齐了章首提要、示例、练习、难点小结、章末习题、验收和参考题解。已记录 234 道随堂练习、187 道章末习题，并完成现有环境中的软件补测和 PDF 检查。
 

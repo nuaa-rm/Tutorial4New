@@ -1,0 +1,39 @@
+{
+  "physical_pages": 259,
+  "changed_text_pages": [
+    1,
+    2
+  ],
+  "unchanged_text_pages": [
+    3,
+    259
+  ],
+  "previous_pdf_sha256": "0175d451558b8f7b2aa2f0e5412e6df3a58a3fb89f687be42c1b1b92986f5da9",
+  "pdf_sha256": "9b76778088c85c809805e9e7489e31d8579f8cbaf70612792a1f827a27e2c248",
+  "log_checks": {
+    "undefined_references": false,
+    "duplicate_labels": false,
+    "missing_characters": false,
+    "rerun_required": false
+  },
+  "preexisting_warnings": [
+    "Overfull \\hbox (21.58704pt too wide) in paragraph at lines 263--265"
+  ],
+  "visual_review": {
+    "learning_guide_physical_page": 2,
+    "result": "pass: 四阶段面板、编号、两行说明、连接线及页脚均清晰，无遮挡或溢出"
+  },
+  "shared_template_regression": {
+    "volume_2_cover_and_guide": "pixel_identical_to_HEAD_template",
+    "volume_3_cover_and_guide": "pixel_identical_to_HEAD_template"
+  },
+  "refreshed_assets": [
+    "preview.pdf",
+    "volume-01.pdf",
+    "volume-01-1.png",
+    "volume-01-2.png",
+    "volume-01-spread.png",
+    "series-preview.png",
+    "guide-series-preview.png"
+  ]
+}

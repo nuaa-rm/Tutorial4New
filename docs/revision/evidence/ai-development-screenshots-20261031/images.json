@@ -1,0 +1,47 @@
+{
+  "capture_date": "2026-10-31",
+  "source": "本机Linux ChatGPT桌面版Codex入口，Niri指定窗口取景",
+  "raw_images_in_repository": false,
+  "redaction_method": "实心遮挡、局部取景，展平RGB并去除元数据",
+  "controls_authenticity": {
+    "composer_exact_original_crop": true,
+    "review_exact_original_except_filename_redaction": true
+  },
+  "source_views": "root逐张查看，独立图文与隐私复核未见项目/对话/账号露出",
+  "images": [
+    {
+      "file": "01-基础通识/images/ai/composer-controls_revised.png",
+      "size": [
+        945,
+        200
+      ],
+      "mode": "RGB",
+      "sha256": "60021824609a372e052f730393f1b9704ee8e02238e3f8ee886835c451e2a6a5",
+      "has_exif": false,
+      "no_alpha": true
+    },
+    {
+      "file": "01-基础通识/images/ai/desktop-overview_revised.png",
+      "size": [
+        2560,
+        1495
+      ],
+      "mode": "RGB",
+      "sha256": "869af8edafdd99bc222fa3ab443cdd4dee071262627591984744f418b2283bd0",
+      "has_exif": false,
+      "no_alpha": true
+    },
+    {
+      "file": "01-基础通识/images/ai/review-pane_revised.png",
+      "size": [
+        1070,
+        860
+      ],
+      "mode": "RGB",
+      "sha256": "30736a4584ba14151737900f9133f45e46e67c682f462c4cb574978e50a8159c",
+      "has_exif": false,
+      "no_alpha": true
+    }
+  ],
+  "temporary_unredacted_files_removed": true
+}

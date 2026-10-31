@@ -1,0 +1,5 @@
+Two final XeLaTeX runs after screenshots and layout edits, exit 0.
+259 physical pages; chapter 4 physical 174-206; added answers physical 255-259.
+No missing characters, undefined references, duplicate labels or rerun request.
+Three real local screenshots added; no new Overfull warning.
+Previous Chapter1/font warnings unchanged.
