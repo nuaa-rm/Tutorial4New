@@ -1,0 +1,27 @@
+{
+  "physical_pages": 259,
+  "changed_text_pages": [
+    184,
+    185,
+    186
+  ],
+  "pdf_sha256": "c31f6cfbde019a6f3cdb5aee843dc11be7b2f6034fc1a83d2fc20321a9f4f1b5",
+  "previous_pdf_sha256": "9b76778088c85c809805e9e7489e31d8579f8cbaf70612792a1f827a27e2c248",
+  "log_checks": {
+    "undefined_references": false,
+    "duplicate_labels": false,
+    "missing_characters": false,
+    "rerun_required": false
+  },
+  "preexisting_overfull": [
+    "Overfull \\hbox (21.58704pt too wide) in paragraph at lines 263--265"
+  ],
+  "visual_review": {
+    "physical_pages": [
+      184,
+      185,
+      186
+    ],
+    "result": "pass: 主界面骨架、Dot 行及圆形头像无矩形残留；差异路径为短条，代码清晰；图注、相邻段落和页边均正常。"
+  }
+}

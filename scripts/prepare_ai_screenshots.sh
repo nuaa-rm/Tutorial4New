@@ -1,52 +1,55 @@
 #!/usr/bin/env bash
-# 从真实窗口截图生成脱敏教学图；原图不复制到仓库。
+# 仅将生图候选的骨架占位合入已脱敏截图，保留真实控件与代码像素。
 set -euo pipefail
 
-if [[ $# -ne 3 ]]; then
-  printf '%s\n' '用法：bash scripts/prepare_ai_screenshots.sh 主界面原图 差异面板原图 新输出目录' >&2
+if [[ $# -ne 5 ]]; then
+  printf '%s\n' '用法：bash scripts/prepare_ai_screenshots.sh 已脱敏主图 已脱敏差异图 主图生图候选 差异生图候选 新输出目录' >&2
   exit 2
 fi
 task_main=$1
 task_review=$2
-task_output=$3
-for task_input in "$task_main" "$task_review"; do
+task_main_candidate=$3
+task_review_candidate=$4
+task_output=$5
+for task_input in "$task_main" "$task_review" "$task_main_candidate" "$task_review_candidate"; do
   [[ -f "$task_input" ]] || { printf '文件不存在：%s\n' "$task_input" >&2; exit 2; }
-  # 遮挡坐标只适用本次截图。尺寸不匹配时停止，避免错误脱敏。
-  [[ $(magick identify -format '%wx%h' "$task_input") == 2560x1550 ]] || {
-    printf '%s\n' '原图必须为本次核对的 2560x1550；其他界面须重新审查遮挡坐标。' >&2
-    exit 2
-  }
 done
+
+# 坐标对应已裁剪、已脱敏的入书截图，不可直接用于含隐私的原始截图。
+[[ $(magick identify -format '%wx%h' "$task_main") == 2560x1495 ]] || {
+  printf '%s\n' '已脱敏主图必须为 2560x1495；其他布局须重新核对坐标。' >&2; exit 2;
+}
+[[ $(magick identify -format '%wx%h' "$task_review") == 1070x860 ]] || {
+  printf '%s\n' '已脱敏差异图必须为 1070x860；其他布局须重新核对坐标。' >&2; exit 2;
+}
 [[ ! -e "$task_output" ]] || { printf '%s\n' '输出目录必须尚不存在。' >&2; exit 2; }
 mkdir -p "$task_output"
-task_font=$(fc-match 'Noto Sans CJK SC' -f '%{file}')
+task_temp=$(mktemp -d)
+trap 'rm -rf -- "$task_temp"' EXIT
 
-# 实心覆盖项目/聊天名称、账号头像、标题和对话正文；数字是教材标注。
-magick "$task_main" \
-  -fill '#292b30' \
-  -draw 'rectangle 106,160 410,205 rectangle 106,254 410,1284 rectangle 76,1324 410,1549 rectangle 10,1490 61,1549 rectangle 480,65 1400,112 rectangle 460,125 2540,1340' \
-  -font "$task_font" -pointsize 35 -fill '#bfc6ce' \
-  -annotate +130+320 '项目名称已隐藏' \
-  -annotate +940+715 '对话正文已隐藏' \
-  -annotate +505+98 '聊天标题已隐藏' \
-  -fill '#10bcc4' \
-  -draw 'circle 375,233 420,233 circle 520,210 565,210 circle 980,1440 1025,1440 circle 1300,1371 1345,1371' \
-  -fill '#ffffff' -pointsize 58 \
-  -annotate +357+254 '1' -annotate +502+231 '2' \
-  -annotate +962+1461 '3' -annotate +1282+1392 '4' \
-  -crop 2560x1495+0+55 +repage -alpha off -strip \
-  "$task_output/desktop-overview.png"
+# 白色为可替换的原隐私区；黑色保留原图。四个教材标号也从原图保留。
+magick -size 2560x1495 xc:black -fill white \
+  -draw 'rectangle 106,105 410,150 rectangle 106,199 410,1229 rectangle 76,1269 410,1494 rectangle 10,1435 61,1494 rectangle 480,10 1400,57 rectangle 460,70 2540,1285' \
+  -fill black \
+  -draw 'circle 375,178 422,178 circle 520,155 567,155 circle 980,1385 1027,1385 circle 1300,1316 1347,1316' \
+  "$task_temp/main-mask.miff"
+magick "$task_main_candidate" -resize '2560x1495!' \
+  -fill '#141414' -draw 'rectangle 106,105 410,150' \
+  -fill '#303236' -draw 'roundrectangle 120,119 240,139 8,8' \
+  -fill '#111111' -draw 'rectangle 10,1435 61,1494' \
+  -fill '#303236' -draw 'circle 35,1465 55,1465' \
+  "$task_temp/main-mask.miff" -alpha off -compose CopyOpacity -composite \
+  "$task_temp/main-patch.miff"
+magick "$task_main" "$task_temp/main-patch.miff" -compose Over -composite \
+  -alpha off -strip "$task_output/desktop-overview.png"
 
-# 仅取输入框与改动入口，不包含对话、侧栏、路径或账号。
-magick "$task_main" -crop 945x200+1020+1338 +repage \
-  -alpha off -strip "$task_output/composer-controls.png"
+# 只替换文件路径条，未暂存范围、真实计数、工具栏、行号与全部代码保持原样。
+magick -size 1070x860 xc:black -fill white \
+  -draw 'rectangle 48,131 864,166' "$task_temp/review-mask.miff"
+magick "$task_review_candidate" -resize '1070x860!' \
+  "$task_temp/review-mask.miff" -alpha off -compose CopyOpacity -composite \
+  "$task_temp/review-patch.miff"
+magick "$task_review" "$task_temp/review-patch.miff" -compose Over -composite \
+  -alpha off -strip "$task_output/review-pane.png"
 
-# 仅取差异面板，遮挡相对文件路径；代码内容为本章教材源码。
-magick "$task_review" -fill '#292b30' \
-  -draw 'rectangle 1534,186 2350,221' \
-  -font "$task_font" -pointsize 23 -fill '#bfc6ce' \
-  -annotate +1550+213 '文件路径已隐藏' \
-  -crop 1070x860+1486+55 +repage -alpha off -strip \
-  "$task_output/review-pane.png"
-
-printf '%s\n' '已生成候选脱敏图。须逐张人工复查隐私、控件和排版后再使用。'
+printf '%s\n' '已合入骨架占位候选。须复核隐私、美观、原控件像素及 PDF 实际排版后再使用。'

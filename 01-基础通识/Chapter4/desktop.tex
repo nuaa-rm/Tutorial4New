@@ -126,10 +126,10 @@ API Key、登录缓存和浏览器会话都属于凭据。不要把它们贴进�
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.98\textwidth]{images/ai/desktop-overview_revised.png}
-    \caption{本机 Linux 桌面版的 Codex 入口，2026-10-31 实际截图。1：项目与聊天栏；2：对话区域；3：输入区；4：文件改动入口。项目名、标题、正文和账号头像已实心遮挡，数字为教材标注。}
+    \caption{本机 Linux 桌面版的 Codex 入口，2026-10-31 实际截图。1：项目与聊天栏；2：对话区域；3：输入区；4：文件改动入口。项目名、标题、正文和头像以骨架占位脱敏，数字为教材标注。}
     \label{fig:ai-desktop-overview}
 \end{figure}
-先在图~\ref{fig:ai-desktop-overview}~中找到 1--4，再对照自己的软件。图里的大块灰色区域是脱敏遮挡，实际使用时会显示项目名称和对话内容；选择项目以后，输入区上方的改动入口可以带你进入差异面板。
+先在图~\ref{fig:ai-desktop-overview}~中找到 1--4，再对照自己的软件。图里的圆角灰条是脱敏用的骨架占位，并非软件正在加载；实际使用时会显示项目名称和对话内容。选择项目以后，输入区上方的改动入口可以带你进入差异面板。
 
 新建聊天时，在产品下拉菜单选择 \textbf{ChatGPT} 或 \textbf{Codex}。选择 ChatGPT 后，输入框上方可切换 \textbf{Chat / Work}；做工程任务则选择 Codex。模型菜单用于选模型及可用的思考等级；\texttt{/status} 用于确认当前聊天的状态。想先讨论再实施时使用计划模式；要持续推进较长任务时再考虑目标，见第~\ref{sec:ai-workflow}~节。
 
@@ -167,7 +167,7 @@ API Key、登录缓存和浏览器会话都属于凭据。不要把它们贴进�
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.92\textwidth]{images/ai/review-pane_revised.png}
-    \caption{本机差异面板的真实局部截图。顶部“未暂存”表示查看范围，文件头与行号帮助定位，绿色部分是新增内容。仅保留教材源码区域，文件路径已遮挡；界面计数不是测试结果。}
+    \caption{本机差异面板的真实局部截图。顶部“未暂存”表示查看范围，文件头与行号帮助定位，绿色部分是新增内容。文件路径以骨架占位脱敏，代码和计数保持原样；界面计数不是测试结果。}
     \label{fig:ai-review-pane}
 \end{figure}
 图~\ref{fig:ai-review-pane}~中整段为绿色，是因为这里正在查看新加入的教材文件。普通修改还可能出现删除行与修改块；先确认查看范围，再沿行号阅读，不能看到绿色就默认应该保留。

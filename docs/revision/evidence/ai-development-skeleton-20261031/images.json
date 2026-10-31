@@ -1,0 +1,42 @@
+{
+  "base_commit": "bc7b581",
+  "method": "built-in imagegen candidates, privacy-mask-only composition with ImageMagick; original UI and code preserved",
+  "visual_review": "pass: 主图与差异图已逐张查看，骨架层次清楚；左上 Dot 行与左下头像矩形残留已清理",
+  "records": [
+    {
+      "name": "overview",
+      "size": [
+        2560,
+        1495
+      ],
+      "sha256": "7eff18cb76507ed72511bccf8a27c2bf0abbcaf618878acc01f271982523c6f5",
+      "changed_pixels": 2971675,
+      "changed_pixels_outside_privacy_regions": 0,
+      "mode": "RGB",
+      "metadata_keys": [],
+      "instructional_markers_pixel_identical": true,
+      "composer_pixel_identical": true,
+      "dot_row_background_matches_sidebar": true,
+      "avatar_background_matches_rail": true
+    },
+    {
+      "name": "review",
+      "size": [
+        1070,
+        860
+      ],
+      "sha256": "09e625184d8dc88cb08bfd99fabd0d458fb6fa897c7bd5261d3c71089eb39d26",
+      "changed_pixels": 29412,
+      "changed_pixels_outside_privacy_regions": 0,
+      "mode": "RGB",
+      "metadata_keys": [],
+      "all_diff_code_pixels_identical": true,
+      "toolbar_pixels_identical": true
+    },
+    {
+      "name": "composer-controls",
+      "unchanged": true,
+      "sha256": "60021824609a372e052f730393f1b9704ee8e02238e3f8ee886835c451e2a6a5"
+    }
+  ]
+}
