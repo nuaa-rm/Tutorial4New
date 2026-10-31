@@ -1,0 +1,7 @@
+{
+  "scope": "隔离tmux socket与空配置，未访问现有用户会话",
+  "check": "detached会话在两次客户端查询之间持续输出心跳",
+  "passed": true,
+  "first_heartbeats": 5,
+  "second_heartbeats": 10
+}

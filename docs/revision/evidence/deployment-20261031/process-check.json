@@ -1,0 +1,26 @@
+[
+  {
+    "case": "normal",
+    "exit_code": 0,
+    "stdout": "start pid=5 version=verification-v1 cwd=/tmp/deploy-demo-check-k4c4d376\n2026-10-31T06:10:22+00:00 heartbeat=1\n2026-10-31T06:10:22+00:00 heartbeat=2\n2026-10-31T06:10:22+00:00 heartbeat=3\n",
+    "stderr": ""
+  },
+  {
+    "case": "failure",
+    "exit_code": 1,
+    "stdout": "start pid=6 version=verification-v1 cwd=/tmp/deploy-demo-check-k4c4d376\n2026-10-31T06:10:22+00:00 heartbeat=1\n2026-10-31T06:10:22+00:00 heartbeat=2\n模拟失败：以状态码 1 退出\n",
+    "stderr": ""
+  },
+  {
+    "case": "invalid",
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "usage: heartbeat.py [-h] [--count COUNT] [--interval INTERVAL]\n                    [--fail-after FAIL_AFTER]\nheartbeat.py: error: 次数不能为负，间隔必须大于 0\n"
+  },
+  {
+    "case": "help",
+    "exit_code": 0,
+    "stdout": "usage: heartbeat.py [-h] [--count COUNT] [--interval INTERVAL]\n                    [--fail-after FAIL_AFTER]\n\n只写标准输出的部署练习，不访问相机、串口或控制设备。\n\noptions:\n  -h, --help            show this help message and exit\n  --count COUNT         输出次数，0 为持续运行\n  --interval INTERVAL   输出间隔，单位秒\n  --fail-after FAIL_AFTER\n                        第几次输出后模拟失败\n",
+    "stderr": ""
+  }
+]

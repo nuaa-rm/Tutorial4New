@@ -1,4 +1,4 @@
-% 卷一四章题解；由 main.tex 在全文末尾载入。
+% 卷一五章题解；由 main.tex 在全文末尾载入。
 \begingroup
 \setlength{\emergencystretch}{3em}
 
@@ -1845,6 +1845,129 @@ Token 是输入输出处理的计量单位；窗口限制一次可处理的信�
 \paragraph*{章末第~\ref{prob:v1-ai-10}~题：Skill 验证设计}
 \begin{solution}
 以换算审查为例：给有非整米截断的修改，观察是否核对单位和操作数类型；给单纯构建路径错误，检查描述是否引起误用；缺输入有效范围时应查接口或说明缺口；编译器不可用时应报告工具错误及未验证项。静态格式检查不能证明工作流有效；脚本、测试命令、失败恢复和实际工具结果需要运行核对。判断依据是行为与证据，不是回答是否出现固定标题。
+\end{solution}
+
+
+\section*{第五章：实机调试部署技巧}
+\phantomsection
+\addcontentsline{toc}{section}{第五章题解：实机调试部署技巧}
+\subsubsection*{随堂练习}
+
+\paragraph*{随堂练习~\ref{ex:deploy-physical}：把本地控制台接对}
+\begin{solution}
+视频从机载电脑的 HDMI/DP 输出送到便携屏的输入，键鼠的 USB 接机载电脑；屏幕与机载电脑按各自型号供电，USB-C 是否同时传视频、数据或供电需查接口说明。实际记录机器人上的 \texttt{hostname}、\texttt{whoami} 和架构，确认正在操作目标机。还须核对当前软件版本与启动环境，不能从“看到桌面”推出视觉功能正常。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:deploy-ssh}：身份与连接对象}
+\begin{solution}
+笔记本运行客户端，机器人运行 \texttt{sshd}。通过机器人本地读出的主机公钥指纹核验首次连接，登录后检查 \texttt{hostname}、\texttt{whoami} 与目录。用户私钥留在本人笔记本，公钥加入机器人用户的 \path{~/.ssh/authorized_keys}；主机私钥由机器人 SSH 服务保存，其公钥指纹用于核验服务器身份。别名在笔记本 \path{~/.ssh/config} 中指向实际地址，不会自动修改网络 DNS。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:deploy-remote-editor}：确认远端文件系统}
+\begin{solution}
+先验证普通 SSH，再连接 Remote -- SSH 并检查状态栏、\texttt{hostname} 与 \texttt{pwd}。远程窗口打开的目录属于目标机；本地窗口的同名目录属于笔记本，不能仅靠文件名判断。终端与构建工具要在相应环境核验。SSH 已成功但 Server 下载失败，应查远端系统要求、资源、下载通路与扩展日志，不改用户登录配置来碰运气。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:deploy-desktop}：会话与可用条件}
+\begin{solution}
+合格记录包括系统、桌面会话、工具版本、目标地址或 ID、主机名及控制验证；主动断开后在目标机确认结束。锁屏、退出登录和重启是不同状态，要分别记录。Ubuntu 22.04 的 GNOME 桌面共享依赖已有图形会话，不能据此保证无人登录或无屏重启可用。RustDesk 还要核对 Wayland/X11 与登录界面条件；无设备时保留待测清单。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:deploy-lan}：地址和名字分层核验}
+\begin{solution}
+以双端实际地址、前缀和 \texttt{ip route get 目标地址} 的网卡与源地址为准。IP 能用但名字失败，检查机器人 Avahi 发布、客户端 NSS/解析器与 \texttt{getent hosts}，以及本地多播是否被过滤；两者都失败，先查物理链路、实际子网、错误地址和客户端隔离。\texttt{ping} 成功不证明 SSH 已开，ICMP 被禁也不代表 SSH 必然失败。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:deploy-wired}：双端直连卡}
+\begin{solution}
+示例卡可写笔记本 \texttt{192.168.77.1/24}、机器人 \texttt{192.168.77.2/24}，但必须先确认不与现有网络重叠，接口名与原连接名来自两端实际输出。先插线，再新建并启用各自独立配置；目标在同一子网，无需默认网关和 DNS，\texttt{never-default} 防止它抢默认出口。完成后在两端本地停用 \texttt{rm-direct}，恢复原配置；没有原连接时不杜撰一个恢复命令。未接线的配置卡不能当实接证据。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:deploy-tailscale}：分别证明路径与服务}
+\begin{solution}
+从获准账户的控制台读取设备名、完整 MagicDNS 域名和密钥状态，从目标机读取实际 Tailscale 地址。\texttt{status} 说明可见设备状态，\texttt{tailscale ping} 说明 Tailscale 两端通信路径，真正 SSH 登录才继续证明端口服务与身份认证。必须切到另一互联网出口实测，才能记录跨网成功；密钥到期与重新认证应在有备用入口时处理。截图里的示例开关、域名和地址不是自己的配置。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:deploy-delivery}：同步与可追溯版本}
+\begin{solution}
+先预览专用目录，再实际同步，核对远端 \path{~/rm-deploy-demo/heartbeat.py} 存在，并在两端运行 \texttt{sha256sum} 比较同一文件。传输成功只证明文件到位。部署记录应有提交与未提交差异、目标架构和系统、依赖与模型配置校验值、构建/启动/停止命令、实际验证结果与当前可用版本入口；回退恢复配套组合，并重新验证。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:deploy-acceptance}：把能跑改成证据}
+\begin{solution}
+文件与启动记录包含版本、路径和启动日志；固定输入记录数据版本、输出与预定质量指标；真实设备记录相机实际格式、输入时间戳、串口状态、异常恢复；连续运行记录约定时长、真实起止、资源温度与退出情况。真实相机链路、板端资源温度和物理断连不能由笔记本回放替代。阈值按队内任务确定，没有测量条件就明确未验证。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:deploy-tmux}：离开会话与停止程序}
+\begin{solution}
+重新接回后应看到同一任务的 PID、序号继续增长；\texttt{Ctrl+B} 松开再按 \texttt{D} 只离开 tmux 客户端，\texttt{Ctrl+C} 才交给当前前台程序处理。本例会正常结束。关机或重启会销毁 tmux 服务与进程，用户会话策略也可能影响其存活，不能靠 \texttt{attach} 自动恢复。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:deploy-service}：启动条件和失败处理}
+\begin{solution}
+改 \texttt{Environment} 后 \texttt{daemon-reload} 再 \texttt{restart}，从日志中的版本和目录核对。模拟失败以状态 1 退出，管理器按 \texttt{Restart=on-failure} 等待后重启；命中启动频率限制时先修复、停止、\texttt{reset-failed} 再启动。\texttt{WorkingDirectory} 是相对路径起点，\texttt{ExecStart} 是执行命令，\texttt{start} 立即启动，\texttt{enable} 设置随目标启动；用户管理器的生命周期另行核验。只有 unit 静态检查结果，不能写成服务已启动。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:deploy-ops}：观察不等于停止}
+\begin{solution}
+记录观察时间、版本、\texttt{MainPID}、\texttt{NRestarts}、磁盘使用和相同时间段日志。退出 \texttt{journalctl -f} 只停止查看；\texttt{systemctl --user stop} 才停止本例服务，随后核对 \texttt{inactive} 且心跳不再新增。真实程序显示 \texttt{active} 却无图像，要继续检查相机连接、输入时间戳/帧计数、处理输出速率及错误日志，不能只看进程存在。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:deploy-kvm}：选入口并画接线}
+\begin{solution}
+系统和 SSH 正常但无线不可用，先用有线 SSH；机器人 IP 配错，可选 USB KVM 或网络独立的 IP KVM；停在 BIOS 可用支持该板启动视频与 USB 键盘的硬件 KVM。完全断电须先恢复目标供电，预装且兼容的 ATX 控制也不等于机器人总电源控制。笔记本侧可为一条 USB 或网线，目标侧仍须视频输出到 KVM、KVM 的 USB HID 到机器人，以及对应电源。画面和输入分别验证。
+\end{solution}
+
+\subsubsection*{章末习题}
+
+\paragraph*{章末第~\ref{prob:v1-deploy-1}~题：目标平台}
+\begin{solution}
+\texttt{Exec format error} 常见于体系结构不匹配，还要检查操作系统、动态库、GPU/相机驱动、SDK、路径权限、模型后端与版本。首次安装时网络与远程服务可能尚未具备，便携屏和 USB 键鼠提供直接操作入口；它们也用于系统启动故障救援。进入桌面与真实输入处理通过是不同验收。
+\end{solution}
+
+\paragraph*{章末第~\ref{prob:v1-deploy-2}~题：名字与身份}
+\begin{solution}
+\texttt{Host rm-robot} 是本机 SSH 别名，\texttt{HostName} 指定实际地址或可解析名字；主机指纹核验服务器，用户公钥用于服务器核验登录者。\texttt{Permission denied} 优先查用户和密钥/密码；超时先查链路、地址、路由、访问规则与端口服务。二者都不能靠盲目更换用户名或关闭密钥检查解决。
+\end{solution}
+
+\paragraph*{章末第~\ref{prob:v1-deploy-3}~题：远程入口的边界}
+\begin{solution}
+Remote -- SSH 提供远端工程文件和执行环境；GNOME RDP 提供桌面共享；RustDesk 提供另一套跨平台桌面访问；硬件 KVM 接视频与 USB 输入，可绕开目标机远程桌面及网络服务。22.04 共享已有 GNOME 会话，未登录、锁屏、无屏或不同显示协议时要另测，不能套用新版本远程登录功能。
+\end{solution}
+
+\paragraph*{章末第~\ref{prob:v1-deploy-4}~题：三种名字}
+\begin{solution}
+IP 可用而 \texttt{.local} 不通，检查 Avahi、客户端解析模块和本地 mDNS 多播；跨路由/VLAN 后本地多播通常不再到达。裸主机名可来自 DNS 搜索域、hosts 或其他解析来源，\texttt{.local} 通常是 mDNS，MagicDNS 由 Tailnet 提供名字服务，三者不等价。本机 SSH 别名也不应混入这三种网络名字机制。
+\end{solution}
+
+\paragraph*{章末第~\ref{prob:v1-deploy-5}~题：没有 DHCP 的直连}
+\begin{solution}
+先核对实际路由，选择不重叠的子网，例如双方 \texttt{192.168.77.1/24} 与 \texttt{192.168.77.2/24}。同网段互访无需默认网关和 DNS，独立直连配置不应抢默认路由；本地保留旧配置和恢复入口，停用新配置后恢复旧连接。若接口不由 NetworkManager 管理，沿用实际的 Netplan/networkd 配置流程，不同时接管。
+\end{solution}
+
+\paragraph*{章末第~\ref{prob:v1-deploy-6}~题：Tailscale 路径之后}
+\begin{solution}
+先核对目标实际地址、设备状态与名称，随后查 Tailnet Grants/ACL、主机防火墙、22 端口与 \texttt{sshd}，进入认证阶段再查账户及密钥；普通 OpenSSH 与可选 Tailscale SSH 不能混用假设。Tailscale 无法凭空恢复出口，完全失去可用路径时须本地、有线或独立带外入口。ROS 2 自动发现可能依赖多播与中间件配置，SSH 成功不证明发现与数据通道已通。
+\end{solution}
+
+\paragraph*{章末第~\ref{prob:v1-deploy-7}~题：传输与回退}
+\begin{solution}
+\texttt{-n} 是预览，\texttt{-a} 保留常用属性，\texttt{-v} 显示过程；\texttt{src/} 把源目录内容放入目标 \texttt{dst/}。去掉 \texttt{-n} 才执行，同名文件可能被覆盖。模型、参数与工作区修改均会影响实际行为；只切源码提交会遗漏这些配套文件、依赖和启动配置。旧制品或提交应可追溯，回退后仍需核对运行入口。
+\end{solution}
+
+\paragraph*{章末第~\ref{prob:v1-deploy-8}~题：会话与服务}
+\begin{solution}
+普通 SSH 前台进程在断开时可能收到挂断等影响，不应依赖其继续；tmux 将终端留在远端，但不负责崩溃重启或跨重启恢复；systemd 按 unit 管理启动、停止和可配置的失败恢复。保存 unit 不等于重载或启动，查用户管理器、\texttt{daemon-reload}、\texttt{status} 与日志。交互终端能跑而服务失败，应查工作目录、绝对路径、显式环境与权限，服务不会自动获得交互 Shell 中的一切设置。
+\end{solution}
+
+\paragraph*{章末第~\ref{prob:v1-deploy-9}~题：KVM 的线连到哪里}
+\begin{solution}
+USB KVM 的一线说的是笔记本到 KVM 的 Host 链路；目标机仍需 HDMI/DP 转接视频、USB HID 和电源。IP-KVM 的网线接 KVM 的网络接口，双方还需可用地址；KVM 到目标的线仍存在。普通采集卡只采画面，若无额外 USB 输入模拟就不能操作目标。具体电源与接口以型号手册为准，RJ45 外形也不保证都是网口。
+\end{solution}
+
+\paragraph*{章末第~\ref{prob:v1-deploy-10}~题：赛前恢复演练}
+\begin{solution}
+预先按赛事要求准备有线入口与恢复窗口，停机固定后接线。先查链路/地址/路由，再查 SSH 及身份；连入后看服务状态、主进程、日志时间、工作目录、版本与输入。目标网络不可用时换 USB KVM 或独立 IP-KVM。保留故障日志后停止候选，按记录恢复已验证的程序、参数与模型，重新核对输入输出。记录原因、实际切换结果和未验证项，结束后停止练习服务、恢复网络并清点线缆。没有机器人或赛场条件时，软件演练与真实验收分别写明。
 \end{solution}
 
 \endgroup

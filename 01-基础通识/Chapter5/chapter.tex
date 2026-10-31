@@ -1,0 +1,54 @@
+\chapter{实机调试部署技巧}
+\label{chap:deployment}
+
+\begin{introduction}
+  \item 学习目标：选择现场调试入口；用 SSH、远程桌面和主机名连接机器人；配置有线直连与 Tailscale；同步明确版本并核验运行；使用会话、服务、日志与 KVM 工具定位故障。
+  \item 建议学时：约 2--3 天，包含两机连接、心跳项目与故障排查；真实设备与长时间运行按队内计划另行验收。
+  \item 本卷边界：以 Ubuntu 22.04 机载电脑与常见桌面客户端为例，讲部署和维护基本功；相机、CUDA、ROS 2 及控制链路见卷二、卷三。工具资料按 2026 年 10 月 31 日核对，软件界面和硬件型号应以实际版本为准。
+\end{introduction}
+
+\begingroup
+\setlength{\emergencystretch}{3em}
+\clubpenalty=10000
+\widowpenalty=10000
+
+\input{Chapter5/physical.tex}
+\input{Chapter5/ssh.tex}
+\input{Chapter5/desktop.tex}
+\input{Chapter5/network.tex}
+\input{Chapter5/deployment.tex}
+\input{Chapter5/operations.tex}
+\input{Chapter5/kvm.tex}
+
+\section{本章小结}
+\begin{conclusion}
+代码在自己的电脑上运行，是实机部署的起点。先为机载电脑准备系统、依赖和维护入口，再把确定版本的代码、配置与模型送过去，在目标环境构建、试跑和记录结果。
+
+便携屏与键鼠适合初次安装和现场救援；日常命令操作用 SSH，需要桌面再用 RDP 或其他远程桌面。网络方面，先确认链路和地址，再处理名字：局域网可用 DNS 或 \texttt{.local}，网线直连要配同一子网的地址，跨网络可用 Tailscale 的私有地址和 MagicDNS。名称、网络可达、服务与身份验证是不同层次，逐层排查比反复重装软件更有效。
+
+临时保留终端用 tmux，长期管理程序用 systemd，靠日志与资源记录判断运行状态；无无线环境可用有线网络，操作系统网络失效时再考虑带外 KVM。连接工具给你操作入口，最终交付仍要经过真实输入、异常恢复和约定时长的验证，并保留可以回退的配套版本。
+\end{conclusion}
+
+\begin{problemset}
+  \item\label{prob:v1-deploy-1} （基础）笔记本上的程序能运行，复制到 ARM 机载电脑后却报 \texttt{Exec format error}，还可能遇到哪些环境差异？首次安装系统时为什么仍值得准备便携屏与键鼠？
+  \item\label{prob:v1-deploy-2} （基础）某人把 \texttt{ssh rm-robot} 中的别名当成真实主机名，又把机器人主机指纹当成自己的公钥。分别纠正这两处混淆，并说明 \texttt{Permission denied} 与连接超时通常应从哪层开始查。
+  \item\label{prob:v1-deploy-3} （基础）比较 VS Code Remote -- SSH、GNOME RDP、RustDesk 与 KVM 各自提供的操作入口。Ubuntu 22.04 未登录图形桌面时，为什么不能直接断言其桌面共享一定可用？
+  \item\label{prob:v1-deploy-4} （基础）同一路由器下，IP 可以连接而 \texttt{rm-robot.local} 不可解析；换到校园另一网段后，\texttt{.local} 又失效。分别说明应检查什么；裸主机名、\texttt{.local} 与 MagicDNS 是否是同一机制？
+  \item\label{prob:v1-deploy-5} （基础）笔记本直连机器人网口，双方都没有 DHCP 服务。请设计不与现有网络冲突的地址与掩码，说明是否需要默认网关、DNS，并写出如何恢复原连接。
+  \item\label{prob:v1-deploy-6} （提高）双方均安装 Tailscale，\texttt{tailscale ping} 成功却无法 SSH 登录。给出排查顺序；若机载电脑彻底失去互联网，远方队友能否一定靠 Tailscale 救回来？为什么不能直接用它保证 ROS 2 自动发现？
+  \item\label{prob:v1-deploy-7} （基础）解释 \texttt{rsync -avn src/ host:dst/} 的预览与目录含义。部署记录为什么应包含模型、配置与未提交改动？回退时只切换源码提交可能遗漏什么？
+  \item\label{prob:v1-deploy-8} （提高）比较 SSH 普通前台进程、tmux 会话与 systemd 服务对断线、崩溃、重启的处理。用户服务文件保存好了却未运行，或打开终端能跑、服务中找不到依赖，分别应查哪些条件？
+  \item\label{prob:v1-deploy-9} （基础）“USB KVM 只要一根线”“IP-KVM 插上网线就能操控机器人”“采集卡可以代替 KVM”分别缺少什么前提？画出笔记本、KVM、机器人之间的视频、键鼠与网络连接。
+  \item\label{prob:v1-deploy-10} （实践自测）设计一次赛前演练：无线不可用，候选版本启动后没有新日志。给出有线接入、分层定位、恢复可用版本与退出现场连接的方案，写清应留下的记录。可在练习机完成软件部分，涉及比赛与机器人部分列明实际验证条件。
+\end{problemset}
+
+\section{本章验收}
+下面检查实际操作能力，允许查文档。涉及机器人动作时由负责人确认测试状态与停止入口；没有对应设备的项目保留为待验收，不能拿模拟截图顶替。
+\begin{enumerate}
+  \item 在两台设备间核验主机指纹并用自己的密钥 SSH 登录，现场指出命令在哪台机器执行；通过别名或可解析的主机名连接，解释所用解析机制。
+  \item 在专用连接配置下完成一次网线直连，暂时停用无线连接后仍能 SSH；演示查看实际路由与地址，并恢复原网络配置。跨网条件可用时，再演示 Tailscale 的在线状态、名称和目标端口验证。
+  \item 演示一种适合实际系统的远程桌面，指出它依赖的服务、登录状态和网络条件。若具备 USB KVM 或 IP-KVM，再在操作系统网络不可用时演示画面和键鼠控制，说明各根线与供电作用。
+  \item 从专用目录部署心跳项目，用 tmux 保留会话，再用 systemd 启停并查询日志。由学长在副本设置一个路径、工作目录或退出故障，依据实际证据定位，恢复后停止练习服务。
+  \item 给出一份可以交给队友的部署记录：版本、环境、模型配置、启动与停止、实际验证结果、未验证项和回退入口。真实工程还须另行提交设备输入、异常恢复与约定时长的测试记录。
+\end{enumerate}
+\endgroup

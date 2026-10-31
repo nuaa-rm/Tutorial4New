@@ -1,0 +1,13 @@
+2026-10-31, repository root
+Command:
+  systemd-analyze --user verify 01-基础通识/examples/deployment-demo/rm-heartbeat.service
+
+Sandboxed result: exit 1, socket options denied (SO_PASSRIGHTS/SO_PASSCRED).
+Approved read-only verification outside the sandbox: exit 0, no diagnostics.
+The command verifies unit configuration; it does not install or start the unit.
+No user service was installed, enabled, started or otherwise changed.
+Actual service start/restart, user logout, reboot and target robot remain unverified.
+
+An additional isolated tmux runtime check could not create its server in the sandbox
+(exit 1). The subsequent approved isolated runtime check succeeded; see tmux-check.json.
+Its dedicated socket and server were cleaned; no existing user session was touched.

@@ -1,0 +1,78 @@
+{
+  "date": "2026-10-31",
+  "command": "xelatex -interaction=nonstopmode -halt-on-error main.tex",
+  "working_directory": "01-基础通识",
+  "final_exit_code": 0,
+  "final_pass": 7,
+  "pdf_pages": 286,
+  "chapter_physical_pages": [
+    207,
+    230
+  ],
+  "chapter_printed_pages": [
+    198,
+    221
+  ],
+  "summary_physical_pages": [
+    231,
+    238
+  ],
+  "new_answers_physical_pages": [
+    283,
+    286
+  ],
+  "examples": 18,
+  "exercises": 13,
+  "problems": 10,
+  "figures": 8,
+  "warnings": [
+    "原有Fandol字体形状替代",
+    "原有第一章Night Theme Switcher段落溢出21.58704pt"
+  ],
+  "no_new_overfull": true,
+  "no_undefined_references": true,
+  "no_missing_characters": true,
+  "no_rerun_requested": true,
+  "checks": [
+    "结构/资源/题解定位",
+    "完整新章207-230逐页视觉检查",
+    "卷末231-238与新题解283-286检查",
+    "卷首1-2与目录8-9检查",
+    "修复短nmcli/目录树/PiKVM代码框跨页后重查受影响页"
+  ],
+  "runtime_limits": "真实双机/跨网/服务启动/硬件/长时间运行未实测",
+  "sha256": {
+    "01-基础通识/main.pdf": "dbb37d8dba9d5f67c6f4af725173b981cd79723294685192246ec941c2f98c11",
+    "01-基础通识/images/deployment/tailscale_magicdns.png": "d0da4d2ba4e63a009c1f452c18e6bd7dcbff8666a00d7a9a819f043989b6ff17",
+    "01-基础通识/images/deployment/gnome42-rdp.png": "d39b20bb8da87f43ea51f27c0452ae5ce99b44ba481bd340e70013a11f905050",
+    "01-基础通识/images/deployment/rustdesk-client.png": "68e7c2d82207762e93ec12aebf052e85683fbc16d9ca589d0d31f8e47217a427",
+    "01-基础通识/images/deployment/network_paths_revised.png": "6c9a8af255ecf9e5e5d41abc7e0672680446e731cfbe42e6fb7e7977081a79b7",
+    "01-基础通识/images/deployment/kvm_wiring_revised.png": "933855b953a62a418f653acbf080f6ba2a5321df647e3446883b8ea98cbc2544",
+    "01-基础通识/images/deployment/openterface-mini-kvm.jpg": "ba1782939e2c88fb08bb51fd3bd32887f7191e0ea9f8707a77d7d9a705fa61ea",
+    "01-基础通识/images/deployment/pikvm-v4.jpg": "fc8ae93e2f7b5034d192929fdc78064580b902f44de98c631d55670d4319a59c",
+    "01-基础通识/images/deployment/portable-monitor.jpg": "f359a9bfd6a131d9b6e7b3cd1e00f26d2b816f1a572954305bb2f83ec00ae0f6"
+  },
+  "visual_fix_changed_pages": [
+    9,
+    215,
+    216,
+    219,
+    220,
+    221,
+    222,
+    223,
+    224,
+    225,
+    226,
+    227,
+    228,
+    229
+  ],
+  "chapter1_4_text_unchanged": true,
+  "page_count": 286,
+  "original_page_count": 259,
+  "aux_and_toc_stable": true,
+  "last_pass_text_changed_pages": [
+    9
+  ]
+}

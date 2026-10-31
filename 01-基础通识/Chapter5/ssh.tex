@@ -1,0 +1,93 @@
+\section{先把终端搬过来：SSH}
+\label{sec:deploy-ssh}
+
+便携屏能让你看到机器人上的桌面，但如果只是改参数、编译、看日志，每次搬一套外设实在有点累。安全外壳协议（Secure Shell，SSH）可以让笔记本打开机载电脑的终端：你在自己的键盘上输入，命令却在机器人上执行，结果再传回来。它传输的是终端数据，不需要不断发送整张桌面，通常很适合远程开发。
+
+这里先假定两台电脑已接入同一台路由器，机器人当前地址为 \texttt{192.168.50.20}，普通用户名为 \texttt{rm}。这两个值都要换成自己的；如何找到地址、用主机名代替地址以及没有路由器时怎么办，稍后在第~\ref{sec:deploy-lan}、\ref{sec:deploy-wired}~节动手。\textbf{能上网不代表两台设备之间能互通}，访客网络可能禁止客户端相互访问。
+
+\subsubsection{装在谁上面，命令又在哪边执行}
+
+SSH 分为客户端与服务端：笔记本运行客户端发起连接，机载电脑运行服务端接收连接。Ubuntu 上 \texttt{openssh-client} 提供前者，\texttt{openssh-server} 提供后者。Windows 10/11 通常可在 PowerShell 或终端使用 \texttt{ssh}；若找不到命令，在“可选功能”安装 OpenSSH 客户端。机载电脑装的是 Ubuntu Server 还是 Desktop，不影响使用 SSH。
+
+\begin{example}[从笔记本进入机载电脑]
+先借助便携屏，在\textbf{机器人本机终端}安装并核对服务：
+\begin{tbash}
+sudo apt update
+sudo apt install openssh-server
+sudo systemctl enable --now ssh
+systemctl is-active ssh
+hostname
+whoami
+ip -br address
+sudo ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
+\end{tbash}
+\texttt{is-active} 应输出 \texttt{active}；记下实际用户名、当前接口的 IPv4 地址，以及最后一行的 \texttt{SHA256:...} 主机指纹。若系统使用防火墙，应由维护者允许调试网络到 SSH 端口，不必为了排错关闭整个防火墙。
+
+然后在\textbf{笔记本终端}执行，基本形式是 \texttt{ssh 用户名@地址}：
+\begin{tbash}
+ssh rm@192.168.50.20
+hostname
+whoami
+pwd
+exit
+\end{tbash}
+第一次连接会问是否信任主机密钥。把显示的指纹与刚才在机器人本机看到的指纹核对，一致再输入 \texttt{yes}，然后输入机器人上 \texttt{rm} 用户的密码；输入密码时没有星号回显是正常现象。连接后，\texttt{hostname} 应是机器人而非笔记本的名字，\texttt{pwd} 通常是远端家目录。\texttt{exit} 退出远端终端，回到笔记本。
+\end{example}
+
+如果提示 \texttt{Connection timed out}，先查地址、链路、客户端隔离与防火墙；\texttt{Connection refused} 通常表示目标拒绝该端口连接，应检查 SSH 服务和端口；\texttt{Permission denied} 则优先核对用户名、密码或密钥。用 \texttt{ssh -v rm@地址} 查看连接过程。终端提示符可自定义，容易看花眼时，主动运行 \texttt{hostname} 与 \texttt{pwd} 确认操作对象。
+
+\begin{note}
+主机密钥验证的是“你连到哪台机器”。如果以前连接过，后来出现 \texttt{REMOTE HOST IDENTIFICATION HAS CHANGED}，先核对是否重装系统、地址被另一台机器占用或连接目标错误；确认新指纹后再按文档更新记录。不要养成禁用主机密钥检查的习惯。改 SSH 配置前也应保留当前连接与本地救援入口，先运行 \texttt{sudo sshd -t} 检查配置。
+\end{note}
+
+\subsubsection{密钥和连接别名：少输一点，也更好管理}
+
+用户密钥回答“你是谁”，与刚才用于核验服务器身份的主机密钥职责不同。私钥留在笔记本，公钥可以交给机器人；私钥密码用于保护本地私钥，也不等于机器人登录密码。下面以 Ubuntu 笔记本为例；Windows 客户端也可生成密钥，分发公钥的方法见 OpenSSH 文档。
+
+\begin{example}[给自己的调试连接建档]
+在笔记本上生成专用密钥；若该名字已存在，选新名字，不覆盖旧密钥。按提示设置私钥密码：
+\begin{tbash}
+ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_rm -C "rm-debug-laptop"
+ssh-copy-id -i ~/.ssh/id_ed25519_rm.pub rm@192.168.50.20
+ssh -i ~/.ssh/id_ed25519_rm rm@192.168.50.20
+\end{tbash}
+确认可登录后，退出连接，把下面一段加入\textbf{笔记本}已有的 \path{~/.ssh/config}，不要覆盖其他配置：
+\begin{tbash}
+Host rm-robot
+    HostName 192.168.50.20
+    User rm
+    IdentityFile ~/.ssh/id_ed25519_rm
+    IdentitiesOnly yes
+    ServerAliveInterval 15
+    ServerAliveCountMax 3
+\end{tbash}
+之后运行 \texttt{ssh rm-robot} 即可。\texttt{Host} 是本机别名，\texttt{HostName} 指定实际目标。以后可将目标改为 \path{rm-robot.local} 或 Tailscale 名称。\texttt{IdentityFile} 指明使用哪份私钥；保活参数帮助发现连接中断，不会自动重启远端程序。用 \texttt{ssh -G rm-robot} 可展开当前实际采用的客户端配置。
+\end{example}
+
+不要把私钥提交到 Git，也不要让全队共用一份个人私钥。每人保留自己的身份，离队或笔记本丢失时，维护者便能单独撤销相应公钥。公钥登录先在另一个终端验证成功，再考虑是否调整密码登录策略，避免把自己锁在门外。
+
+\begin{exercise}\label{ex:deploy-ssh}
+使用自己的两台设备完成一次 SSH 登录，记录客户端与服务端的主机名、用户名和主机指纹核验方式。再添加一个连接别名，以密钥登录，说明公钥、私钥、主机密钥分别保存在哪里、负责验证谁。只有一台机器时可先在虚拟机练习，并明确标注不是实机验收。
+\end{exercise}
+
+\begin{conclusion}
+SSH 让你远程使用终端；它需要网络可达、远端服务启动及身份验证成功。IP 地址或可解析的名字负责找机器，主机指纹负责确认机器，用户名与用户密钥负责登录。断开 SSH 后程序是否继续运行，还取决于会话与进程的启动方式，见第~\ref{sec:deploy-ops}~节。
+\end{conclusion}
+
+安装与服务检查可查 \href{https://ubuntu.com/server/docs/how-to/security/openssh-server/}{Ubuntu OpenSSH 指南}；密钥和客户端配置参数分别见 \href{https://man.openbsd.org/ssh-keygen}{ssh-keygen 手册}、\href{https://man.openbsd.org/ssh_config}{ssh\_config 手册}。
+
+\subsubsection{想保留熟悉的编辑器：VS Code Remote -- SSH}
+
+SSH 不要求你只能用终端编辑器。第 1 章用过的 VS Code 可安装 Microsoft 的 \texttt{Remote - SSH} 扩展，在笔记本显示界面，在机载电脑读写工程、运行终端与调试器。这属于远程开发：它不会直接把机器人的整个桌面搬过来，也不会自动把所有本地文件同步过去。
+
+\begin{example}[确认编辑与编译发生在哪台电脑]
+先在普通终端验证 \texttt{ssh rm-robot} 成功，再在\textbf{笔记本}的 VS Code 扩展页安装 \texttt{Remote - SSH}。打开命令面板，选择 \texttt{Remote-SSH: Connect to Host...}，选择配置好的 \texttt{rm-robot}。首次连接会在远端安装 VS Code Server，需要可用下载通路及满足扩展要求的系统与资源；离线场地应提前准备。
+
+连接后检查状态栏显示远程主机，再用 \texttt{File > Open Folder} 打开\textbf{远端}工程目录。在新建的集成终端运行 \texttt{hostname}、\texttt{pwd} 和 \texttt{uname -m}，应看到机器人的主机名、目录和体系结构。打开一个练习文本，加入一行并保存；在独立 SSH 终端用 \texttt{cat} 读取相同的远端路径，确认修改落在远端。C++、CMake 等开发扩展按提示安装到远端，编译器与依赖也需要在远端准备。
+\end{example}
+
+\begin{exercise}\label{ex:deploy-remote-editor}
+用远程窗口打开一个练习工程，从远端集成终端构建或运行本章心跳示例。把 \texttt{hostname} 与当前路径记入日志，再指出本地窗口与远程窗口各修改哪个文件系统。若安装失败，保留扩展日志，区分 SSH 连接失败与远端 Server 安装失败。
+\end{exercise}
+
+新版本对远端 Linux 的库版本、架构与下载条件可能有不同要求，安装前核对 \href{https://code.visualstudio.com/docs/remote/ssh}{Remote -- SSH 官方教程}和其中的系统要求；这也适用于资源有限的 ARM 机载电脑。

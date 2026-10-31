@@ -1,0 +1,131 @@
+{
+  "date": "2026-10-31",
+  "work_directory": "/tmp/deployment-covers-8l0j4w4q",
+  "volume_1": {
+    "passes": 2,
+    "pages": 2,
+    "png_size": [
+      849,
+      1200
+    ],
+    "preview_matches_volume_pdf": true
+  },
+  "other_volumes": {
+    "2": {
+      "before_passes": 2,
+      "current_passes": 2,
+      "pixel_comparison": [
+        {
+          "page": 1,
+          "size": [
+            849,
+            1200
+          ],
+          "identical_pixels": true,
+          "difference_bbox": null,
+          "before_png_sha256": "f7a559b7d002fdf5a54863a6f13d406567b8f3b65aa5596d3ae2d7c6b95e495f",
+          "current_png_sha256": "f7a559b7d002fdf5a54863a6f13d406567b8f3b65aa5596d3ae2d7c6b95e495f"
+        },
+        {
+          "page": 2,
+          "size": [
+            849,
+            1200
+          ],
+          "identical_pixels": true,
+          "difference_bbox": null,
+          "before_png_sha256": "3b175fd66de8b3079cf95141c5a1ef4dd6bdf7ca9a667baa347b709d7d0a9d7d",
+          "current_png_sha256": "3b175fd66de8b3079cf95141c5a1ef4dd6bdf7ca9a667baa347b709d7d0a9d7d"
+        }
+      ]
+    },
+    "3": {
+      "before_passes": 2,
+      "current_passes": 2,
+      "pixel_comparison": [
+        {
+          "page": 1,
+          "size": [
+            849,
+            1200
+          ],
+          "identical_pixels": true,
+          "difference_bbox": null,
+          "before_png_sha256": "9adec2ef1559c89f8481667adc53c16072e77a7f36707b95cfa883c465eff374",
+          "current_png_sha256": "9adec2ef1559c89f8481667adc53c16072e77a7f36707b95cfa883c465eff374"
+        },
+        {
+          "page": 2,
+          "size": [
+            849,
+            1200
+          ],
+          "identical_pixels": true,
+          "difference_bbox": null,
+          "before_png_sha256": "6768e2e76b0983576ab07089fb3f420f49c4f2d173c0591ff88fa69345fc3da4",
+          "current_png_sha256": "6768e2e76b0983576ab07089fb3f420f49c4f2d173c0591ff88fa69345fc3da4"
+        }
+      ]
+    }
+  },
+  "unchanged_tracked_assets": {
+    "volume-02.pdf": {
+      "sha256": "24aa6d6c6f12354de85a2ffd78a903097c48be7af3723a4c705d67479036b74f",
+      "unchanged": true
+    },
+    "volume-02-1.png": {
+      "sha256": "26c4fb2d23eaf7b8c1c642fb4d42a7cce679156fc334d26e2b73a8bf187278a6",
+      "unchanged": true
+    },
+    "volume-02-2.png": {
+      "sha256": "d2e238ad543328f8468c60c7ef8e28d748a25a6196cd52b026d47a16300b6ab5",
+      "unchanged": true
+    },
+    "volume-03.pdf": {
+      "sha256": "85cf5976b4f851c052f46af43d79fa82aa885506d8f7bbe26344eb07292d8ba6",
+      "unchanged": true
+    },
+    "volume-03-1.png": {
+      "sha256": "7bbd1d6017bb2940dd8338a7486c45c49cc8491a732345f05d9d74b3415fa6d1",
+      "unchanged": true
+    },
+    "volume-03-2.png": {
+      "sha256": "af792a1985635fc7f5ff3fbca2ae2fafff437eae74f42ce686bd8c1e10ab38ed",
+      "unchanged": true
+    }
+  },
+  "collage_sizes": {
+    "volume-01-spread.png": [
+      1758,
+      1240
+    ],
+    "series-preview.png": [
+      2627,
+      1240
+    ],
+    "guide-series-preview.png": [
+      2627,
+      1240
+    ]
+  },
+  "visual_review": {
+    "reviewed": [
+      "volume-01-1.png",
+      "volume-01-2.png",
+      "volume-01-spread.png",
+      "series-preview.png",
+      "guide-series-preview.png"
+    ],
+    "result": "pass",
+    "observations": [
+      "卷一导览为三个阶段，覆盖 Linux/C++、CMake/AI、实机部署。",
+      "两行说明均位于面板内，未见重叠、截断或溢出。",
+      "并排图和三卷拼版沿用原尺寸、20像素边距与原背景色。"
+    ],
+    "volume_1_log": "第二遍无Overfull/Underfull/未定义引用；仅有模板类路径名称提示。"
+  },
+  "template_sources": {
+    "before_sha256": "87c011f1c9b68fda54a109e307edb752fd3d580b2455a4580249bbf79966c283",
+    "current_sha256": "87c011f1c9b68fda54a109e307edb752fd3d580b2455a4580249bbf79966c283"
+  }
+}

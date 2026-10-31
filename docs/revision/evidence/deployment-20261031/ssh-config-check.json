@@ -1,0 +1,12 @@
+{
+  "command": "ssh -G -F <temporary-config> rm-robot",
+  "returncode": 0,
+  "checked_values": {
+    "hostname": "192.168.50.20",
+    "user": "rm",
+    "identitiesonly": "yes",
+    "serveraliveinterval": "15",
+    "serveralivecountmax": "3"
+  },
+  "scope": "仅解析教材客户端配置，没有连接主机、读写用户SSH配置或密钥"
+}

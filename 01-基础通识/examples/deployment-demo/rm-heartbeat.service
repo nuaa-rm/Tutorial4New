@@ -1,0 +1,17 @@
+[Unit]
+Description=RoboMaster deployment heartbeat demo
+StartLimitIntervalSec=30
+StartLimitBurst=3
+
+[Service]
+Type=simple
+WorkingDirectory=%h/rm-deploy-demo
+Environment=RM_DEMO_VERSION=service-v1
+ExecStart=/usr/bin/python3 -u %h/rm-deploy-demo/heartbeat.py
+Restart=on-failure
+RestartSec=2s
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

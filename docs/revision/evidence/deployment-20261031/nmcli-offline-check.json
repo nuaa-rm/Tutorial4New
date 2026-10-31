@@ -1,0 +1,28 @@
+{
+  "command": [
+    "nmcli",
+    "--offline",
+    "connection",
+    "add",
+    "type",
+    "ethernet",
+    "ifname",
+    "rm-example0",
+    "con-name",
+    "rm-direct",
+    "connection.autoconnect",
+    "no",
+    "ipv4.method",
+    "manual",
+    "ipv4.addresses",
+    "192.168.77.1/24",
+    "ipv4.never-default",
+    "yes",
+    "ipv6.method",
+    "disabled"
+  ],
+  "version": "nmcli tool, version 1.58.1-2",
+  "returncode": 0,
+  "config": "[connection]\nid=rm-direct\nuuid=a01f0b1b-1568-4ea7-9ae1-6a9eaf442777\ntype=ethernet\nautoconnect=false\ninterface-name=rm-example0\n\n[ethernet]\n\n[ipv4]\naddress1=192.168.77.1/24\nmethod=manual\nnever-default=true\n\n[ipv6]\naddr-gen-mode=default\nmethod=disabled\n\n[proxy]\n",
+  "scope": "离线解析；没有安装或启用连接，不能代替Ubuntu22.04双端实测"
+}

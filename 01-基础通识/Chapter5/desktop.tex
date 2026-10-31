@@ -1,0 +1,67 @@
+\section{需要看画面时：远程桌面}
+\label{sec:deploy-desktop}
+
+SSH 很适合编译、查看日志和启动程序，但有些操作确实需要窗口：例如打开相机厂商的配置工具、查看图形调试器，或演示桌面上的设置。这时可以使用\textbf{远程桌面（remote desktop）}：机载电脑上的服务把桌面画面发给笔记本，笔记本再把键盘与鼠标操作传回去。它依赖机器人上的系统、桌面会话与服务正常工作；后面介绍的硬件 KVM 走的是另一条路径。
+
+\subsubsection{Ubuntu 的 RDP 与笔记本上的客户端}
+
+\textbf{远程桌面协议（Remote Desktop Protocol，RDP）}是一种传输桌面与输入的协议。\textbf{Remmina} 是 Linux 上的客户端，Windows 则可以用自带的“远程桌面连接” \texttt{mstsc}。只在笔记本上安装客户端还不够，\emph{被连接的机载电脑}也要启用对应的服务。
+
+本卷以 Ubuntu 22.04 的 GNOME 桌面为例：在“设置 → 共享”中开启共享，再进入“远程桌面”。图~\ref{fig:deploy-gnome-rdp} 是 GNOME 42 官方发布说明中的界面，重点看远程桌面、远程控制和认证三组设置；图中系统与主机名是官方示例，不是你的连接地址。Ubuntu 后续版本可能把入口移到“设置 → 系统 → 远程桌面”，并区分“桌面共享”与“远程登录”，不要把新版本的功能直接套回 22.04。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.62\textwidth]{deployment/gnome42-rdp.png}
+  \caption{GNOME 42 的 RDP 设置官方截图。Remote Desktop 允许连接，Remote Control 决定能否操作；连接凭据在 Authentication 中设置。}
+  \label{fig:deploy-gnome-rdp}
+\end{figure}
+
+\begin{example}[从笔记本操作 Ubuntu 22.04 桌面]
+这个示例要求双方已有可达的 IP 地址；暂时不知道地址时，先完成第~\ref{sec:deploy-lan}~节的网络核对。机载电脑先接便携屏并登录 GNOME，保持当前桌面处于解锁、唤醒状态。
+\begin{enumerate}
+  \item 在机载电脑“设置 → 共享 → 远程桌面”中开启 Remote Desktop 和 Remote Control，记下界面给出的地址、用户名与密码。这里使用的是\emph{远程桌面设置中的凭据}，不要想当然地填入 Linux 登录密码；查看“验证加密（Verify Encryption）”中的指纹。
+  \item Ubuntu 笔记本安装并打开 Remmina：
+\begin{tbash}
+sudo apt update
+sudo apt install remmina remmina-plugin-rdp
+remmina
+\end{tbash}
+  新建连接，协议选 RDP，服务器填机器人 IP（例如 \texttt{192.168.50.20}）；用户名、密码填上一步的 RDP 凭据，保存并连接。已有其他网络时先确认该示例地址属于当前机器人，不能直接照抄。
+  \item Windows 笔记本可按 \texttt{Win+R}，输入 \texttt{mstsc}，在“计算机”中填同一个 IP，再输入 RDP 凭据。若界面给出非默认端口，应填 \texttt{地址:端口}；本例服务通常使用 TCP 3389。
+  \item 首次连接先将客户端提示的证书指纹与机载电脑上的记录比较。进入远程桌面后打开终端，运行 \texttt{hostname}，并移动一个窗口；同时确认机载屏幕上能看到对应变化，说明连到的是预期会话，且有控制权限。
+\end{enumerate}
+如果双方启用了防火墙，由管理员仅为已核对的调试网段或 Tailscale 接口开放所需服务。不要为了试连直接关闭整机防火墙，也不要把 RDP 端口转发到公网。完成实验后可回到共享设置关闭远程桌面。
+\end{example}
+
+\begin{note}
+22.04 的上述入口主要共享已经登录的桌面。退出登录、锁屏、显示器休眠或拔掉显示器后是否仍能工作，要在本机实际测试；不能从“这次能连”推导出“下次无屏上电也能连”。纯命令行系统、不同桌面、Wayland/X11 会话和显卡驱动也可能需要不同方案。先用便携屏确认会话状态；需要可靠的无头启动时，优先保留 SSH，再按对应版本文档配置桌面服务。
+\end{note}
+
+\subsubsection{RustDesk：跨平台的另一种入口}
+
+\textbf{RustDesk} 也常用于跨平台远程操作。与直接填写 RDP 地址不同，它常用设备 ID 寻找另一端，并通过公共服务或队内自建服务协助连接。图~\ref{fig:deploy-rustdesk} 中左侧是本机 ID 与一次性密码，右侧是要连接的设备 ID；这些字段属于官方演示，不要使用图中的号码连接陌生设备。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.82\textwidth]{deployment/rustdesk-client.png}
+  \caption{RustDesk 官方客户端截图。左侧信息给对方连接本机使用，右侧输入目标设备 ID；底部状态提示当前是否已就绪。}
+  \label{fig:deploy-rustdesk}
+\end{figure}
+
+\begin{example}[用 RustDesk 建立一次受控连接]
+在双方电脑上从\href{https://rustdesk.com/docs/en/client/}{官方客户端文档}进入下载页，选择与系统及处理器架构对应的安装包。Ubuntu 用其 \texttt{.deb} 包；在下载目录运行 \texttt{sudo apt install ./实际文件名.deb}，这里的文件名必须换成你刚下载的包，不能同时随意安装多个版本。
+
+先在机载电脑本地打开 RustDesk，确认底部显示就绪；在笔记本上输入\emph{机载电脑的} ID，点击 Connect。由机载电脑一侧确认本次请求，或使用该次显示的一次性密码完成认证。连接后打开终端核对 \texttt{hostname}，检查鼠标与键盘是否能操作；然后主动断开，并在机载电脑确认连接已经结束。无人值守的固定密码与队内自建服务属于后续配置，先把这次有人确认的连接做通。
+\end{example}
+
+RustDesk 的 Linux 官方说明仍把 Wayland 支持列为实验性，远程访问登录界面要求 X11。若需要切换，可在本地退出当前会话、于登录页选择“Ubuntu on Xorg”后重新测试；登录管理器与无人值守设置另按\href{https://rustdesk.com/docs/en/client/linux/}{官方 Linux 文档}核对，不能只切换一次桌面就承诺重启后的登录界面可用。无头设备还要确认系统实际提供了可捕获的显示输出。它也不能替代网络配置：依赖公共 ID 服务时要能访问相应服务，脱离互联网后的使用必须提前配置并验证。
+
+\begin{exercise}\label{ex:deploy-desktop}
+选择 RDP 或 RustDesk，完成一次“笔记本连入 → 核对主机名 → 操作窗口 → 主动断开”的记录，再分别测试锁屏与退出登录后的连接表现。说明你使用的是共享现有桌面还是另一种会话，记录系统、桌面与工具版本。没有第二台电脑时，先列出所需条件和验证方法，不能把预期写成实测。
+\end{exercise}
+
+\begin{conclusion}
+RDP 是协议，Remmina 与 \texttt{mstsc} 是客户端；RustDesk 是另一套远程访问工具。选择时先问“目标机是否已有可用桌面、我要连接现有会话还是登录新会话、断网和重启后怎么办”。图形连接失败时先保留 SSH 查服务与日志；能移动远程鼠标，只能证明远程输入和显示链路通了，真实相机帧率与控制延迟仍要在设备端测量。
+\end{conclusion}
+
+Ubuntu 22.04 的 RDP 支持见\href{https://documentation.ubuntu.com/release-notes/22.04/}{该版本发布说明}；设置与 Remmina 连接步骤可对照\href{https://ubuntu.com/project/docs/maintainers/test-plans/desktop-team/RemoteDesktop/}{Ubuntu 官方远程桌面测试计划}，新版本的入口差异则查看\href{https://help.ubuntu.com/stable/ubuntu-help/sharing-desktop.html.zh-CN}{当前桌面共享帮助}。

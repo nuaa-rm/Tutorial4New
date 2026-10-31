@@ -1,0 +1,9 @@
+Final command: xelatex -interaction=nonstopmode -halt-on-error main.tex
+Working directory: 01-基础通识
+Exit code: 0; 286 pages.
+No missing files, undefined references, duplicate labels, missing characters or rerun request.
+No new overfull boxes. Existing Chapter 1 Night Theme Switcher overflow and font substitution remain.
+New chapter: physical 207-230; printed 198-221.
+Visual review: covers/TOC, full new chapter, revised summary and new solutions.
+Chapters 1-4 text unchanged across physical 10-206 compared with original PDF.
+Final pass 7: .aux and .toc byte-identical to preceding pass; PDF text changed only on TOC physical page 9 to refresh final page numbers.
