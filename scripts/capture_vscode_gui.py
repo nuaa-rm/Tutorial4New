@@ -56,7 +56,7 @@ def main():
     root = args.output.resolve()
     root.mkdir()  # 不覆盖先前的证据。
     project = root/"project"
-    shutil.copytree(Path(__file__).resolve().parents[1]/"01-基础通识/examples/ide-demo", project)
+    shutil.copytree(Path(__file__).resolve().parents[1]/"00-开发工具与AI协作/examples/ide-demo", project)
     user = root/"user-data"
     (user/"User").mkdir(parents=True)
     settings = {"workbench.startupEditor":"none", "workbench.colorTheme":"Default Light Modern",

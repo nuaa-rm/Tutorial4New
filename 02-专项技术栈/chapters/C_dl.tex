@@ -26,7 +26,7 @@
 \end{conclusion}
 
 \subsubsection{先把 Python 环境选对}
-卷一已经讲过虚拟环境。你可以继续用 Conda，也可以按下面的 venv 方法新建一个；不需要为了学习网络再配一遍整个系统。在 Distrobox 里先进入 Ubuntu，再进入工程目录。安装通用形式是 \texttt{python -m pip install [选项] 包名}；\texttt{-m pip} 使用当前解释器的包管理器，\texttt{==版本} 固定组合，\texttt{--index-url} 选择构建索引。
+我们用 Python 自带的 \texttt{venv} 为训练示例建立一个独立环境，把项目依赖装在一起。在 Distrobox 里先进入 Ubuntu，再进入工程目录。安装通用形式是 \texttt{python -m pip install [选项] 包名}；\texttt{-m pip} 使用当前解释器的包管理器，\texttt{==版本} 固定组合，\texttt{--index-url} 选择构建索引。
 \begin{example}[先在 CPU 上把闭环跑通]
 从项目目录执行。固定 PyTorch 2.6.0 与 torchvision 0.21.0，作为本章已验证的复现组合，不表示它们是最新版本。最后应看到解释器路径、两个版本与 \texttt{torch.Size([2,3])}。
 \begin{tbash}

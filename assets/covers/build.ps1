@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'Stop'
 Push-Location $PSScriptRoot
 try {
-    foreach ($volume in 1..3) {
+    foreach ($volume in 0..3) {
         $jobName = 'volume-{0:D2}' -f $volume
         $texInput = '\def\CoverVolume{' + $volume + '}\input{preview.tex}'
         foreach ($pass in 1..2) {

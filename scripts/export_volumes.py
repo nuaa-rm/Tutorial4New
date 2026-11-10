@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""编译三卷教材，并导出每卷 PDF 和完整的 examples 目录。"""
+"""编译四卷教材，并导出每卷 PDF 和完整的 examples 目录。"""
 
 import argparse
 import hashlib
@@ -11,7 +11,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-VOLUMES = ("01-基础通识", "02-专项技术栈", "03-RM视觉概述")
+VOLUMES = ("00-开发工具与AI协作", "01-基础通识", "02-专项技术栈", "03-RM视觉概述")
 
 
 def auxiliary_digest(build: Path) -> bytes:
@@ -83,7 +83,7 @@ def export(output: Path, overwrite: bool) -> None:
             shutil.copy2(pdf, bundle / f"{name}.pdf")
             shutil.copytree(ROOT / name / "examples", bundle / "examples")
 
-        # 三卷全部编译和复制成功后才替换旧结果；发布失败时恢复旧卷目录。
+        # 各卷全部编译和复制成功后才替换旧结果；发布失败时恢复旧卷目录。
         published = []
         backups = []
         try:
@@ -111,7 +111,7 @@ def main() -> int:
     parser.add_argument("--output", type=Path, default=ROOT / "导出",
                         help="导出位置（默认：仓库根目录下的 导出）")
     parser.add_argument("--overwrite", action="store_true",
-                        help="替换导出位置中已有的三个卷目录（包含旧 examples）")
+                        help="替换导出位置中已有的教材卷目录（包含旧 examples）")
     args = parser.parse_args()
     try:
         export(args.output.expanduser().resolve(), args.overwrite)

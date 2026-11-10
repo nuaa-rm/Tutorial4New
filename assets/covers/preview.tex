@@ -7,15 +7,15 @@
 \TextbookVolume{\CoverVolume}
 \title{长空御风视觉组培训教材}
 \author{长空御风视觉组}
-\version{2026.10}
-\ifnum\CoverVolume=1
+\version{2026.11}
+\ifcase\CoverVolume
+  \extrainfo{先在自己的电脑上跑通小工程，再练习判断与验证 AI 的建议。}
+\or
   \extrainfo{标 $*$ 的小节为选修，不计入通识考核。}
-\else
-  \ifnum\CoverVolume=2
-    \extrainfo{三方向：自瞄 / 雷达 / 导航。OpenCV、深度学习等为共用技能，按方向组合选修。}
-  \else
-    \extrainfo{少公式、重链路与工程准则；细节回卷二。三方向：自瞄 / 雷达 / 导航。}
-  \fi
+\or
+  \extrainfo{三方向：自瞄 / 雷达 / 导航。OpenCV、深度学习等为共用技能，按方向组合选修。}
+\or
+  \extrainfo{少公式、重链路与工程准则；细节回卷二。三方向：自瞄 / 雷达 / 导航。}
 \fi
 \begin{document}
 \maketitle

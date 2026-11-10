@@ -1,0 +1,286 @@
+\chapter{系统外观与终端美化（选修）}
+\label{app:customization}
+
+装好系统、熟悉命令行后，可以按自己的需要调整启动菜单、桌面、Shell。下面三节可以分别选读，动手时先记下原有配置，改完一项就核对一次效果。
+
+\section{GRUB 主题与默认启动项}
+\label{sec:grub-theme}
+也许你已经看腻了启动时那个黑框框，想把它换得好看一点。那我们接下来就给 GRUB 换个主题，不过先把两个系统都能启动这件事确认好，再来折腾外观。主题负责“长什么样”，默认进入哪个系统则要另外设置，装好主题不会顺手替你把这件事也做了。
+
+下面展示的是 Tela 主题，对应项目在 \url{https://github.com/vinceliuice/grub2-themes}。可以用正文 Git 一节的克隆方法获取，也可以在项目页面选择 Code → Download ZIP。然后打开 README，按当前版本的说明选择主题名和分辨率参数；安装脚本也先读一遍，看看要改哪些文件，再决定是否执行。装其他主题的时候也要类似检查，别把来历不明的脚本直接交给 sudo，桌面颜值还没上去，启动先出问题就不划算了。
+\Needspace{8\baselineskip}
+\begin{example}[保存配置后检查默认项]
+在 Ubuntu 中先保存原配置，再只读查看实际菜单标题：
+
+
+\Needspace{7\baselineskip}
+\begin{tbash}
+sudo cp -a /etc/default/grub /etc/default/grub.before-training
+grep '^GRUB_' /etc/default/grub
+grep "^[[:space:]]*menuentry " /boot/grub/grub.cfg
+\end{tbash}
+
+
+如果你还希望没有操作时自动进入 Windows，我们就小小地配置一下引导。打开 \path|/etc/default/grub|，找到 \texttt{GRUB\_DEFAULT}，把它设为\textbf{本机实际菜单标题或稳定的菜单项 ID}。菜单顺序取决于本机生成的配置。改完后运行 \texttt{sudo update-grub} 生成配置，确认没有报错；\texttt{grub.cfg} 是它生成出来的文件，别直接编辑。
+\end{example}
+\begin{note}
+主题安装和引导配置改错可能妨碍选择启动项，所以记得保留可启动 U 盘和原配置。配置有误但 Ubuntu 仍能启动时，至少还可以按对应备份恢复并重新生成：
+
+
+\Needspace{6\baselineskip}
+\begin{tbash}
+sudo cp -a /etc/default/grub.before-training /etc/default/grub
+sudo update-grub
+\end{tbash}
+
+只有确认备份对应本次改动才恢复，别覆盖后来有意修改的配置。
+\end{note}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{grub.png}
+\caption{Tela 主题效果示例}
+\end{figure}
+
+\begin{exercise}\label{ex:appendix-grub}
+只读检查本机的 GRUB 配置与实际菜单，说明哪个设置管理主题、哪个设置管理默认项。再结合正文第~\ref{sec:ubuntu-boot-order}~节说明固件启动顺序的作用。若菜单里已出现两套系统，还需要什么证据才能确认默认启动行为？
+\end{exercise}
+
+\section{GNOME 桌面美化}
+\label{sec:gnome-customize}
+进到 Ubuntu 后，桌面也可以按自己的喜好收拾一下。Ubuntu 22.04 默认使用 GNOME，换个主题、装几个顺手的插件，就能让桌面更合你的习惯。
+
+我们先分清要装的东西：主题主要改窗口外观，图标包改应用图标，Shell 扩展则增加桌面功能。它们各管一层，所以装了图标包，窗口颜色没变是正常的。先记下原来的外观，每次改一项，出了问题也更容易撤回。
+\Needspace{8\baselineskip}
+\begin{example}[主题的下载]
+可以在 \href{https://www.gnome-look.org/browse/}{GNOME Look} 挑选主题（GNOME Shell Themes）或图标包（Full Icon Themes），下载后解压到用户目录。然后借助 Tweaks（优化）和Extension Manager（扩展管理器）进行美化的管理。下面的压缩包名要换成自己实际下载的文件名：
+
+
+\Needspace{8\baselineskip}
+\begin{tbash}
+mkdir -p ~/.themes ~/.icons
+tar -tf theme.tar.gz
+tar -xf theme.tar.gz -C ~/.themes
+sudo apt install gnome-tweaks gnome-shell-extension-manager
+\end{tbash}
+
+
+装好后打开 Tweaks， 在“外观”一栏选择刚装好的兼容主题或图标。有些 GTK4/libadwaita 应用不一定跟着 GTK3 主题改变，不用因为一个窗口没变色就把主题重装一遍。
+
+接下来轮到 Extension Manager 了。打开“浏览”页，搜索你自己喜欢的扩展，点击安装。安装后在“已安装”页可以看到开关和设置按钮，开关控制启用状态，齿轮打开该扩展设置。如果扩展需要重新加载桌面会话，先保存工作，再注销并重新登录。
+\end{example}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{gnome_extension_manager.png}
+\caption{扩展管理器}
+\label{fig:extension_manager}
+\end{figure}
+更多扩展可以在 \url{https://extensions.gnome.org/} 按版本查找。比如 Vitals 可以显示资源占用，Dash to Dock 可以调整程序坞，Clipboard Indicator 可以帮你找回刚刚复制过的文字, Caffeine让屏幕保持唤醒。建议先挑两三个顺手的，别一次全装——插件之间偶尔也会互相打架，尤其是 Dock 和 Panel 类扩展，装多了排查起来很痛苦。
+
+\textbf{常用插件}
+
+以下是视觉组往届同学常用的几款：
+
+\begin{center}
+\begin{tabular}{cc}
+\toprule[1.5pt]
+插件名 & 作用\\
+\midrule[1pt]
+Caffeine & 保持屏幕常亮，编译、跑数据集时防止自动锁屏\\
+TopHat / Vitals & 在顶栏实时显示 CPU、内存、温度等信息\\
+Dark Mode Toggle / Night Theme Switcher & 一键或按计划自动切换深色/浅色模式\\
+Dash to Dock & 把左侧 Dock 栏变成可自定义的程序坞\\
+Dash to Panel + ArcMenu & 合成类似 Windows 的底部任务栏与"开始菜单"\\
+Rounded Window Corners Reborn & 给窗口加上圆角\\
+Blur my Shell & 给顶栏、Dock 等加上毛玻璃半透明效果\\
+Sound Input \& Output Device Chooser & 在右上角菜单直接切换声音输出/输入设备\\
+Clipboard Indicator & 剪贴板历史记录，复制过的内容随时找回来\\
+\bottomrule[1.5pt]
+\end{tabular}
+\end{center}
+
+\begin{note}
+上表插件的主页链接：
+
+\begin{itemize}
+\item Caffeine：\url{https://extensions.gnome.org/extension/517/caffeine/}
+\item TopHat：\url{https://extensions.gnome.org/extension/5219/tophat/}
+\item Vitals：\url{https://extensions.gnome.org/extension/1460/vitals/}
+\item \href{https://extensions.gnome.org/extension/2236/night-theme-switcher/}{Night Theme Switcher}
+\item Dash to Dock：\url{https://extensions.gnome.org/extension/307/dash-to-dock/}
+\item Dash to Panel：\url{https://extensions.gnome.org/extension/1160/dash-to-panel/}
+\item ArcMenu：\url{https://extensions.gnome.org/extension/3628/arcmenu/}
+\item Rounded Window Corners Reborn：\par
+\url{https://extensions.gnome.org/extension/7048/rounded-window-corners-reborn/}
+\item Blur my Shell：\url{https://extensions.gnome.org/extension/3193/blur-my-shell/}
+\item Sound Input \& Output Device Chooser：\par
+\url{https://extensions.gnome.org/extension/906/sound-output-device-chooser/}
+\item Clipboard Indicator：\url{https://extensions.gnome.org/extension/779/clipboard-indicator/}
+\end{itemize}
+\end{note}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{gnome_desktop_after.png}
+\caption{美化后的 GNOME 桌面}
+\label{fig:desktop_after}
+\end{figure}
+
+\begin{exercise}\label{ex:appendix-gnome}
+记录当前图标主题，试用一个兼容的新图标主题。观察应用图标与窗口外观各有什么变化，再切回原来的图标主题。
+\end{exercise}
+
+\section{zsh 与终端美化}\label{sec:zsh-customize}
+
+bash 够用，但用久了难免嫌弃：命令没有建议、语法没有高亮、提示符万年一张脸。zsh（Z shell）配合 Oh My Zsh 框架和 Powerlevel10k 主题，可以把终端武装到牙齿——命令自动建议、语法高亮、git 状态提示全都有，属于从功能机换到智能机的体验。本节为选修内容，不影响后续学习，但装完大概率就回不去了。
+
+\textbf{安装 zsh}
+
+\Needspace{8\baselineskip}
+\begin{example}
+安装 zsh 并将它设为默认 shell：
+
+
+\Needspace{6\baselineskip}
+\begin{tbash}
+sudo apt install zsh
+chsh -s $(which zsh)
+\end{tbash}
+
+
+\end{example}
+
+\texttt{chsh} 修改的是登录 shell，需要\textbf{注销并重新登录}（或重启）后才会生效。重新登录后打开终端，会看到 zsh 的首次配置提示，按 q 跳过即可——反正接下来的配置都交给 Oh My Zsh 统一管理。
+
+\textbf{安装 Oh My Zsh}
+
+Oh My Zsh 是 zsh 的配置管理框架，主题和插件都通过它安装。
+
+\Needspace{8\baselineskip}
+\begin{example}
+安装 Oh My Zsh：
+
+
+\Needspace{8\baselineskip}
+\begin{tbash}
+curl -fLo install-ohmyzsh.sh \
+    https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
+less install-ohmyzsh.sh
+sh install-ohmyzsh.sh
+\end{tbash}
+
+
+\end{example}
+
+先查看来源与脚本内容，确认会写入哪些目录、是否更改登录 Shell；已有 .zshrc 时先备份。安装脚本主要做这些事：把框架克隆到 \textasciitilde/.oh-my-zsh 目录，并生成一份默认的 \textasciitilde/.zshrc 配置文件。
+
+\begin{note}
+如果访问 GitHub 缓慢，可以先配置代理，或使用国内镜像源安装。
+\end{note}
+
+\textbf{安装 Powerlevel10k 主题}
+
+Powerlevel10k（简称 p10k）是一种 zsh 主题，能在提示符中直接显示目录、git 分支与提交状态、命令执行耗时等信息。
+
+\Needspace{8\baselineskip}
+\begin{example}
+安装 p10k 主题：
+
+
+\Needspace{6\baselineskip}
+\begin{tbash}
+git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/.oh-my-zsh/custom/themes/powerlevel10k
+\end{tbash}
+
+
+然后打开 \textasciitilde/.zshrc，把主题行改为：
+
+
+\Needspace{5\baselineskip}
+\begin{tbash}
+ZSH_THEME="powerlevel10k/powerlevel10k"
+\end{tbash}
+
+
+重开终端后会自动进入 p10k 的配置向导（也可以随时用 \texttt{p10k configure} 手动启动），按提示逐项选择喜欢的样式即可。
+\end{example}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{zsh_p10k_configure.png}
+    \caption{p10k 配置向导}
+    \label{fig:p10k_configure}
+\end{figure}
+
+\begin{note}
+p10k 提示符里的图标（文件夹、git 分支符号等）依赖 Nerd Font 字体，推荐按 p10k 文档安装 MesloLGS NF，并在终端设置中把字体改为它，否则图标会显示为方块或问号。字体下载地址：\url{https://github.com/romkatv/powerlevel10k#fonts}
+\end{note}
+
+\textbf{推荐插件}
+
+zsh 的插件生态是它相比 bash 的一大优势，最常用的两个：
+
+\begin{itemize}
+\item zsh-autosuggestions：根据历史命令给出灰色补全建议，按方向键右键采纳；
+\item zsh-syntax-highlighting：命令输入时实时高亮，命令拼错时显示为红色。
+\end{itemize}
+
+\Needspace{8\baselineskip}
+\begin{example}
+安装这两个插件并在 \textasciitilde/.zshrc 中启用：
+
+
+\Needspace{8\baselineskip}
+\begin{tbash}
+git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+git clone https://github.com/zsh-users/zsh-syntax-highlighting ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+\end{tbash}
+
+
+然后修改 \textasciitilde/.zshrc 中的插件行：
+
+
+\Needspace{5\baselineskip}
+\begin{tbash}
+plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
+\end{tbash}
+
+
+\end{example}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{zsh_p10k_effect.png}
+    \caption{配置完成后的终端效果}
+    \label{fig:zsh_effect}
+\end{figure}
+
+\textbf{与 bash 的不同}
+
+换用 zsh 后，日常使用的大部分命令完全一样，但有一些区别需要知道：
+
+\begin{conclusion}
+zsh 与 bash 的主要区别：
+
+\begin{center}
+\begin{tabular}{ccc}
+\toprule[1.5pt]
+对比项 & bash & zsh\\
+\midrule[1pt]
+配置文件 & \textasciitilde/.bashrc & \textasciitilde/.zshrc\\
+通配符无匹配时 & 原样保留（如 \texttt{*.txt}） & 报错 no matches found\\
+数组下标 & 从 0 开始 & 从 1 开始\\
+Tab 补全 & 基础补全 & 支持命令参数、选项的智能补全\\
+\bottomrule[1.5pt]
+\end{tabular}
+\end{center}
+
+两者有语法与默认行为差异，无法将 Bash 配置整体当作 zsh 脚本使用；带 \texttt{\#!/bin/bash} 行首的脚本仍由 bash 执行，更换交互式 shell 也不会影响已有脚本的运行。
+\end{conclusion}
+
+\begin{note}
+\textasciitilde/.bashrc 中的内容不会自动迁移到 \textasciitilde/.zshrc——尤其是 source 类的环境配置行（后续卷二安装 ROS2 时会向 \textasciitilde/.bashrc 写入 source 命令）。换用 zsh 后迁移自己的兼容配置；ROS 2 在 Bash 中加载 setup.bash，在 zsh 中应加载同一路径下的 setup.zsh，不能把 setup.bash 原样复制过去。每次换环境用命令查询验证，不靠提示符判断。
+\end{note}
+
+\begin{exercise}\label{ex:v1-zsh-config}
+完成 zsh、Oh My Zsh、p10k 的安装与主题配置，启用 autosuggestions 插件，并把原来 \textasciitilde/.bashrc 中自己添加的别名迁移到 \textasciitilde/.zshrc。
+\end{exercise}

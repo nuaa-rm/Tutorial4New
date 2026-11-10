@@ -15,7 +15,7 @@ c=argparse.ArgumentParser(description=__doc__);c.add_argument('--project',type=P
 def rec(name,data):records.append({'name':name,'status':'PASS','details':data})
 def run(key,extra=()):
  cmd=[sys.executable,str(p/'audit.py'),key,*map(str,extra)];r=subprocess.run(cmd,capture_output=True,text=True,check=True);d=json.loads(r.stdout);assert d['checked_on']==date.today().isoformat();assert d['owner'] is None;return cmd,d
-expected={'build':('01-基础通识/Chapter3/3.tex','编译过程与 CMake 基础','2026.09',r'target\_link\_libraries'),'geometry':('02-专项技术栈/chapters/G_ba.tex','几何视觉与 Bundle Adjustment','2026.08','PnP'),'engineering':('03-RM视觉概述/chapters/05_engineering.tex','工程准则与调车文化','2026.08','required'),'communication':('02-专项技术栈/chapters/J_comm.tex','多机通信方法','2026.08','CRC')}
+expected={'build':('01-基础通识/Chapter3/3.tex','编译过程与 CMake 基础','2026.11',r'target\_link\_libraries'),'geometry':('02-专项技术栈/chapters/G_ba.tex','几何视觉与 Bundle Adjustment','2026.11','PnP'),'engineering':('03-RM视觉概述/chapters/05_engineering.tex','工程准则与调车文化','2026.11','required'),'communication':('02-专项技术栈/chapters/J_comm.tex','多机通信方法','2026.11','CRC')}
 for key,(rel,title,version,concept) in expected.items():
  cmd,d=run(key);target=root/rel;assert d['status']=='入口与声明一致' and d['chapter']==title and d['book_version']==version;assert Path(d['entry'])==target;assert hashlib.sha256(target.read_bytes()).hexdigest()==d['sha256'];assert concept in target.read_text();cards[key]=d;rec('实际教材入口 '+key,{'command':cmd,'stdout':d,'read_content_marker':concept})
 for key,status in [('lecture','本机未取得文件'),('team','未取得入口')]:

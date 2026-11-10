@@ -1,4 +1,4 @@
-% 卷一五章题解；由 main.tex 在全文末尾载入。
+% 卷一正文与附录题解；由 main.tex 在全文末尾载入。
 \begingroup
 \setlength{\emergencystretch}{3em}
 
@@ -43,20 +43,6 @@ ESP 保留、不格式化，UEFI 引导文件位于其中；/boot 保存内核�
 隔着其他分区时，未分配空间不与根分区相邻，不能直接把那块空间加进去。先验证备份与恢复介质，核对是否能迁移大文件；确需移动分区时制定完整离线方案，在 Live 环境卸载目标并确认电源可靠。完成后用 lsblk 查分区大小、df -hT / 查文件系统容量，并测试系统启动。
 \end{solution}
 
-\paragraph*{随堂练习~\ref{ex:v1-snapshot}：创建与恢复快照（选修）}
-\begin{solution}
-使用正文命令创建并列出快照，记录注释、保存设备和排除范围。个人源码与数据若没有明确纳入，仍要另备份。在虚拟机中，可先把练习系统配置写成 before，创建快照后改成 after，再按目标映射恢复；重启后应回到 before。只完成创建时，实际恢复仍标为待验证，不能把快照列表当作恢复成功证据。
-\end{solution}
-
-\paragraph*{随堂练习~\ref{ex:v1-tar-options}：归档与目录恢复（选修）}
-\begin{solution}
--c 创建，-x 解包，-z 使用 gzip，-f 指定归档，-C 设置基准目录，-t 列内容，-p 在解包时尽量恢复权限。正文实验应得到 camera=ready 与 keep me；cmp 无输出且退出码为 0。另改 source/config.txt 为 camera=updated，打包为 backup2.tar.gz，解到新建的 restored2，再用 cmp 比较。归档只覆盖记录中的路径，不会删除目标中额外的文件；完整镜像还需考虑引导和分区表。
-\end{solution}
-
-\paragraph*{随堂练习~\ref{ex:v1-reinstall-plan}：重装清单}
-\begin{solution}
-先从 Live 环境读取并验证个人资料备份，记录根分区、/home 与 ESP 的设备身份。仅替换根分区；独立 /home 保留且不格式化，ESP 复用且不格式化，Windows 分区保留。安装后核对两系统启动、实际挂载点和恢复资料，再构建小工程。/home 与根同分区时必须先完整备份其资料，根分区格式化后再恢复到新系统。
-\end{solution}
 \paragraph*{随堂练习~\ref{ex:v1-fs-layout}：根目录和设备文件}
 \begin{solution}
 
@@ -100,6 +86,11 @@ sudo apt remove cowsay
 
 应先看到字符画输出，再看到卸载成功的提示。使用完整路径可以避开 \texttt{/usr/games} 未加入 PATH 的情况。
 \texttt{remove} 一般保留配置文件，本题不要求进一步清理所有依赖或配置。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:v1-http-download}：下载文件并查看响应头}
+\begin{solution}
+两个下载命令成功后，应得到内容相同的两个文件。\texttt{cmp} 比较相同的文件时没有输出，退出状态为 \texttt{0}。\texttt{curl -I} 输出中以 \texttt{HTTP/} 开头的一行包含状态码，例如 \texttt{HTTP/1.1 200 OK}。
 \end{solution}
 
 \paragraph*{随堂练习~\ref{ex:v1-file-ops}：文件操作}
@@ -159,13 +150,6 @@ apt list --installed | grep '^[^/]*python[^/]*/' | wc -l
 再次用 cat 查看，文件仍应有原来的三行。\texttt{:q!} 放弃的是本次未保存的编辑，不会撤销上次已经保存的内容。
 \end{solution}
 
-\paragraph*{随堂练习~\ref{ex:v1-astronvim}：AstroNvim 搜索（选修）}
-\begin{solution}
-按正文步骤安装，在项目根目录启动 \texttt{nvim}，等待插件初始化完成。
-先按空格、\texttt{f}、\texttt{f}，输入文件名的一部分，选中文件并打开；再按空格、\texttt{f}、\texttt{w}，搜索文件中确实存在的一段文字，并跳到结果行。
-记录打开的文件名、搜索词和跳转行。若快捷键随版本变化，按空格查看当前菜单；文字搜索失败时先检查项目目录和 \texttt{rg} 是否可用。
-外观不是检查重点，能找到文件、找到内容才算跑通。
-\end{solution}
 
 \paragraph*{随堂练习~\ref{ex:v1-shell-script}：运行脚本}
 \begin{solution}
@@ -227,13 +211,6 @@ printf '%s\n' "$PATH"
 所以“新开终端一定失效”要看它由谁启动。最后在原终端执行 \texttt{export PATH="\$old\_path"} 恢复旧值。
 \end{solution}
 
-\paragraph*{随堂练习~\ref{ex:v1-zsh-config}：迁移 zsh 配置（选修）}
-\begin{solution}
-按正文完成安装，确认 \texttt{\textasciitilde/.zshrc} 中的主题是 p10k，插件列表包含 \texttt{zsh-autosuggestions}。
-只迁移自己添加的、兼容 zsh 的配置，例如 \texttt{alias cls='clear'}，不要整份复制 \texttt{.bashrc}。
-新开 zsh 后，用 \texttt{type cls} 检查别名；执行一次普通命令，再输入相同前缀，应该出现历史建议，按右方向键可接受。
-提示符图标应能正常显示。若仍是方框，检查终端字体；不要为了一个图标把整个 Shell 重装一遍。
-\end{solution}
 
 \paragraph*{随堂练习~\ref{ex:v1-git-config}：本地配置与两种差异}
 \begin{solution}
@@ -298,43 +275,6 @@ Issue 应写出现状、预期结果与可检查的完成标准。PR 的 base �
 Fork 路线中，origin 指向自己的 Fork，upstream 指向原项目；PR 的 base repository 与 base 分支指向原项目及其接收修改的分支，head repository 与 compare 分支指向自己的 Fork 及功能分支。判断标准是提交是否推到正确仓库、PR 是否交给正确项目，以及合并后本地主线是否真正更新。草稿只能证明准备了内容，不能当作实际创建、推送或合并的证据。
 \end{solution}
 
-\paragraph*{随堂练习~\ref{ex:v1-conda-config}：配置来源}
-\begin{solution}
-show-sources 列显式配置位置，show channels 与 show auto\_activate\_base 给有效值；没有显式条目的值可能来自默认配置。ROS 2 编译器、Python 和库路径要来自支持的系统环境，Conda 的路径可能改变查找结果，所以检查实际入口与环境，不能只看提示符。venv 的隔离实验不代替这些 Conda 配置命令的验证。
-\end{solution}
-\paragraph*{随堂练习~\ref{ex:v1-conda-env}：Conda 环境（选修）}
-\begin{solution}
-确认没有需要保留的同名环境，再执行：
-
-\begin{tbash}
-conda create --name rm-answer-py310 python=3.10
-conda activate rm-answer-py310
-conda install numpy
-python --version
-conda list numpy
-python -c "import numpy; print(numpy.__version__)"
-conda deactivate
-conda remove --name rm-answer-py310 --all
-conda env list
-\end{tbash}
-
-应看到 Python 3.10、numpy 的版本信息；删除完成后，环境列表中不再有该环境。
-\begin{note}
-\texttt{--all} 会删除指定环境的全部包，确认环境名无误再执行，不要把平时用的环境拿来交作业。
-\end{note}
-\end{solution}
-
-\paragraph*{随堂练习~\ref{ex:ide-clion}、\ref{ex:ide-vscode}：修改与调试}
-\begin{solution}
-CLion 练习：将 bonus 改为 20 后，输出应为 \texttt{total = 80}。在加法行暂停时 current 为 60、bonus 为 20，result 尚未完成初始化；执行该行后 result 为 80。恢复 bonus 为 15 后重新构建，输出恢复为 75。
-
-VS Code 练习：把光标放在 main 中 bonus 的声明或引用上，执行 Rename Symbol（默认 F2），输入 reward。该局部变量的声明与调用处引用一起变化；函数形参 bonus 是另一个作用域的符号，不应被同步改名。程序仍输出 75。撤销后保存，再检查构建和输出。
-\end{solution}
-
-\paragraph*{随堂练习~\ref{ex:ide-setup}：工具链与界面}
-\begin{solution}
-记录实际编译器入口和版本、两套独立的 Debug 构建目录、运行 total = 75 与退出码 0。CLion 的 Terminal、Build、Run、Debug 分别用于命令、构建日志、运行输出和调试；VS Code 的 Terminal、Output 中 CMake 通道及 Run and Debug 的变量区分别承担对应职责。配置成功只生成构建规则，不证明程序编译或调试通过。
-\end{solution}
 \paragraph*{随堂练习 \ref{ex:serial-device}：识别串口设备}
 \begin{solution}
 实际设备名、所属组与链接以插拔日志及 \texttt{ls -l} 输出为准。队内 USB CDC ACM 设备通常呈现为 \texttt{ttyACM0} 等节点，编号可能因设备发现顺序改变；有唯一标识时可优先使用对应的 \texttt{/dev/serial/by-id/} 链接，或按下一题配置 udev 别名。设备不存在先查连接、驱动、虚拟机 USB 直通及路径；权限不足先对比设备权限、所属组与当前会话的组。Ubuntu 中常见的处理是加入 \texttt{dialout} 后完整注销并重新登录，而不是放宽为所有用户可写。
@@ -388,7 +328,7 @@ udevadm info --name=/dev/rm_control --query=property
 四步是：准备空闲分区、制作启动盘、从 U 盘安装、完成系统设置。
 正文采用“其它选项”手动核对分区和挂载点，这样才能清楚指定 Ubuntu 装在哪里，并保留 Windows 的分区。
 本题针对本书这套手动流程；其他受支持的安装流程也可能使用“与 Windows 共存”等选项。
-无论走哪条流程，都要核对安装目标，不能误选“清除整个磁盘”。ESP 保留且不格式化，根分区只在确认的安装或重装方案中格式化；swap 没有 /swap 挂载点。分区细节见随堂练习~\ref{ex:v1-partition-plan}~的说明。
+无论走哪条流程，都要核对安装目标，不能误选“清除整个磁盘”。ESP 保存引导文件，已有 ESP 要保留。根分区存放 Ubuntu 系统，按安装计划核对后再格式化。swap 为系统提供交换空间，无需设置挂载点。分区细节见随堂练习~\ref{ex:v1-partition-plan}~的说明。
 \end{solution}
 
 \paragraph*{章末第~\ref{prob:v1-linux-2}~题：挂载}
@@ -447,13 +387,6 @@ find /etc -type f -name '*.conf' > "$HOME/conf_list.txt"
 \texttt{git commit} 把暂存区里的内容保存为一次本地提交，并不会自动推送到远程。
 \end{solution}
 
-\paragraph*{章末第~\ref{prob:v1-linux-8}~题：开发工具界面与编译器}
-\begin{solution}
-CLion 的锤子构建目标，绿色三角启动普通运行，小虫带调试器启动；普通运行不会因为设置了断点而暂停。
-VS Code 的 Explorer 管理文件树，Extensions 管理扩展，Terminal 提供可输入命令的 shell，Output 显示扩展日志。
-C/C++ 扩展提供代码分析和调试接入，本身不包含编译器；必须另外安装并选中 GCC、MSVC 等工具链。本例还需要 CMake 和相应构建工具。
-\end{solution}
-
 \paragraph*{章末第~\ref{prob:v1-linux-9}~题：修复 PATH}
 \begin{solution}
 PATH 被覆盖后，Shell 找不到原搜索目录中的外部命令，常见现象是 \texttt{ls} 等报“找不到命令”。Shell 内建命令和使用完整路径调用的程序仍可用。
@@ -463,7 +396,7 @@ PATH 被覆盖后，Shell 找不到原搜索目录中的外部命令，常见现
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 \end{tbash}
 
-这不是你的原始 PATH 全量备份，Conda、用户工具等路径可能仍需补回。
+这不是你的原始 PATH 全量备份，项目环境和用户工具的路径可能仍需补回。
 如果错误写进了 \texttt{\textasciitilde/.bashrc}，用完整路径打开编辑器，例如 \texttt{/usr/bin/nano ~/.bashrc}，删掉错误行或改为：
 
 \begin{tbash}
@@ -538,12 +471,6 @@ SUBSYSTEM=="tty", KERNEL=="ttyACM*", \
 VID/PID 按题意留为占位值，部署时必须替换为目标板的真实值；\texttt{CTRL-A} 是本题给定序列号，不是队内设备的默认值。重载及核验命令见随堂练习~\ref{ex:serial-udev}~的答案。先只接 A，再接 B，并交换插入顺序，核对别名始终对应 A 的序列号和正确权限；仅看 \texttt{readlink} 指向哪个编号还不能证明身份正确。程序配置必须改为该别名。
 
 udev 在设备重新出现时重建链接，但旧的已打开句柄不会恢复，程序需处理断线并重新打开。ACM 提供的仍是字节流接口，一次读取可能只得到半条消息或同时读到多条消息，应累计字节并按协议定界。USB 底层的数据包边界不能当作应用层消息边界。
-\end{solution}
-
-\clearpage
-\paragraph*{第一章章末第~\ref{prob:v1-linux-12}~题：结果与证据}
-\begin{solution}
-三者都不能推出题中的结论。Timeshift 默认排除个人文件，需核对范围并恢复验证个人备份；Conda 环境不证明 ROS 2 使用了系统 Python 与库，应核对实际命令入口、加载脚本及构建日志；桌面主题不决定固件顺序或 GRUB 默认项，需读实际配置并测试启动。外观、存在与功能成功是不同证据。
 \end{solution}
 
 \section*{第二章：现代 C++ 基础}
@@ -1675,182 +1602,9 @@ echo $?
 理解当前题目需要的部分就够了，文档可以慢慢查。
 \end{note}
 
-\section*{第四章：更高效的利用AI开发}
+\section*{第四章：实机调试部署技巧}
 \phantomsection
-\addcontentsline{toc}{section}{第四章题解：更高效的利用AI开发}
-\subsubsection*{随堂练习}
-
-\paragraph*{随堂练习~\ref{ex:ai-principle-responsibility}：启动与正确性}
-\begin{solution}
-至少检查：输入与单位约定、算法与关键实现、可复现的构建及运行命令、覆盖正常和边界输入的结果。还应单列设备与现场验证状态。例如向单位换算函数输入已知的 1000 毫米，预期输出 1 米；再检查零值或非法输入的约定。启动截图不能说明程序是否使用正确标定、尺度或输入，也不能证明真实测距精度。
-\end{solution}
-
-\paragraph*{随堂练习~\ref{ex:ai-principle-model-agent}：建议与执行证据}
-\begin{solution}
-安装命令是建议，除非能看到它已经执行的记录；“全部测试通过”也是待核对的陈述。读取路径说明代理获取了某个文件，但还需核对版本和内容，它不证明测试运行过。应查看实际测试命令、工作目录、工具版本、输入、退出码和日志，并确认这些测试覆盖了本次变更。粘贴协议是在提供当前上下文；训练则改变模型参数，普通对话不等于重新训练。
-\end{solution}
-
-\paragraph*{随堂练习~\ref{ex:ai-principle-selection}：选择能力与投入}
-\begin{solution}
-日志整理可从满足质量要求的快速模型和默认投入起步，用原日志核对完整性。共享状态与疑似死锁可选能处理复杂代码约束的模型，在支持时增加推理投入，先检查锁顺序、共享对象和退出条件，再做有针对性的验证。无日志掉线应先收集版本、拓扑、时间线、两端日志与复现条件，更强推理只能帮助设计观测，不能补出不存在的事实。没有等级开关时，仍可补齐材料、分步调查、另做复核；不能把一句“认真思考”当成已经调整预算。两个产品的“高”可能改变不同预算、模型或工具，需要分别查说明并在同一任务上验证，不能直接换算。材料充分而能力仍不足时再升级，达到验收后无需继续加档。
-\end{solution}
-
-\paragraph*{随堂练习~\ref{ex:ai-principle-context}：压缩摘要}
-\begin{solution}
-保留当前目标、验收条件、坐标单位约束、工作目录与版本、已完成改动和下一步。完整日志可保留路径、产生该日志的命令、首个关键错误和结论，而不复制全文。两份旧方案明确标记为作废并简述原因，防止重试；设备测试列为未完成，不能随摘要压成“测试通过”。没有记忆时，新建对话并附经核对的摘要；不能读本地路径时，再附必要代码、相关日志或可访问的资料，不把路径本身当成内容。关键事实应能从项目文件和原日志恢复。
-\end{solution}
-
-\paragraph*{随堂练习~\ref{ex:ai-principle-evidence}：证据与授权边界}
-\begin{solution}
-离线回放不观测当前设备的曝光时间，因此不能确认硬件同步；短期或离线检查也不能证明连续运行稳定。应将报告改为回放数据范围内的结果，并列出设备时间观测、参数读回及约定时长的实机运行待测。下载依赖只应向需要的目标开放所需网络或在受控环境安装，不应顺带授予所有目录与服务的完整访问。若回放本身只覆盖正常输入，还应补充异常输入检查。
-\end{solution}
-
-\paragraph*{随堂练习~\ref{ex:ai-desktop-entry}：选择入口}
-\begin{solution}
-引用折叠可先用普通聊天，通过自己推导一个模板实例来验收；板端链接失败适合在实际工程环境使用有文件和命令工具的代码代理；日志图表任务需要能处理材料、计算和生成产物的工具，并核对数据、单位与图表。具体可以分别用本例的 Chat、Codex CLI 与 Work，也可使用具备相应能力的其他产品。CLI 是终端客户端，产品名称本身不能决定是否具备工程操作能力，要核对当前模型、工具、工作目录与权限；没有执行工具时由本人应用建议并验证。
-\end{solution}
-
-\paragraph*{随堂练习~\ref{ex:ai-desktop-install}：安装与费用}
-\begin{solution}
-记录应能让另一人识别系统版本、架构、官方安装来源、客户端版本及当前登录方式。CLI 记录还应包括实际可执行文件路径、版本与脱敏后的登录状态；独立安装器、npm、Homebrew 或系统包应按原渠道升级，不能混装后忽略路径冲突。独立安装器路线不需要 Node.js / npm。Ubuntu 22.04 用户可先使用 Codex CLI 工作流，桌面版待使用受支持系统时安装；Linux / WSL2 另需核对沙箱依赖。ChatGPT 登录使用账号方案与权限，API Key 使用 Platform 账户按量计费；检查订阅额度不能替代检查 API 费用。
-\end{solution}
-
-\paragraph*{随堂练习~\ref{ex:ai-desktop-project}：项目与上下文}
-\begin{solution}
-通过标准是有两个按结果命名的独立聊天、正确项目目录以及实际读取文件的路径证据。同步聊天保存的是对话和关联信息，不会自动把整个本地源码目录复制到另一台机器，也不保证该机器具有原环境、工具和设备。继续任务前需核对可访问的来源、主机和路径。
-\end{solution}
-
-\paragraph*{随堂练习~\ref{ex:ai-desktop-review}：检查补丁}
-\begin{solution}
-反馈应指向具体逻辑、预期行为与触发输入，不能只有“再优化一下”。差异检查确认改了什么及范围是否合适；AI 审查寻找潜在缺陷并提供待复核的证据；实际测试验证所覆盖输入与环境中的行为。记录包含工作目录、完整命令、实际结果及未覆盖的部分，不能把三者互相当作替代品。
-\end{solution}
-
-\paragraph*{随堂练习~\ref{ex:ai-desktop-tools}：浏览器与定时任务}
-\begin{solution}
-网页任务应给出本地 URL、例如 1280×720 的窗口大小、进入页面后的动作以及按钮不遮挡等可观察结果，还需可运行的开发服务器和浏览器工具。定时任务应有明确时区、每日时刻、仓库与构建记录来源、仅有新增失败时通知、到期停止等约定。本地任务需要主机、应用和目录可用；云端或远程执行须另查源码、依赖和连接，聊天同步不会补齐它们。
-\end{solution}
-
-\paragraph*{随堂练习~\ref{ex:ai-desktop-plugin}：插件与 MCP}
-\begin{solution}
-例如使用官方 Docs MCP 查询继续会话命令：只读文档，不需要服务账号；成功证据是实际工具查询、打开匹配文档、返回可核对的链接及命令。遇到无法联网应保留错误与环境，不宣称连接成功。插件是能力包，Skill 是流程指导，MCP 是工具连接协议；它们均不能自动授予外部账号访问权限。涉及账号连接时，还需写明实际使用的身份与资源范围。
-\end{solution}
-
-\paragraph*{随堂练习~\ref{ex:ai-cli-start}：启动与定位}
-\begin{solution}
-记录 \texttt{codex --version} 的真实输出，通过 \texttt{/status} 核对工作目录、模型和权限，再用 \texttt{@} 引用 README 或构建文件。答案需对应工程中的实际目标名和构建目录，例如 \texttt{cmake --build build} 的 \texttt{build} 是构建树，不是可执行文件名。用 \texttt{/debug-config} 核对实际配置层与策略；\texttt{/usage} 关注账号用量，\texttt{/status} 的上下文信息关注本次工作容量，压缩不会增加账号额度。合格标准是能打开引用位置独立解释命令，没有把未执行的建议写成实测结果。
-\end{solution}
-
-\paragraph*{随堂练习~\ref{ex:ai-cli-permissions}：权限与中断}
-\begin{solution}
-安装系统包前核对缺少的依赖是否确实被本工程使用、包名与官方安装来源、系统版本、安装范围，以及能否先用项目环境满足。重新下载前核对是否确有损坏、目录中的未提交代码与数据是否已保存、能否只修复相关文件；不能批准含糊的整目录删除。停止回复只停止某段执行，后台命令可能仍在运行，磁盘改动也已发生，所以还要核对 \texttt{/ps}、必要时用 \texttt{/stop}，并检查 Git 差异。
-\end{solution}
-
-\paragraph*{随堂练习~\ref{ex:ai-cli-review}：验证不同层次的结论}
-\begin{solution}
-可选择空输入、非法字符、负数或边界值，须与这次修改的输入契约有关；给出修复前触发与修复后通过的实际命令及输出。CLI 正常退出只说明执行流程的状态；审查未发现问题表示审查没有识别出缺陷；测试通过表示实际运行的用例符合预期，仍受用例和运行环境限制。三者不能代替真实设备、长时间运行或尚未覆盖的输入验证。
-\end{solution}
-
-\paragraph*{随堂练习~\ref{ex:ai-workflow-plan-goal}：选择模式}
-\begin{solution}
-局部变量改名通常用普通请求，仍需检查作用域和构建；SDK 迁移先用计划模式查版本差异、调用方和兼容约束，再分步执行；板端偶发崩溃先规划证据收集，在设备与日志可用且终点清楚后可设目标持续调查。目标可以要求：保留复现输入与日志，在固定板端环境复现并修复崩溃，使指定回归与复现检查通过，保持接口与输出契约；缺少设备、日志或必要依赖时报告已查证据、无法验证的假设及解锁所需输入。没有板端复现与验证时，不能宣称板端崩溃已解决。
-\end{solution}
-
-\paragraph*{随堂练习~\ref{ex:ai-workflow-history}：历史与文件}
-\begin{solution}
-两路对话若仍指向同一目录，修改的就是同一份文件；不能只看新对话名称就认定文件已隔离。先暂停写入与相关目标，检查 Git 状态和差异，保存需要保留的工作并确认基线，再用两个 worktree 或一次只运行一路。本例 Codex 的历史回退不恢复文件，已提交的错误需另行用 Git 撤销或修复，例如经审查后对对应提交执行 \texttt{git revert}。其他工具可能有文件检查点，须确认恢复范围；外部请求与设备状态另行核验。
-\end{solution}
-
-\paragraph*{随堂练习~\ref{ex:ai-workflow-worktree}：独立检出与合入}
-\begin{solution}
-合入前，主目录的策略为 \texttt{fifo}，候选目录的策略为 \texttt{latest}；工作树列表列出两个目录及不同分支。审查差异后快进合入，主目录的策略变成 \texttt{latest}。候选目录无未提交修改时才能正常移除，分支在已合入后可用 \texttt{-d} 删除。相机是操作系统中的共享外部资源，工作树只隔离检出文件，不给每个目录创建一台独立设备。
-\end{solution}
-
-\paragraph*{随堂练习~\ref{ex:ai-workflow-parallel}：并行分工}
-\begin{solution}
-一种分工是：A 只读协议定义与解析代码，输出字段、长度、字节序及边界位置；B 只读调用方与线程退出流程，输出接口依赖和并发风险；C 只读测试、样本和日志，输出已覆盖情形与可复现缺口。三路都不改源码、不连接真实串口，各自附文件位置与不确定项。最终接口修改要等待契约核对，调用方适配要等待接口决定，集成验证要等待实现与相关测试完成；不能一边改接口，一边让另一路凭旧接口改调用方。
-\end{solution}
-
-\paragraph*{随堂练习~\ref{ex:ai-prompt}：把愿望写成验收}
-\begin{solution}
-先采集实际协议、两端版本、复现命令、时间戳日志、输入数据量及丢失的定义，说明是读写失败、校验失败、队列溢出还是应用未消费。任务可先限定为调查接收链路，保持公开接口与帧协议，输出可复现输入和候选原因；证据足够后才安排最小修复。验收应指定运行环境、输入序列、持续时间、允许的丢失或延迟阈值和异常恢复要求。阈值由任务负责人确认，不能虚构“永不丢包”；重构单列任务，避免扩大修复范围。
-\end{solution}
-
-\paragraph*{随堂练习~\ref{ex:ai-management}：任务边界与交接}
-\begin{solution}
-录像任务负责输入适配、时间戳与退出行为，保持下游接口；串口任务负责连接状态、超时与重连，保持帧协议。先确定共享接口，各自在独立分支或 worktree 工作，分别运行回放与软件故障注入，再由一个集成人审查合入并运行组合检查。交接应有目录、分支提交、已完成内容、命令与结果、已知限制和下一步。录像结果只能证明该数据范围下的输入链路；相机读回、物理拔插、板端时序和实车控制仍需实际设备。
-\end{solution}
-
-\paragraph*{随堂练习~\ref{ex:ai-agents}：项目常驻规则}
-\begin{solution}
-合格文件应对应真实工程入口、可执行的配置/构建/测试命令、项目特有且可核查的约定，以及缺设备或依赖时如何报告。本人须实际运行所写命令并说明当前工作目录。一次修复的日志放验证记录，本周待办放任务卡；密码不纳入版本库。生成草稿需要人工核对，不能仅以“有这个文件”判为完成。
-\end{solution}
-
-\paragraph*{随堂练习~\ref{ex:ai-skill}：把重复流程写成技能}
-\begin{solution}
-例如 \texttt{cmake-link-diagnosis}，描述为“定位 CMake 工程的未定义引用或目标链接依赖问题；用于链接失败，不用于运行时崩溃”。输入是完整构建命令、首个相关错误、CMake 目标与实现文件；流程检查声明与定义、源文件是否加入目标、目标依赖、作用域与实际链接命令；输出文件位置、原因证据、最小修正建议和验证状态。“定位 undefined reference”应触发，“程序运行时段错误”不应触发。提取重复日志可用脚本；判定该符号应由哪个库实现、改动是否符合接口需要结合工程判断。缺日志时先说明缺口，不猜一个库名。
-\end{solution}
-
-\paragraph*{随堂练习~\ref{ex:ai-lab}：数值修复与交付}
-\begin{solution}
-让除法的一侧成为浮点数，例如 \texttt{return millimeters / 1000.0;}。整数除法先截断再转换，因此 0、1000 的预期本就是整数，会掩盖错误；1、999、-1500 等输入能检查非整米行为。交付须有原失败与修复后记录、自己的独立样本、相关提交及未验证范围，不含 \texttt{build/}。本项目只验证换算函数，没有相机观测、标定、传感器误差与实车环境，不能推出系统测距精度。
-\end{solution}
-
-\subsubsection*{章末习题}
-
-\paragraph*{章末第~\ref{prob:v1-ai-1}~题：选入口}
-\begin{solution}
-概念与短报错可以先普通聊天；读仓库、改文件并跑 CTest 需要相应工程工具；SSH 环境适合终端客户端；多来源报告需要资料、计算与产物工具。本章分别用 Chat、Codex 和 Work 演示，也允许其他等效产品。聊天与代理能力可能重叠，CLI 只是入口；按当前会话的模型、工具、环境和权限判断能做什么。
-\end{solution}
-
-\paragraph*{章末第~\ref{prob:v1-ai-2}~题：能力与投入}
-\begin{solution}
-模型影响任务能力、速度、输入支持与费用等取舍；推理投入是在支持的实现中可调整的计算预算或模式；Harness 管理上下文、工具、执行循环、权限与会话。简单改名通常可从默认投入起步并核验引用与构建；复杂重构若缺调用方、接口约束或构建环境，提高投入仍不能弥补缺口。不同产品的“深度思考”可能调整预算，也可能切换模型、工具或代理数量，没有统一能力标尺，应查其定义并用同一验收比较。
-\end{solution}
-
-\paragraph*{章末第~\ref{prob:v1-ai-3}~题：上下文与持久事实}
-\begin{solution}
-Token 是输入输出处理的计量单位；窗口限制一次可处理的信息；压缩用更紧凑的状态接替部分早期材料，可能损失细节；项目资料和 Git 则在对话外保存可维护的事实。摘要中的通过结果有版本、输入和环境前提，源码或环境改变后不能沿用；先核对证据和当前状态，必要时重跑相关检查。
-\end{solution}
-
-\paragraph*{章末第~\ref{prob:v1-ai-4}~题：模式与完成状态}
-\begin{solution}
-一次明确的局部修复适合普通请求；跨模块迁移、需求含糊适合先计划；终点清楚、下一步依赖前一轮结果的长任务可设置目标持续推进。目标仍受权限、资源和用户决定约束；达到预算表示本轮资源上限触发，完成则需要目标验收实际达成。停止时应交代剩余工作和证据，不将预算耗尽写成成功。
-\end{solution}
-
-\paragraph*{章末第~\ref{prob:v1-ai-5}~题：两条历史}
-\begin{solution}
-恢复重新打开已有对话，分叉建立另一路消息历史，回退移除或从较早位置重新展开消息，Git 撤销处理文件与提交。它们不自动互相替代。两条分叉若仍指向同一目录，就能互相影响磁盘；应先暂停写入、保存状态，再用 worktree 或明确串行安排。
-\end{solution}
-
-\paragraph*{章末第~\ref{prob:v1-ai-6}~题：隔离与集成}
-\begin{solution}
-各自通过不保证合并正确，接口、依赖或运行顺序可能冲突。端口、相机、串口、GPU、数据库与外部服务账号都是可能共享的资源。给任务分配资源与文件边界，必要时串行运行；合入后重新配置构建，运行跨模块检查，再安排相应设备验收。
-\end{solution}
-
-\paragraph*{章末第~\ref{prob:v1-ai-7}~题：规则与工具}
-\begin{solution}
-插件分发能力，连接器接入服务及账号，MCP 约定工具与资料交互，Skill 提供按需流程，AGENTS.md 保存项目长期规则。查 API 并修调用通常只需当前工程读写工具与官方文档检索或文档 MCP；遵循项目规则，按实际相关测试核验。不必为一个调用安装任务系统或消息服务；Skill 只在反复出现的特定流程确有帮助时增加。
-\end{solution}
-
-\paragraph*{章末第~\ref{prob:v1-ai-8}~题：独立验证}
-\begin{solution}
-缺少对需求、关键实现与测试预期的人工复核，以及独立反例、实际环境与未验证范围。实现和测试可能共享同一错误假设；只测整米值会让整数除法缺陷漏过。根据单位契约手算 1500 或 -500 mm，再与程序比较，并检查测试是否被删除、容差是否被放宽。
-\end{solution}
-
-\paragraph*{章末第~\ref{prob:v1-ai-9}~题：把优化变成任务}
-\begin{solution}
-任务卡至少写数据集版本与划分、当前提交和模型、目标类别及困难样本、召回/精度等质量指标、延迟测量口径与目标平台、允许修改范围和依赖。先建立同一输入与环境上的基线，再定义可接受的质量与时延阈值，分步试验并保留旧版。离线验证报告样本覆盖、误检漏检与同口径对照；板端还要核对真实输入、吞吐、延迟分布、温度和约定时长稳定性。缺少这些条件时先调查与确认，不随意承诺“效果更好且实时”。
-\end{solution}
-
-\paragraph*{章末第~\ref{prob:v1-ai-10}~题：Skill 验证设计}
-\begin{solution}
-以换算审查为例：给有非整米截断的修改，观察是否核对单位和操作数类型；给单纯构建路径错误，检查描述是否引起误用；缺输入有效范围时应查接口或说明缺口；编译器不可用时应报告工具错误及未验证项。静态格式检查不能证明工作流有效；脚本、测试命令、失败恢复和实际工具结果需要运行核对。判断依据是行为与证据，不是回答是否出现固定标题。
-\end{solution}
-
-
-\section*{第五章：实机调试部署技巧}
-\phantomsection
-\addcontentsline{toc}{section}{第五章题解：实机调试部署技巧}
+\addcontentsline{toc}{section}{第四章题解：实机调试部署技巧}
 \subsubsection*{随堂练习}
 
 \paragraph*{随堂练习~\ref{ex:deploy-physical}：把本地控制台接对}
@@ -1866,6 +1620,21 @@ Token 是输入输出处理的计量单位；窗口限制一次可处理的信�
 \paragraph*{随堂练习~\ref{ex:deploy-remote-editor}：确认远端文件系统}
 \begin{solution}
 先验证普通 SSH，再连接 Remote -- SSH 并检查状态栏、\texttt{hostname} 与 \texttt{pwd}。远程窗口打开的目录属于目标机；本地窗口的同名目录属于笔记本，不能仅靠文件名判断。终端与构建工具要在相应环境核验。SSH 已成功但 Server 下载失败，应查远端系统要求、资源、下载通路与扩展日志，不改用户登录配置来碰运气。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:deploy-first-log}：用前台日志验证试跑}
+\begin{solution}
+把正常试跑的 \texttt{--count} 设为 4，并重定向到新的日志文件。最后应看到 \texttt{heartbeat=4} 与退出状态 0。用日志开头的 \texttt{cwd} 核对运行目录，配合 \texttt{hostname} 核对目标机。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:deploy-delivery}：同步与可追溯版本}
+\begin{solution}
+先预览专用目录，再实际同步，核对远端 \path{~/rm-deploy-demo/heartbeat.py} 存在，并在两端运行 \texttt{sha256sum} 比较同一文件。传输成功只证明文件到位。部署记录应有提交与未提交差异、目标架构和系统、依赖与模型配置校验值、构建/启动/停止命令、实际验证结果与当前可用版本入口；回退恢复配套组合，并重新验证。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:deploy-acceptance}：把能跑改成证据}
+\begin{solution}
+文件与启动记录包含版本、路径和启动日志；固定输入记录数据版本、输出与预定质量指标；真实设备记录相机实际格式、输入时间戳、串口状态、异常恢复；连续运行记录约定时长、真实起止、资源温度与退出情况。真实相机链路、板端资源温度和物理断连不能由笔记本回放替代。阈值按队内任务确定，没有测量条件就明确未验证。
 \end{solution}
 
 \paragraph*{随堂练习~\ref{ex:deploy-desktop}：会话与可用条件}
@@ -1888,16 +1657,6 @@ Token 是输入输出处理的计量单位；窗口限制一次可处理的信�
 从获准账户的控制台读取设备名、完整 MagicDNS 域名和密钥状态，从目标机读取实际 Tailscale 地址。\texttt{status} 说明可见设备状态，\texttt{tailscale ping} 说明 Tailscale 两端通信路径，真正 SSH 登录才继续证明端口服务与身份认证。必须切到另一互联网出口实测，才能记录跨网成功；密钥到期与重新认证应在有备用入口时处理。截图里的示例开关、域名和地址不是自己的配置。
 \end{solution}
 
-\paragraph*{随堂练习~\ref{ex:deploy-delivery}：同步与可追溯版本}
-\begin{solution}
-先预览专用目录，再实际同步，核对远端 \path{~/rm-deploy-demo/heartbeat.py} 存在，并在两端运行 \texttt{sha256sum} 比较同一文件。传输成功只证明文件到位。部署记录应有提交与未提交差异、目标架构和系统、依赖与模型配置校验值、构建/启动/停止命令、实际验证结果与当前可用版本入口；回退恢复配套组合，并重新验证。
-\end{solution}
-
-\paragraph*{随堂练习~\ref{ex:deploy-acceptance}：把能跑改成证据}
-\begin{solution}
-文件与启动记录包含版本、路径和启动日志；固定输入记录数据版本、输出与预定质量指标；真实设备记录相机实际格式、输入时间戳、串口状态、异常恢复；连续运行记录约定时长、真实起止、资源温度与退出情况。真实相机链路、板端资源温度和物理断连不能由笔记本回放替代。阈值按队内任务确定，没有测量条件就明确未验证。
-\end{solution}
-
 \paragraph*{随堂练习~\ref{ex:deploy-tmux}：离开会话与停止程序}
 \begin{solution}
 重新接回后应看到同一任务的 PID、序号继续增长；\texttt{Ctrl+B} 松开再按 \texttt{D} 只离开 tmux 客户端，\texttt{Ctrl+C} 才交给当前前台程序处理。本例会正常结束。关机或重启会销毁 tmux 服务与进程，用户会话策略也可能影响其存活，不能靠 \texttt{attach} 自动恢复。
@@ -1915,7 +1674,7 @@ Token 是输入输出处理的计量单位；窗口限制一次可处理的信�
 
 \paragraph*{随堂练习~\ref{ex:deploy-kvm}：选入口并画接线}
 \begin{solution}
-系统和 SSH 正常但无线不可用，先用有线 SSH；机器人 IP 配错，可选 USB KVM 或网络独立的 IP KVM；停在 BIOS 可用支持该板启动视频与 USB 键盘的硬件 KVM。完全断电须先恢复目标供电，预装且兼容的 ATX 控制也不等于机器人总电源控制。笔记本侧可为一条 USB 或网线，目标侧仍须视频输出到 KVM、KVM 的 USB HID 到机器人，以及对应电源。画面和输入分别验证。
+系统和 SSH 正常但无线不可用，先用有线 SSH；机器人 IP 配错，可选 USB KVM 或网络独立的 IP KVM；停在 BIOS 可用支持该板启动视频与 USB 键盘的硬件 KVM。完全断电须先恢复目标供电，预装且兼容的 ATX 控制也不等于机器人总电源控制。NanoKVM-USB 的 Host 接笔记本 USB，Target 接机载电脑 USB，HDMI 输入接机载电脑的 HDMI 输出，机载电脑照常供电。网页选中 \texttt{USB Video} 后核对画面，再选对应串口，在机载电脑的终端里输入 \texttt{hostname} 验证键鼠。
 \end{solution}
 
 \subsubsection*{章末习题}
@@ -1968,6 +1727,52 @@ USB KVM 的一线说的是笔记本到 KVM 的 Host 链路；目标机仍需 HDM
 \paragraph*{章末第~\ref{prob:v1-deploy-10}~题：赛前恢复演练}
 \begin{solution}
 预先按赛事要求准备有线入口与恢复窗口，停机固定后接线。先查链路/地址/路由，再查 SSH 及身份；连入后看服务状态、主进程、日志时间、工作目录、版本与输入。目标网络不可用时换 USB KVM 或独立 IP-KVM。保留故障日志后停止候选，按记录恢复已验证的程序、参数与模型，重新核对输入输出。记录原因、实际切换结果和未验证项，结束后停止练习服务、恢复网络并清点线缆。没有机器人或赛场条件时，软件演练与真实验收分别写明。
+\end{solution}
+
+\paragraph*{章末第~\ref{prob:v1-deploy-log}~题：区分运行内容与退出状态}
+\begin{solution}
+正常日志包含三次心跳，退出状态为 0。模拟故障日志应在第二次心跳后说明故障，退出状态为 1。日志交代程序发生了什么，退出状态便于脚本判断该次命令是否成功。记录两次运行的目标机主机名，并对照日志里的 \texttt{cwd}、版本与实际目录。
+\end{solution}
+
+\section*{附录 A 题解：系统数据备份}
+\phantomsection
+\addcontentsline{toc}{section}{附录 A 题解：系统数据备份}
+
+\paragraph*{随堂练习~\ref{ex:appendix-btrfs}：核对子卷与备份范围}
+\begin{solution}
+用两条输出的文件系统类型、来源和挂载起点记录本机布局。题设中的源码在独立的 \texttt{@home}，只拍摄 \texttt{@} 的快照无法取回它。原盘损坏时，使用独立介质上已经验证可读的个人文件备份，并在新盘或空目录中检查恢复结果。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:v1-snapshot}：创建与恢复快照（选修）}
+\begin{solution}
+使用附录中的命令创建并列出快照，记录注释、保存设备和排除范围。个人源码与数据若没有明确纳入，仍要另备份。在虚拟机中，可先把练习系统配置写成 before，创建快照后改成 after，再按目标映射恢复；重启后应回到 before。只完成创建时，实际恢复仍标为待验证，不能把快照列表当作恢复成功证据。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:v1-tar-options}：归档与目录恢复（选修）}
+\begin{solution}
+-c 创建，-x 解包，-z 使用 gzip，-f 指定归档，-C 设置基准目录，-t 列内容，-p 在解包时尽量恢复权限。附录实验应得到 camera=ready 与 keep me；cmp 无输出且退出码为 0。另改 source/config.txt 为 camera=updated，打包为 backup2.tar.gz，解到新建的 restored2，再用 cmp 比较。归档只覆盖记录中的路径，不会删除目标中额外的文件；完整镜像还需考虑引导和分区表。
+\end{solution}
+
+\section*{附录 B 题解：系统外观与终端美化}
+\phantomsection
+\addcontentsline{toc}{section}{附录 B 题解：系统外观与终端美化}
+
+\paragraph*{随堂练习~\ref{ex:appendix-grub}：区分主题与默认项}
+\begin{solution}
+\texttt{GRUB\_THEME} 指向主题配置，\texttt{GRUB\_DEFAULT} 决定菜单默认项。根据本机实际的菜单标题或 ID 核对默认项，另外查固件启动顺序以确认机器会先进入哪个引导程序。菜单显示两个条目只说明两套系统有可选入口。练习可先只读记录，默认启动行为还需要通过实际开机验证。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:appendix-gnome}：单独验证一种外观改动}
+\begin{solution}
+先记录原图标主题，在 Tweaks 中选择兼容的新图标主题，检查应用列表里可辨认的图标是否改变，最后切回原主题确认恢复。图标有变化即可核对这次改动，窗口颜色与扩展开关可分别查看。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:v1-zsh-config}：迁移 zsh 配置（选修）}
+\begin{solution}
+按附录完成安装，确认 \texttt{\textasciitilde/.zshrc} 中的主题是 p10k，插件列表包含 \texttt{zsh-autosuggestions}。
+只迁移自己添加的、兼容 zsh 的配置，例如 \texttt{alias cls='clear'}，不要整份复制 \texttt{.bashrc}。
+新开 zsh 后，用 \texttt{type cls} 检查别名；执行一次普通命令，再输入相同前缀，应该出现历史建议，按右方向键可接受。
+提示符图标应能正常显示。若仍是方框，检查终端字体；不要为了一个图标把整个 Shell 重装一遍。
 \end{solution}
 
 \endgroup

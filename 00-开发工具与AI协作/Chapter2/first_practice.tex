@@ -1,0 +1,22 @@
+\section{首次上手：先写预期，再验证 AI 的建议}
+\label{sec:ai-first-practice}
+
+上章的计分器已经在你的电脑上跑出了 \texttt{total = 75}。现在设想规则变了：基础分仍是 60，这一轮要扣 5 分。AI 可以帮你找到要改的一行。改之前先在纸上算一遍，给自己留一个判断结果的依据。
+
+\begin{example}[请 AI 建议一处小改动]
+先复制卷零的 \path{examples/ide-demo}，用上章选好的 IDE 打开副本，并重新构建运行。看到原始结果 75 后，写下新规则下的预期 55。把练习项目的 \texttt{main.cpp} 贴到你手边的 AI 聊天工具，附上下面的要求：
+
+\begin{quote}
+这是我刚跑通的计分器，当前输出 total = 75。基础分保持 60，这一轮要扣 5 分。请指出需要改哪一行，解释为什么，并给出改前改后的那一行。保留计分函数和输出格式。
+\end{quote}
+
+自己对照原文件，确认改的是 \texttt{main} 中的 bonus 初始化，把 15 改成 \texttt{-5}。如果建议改到了计算函数或写死了输出，先回看任务范围。保存后重新构建和运行，输出应为 \texttt{total = 55}。再亲手把 bonus 改成 0，先预测输出，再重新构建运行，核对是否为 \texttt{total = 60}。如果观察到旧输出，回看第~\ref{sec:ide-debug}~节的构建与启动目标检查。
+\end{example}
+
+\begin{conclusion}
+AI 的解释是待验证的线索。先写预期，确认实际改动，再用自己的输入重新运行。遇到问题时，把你看到的报错和复现步骤一起交给 AI 或队友。
+\end{conclusion}
+
+\begin{exercise}\label{ex:ai-first-practice}
+现在基础分仍为 60，改成加 7 分。给 AI 写一条只解释改动、只涉及一行代码的请求。记录自己的预期、AI 建议的位置、实际改动与重新构建后的输出。再自选一个不同的加分值，独立核对一次。
+\end{exercise}

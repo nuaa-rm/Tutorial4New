@@ -1,0 +1,106 @@
+\section{连上以后，把哪一版程序送上车}
+\label{sec:deploy-delivery}
+
+SSH 登录成功以后，就可以开始部署（Deployment）：把明确版本的代码、依赖、模型和配置放到目标机器，在那里构建或安装，再核对程序是否按约定运行。\textbf{连得上只是维护入口可用，不是视觉系统已经能上场。}
+
+先记录三件事：要部署哪个 Git 提交，目标平台和依赖是什么，如何判断这次部署成功。笔记本常见的 \texttt{x86\_64} 与机载 ARM 的 \texttt{aarch64} 不是同一架构；把前者的可执行文件复制过去，可能直接得到 \texttt{Exec format error}。动态库、GPU 驱动、CUDA、相机 SDK、模型推理后端也各有版本约束。初学时优先在目标机用源码重新构建，交叉编译及板卡工具链留给专项工程。
+
+\subsubsection{用独立目录试跑，再保留能回去的版本}
+
+同步文件可用 \texttt{scp}，基本形式是 \texttt{scp 本地文件 用户@地址:远端目录/}；复制目录加 \texttt{-r}。文件较多、会反复部署时可用 \texttt{rsync}，它能比较并传送变化。通过 SSH 传输时，基本形式为 \texttt{rsync [选项] 源目录/ 主机:目标目录/}。\texttt{-a} 保留常见文件属性，\texttt{-v} 显示过程，\texttt{-n} 只预览。两端都需要安装 \texttt{rsync}；下面使用第~\ref{sec:deploy-ssh}~节的 SSH 别名。
+
+\begin{example}[先同步安全的小项目，再处理真实视觉工程]
+先在\textbf{笔记本}进入本卷目录，确认有 \path{examples/deployment-demo/}。通过 SSH 新建目标机上的练习目录。若提示同名目录已经存在，先换一个目录名，后续命令也一起换，避免覆盖上一次练习。
+
+\begin{tbash}
+ssh rm-robot 'mkdir ~/rm-deploy-demo'
+\end{tbash}
+
+如果两端都有 \texttt{rsync}，在笔记本上先预览，再传输。Ubuntu 上缺少这个工具时，可用 \texttt{sudo apt install rsync} 安装。
+\begin{tbash}
+rsync -avn examples/deployment-demo/ rm-robot:rm-deploy-demo/
+rsync -av examples/deployment-demo/ rm-robot:rm-deploy-demo/
+\end{tbash}
+源目录末尾的斜杠表示传输目录里的内容。使用 Windows PowerShell 等已有 \texttt{scp} 的终端时，可以逐个复制同一组文件：
+\begin{tbash}
+scp examples/deployment-demo/heartbeat.py rm-robot:rm-deploy-demo/
+scp examples/deployment-demo/rm-heartbeat.service rm-robot:rm-deploy-demo/
+scp examples/deployment-demo/README.md rm-robot:rm-deploy-demo/
+\end{tbash}
+传完后登录目标机，确认 \path{~/rm-deploy-demo/heartbeat.py} 存在，且 \texttt{python3 heartbeat.py --help} 在该目录下能显示帮助。
+\end{example}
+
+\subsubsection{前台试跑并核对日志}
+\label{sec:deploy-first-log}
+
+心跳程序只用 Python 标准库。它打印 PID、版本标记、工作目录和 UTC 时间戳，再按间隔输出序号。\texttt{--count} 控制次数，\texttt{--fail-after} 模拟在第几次输出后失败，便于检查能否分辨正常与异常退出。完整脚本如下：
+
+\lstinputlisting[language=Python,numbers=left,numberstyle={\color{gray}\tiny}]{examples/deployment-demo/heartbeat.py}
+
+\begin{example}[在 SSH 终端记录正常与异常退出]
+在\textbf{目标机的 SSH 终端}运行。\texttt{> 文件 2>\&1} 将标准输出和错误都写入日志。用 \texttt{\$?} 立即记录 Python 的退出状态，再查看日志。
+
+\begin{tbash}
+cd ~/rm-deploy-demo
+hostname
+pwd
+python3 heartbeat.py --count 3 --interval 0.2 > heartbeat-ok.log 2>&1
+printf 'exit=%s\n' "$?"
+tail -n 4 heartbeat-ok.log
+python3 heartbeat.py --count 5 --interval 0.2 --fail-after 2 > heartbeat-fail.log 2>&1
+printf 'exit=%s\n' "$?"
+tail -n 4 heartbeat-fail.log
+\end{tbash}
+
+第一份日志应有三次心跳，退出状态为 0；第二份在两次心跳后记录模拟失败，退出状态为 1。两份日志开头的版本和工作目录应该一致，PID 则来自各次启动。把目标主机名、同步的版本、命令与两份日志放进交接记录。计数跑完会自行退出，持续运行的前台练习可按 Ctrl+C 停止。
+\end{example}
+
+\begin{exercise}\label{ex:deploy-first-log}
+在目标机把正常试跑次数改为 4，另存一份日志。预先写下你期待的最后一条心跳和退出状态，运行后核对，并用启动信息说明程序是从哪个目录运行的。
+\end{exercise}
+
+\subsubsection{把试跑步骤用到真实 C++ 工程}
+
+在目标机建立新的候选目录，从确定的提交取源码；在该目录单独配置、构建和安装。不要把笔记本的 \path{build/} 一起搬过去，CMake 缓存可能记录了笔记本上的编译器和绝对路径。第 3 章的构建命令仍然适用，只是这次在\textbf{机器人 SSH 终端}运行：
+\begin{tbash}
+uname -m
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j2
+cmake --install build --prefix "$HOME/rm-candidate/install"
+\end{tbash}
+这里假定当前目录就是带有安装规则的候选工程，\path{~/rm-candidate/install} 是本次专用目录。\texttt{-j2} 用两个并行任务，内存紧张的板子可从 \texttt{-j1} 开始；开发机上“线程全开”的习惯搬到小板上，可能先把内存吃光。安装后还需按工程说明传入配置、模型与测试数据，从真实安装位置试跑。
+
+版本不能只靠文件夹名字记。保存源码提交号、未提交修改状态、模型与配置的校验值，以及目标机环境；模型太大不适合直接放 Git 时，也应记录可追溯的存储位置与散列值。修改配置同样会改变行为，不能只记“源码没动”。
+
+\begin{tbash}
+git rev-parse HEAD
+git status --short
+sha256sum config.yaml model.onnx
+uname -m
+cat /etc/os-release
+\end{tbash}
+上面最后一组命令在\textbf{真实工程根目录}执行，文件名换成实际的配置与模型。它们不是心跳项目的文件。把输出和启动命令、测试时间、实际结果写入部署记录，便于队友复现。
+
+\begin{exercise}\label{ex:deploy-delivery}
+把心跳项目同步到另一台机器的专用目录，确认层级正确，并比较两端 \texttt{heartbeat.py} 的 SHA-256 值。再为自己的 C++ 项目写一份部署记录模板，至少包含版本、架构、依赖、配置、启动方式、验证结果和回退办法。不要把当前可用的比赛目录拿来做覆盖练习。
+\end{exercise}
+
+\begin{conclusion}
+保留当前已验证版本，在独立目录试跑候选；验收通过后再按队内流程切换。回退要能恢复\textbf{程序、配置与模型的配套组合}，并重新核对启动入口。旧版本放在 Git 提交、发布目录或规范的制品存储中，不靠在源码树里不断增加 \texttt{old2\_final\_reallyfinal} 来维持记忆。
+\end{conclusion}
+
+\subsubsection{软件通过以后，还要看真实输入与连续运行}
+
+先用固定录像或心跳程序确认部署流程，再接相机、串口与控制。检查设备权限、相机实际分辨率和帧率、输入输出时间戳、CPU/GPU 占用、内存和温度，以及掉线后的恢复。长时间测试要记录约定时长和实际结束状态；只截一张“进程还在”的图，无法证明整个期间都在正常处理数据。
+
+\begin{example}[给一次板端试跑写清证据]
+试跑前，由负责人确定机器人固定方式、允许的动作与停止入口；涉及执行器时，先与电控同学核对安全测试状态。记录候选提交、参数和输入，先跑固定回放核对输出，再在允许状态接入真实设备。试跑过程中保存启动日志、设备断连与重连日志、处理速率及延迟口径、温度和资源采样。结束后写明实际时长、是否异常退出、如何停止，以及是否恢复到当前可用版本。
+
+没有相机或板子时，可以完成文件传输、环境核对与软件回放，把相机输入、功耗温度、真实串口与连续运行列为待验证；不能用“回放通过”替它们打勾。
+\end{example}
+
+\begin{exercise}\label{ex:deploy-acceptance}
+把“机器人上能跑就行”改写成可检查的验收要求。任选一个视觉功能，分别写出文件与启动、固定输入、真实设备、约定时长运行四类证据，并指出哪两项不能由自己的笔记本回放替代。阈值由实际项目确定，不猜一组好看的数字。
+\end{exercise}
+
+文件传输选项与目录末尾斜杠的细节可查 \href{https://download.samba.org/pub/rsync/rsync.1}{rsync 官方手册}；硬件相关依赖与测试则以目标板及对应 SDK 文档为准。

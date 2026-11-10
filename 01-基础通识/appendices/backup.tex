@@ -1,0 +1,129 @@
+\chapter{系统数据备份（选修）}
+\label{app:backup}
+
+装好系统后，接下来会陆续改配置、装依赖、积累代码和数据。一次配置改错，可能只需要回到上次能用的状态。要是磁盘损坏，我们则需要从另一份副本找回文件。动手前先想清楚要保住什么，再决定做系统快照、个人文件备份，或两样都做。
+
+\section{Btrfs 子卷与快照}
+\label{sec:backup-btrfs}
+
+Btrfs 是一种 Linux 文件系统。它可以把同一个文件系统划分为多个\textbf{子卷（Subvolume）}。子卷可以分别挂载和创建快照，例如把系统文件所在的 \texttt{@} 挂载到 \texttt{/}，把个人文件所在的 \texttt{@home} 挂载到 \texttt{/home}。这两个子卷可以位于同一块物理磁盘，分开挂载也仍然共享这块盘的存储空间。
+
+快照记录一个子卷在创建时的状态。Btrfs 使用\textbf{写时复制（Copy-on-Write）}，刚创建的快照与原子卷共享已有数据块。以后修改原文件时，新的数据写到新的位置，快照仍能读到旧版本。这样就能快速留一个修改前的状态。快照只覆盖选中的子卷，嵌套子卷也要单独处理。只给 \texttt{@} 做快照时，单独挂载的 \texttt{@home} 不在这份快照里。
+
+\begin{example}[只读查看根目录与家目录所在的文件系统]
+在 Linux 终端查询两个路径的实际挂载来源。
+\begin{tbash}
+findmnt -n -o TARGET,SOURCE,FSTYPE,FSROOT --target /
+findmnt -n -o TARGET,SOURCE,FSTYPE,FSROOT --target /home
+\end{tbash}
+\texttt{--target} 查包含该路径的挂载项，\texttt{-n} 隐去表头，\texttt{-o} 指定输出列。四列依次是挂载点、来源、文件系统类型和该挂载在文件系统内的起点。如果两行类型都是 \texttt{btrfs}，起点分别为 \texttt{/@} 与 \texttt{/@home}，就可以判断它们挂载了不同的子卷。若第二条也返回根挂载，说明 \texttt{/home} 这个路径当前落在根挂载内。若根目录是本书安装示例的 \texttt{ext4}，可以用下一节的 Timeshift RSYNC 模式。
+\end{example}
+
+\begin{note}
+原生快照和源子卷位于同一个 Btrfs 文件系统，磁盘损坏时可能一起丢失。源码、数据集和重要配置要在独立介质上另存，并试着恢复一份。想把只读快照复制到另一块 Btrfs 磁盘，可以进一步了解 \texttt{btrfs send} 与 \texttt{btrfs receive}。核对原理与适用条件可查\href{https://btrfs.readthedocs.io/en/latest/btrfs-subvolume.html}{Btrfs 子卷文档}和\href{https://btrfs.readthedocs.io/en/latest/btrfs-send.html}{快照传输文档}。
+\end{note}
+
+\begin{exercise}\label{ex:appendix-btrfs}
+运行两条只读命令，记录本机的根挂载与家目录所在挂载。再假设 \texttt{@} 与 \texttt{@home} 位于同一块盘，只给 \texttt{@} 做了快照。说明能否用它找回 \texttt{/home} 里的源码，并说出原盘损坏时要从哪里恢复。
+\end{exercise}
+
+\section{Timeshift 系统快照}
+\label{sec:timeshift-backup}
+Timeshift 可以给系统文件和设置制作快照（Snapshot），你可以把它想成给系统照一张相，后来配环境出了问题，再按这张相恢复。操作并不复杂，比事后重新配一遍省事得多；不过相机拍到了什么，还是要看你设置的范围，不是按一下就把整台电脑都保存了。
+\begin{note}
+\textbf{Timeshift 默认排除个人文件。}源码、照片、数据集要另做备份；快照放在同一块物理盘上，也无法抵御这块盘损坏。恢复会把所选系统文件还原到快照状态，期间的新配置可能被覆盖。先备份个人数据和当前配置，确认目标系统与快照，再恢复。官方说明见 \url{https://github.com/linuxmint/timeshift}。
+\end{note}
+\Needspace{8\baselineskip}
+\begin{example}[创建并核对系统快照]
+首先在 Ubuntu 中安装 Timeshift，然后从应用菜单点击它的图标，或者在终端里输入最后一条命令，进入配置向导：
+
+
+\Needspace{7\baselineskip}
+\begin{tbash}
+sudo apt update
+sudo apt install timeshift
+sudo timeshift-launcher
+\end{tbash}
+
+
+进入向导后，按附录~\ref{sec:backup-btrfs}~节的办法确认根文件系统。本书双系统示例用 ext4，选择 RSYNC 模式，它借助 rsync 与硬链接共享未变化的文件。若根文件系统是 Btrfs，且子卷布局符合所用版本的要求，可以选择 BTRFS 模式，并在设置里核对是否包含家目录子卷。
+
+在 RSYNC 模式下选择保存位置时，按磁盘型号和容量认清目标，确认它有足够空间，并支持 Linux 权限和硬链接。有条件时把 RSYNC 快照保存在另一块物理盘上。BTRFS 模式的原生快照留在源文件系统，个人文件仍要复制到独立介质。自动备份页面可以选择每月、每周、每天等计划，旁边的数量表示保留多少份；旧快照会按保留策略清理，所以先想好自己要留多久，不必把所有选项都勾上。
+
+接下来核对所选模式的备份范围。RSYNC 模式查看“用户主目录”和“筛选”页，BTRFS 模式核对纳入的子卷。确认范围后完成向导，点击“创建”，等快照制作完成。我们再用下面的命令查看列表：
+
+
+\Needspace{5\baselineskip}
+\begin{tbash}
+sudo timeshift --list
+\end{tbash}
+
+
+列表里应该能找到这次的时间、标签和注释。如果没有失败提示的话，到这里就有了一份系统快照，不过个人代码和数据仍要按照前面的提醒另做备份。完成初始配置后，你也可以直接在命令行创建手动快照，通用形式为 \texttt{timeshift --create [选项]}，比如：
+
+
+\Needspace{6\baselineskip}
+\begin{tbash}
+sudo timeshift --create --comments "before-training" --tags O
+sudo timeshift --list
+\end{tbash}
+
+
+这里的 \texttt{--comments} 用来写说明，\texttt{--tags O} 表示按需创建。设备选择沿用你刚刚核对过的配置，不要照抄这里的磁盘名。
+\end{example}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{restore1.png}
+\caption{Timeshift 列表：核对时间、系统版本与快照数量}
+\label{fig:restore1}
+\end{figure}
+
+\textbf{接下来我们看看怎样恢复。}如果系统还能正常打开桌面，就启动 Timeshift，选择刚刚核对过的快照，点击“恢复”。这里要特别留意目标设备页：根分区、EFI 分区等映射指的是要恢复到哪里，不只是备份存在哪里。先确认当前文件已经另做备份、目标系统也选对了，再读一遍最终变更摘要，确认后继续。恢复结束后重启，看看被恢复的配置是否回到原来的内容，个人文件是否仍在。
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{restore2.png}
+\caption{恢复目标选择页}
+\label{fig:restore2}
+\end{figure}
+如果图形化桌面已经打不开，但还能进入 TTY 命令行界面，可以先运行 \texttt{timeshift --help} 看当前版本的用法，再通过 \texttt{timeshift --restore} 进入交互恢复。如果连系统都进不去了，这时候之前保存的“数字生命”就派上用场了：从 Live U 盘进入 Try Ubuntu，安装 Timeshift，再选择备份所在的设备和要恢复的目标系统。不要为了让命令少问几句，就照抄不明理由的 \texttt{--skip-grub} 跳过引导处理。
+
+\begin{exercise}\label{ex:v1-snapshot}
+创建一个带注释的快照，记录列表、保存设备和排除范围。说明哪些个人文件仍需另备份；在可重建系统中完成一次配置恢复并记录前后内容，没有该环境时明确待验证项。
+\end{exercise}
+
+\section{文件归档与恢复：先在小目录里练}
+\label{sec:archive-backup}
+Timeshift 帮我们保存系统状态，那自己写的代码和配置又怎样备份呢？接下来介绍 \texttt{tar}，它可以把多个文件打成归档（Archive），配合 gzip 压缩后，常见的扩展名就是 \texttt{.tar.gz}。这样我们就能把一个目录里的内容打包带走，再解到另一个地方。
+
+不过 tar 归档不是整块磁盘的扇区镜像，它没有自动保存 GPT、EFI 引导状态，也不能保证正在写入的文件前后一致。直接“把 / 打包，再解压到 /”还可能覆盖真实系统，对新手来说既难验证又难补救。所以这里我们先在一个小目录里练清楚备份和恢复的过程；如果以后需要迁移整个系统，再单独准备完整的恢复方案。
+
+通用形式为 \texttt{tar -czf 归档文件 -C 起始目录 要保存的相对路径}；恢复用 \texttt{tar -xzf 归档文件 -C 目标目录}。\texttt{-c} 创建、\texttt{-x} 解包、\texttt{-z} 使用 gzip、\texttt{-f} 指定归档文件，\texttt{-C} 先切换基准目录，\texttt{-t} 列内容，\texttt{-v} 显示详细过程；\texttt{-p} 在解包时尽量恢复权限，不是提高压缩完整性。
+\Needspace{8\baselineskip}
+\begin{example}[备份、损坏、恢复与额外文件]
+我们先造一个只有配置文件的小环境，备份它，再故意把恢复目录里的配置改坏，最后试着读档。在 Bash 终端一次执行下列命令即可，\texttt{mktemp -d} 会创建独立的临时目录，下面的覆盖都发生在这个实验目录里，不需要 sudo。
+
+\begin{tbash}
+lab=$(mktemp -d)
+mkdir -p "$lab/source" "$lab/restored"
+printf 'camera=ready\n' > "$lab/source/config.txt"
+tar -czf "$lab/backup.tar.gz" -C "$lab/source" .
+tar -tzf "$lab/backup.tar.gz"
+printf 'camera=broken\n' > "$lab/restored/config.txt"
+printf 'keep me\n' > "$lab/restored/extra.txt"
+tar -xzf "$lab/backup.tar.gz" -C "$lab/restored"
+cmp "$lab/source/config.txt" "$lab/restored/config.txt"
+cat "$lab/restored/config.txt" "$lab/restored/extra.txt"
+printf 'lab=%s\n' "$lab"
+\end{tbash}
+
+运行后，归档列表里应该能看到 \texttt{./config.txt}。\texttt{cmp} 是比较文件内容的命令，成功时没有输出，退出码为 0；最后两行文件内容应该是 \texttt{camera=ready} 和 \texttt{keep me}。配置从 broken 变回 ready，说明同名文件确实恢复了，不过后来添加的 extra.txt 还在。也就是说，\textbf{解包不等于让整个目标目录精确回到旧状态}，这个“读档”不会自动把后来多出来的文件删掉。
+\end{example}
+\begin{note}
+\texttt{tar -x} 会覆盖目标中的同名文件。真实备份先解到新的空目录，检查内容和权限，再决定怎样合并。不要对不可信归档用 root 解包；不要把 \texttt{-C /} 当作通用恢复命令。tar 的非零退出码也不能一律忽略：读失败、文件变化或空间不足时，检查 stderr 并重新验证归档。
+\end{note}
+\begin{exercise}\label{ex:v1-tar-options}
+解释 \texttt{-c/-x/-z/-f/-C/-t/-p} 的作用，实际运行目录恢复实验。修改一个源文件后重新备份到\textbf{另一个归档名}，解到新的空目录并用 \texttt{cmp} 验证，说明为何额外文件不会自动消失。
+\end{exercise}
+\begin{conclusion}
+本机配置回退先查系统快照的范围，个人文件备份则要留在独立介质上。把备份范围、保存介质和恢复目标一起记下来。归档只覆盖其中保存的文件，解包后还要检查内容和权限。
+\end{conclusion}

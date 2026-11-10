@@ -208,7 +208,7 @@ stty -F "$PORT" -a
 本例需先完成别名绑定；也可临时填写已确认的实际设备路径。输出中应能找到波特率 115200、\texttt{cs8}、\texttt{-parenb}、\texttt{-cstopb} 等。对 ACM 设备，这些是主机请求的配置，固件如何使用须查板端约定。后续程序打开串口时可能重新设置参数，因此在终端设好一次不等于所有程序都会沿用。
 \end{example}
 
-使用 pySerial 附带的 miniterm 可以交互收发；通用形式为 \texttt{python3 -m serial.tools.miniterm [选项] 设备 波特率}。本节在 Ubuntu 中安装系统包，并显式使用系统 Python，避免 Conda 环境读不到系统包。
+使用 pySerial 附带的 miniterm 可以交互收发；通用形式为 \texttt{python3 -m serial.tools.miniterm [选项] 设备 波特率}。本节在 Ubuntu 中安装系统包，并显式使用系统 Python，确保解释器能找到由系统包管理器安装的 pySerial。
 
 \Needspace{8\baselineskip}
 \begin{example}[队内 ACM 设备的收发验证]

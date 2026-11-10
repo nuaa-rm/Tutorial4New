@@ -1,0 +1,109 @@
+\section{运维工具：保留现场、管好进程与日志}
+\label{sec:deploy-ops}
+
+连接机器人以后，我们经常会同时开着程序、看着日志，再改一点参数。SSH 一断，程序还在不在？换个终端启动，怎么就找不到配置了？这时候需要的不只是“再连一次”，还要把进程怎样启动、怎样停止、出了什么问题讲清楚。下面用一个不会访问硬件的心跳程序练习，先把操作跑明白，再迁移到队内工程。
+
+\subsubsection{用 tmux 保留调试终端}
+
+终端复用器（Terminal Multiplexer）tmux 可以让一个远程终端容纳多个窗口，也能把会话暂时放到后台，稍后再接回来。你可以把它想成留在机器人上的一张工作台：笔记本暂时合上了，工作台上的终端还在。程序必须在 tmux 会话里面启动，这个作用才覆盖它；已经在普通 SSH 终端跑起来的进程不会自动搬进去。
+
+\Needspace{11\baselineskip}
+\begin{example}[断开以后接回同一个任务]
+本卷 \path{examples/deployment-demo} 只有下面三个文件。先把整个目录复制到机器人家目录并命名为 \path{rm-deploy-demo}；确认没有同名旧实验，避免覆盖已有工作。
+\begin{lstlisting}[language={}]
+rm-deploy-demo/
+  heartbeat.py           # 输出运行状态
+  rm-heartbeat.service   # 用户服务配置
+  README.md              # 复现、停止与清理说明
+\end{lstlisting}
+Ubuntu 缺少工具时先执行 \texttt{sudo apt install tmux htop}。随后在机器人终端创建名为 \texttt{rm-debug} 的会话并启动程序：
+\begin{tbash}
+cd ~/rm-deploy-demo
+tmux new -s rm-debug
+python3 heartbeat.py
+\end{tbash}
+看到 \texttt{heartbeat=1}、\texttt{heartbeat=2} 持续增加后，先按 \texttt{Ctrl+B}，松开，再按 \texttt{D}，回到原终端。此时可以退出 SSH，重新连接后执行：
+\begin{tbash}
+tmux ls
+tmux attach -t rm-debug
+\end{tbash}
+如果接回后序号继续增长，而不是又从 1 开始，说明看见的仍是原进程。最后按 \texttt{Ctrl+C} 停止心跳，再输入 \texttt{exit} 结束这个窗口。通用写法是 \texttt{tmux new -s 会话名} 创建，\texttt{tmux attach -t 会话名} 接回。更多窗口和分屏操作见\href{https://github.com/tmux/tmux/wiki/Getting-Started}{tmux 官方入门}。
+\end{example}
+
+\begin{note}
+tmux 保留的是当前主机上的终端任务。主机关机、系统重启、进程崩溃或系统结束该用户会话，都可能让任务结束。它不能替代服务管理，也不保证退出所有登录后用户进程一定保留；是否结束还受系统登录策略影响。先在自己的目标系统上实际断开、接回验证。
+\end{note}
+
+\begin{exercise}\label{ex:deploy-tmux}
+在 tmux 中运行心跳，记下 PID 与序号，暂时离开并重新接回，确认是否还是同一进程。随后分别用 Ctrl+C 和 tmux 的离开操作，记录哪一个停止了心跳。再说明重启机器人后，这个会话能不能靠 \texttt{attach} 找回来。
+\end{exercise}
+
+\subsubsection{用 systemd 把启动条件写下来}
+
+调试阶段适合手动开终端；需要固定方式运行的任务，可以交给服务管理器 systemd。服务配置把启动命令、运行目录、环境和失败后的动作放在同一个文件里，队友不用再猜“你刚才先敲了哪三条命令”。不过服务通常不会读取交互终端的 \path{.bashrc}，也不会自动加载项目的 Python 或 ROS 环境；这些前提要在启动脚本或服务配置中明确写出来。
+
+\begin{example}[先验证程序，再交给服务]
+先按第~\ref{sec:deploy-first-log}~节在目标机手动运行心跳脚本，核对正常和模拟失败两次退出，再把已验证的启动命令交给服务。
+
+接下来使用同目录中的用户服务配置。\texttt{\%h} 是 systemd 展开的用户家目录，\texttt{WorkingDirectory} 决定程序从哪里出发找相对路径；\texttt{ExecStart} 使用解释器的绝对路径，随后给出完整脚本路径。\texttt{Environment} 明确本次运行的版本标记，\texttt{-u} 让 Python 的输出不滞留在缓冲区。
+\lstinputlisting[language={},numbers=left,numberstyle={\color{gray}\tiny}]{examples/deployment-demo/rm-heartbeat.service}
+确认 \path{~/.config/systemd/user/rm-heartbeat.service} 没有被其他任务占用后，安装并启动：
+\begin{tbash}
+mkdir -p ~/.config/systemd/user
+cp rm-heartbeat.service ~/.config/systemd/user/
+systemd-analyze --user verify ~/.config/systemd/user/rm-heartbeat.service
+systemctl --user daemon-reload
+systemctl --user start rm-heartbeat.service
+systemctl --user status rm-heartbeat.service --no-pager
+journalctl --user -u rm-heartbeat.service -n 10 --no-pager
+\end{tbash}
+应看到服务为 \texttt{active (running)}，日志中的版本变成 \texttt{service-v1}，运行目录是用户家目录下的 \path{rm-deploy-demo}。这同时检验了“程序启动”和“启动条件正确”，比只看有没有一个进程更有用。\texttt{verify} 只检查配置，不能代替真正启动。出现“无法连接用户总线”时，先确认是否是正常的 Linux 登录环境、用户管理器是否运行；不要改用 \texttt{sudo systemctl} 把它悄悄变成另一种服务。
+
+修改 unit 后先 \texttt{daemon-reload}，再用 \texttt{systemctl --user restart rm-heartbeat.service} 重启；只改脚本时重启即可。观察结束后执行：
+\begin{tbash}
+systemctl --user stop rm-heartbeat.service
+systemctl --user is-active rm-heartbeat.service
+\end{tbash}
+应看到 \texttt{inactive}，且日志不再增加心跳。清理这次复制的 unit 与练习文件的方法见项目 README。
+\end{example}
+
+\texttt{Restart=on-failure} 表示进程失败后可由管理器重启，\texttt{RestartSec=2s} 留出等待时间；显式 \texttt{stop} 不会因此把任务立即拉回来。本例还限制 30 秒内最多启动 3 次，避免错误配置导致无休止快速重启。你可以在练习副本的 \texttt{ExecStart} 末尾加 \texttt{--fail-after 2}，重载后观察失败与重启记录；触发启动频率限制后，修复原因，再停止并执行 \texttt{systemctl --user reset-failed rm-heartbeat.service}，才重新启动。不要把“它会自动重启”当成故障已经解决。
+
+\begin{note}
+这里使用 \texttt{systemctl --user}，只执行 \texttt{start}，没有设置自启动。\texttt{enable} 决定服务是否随相应目标启动；用户服务的生命周期还取决于用户管理器，不能据此保证开机无人登录时运行。真实无人值守部署由队内维护者决定使用系统服务还是用户 lingering，并在目标机器验证启动顺序、设备权限和退出策略。涉及电机或执行机构的程序，应先落实队内安全测试状态，再安排自动启动与失败恢复。
+\end{note}
+
+更完整的参数含义可查\href{https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html}{systemd.service}与\href{https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html}{systemd.exec}。ROS 2 工程还需按卷二的环境加载方式组织启动，不能只把这里的 Python 文件名换成节点名就算部署完成。
+
+\begin{exercise}\label{ex:deploy-service}
+在练习副本中修改环境版本标记，重载、重启并从日志核对；再加入 \texttt{--fail-after 2} 观察退出与重启。说明 \texttt{WorkingDirectory}、\texttt{ExecStart}、\texttt{start}、\texttt{enable} 各负责什么，最后恢复配置并停止练习服务。不能运行用户服务的环境，记录实际错误并给出待验证步骤，不把静态检查记成启动成功。
+\end{exercise}
+
+\subsubsection{用资源与日志记录定位问题}
+
+程序能启动以后，还要看看它有没有把机载电脑吃满。\texttt{htop} 可以观察进程与 CPU、内存占用；\texttt{df -h} 看文件系统是否快满，\texttt{du -h --max-depth=1 目录} 找出占空间的子目录。它们回答的问题不同：CPU 满了不等于一定需要换模型，磁盘满了也不能先随便删日志。先记录运行场景、进程和时间，再结合算法帧率、延迟与温度看原因；GPU 指标则按实际平台使用厂商工具。
+
+\begin{example}[留下一份能继续排查的记录]
+假设心跳已经作为用户服务运行，在机器人终端执行：
+\begin{tbash}
+systemctl --user show rm-heartbeat.service -p MainPID -p NRestarts
+htop
+\end{tbash}
+第一条给出主进程 PID 和管理器记录的重启次数，在 htop 中按 PID 找到对应进程，观察后按 \texttt{Q} 退出。再在自己的家目录里保留本次信息：
+\begin{tbash}
+mkdir -p ~/deploy-notes
+date -Is > ~/deploy-notes/observed-at.txt
+df -h > ~/deploy-notes/disk.txt
+journalctl --user -u rm-heartbeat.service -b -n 100 --no-pager > ~/deploy-notes/heartbeat.log
+journalctl --user -u rm-heartbeat.service -f
+\end{tbash}
+\texttt{-b} 选本次系统启动，\texttt{-n 100} 保留最近一百条；\texttt{-f} 持续跟随日志，按 Ctrl+C 只是退出查看，心跳仍由服务管理器运行。队内真实工程还应保存 Git 提交、设备、配置和复现命令。日志能否跨重启保存取决于 journal 的存储配置；需要长期留存时应确认容量和轮转策略，并导出相关片段。分享前检查日志有没有密码、令牌或无关个人信息。
+\end{example}
+
+\begin{conclusion}
+SSH 是连接入口，tmux 保留调试终端，systemd 管理进程的启动与停止，journalctl 查询其日志。四者可以配合，但“接得上”“进程存在”“日志有心跳”“功能正确”是四个不同判断。排错时沿着连接、启动条件、进程状态和实际输入输出逐层核对，避免只盯着一个绿色 \texttt{active} 放心下车。
+\end{conclusion}
+
+\begin{exercise}\label{ex:deploy-ops}
+以一次心跳运行建立记录：写出观察时间、运行版本、PID、重启次数、磁盘使用和最近日志。然后只退出 \texttt{journalctl -f}，检查进程是否还在；最后真正停止服务并确认结果。如果真实视觉程序显示 \texttt{active} 却没有新图像，指出还应核对哪两类输入输出证据。
+\end{exercise}

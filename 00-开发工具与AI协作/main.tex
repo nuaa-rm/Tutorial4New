@@ -1,0 +1,62 @@
+% 卷零 · 开发工具与 AI 协作
+% 模板：ElegantBook（教材书籍模板，见 templates/elegantbook.cls）
+% 编译：xelatex main.tex（建议编译两次以生成目录）
+\documentclass[
+  lang=cn,
+  scheme=chinese,
+  chinesefont=ctexfont,
+  11pt,
+  oneside,
+  device=normal,
+  color=cyan,
+  mode=fancy
+]{../templates/elegantbook}
+
+\input{../templates/preamble.tex}
+\usepackage{longtable}
+\usepackage{needspace}
+
+\title{长空御风视觉组培训教材}
+\subtitle{卷零 · 开发工具与 AI 协作}
+\author{长空御风视觉组}
+\institute{视觉组培训}
+\date{\today}
+\version{2026.11}
+\TextbookVolume{0}
+\extrainfo{先在自己的电脑上跑通小工程，再练习判断与验证 AI 的建议。}
+
+\begin{document}
+
+\maketitle
+
+\frontmatter
+
+\chapter*{认识技术组与视觉组}
+\addcontentsline{toc}{chapter}{认识技术组与视觉组}
+\input{preface/promo_body.tex}
+
+\chapter*{编者说明}
+\addcontentsline{toc}{chapter}{编者说明}
+\input{preface/editors_note.tex}
+
+\begingroup
+\setstretch{1.1}
+\tableofcontents
+\endgroup
+
+\mainmatter
+
+\input{Chapter1/chapter.tex}
+\input{Chapter2/chapter.tex}
+
+\chapter*{卷零小结}
+\addcontentsline{toc}{chapter}{卷零小结}
+\markboth{卷零小结}{卷零小结}
+\input{summary.tex}
+
+\chapter*{参考题解}
+\addcontentsline{toc}{chapter}{参考题解}
+\markboth{参考题解}{参考题解}
+\input{answers.tex}
+
+\end{document}

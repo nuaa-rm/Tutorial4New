@@ -21,7 +21,7 @@
 \author{长空御风视觉组}
 \institute{视觉组培训}
 \date{\today}
-\version{2026.10}
+\version{2026.11}
 \TextbookVolume{1}
 \extrainfo{标 $*$ 的小节为选修，不计入通识考核。}
 
@@ -35,10 +35,6 @@
 \addcontentsline{toc}{chapter}{编者说明}
 \input{preface/editors_note.tex}
 
-\chapter*{认识技术组与视觉组}
-\addcontentsline{toc}{chapter}{认识技术组与视觉组}
-\input{preface/promo_body.tex}
-
 \tableofcontents
 
 \mainmatter
@@ -47,19 +43,19 @@
 \chapter{Linux 工作环境}
 
 \begin{introduction}
-  \item 学习目标：完成双系统安装核对；管理文件、权限与归档；编写 Bash 脚本并验证环境继承；用 Git 完成提交与交换；构建、运行和调试 C++ 工程；识别串口并验证字节收发。
-  \item 建议学时：约 1 周；IDE 操作另留半天，串口实验约 2--3 小时。选修维护与美化按需安排。
-  \item 本卷边界：环境与标准 C++ 工具链是通识重点；备份、重装、Conda 与美化为选修。ROS 2、帧协议和 CRC 见卷二；真实写盘与板端测试须在对应环境按清单验证。
+  \item 学习目标：完成双系统安装核对；管理文件、权限与归档；编写 Bash 脚本并验证环境继承；用 Git 完成提交与交换；识别串口并验证字节收发。
+  \item 建议学时：约 1 周；串口实验约 2--3 小时。
+  \item 本卷边界：环境与标准 C++ 工具链是通识重点，系统备份见附录~\ref{app:backup}，外观与终端美化见附录~\ref{app:customization}。CLion 与 VS Code 的操作见卷零第 1 章。ROS 2、帧协议和 CRC 见卷二；真实写盘与板端测试须在对应环境按清单验证。
 \end{introduction}
+
+卷零的计分器在 Windows 上就能跑，为什么到了这一章，我们要开始用 Linux？因为接下来写的程序，最终要搬到机器人上运行。队里的机载电脑使用 Ubuntu。我们在自己的电脑上也用 Ubuntu，就能提前熟悉队友常用的命令、依赖安装方式和构建流程。遇到问题时，队友也更容易照着你记录的步骤复现。
+
+举个例子，计分器只要能算出结果、打印到屏幕上就行。到了机器人上，程序还要打开串口、读取相机数据，有时还得远程登录去查日志。假如程序报错说串口打不开，我们可以先看系统有没有识别到设备，再检查当前用户有没有访问权限。自己先在 Linux 上练过这些操作，到了实机上就知道该从哪里查。
+
+从这一章开始，我们用 Ubuntu 练习这些基本功。如果手头已经有可用的 Ubuntu，可以从文件系统与常用命令开始。需要安装双系统的同学，先跟着下一节核对磁盘和备份，再动手安装。
 
 \section{安装 Ubuntu 22.04 双系统}
 \input{Chapter1/11.tex}
-
-\section{系统数据备份*}
-\input{Chapter1/12.tex}
-
-\section{卸载重装 Ubuntu 系统*}
-\input{Chapter1/13.tex}
 
 \section{文件系统与常用命令}
 \input{Chapter1/14_fs.tex}
@@ -70,12 +66,6 @@
 \section{Git 工具的使用}
 \input{Chapter1/15.tex}
 
-\section{Conda 的简单使用*}
-\input{Chapter1/16.tex}
-
-\section{CLion 与 VS Code 开发环境}
-\input{Chapter1/17_ide.tex}
-
 \section{Linux 串口通信基础}
 \input{Chapter1/18_serial.tex}
 
@@ -83,37 +73,31 @@
 本章围绕"装好系统 → 用好系统 → 护好系统"这条主线展开：
 
 \begin{itemize}
-\item \textbf{安装与维护}：双系统安装的四个流程（分区、制作启动盘、安装、设置）需要亲手走一遍；Timeshift 保护系统文件与设置，个人资料另备份；恢复前检查快照范围、目标与新数据，不能把快照当成整盘无损回档。系统扩容、grub 美化、卸载重装属于选修内容，用到时再回来查即可。
+\item \textbf{安装与维护}：按步骤核对分区、启动盘、安装选项和启动设置。操作磁盘前，按附录~\ref{app:backup} 核对系统快照与个人文件备份的范围。系统扩容按需学习，GRUB 主题和桌面定制见附录~\ref{app:customization}。
 \item \textbf{命令行基础}：目录结构、"一切皆文件"与挂载是必须理解的概念；文件管理（ls/cp/mv/rm）、查找（find/grep）、重定向与管道、vim 基本操作是每天都要用的基本功，要求熟练；各命令的参数不必死记，会用参数表和 man 手册查即可。
 \item \textbf{shell 与环境变量}：会编写并运行简单的 shell 脚本；理解 PATH 的作用，区分普通变量、export 与 source，按 Shell 启动方式核对配置读取；日常交互 Bash 配置优先放在 \textasciitilde/.bashrc。
 \item \textbf{git}：理解工作区、暂存区、本地版本库、远程仓库四个区域的流转关系，熟练掌握 add、commit、push、pull 的日常闭环，会写基本的 .gitignore。
-\item \textbf{conda}（选修）：会创建、激活、退出和删除虚拟环境，配环境时先在虚拟环境中试错。
-\item \textbf{图形开发工具}：安装 CLion 与 VS Code，识别菜单、项目树、工具栏、输出面板和状态栏；用同一份 CMake 工程完成配置、构建、运行和断点调试，能区分编辑器与编译工具链。
 \item \textbf{串口通信}：识别队内 USB CDC ACM 设备及所属组，用 udev 为目标板绑定固定别名；区分 USB 通信与 UART 参数的含义，通过约定的测试协议验证收发；按设备、权限、命名、占用和协议逐层排错。
 \end{itemize}
 
-完成本章验收后，就可以揣着新装好的系统进入第 2 章了。配置环境的道路还会不断延伸——不要停下来啊，第 2 章现代 C++ 见。
+完成本章验收后，就可以用新装好的系统开始写 C++ 了。想先用图形界面打开工程、运行程序或打断点，可以配合卷零第 1 章《本地开发环境与 IDE》一起练。
 
 \begin{problemset}
-\item \label{prob:v1-linux-1} 说出双系统安装的四个主要流程，并说明本教程为什么选择“其它选项”。指出 UEFI/GPT 安装中 ESP、根分区与交换空间的职责，重装时分别怎样处理。
+\item \label{prob:v1-linux-1} 说出双系统安装的四个主要流程，并说明本教程为什么选择“其它选项”。指出 UEFI/GPT 安装中 ESP、根分区与交换空间的职责。
 \item \label{prob:v1-linux-2} 解释"挂载"的含义，并说明 U 盘插入 Ubuntu 后一般被自动挂载到哪个目录下。
 \item \label{prob:v1-linux-3} 写出命令：以易读单位统计当前目录下各子目录的磁盘占用（只统计一层）。
 \item \label{prob:v1-linux-4} （基础）解释 \texttt{chmod 755 run.sh} 中三个数字各自的含义，并写出等价的符号写法。串口设备属于 \texttt{dialout} 组但当前用户不在该组时，应如何取得访问权限？
 \item \label{prob:v1-linux-5} 写出命令：在 \texttt{/etc} 目录下查找所有以 \texttt{.conf} 结尾的文件，并把结果保存到家目录下的 \path{conf_list.txt} 中。
 \item \label{prob:v1-linux-6} 说明 \texttt{./test.sh} 与 \texttt{bash test.sh} 两种脚本运行方式的区别，以及前者为什么需要先执行 \texttt{chmod +x}。
 \item \label{prob:v1-linux-7} 说明 git 中工作区、暂存区、本地版本库三者的区别，以及 \texttt{git add} 与 \texttt{git commit} 各自的作用。
-\item \label{prob:v1-linux-8} （基础）分别说明 CLion 的锤子、绿色三角、小虫按钮的作用，以及 VS Code 的 Explorer、Extensions、Terminal、Output 各负责什么。为什么装好 VS Code 的 C/C++ 扩展后仍可能无法编译？
 \item \label{prob:v1-linux-9} （提高）若把 PATH 误写为 \texttt{export PATH=/opt/app/bin}（未包含原来的 \texttt{\$PATH}），会出现什么现象？分别就"终端内直接修改"和"写入 .bashrc"两种情况说明恢复方法。
 \item \label{prob:v1-linux-10} （实践）编写脚本 \texttt{backup.sh}：将家目录下指定的某个目录打包为以当天日期命名的 \texttt{tar.gz} 文件，保存到 \texttt{\textasciitilde/backups} 目录中，并解压验证内容完整。
 \item \label{prob:v1-linux-11} （串口综合）队内两块 USB CDC ACM 板的 VID/PID 相同，序列号分别为 \texttt{CTRL-A} 和 \texttt{CTRL-B}。解释 ACM 与 USB 转 UART 的区别，说明为什么设置 115200、8N1 不能直接推出原生 USB 的吞吐上限。以 VID/PID 占位值写出将 A 板绑定为 \texttt{/dev/rm\_control} 的 udev 规则，给出重载和核验步骤，并解释为什么绑定后仍需处理断线重连、一次读取仍不一定得到一条完整消息。
-\item \label{prob:v1-linux-12}（选修自测）“做过 Timeshift 快照”“创建了 Conda 环境”“装了桌面主题”能分别证明个人文件已备份、ROS 2 编译环境正确和默认启动项正确吗？分别给出应核对的证据。
 \end{problemset}
 
 \section{本章验收}
 \begin{enumerate}
-\item 演示在 Ubuntu 中定位目录、检查文件权限、运行自己的 Shell 脚本，并解释一次 Git 暂存与提交的差别；安装与备份部分使用已有操作记录核验。
-\item 在 CLion 和 VS Code 中分别打开教学工程，指出菜单、文件树、编辑区、构建入口、运行入口、调试入口、终端和状态栏；两套软件均成功输出 \texttt{total = 75}。
-\item 任选一套工具现场断点调试：在函数调用处暂停，演示步入、步过、步出、继续；指出当前栈帧与变量值，并解释为什么暂停行的赋值尚未生效。
+\item 演示在 Ubuntu 中定位目录、检查文件权限、运行自己的 Shell 脚本，并解释一次 Git 暂存与提交的差别；安装部分使用已有操作记录核验。
 \item 使用队内 USB CDC ACM 板，演示设备识别、普通用户权限检查和固定别名绑定，改变插入顺序后仍能定位同一块板；在电控确认的安全测试状态下，按约定协议验证收发。由考核者给出一个权限或命名故障，说明定位依据。
 \end{enumerate}
 
@@ -215,7 +199,7 @@
     \item \textbf{写清目标与依赖}：先用 \texttt{add\_executable} 或 \texttt{add\_library} 创建目标，再给它设置头文件路径和链接依赖。这部分要会写，也要能说出哪些配置只给自己用，哪些会传给下游。
     \item \textbf{按阶段排错}：先判断卡在配置、编译、链接还是运行，再查相应的路径、实现或依赖。参数细节、自定义模块和 ROS2 的构建约定，用到时会查就行。
 \end{itemize}
-现在拿一份构建文件，试着说出它要生成什么、依赖什么、怎样运行验证。能说清，也能亲手跑通，就可以带着这些基本功去卷二了。
+现在拿一份构建文件，试着说出它要生成什么、依赖什么、怎样运行验证。能在本机跑通以后，第~\ref{chap:deployment}~章会用相同的构建思路检查目标机器。学过 Git 和 CMake 后，也可以回卷零继续做 AI 协作的进阶实验。
 以后再遇到满屏报错，至少知道从哪里查起——这已经比对着终端许愿靠谱多了。
 
 \begin{problemset}
@@ -246,14 +230,16 @@
 
 \input{Chapter4/chapter.tex}
 
-\input{Chapter5/chapter.tex}
-
 \chapter*{卷一小结}
 \addcontentsline{toc}{chapter}{卷一小结}
 \markboth{卷一小结}{卷一小结}
 \input{summary.tex}
 
-% 统一题解放在卷一全文末尾，题目仍保留在原章。
+\appendix
+\input{appendices/backup.tex}
+\input{appendices/customization.tex}
+
+% 统一题解放在卷末。
 \chapter*{参考题解}
 \addcontentsline{toc}{chapter}{参考题解}
 \markboth{参考题解}{参考题解}

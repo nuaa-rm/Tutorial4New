@@ -5,7 +5,7 @@
 | 文件 | 内容及来源 | 处理与检查 |
 |---|---|---|
 | `network_paths_revised.png` | 教材自绘局域网、直连与 Tailscale 网络路径；生成脚本 `scripts/render_deployment_network.py` | 候选图 `network_paths_candidate.png` 已在本地实际打开检查，统一浅青/深灰配色、中文字体与箭头后发布 `_revised`。原候选仅放 `/tmp`，不在源码堆备份。正文实际尺寸由整卷 PDF 复查。 |
-| `kvm_wiring_revised.png` | 教材自绘 USB KVM/IP KVM 接线，脚本 `scripts/render_deployment_kvm.py` | 实际查看后确认视频/HID方向、笔记本侧单线与目标侧供电；以 `_revised` 标记。候选仅存 `/tmp`。 |
+| `kvm_wiring_revised.png` | 教材自绘 NanoKVM-USB 与 PiKVM 接线，脚本 `scripts/render_deployment_kvm.py` | 展示 Host、Target、HDMI 输入和视频、键鼠的传输方向，以及机载电脑和 PiKVM 的供电。USB 接法参考 [Sipeed 快速上手指南](https://wiki.sipeed.com/hardware/zh/kvm/NanoKVM_USB/quick_start.html)。 |
 | `tailscale_magicdns.png` | Tailscale 官方 MagicDNS 文档中的 Enable MagicDNS 界面图，https://tailscale.com/docs/features/magicdns ，原图 https://tailscale.com/_next/static/media/magic-dns-toggle.a34b50f9.png | 原图下载后实际打开检查，保持界面原貌与英文，不改写按钮或状态。无账户数据。正文说明它只演示未启用时的入口。 |
 
 ## 官方资料

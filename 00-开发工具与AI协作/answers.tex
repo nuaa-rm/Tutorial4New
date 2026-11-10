@@ -1,0 +1,241 @@
+\begingroup
+\setlength{\emergencystretch}{3em}
+
+先按章末要求自己做一次，再用下面的题解核对思路。操作题以你实际使用的工具、设备与运行记录为准。
+
+\section*{第一章：本地开发环境与 IDE}
+\phantomsection
+\addcontentsline{toc}{section}{第一章题解：本地开发环境与 IDE}
+\subsubsection*{随堂练习}
+
+\paragraph*{随堂练习~\ref{ex:ide-clion}、\ref{ex:ide-vscode}：修改与调试}
+\begin{solution}
+CLion 练习：将 bonus 改为 20 后，输出应为 \texttt{total = 80}。在加法行暂停时 current 为 60、bonus 为 20，result 尚未完成初始化；执行该行后 result 为 80。恢复 bonus 为 15 后重新构建，输出恢复为 75。
+
+VS Code 练习：把光标放在 main 中 bonus 的声明或引用上，执行 Rename Symbol（默认 F2），输入 reward。该局部变量的声明与调用处引用一起变化；函数形参 bonus 是另一个作用域的符号，不应被同步改名。程序仍输出 75。撤销后保存，再检查构建和输出。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:ide-setup}：工具链与界面}
+\begin{solution}
+记录所用编译器入口和版本、Debug 构建目录、运行 total = 75 与退出码 0。以后换工具时，再核对两套工具各用独立的构建目录。CLion 的 Terminal、Build、Run、Debug 分别用于命令、构建日志、运行输出和调试；VS Code 的 Terminal、Output 中 CMake 通道及 Run and Debug 的变量区分别承担对应职责。配置成功只生成构建规则，不证明程序编译或调试通过。
+\end{solution}
+\paragraph*{随堂练习~\ref{ex:ide-debug}：核对参数与栈帧}
+\begin{solution}
+用原始源码时，在 \texttt{add\_score} 中应读到 \texttt{current = 60} 和 \texttt{bonus = 15}。回到 \texttt{main} 并停在第 12 行时，\texttt{total} 应为 75。断点未命中时，先确认选了 Debug 构建和 \texttt{ide\_demo} 目标，再核对源码路径、当前构建目录和正在调试的可执行文件。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:v0-astronvim}：AstroNvim 搜索（选修）}
+\begin{solution}
+按本章步骤安装，然后在练习工程根目录启动独立配置，等待插件初始化完成。
+
+\begin{tbash}
+NVIM_APPNAME=astronvim-training nvim .
+\end{tbash}
+
+先按空格、\texttt{f}、\texttt{f}，输入文件名的一部分，选中文件并打开；再按空格、\texttt{f}、\texttt{w}，搜索文件中确实存在的一段文字，并跳到结果行。
+记录打开的文件名、搜索词和跳转行。若快捷键随版本变化，按空格查看当前菜单；文字搜索失败时先检查项目目录和 \texttt{rg} 是否可用。
+外观不是检查重点，能找到文件、找到内容才算跑通。
+\end{solution}
+
+\subsubsection*{章末习题}
+
+\paragraph*{章末第~\ref{prob:v0-ide-1}~题：开发工具界面与编译器}
+\begin{solution}
+CLion 的锤子构建目标，绿色三角启动普通运行，小虫带调试器启动；普通运行不会因为设置了断点而暂停。
+VS Code 的 Explorer 管理文件树，Extensions 管理扩展，Terminal 提供可输入命令的 shell，Output 显示扩展日志。
+C/C++ 扩展提供代码分析和调试接入，本身不包含编译器；必须另外安装并选中 GCC、MSVC 等工具链。本例还需要 CMake 和相应构建工具。
+\end{solution}
+
+\paragraph*{章末第~\ref{prob:v0-ide-2}~题：构建缓存与旧输出}
+\begin{solution}
+每套工具链使用独立的构建目录，CMake 缓存里保留了之前的编译器、生成器和路径。看到旧输出时，依次核对源码是否保存、当前打开的工程是否正确、构建是否成功，以及启动的目标和路径是否对应刚构建的程序。
+\end{solution}
+
+\paragraph*{章末第~\ref{prob:v0-ide-3}~题：观察函数调用}
+\begin{solution}
+预期输出是 \texttt{total = 85}。进入 \texttt{add\_score} 后，\texttt{current} 和 \texttt{bonus} 应分别为 60 和 25。回到 \texttt{main} 且赋值执行完毕后，\texttt{total} 应为 85。记录应包含新构建的目标路径、终端输出和变量值。
+\end{solution}
+
+\section*{第二章：用 AI 协作开发}
+\phantomsection
+\addcontentsline{toc}{section}{第二章题解：用 AI 协作开发}
+\subsubsection*{随堂练习}
+
+\paragraph*{随堂练习~\ref{ex:ai-first-practice}：先预测，再核对}
+\begin{solution}
+保留 \texttt{add\_score} 与输出方式，只改 \texttt{main} 里的 bonus 初始化。加 7 分时预期 \texttt{total = 67}；另选 bonus 为 2 时应输出 \texttt{total = 62}。两次都记录修改行、构建结果和实际输出。建议是否正确由需求与运行证据判断。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:ai-prompt}：把现象写成可检查的问题}
+\begin{solution}
+可在练习副本删掉 \texttt{main.cpp} 里初始化 bonus 那一行的分号，再构建并保留第一条相关错误。向 AI 给出修改位置、实际报错和相关两行代码，说明预期是正常构建并输出 75，请它指出应先查的语法。恢复分号后重新构建、运行，并核对实际输出。不同编译器的报错文字可能不同。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:ai-desktop-entry}：选择入口}
+\begin{solution}
+解释一行计分代码可先用普通聊天，通过自己手算输入输出验收。定位练习工程的构建错误时，可让有文件与命令工具的代码代理查看相关源码和日志，按记录复查。制作图表可用支持读取材料和生成产物的工具，核对数据、单位与图表。CLI 是终端入口，能用哪些能力还要检查工具、工作目录与权限。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:ai-principle-responsibility}：启动与正确性}
+\begin{solution}
+至少检查：输入与单位约定、算法与关键实现、可复现的构建及运行命令、覆盖正常和边界输入的结果。例如输入 1500 毫米，预期输出 1.5 米；再用零值检查结果。启动截图只记录启动现象，换算正确性要用明确的输入与输出检验。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:ai-principle-model-agent}：建议与执行证据}
+\begin{solution}
+安装命令是建议，除非能看到它已经执行的记录；“全部测试通过”也是待核对的陈述。读取路径说明代理获取了某个文件，但还需核对版本和内容，它不证明测试运行过。应查看实际测试命令、工作目录、工具版本、输入、退出码和日志，并确认这些测试覆盖了本次变更。粘贴协议是在提供当前上下文；训练则改变模型参数，普通对话不等于重新训练。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:ai-principle-evidence}：证据与授权边界}
+\begin{solution}
+离线回放不观测当前设备的曝光时间，因此不能确认硬件同步；短期或离线检查也不能证明连续运行稳定。应将报告改为回放数据范围内的结果，并列出设备时间观测、参数读回及约定时长的实机运行待测。下载依赖只应向需要的目标开放所需网络或在受控环境安装，不应顺带授予所有目录与服务的完整访问。若回放本身只覆盖正常输入，还应补充异常输入检查。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:ai-principle-selection}：选择能力与投入}
+\begin{solution}
+日志整理可从满足质量要求的快速模型和默认投入起步，用原日志核对完整性。共享状态与疑似死锁可选能处理复杂代码约束的模型，在支持时增加推理投入，先检查锁顺序、共享对象和退出条件，再做有针对性的验证。无日志掉线应先收集版本、拓扑、时间线、两端日志与复现条件，更强推理只能帮助设计观测，不能补出不存在的事实。没有等级开关时，仍可补齐材料、分步调查、另做复核；不能把一句“认真思考”当成已经调整预算。两个产品的“高”可能改变不同预算、模型或工具，需要分别查说明并在同一任务上验证，不能直接换算。材料充分而能力仍不足时再升级，达到验收后无需继续加档。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:ai-principle-context}：压缩摘要}
+\begin{solution}
+保留当前目标、验收条件、坐标单位约束、工作目录与版本、已完成改动和下一步。完整日志可保留路径、产生该日志的命令、首个关键错误和结论，而不复制全文。两份旧方案明确标记为作废并简述原因，防止重试；设备测试列为未完成，不能随摘要压成“测试通过”。没有记忆时，新建对话并附经核对的摘要；不能读本地路径时，再附必要代码、相关日志或可访问的资料，不把路径本身当成内容。关键事实应能从项目文件和原日志恢复。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:ai-desktop-install}：安装与费用}
+\begin{solution}
+记录应能让另一人识别系统版本、架构、官方安装来源、客户端版本及当前登录方式。CLI 记录还应包括实际可执行文件路径、版本与脱敏后的登录状态；独立安装器、npm、Homebrew 或系统包应按原渠道升级，不能混装后忽略路径冲突。独立安装器路线不需要 Node.js / npm。Ubuntu 22.04 用户可先使用 Codex CLI 工作流，桌面版待使用受支持系统时安装；Linux / WSL2 另需核对沙箱依赖。ChatGPT 登录使用账号方案与权限，API Key 使用 Platform 账户按量计费；检查订阅额度不能替代检查 API 费用。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:ai-desktop-project}：项目与上下文}
+\begin{solution}
+通过标准是有两个按结果命名的独立聊天、正确项目目录以及实际读取文件的路径证据。同步聊天保存的是对话和关联信息，不会自动把整个本地源码目录复制到另一台机器，也不保证该机器具有原环境、工具和设备。继续任务前需核对可访问的来源、主机和路径。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:ai-desktop-tools}：浏览器与定时任务}
+\begin{solution}
+网页任务应给出本地 URL、例如 1280×720 的窗口大小、进入页面后的动作以及按钮不遮挡等可观察结果，还需可运行的开发服务器和浏览器工具。定时任务应有明确时区、每日时刻、仓库与构建记录来源、仅有新增失败时通知、到期停止等约定。本地任务需要主机、应用和目录可用；云端或远程执行须另查源码、依赖和连接，聊天同步不会补齐它们。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:ai-desktop-plugin}：插件与 MCP}
+\begin{solution}
+例如使用官方 Docs MCP 查询继续会话命令：只读文档，不需要服务账号；成功证据是实际工具查询、打开匹配文档、返回可核对的链接及命令。遇到无法联网应保留错误与环境，不宣称连接成功。插件是能力包，Skill 是流程指导，MCP 是工具连接协议；它们均不能自动授予外部账号访问权限。涉及账号连接时，还需写明实际使用的身份与资源范围。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:ai-cli-start}：启动与定位}
+\begin{solution}
+记录 \texttt{codex --version} 的真实输出，通过 \texttt{/status} 核对工作目录、模型和权限，再用 \texttt{@} 引用 README 或构建文件。答案需对应工程中的实际目标名和构建目录，例如 \texttt{cmake --build build} 的 \texttt{build} 是构建树，不是可执行文件名。用 \texttt{/debug-config} 核对实际配置层与策略；\texttt{/usage} 关注账号用量，\texttt{/status} 的上下文信息关注本次工作容量，压缩不会增加账号额度。合格标准是能打开引用位置独立解释命令，没有把未执行的建议写成实测结果。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:ai-cli-permissions}：权限与中断}
+\begin{solution}
+安装系统包前核对缺少的依赖是否确实被本工程使用、包名与官方安装来源、系统版本、安装范围，以及能否先用项目环境满足。重新下载前核对是否确有损坏、目录中的未提交代码与数据是否已保存、能否只修复相关文件；不能批准含糊的整目录删除。停止回复只停止某段执行，后台命令可能仍在运行，磁盘改动也已发生，所以还要核对 \texttt{/ps}、必要时用 \texttt{/stop}，并检查 Git 差异。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:ai-workflow-plan-goal}：选择模式}
+\begin{solution}
+局部变量改名通常用普通请求，仍需检查作用域和构建；SDK 迁移先用计划模式查版本差异、调用方和兼容约束，再分步执行；板端偶发崩溃先规划证据收集，在设备与日志可用且终点清楚后可设目标持续调查。目标可以要求：保留复现输入与日志，在固定板端环境复现并修复崩溃，使指定回归与复现检查通过，保持接口与输出契约；缺少设备、日志或必要依赖时报告已查证据、无法验证的假设及解锁所需输入。没有板端复现与验证时，不能宣称板端崩溃已解决。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:ai-workflow-parallel}：并行分工}
+\begin{solution}
+一种分工是：A 只读协议定义与解析代码，输出字段、长度、字节序及边界位置；B 只读调用方与线程退出流程，输出接口依赖和并发风险；C 只读测试、样本和日志，输出已覆盖情形与可复现缺口。三路都不改源码、不连接真实串口，各自附文件位置与不确定项。最终接口修改要等待契约核对，调用方适配要等待接口决定，集成验证要等待实现与相关测试完成；不能一边改接口，一边让另一路凭旧接口改调用方。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:ai-desktop-review}：检查补丁}
+\begin{solution}
+反馈应指向具体逻辑、预期行为与触发输入，不能只有“再优化一下”。差异检查确认改了什么及范围是否合适；AI 审查寻找潜在缺陷并提供待复核的证据；实际测试验证所覆盖输入与环境中的行为。记录包含工作目录、完整命令、实际结果及未覆盖的部分，不能把三者互相当作替代品。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:ai-cli-review}：验证不同层次的结论}
+\begin{solution}
+可选择空输入、非法字符、负数或边界值，须与这次修改的输入契约有关；给出修复前触发与修复后通过的实际命令及输出。CLI 正常退出只说明执行流程的状态；审查未发现问题表示审查没有识别出缺陷；测试通过表示实际运行的用例符合预期，仍受用例和运行环境限制。三者不能代替真实设备、长时间运行或尚未覆盖的输入验证。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:ai-workflow-history}：历史与文件}
+\begin{solution}
+两路对话若仍指向同一目录，修改的就是同一份文件；不能只看新对话名称就认定文件已隔离。先暂停写入与相关目标，检查 Git 状态和差异，保存需要保留的工作并确认基线，再用两个 worktree 或一次只运行一路。本例 Codex 的历史回退不恢复文件，已提交的错误需另行用 Git 撤销或修复，例如经审查后对对应提交执行 \texttt{git revert}。其他工具可能有文件检查点，须确认恢复范围；外部请求与设备状态另行核验。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:ai-workflow-worktree}：独立检出与合入}
+\begin{solution}
+合入前，主目录的策略为 \texttt{fifo}，候选目录的策略为 \texttt{latest}；工作树列表列出两个目录及不同分支。审查差异后快进合入，主目录的策略变成 \texttt{latest}。候选目录无未提交修改时才能正常移除，分支在已合入后可用 \texttt{-d} 删除。相机是操作系统中的共享外部资源，工作树只隔离检出文件，不给每个目录创建一台独立设备。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:ai-management}：任务边界与交接}
+\begin{solution}
+录像任务负责输入适配、时间戳与退出行为，保持下游接口；串口任务负责连接状态、超时与重连，保持帧协议。先确定共享接口，各自在独立分支或 worktree 工作，分别运行回放与软件故障注入，再由一个集成人审查合入并运行组合检查。交接应有目录、分支提交、已完成内容、命令与结果、已知限制和下一步。录像结果只能证明该数据范围下的输入链路；相机读回、物理拔插、板端时序和实车控制仍需实际设备。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:ai-agents}：项目常驻规则}
+\begin{solution}
+合格文件应对应真实工程入口、可执行的配置/构建/测试命令、项目特有且可核查的约定，以及缺设备或依赖时如何报告。本人须实际运行所写命令并说明当前工作目录。一次修复的日志放验证记录，本周待办放任务卡；密码不纳入版本库。生成草稿需要人工核对，不能仅以“有这个文件”判为完成。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:ai-skill}：把重复流程写成技能}
+\begin{solution}
+例如 \texttt{cmake-link-diagnosis}，描述为“定位 CMake 工程的未定义引用或目标链接依赖问题；用于链接失败，不用于运行时崩溃”。输入是完整构建命令、首个相关错误、CMake 目标与实现文件；流程检查声明与定义、源文件是否加入目标、目标依赖、作用域与实际链接命令；输出文件位置、原因证据、最小修正建议和验证状态。“定位 undefined reference”应触发，“程序运行时段错误”不应触发。提取重复日志可用脚本；判定该符号应由哪个库实现、改动是否符合接口需要结合工程判断。缺日志时先说明缺口，不猜一个库名。
+\end{solution}
+
+\paragraph*{随堂练习~\ref{ex:ai-lab}：数值修复与交付}
+\begin{solution}
+让除法的一侧成为浮点数，例如 \texttt{return millimeters / 1000.0;}。整数除法先截断再转换，因此 0、1000 的预期本就是整数，会掩盖错误；1、999、-1500 等输入能检查非整米行为。交付须有原失败与修复后记录、自己的独立样本、相关提交及未验证范围，不含 \texttt{build/}。本项目只验证换算函数，没有相机观测、标定、传感器误差与实车环境，不能推出系统测距精度。
+\end{solution}
+
+\subsubsection*{章末习题}
+
+\paragraph*{章末第~\ref{prob:v0-ai-first}~题：用另一组输入验证}
+\begin{solution}
+把 bonus 改为 0 后应输出 \texttt{total = 60}；写死输出的程序仍显示 55。保留原函数与输出语句，将 \texttt{main} 里的 bonus 初始化改为 \texttt{-5}，重新构建后用两组输入检查。
+\end{solution}
+
+\paragraph*{章末第~\ref{prob:v1-ai-1}~题：选入口}
+\begin{solution}
+概念与短报错可以先普通聊天；读仓库、改文件并跑 CTest 需要相应工程工具；SSH 环境适合终端客户端；多来源报告需要资料、计算与产物工具。本章分别用 Chat、Codex 和 Work 演示，也允许其他等效产品。聊天与代理能力可能重叠，CLI 只是入口；按当前会话的模型、工具、环境和权限判断能做什么。
+\end{solution}
+
+\paragraph*{章末第~\ref{prob:v1-ai-2}~题：能力与投入}
+\begin{solution}
+模型影响任务能力、速度、输入支持与费用等取舍；推理投入是在支持的实现中可调整的计算预算或模式；Harness 管理上下文、工具、执行循环、权限与会话。简单改名通常可从默认投入起步并核验引用与构建；复杂重构若缺调用方、接口约束或构建环境，提高投入仍不能弥补缺口。不同产品的“深度思考”可能调整预算，也可能切换模型、工具或代理数量，没有统一能力标尺，应查其定义并用同一验收比较。
+\end{solution}
+
+\paragraph*{章末第~\ref{prob:v1-ai-3}~题：上下文与持久事实}
+\begin{solution}
+Token 是输入输出处理的计量单位；窗口限制一次可处理的信息；压缩用更紧凑的状态接替部分早期材料，可能损失细节；项目资料和 Git 则在对话外保存可维护的事实。摘要中的通过结果有版本、输入和环境前提，源码或环境改变后不能沿用；先核对证据和当前状态，必要时重跑相关检查。
+\end{solution}
+
+\paragraph*{章末第~\ref{prob:v1-ai-4}~题：模式与完成状态}
+\begin{solution}
+一次明确的局部修复适合普通请求；跨模块迁移、需求含糊适合先计划；终点清楚、下一步依赖前一轮结果的长任务可设置目标持续推进。目标仍受权限、资源和用户决定约束；达到预算表示本轮资源上限触发，完成则需要目标验收实际达成。停止时应交代剩余工作和证据，不将预算耗尽写成成功。
+\end{solution}
+
+\paragraph*{章末第~\ref{prob:v1-ai-5}~题：两条历史}
+\begin{solution}
+恢复重新打开已有对话，分叉建立另一路消息历史，回退移除或从较早位置重新展开消息，Git 撤销处理文件与提交。它们不自动互相替代。两条分叉若仍指向同一目录，就能互相影响磁盘；应先暂停写入、保存状态，再用 worktree 或明确串行安排。
+\end{solution}
+
+\paragraph*{章末第~\ref{prob:v1-ai-6}~题：隔离与集成}
+\begin{solution}
+各自通过不保证合并正确，接口、依赖或运行顺序可能冲突。端口、相机、串口、GPU、数据库与外部服务账号都是可能共享的资源。给任务分配资源与文件边界，必要时串行运行；合入后重新配置构建，运行跨模块检查，再安排相应设备验收。
+\end{solution}
+
+\paragraph*{章末第~\ref{prob:v1-ai-7}~题：规则与工具}
+\begin{solution}
+插件分发能力，连接器接入服务及账号，MCP 约定工具与资料交互，Skill 提供按需流程，AGENTS.md 保存项目长期规则。查 API 并修调用通常只需当前工程读写工具与官方文档检索或文档 MCP；遵循项目规则，按实际相关测试核验。不必为一个调用安装任务系统或消息服务；Skill 只在反复出现的特定流程确有帮助时增加。
+\end{solution}
+
+\paragraph*{章末第~\ref{prob:v1-ai-8}~题：独立验证}
+\begin{solution}
+缺少对需求、关键实现与测试预期的人工复核，以及独立反例、实际环境与未验证范围。实现和测试可能共享同一错误假设；只测整米值会让整数除法缺陷漏过。根据单位契约手算 1500 或 -500 mm，再与程序比较，并检查测试是否被删除、容差是否被放宽。
+\end{solution}
+
+\paragraph*{章末第~\ref{prob:v1-ai-9}~题：把优化变成任务}
+\begin{solution}
+任务卡至少写数据集版本与划分、当前提交和模型、目标类别及困难样本、召回/精度等质量指标、延迟测量口径与目标平台、允许修改范围和依赖。先建立同一输入与环境上的基线，再定义可接受的质量与时延阈值，分步试验并保留旧版。离线验证报告样本覆盖、误检漏检与同口径对照；板端还要核对真实输入、吞吐、延迟分布、温度和约定时长稳定性。缺少这些条件时先调查与确认，不随意承诺“效果更好且实时”。
+\end{solution}
+
+\paragraph*{章末第~\ref{prob:v1-ai-10}~题：Skill 验证设计}
+\begin{solution}
+以换算审查为例：给有非整米截断的修改，观察是否核对单位和操作数类型；给单纯构建路径错误，检查描述是否引起误用；缺输入有效范围时应查接口或说明缺口；编译器不可用时应报告工具错误及未验证项。静态格式检查不能证明工作流有效；脚本、测试命令、失败恢复和实际工具结果需要运行核对。判断依据是行为与证据，不是回答是否出现固定标题。
+\end{solution}
+
+\endgroup

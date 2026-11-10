@@ -3,7 +3,7 @@
 安装双系统主要分为以下四个流程：系统分区、制作启动盘、从 U 盘进行安装、系统设置相关。下面我们就来一一说明 Ubuntu 22.04 LTS 的安装路线。
 
 \begin{note}
-\textbf{动磁盘之前先准备恢复办法。}把你的个人文件备份到另一块介质，并且实际打开几个备份文件确认文件已经备份；保存 Windows 的 BitLocker设备加密恢复密钥，记录磁盘编号、容量与现有 EFI 分区。启动 U 盘中的镜像写入会清空 U 盘；安装器里的格式化会清空选中的分区。看不清是哪块盘时先停下来核对，不按容量猜一个就点确认。
+\textbf{动磁盘之前先准备恢复办法。}把个人文件备份到另一块介质，并实际打开几个备份文件确认内容。备份与核验方法见附录~\ref{app:backup}。保存 Windows 的 BitLocker设备加密恢复密钥，记录磁盘编号、容量与现有 EFI 分区。启动 U 盘中的镜像写入会清空 U 盘；安装器里的格式化会清空选中的分区。看不清是哪块盘时先停下来核对，不按容量猜一个就点确认。
 \end{note}
 
 下面四部分连起来，就是一次完整的双系统安装示例。我们先把备份做好，再跟着步骤操作；每一步也会说明做完后应该看到什么，免得点完按钮却不知道到底成功了没有。担心的话，可以照着随堂练习先做记录和判断，确认自己的方案后再真正写盘。
@@ -45,7 +45,7 @@
 \caption{Etcher 界面：镜像、目标盘与写入三个入口}
 \label{fig:linux3}
 \end{figure}
-启动盘做好后，再插到 Windows 中，可能会弹出“需要格式化”的提示。这一般是因为 Windows 不能识别其中所有分区，\textbf{取消提示就好，不要为了消除弹窗把启动盘格式化}，不然你就要重头再来了。这种镜像写入方式也不保证剩余空间还能继续存普通文件，所以资料另找地方放。启动盘被称为“数字生命”，请好好保存，如果后续系统出问题了需要重装，你还用得到它。
+启动盘做好后，再插到 Windows 中，可能会弹出“需要格式化”的提示。这一般是因为 Windows 不能识别其中所有分区，\textbf{取消提示就好，不要为了消除弹窗把启动盘格式化}，不然你就要重头再来了。这种镜像写入方式也不保证剩余空间还能继续存普通文件，所以资料另找地方放。启动盘被称为“数字生命”，请好好保存。后续系统无法启动时，还可以用它进入 Live 环境检查文件。
 \begin{exercise}\label{ex:v1-usb-image}
 核对下载的 ISO 校验值，记录 Etcher 中的镜像名称、目标容量及写入校验结果。
 \end{exercise}
@@ -60,20 +60,20 @@
 \label{fig:install1}
 \end{figure}
 
-进入启动选项界面后，选择这只 U 盘对应的 UEFI启动项，回车。它可能显示为 Linpus lite，也可能是 Kingston、SanDisk 等品牌名，认准自己的 U 盘即可，不必纠结名字是否和截图一致。接着选择 Install Ubuntu，开始正式安装。
+进入启动选项界面后，选择这只 U 盘对应的 UEFI启动项，回车。它可能显示为 Linpus lite，也可能是 Kingston、SanDisk 等品牌名，认准自己的 U 盘即可，不必纠结名字是否和截图一致。进入安装器的欢迎界面后，在左侧选择“中文(简体)”，再点击右侧的“安装 Ubuntu”。
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.75\textwidth]{install2.jpg}
-\caption{安装 Ubuntu}
+\includegraphics[width=0.75\textwidth]{install2.png}
+\caption{安装器欢迎界面，可选择试用或安装 Ubuntu}
 \label{fig:install2}
 \end{figure}
 
-首先选择语言为简体中文，“键盘布局”按你实际使用的键盘选择，无线连接和更新可以按当前网络条件决定。然后在“更新和其他软件”页面选择“正常安装”，按硬件需要勾选第三方驱动。
+“键盘布局”按你实际使用的键盘选择，无线连接和更新可以按当前网络条件决定。然后在“更新和其他软件”页面选择“正常安装”，按硬件需要勾选第三方软件。
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.75\textwidth]{install3.jpg}
-\caption{第三方驱动与 Secure Boot 设置}
+\includegraphics[width=0.75\textwidth]{install3.png}
+\caption{更新和其他软件页面，图中选择了“正常安装”并勾选了第三方软件}
 \label{fig:install3}
 \end{figure}
 如果启用了 Secure Boot，安装第三方驱动时可能要求你设置 MOK（Machine Owner Key，机器所有者密钥）注册密码。这个密码是给重启后的密钥注册用的，记下来，到时候按提示确认即可。它不是 Ubuntu 账户的登录密码，后面我们还要另外建立账户，别看到这里填过密码就把后面的步骤跳过去了。
@@ -81,8 +81,8 @@
 接下来来到“安装类型”，本教程选择\textbf{“其它选项”}，这样我们可以按照刚才的规划手动分区，也能看清究竟要格式化哪些地方。有的安装器会提供“与 Windows 共存”的自动方案，你可以按实际情况选择，但最后的写盘摘要一样要核对。这里最需要注意的是：\textbf{千万不能选择抹掉整个磁盘}，否则留下来的就不是双系统了，到时候只能对着消失的Windows哭泣，重装整个Windows系统。
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{install4.jpg}
-\caption{手动分区：找到之前腾出的空闲空间，图中的设备编号不能照抄}
+\includegraphics[width=0.8\textwidth]{install4.png}
+\caption{安装类型中的手动分区界面。示例盘已有 Ubuntu，操作时请核对自己磁盘上的分区和空闲空间}
 \label{fig:install4}
 \end{figure}
 首先找到电脑已有的 EFI 系统分区（EFI System Partition，ESP），它通常是 FAT32，里面有 Windows Boot Manager。我们复用它作为 \texttt{/boot/efi}，\textbf{不要勾选格式化}，Windows 也要靠它启动。这里的 ESP 和存放 Linux 内核的 \texttt{/boot} 不是同一个东西，名字看起来相近，却不能互相替代。如果你的电脑有多块硬盘，需要选择你安装 Ubuntu 的那块硬盘上的 ESP。
@@ -90,7 +90,7 @@
 然后找到之前压缩出来的空闲区域，点击加号，在这里创建 Ubuntu 的 ext4 分区。你可以按下面两种思路来安排：
 \begin{itemize}
 \item \textbf{全部放在根分区里。}只创建一个挂载到 \texttt{/} 的分区，用户文件也就放在这个分区里的 \texttt{/home} 目录。这种方式最简洁，适合先把系统用起来；不过日后格式化根分区时，个人文件也会一起被清空。
-\item \textbf{把根分区与个人文件分开。}可以给 \texttt{/} 约 80 GiB，再把剩余空间给独立的 \texttt{/home}。这个容量只是例子，你可以按需求调整。以后重装时可以选择保留 /home，不过仍然要先备份，并在安装器里\textbf{明确取消它的格式化}。
+\item \textbf{把根分区与个人文件分开。}可以给 \texttt{/} 约 80 GiB，再把剩余空间给独立的 \texttt{/home}。这个容量只是例子，你可以按需求调整。如果要复用已有的 \texttt{/home} 分区，先确认备份可读，并在安装器里\textbf{明确取消该分区的格式化}。
 \end{itemize}
 普通入门安装一般不需要另建 \texttt{/boot}。交换空间（Swap）则可以用安装器建立的交换文件；如果你选择单独建立交换分区，类型选“交换空间”即可。一般来说可以为其分配约 8或16 GiB，或者按电脑内存大小来定。
 
@@ -116,7 +116,7 @@ Ubuntu 安装完成后，有些电脑会默认先进入 Ubuntu 的引导菜单�
 
 首先再次进入 UEFI 固件设置，找到 Boot 相关页面，把 Windows Boot Manager 移到 ubuntu 上方，保存退出即可。保存前记得拍下原来的顺序，改完后再分别测试两套系统能否启动。要用 Ubuntu 时，从一次性启动菜单中选择 ubuntu 就好。
 
-这里顺便区分一下：固件的启动顺序决定先启动哪个引导程序，GRUB 菜单的默认项则决定进入 GRUB 引导程序后选哪个系统，它们是两层设置。如果你觉得每次打开一次性启动菜单还是繁琐，也可以在 GRUB 中设置默认项，下面的美化小节会接着说明。
+这里顺便区分一下：固件的启动顺序决定先启动哪个引导程序，GRUB 菜单的默认项则决定进入 GRUB 引导程序后选哪个系统，它们是两层设置。如果你觉得每次打开一次性启动菜单还是繁琐，也可以在 GRUB 中设置默认项，设置方法和 GRUB 主题见附录~\ref{sec:grub-theme}，GNOME 主题与扩展见附录~\ref{sec:gnome-customize}。
 \begin{exercise}\label{ex:v1-boot-order}
 进入固件设置，只记录当前启动顺序与调整入口，不保存修改。说明一次性选择 Ubuntu 与永久调整默认顺序分别适合什么情况。
 \end{exercise}
@@ -161,122 +161,3 @@ sudo gparted
 \begin{exercise}\label{ex:v1-resize-plan}
 画出“根分区—其他分区—未分配空间”的布局，说明为何不能直接扩大根分区。写出备份、离线环境和结果核验计划。
 \end{exercise}
-
-\subsubsection{GRUB 美化*}
-\label{sec:grub-theme}
-也许你已经看腻了启动时那个黑框框，想把它换得好看一点。那我们接下来就给 GRUB 换个主题，不过先把两个系统都能启动这件事确认好，再来折腾外观。主题负责“长什么样”，默认进入哪个系统则要另外设置，装好主题不会顺手替你把这件事也做了。
-
-下面展示的是 Tela 主题，对应项目在 \url{https://github.com/vinceliuice/grub2-themes}。在介绍 Git 之前，你可以先点击网页上的 Code → Download ZIP 下载。然后打开 README，按当前版本的说明选择主题名和分辨率参数；安装脚本也先读一遍，看看要改哪些文件，再决定是否执行。装其他主题的时候也要类似检查，别把来历不明的脚本直接交给 sudo，桌面颜值还没上去，启动先出问题就不划算了。
-\Needspace{8\baselineskip}
-\begin{example}[保存配置后检查默认项]
-在 Ubuntu 中先保存原配置，再只读查看实际菜单标题：
-
-
-\Needspace{7\baselineskip}
-\begin{tbash}
-sudo cp -a /etc/default/grub /etc/default/grub.before-training
-grep '^GRUB_' /etc/default/grub
-grep "^[[:space:]]*menuentry " /boot/grub/grub.cfg
-\end{tbash}
-
-
-如果你还希望没有操作时自动进入 Windows，我们就小小地配置一下引导。打开 \path|/etc/default/grub|，找到 \texttt{GRUB\_DEFAULT}，把它设为\textbf{本机实际菜单标题或稳定的菜单项 ID}。不过一般来说 Windows 是第三项。改完后运行 \texttt{sudo update-grub} 生成配置，确认没有报错；\texttt{grub.cfg} 是它生成出来的文件，别直接编辑。
-\end{example}
-\begin{note}
-主题安装和引导配置改错可能妨碍选择启动项，所以记得保留可启动 U 盘和原配置。配置有误但 Ubuntu 仍能启动时，至少还可以按对应备份恢复并重新生成：
-
-
-\Needspace{6\baselineskip}
-\begin{tbash}
-sudo cp -a /etc/default/grub.before-training /etc/default/grub
-sudo update-grub
-\end{tbash}
-
-只有确认备份对应本次改动才恢复，别覆盖后来有意修改的配置。
-\end{note}
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{grub.png}
-\caption{Tela 主题效果示例}
-\end{figure}
-
-\subsubsection{桌面美化*}
-\label{sec:gnome-customize}
-GRUB 好看了，桌面也可以按自己的喜好收拾一下。Ubuntu 22.04 默认使用 GNOME，换个主题、装几个顺手的插件，就能让桌面更合你的习惯。
-
-我们先分清要装的东西：主题主要改窗口外观，图标包改应用图标，Shell 扩展则增加桌面功能。它们各管一层，所以装了图标包，窗口颜色没变是正常的。先记下原来的外观，每次改一项，出了问题也更容易撤回。
-\Needspace{8\baselineskip}
-\begin{example}[主题的下载]
-这里推荐一个美化网站 GNOME LOOK \url{https://www.gnome-look.org/browse/}，可以从这里挑选自己喜欢的主题(Gnome Shell Themes)或图标包(Full Icon Themes)下载，解压到用户目录。然后借助 Tweaks（优化）和Extension Manager（扩展管理器）进行美化的管理。下面的压缩包名要换成自己实际下载的文件名：
-
-
-\Needspace{8\baselineskip}
-\begin{tbash}
-mkdir -p ~/.themes ~/.icons
-tar -tf theme.tar.gz
-tar -xf theme.tar.gz -C ~/.themes
-sudo apt install gnome-tweaks gnome-shell-extension-manager
-\end{tbash}
-
-
-装好后打开 Tweaks， 在“外观”一栏选择刚装好的兼容主题或图标。有些 GTK4/libadwaita 应用不一定跟着 GTK3 主题改变，不用因为一个窗口没变色就把主题重装一遍。
-
-接下来轮到 Extension Manager 了。打开“浏览”页，搜索你自己喜欢的扩展，点击安装。安装后在“已安装”页可以看到开关和设置按钮，开关控制启用状态，齿轮打开该扩展设置。注意有些扩展需要重启 GNOME 才能生效，可以按 Alt+F2 输入 r 回车重启。
-\end{example}
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{gnome_extension_manager.png}
-\caption{扩展管理器}
-\label{fig:extension_manager}
-\end{figure}
-更多扩展可以在 \url{https://extensions.gnome.org/} 按版本查找。比如 Vitals 可以显示资源占用，Dash to Dock 可以调整程序坞，Clipboard Indicator 可以帮你找回刚刚复制过的文字, Caffeine让屏幕保持唤醒。建议先挑两三个顺手的，别一次全装——插件之间偶尔也会互相打架，尤其是 Dock 和 Panel 类扩展，装多了排查起来很痛苦。
-
-\textbf{常用插件}
-
-以下是视觉组往届同学常用的几款：
-
-\begin{center}
-\begin{tabular}{cc}
-\toprule[1.5pt]
-插件名 & 作用\\
-\midrule[1pt]
-Caffeine & 保持屏幕常亮，编译、跑数据集时防止自动锁屏\\
-TopHat / Vitals & 在顶栏实时显示 CPU、内存、温度等信息\\
-Dark Mode Toggle / Night Theme Switcher & 一键或按计划自动切换深色/浅色模式\\
-Dash to Dock & 把左侧 Dock 栏变成可自定义的程序坞\\
-Dash to Panel + ArcMenu & 合成类似 Windows 的底部任务栏与"开始菜单"\\
-Rounded Window Corners Reborn & 给窗口加上圆角\\
-Blur my Shell & 给顶栏、Dock 等加上毛玻璃半透明效果\\
-Sound Input \& Output Device Chooser & 在右上角菜单直接切换声音输出/输入设备\\
-Clipboard Indicator & 剪贴板历史记录，复制过的内容随时找回来\\
-\bottomrule[1.5pt]
-\end{tabular}
-\end{center}
-
-\begin{note}
-上表插件的主页链接：
-
-\begin{itemize}
-\item Caffeine：\url{https://extensions.gnome.org/extension/517/caffeine/}
-\item TopHat：\url{https://extensions.gnome.org/extension/5219/tophat/}
-\item Vitals：\url{https://extensions.gnome.org/extension/1460/vitals/}
-\item Night Theme Switcher：
-\url{https://extensions.gnome.org/extension/2236/night-theme-switcher/}
-\item Dash to Dock：\url{https://extensions.gnome.org/extension/307/dash-to-dock/}
-\item Dash to Panel：\url{https://extensions.gnome.org/extension/1160/dash-to-panel/}
-\item ArcMenu：\url{https://extensions.gnome.org/extension/3628/arcmenu/}
-\item Rounded Window Corners Reborn：\par
-\url{https://extensions.gnome.org/extension/7048/rounded-window-corners-reborn/}
-\item Blur my Shell：\url{https://extensions.gnome.org/extension/3193/blur-my-shell/}
-\item Sound Input \& Output Device Chooser：\par
-\url{https://extensions.gnome.org/extension/906/sound-output-device-chooser/}
-\item Clipboard Indicator：\url{https://extensions.gnome.org/extension/779/clipboard-indicator/}
-\end{itemize}
-\end{note}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.85\textwidth]{gnome_desktop_after.png}
-\caption{美化后的 GNOME 桌面}
-\label{fig:desktop_after}
-\end{figure}

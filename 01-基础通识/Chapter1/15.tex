@@ -7,6 +7,11 @@
 Ubuntu 可先运行 \texttt{git --version}；命令不存在时用 \texttt{sudo apt install git} 安装。成功应打印版本。
 \end{example}
 
+\subsubsection{推荐配套练习：Learn Git Branching}
+\begin{tcolorbox}[colback=coverpale,colframe=coveraqua,title={建议边读边练}]
+第一次学 Git，推荐打开\href{https://learngitbranching.js.org/?locale=zh_CN}{Learn Git Branching 中文版}，从入门关卡练提交、建分支和合并。每敲一条命令就看看提交图和分支指针怎么动。读到变基和优选时，可以回到网页做对应关卡，再用本节的本地仓库实验核对真实命令的结果。
+\end{tcolorbox}
+
 \subsubsection{四个区域}
 \label{sec:git-regions}
 Git 的概念一下子有点多，我们先来了解一下最基本的4个区域。工作区（Working tree）就是你正在编辑的文件；暂存区（Index）保存这次准备提交的版本；本地仓库记录已经提交的历史；远程仓库则是另一份用来交换提交的仓库，通常在服务器上，也可以像下面的实验一样放在本机。
@@ -316,7 +321,7 @@ Git 操作先问“我正在改哪个区域”：编辑改工作区，add 更新
 \texttt{fetch} 不会替你改工作区，\texttt{pull} 还会整合到当前分支，\texttt{push} 则更新远程分支；推送成功不代表队友的工作区已经同步，也不代表功能分支已经合进 main。\texttt{pull --ff-only} 如果拒绝，先查清双方的提交，不要紧接着强制推送。
 
 \begin{note}
-如果你想继续练习分支、合并、变基和优选，可以访问\href{https://learngitbranching.js.org/?locale=zh_CN}{Learn Git Branching 中文版}，相信网页动画能加深你的理解。遇到更复杂的提交整理或子模块管理问题，再查\href{https://git-scm.com/book/zh/v2}{Pro Git 中文版}，先把本章的实际流程练熟。
+遇到更复杂的提交整理或子模块管理问题，再查\href{https://git-scm.com/book/zh/v2}{Pro Git 中文版}，先把本章的实际流程练熟。
 \end{note}
 
 \subsubsection{与 GitHub 进行远程交互}

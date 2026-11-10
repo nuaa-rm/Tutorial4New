@@ -1,4 +1,4 @@
-% 三卷共用的封面与内标题页。由 preamble.tex 载入。
+% 各卷共用的封面与内标题页。由 preamble.tex 载入。
 % 封面文字为矢量文字；共用插画保存在 assets/covers/vision-optics.png。
 \definecolor{coverink}{HTML}{16343E}
 \definecolor{covermuted}{HTML}{536E76}
@@ -18,18 +18,25 @@
 
 \makeatletter
 \newcommand{\textbook@coverdata}{%
-  \def\textbook@stages{3}%
   \def\textbook@rowbottom{0.074}%
   \ifcase\TextbookVolumeNumber\relax
+    \def\textbook@vol{卷零}\def\textbook@num{00}%
+    \def\textbook@topic{开发工具与 AI 协作}%
+    \def\textbook@english{DEVELOPMENT TOOLS \& AI}%
+    \def\textbook@keywords{CLion\quad /\quad VS Code\quad /\quad AstroNvim\quad /\quad AI 协作}%
+    \def\textbook@intro{先用手边的电脑跑通小工程。\\从第一次修改开始，练习判断和验证 AI 的建议。}%
+    \def\textbook@one{在本机跑通小工程}\def\textbook@onedesc{任选 CLion 或 VS Code 构建和运行，\\用断点与变量窗口定位程序行为。}%
+    \def\textbook@two{练习验证 AI 的建议}\def\textbook@twodesc{先写下预期，核对改动并重新运行，\\再用另一组输入检验结果。}%
+    \def\textbook@three{按任务选择工具与实作}\def\textbook@threedesc{桌面与终端功能随用随查，\\需要审查、回退和交付时再结合项目练习。}%
   \or
     \def\textbook@vol{卷一}\def\textbook@num{01}%
     \def\textbook@topic{基础通识}%
     \def\textbook@english{FOUNDATIONS}%
-    \def\textbook@keywords{Linux\quad /\quad C++\quad /\quad CMake\quad /\quad AI 协作\quad /\quad 实机部署}%
-    \def\textbook@intro{从自己的电脑出发，把工程一步步带到机器人上。\\写清代码，验证修改，也学会连接、部署和排错。}%
-    \def\textbook@one{用好环境，写清程序}\def\textbook@onedesc{从 Linux、命令行与 Git 练到现代 C++，\\把文件、对象、资源和并发关系弄明白。}%
-    \def\textbook@two{搭好工程，用好 AI 协作}\def\textbook@twodesc{用 CMake 管好构建与依赖，让 AI 协助开发，\\自己审查代码、独立验证并保留可复现的版本。}%
-    \def\textbook@three{走到实机，完成部署与调试}\def\textbook@threedesc{配好网络，用 SSH、远程桌面和 KVM 连接机器人，\\核对启动环境、运行日志与现场恢复办法。}%
+    \def\textbook@keywords{Linux\quad /\quad Git\quad /\quad C++\quad /\quad CMake\quad /\quad 实机部署}%
+    \def\textbook@intro{从 Linux 和 Git 开始，学会写代码和组织工程。\\在自己的电脑上跑通，再到目标机核对结果。}%
+    \def\textbook@one{用好 Linux 工作环境}\def\textbook@onedesc{装好 Ubuntu，练习命令行、Shell 与 Git，\\用文件权限和设备路径排查基本问题。}%
+    \def\textbook@two{写出能复现的 C++ 工程}\def\textbook@twodesc{用现代 C++ 管理数据、资源与并发，\\用 CMake 配置目标、依赖和构建流程。}%
+    \def\textbook@three{在目标机试跑并核对日志}\def\textbook@threedesc{用 SSH 登录 Ubuntu 目标机，\\部署确定版本，检查运行结果与退出状态。}%
   \or
     \def\textbook@vol{卷二}\def\textbook@num{02}%
     \def\textbook@topic{专项技术栈}%
@@ -49,7 +56,7 @@
     \def\textbook@two{串起感知与行动}\def\textbook@twodesc{沿相机、识别、估计与控制梳理数据流，\\说明各模块的输入、输出和接口责任。}%
     \def\textbook@three{形成工程判断}\def\textbook@threedesc{结合前端调试、工程准则与进阶地图，\\让系统设计与赛场验证形成完整的工作流程。}%
   \else
-    \PackageError{cover}{Unsupported volume number}{Use 1, 2 or 3.}%
+    \PackageError{cover}{Unsupported volume number}{Use 0, 1, 2 or 3.}%
   \fi
 }
 
@@ -152,7 +159,7 @@
   \node[anchor=north west,inner sep=0pt,text=covermuted,align=left,
     font=\sffamily\fontsize{10.5}{17}\selectfont] at (0.215,#1-0.017) {#4};
   \node[anchor=north east,inner sep=0pt,text=covermuted,
-    font=\sffamily\fontsize{6.5}{9}\selectfont] at (0.877,#1+0.027) {#2\ /\ 0\textbook@stages};
+    font=\sffamily\fontsize{6.5}{9}\selectfont] at (0.877,#1+0.027) {#2\ /\ 03};
   \draw[coveraqua,line width=1pt] (0.887,#1-\textbook@rowbottom+0.014)
     -- (0.902,#1-\textbook@rowbottom+0.014);
 }
@@ -216,26 +223,14 @@
 
       \node[anchor=west,inner sep=0pt,text=covermuted,
         font=\sffamily\fontsize{8}{11}\selectfont]
-        at (0.10,0.626) {学习路径\quad /\quad \textbook@stages\ 个阶段};
-      \ifnum\textbook@stages=4
-        % 卷一四章各占一个阶段，收紧面板高度，保留正文字号和页底留白。
-        \draw[coveraqua!65,line width=1pt] (0.120,0.587) -- (0.120,0.255);
-        \foreach \y in {0.510,0.400,0.290} {
-          \draw[coveraqua,line width=0.8pt] (0.115,\y+0.006) -- (0.120,\y) -- (0.125,\y+0.006);
-        }
-        \textbook@learningrow{0.565}{01}{\textbook@one}{\textbook@onedesc}
-        \textbook@learningrow{0.455}{02}{\textbook@two}{\textbook@twodesc}
-        \textbook@learningrow{0.345}{03}{\textbook@three}{\textbook@threedesc}
-        \textbook@learningrow{0.235}{04}{\textbook@four}{\textbook@fourdesc}
-      \else
-        \draw[coveraqua!65,line width=1pt] (0.120,0.580) -- (0.120,0.298);
-        \foreach \y in {0.485,0.345} {
-          \draw[coveraqua,line width=0.8pt] (0.115,\y+0.006) -- (0.120,\y) -- (0.125,\y+0.006);
-        }
-        \textbook@learningrow{0.558}{01}{\textbook@one}{\textbook@onedesc}
-        \textbook@learningrow{0.418}{02}{\textbook@two}{\textbook@twodesc}
-        \textbook@learningrow{0.278}{03}{\textbook@three}{\textbook@threedesc}
-      \fi
+        at (0.10,0.626) {学习路径\quad /\quad 3 个阶段};
+      \draw[coveraqua!65,line width=1pt] (0.120,0.580) -- (0.120,0.298);
+      \foreach \y in {0.485,0.345} {
+        \draw[coveraqua,line width=0.8pt] (0.115,\y+0.006) -- (0.120,\y) -- (0.125,\y+0.006);
+      }
+      \textbook@learningrow{0.558}{01}{\textbook@one}{\textbook@onedesc}
+      \textbook@learningrow{0.418}{02}{\textbook@two}{\textbook@twodesc}
+      \textbook@learningrow{0.278}{03}{\textbook@three}{\textbook@threedesc}
 
       \draw[coveraqua!55,line width=0.5pt] (0.10,0.173) -- (0.90,0.173);
       \draw[coveraccent,line width=1.2pt] (0.10,0.173) -- (0.16,0.173);

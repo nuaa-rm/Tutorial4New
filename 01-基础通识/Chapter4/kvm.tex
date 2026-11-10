@@ -1,0 +1,84 @@
+\section{赛前与故障救援：让笔记本变成硬件控制台}
+\label{sec:deploy-kvm}
+
+快要上场时，无线连接可能受到现场条件或赛事规定限制。看起来又得抱着便携屏和键盘蹲回地上了？先别急：如果机器人系统与网络服务正常，第~\ref{sec:deploy-wired}~节的\textbf{有线 SSH} 就能解决不少问题。若连网卡都没配好、系统还停在启动界面，或你需要操作 BIOS，则可以准备\textbf{键盘、视频、鼠标（Keyboard, Video, Mouse，KVM）}工具。
+
+硬件 KVM 将目标电脑的视频送到笔记本，并把笔记本的操作模拟成目标电脑的 USB 键鼠输入。和前面的 SSH、RDP 相比，这种独立于目标系统网络服务的访问通常称为\textbf{带外管理（out-of-band management）}。
+
+图~\ref{fig:deploy-kvm-wiring}~先把两种接法放在一起。顺着箭头看：机器人视频送到 KVM，键鼠输入则从 KVM 送回机器人；笔记本接的是 KVM 的控制端，不能省掉机器人侧的线。
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.95\textwidth]{deployment/kvm_wiring_revised.png}
+  \caption{USB KVM 与 IP KVM 的接线关系示意。“笔记本侧一根线”与“机器人侧多条连接”同时成立；供电方式须按具体型号核对。}
+  \label{fig:deploy-kvm-wiring}
+\end{figure}
+
+\subsubsection{USB KVM：一根线接笔记本，另一侧接机器人}
+
+以 \textbf{Sipeed NanoKVM-USB} 为例，图~\ref{fig:deploy-kvm-wiring} 上半部分画出了三条连接。笔记本用一根 USB 数据线接到 KVM 的 Host 端，接收画面并发送键鼠操作。机载电脑用 HDMI 输出画面，再用另一根 USB 数据线接到 Target 端，接收模拟键鼠输入。机器人的正常电源仍需接好。接线前可对照图~\ref{fig:deploy-usb-kvm} 的外壳标记和\href{https://wiki.sipeed.com/hardware/zh/kvm/NanoKVM_USB/quick_start.html}{Sipeed 的接口对照图}。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.54\textwidth]{deployment/nanokvm-usb-head.png}
+  \caption{Sipeed NanoKVM-USB 官方产品图。左侧竖放设备的顶面露出了 \texttt{TARGET} 端，小口是 Target USB，大口是 HDMI 输入。Host USB 位于标有 \texttt{HOST} 的另一端，与 HDMI 环出口同侧。}
+  \label{fig:deploy-usb-kvm}
+\end{figure}
+
+\Needspace{6\baselineskip}
+\begin{example}[用笔记本的浏览器操作机载电脑]
+\begin{enumerate}
+  \item 让机器人处于安全测试状态，确认视频输出和所需的转接头。用支持数据传输的 USB 3.0 线把笔记本接到 Host，再用 USB 数据线把机载电脑接到 Target，最后把机载电脑的 HDMI 输出接到 KVM 的 HDMI 输入。
+  \item 在笔记本的桌面版 Chrome 打开\href{https://usbkvm.sipeed.com/}{Sipeed 网页控制台}。允许网页使用摄像头，然后选择 \texttt{USB Video}，确认看到的是机载电脑的画面。
+  \item 点击“选择串口”，选中 NanoKVM-USB 对应的串口。回到控制画面，打开机载电脑的终端并输入 \texttt{hostname}，核对目标主机名。这一步用来单独确认键鼠链路。
+  \item 若要验证开机阶段的控制，在约定的维护窗口重启\emph{测试机}，查看启动画面，按主板说明进入 BIOS/UEFI 并测试按键。若只有鼠标操作异常，可试着把鼠标模式切到相对模式。
+\end{enumerate}
+有画面却无法操作时，检查串口是否选对、浏览器是否支持网页串口（Web Serial）以及 Target 端的 USB 数据线。没有画面时，检查浏览器的摄像头权限、\texttt{USB Video} 设备和 HDMI 输入。
+
+画面和键鼠数据都通过本地 USB 传输，机载电脑可以不联网。在线控制台需要笔记本能打开网页。现场若也无法上网，可提前安装\href{https://github.com/sipeed/NanoKVM-USB/releases}{官方桌面客户端}，赛前断网复测画面和键鼠。
+\end{example}
+
+\begin{note}
+多数笔记本的 HDMI 口是\emph{输出}，拿一根 HDMI 线把两台电脑相连，笔记本通常不会变成显示器。普通 HDMI 采集卡可以把画面送入笔记本，但它没有自动提供 USB 键鼠模拟功能；完整控制还需要相应输入链路。USB-C 同样只是接口形状，普通两台电脑之间也不能靠随便一根 USB 线直接互控。
+\end{note}
+
+\subsubsection{IP KVM：通过网线进入浏览器控制台}
+
+另一类是 \textbf{IP KVM（KVM over IP）}，例如 \textbf{PiKVM}。图~\ref{fig:deploy-ip-kvm} 中可看到它自己的以太网口：HDMI 和 USB 仍连接机器人，笔记本则通过网络访问\emph{KVM 本身}的网页。机器人自己的网卡就算配置错了，只要 KVM 的网络、供电与视频输入正常，仍有机会从网页控制台进去修复。
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.78\textwidth]{deployment/pikvm-v4.jpg}
+  \caption{PiKVM V4 Mini（左）与 Plus（右）官方照片。网线连接 KVM 的网络端口；其他 RJ45 外形接口可能承担串口或 ATX 功能，必须按标识区分。}
+  \label{fig:deploy-ip-kvm}
+\end{figure}
+
+\begin{example}[在有线局域网里使用 PiKVM]
+以已装好系统的 PiKVM V4 为例，按型号手册接好机器人 HDMI 输出和 USB 键鼠模拟口，并使用规定的独立电源。用网线将 PiKVM 与笔记本接入同一个带 DHCP 的有线调试网络，从 PiKVM 屏幕或路由器租约表读取其地址，例如 \texttt{192.168.50.30}。
+
+在笔记本浏览器打开 \texttt{https://192.168.50.30/}。原厂默认配置的网页账户为 \texttt{admin}、密码为 \texttt{admin}，双因素认证码默认未启用；已配置过的设备应向管理者取得实际凭据，不能靠反复尝试默认密码接管未知设备。自签名证书提示出现时，先通过本地屏幕、租约与接线核对设备身份。
+
+\Needspace{11\baselineskip}
+首次登录后先点 Terminal，进入的是 \emph{PiKVM 自己的管理终端}。运行 \texttt{su -}，原厂系统管理员 \texttt{root} 的默认密码为 \texttt{root}，随后逐行运行：
+\begin{tbash}
+rw
+passwd root
+kvmd-htpasswd set admin
+ro
+exit
+\end{tbash}
+\texttt{rw}/\texttt{ro} 临时切换 PiKVM 的系统分区可写/只读状态；中间两条命令分别交互式设置系统管理员和网页管理员的新密码。退出终端，重新登录网页验证新密码，然后点击 KVM 进入机器人的控制台，打开目标机终端核对 \texttt{hostname}。网页的 KVM 画面是机器人，PiKVM 的 Web Terminal 是 KVM 管理系统，两者不要弄反。接线、出厂凭据与首次配置见\href{https://docs.pikvm.org/v4/}{PiKVM V4 官方快速指南}。
+
+如果想把笔记本用一根网线\emph{直接}接到 PiKVM，而不经过路由器，应先按对应固件说明为它与笔记本配置同网段静态地址；两台设备都在等待 DHCP 时，插线不会凭空出现 DHCP 服务器。先在有 DHCP 的网络完成首次配置，再验证脱网直连，赛前就不用临场猜地址。
+\end{example}
+
+IP KVM 的“一根网线”也只描述笔记本侧的访问链路，KVM 到机器人仍需视频、USB 与相应供电。某些型号还有 ATX 开关机控制，但必须另接受支持的主板接口；有 KVM 不等于自动获得机器人总电源控制。板子没有显示输出、供电损坏，或系统卡死后根本不响应 USB，KVM 也不能把它凭空救活。确认具体主板的输出、开机键盘识别与 KVM 固件兼容性，比背产品参数更有用。
+
+\begin{exercise}\label{ex:deploy-kvm}
+给“系统正常但无线不能用”“机器人 IP 配错”“停在 BIOS”“目标机完全断电”四种场景分别选择有线 SSH、USB KVM 或 IP KVM，并说明成立条件。再画出 NanoKVM-USB 的三条连接，标清 Host、Target、HDMI 输入和机载电脑的供电。有设备时，在控制端分别验证“有画面”和“能输入”。
+\end{exercise}
+
+\begin{conclusion}
+系统和网络服务正常，先用有线 SSH；需要窗口且桌面正常，用 RDP 或 RustDesk；需要查看启动过程、修改网络或绕过失效的桌面服务，考虑硬件 KVM。USB KVM 让笔记本通过 USB 充当控制台，IP KVM 让浏览器通过网络访问控制台。它们都需要目标机具备可用的视频与输入接口；“一根线”不取消机器人侧的接线与供电。
+\end{conclusion}
+
+上场前把线缆、转接头、备用地址、登录方式和恢复步骤装进调试包，在本机演练一次，再按当届赛事规则及现场裁判要求确认哪些连接允许使用、何时必须拔除。不能因为改成有线就默认比赛全过程都允许连接；正式启动前还要清点外接线缆，防止运动时拉扯接口。

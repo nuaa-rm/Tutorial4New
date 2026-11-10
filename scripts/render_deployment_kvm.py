@@ -49,25 +49,27 @@ def main():
             draw.polygon(((x2, y2), (x2-8, y2+12), (x2+8, y2+12)), fill=fill)
 
     draw.text((38, 24), 'KVM 接线：笔记本侧一根线，机器人侧仍需完整接线', font=title, fill=ink)
-    for top, label in [(112, '1  USB KVM：以 Openterface Mini-KVM 为例'),
-                       (574, '2  IP KVM：以独立供电的 PiKVM 型号为例')]:
+    for top, label, usb_label in [
+        (112, '1  USB KVM：以 Sipeed NanoKVM-USB 为例', 'Target USB · 键鼠'),
+        (574, '2  IP KVM：以独立供电的 PiKVM 型号为例', 'USB HID 键鼠'),
+    ]:
         draw.rounded_rectangle((28, top, 1632, top+425), radius=20, fill='#F2F9FB')
         draw.text((52, top+16), label, font=heading, fill=cyan)
         box(60, top+105, 300, 155, ['笔记本', '屏幕与键鼠'])
         box(1280, top+105, 315, 155, ['机载电脑', 'HDMI 输出', 'USB 主机口'])
         center('HDMI 视频', 1100, top+100, font, cyan)
         arrow(1272, top+137, 930, top+137)
-        center('USB HID 键鼠', 1100, top+184, font, cyan)
+        center(usb_label, 1100, top+184, font, cyan)
         arrow(930, top+220, 1272, top+220)
         box(1280, top+315, 315, 62, ['机器人正常电源'])
         arrow(1437, top+309, 1437, top+266)
 
-    box(650, 217, 270, 155, ['Mini-KVM', 'Host / Target'])
-    center('一根 USB 数据线', 505, 251, small, cyan)
+    box(650, 217, 270, 155, ['NanoKVM-USB'])
+    center('Host USB · 数据线', 505, 251, small, cyan)
     arrow(368, 294, 642, 294, both=True)
     center('画面回传 / 输入控制', 505, 337, small)
-    center('笔记本运行控制端应用', 210, 399, small)
-    center('由 Host USB 供电', 785, 459, font)
+    center('笔记本打开控制台', 210, 399, small)
+    center('视频与键鼠经本地 USB 传输', 785, 459, font)
 
     box(650, 679, 270, 155, ['IP KVM', '自己的网口'])
     center('一根网线', 505, 713, small, cyan)

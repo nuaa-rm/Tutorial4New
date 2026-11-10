@@ -311,7 +311,29 @@ sudo apt install tree
 使用 \texttt{apt search} 搜索并安装一个你感兴趣的小软件（如 \texttt{cowsay}），运行验证后用 \texttt{sudo apt remove} 将其卸载。
 \end{exercise}
 
-\textbf{04文件与目录管理}
+\Needspace{7\baselineskip}
+\textbf{04从网址下载文件}
+
+拿到资料的下载地址后，可以用 \texttt{wget} 或 \texttt{curl} 把文件保存到本地，再用相应的程序打开。若系统提示找不到命令，可用 \texttt{sudo apt install wget curl} 安装。下载到自己的目录时，用普通用户执行即可。
+
+\texttt{wget URL} 默认把下载结果保存到当前目录。想指定文件名，用大写的 \texttt{-O}。\texttt{curl URL} 默认把响应正文输出到终端，适合直接看简短的文本响应。想保存到指定文件，用小写的 \texttt{-o}。
+
+\Needspace{10\baselineskip}
+\begin{example}[用两种命令下载同一份文件]
+在一个空的练习目录里打开终端，将同一份 GNU 许可证文本分别保存为两个文件，再查看服务器的响应头。
+\begin{tbash}
+wget -O wget-gpl.txt "https://www.gnu.org/licenses/gpl-3.0.txt"
+curl -fL -o curl-gpl.txt "https://www.gnu.org/licenses/gpl-3.0.txt"
+curl -I "https://www.gnu.org/licenses/gpl-3.0.txt"
+\end{tbash}
+\texttt{curl} 的 \texttt{-f} 让 HTTP 错误（如 404）以失败状态返回，\texttt{-L} 允许跟随重定向。第三条命令的 \texttt{-I} 只查看响应头，通常可看到状态码以及 \texttt{Content-Type} 等字段。这条命令不会创建下载文件。
+\end{example}
+
+\begin{exercise}\label{ex:v1-http-download}
+运行上面的命令。用 \texttt{cmp wget-gpl.txt curl-gpl.txt} 逐字节比较两个文件。记录比较结果，并指出响应头里哪一行表示 HTTP 状态。
+\end{exercise}
+
+\textbf{05文件与目录管理}
 
 先认识几个常用概念，后面的命令都要用到它们：
 
@@ -586,7 +608,7 @@ cat hard.txt copy.txt
 \begin{exercise}\label{ex:v1-links-permissions-archive}
 在独立目录复现链接例题，给一个练习脚本设置 755，记录 ls -l 与 ls -i。把目录打包，再解到新的空目录并比较内容。说明链接、复制、权限和归档各解决什么问题，不对设备文件 chmod 777。
 \end{exercise}
-\textbf{05查找、管道与重定向}
+\textbf{06查找、管道与重定向}
 
 
 \begin{table}[H]\centering
@@ -741,7 +763,7 @@ wc -l < errors.txt
 使用管道和 grep，从 \texttt{apt list --installed} 的输出中筛选出名字包含 \texttt{python} 的软件包；再结合 \texttt{wc -l} 统计数量；将筛选结果重定向到新文件，再读取该文件统计行数并核对一致。
 \end{exercise}
 
-\textbf{06文件内容}
+\textbf{07文件内容}
 
 
 \begin{table}[H]\centering
@@ -867,68 +889,7 @@ Vim 启动后通常处于普通模式，按 i 进入插入模式，Esc 返回普
 
 \begin{note}
 vim是一个完全可以在终端中运行的文本编辑器，功能强大，如果是远程控制等情况没有图形化界面，vim的优点就会比较突出，但是新手可能难以适应。
-如果你对vim感到无从下手，可以试试更简单的终端文本编辑器nano，这个操作比较符合直觉。或者是使用在vim基础上发展的nvim，而且加入一些美化，比如AstroNvim
-\url{https://astronvim.com/}（开箱即用的 Neovim 配置，安装方法见本节末尾的"AstroNvim"小节）。如果你想进行vim的命令学习，推荐 vim-adventure \url{https://vim-adventures.com/}，这是一个图形化的使用vim命令的小游戏，可以轻松入门vim内容，但是完整版需要付费，也可用自带的 vimtutor 练习基础操作。
+如果刚开始还不熟悉 Vim，可以先用 nano 编辑文件。想在终端里加上文件树和代码补全时，见卷零第 1 章《终端开发环境：AstroNvim》。如果你想进行vim的命令学习，推荐 vim-adventure \url{https://vim-adventures.com/}，这是一个图形化的使用vim命令的小游戏，可以轻松入门vim内容，但是完整版需要付费，也可用自带的 vimtutor 练习基础操作。
 \end{note}
 
 以上就是linux系统中关于文件和目录的基本操作，俗话说熟能生巧，请读者利用空余时间多加练习，尽快适应linux系统的命令行操作。
-
-\subsubsection{终端里的 IDE：AstroNvim*}
-
-Vim 本身有语法高亮与基础补全，但插件组合需要配置。Neovim（nvim）是 vim 的现代化分支，而 AstroNvim 是一套开箱即用的 Neovim 配置——装完就有文件树、模糊搜索、代码补全和漂亮的界面，毛坯房直接变精装，终端里也能有接近 IDE 的体验。
-
-\textbf{安装新版 Neovim}
-
-AstroNvim 需要较新版本的 Neovim，而 Ubuntu 22.04 仓库自带的版本太老，因此先核对官方要求再安装。下面仅用于 \texttt{x86\_64}，如果是在 Nvidia Orin NX 等 ARM 机器安装需要换用 arm64 架构包：
-
-\Needspace{8\baselineskip}
-\begin{example}
-下载并解压 Neovim 到 \texttt{/opt}，顺手装上两个依赖（ripgrep 用于全局搜索，gcc 用于编译语法高亮组件）：
-
-
-\Needspace{8\baselineskip}
-\begin{tbash}
-curl -fLO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
-sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
-sudo apt install ripgrep gcc
-\end{tbash}
-
-
-然后把刚刚解压出的 bin 目录放到 PATH 前面，这样 Shell 会优先找到新版 Neovim。下面的设置只对当前会话生效；想长期使用，可以把这一行写入自己的 Bash 或 zsh 配置，方法见第\ref{sec:shell-environment}节：
-
-
-\Needspace{5\baselineskip}
-\begin{tbash}
-export PATH=/opt/nvim-linux-x86_64/bin:$PATH
-\end{tbash}
-
-
-生效后执行 \texttt{command -v nvim} 与 \texttt{nvim --version}，确认找到的是新安装的程序且版本满足要求；若旧版抢先被找到，把新目录放到 PATH 前面。
-\end{example}
-
-\textbf{安装 AstroNvim}
-
-首次启动会自动下载安装全部插件，泡杯茶等它跑完，看到编辑界面就大功告成了。
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{astronvim_welcome.png}
-    \caption{AstroNvim 界面}
-    \label{fig:astronvim}
-\end{figure}
-
-\textbf{上手要点}
-
-\begin{itemize}
-\item Leader 键是空格：按下 \texttt{<Space>} 稍等片刻会弹出快捷键菜单，忘了按键组合也不用背，跟着菜单按就行；
-\item \texttt{<Space>ff} 模糊搜索并打开文件，\texttt{<Space>fw} 在整个项目中搜索文字（依赖 ripgrep）；
-\item 使用 \texttt{:LspInstall clangd} 安装 C++ 的语言服务器后，即可获得代码补全和跳转。
-\end{itemize}
-
-\begin{note}
-界面中的图标和 zsh 的 p10k 主题一样依赖 Nerd Font，装过 MesloLGS NF 的话直接通用（见第\ref{sec:zsh-customize}节）。更多用法见官方文档：\url{https://docs.astronvim.com/}
-\end{note}
-
-\begin{exercise}\label{ex:v1-astronvim}
-完成 AstroNvim 的安装，用 \texttt{<Space>ff} 打开任意一个文本文件，再用 \texttt{<Space>fw} 在某个项目目录中搜索一个关键词，体验模糊搜索。
-\end{exercise}

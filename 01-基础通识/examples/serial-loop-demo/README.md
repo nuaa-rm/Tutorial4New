@@ -1,6 +1,6 @@
 # 串口字节与读取超时
 
-依赖 Python 3 和 pySerial。Ubuntu 可用 `sudo apt install python3-serial` 安装；使用 `/usr/bin/python3`，避免 Conda 的 Python 读不到系统包。
+依赖 Python 3 和 pySerial。Ubuntu 可用 `sudo apt install python3-serial` 安装；使用 `/usr/bin/python3`，以便加载由系统包管理器安装的 pySerial。
 
 从本目录运行：
 
