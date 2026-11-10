@@ -1617,6 +1617,11 @@ echo $?
 笔记本运行客户端，机器人运行 \texttt{sshd}。通过机器人本地读出的主机公钥指纹核验首次连接，登录后检查 \texttt{hostname}、\texttt{whoami} 与目录。用户私钥留在本人笔记本，公钥加入机器人用户的 \path{~/.ssh/authorized_keys}；主机私钥由机器人 SSH 服务保存，其公钥指纹用于核验服务器身份。别名在笔记本 \path{~/.ssh/config} 中指向实际地址，不会自动修改网络 DNS。
 \end{solution}
 
+\paragraph*{随堂练习~\ref{ex:deploy-x11}：核对窗口与程序的位置}
+\begin{solution}
+在笔记本的普通桌面终端检查会话类型和 \texttt{DISPLAY}，以 \texttt{xprop} 能连接本地 X 显示为准。连上 \texttt{ssh -X} 后，\texttt{hostname} 显示机载电脑的名称，远端 \texttt{DISPLAY} 通常形如 \texttt{localhost:10.0}。时钟进程在机载电脑上，窗口出现在笔记本。若本地显示不可用，先确认终端来自当前桌面会话，再检查 Xwayland 是否启用。只支持 X11 的程序可改用可用的 Xorg 会话或远程桌面，支持原生 Wayland 的程序可从笔记本的 Wayland 会话用 \texttt{waypipe} 转发。
+\end{solution}
+
 \paragraph*{随堂练习~\ref{ex:deploy-remote-editor}：确认远端文件系统}
 \begin{solution}
 先验证普通 SSH，再连接 Remote -- SSH 并检查状态栏、\texttt{hostname} 与 \texttt{pwd}。远程窗口打开的目录属于目标机；本地窗口的同名目录属于笔记本，不能仅靠文件名判断。终端与构建工具要在相应环境核验。SSH 已成功但 Server 下载失败，应查远端系统要求、资源、下载通路与扩展日志，不改用户登录配置来碰运气。

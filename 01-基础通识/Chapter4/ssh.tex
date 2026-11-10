@@ -1,7 +1,7 @@
 \section{先把终端搬过来：SSH}
 \label{sec:deploy-ssh}
 
-便携屏能让你看到机器人上的桌面，但如果只是改参数、编译、看日志，每次搬一套外设实在有点累。安全外壳协议（Secure Shell，SSH）可以让笔记本打开机载电脑的终端：你在自己的键盘上输入，命令却在机器人上执行，结果再传回来。它传输的是终端数据，不需要不断发送整张桌面，通常很适合远程开发。
+便携屏能让你看到机器人上的桌面，但如果只是改参数、编译、看日志，每次搬一套外设实在有点累。安全外壳协议（Secure Shell，SSH）可以让笔记本打开机载电脑的终端：你在自己的键盘上输入，命令却在机器人上执行，结果再传回来。普通 SSH 登录只传终端数据，通常很适合远程开发。
 
 这里先假定两台电脑已接入同一台路由器，机器人当前地址为 \texttt{192.168.50.20}，普通用户名为 \texttt{rm}。这两个值都要换成自己的；如何找到地址、用主机名代替地址以及没有路由器时怎么办，稍后在第~\ref{sec:deploy-lan}、\ref{sec:deploy-wired}~节动手。\textbf{能上网不代表两台设备之间能互通}，访客网络可能禁止客户端相互访问。
 
@@ -21,7 +21,7 @@ whoami
 ip -br address
 sudo ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
 \end{tbash}
-\texttt{is-active} 应输出 \texttt{active}；记下实际用户名、当前接口的 IPv4 地址，以及最后一行的 \texttt{SHA256:...} 主机指纹。若系统使用防火墙，应由维护者允许调试网络到 SSH 端口，不必为了排错关闭整个防火墙。
+\texttt{is-active} 应输出 \texttt{active}。记下实际用户名、当前接口的 IPv4 地址，以及最后一行的 \texttt{SHA256:...} 主机指纹。若机载电脑启用了防火墙，只对调试网络放行 SSH 端口。
 
 然后在\textbf{笔记本终端}执行，基本形式是 \texttt{ssh 用户名@地址}：
 \begin{tbash}
@@ -64,7 +64,7 @@ Host rm-robot
 之后运行 \texttt{ssh rm-robot} 即可。\texttt{Host} 是本机别名，\texttt{HostName} 指定实际目标。以后可将目标改为 \path{rm-robot.local} 或 Tailscale 名称。\texttt{IdentityFile} 指明使用哪份私钥；保活参数帮助发现连接中断，不会自动重启远端程序。用 \texttt{ssh -G rm-robot} 可展开当前实际采用的客户端配置。
 \end{example}
 
-不要把私钥提交到 Git，也不要让全队共用一份个人私钥。每人保留自己的身份，离队或笔记本丢失时，维护者便能单独撤销相应公钥。公钥登录先在另一个终端验证成功，再考虑是否调整密码登录策略，避免把自己锁在门外。
+不要把私钥提交到 Git，也不要让全队共用一份个人私钥。每人使用自己的密钥，队员离队或笔记本丢失时，你就可以在机载电脑上单独撤销对应的公钥。公钥登录先在另一个终端验证成功，再考虑是否调整密码登录策略，避免把自己锁在门外。
 
 \begin{exercise}\label{ex:deploy-ssh}
 使用自己的两台设备完成一次 SSH 登录，记录客户端与服务端的主机名、用户名和主机指纹核验方式。再添加一个连接别名，以密钥登录，说明公钥、私钥、主机密钥分别保存在哪里、负责验证谁。只有一台机器时可先在虚拟机练习，并明确标注不是实机验收。
@@ -75,6 +75,66 @@ SSH 让你远程使用终端；它需要网络可达、远端服务启动及身�
 \end{conclusion}
 
 安装与服务检查可查 \href{https://ubuntu.com/server/docs/how-to/security/openssh-server/}{Ubuntu OpenSSH 指南}；密钥和客户端配置参数分别见 \href{https://man.openbsd.org/ssh-keygen}{ssh-keygen 手册}、\href{https://man.openbsd.org/ssh_config}{ssh\_config 手册}。
+
+\Needspace{10\baselineskip}
+\subsubsection{用 SSH 显示远程窗口（选读）}
+\label{sec:deploy-x11-forwarding}
+
+有时只想打开机载电脑上的一个配置工具。若程序支持 \textbf{X11}，可以让它在机载电脑上运行，通过 SSH 把窗口显示在笔记本上。程序仍读取机载电脑上的文件，也仍使用那台电脑的资源。要接管机载电脑已有的整个桌面，见第~\ref{sec:deploy-desktop}~节。
+
+X11 和 \textbf{Wayland} 都是 Linux 图形程序与显示系统之间的协议。使用 X11 时，程序通过 X 服务器显示窗口和接收输入，SSH 可以转发这条 X11 连接。使用 Wayland 时，原生程序连接到负责合成窗口和分发输入的 Wayland 合成器。\textbf{Xwayland} 是在 Wayland 会话中为 X11 程序提供兼容性的 X 服务器。
+
+\Needspace{10\baselineskip}
+\begin{example}[让机载电脑上的时钟显示在笔记本]
+先确认普通 SSH 已能登录。在\textbf{机载电脑}上安装授权工具和测试程序，然后检查 SSH 服务端的配置。
+\begin{tbash}
+sudo apt install xauth x11-apps
+sudo sshd -T | grep -E '^x11(forwarding|uselocalhost) '
+\end{tbash}
+预期看到 \texttt{x11forwarding yes} 和 \texttt{x11uselocalhost yes}。如果服务端尚未允许转发，在机载电脑上编辑 \path{/etc/ssh/sshd_config} 或其中引用的配置文件，启用 \texttt{X11Forwarding yes}，保留 \texttt{X11UseLocalhost yes}。保持现有 SSH 连接，先用 \texttt{sudo sshd -t} 检查配置，确认通过后在 Ubuntu 上用 \texttt{sudo systemctl reload ssh} 重载。
+
+\Needspace{9\baselineskip}
+在\textbf{笔记本的图形终端}打开一条新连接。Ubuntu 笔记本可用 \texttt{sudo apt install xauth} 安装本地授权工具。第一行在笔记本执行，其余三行在连上后的远端终端执行。
+\begin{tbash}
+ssh -X rm-robot
+hostname
+echo "$DISPLAY"
+xclock
+\end{tbash}
+主机名应是机载电脑的名称，\texttt{DISPLAY} 通常类似 \texttt{localhost:10.0}，这个地址由 SSH 分配，保留它即可。时钟窗口应出现在笔记本上。关闭窗口后，远端终端会回到提示符。机载电脑可以只运行命令行系统，只需具备 SSH 服务、授权工具和要打开的程序。
+\end{example}
+
+没有窗口时，先按下文检查笔记本能否打开本地 X11 显示，再用 \texttt{ssh -v -X rm-robot} 检查转发请求是否被接受。远端的 \texttt{DISPLAY} 为空时，优先核对服务端配置和两端的 \texttt{xauth}。\texttt{-X} 使用受限制的转发，某些程序或本地 X 服务器可能不支持。若确认问题出在这一限制，可仅对信任的主机和程序试用 \texttt{ssh -Y rm-robot}。\texttt{-Y} 会给予远端程序访问笔记本 X11 会话的较大权限。详见 \href{https://man.openbsd.org/ssh#X11_FORWARDING}{OpenSSH 的 X11 转发说明}。
+
+\Needspace{7\baselineskip}
+\textbf{笔记本平时用 Wayland 怎么办}
+
+先从\textbf{笔记本的桌面}打开一个新的普通用户终端。这里查的是笔记本的显示环境，所以在发起 SSH 之前执行下面的命令。
+\begin{tbash}
+printf 'XDG_SESSION_TYPE=%s\nDISPLAY=%s\n' "$XDG_SESSION_TYPE" "$DISPLAY"
+command -v Xwayland
+\end{tbash}
+\texttt{XDG\_SESSION\_TYPE} 显示 \texttt{wayland} 时，\texttt{command -v Xwayland} 可检查是否找得到 Xwayland 程序，常见路径是 \path{/usr/bin/Xwayland}。有这个路径只说明找得到程序。\texttt{DISPLAY} 若有值，例如 \texttt{:0}，再实际连一次 X 显示。Ubuntu 上缺少 \texttt{xprop} 时，可在笔记本上用 \texttt{sudo apt install x11-utils} 安装。
+\begin{tbash}
+xprop -root >/dev/null && echo "X11 OK"
+\end{tbash}
+
+\begin{itemize}
+  \item \textbf{显示 \texttt{X11 OK}。}笔记本当前终端能连接 X 服务器，可以保留当前会话，用上面的 \texttt{ssh -X} 转发。机载电脑上的程序要支持 X11。有多个图形后端时，可在远端启动命令前加 \texttt{GDK\_BACKEND=x11}（GTK）或 \texttt{QT\_QPA\_PLATFORM=xcb}（Qt），前提是已安装相应后端。
+  \item \textbf{\texttt{DISPLAY} 为空，或提示 \texttt{unable to open display}。}先回到笔记本桌面，用当前登录用户打开新终端复查。若 Ubuntu 22.04 的 GNOME 会话缺少 Xwayland，在笔记本上运行 \texttt{sudo apt install xwayland}，退出桌面并重新登录，再跑一次检查。若已经安装，按所用桌面的说明确认 Xwayland 支持已启用。显示地址由桌面会话提供，手动填一个 \texttt{:0} 无法启动 Xwayland。
+  \item \textbf{仍没有可用的 X11 显示。}如果程序支持原生 Wayland，可以改用下面的 \texttt{waypipe}。如果程序只支持 X11，可在笔记本切换到可用的 Xorg 会话再检查。Ubuntu 22.04 的 GNOME 登录页可在选中用户名后，通过齿轮选择 \href{https://documentation.ubuntu.com/release-notes/22.04/}{Ubuntu on Xorg}。也可按第~\ref{sec:deploy-desktop}~节连接机载电脑的远程桌面，在其支持 X11 的图形会话里启动程序。
+\end{itemize}
+
+\Needspace{6\baselineskip}
+原生 Wayland 窗口可以用 \texttt{waypipe} 经 SSH 转发到笔记本的 Wayland 会话。两端都要安装 \texttt{waypipe}，并允许 SSH 转发 Unix 套接字。在 Ubuntu 22.04 可从 \texttt{universe} 软件源安装 \texttt{waypipe}。在机载电脑安装 \texttt{gtk-4-examples} 后，从笔记本的 Wayland 图形终端运行下面的命令。
+\begin{tbash}
+waypipe ssh rm-robot env GDK_BACKEND=wayland gtk4-demo
+\end{tbash}
+窗口能出现并响应操作，才算这个程序的转发成功。两端版本、图形接口及应用依赖会影响兼容性。若要看相机的实时画面或跑依赖 GPU 的图形工具，先用真实数据测延迟和帧率，再选入口。参见 \href{https://wayland.freedesktop.org/docs/book/Xwayland.html}{Wayland 的 Xwayland 说明}和 \href{https://manpages.ubuntu.com/manpages/jammy/man1/waypipe.1.html}{Ubuntu 22.04 的 waypipe 手册}。
+
+\begin{exercise}\label{ex:deploy-x11}
+记录笔记本的会话类型、本地 \texttt{DISPLAY} 和 \texttt{xprop} 的检查结果。若本地 X11 显示可用，连接 SSH 后记录远端主机名和 SSH 分配的 \texttt{DISPLAY}，打开时钟并指出程序和窗口分别在哪台电脑上。若本地检查失败，说明你会先检查哪一项，以及仅支持 X11 和支持原生 Wayland 的程序分别可走哪条路线。
+\end{exercise}
 
 \subsubsection{远程编辑：VS Code Remote -- SSH（选读）}
 如果已经按卷零第 1 章在本机用过 VS Code，这里可以沿用熟悉的编辑界面，把打开的工程换成机器人上的目录。
